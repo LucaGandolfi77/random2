@@ -28,6 +28,8 @@
         phaseTimer: 0,
         theatre: "overlord",
         difficulty: "arcade",
+        checkpoint: 0,
+        checkpoints: null,
         stage: null,
         stageNumber: 32,
         stageIndex: 0,
@@ -100,6 +102,8 @@
         DOME.overlayMsg = document.getElementById("overlay-msg");
         DOME.overlayStats = document.getElementById("overlay-stats");
         DOME.overlayPlay = document.getElementById("overlay-play");
+        DOME.continueBtn = document.getElementById("continue-btn");
+        DOME.continueStage = document.getElementById("continue-stage");
         DOME.overlayTheme = document.getElementById("overlay-theme");
         DOME.finalScore = document.getElementById("final-score");
         DOME.finalHigh = document.getElementById("final-high");
@@ -1032,6 +1036,7 @@
         const stages = currentStages();
         state.stageIndex = 0;
         state.stageNumber = stages[0].n;
+        state.checkpoint = 0;
         state.score = 0;
         state.lives = config.startLives;
         state.fireShots = 2;
@@ -1098,6 +1103,12 @@
     }
 
     function endStage() {
+        if (!state.checkpoints) state.checkpoints = { overlord: 0, rising: 0 };
+        if (state.stageIndex > state.checkpoints[state.theatre]) {
+            state.checkpoints[state.theatre] = state.stageIndex;
+            save();
+        }
+        state.checkpoint = state.checkpoints[state.theatre];
         const row = D.bonusFor(shootDownRate());
         state.accuracyBonus = row.pts;
         state.loopBonus = state.loops * config.loopBonus;
@@ -1129,6 +1140,16 @@
         startStage(state.stageIndex + 1);
     }
 
+    function continueRun() {
+        const stages = currentStages();
+        const from = clamp(state.checkpoint, 0, stages.length - 1);
+        resetGame();
+        state.checkpoint = from;
+        hideOverlay();
+        Sound.unlock();
+        startStage(from);
+    }
+
     function gameOver() {
         state.phase = "gameover";
         Music.stop();
@@ -1151,6 +1172,11 @@
         DOME.overlayPlay.textContent = "\u25B6 Play Again";
         if (DOME.theatreChoices) DOME.theatreChoices.classList.add("hidden");
         if (DOME.difficultyRow) DOME.difficultyRow.classList.add("hidden");
+        if (DOME.continueBtn) {
+            const resume = clamp(state.checkpoint, 0, currentStages().length - 1);
+            DOME.continueStage.textContent = currentStages()[resume].n;
+            DOME.continueBtn.classList.toggle("hidden", resume <= 0);
+        }
     }
 
     /* ===== Update ===== */
@@ -1462,6 +1488,7 @@
         DOME.pauseBtn.addEventListener("click", togglePause);
         DOME.soundBtn.addEventListener("click", toggleSound);
         DOME.overlayPlay.addEventListener("click", () => { Sound.unlock(); startGame(); });
+        if (DOME.continueBtn) DOME.continueBtn.addEventListener("click", () => { Sound.unlock(); continueRun(); });
         DOME.overlayTheme.addEventListener("click", cycleTheme);
 
         if (DOME.difficultyChoices) {
@@ -1489,6 +1516,7 @@
     function setTheatre(id) {
         if (!D.theatres[id]) return;
         state.theatre = id;
+        if (state.checkpoints) state.checkpoint = state.checkpoints[id] || 0;
         state.highScore = state.highScores[id] || 0;
         DOME.overlayMsg.textContent = D.theatres[id].blurb;
         markTheatreButtons();
@@ -1890,6 +1918,7 @@
         DOME.overlayMsg.textContent = t.blurb;
         DOME.overlayStats.classList.add("hidden");
         DOME.overlayPlay.textContent = "\u25B6 Play";
+        if (DOME.continueBtn) DOME.continueBtn.classList.add("hidden");
         if (DOME.theatreChoices) {
             DOME.theatreChoices.classList.remove("hidden");
             markTheatreButtons();
@@ -1923,6 +1952,7 @@
             theme: state.theme,
             theatre: state.theatre,
             difficulty: state.difficulty,
+            checkpoint: state.checkpoints ? state.checkpoints[state.theatre] || 0 : 0,
             sound: state.sound,
         });
     }
@@ -1934,6 +1964,9 @@
             state.theme = themes[saved.theme] ? saved.theme : "olive";
             state.theatre = D.theatres[saved.theatre] ? saved.theatre : "overlord";
             state.difficulty = D.difficulty[saved.difficulty] ? saved.difficulty : "arcade";
+            state.checkpoint = { overlord: 0, rising: 0 };
+            state.checkpoints = { overlord: 0, rising: 0 };
+            state.checkpoints[saved.theatre] = saved.checkpoint || 0;
             state.sound = saved.sound !== false;
         }
         state.highScore = state.highScores[state.theatre] || 0;

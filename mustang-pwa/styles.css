@@ -9,9 +9,9 @@
     --border: #d4af37;
     --shadow: rgba(212, 175, 55, 0.35);
     --font: 'Arial', sans-serif;
-    --header-height: 78px;
+    --header-height: 56px;
     color-scheme: dark;
-    --nav-height: 92px;
+    --nav-height: 76px;
 }
 
 /* ===== Theme Variants ===== */
@@ -93,7 +93,7 @@ header::after {
 }
 
 h1 {
-    font-size: 1.6rem;
+    font-size: 1.25rem;
     color: var(--neon);
     text-shadow: 0 0 8px var(--shadow), 0 0 16px var(--shadow);
     letter-spacing: 3px;
@@ -102,7 +102,7 @@ h1 {
 
 .score-board {
     display: flex;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
     z-index: 2;
     font-size: 0.95rem;
@@ -185,7 +185,7 @@ main {
 
 nav.controls {
     height: var(--nav-height);
-    padding: 10px 12px;
+    padding: 6px 10px;
     display: flex;
     gap: 10px;
     justify-content: center;
@@ -196,8 +196,8 @@ nav.controls {
 
 .btn {
     font-family: var(--font);
-    font-size: 0.95rem;
-    padding: 10px 16px;
+    font-size: 0.9rem;
+    padding: 8px 14px;
     border: 2px solid var(--border);
     border-radius: 6px;
     background: var(--panel);
@@ -371,6 +371,11 @@ nav.controls {
     letter-spacing: 2px;
 }
 
+#continue-btn {
+    border-color: var(--accent);
+    margin-bottom: 8px;
+}
+
 #overlay-play, #overlay-theme {
     width: 100%;
     margin-top: 8px;
@@ -405,14 +410,25 @@ nav.controls {
 /* ===== Mobile ===== */
 @media (max-width: 768px) {
     :root {
-        --header-height: 70px;
-        --nav-height: 104px;
+        --header-height: 48px;
+        --nav-height: 66px;
     }
 
-    h1 { font-size: 1.15rem; letter-spacing: 2px; }
-    .btn { padding: 9px 10px; font-size: 0.78rem; letter-spacing: 0; }
-    .score-board { gap: 10px; font-size: 0.75rem; flex-wrap: wrap; justify-content: flex-end; }
-    .btn.loop { min-width: 78px; }
-    .panel { padding: 20px 16px; }
-    .panel h2 { font-size: 1.5rem; }
+    h1 { font-size: 0.95rem; letter-spacing: 1px; }
+    .btn { padding: 7px 8px; font-size: 0.7rem; letter-spacing: 0; }
+    .score-board { gap: 8px; font-size: 0.68rem; }
+    .score-board b { text-shadow: none; }
+    .btn.loop { min-width: 68px; }
+    .panel { padding: 18px 14px; }
+    .panel h2 { font-size: 1.3rem; margin-bottom: 8px; }
+    .panel p { margin-bottom: 12px; font-size: 0.85rem; }
+    main { padding: 4px; }
+    .controls-hint { padding: 8px 10px; bottom: 6px; }
+    .controls-hint p { font-size: 0.64rem; }
+}
+
+/* the scoreboard wraps onto a second row on narrow screens instead of
+   shrinking the playfield further */
+@media (max-width: 360px) {
+    h1 { display: none; }
 }

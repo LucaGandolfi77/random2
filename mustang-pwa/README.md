@@ -36,6 +36,10 @@ do not spend is worth 1,000 points each at the end of the stage.
 
 ## Mechanics
 
+**Continue.** If you run out of aircraft the game offers to restart from the
+last sector you cleared, with three lives and the score back to zero. It is
+remembered per front and never moves backwards.
+
 **Difficulty.** Three presets, chosen on the title screen and remembered between
 runs. *Recruit* softens enemy speed, toughness, rate of fire, bullet speed and
 wave density. *Arcade* is the neutral preset, the one the original cabinet ran.
@@ -87,7 +91,7 @@ No dependencies needed, plain `node`:
 node --check src/data.js && node --check src/audio.js && node --check src/art.js && node --check src/game.js
 node tests/run-all.mjs         # everything below, with a summary
 node tests/check-data.mjs      # 1494 assertions over stage, enemy, music, difficulty, bonus tables
-node tests/smoke.mjs           # boots the game headless and plays it, 150 assertions
+node tests/smoke.mjs           # boots the game headless and plays it, 158 assertions
 node tests/check-wiring.mjs    # DOM ids, asset paths, portability, precache list, manifest
 ```
 
@@ -202,13 +206,20 @@ Fixed, and covered by the regression block in `tests/smoke.mjs`:
       `scope`, `categories` and `lang`.
 - [x] The aircraft banks while dragging. Horizontal drag velocity now drives
       the same roll the keyboard did.
-- [ ] Landscape layout. The 2:3 canvas letterboxes to a narrow strip.
-- [ ] The playfield is a fixed 2:3 and wastes about a third of a modern phone. A
-      390x844 screen renders the game 585 px tall and leaves 259 px unused. Going
-      to 400x740 would fill the display, but it is invasive: the terrain tape,
-      formation layout, boss positions and every movement budget are tuned for
-      400x600 and have to be rebalanced together. Treat it as its own project.
-      Everything else in this list is now done; this is the biggest one left.
+- [ ] Landscape layout. The 2:3 canvas letterboxes to a narrow strip. Worth
+      re-measuring now that the chrome is much shorter: on a 844x390 landscape
+      phone the playfield would be about 500x200. A dedicated landscape layout
+      with the buttons down one side is the obvious answer.
+- [ ] ~~The playfield wastes a third of the screen.~~ **This was wrong and has
+      been measured out.** The canvas already fills whatever box it is given:
+      `fitCanvas` binds on whichever dimension runs out first, so the free area
+      is the same at 2:3 and at 400x740, and on short screens the taller aspect
+      is about 19% *worse*. The real waste was the chrome around it, 194 px of
+      header and navigation, 23% of an iPhone 14. That is fixed: the header and
+      the button bar are now 48 and 66 px on mobile, which buys a small phone
+      like the SE **31% more playable area**. On a modern phone the canvas was
+      already full width and nothing was being wasted, so there is no aspect
+      change to make and the 2:3 playfield stays.
 - [x] Wake lock, so a long mission does not put the screen to sleep. Released and
       re-taken with the page.
 - [x] `visualViewport` is watched as well as `resize`, so the canvas follows the
@@ -272,7 +283,10 @@ remaining cost is aircraft, armour and the HUD, which is the actual content.
       speed, toughness, rate of fire, bullet speed and wave density. Arcade is
       the neutral one and the default, so the game plays like the original
       unless you ask otherwise.
-- [ ] Checkpoint or continue, so one bad stage is not a full restart.
+- [x] Checkpoint and continue. The furthest cleared stage is remembered per
+      front, survives a reload, and never moves backwards. On game over a
+      Continue button offers to restart from the last sector you cleared, with
+      three lives and the score reset, so one bad stage is not a whole run.
 - [x] Screen shake on every kill, a harder shake and a hit-stop on boss hits and
       on your own death. Hit-stop is deliberately **not** applied to ordinary
       kills: in a game this dense it made the whole screen stutter every time a

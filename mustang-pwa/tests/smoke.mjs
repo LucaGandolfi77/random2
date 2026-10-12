@@ -87,7 +87,7 @@ const ids = [
     "game-canvas", "score", "high-score", "lives", "stage", "loops",
     "start-btn", "loop-btn", "pause-btn", "sound-btn",
     "overlay", "overlay-title", "overlay-msg", "overlay-stats",
-    "overlay-play", "overlay-theme", "final-score", "final-high", "final-lives", "final-rank",
+    "overlay-play", "continue-btn", "continue-stage", "overlay-theme", "final-score", "final-high", "final-lives", "final-rank",
     "theatre-choices", "install-prompt", "install-btn", "install-later",
     "theatre-overlord", "theatre-rising",
 ];
@@ -174,6 +174,12 @@ function holdKeys(codes, frames, opts) {
     for (const c of codes) key(c, true);
     for (let i = 0; i < frames; i++) { armPlayer(opts); step(1); }
     for (const c of codes) key(c, false);
+}
+
+function keepAlive() {
+    S.player.alive = true;
+    S.player.invuln = 1e9;
+    S.player.looping = false;
 }
 
 function shootDown() {
@@ -1044,6 +1050,73 @@ ok("wave plans never fall back to the forced air unit", (() => {
     }
     return forcedWaves === 0;
 })(), forcedWaves + " forced waves");
+
+/* ===== Checkpoint and continue ===== */
+console.log("\ncheckpoint");
+
+function playStageToTally(index) {
+    M.game.startStage(index);
+    let n = 0;
+    while (S.phase === "briefing" && n++ < 400) step(1);
+    S.wavePlan.length = 0;
+    S.weightTotal = 100;
+    S.weightKilled = 100;
+    n = 0;
+    while (S.phase === "playing" && n++ < 12000) { keepAlive(); step(1); }
+    return S.phase === "clear";
+}
+
+S.checkpoints = { overlord: 0, rising: 0 };
+M.game.setTheatre("overlord");
+M.game.startGame();
+const clearedFive = playStageToTally(5);
+ok("clearing a stage advances the checkpoint", clearedFive && S.checkpoint === 5,
+    "checkpoint " + S.checkpoint + " stage " + S.stage.n);
+
+ok("the checkpoint only ever moves forward", (() => {
+    if (!playStageToTally(2)) return "could not replay an earlier stage";
+    return S.checkpoint === 5;
+})(), "checkpoint went to " + S.checkpoint);
+
+ok("the checkpoint survives a reload", (() => {
+    const raw = JSON.parse(storage.get("mustang-pwa") || "{}");
+    return raw.checkpoint === 5;
+})(), storage.get("mustang-pwa"));
+
+ok("a fresh run starts from stage 32", (() => {
+    M.game.startGame();
+    return S.stageIndex === 0 && S.stage.n === 32;
+})(), S.stage.n);
+
+ok("dying offers a continue from the last cleared stage", (() => {
+    S.phase = "playing";
+    keepAlive();
+    S.lives = 0;
+    S.enemies.length = 0;
+    S.ebullets.push({ x: S.player.x, y: S.player.y, vx: 0, vy: 0, r: 3, life: 4, dead: false });
+    let n = 0;
+    while (S.phase !== "gameover" && n++ < 600) { keepAlive(); step(1); }
+    if (S.phase !== "gameover") return "never reached game over: " + S.phase;
+    const offered = !els["continue-btn"].classList.contains("hidden");
+    return offered && els["continue-stage"].textContent === "27";
+})(), els["continue-stage"].textContent + " hidden=" + els["continue-btn"].classList.contains("hidden"));
+
+ok("continuing restarts at the last cleared stage with full lives", (() => {
+    const from = S.stage.n;
+    S.score = 0;
+    els["continue-btn"]._h.click[0]();
+    return S.stage.n === from && S.lives === 3 && S.score === 0 && S.phase === "briefing";
+})(), S.stage.n + " lives " + S.lives + " phase " + S.phase);
+
+ok("the two fronts keep separate checkpoints", (() => {
+    M.game.setTheatre("rising");
+    M.game.startGame();
+    return S.checkpoint === 0 && S.stage.n === 32;
+})(), "rising checkpoint " + S.checkpoint);
+ok("and the allied one is untouched", (() => {
+    M.game.setTheatre("overlord");
+    return S.checkpoint === 5;
+})(), "overlord checkpoint " + S.checkpoint);
 
 /* ===== Winning the war ===== */
 console.log("\nvictory");
