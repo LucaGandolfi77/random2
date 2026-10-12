@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Virtual Farm Tycoon</title>
+    <meta name="theme-color" content="#4caf50">
+    <meta name="description" content="Manage your virtual farm, grow crops, raise animals, and build wealth!">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>🌾 Virtual Farm Tycoon</h1>
+            <div class="farm-stats">
+                <div class="stat-item">💰 Coins: <span id="coins">0</span></div>
+                <div class="stat-item">📅 Day: <span id="day">1</span></div>
+                <div class="stat-item">☀️ Weather: <span id="weather">☀️</span></div>
+                <div class="stat-item">🏠 Land: <span id="land-size">1x1</span></div>
+            </div>
+        </header>
+
+        <main>
+            <div class="farm-grid" id="farm-grid">
+                <!-- Farm cells will be dynamically generated here -->
+            </div>
+            
+            <aside class="farm-tools">
+                <div class="tool-panel">
+                    <h3>🌱 Crops</h3>
+                    <div class="inventory-grid" id="crop-inventory">
+                        <!-- Crop items will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tool-panel">
+                    <h3>🐄 Animals</h3>
+                    <div class="inventory-grid" id="animal-inventory">
+                        <!-- Animal items will be added here -->
+                    </div>
+                </div>
+                
+                <div class="tool-panel">
+                    <h3>🛠️ Tools</h3>
+                    <div class="inventory-grid" id="tool-inventory">
+                        <!-- Tool items will be added here -->
+                    </div>
+                </div>
+                
+                <button id="sell-all-btn" class="btn danger">Sell All Crops</button>
+                <button id="plant-all-btn" class="btn primary">Plant All</button>
+                <button id="next-day-btn" class="btn">Next Day 🌅</button>
+            </aside>
+        </main>
+
+        <div id="overlay" class="overlay hidden">
+            <div class="panel">
+                <h2 id="overlay-title">Welcome to Farm Tycoon!</h2>
+                <p id="overlay-msg">Click on empty cells to start planting crops or raising animals!</p>
+                <div id="overlay-stats" class="hidden">
+                    <p>Final Score: <span id="final-score">0</span></p>
+                    <p>Day: <span id="final-day">0</span></p>
+                </div>
+                <button id="overlay-play" class="btn primary">▶ Start Farming</button>
+            </div>
+        </div>
+
+        <div id="install-prompt" class="install-prompt hidden">
+            <p>📱 Install Virtual Farm Tycoon for the best farming experience!</p>
+            <button id="install-btn" class="btn primary">Install</button>
+            <button id="install-later" class="btn">Later</button>
+        </div>
+    </div>
+
+    <script src="/game.js"></script>
+    <script src="/service-worker.js"></script>
+</body>
+</html>
