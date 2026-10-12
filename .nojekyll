@@ -1,0 +1,2 @@
+# Disable Jekyll processing — serve all files as-is (faster, and needed for
+# directories starting with underscores if any are ever added).

@@ -6,7 +6,7 @@ import { Input } from './core/input.js';
 import { Audio } from './core/audio.js';
 import { makeRng, isTouchDevice, store } from './core/utils.js';
 
-import { THEMES, THEME_IDS, currentTheme, setTheme, randomTheme } from './world/themes.js';
+import { THEMES, THEME_IDS, currentTheme, setTheme, randomTheme, setScale } from './world/themes.js';
 import { applyLayout, MAP, groundY } from './world/layout.js';
 import { applyPalette } from './world/palette.js';
 import {
@@ -26,8 +26,9 @@ import { createHoles, R0, TIERS } from './game/hole.js';
 import { createBrain } from './game/ai.js';
 import { HoleCamera } from './game/camera.js';
 import { Effects } from './game/effects.js';
-import { Director, MATCH_TIME } from './game/director.js';
+import { Director } from './game/director.js';
 import { PowerUps, applyPower } from './game/powerups.js';
+import { MODES, MODE_IDS, DEFAULT_MODE, mode, propDensity } from './game/modes.js';
 
 import { Hud } from './ui/hud.js';
 import { Screens } from './ui/screens.js';
@@ -37,17 +38,22 @@ import { initPwa, createWakeLock } from './pwa.js';
 /* =============================================================== bootstrap */
 
 const canvas = document.getElementById('scene');
-// ?q=low|med|high per provare la grafica; ?t=nevegal per provare un tema
+// ?q=low|med|high per provare la grafica; ?t=nevegal per il tema; ?m=continente per la modalità
 const params = new URLSearchParams(location.search);
 const engine = new Engine(canvas, params.get('q') || store.get('bucio.quality', 'high'));
 const scene = engine.scene;
 const rng = makeRng(777);
 
-/* ============================================================ il tema attivo */
+/* ================================================== la modalità e il tema attivi */
+
+let modeId = params.get('m') || store.get('bucio.mode', DEFAULT_MODE);
+if (!MODES[modeId]) modeId = DEFAULT_MODE;
 
 let themeId = params.get('t') || store.get('bucio.theme', 'portomarina');
 if (!THEMES[themeId]) themeId = 'portomarina';
 setTheme(themeId);
+// la scala del mondo la decide la modalità: va impostata prima del layout
+setScale(mode(modeId).scale);
 applyLayout(themeId);
 applyPalette(currentTheme().palette);
 
@@ -124,10 +130,11 @@ const screens = new Screens({
   onResume: () => resume(),
   onQuit: () => toMenu(),
   onTheme: (id) => chooseTheme(id),
+  onMode: (id) => chooseMode(id),
   onQuality: (q) => {
     store.set('bucio.quality', q);
     engine.applyQuality(q);
-    buildWorld(QUALITY[q].density);
+    buildWorld(propDensity(QUALITY[q].density, modeId));
     hud.toast(`Grafica: ${QUALITY[q].label} — mondo ricaricato`);
   },
   onSound: (on) => {
@@ -174,6 +181,9 @@ const debug = {
   themeId: () => currentTheme().id,
   themes: THEME_IDS,
   power: (id) => applyPower(player, id, { rivals: holes }),
+  mode: () => modeId,
+  modes: MODE_IDS,
+  setMode: (id) => chooseMode(id, { silent: true }),
   /** Avanza la simulazione senza renderizzare: utilissimo per i test. */
   ff(seconds, dtStep = 1 / 60) {
     const n = Math.round(seconds / dtStep);
@@ -202,6 +212,7 @@ function buildWorld(density) {
     audio,
     cam,
     powers,
+    mode: mode(modeId),
     hooks: {
       onFeed: (text, kind) => hud.pushFeed(text, kind),
       onPickup: (h, def, pos) => director.onPickup(h, def, pos),
@@ -233,6 +244,15 @@ function buildWorld(density) {
           flashHurt();
         }
       },
+      onEliminate: (win, lose) => {
+        if (win.isPlayer) {
+          buzz([80, 50, 120]);
+          const left = holes.filter((h) => !h.out).length;
+          if (left === 1) hud.toast("Sei l'ultimo buco in piedi! 🕳️", 2800);
+        } else if (lose.isPlayer) {
+          hud.toast(`${win.name} ti ha divorato: partita finita`, 2400);
+        }
+      },
       onEnd: (res) => {
         setState('results');
         touchCtl.show(false);
@@ -250,7 +270,7 @@ function rebuildAll(density) {
   world.group.traverse((o) => {
     if (o.isInstancedMesh) o.dispose();
   });
-  buildWorld(density ?? QUALITY[engine.quality].density);
+  buildWorld(density ?? propDensity(QUALITY[engine.quality].density, modeId));
   resetHoles();
 }
 
@@ -272,10 +292,41 @@ function chooseTheme(id, { silent = false } = {}) {
   }
 }
 
+/**
+ * Cambia modalità: cambia la scala del mondo, la durata, la densità di cibo e
+ * le regole del morso, quindi va ricostruito tutto quello che ne dipende.
+ */
+function chooseMode(id, { silent = false } = {}) {
+  if (!MODES[id] || id === modeId) {
+    if (MODES[id]) screens.setMode(modeId);
+    return;
+  }
+  modeId = id;
+  store.set('bucio.mode', modeId);
+  setScale(mode(modeId).scale);
+  applyLayout(themeId);
+  applyPalette(currentTheme().palette);
+  buildVisuals();
+  rebuildAll();
+  cam.orbit(0, { x: 0, y: 0, z: 0 }, orbitRadius());
+  screens.setMode(modeId);
+  screens.refreshBest();
+  if (!silent) {
+    const m = mode(modeId);
+    hud.toast(`${m.emoji} ${m.name} — ${m.knockout ? 'il morso è definitivo' : 'i rivali si rimettono in gioco'}`);
+  }
+}
+
+/** Quanto è lontano l'orbita del menu: deve stare dentro la mappa. */
+function orbitRadius() {
+  return Math.min(220, MAP.half * 0.92);
+}
+
 /* ================================================================= partita */
 
 function resetHoles() {
   holes.forEach((h, i) => {
+    h.comeBack();
     const s = SPAWNS[i % SPAWNS.length];
     h.x = s.x;
     h.z = s.z;
@@ -322,7 +373,8 @@ function startMatch() {
   cam.snapTo(player);
   audio.whoosh();
   wake.request();
-  hud.toast(`Divora ${currentTheme().name}! 🍦`, 1500);
+  const m = mode(modeId);
+  hud.toast(`Divora ${currentTheme().name}! ${m.emoji}`, 1500);
 }
 
 function pause() {
@@ -414,7 +466,7 @@ function step(dt, t) {
     if (hudAcc > 0.08) {
       hudAcc = 0;
       hud.setScore(player.score);
-      hud.setTimer(director.time, MATCH_TIME);
+      hud.setTimer(director.time, director.timeTotal);
       hud.setTier(player.tier);
       hud.setSize(player.r);
       hud.setBoard(director.board());
@@ -425,10 +477,11 @@ function step(dt, t) {
     }
   } else if (state === 'menu' || state === 'results' || state === 'loading') {
     for (const h of holes) {
+      if (h.out) continue; // i buchi fuori partita restano spenti
       h.update(dt, t);
       if (h.isPlayer) h.input.mag = 0;
     }
-    cam.orbit(dt, { x: 0, y: 0, z: 0 }, state === 'results' ? 86 : 98);
+    cam.orbit(dt, { x: 0, y: 0, z: 0 }, orbitRadius());
   }
 
   if (director && state === 'playing') powers.update(dt, t, holes, director);
@@ -479,12 +532,13 @@ async function doInstall() {
 /* ================================================================= avvio */
 
 buildVisuals();
-buildWorld(QUALITY[engine.quality].density);
+buildWorld(propDensity(QUALITY[engine.quality].density, modeId));
 resetHoles();
-cam.orbit(0, { x: 0, y: 0, z: 0 }, 98);
+cam.orbit(0, { x: 0, y: 0, z: 0 }, orbitRadius());
 engine.start(step);
 
 function boot() {
+  screens.setMode(modeId);
   screens.show('menu');
   screens.refreshBest();
   screens.hideLoader();

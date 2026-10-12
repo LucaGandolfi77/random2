@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>random2 · Play</title>
+  <meta name="description" content="A collection of installable mini-games and tools. Play instantly in the browser — offline-ready, iPhone-friendly, zero downloads.">
+
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0d16">
+
+  <!-- iPhone / iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="random2">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+
+  <style>
+    :root {
+      --bg: #0b0d16;
+      --surface: rgba(255, 255, 255, 0.045);
+      --surface-strong: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #f4f5fb;
+      --muted: rgba(233, 236, 250, 0.62);
+      --faint: rgba(233, 236, 250, 0.4);
+      --accent: #8b5cf6;
+      --accent-2: #ec4899;
+      --radius: 24px;
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ---- Animated background ---- */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 800px at 85% -10%, rgba(139, 92, 246, 0.16), transparent 60%),
+        radial-gradient(1000px 700px at -10% 100%, rgba(236, 72, 153, 0.12), transparent 60%),
+        var(--bg);
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.35;
+      will-change: transform;
+    }
+    .blob-1 {
+      width: 46vmax; height: 46vmax;
+      left: -18vmax; top: -12vmax;
+      background: conic-gradient(from 120deg, #4f46e5, #7c3aed, #4f46e5);
+      animation: drift1 26s ease-in-out infinite alternate;
+    }
+    .blob-2 {
+      width: 40vmax; height: 40vmax;
+      right: -16vmax; bottom: -14vmax;
+      background: conic-gradient(from 300deg, #db2777, #9333ea, #db2777);
+      animation: drift2 32s ease-in-out infinite alternate;
+    }
+    @keyframes drift1 {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to   { transform: translate3d(9vmax, 6vmax, 0) scale(1.15); }
+    }
+    @keyframes drift2 {
+      from { transform: translate3d(0, 0, 0) scale(1.1); }
+      to   { transform: translate3d(-8vmax, -7vmax, 0) scale(0.95); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .blob { animation: none; }
+    }
+
+    /* ---- Layout ---- */
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding:
+        calc(28px + var(--sat))
+        max(20px, var(--sar))
+        calc(40px + var(--sab))
+        max(20px, var(--sal));
+    }
+
+    /* ---- Hero ---- */
+    .hero {
+      text-align: center;
+      padding: clamp(28px, 7vw, 72px) 0 clamp(30px, 6vw, 56px);
+    }
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .kicker::before {
+      content: "";
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.9);
+    }
+    .hero h1 {
+      margin: 20px 0 14px;
+      font-size: clamp(44px, 11vw, 84px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.02;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(120deg, #a78bfa 0%, #e879f9 45%, #fb7185 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero .sub {
+      max-width: 560px;
+      margin: 0 auto;
+      font-size: clamp(16px, 4vw, 19px);
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .hero .hint {
+      margin-top: 18px;
+      font-size: 13.5px;
+      color: var(--faint);
+    }
+    .hero .hint strong { color: var(--muted); font-weight: 600; }
+
+    /* ---- Grid ---- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 315px), 1fr));
+      gap: 18px;
+    }
+
+    /* ---- Card ---- */
+    .card {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+    @media (hover: hover) {
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.2);
+        background: var(--surface-strong);
+      }
+    }
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+    .tile {
+      flex: 0 0 auto;
+      width: 58px; height: 58px;
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      border-radius: 17px;
+      box-shadow: 0 6px 20px -6px var(--tile-glow, rgba(0, 0, 0, 0.5)),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .card h2 {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .card .tagline {
+      font-size: 14.5px;
+      line-height: 1.5;
+      color: var(--muted);
+      flex: 1;
+      margin-bottom: 14px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .chip {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--faint);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 10px;
+      white-space: nowrap;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      text-decoration: none;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.15s ease, filter 0.2s ease;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-play {
+      flex: 1;
+      color: #fff;
+      background: linear-gradient(135deg, var(--c1, #6366f1), var(--c2, #a855f7));
+      box-shadow: 0 8px 22px -8px var(--tile-glow, rgba(99, 102, 241, 0.7));
+    }
+    @media (hover: hover) {
+      .btn-play:hover { filter: brightness(1.12); }
+    }
+    .btn-src {
+      flex: 0 0 auto;
+      width: 48px;
+      padding: 0;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+    }
+    .btn-src svg { width: 20px; height: 20px; fill: currentColor; }
+    @media (hover: hover) {
+      .btn-src:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.25); }
+    }
+
+    /* ---- Footer ---- */
+    footer {
+      margin-top: 44px;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--faint);
+    }
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1px;
+    }
+    @media (hover: hover) {
+      footer a:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.3); }
+    }
+    footer p + p { margin-top: 8px; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <div class="wrap">
+    <header class="hero">
+      <p class="kicker">GitHub Pages · PWA Arcade</p>
+      <h1>random<span class="grad">2</span></h1>
+      <p class="sub">A shelf of installable mini-games and one dev tool. Everything runs right in the browser — no accounts, no downloads.</p>
+      <p class="hint">On iPhone: tap <strong>Share → Add to Home Screen</strong> inside a game for fullscreen, offline play.</p>
+    </header>
+
+    <main>
+      <h2 class="visually-hidden">Projects</h2>
+      <section class="grid" aria-label="Projects">
+
+        <article class="card" style="--c1:#f59e0b; --c2:#f97316; --tile-glow:rgba(245,158,11,.55);">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#f59e0b,#ea580c)">👑</div>
+            <h2>King Shot</h2>
+          </div>
+          <p class="tagline">Pull, aim, loose. Medieval archery built for touch — one finger is all you need.</p>
+          <div class="chips"><span class="chip">ARCADE</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="king-shot-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/king-shot-pwa" aria-label="King Shot source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card" style="--c1:#0ea5e9; --c2:#6366f1; --tile-glow:rgba(14,165,233,.55);">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#38bdf8,#6366f1)">✈️</div>
+            <h2>Plane Shooter</h2>
+          </div>
+          <p class="tagline">Classic side-scrolling sky action. Weave through enemies and blast everything that moves.</p>
+          <div class="chips"><span class="chip">SHMUP</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="plane-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/plane-pwa" aria-label="Plane Shooter source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card" style="--c1:#eab308; --c2:#ec4899; --tile-glow:rgba(234,179,8,.55);">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#facc15,#ec4899)">🎰</div>
+            <h2>Slot Machine</h2>
+          </div>
+          <p class="tagline">Spin the reels, chase the jackpot. Bright, fast and weirdly hard to put down.</p>
+          <div class="chips"><span class="chip">CASINO</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="slot-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/slot-pwa" aria-label="Slot Machine source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card" style="--c1:#22c55e; --c2:#14b8a6; --tile-glow:rgba(34,197,94,.55);">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#4ade80,#14b8a6)">🐍</div>
+            <h2>Snake</h2>
+          </div>
+          <p class="tagline">The retro classic, reimagined with themes, power-ups and buttery-smooth movement.</p>
+          <div class="chips"><span class="chip">RETRO</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="snake-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/snake-pwa" aria-label="Snake source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card" style="--c1:#ef4444; --c2:#b45309; --tile-glow:rgba(239,68,68,.5);">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#f87171,#b45309)">🛩️</div>
+            <h2>Mustang 1942</h2>
+          </div>
+          <p class="tagline">Vertical WWII air shooter: aerial loops, POW crates, side fighters and 32 stages on two fronts.</p>
+          <div class="chips"><span class="chip">SHMUP</span><span class="chip">32 STAGES</span><span class="chip">PWA</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="mustang-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/mustang-pwa" aria-label="Mustang 1942 source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card" style="--c1:#10b981; --c2:#84cc16; --tile-glow:rgba(16,185,129,.55);">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#34d399,#84cc16)">🌾</div>
+            <h2>Farm Tycoon</h2>
+          </div>
+          <p class="tagline">Grow crops, raise animals and ride the weather. A cozy idle-farm empire in your pocket.</p>
+          <div class="chips"><span class="chip">IDLE</span><span class="chip">SIM</span><span class="chip">PWA</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="virtual-farm-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/virtual-farm-pwa" aria-label="Farm Tycoon source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card" style="--c1:#8b5cf6; --c2:#d946ef; --tile-glow:rgba(139,92,246,.6);">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#7c3aed,#c026d3)">🕳️</div>
+            <h2>BUCIO</h2>
+          </div>
+          <p class="tagline">You are a low-poly black hole loose over an Italian seaside town. Devour everything in 120 seconds.</p>
+          <div class="chips"><span class="chip">3D</span><span class="chip">THREE.JS</span><span class="chip">PWA</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="bucio/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/bucio" aria-label="BUCIO source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card" style="--c1:#64748b; --c2:#0ea5e9; --tile-glow:rgba(100,116,139,.55);">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#64748b,#0ea5e9)">🛠️</div>
+            <h2>EADS Studio</h2>
+          </div>
+          <p class="tagline">Embedded Analysis & Debug Studio — a desktop frontend for Cppcheck and Doxygen. Python, not a web game.</p>
+          <div class="chips"><span class="chip">TOOL</span><span class="chip">PYTHON</span><span class="chip">DESKTOP</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="https://github.com/LucaGandolfi77/random2/tree/main/EADS">⌘&nbsp; Open on GitHub</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/EADS" aria-label="EADS source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+      </section>
+    </main>
+
+    <footer>
+      <p>All games are procedural — no binary assets, no tracking, works offline once installed.</p>
+      <p><a href="https://github.com/LucaGandolfi77/random2">github.com/LucaGandolfi77/random2</a></p>
+    </footer>
+  </div>
+</body>
+</html>

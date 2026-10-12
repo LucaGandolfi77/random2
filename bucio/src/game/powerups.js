@@ -127,7 +127,7 @@ export class PowerUps {
       if (this.active.some((a) => a.visible && (a.userData.x - x) ** 2 + (a.userData.z - z) ** 2 < 900))
         continue;
       let busy = false;
-      for (const h of holes) if ((h.x - x) ** 2 + (h.z - z) ** 2 < 900) busy = true;
+      for (const h of holes) if (!h.out && (h.x - x) ** 2 + (h.z - z) ** 2 < 900) busy = true;
       if (busy) continue;
       return { x, z };
     }
@@ -175,6 +175,7 @@ export class PowerUps {
 
       let eaten = false;
       for (const h of holes) {
+        if (h.out) continue; // i buchi fuori partita non agganciano nulla
         const reach = h.r * 0.6 + 1.1;
         if ((u.x - h.x) ** 2 + (u.z - h.z) ** 2 < reach * reach) {
           hooks.onPickup(h, u.def, { x: u.x, z: u.z, y: u.y });
@@ -208,7 +209,7 @@ export function applyPower(hole, id, ctx) {
       return p;
     case 'ruba': {
       const rival = ctx.rivals
-        .filter((h) => h !== hole)
+        .filter((h) => h !== hole && !h.out)
         .sort((a, b) => b.score - a.score)[0];
       if (!rival) return null;
       const steal = Math.round(rival.score * 0.2);

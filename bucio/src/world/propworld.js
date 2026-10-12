@@ -14,11 +14,11 @@ import {
   isSeaDeep,
   isSolid,
   isPond,
+  ROADS,
   SPAWNS,
 } from './layout.js';
 import { clamp, makeRng } from '../core/utils.js';
 
-const HALF = MAP.half;
 const CELL = 12;
 const key = (cx, cz) => cx * 4096 + cz;
 
@@ -197,6 +197,8 @@ export class PropWorld {
   /** Punto casuale coerente con una zona della mappa. */
   samplePoint(zone) {
     const rng = this.rng;
+    // mai una costante: la mappa cambia dimensione con la modalità
+    const HALF = MAP.half;
     if (zone === 'sea') {
       const x = rng.range(-HALF + 8, HALF - 8);
       const s = shoreZ(x);
@@ -213,14 +215,8 @@ export class PropWorld {
       const x = rng.range(-HALF + 8, HALF - 8);
       return { x, z: shoreZ(x) - 4 };
     }
-    if (zone === 'road') {
-      const roads = [
-        { axis: 'x', at: -34, w: 9 },
-        { axis: 'x', at: -6, w: 7 },
-        { axis: 'z', at: -14, w: 7 },
-        { axis: 'z', at: 34, w: 6 },
-      ];
-      const r = rng.pick(roads);
+    if (zone === 'road' && ROADS.length) {
+      const r = rng.pick(ROADS);
       const along = rng.range(-HALF + 10, HALF - 10);
       const off = rng.range(-r.w * 0.34, r.w * 0.34);
       return r.axis === 'x' ? { x: along, z: r.at + off } : { x: r.at + off, z: along };
@@ -407,9 +403,10 @@ export class PropWorld {
     if (!candidates.length) return null;
     const pick = candidates[Math.floor(this.rng() * candidates.length)];
     let placed = false;
+    const half = MAP.half;
     for (let t = 0; t < 30 && !placed; t++) {
-      const x = this.rng.range(-HALF * 0.72, HALF * 0.72);
-      const z = this.rng.range(-HALF * 0.72, HALF * 0.5);
+      const x = this.rng.range(-half * 0.72, half * 0.72);
+      const z = this.rng.range(-half * 0.72, half * 0.5);
       if (isSeaDeep(x, z) || isRoad(x, z)) continue;
       if (!this.canPlace(x, z, 3.5)) continue;
       pick.active = true;

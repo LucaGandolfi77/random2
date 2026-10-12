@@ -1,6 +1,6 @@
 // Virtual Farm Tycoon Service Worker
-const CACHE_NAME = 'farm-tycoon-v1'
-const STATIC_CACHE = 'farm-static-v1'
+const CACHE_NAME = 'farm-tycoon-v2'
+const STATIC_CACHE = 'farm-static-v2'
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
@@ -8,11 +8,11 @@ self.addEventListener('install', (event) => {
     caches.open(STATIC_CACHE)
       .then((cache) => {
         return cache.addAll([
-          '/',
-          '/index.html',
-          '/game.js',
-          '/styles.css',
-          '/manifest.json'
+          './',
+          './index.html',
+          './game.js',
+          './styles.css',
+          './manifest.json'
         ])
       })
   )

@@ -1,13 +1,13 @@
 /* ===== King Shot PWA Service Worker ===== */
-const CACHE_NAME = "king-shot-pwa-v1";
+const CACHE_NAME = "king-shot-pwa-v2";
 const ASSETS = [
-    "/",
-    "/index.html",
-    "/styles.css",
-    "/game.js",
-    "/manifest.json",
-    "/icons/icon-192.svg",
-    "/icons/icon-512.svg",
+    "./",
+    "./index.html",
+    "./styles.css",
+    "./game.js",
+    "./manifest.json",
+    "./icons/icon-192.svg",
+    "./icons/icon-512.svg",
 ];
 
 // Install: cache all assets

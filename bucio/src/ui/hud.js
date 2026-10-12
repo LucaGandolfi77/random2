@@ -65,15 +65,17 @@ export class Hud {
   }
 
   setBoard(rows) {
-    const key = rows.map((r) => `${r.name}${r.score}`).join('|');
+    const key = rows.map((r) => `${r.name}${r.score}${r.out ? 'x' : ''}`).join('|');
     if (key === this._lastBoard) return;
     this._lastBoard = key;
     this.board.innerHTML = rows
       .map(
-        (r, i) => `<div class="board-row ${r.isPlayer ? 'me' : ''} ${i === 0 ? 'lead' : ''}">
+        (r, i) => `<div class="board-row ${r.isPlayer ? 'me' : ''} ${i === 0 ? 'lead' : ''} ${
+          r.out ? 'out' : ''
+        }">
           <span class="board-dot" style="background:#${r.color.toString(16).padStart(6, '0')}"></span>
           <span class="board-name">${r.name}</span>
-          <span class="board-score">${formatInt(r.score)}</span>
+          <span class="board-score">${r.out ? 'KO' : formatInt(r.score)}</span>
         </div>`
       )
       .join('');

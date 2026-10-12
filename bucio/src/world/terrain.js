@@ -55,7 +55,9 @@ export function buildOpenSea() {
 }
 
 export function buildTerrain() {
-  const seg = 132;
+  // la mesh segue la mappa: nel mondo grande servono più triangoli, ma non
+  // così tanti da far crollare il frame (il tetto è 200 per lato)
+  const seg = Math.min(200, Math.max(64, Math.round((132 * MAP.half) / 108)));
   const geo = new THREE.PlaneGeometry(MAP.half * 2, MAP.half * 2, seg, seg);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
@@ -89,18 +91,20 @@ export function buildTerrain() {
 
 /** Mar Tirreno: piano animato, più scuro dove è più fondo. */
 export function buildSea() {
-  const seg = 90;
+  // tetto basso di segmenti: il mare si ricalcola a ogni frame
+  const seg = Math.min(130, Math.max(48, Math.round((90 * MAP.half) / 108)));
   const geo = new THREE.PlaneGeometry(MAP.half * 2, MAP.half * 2, seg, seg);
   geo.rotateX(-Math.PI / 2);
   const pos = geo.attributes.position;
   const colors = new Float32Array(pos.count * 3);
   const shallow = c(P.foam).lerp(c(P.sea), 0.55);
   const deep = c(P.seaDeep);
+  const deepAt = 22 * (MAP.half / 108); // la sfumatura segue la larghezza della mappa
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
     const z = pos.getZ(i);
     pos.setY(i, MAP.seaLevel);
-    const t = smoothstep(clamp((z - shoreZ(x) + 2) / 22, 0, 1));
+    const t = smoothstep(clamp((z - shoreZ(x) + 2) / deepAt, 0, 1));
     const col = shallow.clone().lerp(deep, t);
     colors[i * 3] = col.r;
     colors[i * 3 + 1] = col.g;
@@ -154,11 +158,12 @@ export function animateSea(sea, t) {
   if (!sea) return;
   const pos = sea.geometry.attributes.position;
   const base = sea.userData.base;
+  const k = 108 / MAP.half; // nel mondo grande le onde non devono allungarsi
   for (let i = 0; i < pos.count; i++) {
     const x = base[i * 3];
     const z = base[i * 3 + 2];
     pos.array[i * 3 + 1] =
-      Math.sin(x * 0.09 + t * 0.9) * 0.075 + Math.sin(z * 0.13 - t * 1.35) * 0.055;
+      Math.sin(x * 0.09 * k + t * 0.9) * 0.075 + Math.sin(z * 0.13 * k - t * 1.35) * 0.055;
   }
   pos.needsUpdate = true;
   sea.geometry.computeVertexNormals();
@@ -171,7 +176,7 @@ export function buildFoam() {
     empty.name = 'schiuma';
     return empty;
   }
-  const steps = 96;
+  const steps = Math.min(180, Math.max(64, Math.round((96 * MAP.half) / 108)));
   const verts = [];
   const cols = [];
   const idx = [];

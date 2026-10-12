@@ -8,6 +8,9 @@ quattro rivali.
 Installabile, offline, su desktop e telefono. Nessun asset binario nel bundle:
 tutta la grafica è procedurale e tutto l'audio è sintetizzato.
 
+> 📈 **Prossimo passo:** piano per aggiungere account, login e livelli →
+> [PLAN-ACCOUNTS-LIVELLI.md](PLAN-ACCOUNTS-LIVELLI.md)
+
 ---
 
 ## Gioca
@@ -37,6 +40,23 @@ La cartella `dist/` è statica: si può servire da qualsiasi hosting
 | Muto | `M` | — | — | — |
 
 Parametro utile per provare la grafica: `?q=low`, `?q=med`, `?q=high`.
+
+## Le due modalità
+
+Si scelgono dal menu (e restano scelte: `?m=continente` per provarle al volo).
+
+| | 🏙️ Città | 🌍 Continente |
+|---|---|---|
+| Mappa | 108 di semi-lato | **194** — quasi doppia, ~4600 oggetti |
+| Durata | 120 s | 180 s |
+| Morso a un rivale | perde il 38% della massa e scappa | **è eliminato per sempre** |
+| Chi viene morso | torna subito in partita | sparisce dalla mappa e dalla classifica dei vivi |
+| Fine | allo scadere del tempo | allo scadere **o** quando rimane un buco solo |
+
+In Continente i rivali sono anche più coraggiosi: ti vengono a cercare invece di
+aspettarti, e con un po' di vantaggio in meno (il 15% di massa invece del 30%)
+puoi divorarli — perché in un continente inseguire un rivale deve valere la
+corsa. Se ti prendono, la partita finisce lì.
 
 ## Come funziona
 
@@ -86,6 +106,7 @@ src/
 │  ├─ props.js        catalogo di 35 oggetti (vespe, palazzi, barche…)
 │  └─ propworld.js    InstancedMesh, griglia spaziale, divoramento, respawn
 ├─ game/
+│  ├─ modes.js        modalità: dimensione mondo, durata, regole del morso
 │  ├─ hole.js         il buco: crescita, input, onde, tier
 │  ├─ ai.js           cervello dei rivali
 │  ├─ director.js     timer, regole, scontri, oro, classifica
@@ -93,6 +114,16 @@ src/
 │  └─ effects.js      particelle, onde d'urto, numeri che salgono
 └─ ui/                hud.js · screens.js · joystick.js
 ```
+
+## Test
+
+```bash
+npm test    # smoke test headless: mondo grande, knockout, partite complete
+```
+
+Simula il gioco senza render e verifica che il Continente sia davvero più
+grande, che i rivali divorati spariscano, che l'ultimo buco in piedi chiuda la
+partita e che la modalità Città sia rimasta identica a prima.
 
 ### Perché è veloce
 

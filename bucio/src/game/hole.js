@@ -63,6 +63,8 @@ export class Hole {
     this.idleT = 0;
     this.powers = makePowerState();
     this.lastVictim = null;
+    this.out = false; // divorato in modo definitivo: non torna più in partita
+    this.knockout = false; // regola della modalità corrente (la imposta il regista)
     this._spin = 0;
 
     this.group = new THREE.Group();
@@ -205,6 +207,36 @@ export class Hole {
   /** Lo scudo rende intoccabile: nessun buco più grosso può divorarti. */
   get shielded() {
     return this.powers.scudo > 0;
+  }
+
+  /** È ancora in partita? */
+  get alive() {
+    return !this.out;
+  }
+
+  /**
+   * Divorato per sempre: sparisce dalla mappa e da tutte le regole. Il
+   * punteggio resta congelato (serve alla classifica finale), il resto no.
+   */
+  eliminate() {
+    if (this.out) return false;
+    this.out = true;
+    this.pulse = null;
+    this.input.x = 0;
+    this.input.y = 0;
+    this.input.mag = 0;
+    this.vx = 0;
+    this.vz = 0;
+    this.breakCombo();
+    this.resetPowers();
+    this.group.visible = false;
+    return true;
+  }
+
+  /** Torna in partita (nuova partita, nuovo tema). */
+  comeBack() {
+    this.out = false;
+    this.group.visible = true;
   }
 
   resetPowers() {

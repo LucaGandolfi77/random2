@@ -1,4 +1,5 @@
 import { clamp, damp } from '../core/utils.js';
+import { KO, KO_AI } from './modes.js';
 
 /**
  * Cervello dei buchi rivali. Una state machine semplice ma con carattere:
@@ -39,18 +40,23 @@ export function updateAI(hole, brain, dt, world, holes, now) {
   }
   brain.pulseCd -= dt;
 
-  /* ------------------------------------------------------------- percezione */
+/* ------------------------------------------------------------- percezione */
+  // quanto di massa serve per poter divorare un buco, e quanto per doverne
+  // scappare: in knockout le due soglie si abbassano, perché lì o ti prende
+  // lui o prendi tu, sempre
+  const ratio = hole.knockout ? KO.massRatio : 1.3;
+  const threatRatio = hole.knockout ? KO.threatRatio : 1.25;
   let threat = null;
   let threatD = Infinity;
   let prey = null;
   let preyD = Infinity;
   for (const o of holes) {
-    if (o === hole) continue;
+    if (o === hole || o.out) continue; // un buco fuori partita non è preda
     const d = Math.hypot(o.x - hole.x, o.z - hole.z);
-    if (o.mass > hole.mass * 1.25 && d < threatD) {
+    if (o.mass > hole.mass * threatRatio && d < threatD) {
       threat = o;
       threatD = d;
-    } else if (hole.mass > o.mass * 1.3 && d < preyD) {
+    } else if (hole.mass > o.mass * ratio && d < preyD) {
       prey = o;
       preyD = d;
     }
@@ -58,16 +64,24 @@ export function updateAI(hole, brain, dt, world, holes, now) {
 
   // I rivali non fanno la caccia all'uccello in campo aperto: pasano più tempo
   // a mangiare che a inseguirti, altrimenti un buco piccolo non cresce mai.
-  const dangerRange = 16 + hole.r * 5;
-  const huntRange = 10 + hole.r * 2.2;
+  // Con il knockout però il morso è definitivo: vale la pena inseguire.
+  const huntMul = hole.knockout ? KO_AI.huntMul : 1;
+  const dangerRange = (16 + hole.r * 5) * (hole.knockout ? KO_AI.fearMul : 1);
+  const huntRange = (10 + hole.r * 2.2) * huntMul;
+  // nel continente nessuno si incontra mai da solo: senza questo, 180 secondi
+  // di buchi che passeggiano paralleli senza mordersi mai
+  const farHunt = hole.knockout ? 90 + hole.r * 10 : 0;
 
   /* -------------------------------------------------------------- decisione */
   if (brain.think <= 0) {
     brain.think = 0.22 + (1 - brain.skill) * 0.3;
-    // se sto morendo di fame, me ne fotto del pericolo: vado a mangiare
+    // se sto morendo di fame, me ne fotte del pericolo: vado a mangiare
     if (threat && threatD < dangerRange && hole.idleT < 2.5) {
       brain.state = STATES.FLEE;
     } else if (prey && preyD < huntRange) {
+      brain.state = STATES.HUNT;
+      brain.target = prey;
+    } else if (prey && preyD < farHunt && brain.rng() < 0.65 + brain.skill * 0.3) {
       brain.state = STATES.HUNT;
       brain.target = prey;
     } else {
@@ -81,7 +95,10 @@ export function updateAI(hole, brain, dt, world, holes, now) {
     brain.item = null; // niente da mangiare da un po': riparto da zero
   }
   if (brain.state === STATES.FLEE && !threat) brain.state = STATES.SEEK;
-  if (brain.state === STATES.HUNT && (!brain.target || brain.target.mass <= hole.mass * 1.3))
+  if (
+    brain.state === STATES.HUNT &&
+    (!brain.target || brain.target.out || brain.target.mass <= hole.mass * ratio)
+  )
     brain.state = STATES.SEEK;
 
   let tx = hole.x;
@@ -97,7 +114,7 @@ export function updateAI(hole, brain, dt, world, holes, now) {
     }
     case STATES.HUNT: {
       const t = brain.target;
-      if (!t || t.mass <= hole.mass * 1.3) {
+      if (!t || t.out || t.mass <= hole.mass * ratio) {
         brain.state = STATES.SEEK;
         break;
       }

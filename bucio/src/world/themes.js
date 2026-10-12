@@ -483,14 +483,75 @@ export const THEME_IDS = Object.keys(THEMES);
 
 let currentId = 'portomarina';
 let rng = makeRng(4242);
+let scale = 1;
+const scaledCache = new Map();
 
 export function currentTheme() {
-  return THEMES[currentId];
+  if (scale === 1) return THEMES[currentId];
+  const key = `${currentId}@${scale}`;
+  let t = scaledCache.get(key);
+  if (!t) scaledCache.set(key, (t = scaleTheme(THEMES[currentId], scale)));
+  return t;
 }
 
 export function setTheme(id) {
   currentId = THEMES[id] ? id : 'portomarina';
   return currentId;
+}
+
+/** Ingrandisce (o rimpicciolisce) il mondo attivo: lo vede solo `currentTheme`. */
+export function setScale(s) {
+  scale = s > 0 ? s : 1;
+  return scale;
+}
+
+export function themeScale() {
+  return scale;
+}
+
+/**
+ * Riscala un tema a partire dalla sua versione base.
+ *
+ * Il trucco è uno solo: ogni funzione che dipende dalle coordinate viene
+ * avvolta e riceve `(x / S, z / S)`. Così i temi continuano a ragionare nelle
+ * loro unità originali — strade, riva, piazza, alture — e il risultato è un
+ * mondo identico ma più grande, senza duplicare una riga di logica per tema.
+ * Le quote crescono meno che le distanze (radice quadrata), altrimenti il
+ * rilievo diventerebbe un muro.
+ */
+export function scaleTheme(base, S) {
+  if (S === 1) return base;
+  const k = Math.sqrt(S); // fattore delle quote
+  const roadW = 1 + (S - 1) * 0.35; // le strade si allargano, ma non del doppio
+  // le partenze non si allargano quanto la mappa: in un mondo grande partire
+  // alle estremità significa 100 secondi a non trovarsi mai
+  const spawnK = 1 + (S - 1) * 0.5;
+  const fogFar = Math.min(850, base.sky.fogFar * S);
+
+  return {
+    ...base,
+    map: {
+      ...base.map,
+      half: base.map.half * S,
+      shoreBase: base.map.shoreBase * S,
+      beachDepth: base.map.beachDepth * S,
+      seaLevel: base.map.seaLevel * k,
+    },
+    shore: base.shore ? (x) => base.shore(x / S) * S : undefined,
+    solid: base.solid ? (x, z) => base.solid(x / S, z / S) : undefined,
+    relief: base.relief ? (x, z) => base.relief(x / S, z / S) * k : undefined,
+    ground: (x, z, rng, out) => base.ground(x / S, z / S, rng, out),
+    roads: base.roads.map((r) => ({ ...r, at: r.at * S, w: r.w * roadW })),
+    plaza: { x: base.plaza.x * S, z: base.plaza.z * S, r: base.plaza.r * k },
+    spawns: base.spawns.map((p) => ({ x: p.x * spawnK, z: p.z * spawnK })),
+    ponds: (base.ponds ?? []).map((p) => ({ x: p.x * S, z: p.z * S, r: p.r * k })),
+    zones: {
+      town: (x, z) => base.zones.town(x / S, z / S),
+      field: (x, z) => base.zones.field(x / S, z / S),
+      water: (x, z) => base.zones.water(x / S, z / S),
+    },
+    sky: { ...base.sky, fogNear: base.sky.fogNear * S, fogFar },
+  };
 }
 
 /** Sceglie un tema a caso, evitando di ripetere quello precedente. */

@@ -3,19 +3,22 @@ import { applyPower, POWERS } from './powerups.js';
 import { updateAI } from './ai.js';
 import { formatInt, clamp } from '../core/utils.js';
 import { P } from '../world/palette.js';
+import { MODES, DEFAULT_MODE, KO } from './modes.js';
 
 export const MATCH_TIME = 120;
 const GOLD_FIRST = 16;
-const GOLD_EVERY = 22;
 const POWER_FIRST = 9;
-const POWER_EVERY = 15;
 
 /**
  * Il regista della partita: timer, regole del divoramento, scontri fra buchi,
  * eventi dell'Oro e classifica finale.
+ *
+ * La modalità decide quasi tutto: quanto dura, quanto oro esce e — soprattutto
+ * — se un morso è definitivo (`knockout`). Con knockout il divorato sparisce
+ * dalla partita, e la partita finisce quando rimane un buco solo.
  */
 export class Director {
-  constructor({ world, holes, brains, effects, audio, cam, powers, hooks = {} }) {
+  constructor({ world, holes, brains, effects, audio, cam, powers, mode = MODES[DEFAULT_MODE], hooks = {} }) {
     this.world = world;
     this.holes = holes;
     this.brains = brains;
@@ -23,14 +26,17 @@ export class Director {
     this.audio = audio;
     this.cam = cam;
     this.powers = powers;
+    this.mode = mode;
     this.hooks = hooks;
     this.reset();
   }
 
   reset() {
-    this.time = MATCH_TIME;
+    this.timeTotal = this.mode.time;
+    this.time = this.timeTotal;
     this.elapsed = 0;
     this.ended = false;
+    this.reason = null;
     this.nextGold = GOLD_FIRST;
     this.nextPower = POWER_FIRST;
     this.golds = 0;
@@ -43,7 +49,14 @@ export class Director {
     for (const h of this.holes) {
       h.satiety = 0;
       h.lastVictim = null;
+      h.knockout = this.mode.knockout;
+      h.comeBack();
     }
+  }
+
+  /** I buchi ancora in partita. */
+  get aliveHoles() {
+    return this.holes.filter((h) => !h.out);
   }
 
   get player() {
@@ -54,7 +67,7 @@ export class Director {
     if (this.ended) return;
     this.elapsed += dt;
     this._lastDt = dt;
-    this.time = Math.max(0, MATCH_TIME - this.elapsed);
+    this.time = Math.max(0, this.timeTotal - this.elapsed);
 
     // ultimi secondi: il cuore batte
     const sec = Math.ceil(this.time);
@@ -65,12 +78,15 @@ export class Director {
 
     // IA sempre un passo indietro rispetto al giocatore
     for (let i = 0; i < this.brains.length; i++) {
+      const rival = this.holes[i + 1];
+      if (rival.out) continue;
       const b = this.brains[i];
-      b.skill = clamp(b.base * (1 + (this.elapsed / MATCH_TIME) * 0.3), 0.4, 1.5);
-      updateAI(this.holes[i + 1], b, dt, this.world, this.holes, now);
+      b.skill = clamp(b.base * (1 + (this.elapsed / this.timeTotal) * 0.3), 0.4, 1.5);
+      updateAI(rival, b, dt, this.world, this.holes, now);
     }
 
     for (const h of this.holes) {
+      if (h.out) continue;
       h.idleT += dt;
       h.update(dt, now);
       if (h.newTier) this.hooks.onTier?.(h, h.newTier);
@@ -89,10 +105,12 @@ export class Director {
     }
 
     this._holeVersusHole();
+    if (this.ended) return; // il giocatore è stato divorato: partita finita
+    this._lastStanding();
     this._gold(now);
     this._powers(now);
 
-    if (this.time <= 0) this._end();
+    if (this.time <= 0) this._end('time');
   }
 
   /* ------------------------------------------------------------ divoramento */
@@ -182,28 +200,42 @@ export class Director {
 
   _holeVersusHole() {
     const hs = this.holes;
+    // in knockout il morso è definitivo e il mondo è grande: senza un po' di
+    // vantaggio in più i buchi si sfiorerebbero per 180 s senza mordersi mai
+    const ratio = this.mode.knockout ? KO.massRatio : 1.3;
+    const reachF = this.mode.knockout ? KO.reach : 0.78;
     for (const h of hs) if (h.satiety > 0) h.satiety -= this._lastDt;
     for (let i = 0; i < hs.length; i++) {
+      const a = hs[i];
+      if (a.out) continue;
       for (let j = i + 1; j < hs.length; j++) {
-        const a = hs[i];
         const b = hs[j];
+        if (b.out) continue;
         const d = Math.hypot(a.x - b.x, a.z - b.z);
-        const reach = Math.min(a.r, b.r) * 0.78;
+        const reach = Math.min(a.r, b.r) * reachF;
         if (d > reach || d === 0) continue;
         if (a.invuln > 0 || b.invuln > 0) continue;
         if (a.shielded || b.shielded) continue;
         // dopo aver divorato qualcuno, un buco ha la pancia piena: niente doppio
         if (a.satiety <= 0 || a.lastVictim !== b) {
-          if (a.mass > b.mass * 1.3) this._devour(a, b);
+          if (a.mass > b.mass * ratio) this._devour(a, b);
         }
+        if (this.ended) return;
         if (b.satiety <= 0 || b.lastVictim !== a) {
-          if (b.mass > a.mass * 1.3) this._devour(b, a);
+          if (b.mass > a.mass * ratio) this._devour(b, a);
         }
+        if (this.ended) return;
       }
     }
   }
 
   _devour(win, lose) {
+    // il morso è definitivo: il perdente sparisce dalla partita
+    if (this.mode.knockout) {
+      this._knockout(win, lose);
+      return;
+    }
+
     const ratio = lose.mass / win.mass;
     const steal = Math.round(lose.score * (win.tier >= 3 ? 0.9 : 0.35));
     win.addMass(lose.mass * 0.42);
@@ -248,6 +280,56 @@ export class Director {
     }
   }
 
+  /**
+   * Morso definitivo (modalità knockout): il perdente esce dalla partita per
+   * sempre. Metà dei suoi punti passa a chi lo ha divorato, più un bonus: in
+   * un mondo grande inseguire un rivale costa, deve valere la pena.
+   */
+  _knockout(win, lose) {
+    if (!lose.eliminate()) return;
+    const steal = Math.round(lose.score * KO.steal);
+    const gained = steal + KO.bonus;
+    win.addMass(lose.mass * KO.massShare);
+    win.addScore(gained);
+    win.kills++;
+    win.bumpCombo();
+    win.satiety = 3.2;
+    win.lastVictim = lose;
+
+    const lx = lose.x;
+    const lz = lose.z;
+    // il colpo finale: due onde e una nuvola di polvere al posto del perdente
+    this.fx.ring(lx, lz, lose.r * 0.5, lose.r * 7, 0.9, 0xff5f5f);
+    this.fx.ring(lx, lz, 0.4, 22, 0.65, 0xffd15c);
+    this.fx.pop(lx, 0.4, lz, 0x7a2030, 34, 2.2);
+    this.fx.text(lx, lose.r + 2.4, lz, 'ELIMINATO', '#ff9d9d', 1.9);
+    this.cam.shake(win.isPlayer || lose.isPlayer ? 0.95 : 0.25);
+
+    if (win.isPlayer) {
+      this.audio.devour();
+      this.fx.text(win.x, 2.4, win.z, `ELIMINATO! +${gained}`, '#ffd15c', 2);
+      this.hooks.onFeed?.(`Hai divorato ${lose.name} per sempre! +${gained}`, 'kill');
+      this.hooks.onBite?.(win);
+      this.hooks.onEliminate?.(win, lose);
+    } else if (lose.isPlayer) {
+      this.audio.bite();
+      this.fx.text(lx, 2.4, lz, 'DIVORATO', '#ff8080', 2.2);
+      this.hooks.onFeed?.(`${win.name} ti ha divorato: sei fuori`, 'hurt');
+      this.hooks.onBite?.(lose);
+      this.hooks.onEliminate?.(win, lose);
+      this._end('out');
+    } else {
+      this.hooks.onFeed?.(`${win.name} ha divorato ${lose.name} per sempre`, 'kill');
+    }
+  }
+
+  /** Ultimo buco in piedi: la partita si chiude lì, senza aspettare il timer. */
+  _lastStanding() {
+    if (!this.mode.knockout || this.ended) return;
+    const alive = this.aliveHoles.length;
+    if (alive <= 1) this._end('last');
+  }
+
   /* ------------------------------------------------------------ onda di gravità */
 
   _pulseWave(h) {
@@ -261,7 +343,7 @@ export class Director {
 
     // rivali colpiti: storditi e sospinti
     for (const o of this.holes) {
-      if (o === h || o.invuln > 0) continue;
+      if (o === h || o.invuln > 0 || o.out) continue;
       const d = Math.hypot(o.x - h.x, o.z - h.z);
       if (d < wave && d > prev - 1) {
         o.stun = 0.8;
@@ -294,7 +376,7 @@ export class Director {
 
   _gold(now) {
     if (this.elapsed < this.nextGold) return;
-    this.nextGold += GOLD_EVERY;
+    this.nextGold += this.mode.goldEvery;
     const g = this.world.spawnGold(now);
     if (g) {
       this.golds++;
@@ -309,7 +391,7 @@ export class Director {
   _powers(now) {
     if (!this.powers) return;
     if (this.elapsed < this.nextPower) return;
-    this.nextPower += POWER_EVERY;
+    this.nextPower += this.mode.powerEvery;
     const p = this.powers.spawn(this.holes, now);
     if (!p) return;
     this.hooks.onPowerSpawn?.(p);
@@ -336,13 +418,21 @@ export class Director {
 
   /* ------------------------------------------------------------------ fine */
 
-  _end() {
+  _end(reason = 'time') {
     this.ended = true;
-    const ranking = [...this.holes].sort((a, b) => b.score - a.score);
+    this.reason = reason;
+    // chi è ancora in partita conta più di chi ha accumulato punti prima di
+    // essere stato divorato: in knockout la classifica è una sopravvivenza
+    const ranking = [...this.holes].sort(
+      (a, b) => Number(a.out) - Number(b.out) || b.score - a.score
+    );
     const p = this.player;
     const place = ranking.indexOf(p) + 1;
-    this.audio.jingle(place === 1);
+    const survived = reason === 'last' || !p.out;
+    this.audio.jingle(survived && place === 1);
     this.hooks.onEnd?.({
+      reason,
+      mode: this.mode.id,
       ranking: ranking.map((h, i) => ({
         place: i + 1,
         name: h.isPlayer ? 'Tu' : h.name,
@@ -350,24 +440,33 @@ export class Director {
         score: h.score,
         radius: h.r,
         isPlayer: h.isPlayer,
+        out: h.out,
       })),
       player: {
         score: p.score,
         place,
+        out: p.out,
         eaten: p.eaten,
         powers: this.powersTaken,
         kills: p.kills,
         maxR: p.bestR,
         bestCombo: this.playerBestCombo,
         tier: tierOf(p.bestR),
+        survived: this.elapsed,
       },
     });
   }
 
-  /** Classifica live, ordinata per punti. */
+  /** Classifica live: vivi prima, poi eliminati. */
   board() {
     return [...this.holes]
-      .sort((a, b) => b.score - a.score)
-      .map((h) => ({ name: h.isPlayer ? 'Tu' : h.name, color: h.color, score: h.score, isPlayer: h.isPlayer }));
+      .sort((a, b) => Number(a.out) - Number(b.out) || b.score - a.score)
+      .map((h) => ({
+        name: h.isPlayer ? 'Tu' : h.name,
+        color: h.color,
+        score: h.score,
+        isPlayer: h.isPlayer,
+        out: h.out,
+      }));
   }
 }

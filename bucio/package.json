@@ -9,6 +9,7 @@
     "dev": "vite",
     "build": "npm run icons && vite build",
     "preview": "vite preview --port 4173",
+    "test": "node scripts/smoke-modes.mjs",
     "typecheck": "tsc --noEmit --allowJs --checkJs --skipLibCheck --target es2022 --module esnext --moduleResolution bundler --lib es2022,dom,dom.iterable src/main.js"
   },
   "dependencies": {

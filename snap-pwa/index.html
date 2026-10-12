@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Snap PWA — Fotocamera con Filtri</title>
+  <meta name="description" content="Fotocamera in tempo reale con lenti volto (cagnolino, occhiali, corona, cuori) e filtri retrò. Le snap restano sul tuo dispositivo.">
+
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#101014">
+
+  <!-- iPhone / iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Snap">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============ SCHERMATA INIZIALE ============ -->
+  <section id="start" class="screen visible">
+    <div class="start-inner">
+      <div class="ghost" aria-hidden="true">👻</div>
+      <h1>Snap<span>PWA</span></h1>
+      <p class="tagline">Fotocamera in tempo reale con lenti volto e filtri retrò.</p>
+      <button id="start-btn" class="btn-gallo">Attiva la fotocamera</button>
+      <p class="privacy">🔒 Tutto resta sul tuo dispositivo — niente upload, niente account.</p>
+      <p id="start-error" class="error" hidden></p>
+    </div>
+  </section>
+
+  <!-- ============ FOTOCAMERA ============ -->
+  <main id="camera" class="screen">
+    <video id="video" playsinline muted autoplay></video>
+    <canvas id="overlay"></canvas>
+    <div id="flash" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <button id="flip-btn" class="iconbtn" aria-label="Cambia fotocamera">🔄</button>
+      <span class="spacer"></span>
+      <button id="flash-btn" class="iconbtn" aria-label="Flash schermo">⚡</button>
+      <button id="memories-btn" class="iconbtn" aria-label="Ricordi">📚</button>
+    </header>
+
+    <div id="status" class="status" hidden></div>
+
+    <button id="shutter" aria-label="Scatta una foto"><span class="ring"></span></button>
+
+    <nav id="carousel" class="carousel" aria-label="Filtri"></nav>
+  </main>
+
+  <!-- ============ ANTEPRIMA SNAP ============ -->
+  <section id="preview" class="screen">
+    <img id="preview-img" alt="La tua snap">
+    <input id="caption" type="text" maxlength="80" placeholder="Aggiungi una caption…" autocomplete="off">
+    <div class="preview-actions">
+      <button id="discard-btn" class="iconbtn" aria-label="Scarta">✖</button>
+      <button id="download-btn" class="iconbtn" aria-label="Scarica">⬇️</button>
+      <button id="save-btn" class="btn-gallo">💾 Salva nei Ricordi</button>
+    </div>
+  </section>
+
+  <!-- ============ RICORDI ============ -->
+  <section id="memories" class="screen">
+    <header class="mem-header">
+      <h2>📚 Ricordi</h2>
+      <button id="memories-close" class="iconbtn" aria-label="Chiudi">✖</button>
+    </header>
+    <div id="memories-grid" class="mem-grid"></div>
+    <p id="memories-empty" class="mem-empty" hidden>Nessuna snap salvata…<br>Scattane una! 👻</p>
+  </section>
+
+  <!-- ============ VISUALIZZATORE ============ -->
+  <div id="viewer" class="screen">
+    <img id="viewer-img" alt="Snap">
+    <p id="viewer-caption"></p>
+    <div class="viewer-actions">
+      <button id="viewer-download" class="iconbtn" aria-label="Scarica">⬇️</button>
+      <button id="viewer-delete" class="iconbtn" aria-label="Elimina">🗑️</button>
+      <button id="viewer-close" class="iconbtn" aria-label="Chiudi">✖</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

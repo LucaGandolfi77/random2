@@ -43,6 +43,11 @@ class VirtualFarmTycoon {
   }
   
   init() {
+    // Register the service worker (required for offline support + install prompt)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(() => {})
+    }
+
     // Load saved game
     this.loadGame()
     
@@ -231,8 +236,7 @@ class VirtualFarmTycoon {
           <div style="margin-top: 10px;">${actions.join(' ')}</div>
         </div>
       `
-    
-    else if (plot.type === 'animal') {
+    } else if (plot.type === 'animal') {
       const actions = []
       
       if (plot.feedToday) {
