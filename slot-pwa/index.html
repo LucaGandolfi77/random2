@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Slot PWA</title>
+    <meta name="theme-color" content="#ffcc00">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="/icons/icon-192.svg" type="image/svg+xml">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>SLOT PWA</h1>
+            <div class="score-board">
+                <span class="score">SCORE: <span id="score">0</span></span>
+                <span class="high-score">HIGH: <span id="high-score">0</span></span>
+                <span class="bet">BET: <span id="bet">1</span></span>
+            </div>
+        </header>
+
+        <main>
+            <canvas id="game-canvas"></canvas>
+            <div id="spin-button" class="spin-btn">SPIN</div>
+        </main>
+
+        <nav class="controls">
+            <button id="theme-btn" class="btn">🎨 Theme</button>
+            <button id="bet-btn" class="btn">BET</button>
+        </nav>
+
+        <div id="overlay" class="overlay hidden">
+            <div class="panel">
+                <h2 id="overlay-title">SLOT PWA</h2>
+                <p id="overlay-msg">Ready to spin the reels!</p>
+                <div id="overlay-stats" class="hidden">
+                    <p>Score: <span id="final-score">0</span></p>
+                    <p>High Score: <span id="final-high">0</span></p>
+                </div>
+                <button id="overlay-play" class="btn primary">▶ Play Again</button>
+                <button id="overlay-theme" class="btn">🎨 Change Theme</button>
+            </div>
+        </div>
+
+        <div id="install-prompt" class="install-prompt hidden">
+            <p>Install Slot PWA for the best iPhone experience!</p>
+            <button id="install-btn" class="btn primary">Install</button>
+            <button id="install-later" class="btn">Later</button>
+        </div>
+    </div>
+
+    <script src="/game.js"></script>
+    <script src="/service-worker.js"></script>
+</body>
+</html>
