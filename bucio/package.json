@@ -1,0 +1,22 @@
+{
+  "name": "bucio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "BUCIO — un buco nero low-poly che divora una cittadina italiana",
+  "scripts": {
+    "icons": "node scripts/gen-icons.mjs",
+    "dev": "vite",
+    "build": "npm run icons && vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit --allowJs --checkJs --skipLibCheck --target es2022 --module esnext --moduleResolution bundler --lib es2022,dom,dom.iterable src/main.js"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5",
+    "vite": "^8.3.4",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}
