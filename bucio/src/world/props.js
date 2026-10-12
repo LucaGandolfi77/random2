@@ -19,6 +19,7 @@ def({
   label: 'Sedia sdraio',
   r: 0.52,
   mass: 0.095,
+  themes: ['portomarina'],
   zone: 'beach',
   count: 150,
   build: () =>
@@ -37,6 +38,7 @@ def({
   label: 'Ombrellone',
   r: 1.15,
   mass: 0.247,
+  themes: ['portomarina'],
   zone: 'beach',
   count: 100,
   build: () =>
@@ -54,6 +56,7 @@ def({
   label: 'Ombrellone gigante',
   r: 1.75,
   mass: 0.646,
+  themes: ['portomarina'],
   zone: 'beach',
   count: 22,
   build: () =>
@@ -71,6 +74,7 @@ def({
   label: 'Tavolino',
   r: 0.44,
   mass: 0.076,
+  themes: ['portomarina'],
   zone: 'beach',
   count: 110,
   build: () =>
@@ -88,6 +92,7 @@ def({
   label: 'Gelato',
   r: 0.28,
   mass: 0.057,
+  themes: ['portomarina'],
   zone: 'beach',
   count: 130,
   build: () =>
@@ -104,6 +109,7 @@ def({
   label: 'Gelataio',
   r: 0.8,
   mass: 0.494,
+  themes: ['portomarina'],
   zone: 'beach',
   count: 26,
   build: () =>
@@ -124,6 +130,7 @@ def({
   label: 'Tavola da surf',
   r: 0.82,
   mass: 0.19,
+  themes: ['portomarina'],
   zone: 'beach',
   count: 40,
   build: () =>
@@ -141,6 +148,7 @@ def({
   label: 'Barca',
   r: 1.5,
   mass: 1.33,
+  themes: ['portomarina'],
   zone: 'sea',
   count: 40,
   float: 0.35,
@@ -161,6 +169,7 @@ def({
   label: 'Veliero',
   r: 2.3,
   mass: 3.23,
+  themes: ['portomarina'],
   zone: 'sea',
   count: 14,
   float: 0.4,
@@ -200,6 +209,7 @@ def({
   label: 'Boa',
   r: 0.42,
   mass: 0.057,
+  themes: ['portomarina'],
   zone: 'sea',
   count: 40,
   float: 0.1,
@@ -215,6 +225,7 @@ def({
   label: 'Faro',
   r: 1.9,
   mass: 4.94,
+  themes: ['portomarina'],
   zone: 'sea',
   count: 3,
   build: () =>
@@ -233,6 +244,7 @@ def({
   label: 'Gru del porto',
   r: 2.0,
   mass: 3.61,
+  themes: ['portomarina'],
   zone: 'sea',
   count: 6,
   build: () =>
@@ -255,6 +267,7 @@ def({
   label: 'Palazzo',
   r: 2.7,
   mass: 6.46,
+  themes: ['portomarina'],
   zone: 'town',
   count: 32,
   scaleVar: 0.22,
@@ -289,6 +302,7 @@ def({
   label: 'Palazzo alto',
   r: 2.2,
   mass: 5.51,
+  themes: ['portomarina'],
   zone: 'town',
   count: 24,
   scaleVar: 0.18,
@@ -317,6 +331,7 @@ def({
   label: 'Chiesa',
   r: 2.4,
   mass: 5.7,
+  themes: ['portomarina'],
   zone: 'town',
   count: 9,
   build: () =>
@@ -343,6 +358,7 @@ def({
   label: 'Fontana',
   r: 1.35,
   mass: 2.09,
+  themes: ['portomarina'],
   zone: 'town',
   count: 8,
   build: () =>
@@ -360,6 +376,7 @@ def({
   label: 'Gazebo del mercato',
   r: 1.25,
   mass: 1.045,
+  themes: ['portomarina'],
   zone: 'town',
   count: 22,
   build: () =>
@@ -379,6 +396,7 @@ def({
   label: 'Chiosco dei giornali',
   r: 1.15,
   mass: 1.33,
+  themes: ['portomarina'],
   zone: 'town',
   count: 14,
   build: () =>
@@ -483,6 +501,7 @@ def({
   label: 'Vespa',
   r: 0.72,
   mass: 0.418,
+  themes: ['portomarina'],
   zone: 'town',
   count: 36,
   build: () =>
@@ -504,6 +523,7 @@ def({
   label: 'Fiat 500',
   r: 1.25,
   mass: 1.045,
+  themes: ['portomarina'],
   zone: 'road',
   count: 36,
   build: () =>
@@ -648,6 +668,7 @@ def({
   label: 'Gelato gigante',
   r: 1.6,
   mass: 2.2,
+  themes: ['portomarina'],
   zone: 'any',
   count: 1,
   gold: true,
@@ -666,6 +687,7 @@ def({
   label: 'Statua del Nettuno',
   r: 2.3,
   mass: 3.2,
+  themes: ['portomarina'],
   zone: 'any',
   count: 1,
   gold: true,
@@ -691,6 +713,7 @@ def({
   count: 1,
   gold: true,
   rarity: 2,
+  themes: ['portomarina', 'notteneon'],
   build: () =>
     merge([
       ...[-1.7, 1.7].flatMap((x) =>

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { P, c } from '../world/palette.js';
 import { clampToBounds, groundY } from '../world/layout.js';
+import { makePowerState, tickPowers } from './powerups.js';
 
 export const R0 = 1.15; // raggio iniziale
 export const R_MAX = 15.5; // oltre questo si continua a mangiare, non a crescere
@@ -60,6 +61,7 @@ export class Hole {
     this.pulse = null;
     this.satiety = 0;
     this.idleT = 0;
+    this.powers = makePowerState();
     this.lastVictim = null;
     this._spin = 0;
 
@@ -161,7 +163,8 @@ export class Hole {
   }
 
   get speed() {
-    return BASE_SPEED * Math.pow(R0 / this.r, 0.26);
+    const turbo = this.powers.turbo > 0 ? 1.85 : 1;
+    return BASE_SPEED * Math.pow(R0 / this.r, 0.26) * turbo;
   }
 
   get massRatio() {
@@ -176,7 +179,8 @@ export class Hole {
    * che non potrà mai mangiare.
    */
   get eatReach() {
-    return this.r * 0.95 * (this.tier >= 2 ? 1.16 : 1);
+    const magnet = this.powers.magnetismo > 0 ? 1.7 : 1;
+    return this.r * 0.95 * (this.tier >= 2 ? 1.16 : 1) * magnet;
   }
 
   /** Un buco saturo non si allarga più: è un tetto, non un bug. */
@@ -194,7 +198,17 @@ export class Hole {
    */
   get scoreMul() {
     const fame = this.tier >= 1 ? 1.2 : 1;
-    return this.saturated ? fame * 0.55 : fame;
+    const golden = this.powers.punti > 0 ? 2 : 1;
+    return (this.saturated ? fame * 0.55 : fame) * golden;
+  }
+
+  /** Lo scudo rende intoccabile: nessun buco più grosso può divorarti. */
+  get shielded() {
+    return this.powers.scudo > 0;
+  }
+
+  resetPowers() {
+    this.powers = makePowerState();
   }
 
   addMass(m) {
@@ -232,6 +246,7 @@ export class Hole {
   }
 
   update(dt, now) {
+    tickPowers(this, dt);
     const inp = this.input;
     const mag = this.stun > 0 ? 0 : Math.min(1, inp.mag);
     const dirx = inp.mag > 0.06 ? inp.x / Math.max(0.06, inp.mag) : 0;

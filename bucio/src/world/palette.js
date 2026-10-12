@@ -40,6 +40,17 @@ export const P = {
  */
 export const c = (hex) => new THREE.Color(hex);
 
+/**
+ * Applica la palette del tema. `P` resta un oggetto vivo: tutti i moduli
+ * che lo importano vedono subito i colori dell'ambientazione scelta.
+ */
+export function applyPalette(overrides) {
+  for (const [k, v] of Object.entries(overrides ?? {})) {
+    if (k in P) P[k] = v;
+  }
+  return P;
+}
+
 /** Materiale condiviso per tutti i props low-poly (un solo draw call per tipo). */
 export function propMaterial() {
   return new THREE.MeshLambertMaterial({

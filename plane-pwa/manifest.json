@@ -1,0 +1,22 @@
+{
+  "name": "Plane PWA",
+  "short_name": "Plane PWA",
+  "description": "A classic iPhone‑friendly plane shooter: control a plane, dodge enemies, and shoot them down for points. Touch to aim, tap to fire!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#ffaa00",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -2,18 +2,20 @@ import * as THREE from 'three';
 import { P, c } from './palette.js';
 import { ico, part, merge } from './geometry.js';
 import { makeRng } from '../core/utils.js';
+import { currentTheme } from './themes.js';
 
 /**
  * Cielo al tramonto: il buco è cadato dal cielo, ma Portomarina fa le
  * undici di sera. Cupola a gradiente + nuvole low-poly che derivano piano.
  */
 export function buildSky() {
+  const sky = currentTheme().sky;
   const geo = new THREE.SphereGeometry(420, 20, 12);
   const pos = geo.attributes.position;
   const cols = new Float32Array(pos.count * 3);
-  const top = c(P.night).multiplyScalar(1.1);
-  const mid = c(P.navy).lerp(c(P.rose), 0.28);
-  const low = c(P.sky2).lerp(c(P.lemon), 0.42);
+  const top = c(sky.top);
+  const mid = c(sky.mid);
+  const low = c(sky.horizon);
   const col = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const y = pos.getY(i) / 420; // -1..1
@@ -34,13 +36,13 @@ export function buildSky() {
 }
 
 /** Nuvole a ciambella: un cluster di ico-sfere schiacciate. */
-function cloudGeometry(rng) {
+function cloudGeometry(rng, colA, colB) {
   const puffs = [];
   const n = 4 + Math.floor(rng() * 4);
   for (let i = 0; i < n; i++) {
     const r = 5 + rng() * 6;
     puffs.push(
-      part(ico(r, 0), i % 2 ? P.white : P.cream, {
+      part(ico(r, 0), i % 2 ? colA : colB, {
         x: (i - n / 2) * 7 + rng() * 4,
         y: rng() * 3,
         z: (rng() - 0.5) * 8,
@@ -54,16 +56,25 @@ function cloudGeometry(rng) {
 
 export function buildClouds() {
   const rng = makeRng(4242);
+  const sky = currentTheme().sky;
   const group = new THREE.Group();
   group.name = 'nuvole';
-  const mat = new THREE.MeshLambertMaterial({ color: c(P.cream), flatShading: true, fog: false });
-  for (let i = 0; i < 16; i++) {
-    const mesh = new THREE.Mesh(cloudGeometry(rng), mat);
+  const mat = new THREE.MeshLambertMaterial({
+    color: c(sky.cloud),
+    flatShading: true,
+    fog: false,
+  });
+  const n = sky.cloudsBelow ? 22 : 15;
+  for (let i = 0; i < n; i++) {
+    const mesh = new THREE.Mesh(cloudGeometry(rng, sky.cloud, P.white), mat);
     const a = rng() * Math.PI * 2;
-    const rad = 120 + rng() * 220;
-    mesh.position.set(Math.cos(a) * rad, 46 + rng() * 52, Math.sin(a) * rad);
+    const rad = 120 + rng() * 240;
+    // sull'isola le nuvole stanno SOTTO, a fare da pavimento
+    const y = sky.cloudsBelow ? -18 - rng() * 30 : 46 + rng() * 52;
+    mesh.position.set(Math.cos(a) * rad, y, Math.sin(a) * rad);
     mesh.userData.speed = 1.1 + rng() * 1.8;
     mesh.rotation.y = rng() * Math.PI;
+    mesh.userData.floor = sky.cloudsBelow;
     group.add(mesh);
   }
   return group;
@@ -72,19 +83,51 @@ export function buildClouds() {
 export function animateSky(clouds, dt) {
   for (const cl of clouds.children) {
     cl.position.x += cl.userData.speed * dt;
-    if (cl.position.x > 340) cl.position.x = -340;
+    if (cl.position.x > 360) cl.position.x = -360;
   }
   clouds.rotation.y += dt * 0.004;
 }
 
-/** Luce: un sole basso e caldo con ombre lunghe, più un rimbalzo dal mare. */
-export function buildLights(scene) {
-  const hemi = new THREE.HemisphereLight(c(P.sky2).getHex(), c(P.seaDeep).getHex(), 1.05);
-  hemi.position.set(0, 60, 0);
-  scene.add(hemi);
+/** Qualche stella, per i temi notturni. */
+function addStars(group, sky) {
+  const rng = makeRng(31337);
+  const count = 420;
+  const pos = new Float32Array(count * 3);
+  const col = new Float32Array(count * 3);
+  const c0 = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const a = rng() * Math.PI * 2;
+    const y = 0.12 + rng() * 0.85;
+    const r = Math.sqrt(1 - y * y);
+    pos[i * 3] = Math.cos(a) * r * 400;
+    pos[i * 3 + 1] = y * 400;
+    pos[i * 3 + 2] = Math.sin(a) * r * 400;
+    c0.setHSL(0.58, 0.35, 0.55 + rng() * 0.45);
+    col[i * 3] = c0.r;
+    col[i * 3 + 1] = c0.g;
+    col[i * 3 + 2] = c0.b;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const stars = new THREE.Points(
+    g,
+    new THREE.PointsMaterial({ size: 2.4, vertexColors: true, sizeAttenuation: false, fog: false })
+  );
+  stars.name = 'stelle';
+  stars.frustumCulled = false;
+  group.add(stars);
+}
 
-  const sun = new THREE.DirectionalLight(c(P.sun).getHex(), 2.1);
-  sun.position.set(-70, 62, 96);
+/** Luce: un sole basso e caldo con ombre lunghe, più un rimbalzo dal mare. */
+export function buildLights(group) {
+  const sky = currentTheme().sky;
+  const hemi = new THREE.HemisphereLight(sky.hemiSky, sky.hemiGround, sky.hemiInt);
+  hemi.position.set(0, 60, 0);
+  group.add(hemi);
+
+  const sun = new THREE.DirectionalLight(sky.sun, sky.sunInt);
+  sun.position.set(...sky.sunPos);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 10;
@@ -96,12 +139,14 @@ export function buildLights(scene) {
   sun.shadow.camera.bottom = -d;
   sun.shadow.bias = -0.0016;
   sun.shadow.normalBias = 0.045;
-  scene.add(sun);
-  scene.add(sun.target);
+  group.add(sun);
+  group.add(sun.target);
 
-  const bounce = new THREE.DirectionalLight(c(P.sea).getHex(), 0.35);
+  const bounce = new THREE.DirectionalLight(P.sea, 0.35);
   bounce.position.set(60, 24, -70);
-  scene.add(bounce);
+  group.add(bounce);
+
+  if (sky.stars) addStars(group, sky);
 
   return { hemi, sun, bounce };
 }

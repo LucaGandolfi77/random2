@@ -62,6 +62,7 @@
         </div>
 
         <div class="combo" id="hud-combo" hidden><span id="hud-combo-x">x2</span></div>
+        <div class="powers" id="hud-powers"></div>
         <div class="feed" id="hud-feed"></div>
         <div class="pulse-hint" id="hud-pulse" hidden>ONDATA</div>
       </div>
@@ -84,7 +85,7 @@
           </div>
 
           <p class="pitch">
-            Sei un buco nero caduto dal cielo su <em>Portomarina</em>.<br />
+            Sei un buco nero caduto dal cielo su <em id="menu-place">Portomarina</em>.<br />
             120 secondi per divorarla. Anche i rivali.
           </p>
 
@@ -100,6 +101,10 @@
           </div>
 
           <div class="settings">
+            <div class="setting">
+              <label for="sel-theme">Ambientazione</label>
+              <select id="sel-theme"></select>
+            </div>
             <div class="setting">
               <label for="sel-quality">Grafica</label>
               <select id="sel-quality">
@@ -139,7 +144,8 @@
             <li><b>Cresci</b> e la camera si allontana: si vede sempre più paese.</li>
             <li><b>Sconfiggi i rivali</b> se sei più grosso: prendi 3× il loro punteggio.</li>
             <li><b>Cattura l'Oro</b> quando appare: vale 500 punti, sparisce in fretta.</li>
-            <li><b>Ondata di gravità</b> (SPAZIO / pulsante ◉) al livello 4: risucchia tutto intorno.</li>
+            <li><b>Ondata di gravità</b> (SPAZIO / pulsante ◉) al livello 5: risucchia tutto intorno.</li>
+            <li><b>Potenziamenti</b>: le gemme colorate danno turbo, magnetismo, punti doppi, uno scudo, una crescita istantanea o un colpo di fortuna.</li>
           </ul>
           <div class="tier-list" id="howto-tiers"></div>
           <button class="btn btn-primary" id="btn-howto-close">Torna</button>

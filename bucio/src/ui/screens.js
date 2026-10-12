@@ -1,5 +1,6 @@
 import { formatInt, store } from '../core/utils.js';
 import { TIERS, R0 } from '../game/hole.js';
+import { THEMES, THEME_IDS, currentTheme } from '../world/themes.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -30,6 +31,16 @@ export class Screens {
     $('btn-install').onclick = () => this.hooks.onInstall?.();
     $('btn-ios').onclick = () =>
       this.hooks.onToast?.('Su iPhone: tocca Condividi e poi "Aggiungi alla schermata Home"');
+
+    const th = $('sel-theme');
+    th.innerHTML =
+      THEME_IDS.map(
+        (id) =>
+          `<option value="${id}">${THEMES[id].emoji} ${THEMES[id].name}</option>`
+      ).join('') + '<option value="random">🎲 Casuale</option>';
+    th.value = store.get('bucio.theme', 'portomarina');
+    th.onchange = () => this.hooks.onTheme(th.value);
+    this.setTheme(currentTheme().id);
 
     const q = $('sel-quality');
     q.value = store.get('bucio.quality', 'high');
@@ -80,8 +91,17 @@ export class Screens {
   }
 
   refreshBest() {
-    $('menu-best').textContent = formatInt(store.get('bucio.best', 0));
+    const key = `bucio.best.${currentTheme().id}`;
+    $('menu-best').textContent = formatInt(Math.max(store.get(key, 0), store.get('bucio.best', 0)));
     $('menu-bestsize').textContent = store.get('bucio.bestSize', R0).toFixed(1);
+  }
+
+  /** Nome del luogo nel pitch del menu. */
+  setTheme(id) {
+    const t = THEMES[id];
+    if (!t) return;
+    $('menu-place').textContent = t.name;
+    $('sel-theme').value = id;
   }
 
   /** Schermata finale: classifica, record, statistiche. */
@@ -94,9 +114,13 @@ export class Screens {
       : 'La città è stata divorata. Quasi tutta.';
 
     $('res-score').textContent = formatInt(player.score);
-    const rec = store.get('bucio.best', 0);
+    const key = `bucio.best.${currentTheme().id}`;
+    const rec = Math.max(store.get(key, 0), store.get('bucio.best', 0));
     const isRecord = player.score > rec;
-    if (isRecord) store.set('bucio.best', player.score);
+    if (isRecord) {
+      store.set('bucio.best', player.score);
+      store.set(key, player.score);
+    }
     if (player.maxR > store.get('bucio.bestSize', 0)) store.set('bucio.bestSize', player.maxR);
     $('res-record').hidden = !isRecord;
 
@@ -118,6 +142,7 @@ export class Screens {
       <div class="stat"><b>${player.maxR.toFixed(1)} m</b> buco più grande</div>
       <div class="stat"><b>x${player.bestCombo}</b> combo migliore</div>
       <div class="stat"><b>${player.kills}</b> ${morsi}</div>
+      <div class="stat"><b>${player.powers ?? 0}</b> potenziamenti</div>
       <div class="stat"><b>${TIERS[player.tier]?.name ?? '—'}</b> livello finale</div>`;
 
     this.show('results');

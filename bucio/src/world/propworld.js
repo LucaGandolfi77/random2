@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { PROP_DEFS, pointsFor } from './props.js';
+import { PROP_DEFS_EXTRA } from './props-extra.js';
+import { currentTheme } from './themes.js';
 import { propMaterial } from './palette.js';
 import {
   MAP,
@@ -10,6 +12,8 @@ import {
   isSea,
   isBeach,
   isSeaDeep,
+  isSolid,
+  isPond,
   SPAWNS,
 } from './layout.js';
 import { clamp, makeRng } from '../core/utils.js';
@@ -49,6 +53,7 @@ export class PropWorld {
     this._quat = new THREE.Quaternion();
     this._scl = new THREE.Vector3();
 
+    this.themeId = currentTheme().id;
     this._build();
     this._buildGold();
     this._buildFallPool();
@@ -56,8 +61,15 @@ export class PropWorld {
 
   /* ------------------------------------------------------------ costruzione */
 
+  /** Tutti i prop disponibili nel tema corrente (quelli senza etichetta sono universali). */
+  static defsFor(themeId) {
+    return [...PROP_DEFS, ...PROP_DEFS_EXTRA].filter(
+      (d) => !d.themes || d.themes.includes(themeId)
+    );
+  }
+
   _build() {
-    for (const d of PROP_DEFS) {
+    for (const d of PropWorld.defsFor(this.themeId)) {
       if (d.gold) continue;
       const count = Math.max(3, Math.round(d.count * this.density));
       const geo = d.build();
@@ -84,7 +96,7 @@ export class PropWorld {
           s: 1,
           alive: false,
           respawn: 0,
-          float: d.zone === 'sea' ? 0 : d.float ?? 0,
+          float: d.float ?? (d.zone === 'sea' ? 0 : 0),
           phase: this.rng() * 6.28,
         };
         this.items.push(item);
@@ -96,7 +108,7 @@ export class PropWorld {
   }
 
   _buildGold() {
-    for (const d of PROP_DEFS.filter((p) => p.gold)) {
+    for (const d of PropWorld.defsFor(this.themeId).filter((p) => p.gold)) {
       const geo = d.build();
       const mesh = new THREE.Mesh(geo, this.material);
       mesh.castShadow = true;
@@ -220,6 +232,7 @@ export class PropWorld {
   }
 
   zoneOk(x, z, d) {
+    if (!isSolid(x, z) || isPond(x, z)) return false;
     const big = d.r >= 1.6;
     if (d.zone === 'sea') return isSeaDeep(x, z);
     if (d.zone === 'road') return isRoad(x, z) && !isSea(x, z);
@@ -259,7 +272,8 @@ export class PropWorld {
     if (item.alive) this._vacate(item);
     item.x = x;
     item.z = z;
-    item.y = d.zone === 'sea' ? MAP.seaLevel + 0.28 : groundY(x, z);
+    item.y =
+      (d.zone === 'sea' ? MAP.seaLevel + 0.28 : groundY(x, z)) + (d.lift ?? 0);
     item.ry = this.rng() * Math.PI * 2;
     item.s = 1 + (d.scaleVar ? this.rng.range(-d.scaleVar, d.scaleVar) : this.rng.range(-0.09, 0.09));
     item.alive = true;

@@ -1,49 +1,87 @@
 import { clamp, smoothstep } from '../core/utils.js';
+import { currentTheme, THEMES } from './themes.js';
 
 /**
- * Pianta di Portomarina: una cittadina italiana schiacciata tra la collina
- * (a nord) e il mare (a sud). Tutti i moduli leggono da qui, così terreno,
- * strade e oggetti restano coerenti.
+ * La mappa attiva. Tutti i moduli leggono da qui: quando cambia
+ * l'ambientazione, `applyLayout` aggiorna questo oggetto e il resto del
+ * gioco si adatta senza sapere nulla dei temi.
  */
 export const MAP = {
-  half: 108, // semi-estensione della mappa giocabile
+  half: 108,
+  water: true,
   seaLevel: -0.14,
-  shoreBase: 34, // z medio della linea di riva
+  shoreBase: 34,
   shoreWave: 10,
-  beachDepth: 20, // distanza riva -> fondo mare
+  beachDepth: 20,
 };
 
-const SEA_LEVEL = MAP.seaLevel;
-const SHORE_BASE = MAP.shoreBase;
-const SHORE_WAVE = MAP.shoreWave;
-const BEACH_DEPTH = MAP.beachDepth;
-const HALF = MAP.half;
+export const ROADS = [];
+export const PIAZZA = { x: 0, z: 0, r: 0 };
+export const SPAWNS = [];
+export const PONDS = [];
 
-/** Linea di riva: una curva morbida, non una dritta. */
+export const BOUNDS = {
+  minX: -100,
+  maxX: 100,
+  minZ: -100,
+  maxZ: 100,
+};
+
+let theme = THEMES.portomarina;
+
+/** Installa un tema: da qui in poi il mondo è quello. */
+export function applyLayout(id) {
+  theme = currentTheme();
+  Object.assign(MAP, theme.map);
+  ROADS.length = 0;
+  ROADS.push(...theme.roads);
+  Object.assign(PIAZZA, theme.plaza);
+  SPAWNS.length = 0;
+  SPAWNS.push(...theme.spawns);
+  PONDS.length = 0;
+  PONDS.push(...(theme.ponds ?? []));
+  const h = MAP.half;
+  BOUNDS.minX = -h + 4;
+  BOUNDS.maxX = h - 4;
+  BOUNDS.minZ = -h + 4;
+  BOUNDS.maxZ = MAP.water ? h - 12 : h - 6;
+  return theme;
+}
+
+export function layoutTheme() {
+  return theme;
+}
+
+/** Linea di riva (le spiagge dei temi con acqua). */
 export function shoreZ(x) {
-  return (
-    SHORE_BASE +
-    Math.sin(x * 0.042) * SHORE_WAVE * 0.6 +
-    Math.sin(x * 0.015 + 1.7) * SHORE_WAVE * 0.8 +
-    Math.sin(x * 0.09 + 0.4) * 1.6
-  );
+  return theme.shore ? theme.shore(x) : MAP.shoreBase;
 }
 
-/** Quota del terreno: 0 in città, scende a -1.1 nel fondo del mare. */
+/** Quota del terreno: base + rilievi del tema. */
 export function groundY(x, z) {
-  const s = shoreZ(x);
-  if (z < s - BEACH_DEPTH * 0.42) return 0;
-  const t = clamp((z - (s - BEACH_DEPTH * 0.42)) / (BEACH_DEPTH * 0.85), 0, 1);
-  return smoothstep(t) * -1.35 + (t > 0 ? 0 : 0);
+  let y = 0;
+  if (MAP.water) {
+    const s = shoreZ(x);
+    const edge = -MAP.beachDepth * 0.42;
+    if (z >= s + edge) {
+      const t = clamp((z - (s + edge)) / (MAP.beachDepth * 0.85), 0, 1);
+      y = smoothstep(t) * -1.35;
+    }
+  }
+  if (theme.relief) y += theme.relief(x, z);
+  return y;
 }
 
-/** Le strade: due viali paralleli al mare più due vie di servizio. */
-export const ROADS = [
-  { axis: 'x', at: -34, w: 9 }, // Corso Umberto
-  { axis: 'x', at: -6, w: 7 }, // Lungomare
-  { axis: 'z', at: -14, w: 7 }, // Via del Porto
-  { axis: 'z', at: 34, w: 6 }, // Via Bassa
-];
+/** C'è terreno solido qui? false = nel vuoto (isole sospese). */
+export function isSolid(x, z) {
+  if (theme.solid && !theme.solid(x, z)) return false;
+  return true;
+}
+
+export function isPond(x, z) {
+  for (const p of PONDS) if ((x - p.x) ** 2 + (z - p.z) ** 2 < p.r * p.r) return true;
+  return false;
+}
 
 export function isRoad(x, z) {
   for (const r of ROADS) {
@@ -53,35 +91,28 @@ export function isRoad(x, z) {
   return false;
 }
 
-/** Piazza Grande: il cuore sociale, niente prop al centro. */
-export const PIAZZA = { x: 16, z: -34, r: 15 };
-export const isPiazza = (x, z) => Math.hypot(x - PIAZZA.x, z - PIAZZA.z) < PIAZZA.r;
+export function isPiazza(x, z) {
+  return (x - PIAZZA.x) ** 2 + (z - PIAZZA.z) ** 2 < PIAZZA.r * PIAZZA.r;
+}
 
-export const isTown = (x, z) => z < shoreZ(x) - BEACH_DEPTH * 0.42 - 2;
-export const isBeach = (x, z) => !isTown(x, z) && z < shoreZ(x) + 1.5;
-export const isSea = (x, z) => z > shoreZ(x) - BEACH_DEPTH * 0.42;
-export const isSeaDeep = (x, z) => z > shoreZ(x) + 3;
+export function isTown(x, z) {
+  return theme.zones.town(x, z);
+}
 
-export const BOUNDS = {
-  minX: -HALF + 4,
-  maxX: HALF - 4,
-  minZ: -HALF + 4,
-  maxZ: HALF - 12,
-};
+export function isBeach(x, z) {
+  return theme.zones.field(x, z);
+}
 
-/** Porta una posizione dentro i limiti giocabili. */
+export function isSea(x, z) {
+  return MAP.water ? theme.zones.water(x, z) : false;
+}
+
+export function isSeaDeep(x, z) {
+  return MAP.water && groundY(x, z) < MAP.seaLevel - 0.12;
+}
+
 export function clampToBounds(v) {
   v.x = clamp(v.x, BOUNDS.minX, BOUNDS.maxX);
   v.z = clamp(v.z, BOUNDS.minZ, BOUNDS.maxZ);
   return v;
 }
-
-/** Punti di partenza dei buchi: sparagli per la town e il mare. */
-/** Punti di partenza: tutti in terraferma, lontani dal mare aperto. */
-export const SPAWNS = [
-  { x: -38, z: -20 },
-  { x: 30, z: -30 },
-  { x: -58, z: -42 },
-  { x: 64, z: -8 },
-  { x: -10, z: 8 },
-];

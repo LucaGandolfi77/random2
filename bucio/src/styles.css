@@ -371,6 +371,10 @@ body {
   border-left-color: #ff4d4d;
   color: #ff9b9b;
 }
+.feed-line.power {
+  border-left-color: var(--lemon);
+  color: #ffe9a8;
+}
 .feed-line.pulse {
   border-left-color: var(--mint);
   color: var(--mint);
@@ -432,6 +436,61 @@ body {
 
 .pulse-hint[hidden] {
   display: none;
+}
+
+/* --------------------------------------------------- potenziamenti attivi */
+
+.powers {
+  position: absolute;
+  right: calc(14px + var(--safe-r));
+  top: calc(112px + var(--safe-t));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.power {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--glass);
+  border: 1px solid var(--stroke);
+  border-right-width: 3px;
+  border-radius: 12px;
+  padding: 5px 10px 7px;
+  backdrop-filter: blur(8px);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  overflow: hidden;
+  animation: powerIn 0.3s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.power b {
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+}
+
+.power span {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.power i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.2s linear;
+}
+
+@keyframes powerIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
 }
 
 /* ==================================================== TOUCH CONTROLS */

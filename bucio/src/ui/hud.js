@@ -1,5 +1,6 @@
 import { formatInt, clamp } from '../core/utils.js';
 import { TIERS } from '../game/hole.js';
+import { POWERS } from '../game/powerups.js';
 
 const $ = (id) => document.getElementById(id);
 const ARC = 2 * Math.PI * 44;
@@ -22,6 +23,8 @@ export class Hud {
     this.feed = $('hud-feed');
     this.toastEl = $('hud-toast');
     this.pulseHint = $('hud-pulse');
+    this.powers = $('hud-powers');
+    this._powerNodes = new Map();
     this.lines = [];
     this._toastT = null;
     this._lastBoard = '';
@@ -92,6 +95,32 @@ export class Hud {
     this.pulseHint.hidden = !on;
   }
 
+  /** Potenziamenti attivi: pastiglia con il tempo che resta. */
+  setPowers(state) {
+    for (const [id, t] of Object.entries(state)) {
+      const def = POWERS[id];
+      if (!def || def.dur === 0) continue;
+      let node = this._powerNodes.get(id);
+      if (t <= 0) {
+        if (node) {
+          node.remove();
+          this._powerNodes.delete(id);
+        }
+        continue;
+      }
+      if (!node) {
+        node = document.createElement('div');
+        node.className = 'power';
+        node.style.color = `#${def.color.toString(16).padStart(6, '0')}`;
+        node.innerHTML = `<b>${def.label}</b><span></span><i></i>`;
+        this.powers.appendChild(node);
+        this._powerNodes.set(id, node);
+      }
+      node.querySelector('span').textContent = `${Math.ceil(t)}s`;
+      node.querySelector('i').style.width = `${(t / def.dur) * 100}%`;
+    }
+  }
+
   /** Notifiche brevi a sinistra: cosa hai appena divorato. */
   pushFeed(text, kind = '') {
     const el = document.createElement('div');
@@ -131,6 +160,8 @@ export class Hud {
 
   clearFeed() {
     this.feed.innerHTML = '';
+    this.powers.innerHTML = '';
+    this._powerNodes.clear();
     this.lines.length = 0;
     this.toastEl.hidden = true;
     this.combo.hidden = true;

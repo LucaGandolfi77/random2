@@ -1,4 +1,5 @@
 import { R0, tierOf } from './hole.js';
+import { applyPower, POWERS } from './powerups.js';
 import { updateAI } from './ai.js';
 import { formatInt, clamp } from '../core/utils.js';
 import { P } from '../world/palette.js';
@@ -6,19 +7,22 @@ import { P } from '../world/palette.js';
 export const MATCH_TIME = 120;
 const GOLD_FIRST = 16;
 const GOLD_EVERY = 22;
+const POWER_FIRST = 9;
+const POWER_EVERY = 15;
 
 /**
  * Il regista della partita: timer, regole del divoramento, scontri fra buchi,
  * eventi dell'Oro e classifica finale.
  */
 export class Director {
-  constructor({ world, holes, brains, effects, audio, cam, hooks = {} }) {
+  constructor({ world, holes, brains, effects, audio, cam, powers, hooks = {} }) {
     this.world = world;
     this.holes = holes;
     this.brains = brains;
     this.fx = effects;
     this.audio = audio;
     this.cam = cam;
+    this.powers = powers;
     this.hooks = hooks;
     this.reset();
   }
@@ -28,7 +32,9 @@ export class Director {
     this.elapsed = 0;
     this.ended = false;
     this.nextGold = GOLD_FIRST;
+    this.nextPower = POWER_FIRST;
     this.golds = 0;
+    this.powersTaken = 0;
     this._buf = [];
     this._tickAt = -1;
     this._lastGlurp = 0;
@@ -84,6 +90,7 @@ export class Director {
 
     this._holeVersusHole();
     this._gold(now);
+    this._powers(now);
 
     if (this.time <= 0) this._end();
   }
@@ -184,6 +191,7 @@ export class Director {
         const reach = Math.min(a.r, b.r) * 0.78;
         if (d > reach || d === 0) continue;
         if (a.invuln > 0 || b.invuln > 0) continue;
+        if (a.shielded || b.shielded) continue;
         // dopo aver divorato qualcuno, un buco ha la pancia piena: niente doppio
         if (a.satiety <= 0 || a.lastVictim !== b) {
           if (a.mass > b.mass * 1.3) this._devour(a, b);
@@ -296,6 +304,36 @@ export class Director {
     }
   }
 
+  /* --------------------------------------------------------- potenziamenti */
+
+  _powers(now) {
+    if (!this.powers) return;
+    if (this.elapsed < this.nextPower) return;
+    this.nextPower += POWER_EVERY;
+    const p = this.powers.spawn(this.holes, now);
+    if (!p) return;
+    this.hooks.onPowerSpawn?.(p);
+    this.hooks.onFeed?.(`Potenziamento in giro: ${p.def.label}`, 'power');
+  }
+
+  onPickup(hole, def, pos) {
+    const info = applyPower(hole, def.id, { rivals: this.holes });
+    if (!info) return;
+    this.powersTaken++;
+    hole.addScore(15);
+    this.fx.ring(pos.x, pos.z, 0.4, hole.r * 2.6, 0.55, def.color);
+    this.fx.pop(pos.x, pos.y + 1.1, pos.z, def.color, 20, 1.5);
+    this.fx.text(pos.x, pos.y + 2.4, pos.z, def.label, `#${def.color.toString(16).padStart(6, '0')}`, 1.7);
+    if (hole.isPlayer) {
+      this.audio.gold();
+      this.cam.shake(0.4);
+      this.hooks.onPower?.(hole, info);
+      this.hooks.onFeed?.(`${info.label}: ${info.desc}!`, 'power');
+    } else {
+      this.hooks.onFeed?.(`${hole.name} ha preso ${info.label}`, 'power');
+    }
+  }
+
   /* ------------------------------------------------------------------ fine */
 
   _end() {
@@ -317,6 +355,7 @@ export class Director {
         score: p.score,
         place,
         eaten: p.eaten,
+        powers: this.powersTaken,
         kills: p.kills,
         maxR: p.bestR,
         bestCombo: this.playerBestCombo,
