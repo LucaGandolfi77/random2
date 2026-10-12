@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mustang PWA</title>
+    <meta name="description" content="A vertical scrolling WWII air shooter: aerial loops, POW crates, side fighters and sector bosses across 32 stages on two fronts.">
+    <meta name="theme-color" content="#14180f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mustang PWA">
+    <link rel="apple-touch-icon" href="icons/icon-180.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+</head>
+<body>
+    <div id="app">
+        <a class="skip" href="#start-btn">Skip to controls</a>
+        <header>
+            <h1>MUSTANG PWA</h1>
+            <div class="score-board" role="status" aria-live="polite">
+                <span class="score">SCORE <b id="score">0</b></span>
+                <span class="high-score">HIGH <b id="high-score">0</b></span>
+                <span class="lives">LIVES <b id="lives">3</b></span>
+                <span class="stage">STAGE <b id="stage">32</b></span>
+                <span class="loops">LOOPS <b id="loops">3</b></span>
+            </div>
+        </header>
+
+        <main>
+            <canvas id="game-canvas"></canvas>
+            <div id="controls-hint" class="controls-hint">
+                <p><b>Drag</b> to fly &middot; firing is automatic</p>
+                <p><b>LOOP</b> dodges through fire, but you cannot shoot while rolling</p>
+                <p>Three loops per stage. Whatever you do not spend is worth 1,000 points each.</p>
+            </div>
+        </main>
+
+        <nav class="controls">
+            <button id="start-btn" class="btn primary">&#9654; Start</button>
+            <button id="loop-btn" class="btn loop" aria-keyshortcuts="X">&#8635; Loop</button>
+            <button id="pause-btn" class="btn">&#9208; Pause</button>
+            <button id="sound-btn" class="btn" aria-pressed="true">&#128266; Sound</button>
+        </nav>
+
+        <div id="overlay" class="overlay hidden">
+            <div class="panel">
+                <h2 id="overlay-title">MUSTANG PWA</h2>
+                <p id="overlay-msg">Pick a front and take off.</p>
+                <div id="difficulty-row" class="choices-row">
+                    <span class="choices-label">DIFFICULTY</span>
+                    <div id="difficulty-choices" class="chips">
+                        <button id="diff-recruit" class="btn chip" data-difficulty="recruit">RECRUIT</button>
+                        <button id="diff-arcade" class="btn chip" data-difficulty="arcade">ARCADE</button>
+                        <button id="diff-ace" class="btn chip" data-difficulty="ace">ACE</button>
+                    </div>
+                </div>
+                <div id="theatre-choices" class="theatre-choices">
+                    <button id="theatre-overlord" class="btn theatre" data-theatre="overlord">
+                        <strong>OPERATION OVERLORD</strong><small>P-51 Mustang &middot; Europe 1944</small>
+                    </button>
+                    <button id="theatre-rising" class="btn theatre" data-theatre="rising">
+                        <strong>OPERATION RISING SUN</strong><small>A6M Zero &middot; Pacific 1942</small>
+                    </button>
+                </div>
+                <div id="overlay-stats" class="hidden">
+                    <p>Score: <span id="final-score">0</span></p>
+                    <p>High Score: <span id="final-high">0</span></p>
+                    <p>Lives left: <span id="final-lives">3</span></p>
+                    <p class="rank-line">Rank: <span id="final-rank">ROOKIE</span></p>
+                </div>
+                <button id="overlay-play" class="btn primary">&#9654; Play</button>
+                <button id="overlay-theme" class="btn">&#127912; Change Theme</button>
+            </div>
+        </div>
+
+        <div id="install-prompt" class="install-prompt hidden">
+            <p>Install Mustang PWA for the best iPhone experience!</p>
+            <button id="install-btn" class="btn primary">Install</button>
+            <button id="install-later" class="btn">Later</button>
+        </div>
+    </div>
+
+    <script src="src/data.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/art.js"></script>
+    <script src="src/game.js"></script>
+    <script src="service-worker.js"></script>
+</body>
+</html>

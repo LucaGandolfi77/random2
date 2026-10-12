@@ -1,0 +1,418 @@
+/* ===== Mustang PWA iPhone Styles ===== */
+:root {
+    --bg: #14180f;
+    --grid: #232a1c;
+    --neon: #d4af37;
+    --accent: #6b7a3a;
+    --text: #e8e4d4;
+    --panel: #1b2116;
+    --border: #d4af37;
+    --shadow: rgba(212, 175, 55, 0.35);
+    --font: 'Arial', sans-serif;
+    --header-height: 78px;
+    color-scheme: dark;
+    --nav-height: 92px;
+}
+
+/* ===== Theme Variants ===== */
+[data-theme="retro"] {
+    --bg: #000000;
+    --grid: #111111;
+    --neon: #00ffff;
+    --accent: #00ccff;
+    --border: #00ffff;
+    --shadow: rgba(0, 255, 255, 0.45);
+}
+
+[data-theme="night"] {
+    --bg: #050810;
+    --grid: #0e1422;
+    --neon: #7fb2ff;
+    --accent: #2a3f66;
+    --border: #7fb2ff;
+    --shadow: rgba(127, 178, 255, 0.35);
+}
+
+[data-theme="sepia"] {
+    --bg: #2b2118;
+    --grid: #3a2e21;
+    --neon: #c9a227;
+    --accent: #8a6d4a;
+    --border: #c9a227;
+    --shadow: rgba(201, 162, 39, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+}
+
+#app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+header {
+    height: var(--header-height);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, var(--bg) 0%, #000 100%);
+    border-bottom: 2px solid var(--border);
+    position: relative;
+    overflow: hidden;
+}
+
+header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 100%, var(--shadow) 0%, transparent 70%);
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+h1 {
+    font-size: 1.6rem;
+    color: var(--neon);
+    text-shadow: 0 0 8px var(--shadow), 0 0 16px var(--shadow);
+    letter-spacing: 3px;
+    z-index: 2;
+}
+
+.score-board {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    z-index: 2;
+    font-size: 0.95rem;
+}
+
+.score-board b {
+    color: var(--neon);
+    text-shadow: 0 0 4px var(--shadow);
+    font-variant-numeric: tabular-nums;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    position: relative;
+    min-height: 0;
+}
+
+#game-canvas {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    max-width: 100%;
+    max-height: 100%;
+    background: var(--grid);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 0 20px var(--shadow);
+    touch-action: none;
+}
+
+.skip {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 500;
+    padding: 10px 16px;
+    background: var(--neon);
+    color: var(--bg);
+    font-weight: bold;
+}
+
+.skip:focus {
+    left: 8px;
+    top: 8px;
+}
+
+:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.controls-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 10px;
+    transform: translateX(-50%);
+    width: min(94%, 380px);
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.72);
+    text-align: center;
+    pointer-events: none;
+    z-index: 4;
+}
+
+.controls-hint p {
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: rgba(232, 228, 212, 0.85);
+}
+
+.controls-hint b {
+    color: var(--neon);
+}
+
+nav.controls {
+    height: var(--nav-height);
+    padding: 10px 12px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    background: var(--panel);
+    border-top: 2px solid var(--border);
+}
+
+.btn {
+    font-family: var(--font);
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--neon);
+    color: var(--bg);
+    box-shadow: 0 0 16px var(--shadow);
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.btn.primary {
+    background: var(--neon);
+    color: var(--bg);
+    font-weight: bold;
+}
+
+.btn.loop {
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: bold;
+    min-width: 92px;
+}
+
+.btn.loop:disabled {
+    color: var(--text);
+}
+
+/* ===== Overlay ===== */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.86);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 16px;
+}
+
+.panel {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 26px 24px;
+    text-align: center;
+    box-shadow: 0 0 40px var(--shadow);
+    max-width: 420px;
+    width: 100%;
+}
+
+.panel h2 {
+    font-size: 1.9rem;
+    color: var(--neon);
+    text-shadow: 0 0 12px var(--shadow);
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+}
+
+.panel p {
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: rgba(232, 228, 212, 0.85);
+}
+
+.choices-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.choices-label {
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+    color: rgba(232, 228, 212, 0.55);
+}
+
+.chips {
+    display: flex;
+    gap: 6px;
+}
+
+.btn.chip {
+    flex: 1;
+    padding: 8px 6px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+}
+
+.btn.chip.active {
+    background: var(--neon);
+    color: var(--bg);
+    box-shadow: 0 0 14px var(--shadow);
+}
+
+.theatre-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.btn.theatre {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+    padding: 10px 14px;
+    line-height: 1.3;
+}
+
+.btn.theatre strong {
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.btn.theatre small {
+    font-size: 0.7rem;
+    text-transform: none;
+    letter-spacing: 0;
+    color: rgba(232, 228, 212, 0.6);
+}
+
+.btn.theatre.active {
+    background: var(--neon);
+    color: var(--bg);
+    box-shadow: 0 0 18px var(--shadow);
+}
+
+.btn.theatre.active small {
+    color: rgba(0, 0, 0, 0.65);
+}
+
+#overlay-stats p {
+    font-size: 1rem;
+    margin: 6px 0;
+}
+
+#overlay-stats span {
+    color: var(--neon);
+    font-weight: bold;
+}
+
+.rank-line {
+    margin-top: 12px !important;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+#final-rank {
+    font-size: 1.15rem;
+    letter-spacing: 2px;
+}
+
+#overlay-play, #overlay-theme {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ===== Install Prompt ===== */
+.install-prompt {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    box-shadow: 0 0 20px var(--shadow);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.install-prompt p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 768px) {
+    :root {
+        --header-height: 70px;
+        --nav-height: 104px;
+    }
+
+    h1 { font-size: 1.15rem; letter-spacing: 2px; }
+    .btn { padding: 9px 10px; font-size: 0.78rem; letter-spacing: 0; }
+    .score-board { gap: 10px; font-size: 0.75rem; flex-wrap: wrap; justify-content: flex-end; }
+    .btn.loop { min-width: 78px; }
+    .panel { padding: 20px 16px; }
+    .panel h2 { font-size: 1.5rem; }
+}

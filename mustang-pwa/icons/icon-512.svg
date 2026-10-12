@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="body" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8a9a4e"/>
+      <stop offset="100%" stop-color="#55632f"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#77853f"/>
+      <stop offset="100%" stop-color="#414d24"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#d4af37" flood-opacity="0.45"/>
+    </filter>
+    <clipPath id="hull">
+      <path d="M256,117 C269,133 275,155 275,187 L275,315 C275,347 267,363 256,373 C245,363 237,347 237,315 L237,187 C237,155 243,133 256,117 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="512" height="512" fill="#14180f" rx="85"/>
+  <rect x="75" y="75" width="363" height="363" fill="none" stroke="#d4af37" stroke-width="5" rx="64" opacity="0.7"/>
+
+  <g filter="url(#shadow)">
+    <polygon points="256,219 163,275 155,312 256,291 357,312 349,275" fill="url(#wing)"/>
+    <polygon points="256,312 216,344 211,373 256,360 301,373 296,344" fill="url(#wing)"/>
+
+    <path d="M256,117 C269,133 275,155 275,187 L275,315 C275,347 267,363 256,373 C245,363 237,347 237,315 L237,187 C237,155 243,133 256,117 Z"
+          fill="url(#body)" stroke="#2c331a" stroke-width="3"/>
+
+    <g clip-path="url(#hull)">
+      <ellipse cx="229" cy="176" rx="43" ry="35" fill="#3f4a22" opacity="0.75"/>
+      <ellipse cx="288" cy="277" rx="37" ry="43" fill="#3f4a22" opacity="0.7"/>
+      <ellipse cx="256" cy="373" rx="48" ry="24" fill="#333c1b" opacity="0.6"/>
+    </g>
+
+    <ellipse cx="256" cy="219" rx="16" ry="32" fill="#a8c8d8" opacity="0.88"/>
+    <rect x="251" cy="192" width="9" height="53" rx="4" fill="#7d9bad" opacity="0.9"/>
+
+    <circle cx="256" cy="131" r="13" fill="#d4af37"/>
+    <path d="M235,144 L277,144" stroke="#c8b06a" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+
+    <rect x="176" y="285" width="43" height="11" rx="5" fill="#d4af37" opacity="0.9"/>
+    <rect x="293" y="285" width="43" height="11" rx="5" fill="#d4af37" opacity="0.9"/>
+
+    <path d="M248,171 L248,336" stroke="#6d7c3c" stroke-width="2.4" opacity="0.7"/>
+    <path d="M264,171 L264,336" stroke="#6d7c3c" stroke-width="2.4" opacity="0.7"/>
+  </g>
+</svg>
