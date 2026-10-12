@@ -1,0 +1,18 @@
+{
+  "name": "Snap PWA — Fotocamera con Filtri",
+  "short_name": "Snap",
+  "description": "Fotocamera in tempo reale con lenti volto e filtri retrò. Le snap restano sul tuo dispositivo.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101014",
+  "theme_color": "#101014",
+  "lang": "it",
+  "categories": ["photo", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
+}

@@ -15,6 +15,7 @@ A collection of installable mini-games (PWAs) and one dev tool, hosted on GitHub
 | [Mustang 1942](mustang-pwa/) | WWII vertical shmup, 32 stages | [▶ Play](mustang-pwa/) |
 | [Farm Tycoon](virtual-farm-pwa/) | Idle farming simulator | [▶ Play](virtual-farm-pwa/) |
 | [BUCIO](bucio/) | 3D black-hole eat-'em-up (Vite + three.js) | [▶ Play](bucio/) |
+| [Snap Cam](snap-pwa/) | Camera with face lenses & film filters | [▶ Play](snap-pwa/) |
 | [EADS](EADS/) | Embedded Analysis & Debug Studio (Python desktop tool) | [GitHub](EADS/) |
 
 ## Deployment
