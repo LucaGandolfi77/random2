@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+logs/
+debug-logs/
+
+*.tar.xz
+projects.tmp

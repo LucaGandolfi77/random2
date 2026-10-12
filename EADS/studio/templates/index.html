@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="it">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="studio-version" content="{{ studio_version }}">
+  <title>Embedded Analysis & Debug Studio v{{ studio_version }}</title>
+  <link rel="icon" href="{{ url_for('web.favicon') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static',filename='style.css',v=studio_version) }}">
+  <link rel="stylesheet" href="{{ url_for('static',filename='ui-fix.css',v=studio_version) }}">
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>Embedded Analysis & Debug Studio <span id="studioVersion">v{{ studio_version }}</span></h1>
+      <p id="appStatus">Inizializzazione...</p>
+    </div>
+    <select id="project" aria-label="Project"></select>
+  </header>
+  <nav id="tabs">
+    <button type="button" data-tab="source" class="active">Sources</button>
+    <button type="button" data-tab="explorer">Explorer</button>
+    <button type="button" data-tab="elf">ELF</button>
+    <button type="button" data-tab="toolchain">Toolchain</button>
+    <button type="button" data-tab="run">Run</button>
+    <button type="button" data-tab="debug">Debug</button>
+    <button type="button" data-tab="analysis">Analysis</button>
+  </nav>
+  <main>
+    <section id="source" class="panel active">
+      <div class="bar"><input id="filter" placeholder="Filter sources"><button type="button"
+          id="scan">Scan</button><button type="button" id="all">Select buildable</button><button type="button"
+          id="none">Clear</button><button type="button" id="build">Build</button><button type="button" id="buildStop"
+          disabled>Cancel</button><span id="count"></span></div>
+      <div class="split">
+        <div id="sources" class="card"></div>
+        <div class="card">
+          <h3 id="previewTitle">Preview</h3>
+          <pre id="preview">Select a file.</pre>
+        </div>
+      </div>
+      <pre id="buildlog" class="console"></pre>
+    </section>
+    <section id="explorer" class="panel explorer-panel">
+  <div class="explorer-shell">
+    <aside class="explorer-sidebar">
+      <div class="explorer-toolbar">
+        <strong>EXPLORER</strong>
+        <div>
+          <button id="explorerRefresh" type="button" title="Refresh">Refresh</button>
+          <button id="explorerExpand" type="button" title="Expand all">Expand</button>
+          <button id="explorerCollapse" type="button" title="Collapse all">Collapse</button>
+        </div>
+      </div>
+      <div class="explorer-search">
+        <input id="explorerFilter" placeholder="Filter files and folders" autocomplete="off">
+        <button id="explorerClear" type="button" title="Clear filter">Clear</button>
+      </div>
+      <div class="explorer-project-line">
+        <span id="workspaceName">PROJECT</span>
+        <span id="explorerCount">0/0</span>
+      </div>
+      <div id="projectTree" class="project-tree" role="tree" aria-label="Project files"></div>
+    </aside>
+    <div id="explorerResizer" class="explorer-resizer" title="Drag to resize the Explorer"></div>
+    <section class="file-viewer">
+      <div id="editorTabs" class="editor-tabs"><div class="editor-welcome-tab">Welcome</div></div>
+      <div id="editorBreadcrumbs" class="editor-breadcrumbs">Select a file from the tree</div>
+      <div id="fileViewerBody" class="file-viewer-body">
+        <div id="editorEmpty" class="editor-empty"><strong>Embedded Analysis &amp; Debug Studio</strong><span>Select a text file from the Explorer.</span></div>
+        <div id="codeViewport" class="code-viewport" hidden>
+          <pre id="lineNumbers" class="line-numbers" aria-hidden="true"></pre>
+          <pre id="explorerPreview" class="file-content" tabindex="0"></pre>
+        </div>
+      </div>
+      <div class="viewer-statusbar"><span id="editorStatusPath">Ready</span><span><span id="editorEncoding">UTF-8</span> · <span id="editorLanguage">Plain Text</span> · <span id="editorPosition">Ln 1, Col 1</span></span></div>
+    </section>
+  </div>
+</section>
+<section id="elf" class="panel">
+      <div class="bar"><input id="elfPath" placeholder="path/to/app.elf"><button type="button"
+          id="inspect">Inspect</button><input id="addresses" placeholder="0x1000 0x2000"><button type="button"
+          id="addr2line">Addr2line</button></div>
+      <pre id="elfTabs" class="console"></pre>
+    </section>
+    <section id="toolchain" class="panel"><button type="button" id="inspectToolchain">Inspect toolchain</button>
+      <pre id="toolchainOut" class="console"></pre>
+    </section>
+    <section id="run" class="panel">
+      <div class="bar"><input id="runElf" placeholder="path/to/app.elf"><input id="runProfile"
+          placeholder="execution profile"><button type="button" id="runStart">Run</button><button type="button"
+          id="runStop">Stop</button></div>
+      <pre id="runOut" class="console"></pre>
+    </section>
+    <section id="debug" class="panel">
+      <div class="bar"><input id="debugElf" placeholder="path/to/app.elf"><input id="debugProfile"
+          placeholder="debug profile"><button type="button" id="debugStart">Start</button><button type="button"
+          id="debugStop">Stop</button></div>
+      <div class="bar"><input id="miCommand" value="-break-insert main"><button type="button" id="sendMi">Send
+          MI</button></div>
+      <pre id="debugOut" class="console"></pre>
+    </section>
+    <section id="analysis" class="panel">
+  <div class="analysis-layout">
+    <div class="analysis-controls">
+      <h2>Source checks</h2>
+      <p>Run checks on selected source files. If no source is selected, the complete configured source tree is analyzed.</p>
+      <div id="analysisToolStatus" class="tool-status"></div>
+      <div class="bar">
+        <button id="cppcheckRun" type="button">Run Cppcheck</button>
+        <button id="doxygenRun" type="button">Run Doxygen</button>
+        <button id="analysisStop" type="button" disabled>Cancel</button>
+        <button id="stackLoad" type="button">Stack usage</button>
+      </div>
+    </div>
+    <pre id="analysisOut" class="console analysis-console">Select an analysis tool.</pre>
+  </div>
+</section>
+  </main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static',filename='app.js',v=studio_version) }}" defer></script>
+</body>
+
+</html>

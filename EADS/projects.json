@@ -1,0 +1,226 @@
+{
+  "projects": [
+    {
+      "id": "moonlight-tasmi",
+      "name": "MOONLIGHT tasmi_moonlight",
+      "project_root": "/mnt/c/Users/lgandolfi/Desktop/MISRA/MOONLIGHT/tasmi_moonlight",
+      "rtems_path": "/opt/rtems/rtems-gr740-6.2",
+      "target_prefix": "sparc-rtems6-",
+      "bsp": "gr740-smp-qual-only",
+      "parallel_jobs": 8,
+      "compile_timeout_seconds": 120,
+      "objdump_timeout_seconds": 120,
+      "output_dir": "build-analysis-studio",
+      "source_roots": [
+        "COMMON",
+        "ASW",
+        "BSW",
+        "HDSW"
+      ],
+      "exclude_globs": [
+        "**/build-objdump*/**",
+        "**/wsl_testsuite/**"
+      ],
+      "include_dirs": [
+        "COMMON/include",
+        "COMMON/src",
+        "ASW/include",
+        "ASW/include/asw",
+        "ASW/include/asw/mission",
+        "ASW/include/asw/mission/mdh",
+        "ASW/include/asw/mission/encoder",
+        "ASW/src",
+        "ASW/src/mission",
+        "ASW/src/mission/mdh",
+        "BSW/include",
+        "BSW/src",
+        "HDSW/include",
+        "HDSW/src"
+      ],
+      "idirafter_dirs": [
+        "ASW/include/asw"
+      ],
+      "compiler_flags": [
+        "-c",
+        "-g3",
+        "-O0",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-DDEBUG",
+        "-DMAJOR_VERSION=0",
+        "-DMINOR_VERSION=0",
+        "-DPATCH_VERSION=0",
+        "-DN_COMMITS_AFTER_RELEASE=0",
+        "-DGIT_HASH_UINT32=0"
+      ],
+      "defines": {},
+      "objdump_flags": [
+        "-d",
+        "-r",
+        "-S",
+        "-l",
+        "-C",
+        "-w"
+      ],
+      "execution_profiles": [
+        {
+          "id": "sis",
+          "name": "SIS simulator (GR740)",
+          "executable": "{rtems}/bin/sis",
+          "arguments": [
+            "-gr740",
+            "-m",
+            "4",
+            "{elf}"
+          ]
+        }
+      ],
+      "debug_profiles": [
+        {
+          "id": "sis-remote",
+          "name": "SIS remote (GDB via simulator)",
+          "server_executable": "{rtems}/bin/sis",
+          "server_arguments": [
+            "-gr740",
+            "-gdb",
+            "{elf}"
+          ],
+          "remote": "localhost:1234",
+          "gdb_executable": "{rtems}/bin/gdb",
+          "command_timeout": 10
+        }
+      ],
+      "static_analysis": [
+        {
+          "id": "cppcheck",
+          "kind": "cppcheck",
+          "executable": "cppcheck",
+          "arguments": [
+            "--enable=warning,style,performance,portability",
+            "--inline-suppr",
+            "--force",
+            "--language=c",
+            "--std=c99",
+            "--template=gcc"
+          ],
+          "timeout_seconds": 1800
+        },
+        {
+          "id": "doxygen",
+          "kind": "doxygen",
+          "executable": "doxygen",
+          "arguments": [],
+          "timeout_seconds": 1800
+        }
+      ]
+    },
+    {
+      "id": "ios-src",
+      "name": "IOS Source",
+      "project_root": "/mnt/c/Users/lgandolfi/Desktop/IOS/Gitlab/ios_arm_visual_perception",
+      "rtems_path": "/opt/rtems/rtems-gr740-6.2",
+      "target_prefix": "sparc-rtems6-",
+      "bsp": "gr740-smp-qual-only",
+      "parallel_jobs": 8,
+      "compile_timeout_seconds": 120,
+      "objdump_timeout_seconds": 120,
+      "output_dir": "build-analysis-studio",
+      "explorer_max_files": 50000,
+      "explorer_max_preview_bytes": 2000000,
+      "source_roots": [
+        "."
+      ],
+      "exclude_globs": [
+        ".git/**",
+        "**/.git/**",
+        ".venv/**",
+        "**/.venv/**",
+        "**/__pycache__/**",
+        "**/.pytest_cache/**",
+        "**/node_modules/**",
+        "**/.idea/**",
+        "**/.vscode/**",
+        "build/**",
+        "**/build/**",
+        "build-*/**",
+        "**/build-*/**",
+        "build-analysis-studio/**",
+        "**/build-analysis-studio/**",
+        "**/build-objdump*/**",
+        "**/wsl_testsuite/**",
+        "out/**",
+        "dist/**"
+      ],
+      "include_dirs": [
+        "."
+      ],
+      "idirafter_dirs": [],
+      "compiler_flags": [
+        "-g3",
+        "-O0",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fstack-usage",
+        "-DDEBUG"
+      ],
+      "defines": {},
+      "objdump_flags": [
+        "-d",
+        "-r",
+        "-S",
+        "-l",
+        "-C",
+        "-w"
+      ],
+      "execution_profiles": [
+        {
+          "id": "sis",
+          "name": "SIS simulator (GR740)",
+          "executable": "{rtems}/bin/sis",
+          "arguments": [
+            "-gr740",
+            "{elf}"
+          ]
+        }
+      ],
+      "debug_profiles": [
+        {
+          "id": "sis-remote",
+          "name": "SIS remote (GDB via simulator)",
+          "server_executable": "{rtems}/bin/sis",
+          "server_arguments": [
+            "-gr740",
+            "-gdb",
+            "{elf}"
+          ],
+          "remote": "localhost:1234",
+          "gdb_executable": "{rtems}/bin/gdb",
+          "command_timeout": 10
+        }
+      ],
+      "static_analysis": [
+        {
+          "id": "cppcheck",
+          "kind": "cppcheck",
+          "executable": "cppcheck",
+          "arguments": [
+            "--enable=warning,style,performance,portability",
+            "--inline-suppr",
+            "--force",
+            "--language=c",
+            "--std=c99",
+            "--template=gcc"
+          ],
+          "timeout_seconds": 1800
+        },
+        {
+          "id": "doxygen",
+          "kind": "doxygen",
+          "executable": "doxygen",
+          "arguments": [],
+          "timeout_seconds": 1800
+        }
+      ]
+    }
+  ]
+}

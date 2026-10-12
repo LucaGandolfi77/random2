@@ -1,0 +1,280 @@
+/* ===== Snake PWA Styles ===== */
+:root {
+    --bg: #0a0a0a;
+    --grid: #1a1a1a;
+    --neon: #00ff00;
+    --accent: #00cc00;
+    --text: #e0e0e0;
+    --panel: #111;
+    --border: #00ff00;
+    --shadow: rgba(0, 255, 0, 0.3);
+    --font: 'Courier New', monospace;
+    --header-height: 80px;
+}
+
+/* ===== Theme Variants ===== */
+[data-theme="neon"] {
+    --bg: #050505;
+    --grid: #111;
+    --neon: #00ff00;
+    --accent: #00cc00;
+    --border: #00ff00;
+    --shadow: rgba(0, 255, 0, 0.5);
+}
+
+[data-theme="retro"] {
+    --bg: #000;
+    --grid: #111;
+    --neon: #ff00ff;
+    --accent: #ff00aa;
+    --border: #ff00ff;
+    --shadow: rgba(255, 0, 255, 0.5);
+}
+
+[data-theme="forest"] {
+    --bg: #0a1a0a;
+    --grid: #112a11;
+    --neon: #00cc44;
+    --accent: #00aa33;
+    --border: #00cc44;
+    --shadow: rgba(0, 204, 68, 0.4);
+}
+
+[data-theme="ocean"] {
+    --bg: #0a0a1a;
+    --grid: #12122a;
+    --neon: #00aaff;
+    --accent: #0088cc;
+    --border: #00aaff;
+    --shadow: rgba(0, 170, 255, 0.4);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+}
+
+#app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    height: var(--header-height);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, var(--bg) 0%, #000 100%);
+    border-bottom: 2px solid var(--border);
+    position: relative;
+    overflow: hidden;
+}
+
+header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 100%, var(--shadow) 0%, transparent 70%);
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+h1 {
+    font-size: 1.8rem;
+    color: var(--neon);
+    text-shadow: 0 0 8px var(--shadow), 0 0 16px var(--shadow);
+    letter-spacing: 3px;
+    z-index: 2;
+}
+
+.score-board {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    z-index: 2;
+    font-size: 1.1rem;
+}
+
+.score, .high-score {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.score span, .high-score span {
+    color: var(--neon);
+    text-shadow: 0 0 4px var(--shadow);
+}
+
+main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    position: relative;
+}
+
+#game-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    background: var(--grid);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    image-rendering: pixelated;
+    box-shadow: 0 0 20px var(--shadow);
+}
+
+nav.controls {
+    height: 90px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    background: var(--panel);
+    border-top: 2px solid var(--border);
+}
+
+.btn {
+    font-family: var(--font);
+    font-size: 1rem;
+    padding: 10px 20px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.btn:hover {
+    background: var(--neon);
+    color: var(--bg);
+    box-shadow: 0 0 16px var(--shadow);
+    transform: translateY(-2px);
+}
+
+.btn.primary {
+    background: var(--neon);
+    color: var(--bg);
+    font-weight: bold;
+}
+
+.btn.primary:hover {
+    box-shadow: 0 0 24px var(--shadow);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* ===== Overlay ===== */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.panel {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 40px;
+    text-align: center;
+    box-shadow: 0 0 40px var(--shadow);
+    max-width: 400px;
+    width: 90%;
+}
+
+.panel h2 {
+    font-size: 2rem;
+    color: var(--neon);
+    text-shadow: 0 0 12px var(--shadow);
+    margin-bottom: 16px;
+}
+
+.panel p {
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+#overlay-stats p {
+    font-size: 1.1rem;
+    margin: 8px 0;
+}
+
+#overlay-stats span {
+    color: var(--neon);
+    font-weight: bold;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ===== Install Prompt ===== */
+.install-prompt {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    box-shadow: 0 0 20px var(--shadow);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.install-prompt p {
+    margin: 0;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 768px) {
+    h1 { font-size: 1.4rem; }
+    .btn { padding: 8px 16px; font-size: 0.9rem; }
+    nav.controls { height: 100px; flex-wrap: wrap; gap: 8px; }
+    header { height: 70px; }
+    .score-board { gap: 12px; font-size: 0.9rem; }
+}
+
+/* ===== Swipe Controls Indicator ===== */
+#swipe-hint {
+    position: absolute;
+    bottom: 90px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text);
+    opacity: 0.5;
+    z-index: 10;
+    display: none;
+}
+
+@media (hover: none) {
+    #swipe-hint { display: block; }
+}
