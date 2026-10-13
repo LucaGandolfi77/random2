@@ -787,6 +787,21 @@
 
       <section class="grid" id="grid" aria-label="Projects">
 
+        <article class="card reveal" data-tags="io survival arcade" data-playable="lumen-pwa/" style="--c1:#0ea5e9; --c2:#4ff5ff; --tile-glow:rgba(79,245,255,.5); --shimmer-delay:.1s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#02060e,#0e7490)">🌊</div>
+            <h2>LUMEN</h2>
+          </div>
+          <p class="tagline">A glowworm .io game in the pitch-black abyss. Your light is your eyes — grow, and everyone sees you too.</p>
+          <div class="chips"><span class="chip">.IO</span><span class="chip">SURVIVAL</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="lumen-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/lumen-pwa" aria-label="LUMEN source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="shooter arcade" data-playable="king-shot-pwa/" style="--c1:#f59e0b; --c2:#f97316; --tile-glow:rgba(245,158,11,.55); --shimmer-delay:.2s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#f59e0b,#ea580c)">👑</div>
@@ -1263,7 +1278,8 @@
       { slug: "snake-pwa/",      name: "Snake",        emoji: "🐍", key: "snake-pwa" },
       { slug: "king-shot-pwa/",  name: "King Shot",    emoji: "👑", key: "king-shot-pwa" },
       { slug: "plane-pwa/",      name: "Plane Shooter", emoji: "✈️", key: "plane-pwa" },
-      { slug: "slot-pwa/",       name: "Slot Machine", emoji: "🎰", key: "slot-pwa" }
+      { slug: "slot-pwa/",       name: "Slot Machine", emoji: "🎰", key: "slot-pwa" },
+      { slug: "lumen-pwa/",      name: "LUMEN",       emoji: "🌊", key: "lumen-pwa" }
     ];
     function readJSON(key) { return R2.loadJSON(key, null); }
     function timeAgo(ts) {

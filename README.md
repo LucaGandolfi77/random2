@@ -19,6 +19,7 @@
   - [Plane Shooter](#plane-shooter)
   - [Slot Machine](#slot-machine)
   - [Snake](#snake)
+  - [LUMEN](#lumen)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
   - [BUCIO](#bucio)
@@ -45,11 +46,12 @@
 | 2 | **Plane Shooter** | Side-scrolling shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/plane-pwa/) |
 | 3 | **Slot Machine** | 3-reel casino | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/slot-pwa/) |
 | 4 | **Snake** | Retro arcade | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/snake-pwa/) |
-| 5 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 6 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 7 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 8 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 9 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 5 | **LUMEN** | Bioluminescent .io survival | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/lumen-pwa/) |
+| 6 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 7 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 8 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 9 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 10 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -163,6 +165,36 @@ arrow keys/WASD on desktop.
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG).
+
+### LUMEN
+
+*A bioluminescent `.io` game for the pitch-black abyss.* 🌊
+
+You are a ribbon eel swimming in total darkness. **Your glow radius is your
+vision radius, and it scales with your mass** — so growing lets you see the
+whole map and makes you visible from a very long way off. You also spot other
+creatures' glow halos long before their bodies, which is most of the tension.
+
+- 40 **persistent named rivals** (`Vortex_77`, `Abyssalv2`, `Nyx.exe`…) generated
+  once from a seed and frozen, so the same names hunt you every session. Each
+  has a blended personality across forage / intercept / cut-off / scavenge /
+  escape / wander — skilled bots lead their target by arrival time to set up a
+  cut-off, unskilled ones chase the head and crash
+- **Grudges persist across sessions**: kill a rival and it hunts you back; let
+  one kill you and it respawns already looking for you
+- Hazards: wrecks, jellyfish that stun you, and 900-mass anglerfish that
+  telegraph a lunge with a flare — killable only by spearing the lure with a
+  boost while they lie stunned
+- Corpses drop as edible meat worth 60% of mass, so you can watch your own death
+  get scavenged by someone who was waiting for it
+- Fog of war via a light mask composited through `destination-out` radial
+  gradients, plus marine-snow parallax, bloom and depth-tracking synth drone
+- 3-second spectate of your killer, kill feed, live leaderboard, minimap
+- Fully synthesised WebAudio — no audio assets at all
+
+**Files:** `index.html`, `styles.css`, `src/` (`config`, `storage`, `world`,
+`render`, `player`, `bots`, `audio`, `ui`, `main`), `manifest.json`,
+`service-worker.js`, `icons/`. See [`lumen-pwa/README.md`](lumen-pwa/README.md).
 
 ### Mustang 1942
 
@@ -331,8 +363,8 @@ project. It is itself an installable PWA.
   it works both at a domain root and under GitHub Pages' `/random2/` subpath
 - **🏆 Your records dashboard**: reads each game's high score from device
   storage and shows it on the hub, with a "last played" timestamp and a
-  one-click reset (currently Snake, King Shot, Plane Shooter, Slot Machine —
-  the games that write `random2-last-played`)
+  one-click reset (currently Snake, King Shot, Plane Shooter, Slot Machine and
+  LUMEN — the games that write `random2-last-played`)
 - **🌓 Dark/light theme toggle**, persisted and seeded from
   `prefers-color-scheme` on first visit; `theme-color` meta follows along
 - **↗ Share button**: Web Share API on mobile, clipboard fallback with a toast
@@ -380,6 +412,7 @@ random2/
 │                          # ┘
 │
 ├── mustang-pwa/            # static PWA, code split into src/ modules + tests
+├── lumen-pwa/              # static PWA, src/ modules + headless sim test
 ├── snap-pwa/               # static PWA + vendored MediaPipe engine
 │
 ├── bucio/                  # three.js game, Vite project → dist/ on deploy

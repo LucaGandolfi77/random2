@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LUMEN · .io</title>
+    <meta name="description" content="A bioluminescent .io game for the pitch-black abyss. Your light is your eyes — grow, and everyone sees you too.">
+    <meta name="theme-color" content="#02060e">
+    <meta name="color-scheme" content="dark">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LUMEN">
+</head>
+<body class="in-menu">
+
+    <canvas id="game-canvas"></canvas>
+
+    <!-- ===== HUD ===== -->
+    <div id="hud" class="hidden">
+        <div class="hud-tl">
+            <div class="you-are"><span class="dot"></span><span id="stat-name">You</span></div>
+            <div class="stat"><span class="stat-label">GLOW</span><span class="stat-value" id="stat-mass">0</span></div>
+            <div class="stat"><span class="stat-label">RANK</span><span class="stat-value" id="stat-rank">#1</span></div>
+            <div class="stat"><span class="stat-label">KILLS</span><span class="stat-value" id="stat-kills">0</span></div>
+        </div>
+
+        <div class="hud-tr">
+            <ol id="leaderboard"></ol>
+            <canvas id="minimap" width="132" height="132"></canvas>
+        </div>
+
+        <div id="killfeed"></div>
+        <div id="hunt-banner" class="hidden"></div>
+
+        <button id="boost-pad" aria-label="Boost">BOOST</button>
+    </div>
+
+    <!-- ===== Menu ===== -->
+    <div id="screen-menu" class="screen">
+        <div class="panel">
+            <h1 class="logo">LUMEN</h1>
+            <p class="tagline">Your light is your eyes.<br>Grow&hellip; and everyone sees you too.</p>
+
+            <div class="field">
+                <input id="name-input" type="text" maxlength="14" autocomplete="off"
+                       autocapitalize="off" spellcheck="false" placeholder="your name">
+            </div>
+
+            <button id="btn-play" class="btn primary">DIVE IN</button>
+
+            <p class="fine" id="menu-best"></p>
+
+            <div class="how">
+                <div class="how-row"><span class="key">Drag</span><span>swim — the head never stops</span></div>
+                <div class="how-row"><span class="key">Boost</span><span>burn mass to outrun a threat</span></div>
+                <div class="how-row"><span class="key">Chase</span><span>cut a rival's body, not their head</span></div>
+                <div class="how-row"><span class="key">Mind</span><span>anglers only die to a lure, speared</span></div>
+            </div>
+
+            <div class="row-actions">
+                <button id="btn-sound" class="btn ghost">🔊 Sound</button>
+            </div>
+
+            <p class="fine dim">40 rivals. They remember you.</p>
+        </div>
+    </div>
+
+    <!-- ===== Death ===== -->
+    <div id="screen-death" class="screen hidden">
+        <div class="panel">
+            <h2 id="death-title">Eliminated</h2>
+            <p class="tagline" id="death-sub">The abyss is not empty.</p>
+
+            <div class="results">
+                <div class="result"><span class="result-value" id="os-mass">0</span><span class="result-label">glow</span></div>
+                <div class="result"><span class="result-value" id="os-rank">#1</span><span class="result-label">peak rank</span></div>
+                <div class="result"><span class="result-value" id="os-kills">0</span><span class="result-label">kills</span></div>
+                <div class="result"><span class="result-value" id="os-best">0</span><span class="result-label">best</span></div>
+            </div>
+
+            <button id="btn-again" class="btn primary">DIVE AGAIN</button>
+            <div class="row-actions">
+                <button id="btn-menu" class="btn ghost">Change name</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Install ===== -->
+    <div id="install-prompt" class="install hidden">
+        <p>Install LUMEN to play offline, fullscreen.</p>
+        <div class="row-actions">
+            <button id="btn-install" class="btn primary small">Install</button>
+            <button id="btn-install-later" class="btn ghost small">Later</button>
+        </div>
+    </div>
+
+    <script src="../shared/arcade.js"></script>
+    <script src="src/config.js"></script>
+    <script src="src/storage.js"></script>
+    <script src="src/world.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/player.js"></script>
+    <script src="src/bots.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>
