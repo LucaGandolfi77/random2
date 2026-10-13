@@ -1,10 +1,11 @@
 /* ===== Snake PWA Service Worker ===== */
-const CACHE_NAME = "snake-pwa-v2";
+const CACHE_NAME = "snake-pwa-v3";
 const ASSETS = [
     "./",
     "./index.html",
     "./styles.css",
     "./game.js",
+    "../shared/arcade.js",
     "./manifest.json",
     "./icons/icon-192.svg",
     "./icons/icon-512.svg",

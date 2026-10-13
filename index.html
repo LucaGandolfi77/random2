@@ -540,6 +540,18 @@
       0%, 68%  { transform: translateX(-120%); }
       84%, 100% { transform: translateX(120%); }
     }
+    .tile-fx {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .tile-emoji {
+      position: relative;
+      z-index: 1;
+      will-change: transform;
+    }
     .card h2 {
       font-size: 19px;
       font-weight: 700;
@@ -736,6 +748,8 @@
         <button class="btn btn-primary" id="random-btn" type="button">🎲&nbsp; Surprise me</button>
         <button class="btn btn-ghost" id="theme-btn" type="button" aria-pressed="false">🌓&nbsp; <span id="theme-label">Light mode</span></button>
         <button class="btn btn-ghost" id="share-btn" type="button">↗&nbsp; Share</button>
+        <button class="btn btn-ghost" id="sound-btn" type="button" aria-pressed="true">🔊&nbsp; <span>Sound on</span></button>
+        <button class="btn btn-ghost" id="haptics-btn" type="button" aria-pressed="true">📳&nbsp; <span>Haptics on</span></button>
         <button class="btn btn-ghost" id="install-btn" type="button" hidden>⬇︎&nbsp; Install app</button>
       </div>
     </header>
@@ -766,6 +780,8 @@
           <button class="cat" data-cat="tool" aria-pressed="false" type="button">Tools</button>
         </div>
       </div>
+
+      <p class="visually-hidden" id="filter-status" aria-live="polite"></p>
 
       <section class="grid" id="grid" aria-label="Projects">
 
@@ -928,6 +944,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="shared/arcade.js"></script>
   <script>
   (function () {
     "use strict";
@@ -1087,6 +1104,8 @@
         if (show) visible++;
       });
       emptyEl.classList.toggle("show", visible === 0);
+      var statusEl = document.getElementById("filter-status");
+      if (statusEl) statusEl.textContent = visible + (visible === 1 ? " project shown" : " projects shown");
     }
 
     catButtons.forEach(function (btn) {
@@ -1106,6 +1125,34 @@
       }
     });
     applyFilter();
+
+    /* ---------- Keyboard grid navigation ---------- */
+    var gridEl = document.getElementById("grid");
+    cards.forEach(function (c) { c.setAttribute("tabindex", "0"); });
+    gridEl.addEventListener("keydown", function (e) {
+      var isMove = ["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "Home", "End"].indexOf(e.key) !== -1;
+      var isActivate = e.key === "Enter" || e.key === " ";
+      if (!isMove && !isActivate) return;
+      var card = e.target.closest(".card");
+      if (!card) return;
+      if (isActivate) {
+        var play = card.querySelector(".btn-play");
+        if (play) play.click();
+        e.preventDefault();
+        return;
+      }
+      var visible = cards.filter(function (c) { return !c.classList.contains("hidden-card"); });
+      if (!visible.length) return;
+      e.preventDefault();
+      var idx = visible.indexOf(card);
+      var next = idx;
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") next = idx + 1;
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = idx - 1;
+      if (e.key === "Home") next = 0;
+      if (e.key === "End") next = visible.length - 1;
+      next = (next + visible.length) % visible.length;
+      visible[next].focus();
+    });
 
     /* ---------- Surprise me ---------- */
     document.getElementById("random-btn").addEventListener("click", function () {
@@ -1208,9 +1255,7 @@
       { slug: "plane-pwa/",      name: "Plane Shooter", emoji: "✈️", key: "plane-pwa" },
       { slug: "slot-pwa/",       name: "Slot Machine", emoji: "🎰", key: "slot-pwa" }
     ];
-    function readJSON(key) {
-      try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (e) { return null; }
-    }
+    function readJSON(key) { return R2.loadJSON(key, null); }
     function timeAgo(ts) {
       var s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
       if (s < 90) return "just now";
@@ -1254,16 +1299,36 @@
     window.addEventListener("focus", renderRecords); // refresh after coming back from a game
     document.getElementById("clear-records").addEventListener("click", function () {
       GAME_META.forEach(function (g) {
-        try { localStorage.removeItem(g.key); } catch (e) {}
-        try {
-          var map = readJSON("random2-last-played") || {};
-          delete map[g.slug];
-          localStorage.setItem("random2-last-played", JSON.stringify(map));
-        } catch (e) {}
+        R2.removeKey(g.key);
+        var map = readJSON("random2-last-played") || {};
+        delete map[g.slug];
+        R2.saveJSON("random2-last-played", map);
       });
       renderRecords();
       toast("🧹 Records cleared on this device");
     });
+
+    /* ---------- Global settings: sound & haptics ---------- */
+    var soundBtn = document.getElementById("sound-btn");
+    var hapticsBtn = document.getElementById("haptics-btn");
+    function syncSettingsUI() {
+      var s = R2.getSettings();
+      soundBtn.setAttribute("aria-pressed", String(s.sound));
+      soundBtn.querySelector("span").textContent = s.sound ? "Sound on" : "Sound off";
+      hapticsBtn.setAttribute("aria-pressed", String(s.haptics));
+      hapticsBtn.querySelector("span").textContent = s.haptics ? "Haptics on" : "Haptics off";
+    }
+    soundBtn.addEventListener("click", function () {
+      R2.setSettings({ sound: !R2.getSettings().sound });
+      syncSettingsUI();
+      toast(R2.getSettings().sound ? "🔊 Sound on" : "🔇 Sound off");
+    });
+    hapticsBtn.addEventListener("click", function () {
+      R2.setSettings({ haptics: !R2.getSettings().haptics });
+      syncSettingsUI();
+      toast(R2.getSettings().haptics ? "📳 Haptics on" : "🔕 Haptics off");
+    });
+    syncSettingsUI();
 
     /* ---------- Footer year + SW ---------- */
     document.getElementById("year").textContent = new Date().getFullYear();

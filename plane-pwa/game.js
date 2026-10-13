@@ -24,7 +24,6 @@
         plane: { x: config.canvasWidth / 2, y: config.canvasHeight - 40, w: 20, h: 12, angle: 0 },
         bullets: [],
         enemies: [],
-        particles: [],
         score: 0,
         highScore: 0,
         lives: 3,
@@ -71,89 +70,30 @@
         aimCircle: null,
     };
 
-    /* ===== Sound Engine ===== */
-    const Sound = {
-        ctx: null,
-        init() {
-            try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-        },
-        play(frequency, duration, type = "sine") {
-            if (!this.ctx) return;
-            try {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.frequency.value = frequency;
-                osc.type = type;
-                osc.start();
-                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                osc.stop(this.ctx.currentTime + duration);
-            } catch(e) {}
-        },
-        engine() { this.play(440, 0.05, "triangle"); },
-        shoot() { this.play(660, 0.05, "square"); },
-        hit() { this.play(880, 0.1, "sawtooth"); },
-        powerup() { this.play(1320, 0.2, "sine"); },
-        gameOver() { this.play(200, 0.4, "sine"); },
-        tick() { this.play(330, 0.05, "sine"); },
-    };
+    /* ===== Sound Engine (shared: R2) ===== */
+    const Sound = R2.makeSound({
+        engine: [440, 0.05, "triangle"],
+        shoot: [660, 0.05, "square"],
+        hit: [880, 0.1, "sawtooth"],
+        powerup: [1320, 0.2, "sine"],
+        gameOver: [200, 0.4, "sine"],
+        tick: [330, 0.05, "sine"],
+    });
 
-    /* ===== Particle System ===== */
-    function Particle(x, y, color) {
-        return {
-            x, y,
-            vx: (Math.random() - 0.5) * 6,
-            vy: (Math.random() - 0.5) * 6 - 2,
-            life: 1,
-            color,
-        };
-    }
-    function spawnParticles(x, y, color, count = 8) {
-        for (let i = 0; i < count; i++) {
-            state.particles.push(Particle(x, y, color));
-        }
-    }
-    function updateParticles(dt) {
-        for (let i = state.particles.length - 1; i >= 0; i--) {
-            const p = state.particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += 0.1;
-            p.life -= dt * 3;
-            if (p.life <= 0) state.particles.splice(i, 1);
-        }
-    }
-    function drawParticles(ctx) {
-        const theme = themes[state.theme];
-        for (const p of state.particles) {
-            ctx.globalAlpha = p.life;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 3 * p.life, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-    }
+    /* ===== Particles (shared: R2) ===== */
+    const Particles = R2.makeParticles();
+    function spawnParticles(x, y, color, count = 8) { Particles.spawn(x, y, color, count); }
+    function updateParticles(dt) { Particles.update(dt); }
+    function drawParticles(ctx) { Particles.draw(ctx); }
 
-    /* ===== Shared arcade helpers ===== */
-    function buzz(pattern) {
-        if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
-    }
-    function markPlayed() {
-        try {
-            var map = JSON.parse(localStorage.getItem("random2-last-played") || "{}");
-            map["plane-pwa/"] = Date.now();
-            localStorage.setItem("random2-last-played", JSON.stringify(map));
-        } catch (e) {}
-    }
+    /* ===== Shared arcade helpers (R2) ===== */
+    const buzz = R2.buzz;
+    function markPlayed() { R2.markPlayed("plane-pwa/"); }
 
     /* ===== Game Init ===== */
     function init() {
         setupDOME();
         setupEventListeners();
-        Sound.init();
         loadFromStorage();
         markPlayed();
         setupServiceWorker();
@@ -288,7 +228,7 @@
         state.plane = { x: cw / 2, y: ch - 40, w: 20, h: 12, angle: 0 };
         state.bullets = [];
         state.enemies = [];
-        state.particles = [];
+        Particles.clear();
         state.score = 0;
         state.lives = 3;
         state.spawnTimer = 0;

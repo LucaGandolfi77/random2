@@ -1,10 +1,11 @@
 /* ===== King Shot PWA Service Worker ===== */
-const CACHE_NAME = "king-shot-pwa-v2";
+const CACHE_NAME = "king-shot-pwa-v3";
 const ASSETS = [
     "./",
     "./index.html",
     "./styles.css",
     "./game.js",
+    "../shared/arcade.js",
     "./manifest.json",
     "./icons/icon-192.svg",
     "./icons/icon-512.svg",

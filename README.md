@@ -329,6 +329,14 @@ project. It is itself an installable PWA.
   `prefers-color-scheme` on first visit; `theme-color` meta follows along
 - **↗ Share button**: Web Share API on mobile, clipboard fallback with a toast
   everywhere else
+- **🔊 / 📳 Global settings toggles** (sound & haptics) stored in the shared
+  `random2-settings` blob — every game that loads `shared/arcade.js` respects
+  them
+- **🎬 Live tile previews**: each card's tile runs a tiny animated scene
+  (snake circling its food, slot reels, a black hole feeding…) on one shared
+  rAF loop — paused offscreen, hidden tabs and `prefers-reduced-motion`
+- **⌨️ Keyboard grid navigation**: arrow keys / Home / End walk the visible
+  cards, Enter launches; filter results are announced via an ARIA live region
 - **Custom [`404.html`](404.html)**: a black hole ate your URL — auto-redirects
   to the correct hub root (project pages included) with a countdown
 
@@ -348,6 +356,8 @@ random2/
 ├── index.html              # hub/landing page (self-contained, own SW: sw.js)
 ├── manifest.webmanifest    # hub manifest
 ├── sw.js                   # hub service worker (shell only, relative scope)
+├── shared/
+│   └── arcade.js           # micro-library: audio, particles, storage, settings
 ├── icons/                  # hub icons (PNG 192/512)
 ├── apple-touch-icon.png
 ├── .github/workflows/pages.yml   # build + deploy pipeline
@@ -356,7 +366,8 @@ random2/
 ├── king-shot-pwa/          # │ plain static PWAs — same shape:
 ├── plane-pwa/              # │   index.html · styles.css · game.js
 ├── slot-pwa/               # │   manifest.json · service-worker.js · icons/
-├── virtual-farm-pwa/       # ┘
+├── virtual-farm-pwa/       # │   (+ <script src="../shared/arcade.js"> in the simple four)
+│                          # ┘
 │
 ├── mustang-pwa/            # static PWA, code split into src/ modules + tests
 ├── snap-pwa/               # static PWA + vendored MediaPipe engine
@@ -374,6 +385,10 @@ Design rules that keep the repo boring (in a good way):
 - **No frameworks** for the games: each is vanilla JS on a 2D canvas, with a
   tiny shared shape — `init / gameLoop / update / draw / localStorage` — so any
   one of them can be read top-to-bottom in one sitting.
+- **`shared/arcade.js`** is the one file games may share: sound, particles,
+  storage, settings, haptics and play-tracking. It is a plain script (no
+  modules) exposing a single `window.R2` global, and each game's service
+  worker precaches it so offline play keeps working.
 - **Relative paths everywhere** in the static games, so they run identically at
   a domain root, under `/random2/`, or from any subfolder.
 - **One service worker per game**, each with its own cache name; the hub SW
@@ -437,6 +452,16 @@ a PR — keep this list honest.
 
 ### ✅ Done
 
+- [x] Shared micro-library [`shared/arcade.js`](shared/arcade.js): WebAudio
+      blip engine, particle system, JSON storage helpers, global
+      sound/haptics settings and play-tracking — the four simple games now
+      load it instead of carrying ~90 copied lines each
+- [x] Live animated mini-previews rendered inside hub card tiles (one rAF
+      loop, IntersectionObserver-gated, reduced-motion aware)
+- [x] Hub: keyboard grid navigation (arrows / Home / End / Enter) + ARIA live
+      region announcing filter results
+- [x] Shared settings blob `random2-settings` (sound / haptics) with hub
+      toggles; games honor it via `R2.getSettings()`
 - [x] Hub: records dashboard aggregating per-game high scores from device
       storage, with last-played timestamps and reset
 - [x] Cross-game tracker: Snake / King Shot / Plane / Slot write
@@ -454,16 +479,13 @@ a PR — keep this list honest.
 
 ### 🚧 In progress
 
-- [ ] Shared micro-library (`shared/audio.js`, `shared/storage.js`,
-      `shared/particles.js`) so the four simple games stop carrying ~90 copied
-      lines each
-- [ ] Live animated mini-previews rendered inside hub cards
+- [ ] Extending the shared library to the rest of the arcade (Mustang, Farm,
+      BUCIO still own their engines)
 
 ### 🗺️ Planned
 
 - [ ] Hub: total-playtime stat (needs an opt-in per-game play timer)
-- [ ] Hub: keyboard grid navigation (↑/↓/←/→ + Enter) and an ARIA live region
-      for filter results
+- [ ] Hub: extend theme sync so games follow the hub's dark/light choice
 - [ ] Slot: progressive jackpot meter + free-spin bonus round
 - [ ] Plane: end-of-wave boss encounters with attack patterns
 - [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
@@ -474,8 +496,8 @@ a PR — keep this list honest.
 - [ ] Lighthouse CI gate (perf ≥ 90, a11y ≥ 90) wired into the deploy workflow
 - [ ] iOS install coaching overlay: detect Safari + standalone=no and show the
       Share → Add to Home Screen hint inside each game
-- [ ] Opt-in settings sync across games via a single `random2-settings` blob
-      (theme, sound on/off, haptics on/off)
+- [ ] Opt-in settings sync across games via a single `random2-settings` blob:
+      theme preference inside games, difficulty presets, reduce-motion override
 - [ ] Snap Cam: video lenses (short clips) on top of the photo pipeline
 
 ## CI

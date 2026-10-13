@@ -37,7 +37,6 @@
         paused: false,
         mode: "classic",
         theme: "neon",
-        particles: [],
         tickAccumulator: 0,
         lastUpdate: 0,
         timeLeft: 60,
@@ -80,89 +79,30 @@
         swipeHint: null,
     };
 
-    /* ===== Sound Engine ===== */
-    const Sound = {
-        ctx: null,
-        init() {
-            try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-        },
-        play(frequency, duration, type = "sine") {
-            if (!this.ctx) return;
-            try {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.frequency.value = frequency;
-                osc.type = type;
-                osc.start();
-                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
-                osc.stop(this.ctx.currentTime + duration);
-            } catch(e) {}
-        },
-        eat() { this.play(220, 0.06, "triangle"); },
-        powerup() { this.play(660, 0.15, "square"); },
-        bounce() { this.play(110, 0.1, "sawtooth"); },
-        gameOver() { this.play(80, 0.4, "sine"); },
-        pickup() { this.play(440, 0.1, "triangle"); },
-        tick() { this.play(330, 0.05, "sine"); },
-    };
+    /* ===== Sound Engine (shared: R2) ===== */
+    const Sound = R2.makeSound({
+        eat: [220, 0.06, "triangle"],
+        powerup: [660, 0.15, "square"],
+        bounce: [110, 0.1, "sawtooth"],
+        gameOver: [80, 0.4, "sine"],
+        pickup: [440, 0.1, "triangle"],
+        tick: [330, 0.05, "sine"],
+    });
 
-    /* ===== Particle System ===== */
-    function Particle(x, y, color) {
-        return {
-            x, y,
-            vx: (Math.random() - 0.5) * 4,
-            vy: (Math.random() - 0.5) * 4,
-            life: 1,
-            color,
-        };
-    }
-    function spawnParticles(x, y, color, count = 8) {
-        for (let i = 0; i < count; i++) {
-            state.particles.push(Particle(x, y, color));
-        }
-    }
-    function updateParticles(dt) {
-        for (let i = state.particles.length - 1; i >= 0; i--) {
-            const p = state.particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += 0.1;
-            p.life -= dt * 3;
-            if (p.life <= 0) state.particles.splice(i, 1);
-        }
-    }
-    function drawParticles(ctx) {
-        const theme = themes[state.theme];
-        for (const p of state.particles) {
-            ctx.globalAlpha = p.life;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 3 * p.life, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
-    }
+    /* ===== Particles (shared: R2) ===== */
+    const Particles = R2.makeParticles();
+    function spawnParticles(x, y, color, count = 8) { Particles.spawn(x, y, color, count); }
+    function updateParticles(dt) { Particles.update(dt); }
+    function drawParticles(ctx) { Particles.draw(ctx); }
 
-    /* ===== Shared arcade helpers ===== */
-    function buzz(pattern) {
-        if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
-    }
-    function markPlayed() {
-        try {
-            var map = JSON.parse(localStorage.getItem("random2-last-played") || "{}");
-            map["snake-pwa/"] = Date.now();
-            localStorage.setItem("random2-last-played", JSON.stringify(map));
-        } catch (e) {}
-    }
+    /* ===== Shared arcade helpers (R2) ===== */
+    const buzz = R2.buzz;
+    function markPlayed() { R2.markPlayed("snake-pwa/"); }
 
     /* ===== Game Init ===== */
     function init() {
         setupDOME();
         setupEventListeners();
-        Sound.init();
         loadFromStorage();
         markPlayed();
         setupServiceWorker();
@@ -278,7 +218,7 @@
         state.powerup = null;
         state.powerupType = null;
         state.powerupTimer = 0;
-        state.particles = [];
+        Particles.clear();
         state.tickAccumulator = 0;
         state.gameOver = false;
         state.timeLeft = 60;
