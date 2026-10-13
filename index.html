@@ -736,12 +736,14 @@
       <h1>random<span class="grad">2</span></h1>
       <p class="sub">A shelf of installable mini-games and one dev tool. Everything runs right in the browser — no accounts, no downloads.</p>
       <p class="hint">On iPhone: tap <strong>Share → Add to Home Screen</strong> inside a game for fullscreen, offline play.</p>
+      <p class="hint">🐍 Snake daily challenge seed: <strong id="daily-seed">—</strong> · rolls over at midnight</p>
 
       <div class="stats" aria-label="Arcade stats">
         <div class="stat"><b id="stat-games">0</b><span>Playable games</span></div>
         <div class="stat"><b id="stat-offline">100%</b><span>Offline capable</span></div>
         <div class="stat"><b id="stat-assets">0</b><span>Binary art assets</span></div>
         <div class="stat"><b id="stat-trackers">0</b><span>Trackers & ads</span></div>
+        <div class="stat"><b id="stat-time">—</b><span>Time played</span></div>
       </div>
 
       <div class="hero-actions">
@@ -1066,6 +1068,14 @@
     countUp(document.getElementById("stat-games"), games);
     countUp(document.getElementById("stat-assets"), 0);
     countUp(document.getElementById("stat-trackers"), 0);
+
+    /* ---------- Playtime + daily seed ---------- */
+    var ptMap = R2.loadJSON("random2-playtime", {}) || {};
+    var totalSec = 0;
+    for (var pk in ptMap) totalSec += ptMap[pk] || 0;
+    document.getElementById("stat-time").textContent = totalSec <= 0 ? "—" :
+      (totalSec < 3600 ? Math.round(totalSec / 60) + "m" : (totalSec / 3600).toFixed(1) + "h");
+    document.getElementById("daily-seed").textContent = R2.dailySeed();
 
     /* ---------- Scroll reveal ---------- */
     var cards = Array.prototype.slice.call(document.querySelectorAll(".reveal"));

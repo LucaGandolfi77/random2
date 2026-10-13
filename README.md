@@ -131,6 +131,10 @@ Each reel spins with its own random speed and stops at its own random moment,
 then the middle payline is evaluated.
 
 - 8 symbols (🍇 🍎 🍊 🍋 🔔 ⭐ 💰 🍀) with payouts from 2× to 50×
+- **Progressive jackpot**: the meter grows with every spin (persisted in
+  `slot-jackpot`); three 💰 pay it out in full and reset it — with a golden
+  banner and a rising arpeggio
+- **Free spins**: three ⭐ grant 5 auto-playing spins
 - Adjustable bet (1–10) and persistent high score
 - Win bursts with a particle explosion and a rising arpeggio; losing spins get
   a soft descending tone
@@ -148,6 +152,10 @@ Grid-locked snake with buttery-smooth rendering, swipe gestures on touch and
 arrow keys/WASD on desktop.
 
 - Food (fruit emojis), scoring and speed-up per level
+- Three modes: **classic** (deadly walls), **time** (60-second sprint) and
+  **daily challenge** — a seeded RNG (`R2.dailySeed()` + mulberry32) drives
+  food, power-up and obstacle placement from the day's seed, with its own
+  per-day high score; the hub displays the live seed
 - Power-ups: 🌈 rainbow (triple points), ⏰ clock (bonus time), ⭐ star (points)
 - Optional wrap-around walls vs. classic deadly walls
 - Obstacles appear as levels progress; particle bursts and synth SFX
@@ -335,6 +343,8 @@ project. It is itself an installable PWA.
 - **🎬 Live tile previews**: each card's tile runs a tiny animated scene
   (snake circling its food, slot reels, a black hole feeding…) on one shared
   rAF loop — paused offscreen, hidden tabs and `prefers-reduced-motion`
+- **⏱️ Time played** stat (aggregated from the games that track it) and
+  today's **Snake daily-challenge seed** shown in the hero
 - **⌨️ Keyboard grid navigation**: arrow keys / Home / End walk the visible
   cards, Enter launches; filter results are announced via an ARIA live region
 - **Custom [`404.html`](404.html)**: a black hole ate your URL — auto-redirects
@@ -386,9 +396,10 @@ Design rules that keep the repo boring (in a good way):
   tiny shared shape — `init / gameLoop / update / draw / localStorage` — so any
   one of them can be read top-to-bottom in one sitting.
 - **`shared/arcade.js`** is the one file games may share: sound, particles,
-  storage, settings, haptics and play-tracking. It is a plain script (no
-  modules) exposing a single `window.R2` global, and each game's service
-  worker precaches it so offline play keeps working.
+  storage, settings, haptics, play-time tracking, daily seed + seeded RNG and
+  the iOS install-coaching overlay. It is a plain script (no modules)
+  exposing a single `window.R2` global, and each game's service worker
+  precaches it so offline play keeps working.
 - **Relative paths everywhere** in the static games, so they run identically at
   a domain root, under `/random2/`, or from any subfolder.
 - **One service worker per game**, each with its own cache name; the hub SW
@@ -452,6 +463,17 @@ a PR — keep this list honest.
 
 ### ✅ Done
 
+- [x] Snake **daily challenge**: third game mode driven by `R2.dailySeed()` +
+      a mulberry32 seeded RNG (food, power-ups and obstacle placement), with a
+      per-day high score in `snake-daily`; the hub shows the live seed
+- [x] Slot: **progressive jackpot meter** (grows with every spin, triple 💰
+      pays it out and resets it, persisted in `slot-jackpot`) plus **5 free
+      spins** on triple ⭐ with auto-play
+- [x] Hub: **time played** stat — `R2.trackPlaytime()` accumulates
+      device-local seconds per game (visibility-gated, one write per 5 s)
+- [x] **iOS install coaching**: `R2.installHint()` shows a dismissible
+      "Share → Add to Home Screen" bar in iOS Safari when not installed
+      (no `beforeinstallprompt` there), remembered across all games
 - [x] Shared micro-library [`shared/arcade.js`](shared/arcade.js): WebAudio
       blip engine, particle system, JSON storage helpers, global
       sound/haptics settings and play-tracking — the four simple games now
@@ -486,11 +508,10 @@ a PR — keep this list honest.
 
 - [ ] Hub: total-playtime stat (needs an opt-in per-game play timer)
 - [ ] Hub: extend theme sync so games follow the hub's dark/light choice
-- [ ] Slot: progressive jackpot meter + free-spin bonus round
+- [ ] Hub: live daily-challenge standings (compare `snake-daily` highs
+      across… friends? a static JSON? needs a design)
 - [ ] Plane: end-of-wave boss encounters with attack patterns
 - [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
-- [ ] Snake: daily challenge with a seeded RNG and a shared "daily seed"
-      shown on the hub
 - [ ] Farm: save-file export/import (download/upload JSON) for device migration
 - [ ] Mustang: third front (Korea, 1951) reusing the existing stage engine
 - [ ] Lighthouse CI gate (perf ≥ 90, a11y ≥ 90) wired into the deploy workflow

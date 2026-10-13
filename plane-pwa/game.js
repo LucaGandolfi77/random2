@@ -96,6 +96,8 @@
         setupEventListeners();
         loadFromStorage();
         markPlayed();
+        R2.trackPlaytime("plane-pwa/");
+        R2.installHint();
         setupServiceWorker();
         setupInstallPrompt();
         applyTheme(state.theme);

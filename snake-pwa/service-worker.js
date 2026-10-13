@@ -1,5 +1,5 @@
 /* ===== Snake PWA Service Worker ===== */
-const CACHE_NAME = "snake-pwa-v3";
+const CACHE_NAME = "snake-pwa-v4";
 const ASSETS = [
     "./",
     "./index.html",

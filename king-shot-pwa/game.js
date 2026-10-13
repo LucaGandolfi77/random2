@@ -94,6 +94,8 @@
         setupEventListeners();
         loadFromStorage();
         markPlayed();
+        R2.trackPlaytime("king-shot-pwa/");
+        R2.installHint();
         setupServiceWorker();
         setupInstallPrompt();
         applyTheme(state.theme);

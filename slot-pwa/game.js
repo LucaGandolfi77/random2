@@ -27,6 +27,8 @@
             '🍀': 50,
         },
         symbols: ['🍇','🍎','🍊','🍋','🔔','⭐','💰','🍀'],
+        baseJackpot: 500,
+        jackpotStep: 5,
     };
 
     /* ===== Game State ===== */
@@ -35,6 +37,10 @@
         score: 0,
         highScore: 0,
         bet: 1,
+        jackpot: 500,
+        freeSpins: 0,
+        jackpotFlashUntil: 0,
+        freeSpinFlashUntil: 0,
         spinning: false,
         gameOver: false,
         paused: false,
@@ -97,6 +103,9 @@
         setupEventListeners();
         loadFromStorage();
         markPlayed();
+        R2.trackPlaytime("slot-pwa/");
+        R2.installHint();
+        loadJackpot();
         setupServiceWorker();
         setupInstallPrompt();
         applyTheme(state.theme);
@@ -161,6 +170,8 @@
         state.bet = 1;
         state.spinning = false;
         state.gameOver = false;
+        state.jackpotFlashUntil = 0;
+        state.freeSpinFlashUntil = 0;
         Particles.clear();
         state.frame = 0;
         // Initialize reels
@@ -182,6 +193,12 @@
 
     function startSpin() {
         if (state.spinning) return;
+        if (state.freeSpins > 0) {
+            state.freeSpins--;
+        } else {
+            state.jackpot += config.jackpotStep * state.bet;
+            R2.saveJSON("slot-jackpot", state.jackpot);
+        }
         Sound.spinTick();
         buzz(10);
         state.spinning = true;
@@ -217,19 +234,49 @@
         const first = symbols[0];
         if (symbols.every(s => s === first)) {
             const payout = config.payoutTable[first] || 0;
-            const winAmount = payout * state.bet;
+            let winAmount = payout * state.bet;
+            if (first === '💰') {
+                // JACKPOT: the whole meter, then it resets
+                winAmount += state.jackpot;
+                state.jackpot = config.baseJackpot;
+                R2.saveJSON("slot-jackpot", state.jackpot);
+                state.jackpotFlashUntil = Date.now() + 2600;
+                jackpotArpeggio();
+                spawnParticles(config.canvasWidth / 2, config.canvasHeight / 2, "#ffd700", 40);
+            }
+            if (first === '⭐') {
+                state.freeSpins += 5;
+                state.freeSpinFlashUntil = Date.now() + 2200;
+            }
             state.score += winAmount;
             if (state.score > state.highScore) {
                 state.highScore = state.score;
                 saveHighScore();
             }
-            Sound.win();
+            if (first !== '💰') Sound.win();
             buzz([20, 30, 20]);
             spawnParticles(config.canvasWidth / 2, config.canvasHeight / 2, themes[state.theme].neonGlow, 20);
         } else {
             Sound.lose();
             buzz(8);
         }
+        // free spins auto-play
+        if (state.freeSpins > 0) {
+            setTimeout(function () {
+                if (!state.spinning && !state.gameOver) startSpin();
+            }, 800);
+        }
+    }
+
+    function jackpotArpeggio() {
+        [523, 659, 784, 1047].forEach(function (f, i) {
+            setTimeout(function () { Sound.play(f, 0.22, "square"); }, i * 140);
+        });
+    }
+
+    function loadJackpot() {
+        const j = R2.loadJSON("slot-jackpot", null);
+        state.jackpot = (typeof j === "number" && j >= config.baseJackpot) ? j : config.baseJackpot;
     }
 
     function increaseBet() {
@@ -254,7 +301,7 @@
     function showStartOverlay() {
         DOME.overlay.classList.remove("hidden");
         DOME.overlayTitle.textContent = "SLOT PWA";
-        DOME.overlayMsg.textContent = "Tap the SPIN button to start!";
+        DOME.overlayMsg.textContent = "Tap SPIN to play. Three 💰 hit the jackpot — three ⭐ grant 5 free spins!";
         DOME.overlayStats.classList.add("hidden");
         DOME.overlayPlay.classList.remove("hidden");
         DOME.overlayTheme.classList.remove("hidden");
@@ -360,6 +407,27 @@
         ctx.fillText(`SCORE ${state.score}`, 8, 24);
         ctx.fillText(`HIGH ${state.highScore}`, 8, 44);
         ctx.fillText(`BET ${state.bet}`, 8, 64);
+        ctx.textAlign = "right";
+        ctx.fillStyle = theme.neonGlow;
+        ctx.font = "bold 13px Arial";
+        ctx.fillText(`JACKPOT ${state.jackpot}`, config.canvasWidth - 8, 24);
+        if (state.freeSpins > 0) {
+            ctx.fillText(`FREE ${state.freeSpins}`, config.canvasWidth - 8, 44);
+        }
+        ctx.textAlign = "left";
+        const now = Date.now();
+        if (now < state.jackpotFlashUntil) {
+            ctx.fillStyle = "rgba(255,215,0," + (0.4 + 0.3 * Math.sin(now / 90)).toFixed(3) + ")";
+            ctx.font = "bold 30px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("JACKPOT!", config.canvasWidth / 2, config.canvasHeight / 2 - 20);
+        } else if (now < state.freeSpinFlashUntil) {
+            ctx.fillStyle = "rgba(255,255,255," + (0.4 + 0.3 * Math.sin(now / 90)).toFixed(3) + ")";
+            ctx.font = "bold 26px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("+5 FREE SPINS", config.canvasWidth / 2, config.canvasHeight / 2 - 20);
+        }
+        ctx.font = "bold 14px Arial";
         if (state.spinning) {
             ctx.fillStyle = theme.neonGlow;
             ctx.font = "bold 18px Arial";

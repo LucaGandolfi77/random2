@@ -1,5 +1,5 @@
 /* ===== Slot PWA Service Worker ===== */
-const CACHE_NAME = "slot-pwa-v3";
+const CACHE_NAME = "slot-pwa-v4";
 const ASSETS = [
     "./",
     "./index.html",

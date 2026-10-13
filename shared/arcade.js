@@ -180,6 +180,80 @@
     } catch (e) {}
   }
 
+  /* ---------- daily seed + seeded RNG ---------- */
+
+  /* YYYYMMDD as a number — same value on hub and games, changes at midnight. */
+  function dailySeed(date) {
+    var d = date || new Date();
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  }
+
+  /* mulberry32 — tiny, fast, good-enough 32-bit PRNG. */
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ---------- play-time tracking ----------
+     Accumulates seconds per slug into `random2-playtime`, only while the
+     tab is visible. One tick every 5 s keeps the writes negligible. */
+  function trackPlaytime(slug) {
+    if (window.__r2playtime) return; // one tracker per page
+    window.__r2playtime = true;
+    setInterval(function () {
+      if (document.visibilityState !== "visible") return;
+      try {
+        var map = loadJSON("random2-playtime", {}) || {};
+        map[slug] = (map[slug] || 0) + 5;
+        saveJSON("random2-playtime", map);
+      } catch (e) {}
+    }, 5000);
+  }
+
+  /* ---------- iOS install coaching ----------
+     iOS Safari has no beforeinstallprompt; coach the user instead.
+     Shows once per device until dismissed, standalone users never see it. */
+  function installHint() {
+    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+      navigator.standalone === true;
+    if (!isIOS || standalone) return;
+    if (loadJSON("random2-install-hint-dismissed", false) === true) return;
+
+    var style = document.createElement("style");
+    style.textContent = [
+      "#r2-install-hint{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));",
+      "transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:10px;",
+      "max-width:92vw;padding:10px 12px 10px 16px;border-radius:999px;font:600 13px/1.35 -apple-system,BlinkMacSystemFont,sans-serif;",
+      "color:#f4f5fb;background:rgba(15,17,28,.92);border:1px solid rgba(255,255,255,.14);",
+      "box-shadow:0 10px 30px -10px rgba(0,0,0,.7);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}",
+      "#r2-install-hint b{font-weight:800;}",
+      "#r2-install-hint button{all:unset;cursor:pointer;font:inherit;font-weight:800;opacity:.7;padding:6px 10px;}",
+      "#r2-install-hint button:active{opacity:1;}"
+    ].join("");
+    document.head.appendChild(style);
+
+    var bar = document.createElement("div");
+    bar.id = "r2-install-hint";
+    bar.setAttribute("role", "status");
+    bar.innerHTML = '<span>📲 Install this game: tap <b>Share</b> → <b>Add to Home Screen</b></span>';
+    var close = document.createElement("button");
+    close.type = "button";
+    close.setAttribute("aria-label", "Dismiss install hint");
+    close.textContent = "✕";
+    close.addEventListener("click", function () {
+      bar.remove();
+      saveJSON("random2-install-hint-dismissed", true);
+    });
+    bar.appendChild(close);
+    (document.body || document.documentElement).appendChild(bar);
+  }
+
   /* ---------- exports ---------- */
 
   window.R2 = {
@@ -196,6 +270,10 @@
     setSettings: setSettings,
     buzz: buzz,
     markPlayed: markPlayed,
-    version: "1.0.0"
+    dailySeed: dailySeed,
+    mulberry32: mulberry32,
+    trackPlaytime: trackPlaytime,
+    installHint: installHint,
+    version: "1.1.0"
   };
 })();

@@ -36,6 +36,8 @@
         gameOver: false,
         paused: false,
         mode: "classic",
+        dailySeed: 0,
+        eaten: 0,
         theme: "neon",
         tickAccumulator: 0,
         lastUpdate: 0,
@@ -105,6 +107,8 @@
         setupEventListeners();
         loadFromStorage();
         markPlayed();
+        R2.trackPlaytime("snake-pwa/");
+        R2.installHint();
         setupServiceWorker();
         setupInstallPrompt();
         applyTheme(state.theme);
@@ -219,6 +223,12 @@
         state.powerupType = null;
         state.powerupTimer = 0;
         Particles.clear();
+        state.eaten = 0;
+        state.dailySeed = R2.dailySeed();
+        if (state.mode === "daily") {
+            const d = R2.loadJSON("snake-daily", null);
+            state.highScore = (d && d.date === state.dailySeed) ? (d.high || 0) : 0;
+        }
         state.tickAccumulator = 0;
         state.gameOver = false;
         state.timeLeft = 60;
@@ -276,6 +286,7 @@
         // Food eaten
         if (head.x === state.food.x && head.y === state.food.y) {
             state.score += config.foodScore * state.level;
+            state.eaten++;
             spawnParticles(head.x * config.cellSize + 10, head.y * config.cellSize + 10, themes[state.theme].food, 10);
             Sound.eat();
             buzz(12);
@@ -316,15 +327,17 @@
     }
 
     function maybeSpawnPowerup() {
-        if (!state.powerup && Math.random() < 0.2) {
+        const rng = (state.mode === "daily") ? R2.mulberry32(state.dailySeed + state.eaten * 7919 + 13) : null;
+        const roll = rng ? rng() : Math.random();
+        if (!state.powerup && roll < 0.2) {
             const cols = Math.floor(config.canvasWidth / config.cellSize);
             const rows = Math.floor(config.canvasHeight / config.cellSize);
             state.powerup = {
-                x: Math.floor(Math.random() * cols),
-                y: Math.floor(Math.random() * rows),
+                x: Math.floor(rng() * cols),
+                y: Math.floor(rng() * rows),
             };
             const types = ["rainbow", "clock", "star"];
-            state.powerupType = types[Math.floor(Math.random() * types.length)];
+            state.powerupType = types[Math.floor(rng() * types.length)];
             state.powerupTimer = 15;
         }
     }
@@ -358,10 +371,12 @@
     function addObstacle() {
         const cols = Math.floor(config.canvasWidth / config.cellSize);
         const rows = Math.floor(config.canvasHeight / config.cellSize);
+        const rng = (state.mode === "daily") ? R2.mulberry32(state.dailySeed + state.obstacles.length * 104729 + 7) : null;
+        const rx = rng || Math.random;
         let x, y;
         do {
-            x = Math.floor(Math.random() * cols);
-            y = Math.floor(Math.random() * rows);
+            x = Math.floor(rx() * cols);
+            y = Math.floor(rx() * rows);
         } while (state.snake.some(s => s.x === x && s.y === y) ||
                  state.obstacles.some(o => o.x === x && o.y === y));
         state.obstacles.push({ x, y });
@@ -380,7 +395,9 @@
             }
         }
         if (empty.length === 0) { state.gameOver = true; return; }
-        state.food = empty[Math.floor(Math.random() * empty.length)];
+        const rng = (state.mode === "daily") ? R2.mulberry32(state.dailySeed + state.eaten * 7919) : null;
+        const pick = rng ? rng() : Math.random();
+        state.food = empty[Math.floor(pick * empty.length)];
     }
 
     function die() {
@@ -493,6 +510,10 @@
             ctx.fillStyle = state.timeLeft < 10 ? "#ff0000" : (theme.neon || "#00ff00");
             ctx.fillText("Time: " + Math.max(0, Math.ceil(state.timeLeft)) + "s", 8, 44);
         }
+        if (state.mode === "daily") {
+            ctx.fillStyle = theme.neon || "#00ff00";
+            ctx.fillText("DAILY " + state.dailySeed, 8, 44);
+        }
 
         if (state.paused && !state.gameOver) {
             ctx.fillStyle = "rgba(0,0,0,0.5)";
@@ -532,7 +553,7 @@
 
     /* ===== Mode ===== */
     function cycleMode() {
-        const modes = ["classic", "time"];
+        const modes = ["classic", "time", "daily"];
         const idx = modes.indexOf(state.mode);
         state.mode = modes[(idx + 1) % modes.length];
         saveToStorage();
@@ -552,7 +573,7 @@
         saveHighScore();
         DOME.overlay.classList.remove("hidden");
         DOME.overlayTitle.textContent = "GAME OVER";
-        DOME.overlayMsg.textContent = state.mode === "time" ? "Ran out of time!" : "You hit something!";
+        DOME.overlayMsg.textContent = state.mode === "time" ? "Ran out of time!" : (state.mode === "daily" ? "The daily seed got you!" : "You hit something!");
         DOME.overlayStats.classList.remove("hidden");
         DOME.finalScore.textContent = state.score;
         DOME.finalHigh.textContent = state.highScore;
@@ -573,6 +594,10 @@
             state.mode = data.mode || "classic";
         }
         applyTheme(state.theme);
+        if (state.mode === "daily") {
+            const d = R2.loadJSON("snake-daily", null);
+            state.highScore = (d && d.date === R2.dailySeed()) ? (d.high || 0) : 0;
+        }
     }
 
     function saveToStorage() {
@@ -584,6 +609,16 @@
     }
 
     function saveHighScore() {
+        if (state.mode === "daily") {
+            const d = R2.loadJSON("snake-daily", null) || {};
+            const prev = (d.date === state.dailySeed) ? (d.high || 0) : 0;
+            R2.saveJSON("snake-daily", {
+                date: state.dailySeed,
+                high: Math.max(prev, state.score)
+            });
+            state.highScore = Math.max(prev, state.score);
+            return;
+        }
         state.highScore = Math.max(state.highScore, state.score);
         saveToStorage();
     }
