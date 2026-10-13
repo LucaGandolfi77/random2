@@ -58,6 +58,7 @@
   <!-- ============ ANTEPRIMA SNAP ============ -->
   <section id="preview" class="screen">
     <img id="preview-img" alt="La tua snap">
+    <video id="preview-video" playsinline loop hidden></video>
     <input id="caption" type="text" maxlength="80" placeholder="Aggiungi una caption…" autocomplete="off">
     <div class="preview-actions">
       <button id="discard-btn" class="iconbtn" aria-label="Scarta">✖</button>
@@ -79,6 +80,7 @@
   <!-- ============ VISUALIZZATORE ============ -->
   <div id="viewer" class="screen">
     <img id="viewer-img" alt="Snap">
+    <video id="viewer-video" playsinline controls hidden></video>
     <p id="viewer-caption"></p>
     <div class="viewer-actions">
       <button id="viewer-download" class="iconbtn" aria-label="Scarica">⬇️</button>

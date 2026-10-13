@@ -1,6 +1,10 @@
 /* ===== Snap PWA Service Worker =====
- * Shell offline + cache dei modelli CDN (MediaPipe) al primo utilizzo. */
-const CACHE_NAME = 'snap-pwa-v1';
+ * Shell offline + cache dei modelli MediaPipe al primo utilizzo.
+ * I file in vendor/ (~15 MB) NON sono nel SHELL: vengono cachati alla prima
+ * richiesta, così l'installazione resta immediata ma dalla seconda apertura
+ * le lenti funzionano anche offline.
+ */
+const CACHE_NAME = 'snap-pwa-v2';
 
 const SHELL = [
   './',
@@ -9,9 +13,14 @@ const SHELL = [
   './app.js',
   './filters.js',
   './manifest.json',
+  './apple-touch-icon.png',
   './icons/icon-192.svg',
   './icons/icon-512.svg',
 ];
+
+function isVendor(url) {
+  return url.pathname.includes('/vendor/');
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -33,26 +42,41 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
-  // CDN e modelli (cross-origin): cache-first con risposta opaca —
-  // una volta scaricati, i filtri volto funzionano anche offline.
-  if (req.url.startsWith('https://cdn.jsdelivr.net/') || req.url.startsWith('https://storage.googleapis.com/')) {
+  const url = new URL(req.url);
+
+  // Modelli locali (vendor/) e CDN (fallback): cache-first con aggiornamento
+  // in background — una volta scaricati, i filtri volto funzionano offline.
+  if (isVendor(url) || url.hostname === 'cdn.jsdelivr.net' || url.hostname === 'storage.googleapis.com') {
     event.respondWith(
-      caches.match(req).then((hit) =>
-        hit ??
-        fetch(req).then((res) => {
-          if (res.ok || res.type === 'opaque') {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then((c) => c.put(req, clone));
-          }
-          return res;
-        }).catch(() => hit)
-      )
+      caches.match(req).then((hit) => {
+        const rete = fetch(req)
+          .then((res) => {
+            if (res && (res.ok || res.type === 'opaque')) {
+              const clone = res.clone();
+              caches.open(CACHE_NAME).then((c) => c.put(req, clone));
+            }
+            return res;
+          })
+          .catch(() => hit);
+        return hit ?? rete;
+      })
     );
     return;
   }
 
-  // stessa origine: cache-first con fallback di rete
+  // stessa origine: stale-while-revalidate
   event.respondWith(
-    caches.match(req).then((hit) => hit ?? fetch(req))
+    caches.match(req).then((hit) => {
+      const rete = fetch(req)
+        .then((res) => {
+          if (res && res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(req, clone));
+          }
+          return res;
+        })
+        .catch(() => hit ?? caches.match('./index.html'));
+      return hit ?? rete;
+    })
   );
 });

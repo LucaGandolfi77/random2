@@ -4,7 +4,7 @@
  */
 
 import {
-  FILTRI, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel,
+  FILTRI, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, resetQuizStati,
 } from './filters.js';
 
 /* ---------- riferimenti DOM ---------- */
@@ -30,7 +30,9 @@ const stato = {
   ogniNFrame: 1,
   frame: 0,
   attivo: false,         // loop di rendering in esecuzione
-  ultimaSnap: null,      // { blob, url } in anteprima
+  ultimaSnap: null,      // { blob, url, tipo, poster?, filtro } in anteprima
+  registrazione: null,   // { rec, canvas, inizio } durante un video
+  pressione: 0,          // timer della pressione prolungata
 };
 
 /* ============================================================
@@ -99,6 +101,10 @@ function loop() {
   }
 
   /* lenti volto */
+  window.__dbg = window.__dbg || {};
+  window.__dbg.filtroId = filtro.id;
+  window.__dbg.volto = !!filtro.volto;
+  window.__dbg.chiamate = (window.__dbg.chiamate || 0) + 1;
   if (filtro.volto) {
     gestisciFiltroVolto(filtro, t);
   } else {
@@ -106,20 +112,29 @@ function loop() {
     if (stato.filtroId !== 'nessuno') nascondiStatus();
   }
 
+  /* registrazione video: compilo il canvas che finisce nell'MP4 */
+  if (stato.registrazione) {
+    const reg = stato.registrazione;
+    disegnaFotogramma(reg.canvas.getContext('2d'), reg.canvas.width, reg.canvas.height, t, 'video');
+    const p = Math.min(1, (performance.now() - reg.inizio) / DURATA_VIDEO);
+    $('#shutter').style.setProperty('--p', p.toFixed(3));
+    if (p >= 1) fermaRegistrazione();
+  }
+
   requestAnimationFrame(loop);
 }
 
 async function gestisciFiltroVolto(filtro, t) {
-  // engine lazy: la prima volta scarica il modello (richiede rete)
+  // engine lazy: la prima volta carica il modello da vendor/ (una volta sola)
   if (stato.engineStato === 'idle') {
     stato.engineStato = 'loading';
-    mostraStatus('Scarico i filtri volto… (solo la prima volta)');
+    mostraStatus('Carico i filtri volto… (solo la prima volta)');
     try {
       stato.engine = await ensureEngineVolto();
       stato.engineStato = 'pronto';
     } catch {
       stato.engineStato = 'errore';
-      mostraStatus('Filtri volto non disponibili (serve internet la prima volta)');
+      mostraStatus('Filtri volto non disponibili su questo dispositivo');
       setTimeout(() => stato.filtroId === filtro.id && nascondiStatus(), 3500);
       return;
     }
@@ -144,7 +159,7 @@ async function gestisciFiltroVolto(filtro, t) {
       W: overlay.width, H: overlay.height,
       vw: video.videoWidth, vh: video.videoHeight,
       specchio: stato.frontale,
-    });
+    }, t);
   } else if (performance.now() - stato.ultimaDetection > 1200) {
     mostraStatus('Guarda in camera 👀');
   }
@@ -153,34 +168,39 @@ async function gestisciFiltroVolto(filtro, t) {
 /* ============================================================
  * SCATTO
  * ============================================================ */
-async function scatta() {
-  if (!video.videoWidth) return;
-  suonoOturatore();
-  flashEl.classList.add('on');
-  setTimeout(() => flashEl.classList.remove('on'), 60);
 
+/**
+ * Disegna il fotogramma composito (video + filtro + cornice + lenti) su una
+ * canvas qualsiasi. È l'unico motore di rendering: lo usano la foto e il
+ * video, così ciò che si salva è ciò che si vedeva in anteprima.
+ *
+ * modalita 'foto'  → filtri colore cotto sui pixel (identici all'anteprima,
+ *                    compresi quelli che ctx.filter non sa fare)
+ * modalita 'video' → ctx.filter sulla GPU (i pixel costerebbero 30 fps)
+ */
+function disegnaFotogramma(ctx, W, H, t, modalita) {
   const filtro = filtroPerId(stato.filtroId);
-  const W = 1080;
-  const H = Math.round((W * overlay.clientHeight) / overlay.clientWidth);
-
-  const foto = document.createElement('canvas');
-  foto.width = W; foto.height = H;
-  const ctx = foto.getContext('2d');
 
   // 1. frame video con object-fit:cover (+ specchio se frontale)
   const scala = Math.max(W / video.videoWidth, H / video.videoHeight);
   const dw = video.videoWidth * scala, dh = video.videoHeight * scala;
   ctx.save();
   if (stato.frontale) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+  if (modalita === 'video') {
+    ctx.filter = filtro.animato ? `saturate(1.3) hue-rotate(${(t * 60) % 360}deg)` : (filtro.css ?? 'none');
+  }
   ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  ctx.filter = 'none';
   ctx.restore();
 
-  // 2. filtro pixel (equivalente al CSS dell'anteprima)
-  applicaFiltroPixel(ctx, filtro, W, H, performance.now() / 1000);
+  // 2. filtro colore: pixel per la foto; solo mosaico (già veloce) per il video
+  if (modalita === 'foto' || filtro.pixel) {
+    applicaFiltroPixel(ctx, filtro, W, H, t);
+  }
 
   // 3. cornice + accessori volto, con le stesse coordinate dell'anteprima
   const scalaFoto = W / overlay.width;
-  if (filtro.cornice) disegnaCornice(ctx, filtro, W, H, performance.now() / 1000);
+  if (filtro.cornice) disegnaCornice(ctx, filtro, W, H, t, modalita === 'foto');
   if (filtro.volto && stato.landmarks) {
     ctx.save();
     ctx.scale(scalaFoto, scalaFoto);
@@ -188,23 +208,56 @@ async function scatta() {
       W: overlay.width, H: overlay.height,
       vw: video.videoWidth, vh: video.videoHeight,
       specchio: stato.frontale,
-    });
+    }, t);
     ctx.restore();
   }
+}
 
-  // 4. blob e anteprima
+async function scatta() {
+  if (!video.videoWidth) return;
+  suonoOturatore();
+  flashEl.classList.add('on');
+  setTimeout(() => flashEl.classList.remove('on'), 60);
+
+  const W = 1080;
+  const H = Math.round((W * overlay.clientHeight) / overlay.clientWidth);
+
+  const foto = document.createElement('canvas');
+  foto.width = W; foto.height = H;
+  disegnaFotogramma(foto.getContext('2d'), W, H, performance.now() / 1000, 'foto');
+
   const blob = await new Promise((res) => foto.toBlob(res, 'image/jpeg', 0.92));
-  mostraAnteprima(blob);
+  mostraAnteprima({
+    tipo: 'foto',
+    blob,
+    url: URL.createObjectURL(blob),
+    filtro: stato.filtroId,
+  });
 }
 
 /* ============================================================
  * ANTEPRIMA SNAP
  * ============================================================ */
-function mostraAnteprima(blob) {
+function mostraAnteprima(snap) {
   stato.ultimaSnap?.url && URL.revokeObjectURL(stato.ultimaSnap.url);
-  stato.ultimaSnap = { blob, url: URL.createObjectURL(blob), filtro: stato.filtroId };
-  $('#preview-img').src = stato.ultimaSnap.url;
+  stato.ultimaSnap = snap;
   $('#caption').value = '';
+
+  const img = $('#preview-img');
+  const vid = $('#preview-video');
+  if (snap.tipo === 'video') {
+    img.hidden = true;
+    vid.src = snap.url;
+    vid.hidden = false;
+    vid.loop = true;
+    vid.play().catch(() => {});
+  } else {
+    vid.hidden = true;
+    vid.removeAttribute('src');
+    img.src = snap.url;
+    img.hidden = false;
+  }
+
   mostra('preview');
   $('#caption').blur();
 }
@@ -216,29 +269,59 @@ function scarta() {
 }
 
 async function scarica() {
-  if (!stato.ultimaSnap) return;
+  const snap = stato.ultimaSnap;
+  if (!snap) return;
   const a = document.createElement('a');
-  a.href = stato.ultimaSnap.url;
-  a.download = `snap-${new Date().toISOString().replace(/[:.]/g, '-')}.jpg`;
+  a.href = snap.url;
+  a.download = nomeFile(snap);
   document.body.appendChild(a);
   a.click();
   a.remove();
   toast('Snap scaricata ⬇️');
 }
 
+function nomeFile(snap) {
+  const base = `snap-${new Date(snap.ts ?? Date.now()).toISOString().replace(/[:.]/g, '-')}`;
+  if (snap.tipo === 'video') return base + (snap.blob.type.includes('mp4') ? '.mp4' : '.webm');
+  return base + '.jpg';
+}
+
+async function miniatura(snap) {
+  const lato = 260;
+  const sorgente = snap.poster ?? await caricaImmagine(snap.url);
+  const scala = Math.min(1, lato / Math.max(sorgente.width, sorgente.height));
+  const c = document.createElement('canvas');
+  c.width = Math.max(2, Math.round(sorgente.width * scala));
+  c.height = Math.max(2, Math.round(sorgente.height * scala));
+  c.getContext('2d').drawImage(sorgente, 0, 0, c.width, c.height);
+  return new Promise((res) => c.toBlob(res, 'image/jpeg', 0.7));
+}
+
+function caricaImmagine(url) {
+  return new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = url;
+  });
+}
+
 async function salvaNeiRicordi() {
-  if (!stato.ultimaSnap) return;
-  const snap = {
+  const snap = stato.ultimaSnap;
+  if (!snap) return;
+  const record = {
     id: crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
-    blob: stato.ultimaSnap.blob,
+    tipo: snap.tipo ?? 'foto',
+    blob: snap.blob,
+    miniatura: await miniatura(snap),
     caption: $('#caption').value.trim(),
-    filtro: stato.ultimaSnap.filtro,
+    filtro: snap.filtro,
     ts: Date.now(),
   };
   try {
-    await dbPut(snap);
+    await dbPut(record);
     toast('Salvata nei Ricordi 💾');
-    stato.ultimaSnap.url && URL.revokeObjectURL(stato.ultimaSnap.url);
+    snap.url && URL.revokeObjectURL(snap.url);
     stato.ultimaSnap = null;
     tornaAllaCamera();
   } catch {
@@ -248,6 +331,9 @@ async function salvaNeiRicordi() {
 
 function tornaAllaCamera() {
   $('#preview-img').src = '';
+  $('#preview-img').hidden = false;
+  $('#preview-video').hidden = true;
+  $('#preview-video').removeAttribute('src');
   mostra('camera');
   if (!stato.attivo) { stato.attivo = true; requestAnimationFrame(loop); }
 }
@@ -292,10 +378,16 @@ async function apriRicordi() {
     const cell = document.createElement('button');
     cell.className = 'mem-thumb';
     const img = document.createElement('img');
-    img.src = URL.createObjectURL(s.blob);
+    img.src = URL.createObjectURL(s.miniatura ?? s.blob);
     img.alt = s.caption || 'Snap';
     img.loading = 'lazy';
     cell.appendChild(img);
+    if (s.tipo === 'video') {
+      const play = document.createElement('span');
+      play.className = 'play';
+      play.textContent = '▶';
+      cell.appendChild(play);
+    }
     if (s.caption) {
       const cap = document.createElement('span');
       cap.className = 'cap';
@@ -309,7 +401,19 @@ async function apriRicordi() {
 }
 
 function apriViewer(snap, url) {
-  $('#viewer-img').src = url;
+  const img = $('#viewer-img');
+  const vid = $('#viewer-video');
+  if (snap.tipo === 'video') {
+    img.hidden = true;
+    vid.src = URL.createObjectURL(snap.blob);
+    vid.hidden = false;
+    vid.play().catch(() => {});
+  } else {
+    vid.hidden = true;
+    vid.removeAttribute('src');
+    img.src = url;
+    img.hidden = false;
+  }
   $('#viewer-caption').textContent = snap.caption || '';
   $('#viewer-delete').onclick = async () => {
     if (!confirm('Eliminare questa snap?')) return;
@@ -320,8 +424,8 @@ function apriViewer(snap, url) {
   };
   $('#viewer-download').onclick = () => {
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `snap-${new Date(snap.ts).toISOString().replace(/[:.]/g, '-')}.jpg`;
+    a.href = URL.createObjectURL(snap.blob);
+    a.download = nomeFile(snap);
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -331,6 +435,9 @@ function apriViewer(snap, url) {
 
 function chiudiViewer() {
   $('#viewer-img').src = '';
+  $('#viewer-img').hidden = false;
+  $('#viewer-video').hidden = true;
+  $('#viewer-video').removeAttribute('src');
   mostra('memories');
 }
 
@@ -352,11 +459,90 @@ function selezionaFiltro(id) {
   stato.filtroId = id;
   stato.landmarks = null;
   stato.engineStato = stato.engineStato === 'errore' ? 'idle' : stato.engineStato;
+  resetQuizStati(); // i quiz ripartono con una nuova estrazione
   for (const c of carousel.children) c.classList.toggle('attiva', c.dataset.id === id);
   const attivo = carousel.querySelector(`[data-id="${id}"]`);
   attivo?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   const filtro = filtroPerId(id);
   if (!filtro.volto) nascondiStatus();
+}
+
+/* ============================================================
+ * REGISTRAZIONE VIDEO
+ * ============================================================ */
+const DURATA_VIDEO = 10000; // millisecondi (10 s)
+
+const MIME_VIDEO = [
+  'video/mp4;codecs=avc1.42E01E',
+  'video/mp4',
+  'video/webm;codecs=vp9',
+  'video/webm;codecs=vp8',
+  'video/webm',
+];
+
+function supportaVideo() {
+  return typeof MediaRecorder !== 'undefined'
+    && typeof HTMLCanvasElement.prototype.captureStream === 'function';
+}
+
+function mimeVideo() {
+  if (typeof MediaRecorder === 'undefined') return null;
+  for (const m of MIME_VIDEO) {
+    try { if (MediaRecorder.isTypeSupported(m)) return m; } catch { /* provo il prossimo */ }
+  }
+  return '';
+}
+
+function iniziaRegistrazione() {
+  if (stato.registrazione || !video.videoWidth) return;
+  if (!supportaVideo()) { toast('Video non supportato su questo browser'); return; }
+  const mime = mimeVideo();
+  if (mime === null) { toast('Video non supportato su questo browser'); return; }
+
+  const W = 720;
+  const H = Math.round((W * overlay.clientHeight) / overlay.clientWidth);
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+
+  const stream = canvas.captureStream(30);
+  const opzioni = { videoBitsPerSecond: 6000000 };
+  if (mime) opzioni.mimeType = mime;
+
+  let rec;
+  try { rec = new MediaRecorder(stream, opzioni); }
+  catch { toast('Video non supportato su questo browser'); return; }
+
+  const pezzi = [];
+  rec.ondataavailable = (e) => { if (e.data && e.data.size) pezzi.push(e.data); };
+  rec.onstop = () => {
+    stream.getTracks().forEach((traccia) => traccia.stop());
+    const blob = new Blob(pezzi, { type: rec.mimeType || mime || 'video/mp4' });
+    if (!blob.size) { toast('Registrazione vuota, riprova'); return; }
+    mostraAnteprima({
+      tipo: 'video',
+      blob,
+      url: URL.createObjectURL(blob),
+      filtro: stato.filtroId,
+      poster: canvas,
+      ts: Date.now(),
+    });
+  };
+
+  rec.start(1000);
+  stato.registrazione = { rec, canvas, inizio: performance.now() };
+  $('#shutter').classList.add('registra');
+  toast('Registrazione…');
+}
+
+function fermaRegistrazione() {
+  const reg = stato.registrazione;
+  if (!reg) return;
+  stato.registrazione = null;
+  $('#shutter').classList.remove('registra');
+  $('#shutter').style.removeProperty('--p');
+  clearTimeout(stato.pressione);
+  stato.pressione = 0;
+  if (reg.rec.state !== 'inactive') reg.rec.stop();
 }
 
 /* ============================================================
@@ -410,8 +596,11 @@ async function avviaApp() {
   btn.textContent = 'Attivo…';
   try {
     await avviaFotocamera();
-    dimensionaOverlay();
+    // prima mostro la schermata, poi dimensiono: finché è display:none
+    // l'overlay misura 0x0 e i filtri non avrebbero dove disegnare
     mostra('camera');
+    dimensionaOverlay();
+    requestAnimationFrame(dimensionaOverlay);
     stato.attivo = true;
     requestAnimationFrame(loop);
   } catch (err) {
@@ -429,7 +618,30 @@ async function avviaApp() {
 /* ---------- eventi ---------- */
 $('#start-btn').addEventListener('click', avviaApp);
 $('#flip-btn').addEventListener('click', giraFotocamera);
-$('#shutter').addEventListener('click', scatta);
+
+/* otturatore: tocco = foto, pressione prolungata = video (max 10 s) */
+const otturatore = $('#shutter');
+otturatore.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  try { otturatore.setPointerCapture(e.pointerId); } catch { /* ok lo stesso */ }
+  clearTimeout(stato.pressione);
+  if (!supportaVideo()) return;
+  stato.pressione = setTimeout(iniziaRegistrazione, 250);
+});
+const rilasciaOtturatore = () => {
+  clearTimeout(stato.pressione);
+  const stavaRegistrando = !!stato.registrazione;
+  stato.pressione = 0;
+  if (stavaRegistrando) fermaRegistrazione();
+  else scatta();
+};
+otturatore.addEventListener('pointerup', rilasciaOtturatore);
+otturatore.addEventListener('pointercancel', () => {
+  clearTimeout(stato.pressione);
+  stato.pressione = 0;
+  if (stato.registrazione) fermaRegistrazione();
+});
+otturatore.addEventListener('contextmenu', (e) => e.preventDefault());
 $('#flash-btn').addEventListener('click', (e) => {
   stato.flash = !stato.flash;
   e.currentTarget.classList.toggle('attiva', stato.flash);
@@ -451,8 +663,15 @@ document.addEventListener('visibilitychange', () => {
 });
 
 costruisciCarosello();
+window.__snapDebug = stato;
 
-/* service worker (shell offline; i modelli CDN vengono cachati al primo uso) */
+/* l'overlay va ridimensionato quando la schermata camera diventa visibile
+ * (da display:none le sue misure sono 0) e a ogni rotazione */
+if (typeof ResizeObserver !== 'undefined') {
+  new ResizeObserver(dimensionaOverlay).observe($('#camera'));
+}
+
+/* service worker (shell + modelli MediaPipe in vendor/ cachati al primo uso) */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./service-worker.js').catch(() => {});
 }

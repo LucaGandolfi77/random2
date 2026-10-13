@@ -10,14 +10,19 @@ Le snap restano sul dispositivo (IndexedDB) — niente server, niente account.
 |---|---|
 | 🐶 Cagnolino (orecchie + naso + lingua) | ⚪ B/N · 🎩 Noir · 🟤 Seppia |
 | 😎 Occhiali da sole | 🌈 Vivido · 🧊 Freddo · 🔥 Caldo |
-| 👑 Corona | 🌓 Negativo · 🦄 Arcobaleno (animato) |
-| 😍 Occhi a cuore | 🟪 Mosaico · 🌑 Vignetta · 🎞️ Grana |
+| 👑 Corona | 🌓 Negativo · 🌀 Psichedelico (animato) |
+| 😍 Occhi a cuore · 🐱 Gatto (baffi) | 🟪 Mosaico · 🌑 Vignetta · 🎞️ Grana |
+| 🐰 Coniglio · 🤖 Robot (visiera LED) | 📼 VHS (scanline + frangia) |
+| 🤠 Cowboy · 😈 Diavolo · 😇 Angelo | 🟣 Duotone · 🌡️ Termica · ☁️ Sogno (bloom) |
+| 🌸 Blush + scintille · 🤮 Arcobaleno | |
+| 🐾 Quiz sulla fronte: Che animale? · Che cibo? · Che mood? (estrazione animata) | |
 
 ## Requisiti
 
 - **HTTPS** (obbligatorio per `getUserMedia`) — GitHub Pages va bene
-- Filtri volto: al primo uso scaricano il modello MediaPipe (~4 MB) da CDN;
-  dopo vengono cachati dal service worker e funzionano anche offline
+- Filtri volto: al primo uso caricano l'engine MediaPipe da `vendor/`
+  (~15 MB, già pubblicati col sito e cachati dal service worker);
+  dalla seconda apertura funzionano anche offline
 - iOS Safari 16.4+ consigliato (base per MediaPipe Tasks Vision)
 
 ## Funzioni

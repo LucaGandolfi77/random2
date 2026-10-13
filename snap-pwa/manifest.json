@@ -1,7 +1,7 @@
 {
-  "name": "Snap PWA — Fotocamera con Filtri",
+  "name": "Snap PWA",
   "short_name": "Snap",
-  "description": "Fotocamera in tempo reale con lenti volto e filtri retrò. Le snap restano sul tuo dispositivo.",
+  "description": "Fotocamera in tempo reale con lenti volto (cagnolino, occhiali, corona, cuori) e filtri retrò. Le snap restano sul tuo dispositivo.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
@@ -9,10 +9,25 @@
   "orientation": "portrait",
   "background_color": "#101014",
   "theme_color": "#101014",
-  "lang": "it",
   "categories": ["photo", "entertainment"],
   "icons": [
-    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
-    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
   ]
 }
