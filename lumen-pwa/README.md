@@ -49,6 +49,26 @@ Anglerfish telegraph: the lure flares and the body goes still for half a second
 before it lunges. When it finally lies stunned with the lure out, **spear it
 with a boost** — that is the only way to kill one.
 
+## Depth zones
+
+The map is four horizontal bands, and the *darkness itself* is tinted per band,
+so depth is legible through the fog before you can read anything else.
+
+| Band | Water | Plankton | Jellyfish | Anglers |
+|---|---|---|---|---|
+| **Sunlit** | bright teal | richest | sparse | rare |
+| **Twilight** | blue | good | even | common |
+| **Midnight** | indigo | thin | thick | frequent |
+| **Trenches** | near-black violet | poorest | thickest | everywhere |
+
+The trade is deliberate: the shallows are **bright but empty**, the deep is
+**dark but rich** and packed with things that sting. Bands crossfade over 260px
+rather than snapping, and the same band table drives generation, the darkness
+tint, the minimap and the HUD depth meter, so they cannot drift apart.
+
+Everything lives in `src/zones.js` — per-band density weights are editable
+without touching any system code.
+
 ## The rivals
 
 There is no server. `localStorage` is the entire backend, and the trick that
@@ -96,6 +116,7 @@ service-worker.js   cache-first, fully offline
 icons/              SVG + generated PNGs (incl. maskable)
 src/
   config.js         every tunable number, palette, math + seeded RNG
+  zones.js          depth bands: density weights, darkness tint, band lookup
   storage.js        localStorage backend: roster, stats, grudges, settings
   world.js          generation, spine-based movement, collision, mass economy
   render.js         camera, light-mask compositor, fog of war, bloom, minimap

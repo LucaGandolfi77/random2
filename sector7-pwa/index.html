@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SECTOR 7 · space combat</title>
+    <meta name="description" content="A low-poly space combat game for your pocket. Harvest energy, shoot pirates, dock at the station and upgrade your ship — against the sector, not a clock.">
+    <meta name="theme-color" content="#05070f">
+    <meta name="color-scheme" content="dark">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SECTOR 7">
+</head>
+<body class="in-menu">
+
+    <canvas id="game-canvas"></canvas>
+
+    <!-- ===== HUD ===== -->
+    <div id="hud" class="hidden">
+
+        <div class="hud-tl">
+            <div class="hull-line">
+                <div class="hull-track"><div id="hull-fill"></div></div>
+                <span id="stat-hull">0 / 0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">ENERGY</span>
+                <span class="stat-value is-energy" id="stat-energy">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">CRYSTALS</span>
+                <span class="stat-value is-crystal" id="stat-crystals">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">KILLS</span>
+                <span class="stat-value is-small" id="stat-kills">0</span>
+            </div>
+        </div>
+
+        <div class="hud-tr">
+            <canvas id="minimap" width="132" height="132"></canvas>
+            <!-- Below the minimap rather than above it: at the top the chip
+                 ran under the hull readout on a 320px screen. Down here it
+                 sits with the thing it describes, and the hull line gets the
+                 full width of the header. -->
+            <div class="threat-chip">SECTOR THREAT<b id="stat-tier">1</b></div>
+        </div>
+
+        <div id="killfeed"></div>
+
+        <div id="bounty-banner" class="bounty hidden">
+            <div class="bounty-row">
+                <span class="bounty-tag">WANTED</span>
+                <span class="bounty-name" id="bounty-name">—</span>
+                <span class="bounty-value" id="bounty-value">0 ◈</span>
+            </div>
+            <div class="bounty-track"><div id="bounty-fill"></div></div>
+        </div>
+
+        <div id="contract-track" class="contract-track"></div>
+
+        <!-- A settings chip, not a combat control. It used to sit at the
+             bottom centre, where the action pads reached over it on every
+             phone size - so tapping near the toggle could fire a missile
+             instead. Above the pads it is out of both thumbs' way. -->
+        <button id="btn-dock-toggle" class="assist-toggle" type="button">AIM ASSIST ON</button>
+
+        <div id="storm-warn" class="storm-warn hidden">ION STORM</div>
+
+        <div id="dock-hint" class="dock-hint hidden">
+            <div class="dock-track"><div id="dock-bar"></div></div>
+        </div>
+
+        <div id="stick" class="stick"><div id="stick-knob" class="stick-knob"></div></div>
+
+        <div class="pad-right">
+            <button id="btn-dock" class="pad-btn pad-dock" type="button">DOCK</button>
+            <div class="pad-stack">
+                <button id="btn-missile" class="pad-btn pad-sm" type="button">MSL</button>
+                <button id="btn-mine" class="pad-btn pad-sm" type="button">MINE</button>
+            </div>
+            <button id="btn-fire" class="pad-btn pad-fire" type="button">FIRE</button>
+        </div>
+
+    </div>
+
+    <!-- ===== Menu ===== -->
+    <div id="screen-menu" class="screen">
+        <div class="panel">
+            <h1 class="logo">SECTOR<span>7</span></h1>
+            <p class="tagline">Energy buys upgrades and dies with you.<br>Crystals are yours forever — and the sector gets harder the more you take.</p>
+
+            <div class="field">
+                <input id="name-input" type="text" maxlength="14" autocomplete="off"
+                       autocapitalize="off" spellcheck="false" placeholder="your callsign">
+            </div>
+
+            <button id="btn-play" class="btn primary" type="button">LAUNCH</button>
+
+            <p class="fine" id="menu-best">No flight record yet.</p>
+
+            <div class="how">
+                <div class="how-row"><span class="key">Left thumb</span><span>fly — anywhere you press is the stick</span></div>
+                <div class="how-row"><span class="key">FIRE</span><span>blaster; the turret finds targets for you</span></div>
+                <div class="how-row"><span class="key">DOCK</span><span>hold it inside the station ring</span></div>
+                <div class="how-row"><span class="key">Gather</span><span>crack asteroids for crystals, loot crates for energy</span></div>
+            </div>
+
+            <div class="row-actions">
+                <button id="btn-sound" class="btn ghost" type="button">🔊 Sound</button>
+            </div>
+
+            <p class="fine dim">One ship. One sector. Every upgrade you can afford.</p>
+        </div>
+    </div>
+
+    <!-- ===== Station ===== -->
+    <div id="screen-station" class="screen hidden">
+        <div class="panel panel-wide">
+            <header class="st-head">
+                <h2>STATION 7<span class="st-sub">docked</span></h2>
+                <div class="st-wallet">
+                    <span class="st-coin">⚡<b id="st-energy">0</b></span>
+                </div>
+            </header>
+
+            <div class="st-bar">
+                <div class="st-hull-text">HULL <b id="st-hull">0 / 0</b></div>
+                <div class="hull-track"><div id="st-hull-fill"></div></div>
+                <button id="st-repair-btn" class="btn small" type="button">REPAIR</button>
+            </div>
+            <p class="st-repair-note" id="st-repair">Hull is intact.</p>
+
+            <p class="st-tier-line">SHIP TIER <b id="st-tier">1</b><span id="st-tier-note">· seven tracks, ten levels each</span></p>
+
+            <nav class="st-tabs" id="st-tabs">
+                <button id="tab-modules" class="st-tab is-on" data-tab="modules" type="button">MODULES</button>
+                <button id="tab-contracts" class="st-tab" data-tab="contracts" type="button">CONTRACTS</button>
+                <button id="tab-refits" class="st-tab" data-tab="refits" type="button">REFITS</button>
+                <button id="tab-sectors" class="st-tab" data-tab="sectors" type="button">SECTORS</button>
+            </nav>
+
+            <div id="st-panel-modules" class="st-tabpanel">
+                <div id="st-rows" class="st-rows"></div>
+            </div>
+
+            <div id="st-panel-contracts" class="st-tabpanel is-hidden">
+                <div id="st-contracts" class="st-rows"></div>
+            </div>
+
+            <div id="st-panel-refits" class="st-tabpanel is-hidden">
+                <p class="st-hint">Permanent. Bought with crystals, never refunded.</p>
+                <div id="st-refits" class="st-rows"></div>
+            </div>
+
+            <div id="st-panel-sectors" class="st-tabpanel is-hidden">
+                <p class="st-hint" id="st-sector-hint"></p>
+                <div id="st-sectors" class="st-rows"></div>
+            </div>
+
+            <div class="st-foot">
+                <p class="st-note">You keep every crystal you have ever touched. Your energy is on the deck where you died.</p>
+                <button id="st-launch" class="btn primary" type="button">LAUNCH</button>
+                <button id="st-close" class="btn ghost small" type="button">Back to menu</button>
+                <p class="st-fee-line">Docking fee <b id="st-fee">0</b> ⚡</p>
+            </div>
+
+            <div id="st-toast" class="st-toast is-hidden"></div>
+        </div>
+    </div>
+
+    <!-- ===== Wreck ===== -->
+    <div id="screen-death" class="screen hidden">
+        <div class="panel">
+            <h2 id="death-title">Ship lost</h2>
+            <p class="tagline" id="death-sub">Your hull gave out.</p>
+
+            <div class="results">
+                <div class="result"><span class="result-value" id="os-crystals">0</span><span class="result-label">crystals banked</span></div>
+                <div class="result"><span class="result-value" id="os-kills">0</span><span class="result-label">kills</span></div>
+                <div class="result"><span class="result-value" id="os-best">0</span><span class="result-label">best haul</span></div>
+                <div class="result"><span class="result-value" id="os-deaths">0</span><span class="result-label">wrecks</span></div>
+            </div>
+
+            <button id="btn-again" class="btn primary" type="button">RELAUNCH</button>
+            <div class="row-actions">
+                <button id="btn-menu" class="btn ghost" type="button">Back to menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Install ===== -->
+    <div id="install-prompt" class="install hidden">
+        <p>Install SECTOR 7 to play offline, fullscreen.</p>
+        <div class="row-actions">
+            <button id="btn-install" class="btn primary small" type="button">Install</button>
+            <button id="btn-install-later" class="btn ghost small" type="button">Later</button>
+        </div>
+    </div>
+
+    <script src="../shared/arcade.js"></script>
+    <script src="src/config.js"></script>
+    <script src="src/storage.js"></script>
+    <script src="src/sectors.js"></script>
+    <script src="src/world.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/stations.js"></script>
+    <script src="src/contracts.js"></script>
+    <script src="src/bounty.js"></script>
+    <script src="src/input.js"></script>
+    <script src="src/player.js"></script>
+    <script src="src/npcs.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

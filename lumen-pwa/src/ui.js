@@ -14,6 +14,10 @@
     var feedItems = [];
     var lbTimer = 0;
     var huntTimer = 0;
+    var depthTimer = 0;
+    var depthAcc = 0;
+    var depthAccN = 0;
+    var lastBand = -1;
     var listeners = {};
 
     function el(id) { return document.getElementById(id); }
@@ -34,6 +38,24 @@
         D.killfeed = el("killfeed");
         D.minimap = el("minimap");
         D.huntBanner = el("hunt-banner");
+        D.depth = el("depth");
+        D.depthBands = el("depth-bands");
+        D.depthMarker = el("depth-marker");
+        D.depthName = el("depth-name");
+        D.depthMetres = el("depth-metres");
+
+        /* Build the depth scale from the zone table so the HUD can never drift
+         * out of sync with the world. */
+        var bands = L.Zones.BANDS;
+        for (i = 0; i < bands.length; i++) {
+            var seg = document.createElement("span");
+            seg.className = "depth-band";
+            seg.style.height = ((bands[i].y1 - bands[i].y0) * 100) + "%";
+            seg.style.background = bands[i].tint;
+            seg.style.boxShadow = "inset 0 0 0 1px " + bands[i].accent + "44";
+            seg.title = bands[i].name + " — " + bands[i].blurb;
+            D.depthBands.appendChild(seg);
+        }
 
         D.screenMenu = el("screen-menu");
         D.screenDeath = el("screen-death");
@@ -111,6 +133,8 @@
             updateLeaderboard(world);
         }
 
+        updateDepth(world, dt);
+
         huntTimer -= dt;
         if (huntTimer <= 0) {
             huntTimer = 1;
@@ -137,6 +161,42 @@
             row.dot.style.background = c.color;
             row.name.textContent = c.name;
             row.mass.textContent = Math.floor(c.mass).toLocaleString();
+        }
+    }
+
+    /* Smooth the marker, but let the name and colour swap instantly: crossing
+     * a boundary should be felt, not eased through. */
+    function updateDepth(world, dt) {
+        var p = world.player;
+        if (!p || !D.depth) return;
+
+        var frac = L.Zones.depthFraction(p.headY, world.size);
+        var target = frac * 100;
+
+        if (depthAcc === 0) depthAcc = target;
+        var k = 1 - Math.pow(0.0008, dt);
+        depthAcc += (target - depthAcc) * k;
+
+        D.depthMarker.style.top = depthAcc.toFixed(2) + "%";
+        D.depthMarker.style.background = L.Zones.accentFor(p.headY, world.size);
+        D.depthMarker.style.boxShadow = "0 0 12px " + L.Zones.accentFor(p.headY, world.size);
+
+        var idx = L.Zones.bandIndexAt(p.headY, world.size);
+        if (idx !== lastBand) {
+            lastBand = idx;
+            var band = L.Zones.BANDS[idx];
+            D.depthName.textContent = band.name;
+            D.depthName.style.color = band.accent;
+            D.depth.classList.toggle("is-deep", idx >= 2);
+        }
+
+        /* Average the readout so it stops flickering as you swim. */
+        depthAccN++;
+        depthTimer += dt;
+        if (depthTimer >= 0.25) {
+            D.depthMetres.textContent = Math.round(frac * 1200) + " m";
+            depthTimer = 0;
+            depthAccN = 0;
         }
     }
 

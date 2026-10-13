@@ -34,7 +34,7 @@ Object.defineProperty(globalThis, "navigator", {
     writable: true,
 });
 
-for (const f of ["config.js", "storage.js", "world.js", "bots.js"]) {
+for (const f of ["config.js", "zones.js", "storage.js", "world.js", "bots.js"]) {
     (0, eval)(fs.readFileSync(path.join(SRC, f), "utf8"));
 }
 
@@ -130,6 +130,88 @@ check("player joins the world", W.creatures.length === C.bots.count + 1, W.creat
     }
     check("nothing spawns inside a wreck", inWreck === 0, inWreck);
     check("nothing spawns inside an angler", inAngler === 0, inAngler);
+}
+
+/* ================================================================
+ * 2b. Depth zones
+ * ================================================================ */
+section("depth zones");
+{
+    const size = C.world.size;
+    const bands = L.Zones.BANDS;
+
+    check("four bands, top to bottom", bands.length === 4);
+    check("bands tile the map exactly",
+        bands[0].y0 === 0 && bands[bands.length - 1].y1 === 1 &&
+        bands.every((b, i) => i === 0 || b.y0 === bands[i - 1].y1));
+    check("every band is named and tinted",
+        bands.every((b) => typeof b.name === "string" && /^#[0-9a-f]{6}$/i.test(b.tint)));
+
+    check("band lookup follows depth",
+        L.Zones.bandIndexAt(0, size) === 0 &&
+        L.Zones.bandIndexAt(size * 0.3, size) === 1 &&
+        L.Zones.bandIndexAt(size * 0.6, size) === 2 &&
+        L.Zones.bandIndexAt(size * 0.99, size) === 3);
+    check("depth clamps out of bounds",
+        L.Zones.bandIndexAt(-500, size) === 0 && L.Zones.bandIndexAt(size * 10, size) === 3);
+
+    /* The trenches must actually be darker than the shallows, or the whole
+     * conceit is decoration. */
+    const lum = (hex) => {
+        const n = parseInt(hex.replace("#", ""), 16);
+        return 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255);
+    };
+    const shallow = L.Zones.darknessFor(size * 0.1, size);
+    const deep = L.Zones.darknessFor(size * 0.9, size);
+    check("darkness genuinely deepens with depth",
+        lum(deep) < lum(shallow), shallow + " -> " + deep);
+    check("accent shifts hue with depth",
+        bands[0].accent !== bands[3].accent);
+
+    /* Band edges crossfade over BLEND px rather than snapping. Sampling a few
+     * px either side of the boundary proves nothing about a 260px ramp. */
+    const edge = bands[1].y0 * size;
+    const ramp = [0, 0.25, 0.5, 0.75, 1].map((f) =>
+        L.Zones.darknessFor(edge - L.Zones.BLEND + L.Zones.BLEND * f, size));
+    const distinct = new Set(ramp);
+    check("band edges crossfade over the blend width", distinct.size >= 4, distinct.size + "/5 distinct");
+    check("the crossfade lands exactly on the next band",
+        L.Zones.darknessFor(edge, size) === bands[2].tint,
+        L.Zones.darknessFor(edge, size) + " vs " + bands[2].tint);
+    const rampLum = ramp.map(lum);
+    check("the crossfade darkens monotonically going down",
+        rampLum.every((v, i) => i === 0 || v <= rampLum[i - 1]), ramp.map(lum).join(" > "));
+    check("the tint inside a band is stable",
+        L.Zones.darknessFor(size * 0.4, size) === L.Zones.darknessFor(size * 0.42, size));
+
+    /* Generation must respect the weights, not just be labelled with them. */
+    const tally = (arr, key) => {
+        const out = new Array(bands.length).fill(0);
+        for (const it of arr) {
+            out[L.Zones.bandIndexAt(key ? it[key] : it.y, size)]++;
+        }
+        return out;
+    };
+
+    const planktonByBand = tally(W.food.filter((f) => f.type === "plankton"));
+    const jellyByBand = tally(W.jellies);
+    const share = (a) => a.map((n) => n / a.reduce((x, y) => x + y, 0));
+
+    check("plankton thins out with depth",
+        share(planktonByBand)[0] > share(planktonByBand)[3],
+        share(planktonByBand).map((n) => (n * 100).toFixed(0) + "%").join("/"));
+    check("jellyfish thicken with depth",
+        share(jellyByBand)[3] > share(jellyByBand)[0],
+        share(jellyByBand).map((n) => (n * 100).toFixed(0) + "%").join("/"));
+    check("every band holds some plankton",
+        planktonByBand.every((n) => n > 0), planktonByBand.join("/"));
+    check("every band holds some jellyfish",
+        jellyByBand.every((n) => n > 0), jellyByBand.join("/"));
+
+    /* Anglers are the deep's own hazard. */
+    const anglerDepths = W.anglers.map((a) => L.Zones.depthFraction(a.headY, size));
+    check("anglers favour the deep",
+        mean(anglerDepths) > 0.5, "mean depth " + mean(anglerDepths).toFixed(2));
 }
 
 /* ================================================================

@@ -479,9 +479,11 @@
     function drawScene(world, time) {
         sctx.setTransform(1, 0, 0, 1, 0, 0);
         var grad = sctx.createLinearGradient(0, 0, 0, scene.height);
-        grad.addColorStop(0, "#04101f");
-        grad.addColorStop(0.5, "#020a15");
-        grad.addColorStop(1, "#01060e");
+        /* Band-tinted water column: brighter blue up top, violet-black below. */
+        grad.addColorStop(0, "#0a2438");
+        grad.addColorStop(0.35, "#061629");
+        grad.addColorStop(0.7, "#050d20");
+        grad.addColorStop(1, "#080418");
         sctx.fillStyle = grad;
         sctx.fillRect(0, 0, scene.width, scene.height);
 
@@ -512,7 +514,9 @@
         var ms = C.light.maskScale;
         mctx.setTransform(1, 0, 0, 1, 0, 0);
         mctx.globalCompositeOperation = "source-over";
-        mctx.fillStyle = COL.abyss;
+        /* The darkness takes its colour from the depth band. This is the main
+         * visual difference between the shallows and the trenches. */
+        mctx.fillStyle = L.Zones.darknessFor(Camera.y, world.size);
         mctx.fillRect(0, 0, mask.width, mask.height);
 
         mctx.globalCompositeOperation = "destination-out";
@@ -699,6 +703,15 @@
 
         mctx2.fillStyle = "rgba(3,10,20,0.55)";
         mctx2.fillRect(0, 0, size, size);
+
+        /* Depth bands, so the minimap shows the vertical axis too. */
+        var bands = L.Zones.BANDS;
+        for (var b = 0; b < bands.length; b++) {
+            mctx2.fillStyle = bands[b].tint;
+            mctx2.globalAlpha = 0.55;
+            mctx2.fillRect(0, bands[b].y0 * size, size, (bands[b].y1 - bands[b].y0) * size);
+        }
+        mctx2.globalAlpha = 1;
 
         mctx2.strokeStyle = "rgba(120,200,230,0.18)";
         mctx2.lineWidth = 1;

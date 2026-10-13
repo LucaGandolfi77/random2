@@ -9,6 +9,7 @@ const ASSETS = [
     "./manifest.json",
     "../shared/arcade.js",
     "./src/config.js",
+    "./src/zones.js",
     "./src/storage.js",
     "./src/world.js",
     "./src/render.js",

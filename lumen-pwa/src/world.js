@@ -250,10 +250,13 @@
 
         var pad = 40;
 
+        /* Food, hazards and wrecks are distributed by depth band rather than
+         * uniformly, so the shallows really are bright and thin and the
+         * trenches really are rich and hostile. */
         for (var i = 0; i < W.planktonCount; i++) {
             world.food.push({
                 type: "plankton",
-                x: rng() * size, y: rng() * size,
+                x: rng() * size, y: L.Zones.pickBandY("food", size, rng, pad),
                 r: 2.5, value: W.planktonValue,
                 ttl: Infinity, phase: rng() * 6.283,
             });
@@ -262,7 +265,7 @@
         for (i = 0; i < W.krillCount; i++) {
             world.food.push({
                 type: "krill",
-                x: pad + rng() * (size - pad * 2), y: pad + rng() * (size - pad * 2),
+                x: rng() * size, y: L.Zones.pickBandY("krill", size, rng, pad),
                 r: 5, value: W.krillValue,
                 ttl: Infinity, phase: rng() * 6.283,
                 vx: 0, vy: 0, heading: rng() * 6.283, respawn: 0,
@@ -273,8 +276,7 @@
             var w = L.rand(24, 96);
             var h = L.rand(20, 58);
             world.wrecks.push({
-                x: pad + rng() * (size - pad * 2),
-                y: pad + rng() * (size - pad * 2),
+                x: rng() * size, y: L.Zones.pickBandY("wreck", size, rng, pad),
                 hw: w / 2, hh: h / 2,
                 rot: rng() * 6.283,
                 detail: rng(),
@@ -284,8 +286,7 @@
 
         for (i = 0; i < W.jellyCount; i++) {
             world.jellies.push({
-                x: pad + rng() * (size - pad * 2),
-                y: pad + rng() * (size - pad * 2),
+                x: rng() * size, y: L.Zones.pickBandY("jelly", size, rng, pad),
                 vx: 0, vy: 0,
                 r: 18, phase: rng() * 6.283,
                 heading: rng() * 6.283,
@@ -305,7 +306,9 @@
     }
 
     function spawnAngler() {
-        var spot = findSpawn(260, 220);
+        /* Anglers haunt the deep: band-weighted so the trenches are the place
+         * the lights are worth being afraid of. */
+        var spot = findSpawn(260, 220, "angler");
         var a = {
             x: spot.x, y: spot.y,
             angle: rng() * 6.283,
@@ -671,15 +674,18 @@
 
     /* Clearance padding rejects a large slice of the map, so a strict search
      * alone would dump late arrivals on a single fallback point. Relax on the
-     * second pass, and never share a point as a last resort. */
-    function findSpawn(clear, pad) {
+     * second pass, and never share a point as a last resort. `zoneWeight` picks
+     * a depth band first (see Zones.pickBandY) instead of scattering evenly. */
+    function findSpawn(clear, pad, zoneWeight) {
         var size = world.size;
         var span = size - pad * 2;
         for (var attempt = 0; attempt < 2; attempt++) {
             var want = attempt === 0 ? clear : clear * 0.45;
             for (var tries = 0; tries < 48; tries++) {
                 var x = pad + rng() * span;
-                var y = pad + rng() * span;
+                var y = zoneWeight
+                    ? L.Zones.pickBandY(zoneWeight, size, rng, pad)
+                    : pad + rng() * span;
                 if (isClearSpawn(x, y, want)) return { x: x, y: y };
             }
         }

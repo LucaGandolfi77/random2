@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1b33"/>
+      <stop offset="55%" stop-color="#071122"/>
+      <stop offset="100%" stop-color="#04070f"/>
+    </linearGradient>
+    <linearGradient id="hullTop" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#a5f3fc"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="hullSide" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0e7490"/>
+      <stop offset="100%" stop-color="#0a4a63"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#155e75"/>
+    </linearGradient>
+    <radialGradient id="engine" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff7d6" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#ffb347" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ff7a2f" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="52%" r="46%">
+      <stop offset="0%" stop-color="#1e5f7a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#04070f" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="clip"><rect width="512" height="512" rx="116"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#clip)">
+    <rect width="512" height="512" fill="url(#sky)"/>
+    <circle cx="256" cy="266" r="240" fill="url(#glow)"/>
+
+    <!-- starfield -->
+    <g fill="#ffffff">
+      <circle cx="62" cy="84" r="2.4" opacity=".9"/>
+      <circle cx="128" cy="52" r="1.5" opacity=".55"/>
+      <circle cx="196" cy="96" r="1.8" opacity=".7"/>
+      <circle cx="330" cy="70" r="2.1" opacity=".8"/>
+      <circle cx="404" cy="110" r="1.4" opacity=".5"/>
+      <circle cx="452" cy="58" r="2.2" opacity=".85"/>
+      <circle cx="86" cy="196" r="1.6" opacity=".5"/>
+      <circle cx="446" cy="212" r="1.9" opacity=".65"/>
+      <circle cx="40" cy="352" r="2" opacity=".7"/>
+      <circle cx="472" cy="376" r="1.5" opacity=".5"/>
+      <circle cx="104" cy="452" r="2.3" opacity=".8"/>
+      <circle cx="410" cy="444" r="1.7" opacity=".55"/>
+      <circle cx="366" cy="480" r="2" opacity=".6"/>
+      <circle cx="158" cy="486" r="1.4" opacity=".45"/>
+    </g>
+
+    <!-- engine wash -->
+    <ellipse cx="186" cy="330" rx="88" ry="54" fill="url(#engine)"/>
+
+    <!-- fighter, nose up-right -->
+    <g transform="translate(262 258) rotate(-40)">
+      <!-- far wing (dimmer, reads as the shadowed side) -->
+      <polygon points="40,14 -20,98 8,86 44,28" fill="#0b4a5e"/>
+      <!-- fuselage -->
+      <polygon points="-80,-20 58,-20 100,0 58,20 -80,20 -90,0" fill="url(#hullSide)"/>
+      <!-- upper facet catching the key light -->
+      <polygon points="-80,-20 58,-20 100,0 16,0 -90,0" fill="#0891b2" opacity=".6"/>
+      <!-- nose -->
+      <polygon points="58,-20 100,0 58,20" fill="#67e8f9"/>
+      <!-- near wing -->
+      <polygon points="40,-16 -20,-98 8,-86 44,-28" fill="url(#wing)"/>
+      <polygon points="40,-16 -20,-98 -10,-94 36,-25" fill="#a5f3fc" opacity=".3"/>
+      <!-- canopy -->
+      <polygon points="12,-10 48,-5 48,5 12,10" fill="#cffafe"/>
+      <!-- engines -->
+      <polygon points="-80,-20 -92,0 -80,20 -86,0" fill="#0b3b4d"/>
+      <circle cx="-88" cy="0" r="10" fill="#ffd166"/>
+    </g>
+
+    <!-- energy bolt, bottom-left accent -->
+    <g transform="translate(96 400)">
+      <polygon points="0,-34 14,-8 34,0 14,8 0,34 -14,8 -34,0 -14,-8" fill="#ffd166" opacity=".9"/>
+      <polygon points="0,-20 8,-5 20,0 8,5 0,20 -8,5 -20,0 -8,-5" fill="#fff3c4"/>
+    </g>
+
+    <!-- crystal, top-right accent -->
+    <g transform="translate(400 148)">
+      <polygon points="0,-30 20,0 0,30 -20,0" fill="#7dd3fc"/>
+      <polygon points="0,-30 20,0 0,0 -20,0" fill="#bae6fd"/>
+      <polygon points="0,30 20,0 0,0 -20,0" fill="#38bdf8" opacity=".7"/>
+    </g>
+  </g>
+</svg>
