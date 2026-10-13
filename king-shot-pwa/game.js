@@ -135,12 +135,25 @@
         ctx.globalAlpha = 1;
     }
 
+    /* ===== Shared arcade helpers ===== */
+    function buzz(pattern) {
+        if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+    }
+    function markPlayed() {
+        try {
+            var map = JSON.parse(localStorage.getItem("random2-last-played") || "{}");
+            map["king-shot-pwa/"] = Date.now();
+            localStorage.setItem("random2-last-played", JSON.stringify(map));
+        } catch (e) {}
+    }
+
     /* ===== Game Init ===== */
     function init() {
         setupDOME();
         setupEventListeners();
         Sound.init();
         loadFromStorage();
+        markPlayed();
         setupServiceWorker();
         setupInstallPrompt();
         applyTheme(state.theme);
@@ -266,6 +279,7 @@
 
     function shootArrow() {
         Sound.shoot();
+        buzz(10);
         const angle = state.aimAngle;
         state.arrow = {
             x: state.king.x,
@@ -384,6 +398,7 @@
                 if (dist < state.arrow.life * 10 + e.radius) {
                     // Hit
                     Sound.hit();
+                    buzz(15);
                     spawnParticles(e.x, e.y, themes[state.theme].powerup, 6);
                     state.enemies.splice(i, 1);
                     state.score += 10 * state.level;
@@ -445,6 +460,7 @@
 
     function die() {
         Sound.gameOver();
+        buzz([60, 40, 80]);
         state.gameOver = true;
         state.paused = true;
         saveHighScore();

@@ -138,12 +138,25 @@
         ctx.globalAlpha = 1;
     }
 
+    /* ===== Shared arcade helpers ===== */
+    function buzz(pattern) {
+        if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+    }
+    function markPlayed() {
+        try {
+            var map = JSON.parse(localStorage.getItem("random2-last-played") || "{}");
+            map["slot-pwa/"] = Date.now();
+            localStorage.setItem("random2-last-played", JSON.stringify(map));
+        } catch (e) {}
+    }
+
     /* ===== Game Init ===== */
     function init() {
         setupDOME();
         setupEventListeners();
         Sound.init();
         loadFromStorage();
+        markPlayed();
         setupServiceWorker();
         setupInstallPrompt();
         applyTheme(state.theme);
@@ -230,6 +243,7 @@
     function startSpin() {
         if (state.spinning) return;
         Sound.spinTick();
+        buzz(10);
         state.spinning = true;
         const now = Date.now();
         for (const reel of state.reels) {
@@ -270,9 +284,11 @@
                 saveHighScore();
             }
             Sound.win();
+            buzz([20, 30, 20]);
             spawnParticles(config.canvasWidth / 2, config.canvasHeight / 2, themes[state.theme].neonGlow, 20);
         } else {
             Sound.lose();
+            buzz(8);
         }
     }
 

@@ -6,8 +6,8 @@
   <title>random2 · Play</title>
   <meta name="description" content="A collection of installable mini-games and tools. Play instantly in the browser — offline-ready, iPhone-friendly, zero downloads.">
 
-  <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#0b0d16">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" id="meta-theme" content="#0b0d16">
 
   <!-- iPhone / iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -140,6 +140,93 @@
       box-shadow: 0 0 8px currentColor;
     }
     .status.offline { color: var(--warn); }
+
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(22px + var(--sab));
+      transform: translate(-50%, 16px);
+      opacity: 0;
+      z-index: 60;
+      padding: 11px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      background: rgba(10, 12, 20, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ---- Records dashboard ---- */
+    .records {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      margin: 6px 0 26px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .records-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .records-head h2 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+    .records-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+    .record {
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 8px 10px;
+      background: var(--surface-strong);
+    }
+    .record .rk {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+    .record .rv {
+      display: block;
+      margin-top: 3px;
+      font-size: 21px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      background: linear-gradient(120deg, #c4b5fd, #f9a8d4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .record.played .rk::after {
+      content: " ●";
+      color: var(--ok);
+    }
+    .recent-line {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--faint);
+    }
+    .recent-line b { color: var(--muted); font-weight: 600; }
+    #records[hidden] { display: none; }
 
     /* ---- Layout ---- */
     .wrap {
@@ -579,6 +666,38 @@
       html { scroll-behavior: auto; }
     }
 
+    /* ---- Light theme ---- */
+    [data-theme="light"] {
+      --bg: #eef0f8;
+      --surface: rgba(18, 20, 40, 0.05);
+      --surface-strong: rgba(18, 20, 40, 0.09);
+      --border: rgba(18, 20, 40, 0.13);
+      --text: #171928;
+      --muted: rgba(28, 31, 55, 0.68);
+      --faint: rgba(28, 31, 55, 0.46);
+    }
+    [data-theme="light"] .bg {
+      background:
+        radial-gradient(1200px 800px at 85% -10%, rgba(139, 92, 246, 0.12), transparent 60%),
+        radial-gradient(1000px 700px at -10% 100%, rgba(236, 72, 153, 0.10), transparent 60%),
+        var(--bg);
+    }
+    [data-theme="light"] .blob { opacity: 0.16; }
+    [data-theme="light"] #stars { opacity: 0.45; }
+    [data-theme="light"] .status,
+    [data-theme="light"] .toast {
+      background: rgba(255, 255, 255, 0.8);
+    }
+    [data-theme="light"] .stat b,
+    [data-theme="light"] .record .rv {
+      background: linear-gradient(120deg, #6d4de0, #c2399b);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+    [data-theme="light"] .btn-primary {
+      background: linear-gradient(135deg, #6d5bf0, #b44df0);
+    }
+
     .visually-hidden {
       position: absolute;
       width: 1px; height: 1px;
@@ -615,12 +734,23 @@
 
       <div class="hero-actions">
         <button class="btn btn-primary" id="random-btn" type="button">🎲&nbsp; Surprise me</button>
+        <button class="btn btn-ghost" id="theme-btn" type="button" aria-pressed="false">🌓&nbsp; <span id="theme-label">Light mode</span></button>
+        <button class="btn btn-ghost" id="share-btn" type="button">↗&nbsp; Share</button>
         <button class="btn btn-ghost" id="install-btn" type="button" hidden>⬇︎&nbsp; Install app</button>
       </div>
     </header>
 
     <main>
       <h2 class="visually-hidden">Projects</h2>
+
+      <section class="records" id="records" hidden aria-label="Your records">
+        <div class="records-head">
+          <h2>🏆 Your records</h2>
+          <button class="cat" id="clear-records" type="button">Reset</button>
+        </div>
+        <div class="records-grid" id="records-grid"></div>
+        <p class="recent-line" id="recent-line"></p>
+      </section>
 
       <div class="filters">
         <div class="search">
@@ -795,6 +925,8 @@
       <p style="margin-top:10px; font-size:12px">*except BUCIO, which builds with Vite · © <span id="year">2025</span> LucaGandolfi77</p>
     </footer>
   </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
   (function () {
@@ -1018,6 +1150,120 @@
     window.addEventListener("online", updateStatus);
     window.addEventListener("offline", updateStatus);
     updateStatus();
+
+    /* ---------- Toast ---------- */
+    var toastEl = document.getElementById("toast");
+    var toastTimer = null;
+    function toast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 1900);
+    }
+
+    /* ---------- Theme toggle ---------- */
+    var THEME_KEY = "random2-theme";
+    var metaTheme = document.getElementById("meta-theme");
+    var themeBtn = document.getElementById("theme-btn");
+    var themeLabel = document.getElementById("theme-label");
+    function applyTheme(t) {
+      document.documentElement.setAttribute("data-theme", t);
+      metaTheme.setAttribute("content", t === "light" ? "#eef0f8" : "#0b0d16");
+      themeLabel.textContent = t === "light" ? "Dark mode" : "Light mode";
+      themeBtn.setAttribute("aria-pressed", t === "light" ? "true" : "false");
+    }
+    var storedTheme = null;
+    try { storedTheme = localStorage.getItem(THEME_KEY); } catch (e) {}
+    var initialTheme = storedTheme ||
+      (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    applyTheme(initialTheme);
+    themeBtn.addEventListener("click", function () {
+      var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+      applyTheme(next);
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    });
+
+    /* ---------- Share ---------- */
+    document.getElementById("share-btn").addEventListener("click", function () {
+      var data = {
+        title: "random2 · Play",
+        text: "A shelf of installable mini-games — play in the browser, offline.",
+        url: location.href
+      };
+      if (navigator.share) {
+        navigator.share(data).catch(function () {});
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(data.url).then(function () {
+          toast("🔗 Link copied to clipboard");
+        }, function () { toast("Copy failed — grab the URL bar"); });
+      } else {
+        toast("Sharing not supported here");
+      }
+    });
+
+    /* ---------- Records dashboard + recently played ---------- */
+    var GAME_META = [
+      { slug: "snake-pwa/",      name: "Snake",        emoji: "🐍", key: "snake-pwa" },
+      { slug: "king-shot-pwa/",  name: "King Shot",    emoji: "👑", key: "king-shot-pwa" },
+      { slug: "plane-pwa/",      name: "Plane Shooter", emoji: "✈️", key: "plane-pwa" },
+      { slug: "slot-pwa/",       name: "Slot Machine", emoji: "🎰", key: "slot-pwa" }
+    ];
+    function readJSON(key) {
+      try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (e) { return null; }
+    }
+    function timeAgo(ts) {
+      var s = Math.max(1, Math.floor((Date.now() - ts) / 1000));
+      if (s < 90) return "just now";
+      var m = Math.floor(s / 60);
+      if (m < 60) return m + " min ago";
+      var h = Math.floor(m / 60);
+      if (h < 36) return h + " h ago";
+      var d = Math.floor(h / 24);
+      return d + " d ago";
+    }
+    function renderRecords() {
+      var grid = document.getElementById("records-grid");
+      var section = document.getElementById("records");
+      var recentEl = document.getElementById("recent-line");
+      var lastPlayed = readJSON("random2-last-played") || {};
+      var anyData = false;
+      var html = "";
+      GAME_META.forEach(function (g) {
+        var data = readJSON(g.key);
+        var score = data && typeof data.highScore === "number" ? data.highScore : null;
+        var played = !!lastPlayed[g.slug];
+        if (score !== null || played) anyData = true;
+        html +=
+          '<div class="record' + (played ? " played" : "") + '">' +
+          '<span class="rk">' + g.emoji + " " + g.name + "</span>" +
+          '<span class="rv">' + (score !== null ? score.toLocaleString() : "—") + "</span>" +
+          "</div>";
+      });
+      grid.innerHTML = html;
+      var mostRecent = null, mostTs = 0;
+      GAME_META.forEach(function (g) {
+        var ts = lastPlayed[g.slug];
+        if (ts && ts > mostTs) { mostTs = ts; mostRecent = g; }
+      });
+      recentEl.innerHTML = mostRecent
+        ? "Last played: <b>" + mostRecent.emoji + " " + mostRecent.name + "</b> · " + timeAgo(mostTs)
+        : "";
+      section.hidden = !anyData;
+    }
+    renderRecords();
+    window.addEventListener("focus", renderRecords); // refresh after coming back from a game
+    document.getElementById("clear-records").addEventListener("click", function () {
+      GAME_META.forEach(function (g) {
+        try { localStorage.removeItem(g.key); } catch (e) {}
+        try {
+          var map = readJSON("random2-last-played") || {};
+          delete map[g.slug];
+          localStorage.setItem("random2-last-played", JSON.stringify(map));
+        } catch (e) {}
+      });
+      renderRecords();
+      toast("🧹 Records cleared on this device");
+    });
 
     /* ---------- Footer year + SW ---------- */
     document.getElementById("year").textContent = new Date().getFullYear();

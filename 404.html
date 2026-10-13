@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>404 · random2</title>
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0b0d16">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <style>
+    :root {
+      --bg: #0b0d16;
+      --text: #f4f5fb;
+      --muted: rgba(233, 236, 250, 0.62);
+      --faint: rgba(233, 236, 250, 0.4);
+      --border: rgba(255, 255, 255, 0.09);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Inter, sans-serif;
+      background:
+        radial-gradient(1000px 700px at 85% -10%, rgba(139, 92, 246, 0.16), transparent 60%),
+        radial-gradient(900px 600px at -10% 100%, rgba(236, 72, 153, 0.12), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .hole {
+      font-size: 84px;
+      line-height: 1;
+      margin-bottom: 18px;
+      animation: spin 6s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .hole { animation: none; } }
+    h1 {
+      font-size: clamp(34px, 8vw, 56px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    h1 .grad {
+      background: linear-gradient(120deg, #a78bfa, #e879f9, #fb7185);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    p { color: var(--muted); font-size: 16px; line-height: 1.6; max-width: 420px; margin: 0 auto; }
+    .count { color: var(--faint); font-size: 13.5px; margin-top: 18px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 50px;
+      padding: 0 22px;
+      margin-top: 22px;
+      border-radius: 15px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #fff;
+      background: linear-gradient(135deg, #6d5bf0, #b44df0);
+      box-shadow: 0 10px 26px -10px rgba(139, 92, 246, 0.8);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #eef0f8; --text: #171928;
+        --muted: rgba(28, 31, 55, 0.68); --faint: rgba(28, 31, 55, 0.46);
+        --border: rgba(18, 20, 40, 0.13);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="hole" aria-hidden="true">🕳️</div>
+    <h1>Swallowed by a <span class="grad">black hole</span></h1>
+    <p>This page doesn't exist — or it fell into BUCIO. The arcade hub is one click away.</p>
+    <a class="btn" id="home-link" href="/">🎡 Back to the arcade</a>
+    <p class="count" id="count">Redirecting in <b>5</b>s…</p>
+  </main>
+  <script>
+    (function () {
+      // Project pages are served under /<repo>/ — redirect to that root, not the domain root.
+      var m = location.pathname.match(/^\/([^/]+)\//);
+      var root = (m && m[1] !== "") ? "/" + m[1] + "/" : "/";
+      document.getElementById("home-link").setAttribute("href", root);
+      var n = 5;
+      var el = document.getElementById("count");
+      var t = setInterval(function () {
+        n--;
+        if (n <= 0) { clearInterval(t); location.replace(root); }
+        else { el.innerHTML = "Redirecting in <b>" + n + "</b>s…"; }
+      }, 1000);
+    })();
+  </script>
+</body>
+</html>

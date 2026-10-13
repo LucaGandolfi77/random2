@@ -146,12 +146,25 @@
         ctx.globalAlpha = 1;
     }
 
+    /* ===== Shared arcade helpers ===== */
+    function buzz(pattern) {
+        if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+    }
+    function markPlayed() {
+        try {
+            var map = JSON.parse(localStorage.getItem("random2-last-played") || "{}");
+            map["snake-pwa/"] = Date.now();
+            localStorage.setItem("random2-last-played", JSON.stringify(map));
+        } catch (e) {}
+    }
+
     /* ===== Game Init ===== */
     function init() {
         setupDOME();
         setupEventListeners();
         Sound.init();
         loadFromStorage();
+        markPlayed();
         setupServiceWorker();
         setupInstallPrompt();
         applyTheme(state.theme);
@@ -325,10 +338,12 @@
             state.score += config.foodScore * state.level;
             spawnParticles(head.x * config.cellSize + 10, head.y * config.cellSize + 10, themes[state.theme].food, 10);
             Sound.eat();
+            buzz(12);
             placeFood();
             maybeSpawnPowerup();
         } else if (state.powerup && head.x === state.powerup.x && head.y === state.powerup.y) {
             handlePowerup();
+            buzz(20);
             state.powerup = null;
         } else {
             state.snake.pop();
@@ -430,6 +445,7 @@
 
     function die() {
         Sound.gameOver();
+        buzz([60, 40, 80]);
         state.gameOver = true;
         state.paused = true;
     }

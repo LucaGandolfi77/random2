@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: JavaScript syntax check (ESM-aware)
+        run: |
+          set -euo pipefail
+          files=$(find . -name '*.js' \
+            -not -path '*/node_modules/*' \
+            -not -path '*/.venv/*' \
+            -not -path '*/vendor/*' \
+            -not -path '*/dist/*' \
+            -not -path './EADS/*')
+          if [ -z "$files" ]; then echo "no JS files"; exit 0; fi
+          fail=0
+          for f in $files; do
+            if grep -qE '^[[:space:]]*(import|export)[[:space:]]' "$f"; then
+              # ESM: check through a temporary .mjs copy
+              cp "$f" /tmp/check.mjs
+              node --check /tmp/check.mjs >/dev/null 2>&1 \
+                && echo "OK  (esm) $f" \
+                || { echo "FAIL (esm) $f"; fail=1; }
+            else
+              node --check "$f" >/dev/null 2>&1 \
+                && echo "OK        $f" \
+                || { echo "FAIL      $f"; fail=1; }
+            fi
+          done
+          exit $fail
+
+      - name: Web manifests are valid JSON
+        run: |
+          set -euo pipefail
+          found=0
+          while IFS= read -r f; do
+            found=1
+            python3 -m json.tool "$f" > /dev/null && echo "OK $f"
+          done < <(find . \( -name 'manifest.json' -o -name '*.webmanifest' \) \
+                     -not -path '*/node_modules/*' -not -path '*/.venv/*')
+          [ "$found" -eq 1 ] || { echo "no manifests found"; exit 1; }
+
+      - name: Every PWA index.html links its manifest
+        run: |
+          set -euo pipefail
+          fail=0
+          # Only directories that ship a manifest are expected to be PWAs.
+          while IFS= read -r mf; do
+            dir=$(dirname "$mf")
+            f="$dir/index.html"
+            if [ ! -f "$f" ]; then echo "FAIL $f (missing index.html)"; fail=1; continue; fi
+            if grep -qi 'rel="manifest"' "$f"; then
+              echo "OK $f"
+            else
+              echo "FAIL $f (no manifest link)"; fail=1
+            fi
+          done < <(find . \( -name 'manifest.json' -o -name '*.webmanifest' \) \
+                     -not -path '*/node_modules/*' -not -path '*/.venv/*' \
+                     -not -path '*/dist/*' -not -path './EADS/*')
+          exit $fail

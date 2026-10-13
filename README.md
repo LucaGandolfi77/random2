@@ -321,6 +321,16 @@ project. It is itself an installable PWA.
 - Hub service worker (`sw.js`, network-first for navigations,
   stale-while-revalidate for the shell) — registered with **relative paths**, so
   it works both at a domain root and under GitHub Pages' `/random2/` subpath
+- **🏆 Your records dashboard**: reads each game's high score from device
+  storage and shows it on the hub, with a "last played" timestamp and a
+  one-click reset (currently Snake, King Shot, Plane Shooter, Slot Machine —
+  the games that write `random2-last-played`)
+- **🌓 Dark/light theme toggle**, persisted and seeded from
+  `prefers-color-scheme` on first visit; `theme-color` meta follows along
+- **↗ Share button**: Web Share API on mobile, clipboard fallback with a toast
+  everywhere else
+- **Custom [`404.html`](404.html)**: a black hole ate your URL — auto-redirects
+  to the correct hub root (project pages included) with a countdown
 
 **Quality**
 
@@ -417,7 +427,68 @@ Notes:
    `data-tags="..."`, an emoji tile and a gradient pair.
 5. Add a row to the table in this README (and a section if the game deserves
    one).
-6. Push to `main` — Pages deploys automatically. Done.
+6. Push to `main` — Pages deploys automatically, and CI (see below) runs the
+   static checks. Done.
+
+## Roadmap
+
+Everything below is a real TODO, tracked here. Check something off by opening
+a PR — keep this list honest.
+
+### ✅ Done
+
+- [x] Hub: records dashboard aggregating per-game high scores from device
+      storage, with last-played timestamps and reset
+- [x] Cross-game tracker: Snake / King Shot / Plane / Slot write
+      `random2-last-played` so the hub can show "last played"
+- [x] Hub: dark/light theme toggle (persisted, `prefers-color-scheme` seeded,
+      dynamic `theme-color`)
+- [x] Hub: share button (Web Share API + clipboard fallback + toast)
+- [x] Custom `404.html` with subpath-aware auto-redirect
+- [x] CI workflow (`.github/workflows/ci.yml`): ESM-aware `node --check` over
+      every JS file, JSON validation of all manifests, manifest-link audit for
+      every PWA directory
+- [x] Games: `navigator.vibrate` haptics on shoot/eat/hit/win/game-over
+      (Snake, King Shot, Plane Shooter, Slot Machine)
+- [x] Hub: category filters + live search + surprise-me launcher
+
+### 🚧 In progress
+
+- [ ] Shared micro-library (`shared/audio.js`, `shared/storage.js`,
+      `shared/particles.js`) so the four simple games stop carrying ~90 copied
+      lines each
+- [ ] Live animated mini-previews rendered inside hub cards
+
+### 🗺️ Planned
+
+- [ ] Hub: total-playtime stat (needs an opt-in per-game play timer)
+- [ ] Hub: keyboard grid navigation (↑/↓/←/→ + Enter) and an ARIA live region
+      for filter results
+- [ ] Slot: progressive jackpot meter + free-spin bonus round
+- [ ] Plane: end-of-wave boss encounters with attack patterns
+- [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
+- [ ] Snake: daily challenge with a seeded RNG and a shared "daily seed"
+      shown on the hub
+- [ ] Farm: save-file export/import (download/upload JSON) for device migration
+- [ ] Mustang: third front (Korea, 1951) reusing the existing stage engine
+- [ ] Lighthouse CI gate (perf ≥ 90, a11y ≥ 90) wired into the deploy workflow
+- [ ] iOS install coaching overlay: detect Safari + standalone=no and show the
+      Share → Add to Home Screen hint inside each game
+- [ ] Opt-in settings sync across games via a single `random2-settings` blob
+      (theme, sound on/off, haptics on/off)
+- [ ] Snap Cam: video lenses (short clips) on top of the photo pipeline
+
+## CI
+
+Besides the Pages deploy, every push/PR runs
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+
+1. **JS syntax check** — `node --check` over every `.js` file (excluding
+   `node_modules`, `.venv`, `vendor/`, `dist/`, EADS), automatically switching
+   to module mode for files that use `import`/`export`.
+2. **Manifest JSON check** — every `manifest.json` / `*.webmanifest` must parse.
+3. **PWA audit** — every directory that ships a manifest must have an
+   `index.html` that links it.
 
 ## Privacy & performance
 

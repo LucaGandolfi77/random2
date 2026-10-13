@@ -137,12 +137,25 @@
         ctx.globalAlpha = 1;
     }
 
+    /* ===== Shared arcade helpers ===== */
+    function buzz(pattern) {
+        if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+    }
+    function markPlayed() {
+        try {
+            var map = JSON.parse(localStorage.getItem("random2-last-played") || "{}");
+            map["plane-pwa/"] = Date.now();
+            localStorage.setItem("random2-last-played", JSON.stringify(map));
+        } catch (e) {}
+    }
+
     /* ===== Game Init ===== */
     function init() {
         setupDOME();
         setupEventListeners();
         Sound.init();
         loadFromStorage();
+        markPlayed();
         setupServiceWorker();
         setupInstallPrompt();
         applyTheme(state.theme);
@@ -251,6 +264,7 @@
 
     function shootBullet() {
         Sound.shoot();
+        buzz(8);
         const angle = state.aimAngle;
         state.bullets.push({
             x: state.plane.x,
@@ -339,6 +353,7 @@
                 const dist = Math.hypot(dx, dy);
                 if (dist < b.life * 10 + e.r) {
                     Sound.hit();
+                    buzz(12);
                     spawnParticles(e.x, e.y, themes[state.theme].powerup, 6);
                     state.enemies.splice(j, 1);
                     state.score += 10 * (state.level || 1);
@@ -393,6 +408,7 @@
 
     function die() {
         Sound.gameOver();
+        buzz([60, 40, 80]);
         state.gameOver = true;
         state.paused = true;
         saveHighScore();
