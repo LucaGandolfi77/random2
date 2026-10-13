@@ -28,6 +28,7 @@
     bar:      { emoji: "🍹", name: "Beach Bar",  cat: "drink", cost: 220, serve: 5,  price: 15, caps: [1, 2, 3] },
     pool:     { emoji: "🏊", name: "Piscina",    cat: "relax", cost: 420, serve: 10, price: 26, caps: [2, 3, 4] },
     cabana:   { emoji: "🛖", name: "Cabana",     cat: "relax", cost: 750, serve: 12, price: 45, caps: [1, 2, 2] },
+    hotel:    { emoji: "🏨", name: "Hotel",      cat: "hotel", cost: 1200, night: 200 },
     palm:     { emoji: "🌴", name: "Palma",      cat: "decor", cost: 60,  beauty: 2 },
     torch:    { emoji: "🕯️", name: "Fiaccola",   cat: "decor", cost: 90,  beauty: 2 },
   };
@@ -95,6 +96,8 @@
     missionT: 1,
     dolphins: [],
     dolphinT: 10,
+    rot: 0,
+    hotelAcc: 0,
   };
   var uid = 0;
   var cam = { x: 0, y: 0, z: 1 };
@@ -140,16 +143,37 @@
   }
 
   /* ================= Iso math ================= */
+  /* ---- camera rotation (4 orientations): logical grid fixed, projection rotates ---- */
+  function rotPt(x, y) {
+    var N = 16;
+    switch (state.rot) {
+      case 1: return { x: N - 1 - y, y: x };
+      case 2: return { x: N - 1 - x, y: N - 1 - y };
+      case 3: return { x: y, y: N - 1 - x };
+      default: return { x: x, y: y };
+    }
+  }
+  function invRotPt(x, y) {
+    var N = 16;
+    switch (state.rot) {
+      case 1: return { x: y, y: N - 1 - x };
+      case 2: return { x: N - 1 - x, y: N - 1 - y };
+      case 3: return { x: N - 1 - y, y: x };
+      default: return { x: x, y: y };
+    }
+  }
   function gridToScreen(gx, gy, lift) {
-    var wx = (gx - gy) * (TILE_W / 2);
-    var wy = (gx + gy) * (TILE_H / 2) - (lift || 0);
+    var rp = rotPt(gx, gy);
+    var wx = (rp.x - rp.y) * (TILE_W / 2);
+    var wy = (rp.x + rp.y) * (TILE_H / 2) - (lift || 0);
     return { x: wx * cam.z + cam.x, y: wy * cam.z + cam.y };
   }
   function screenToGrid(sx, sy) {
     var wx = (sx - cam.x) / cam.z;
     var wy = (sy - cam.y) / cam.z;
     var a = wx / (TILE_W / 2), b = wy / (TILE_H / 2);
-    return { gx: (a + b) / 2, gy: (b - a) / 2 };
+    var g = invRotPt((a + b) / 2, (b - a) / 2);
+    return { gx: g.x, gy: g.y };
   }
   function diamondPts(gx, gy, w, d, lift) {
     var p1 = gridToScreen(gx - w / 2, gy - d / 2, lift);
@@ -198,7 +222,11 @@
         if (k !== "water") tileList.push({ gx: gx, gy: gy, kind: k });
       }
     }
-    tileList.sort(function (a, b) { return (a.gx + a.gy) - (b.gx + b.gy); });
+    // painter order must follow the ROTATED depth
+    tileList.sort(function (a, b) {
+      var ra = rotPt(a.gx, a.gy), rb = rotPt(b.gx, b.gy);
+      return (ra.x + ra.y) - (rb.x + rb.y);
+    });
   }
   function rebuildMap() {
     bmap = {};
@@ -587,7 +615,18 @@
       if (!R2.getSettings().music || !R2.getSettings().sound) return;
       if (document.hidden) return;
       if (!this.ensure()) return;
-      var sc = isNight() ? this.NIGHT : this.DAY;
+      // tempo & scala seguono meteo e notte
+      var rainy = state.weather && state.weather.id === "pioggia";
+      var cloudy = state.weather && state.weather.id === "nuvole";
+      var want = rainy ? 440 : (cloudy || isNight() ? 370 : 310);
+      if (this.cur !== want) {
+        this.cur = want;
+        clearInterval(this.timer);
+        var self = this;
+        this.timer = setInterval(function () { self.tick(); }, want);
+        return;
+      }
+      var sc = (isNight() || rainy) ? this.NIGHT : this.DAY;
       var s = this.step++;
       if (s % 4 === 0) this.note(sc[0] / 2, 0.5, "sine", 0.05);
       if (Math.random() < 0.72) {
@@ -613,9 +652,25 @@
       toast("🌙 Tramonto — gli arrivi rallentano");
     } else if (!nowNight && wasNight) {
       state.day++;
+      // 🏨 hotel overnight revenue
+      if (state.hotelAcc > 0) {
+        var inc = Math.round(state.hotelAcc);
+        state.coins += inc;
+        state.stats.earned += inc;
+        state.dayEarned += inc;
+        bumpCoins();
+        toast("🏨 Hotel: +" + fmt(inc) + " 💰 per la notte");
+        state.hotelAcc = 0;
+        save();
+      }
       toast("🌅 Giorno " + state.day + " · ieri +" + fmt(state.dayEarned) + " 💰, " + state.dayServed + " serviti");
       state.dayEarned = 0;
       state.dayServed = 0;
+    }
+    if (nowNight) {
+      var hl = 0;
+      state.buildings.forEach(function (b) { if (b.type === "hotel") hl += b.level; });
+      state.hotelAcc += hl * 8 * dt;
     }
     var ev = state.event && state.event.arrivals ? state.event.arrivals : 1;
     var nightFactor = nowNight ? 0.25 : 1;
@@ -698,6 +753,7 @@
     var rate = 0;
     state.buildings.forEach(function (b) {
       var c = CATALOG[b.type];
+      if (b.type === "hotel") { rate += b.level * 1.6; return; }
       if (c.price && c.serve) rate += (c.price * (1 + (b.level - 1) * 0.25)) / c.serve;
     });
     rate *= OFFLINE_RATE;
@@ -841,8 +897,9 @@
   }
 
   function clampCam() {
-    var wxC = (CENTER - CENTER) * (TILE_W / 2) * cam.z;
-    var wyC = (CENTER + CENTER) * (TILE_H / 2) * cam.z;
+    var rc = rotPt(CENTER, CENTER);
+    var wxC = (rc.x - rc.y) * (TILE_W / 2) * cam.z;
+    var wyC = (rc.x + rc.y) * (TILE_H / 2) * cam.z;
     cam.x = clamp(cam.x, view.w * 0.3 - wxC, view.w * 0.7 - wxC);
     cam.y = clamp(cam.y, view.h * 0.3 - wyC, view.h * 0.85 - wyC);
   }
@@ -908,6 +965,14 @@
       info = "Decorazione · bellezza +";
       upBtn.disabled = true;
       upBtn.textContent = "⬆️ Max";
+    } else if (c.cat === "hotel") {
+      var costH = Math.round(c.cost * 0.9 * b.level);
+      info = "Incassi per notte: " + fmt(b.level * 200) + " 💰";
+      if (b.level >= 3) { upBtn.disabled = true; upBtn.textContent = "⬆️ Max"; }
+      else {
+        upBtn.disabled = state.coins < costH;
+        upBtn.textContent = "⬆️ Migliora · " + fmt(costH);
+      }
     } else {
       var cost = Math.round(c.cost * 0.9 * b.level);
       info = b.type === "pool" || b.type === "cabana" || b.type === "umbrella" ? "Relax" :
@@ -1231,6 +1296,39 @@
         }
         break;
       }
+      case "hotel": {
+        var bot = diamondPts(b.gx, b.gy, 0.8, 0.8, 0);
+        var htop = drawPrism(b.gx, b.gy, 0.8, 0.8, 26, "#e8edf4");
+        var night = isNight();
+        for (var face = 0; face < 2; face++) {
+          var eA = face === 0 ? 3 : 1;
+          for (var fl = 1; fl <= 3; fl++) {
+            for (var wc2 = 0; wc2 < 2; wc2++) {
+              var u = wc2 === 0 ? 0.3 : 0.68;
+              var v = fl / 4;
+              var te = lerp(htop[eA], htop[2], u);
+              var be = lerp(bot[eA], bot[2], u);
+              var wp = { x: lerp(te.x, be.x, v), y: lerp(te.y, be.y, v) };
+              ctx.fillStyle = night ? "#fde047" : "#334155";
+              ctx.fillRect(wp.x - 1.6 * z, wp.y - 1.6 * z, 3.2 * z, 3.2 * z);
+            }
+          }
+        }
+        var ap = gridToScreen(b.gx, b.gy, 32);
+        ctx.strokeStyle = "#94a3b8";
+        ctx.lineWidth = 1.4 * z;
+        ctx.beginPath();
+        ctx.moveTo(ap.x, ap.y);
+        ctx.lineTo(ap.x, ap.y - 9 * z);
+        ctx.stroke();
+        var wave = Math.sin(t * 6 + b.gx) * 1.6 * z;
+        poly([
+          { x: ap.x, y: ap.y - 9 * z },
+          { x: ap.x + 7 * z, y: ap.y - 7.5 * z + wave },
+          { x: ap.x, y: ap.y - 6 * z },
+        ], "#f43f5e");
+        break;
+      }
       case "cabana": {
         drawPrism(b.gx, b.gy, 0.74, 0.74, 15, "#b45309");
         var apex = gridToScreen(b.gx, b.gy, 30);
@@ -1299,8 +1397,8 @@
         circle(ctr.x + (p2 - (b.level - 2) / 2) * 7 * z, ctr.y - 4 * z, 2 * z, "#fbbf24");
       }
     }
-    // night windows
-    if (isNight() && c.cat !== "decor" && b.type !== "pool") {
+    // night windows (not on hotel: it has its own lit facade)
+    if (isNight() && c.cat !== "decor" && b.type !== "pool" && b.type !== "hotel") {
       circle(ctr.x - 4 * z, ctr.y - 7 * z, 1.4 * z, "rgba(253,224,71,0.9)");
       circle(ctr.x + 4 * z, ctr.y - 7 * z, 1.4 * z, "rgba(253,224,71,0.9)");
     }
@@ -1443,9 +1541,18 @@
     drawDolphins();
     drawIsland(t);
     var items = [];
-    state.buildings.forEach(function (b) { items.push({ d: b.gx + b.gy, fn: function () { drawBuilding(b, t); } }); });
-    state.guests.forEach(function (g) { items.push({ d: g.x + g.y + 0.1, fn: function () { drawGuest(g, t); } }); });
-    state.boats.forEach(function (b) { items.push({ d: b.y, fn: function () { drawBoat(b, t); } }); });
+    state.buildings.forEach(function (b) {
+      var rb = rotPt(b.gx, b.gy);
+      items.push({ d: rb.x + rb.y, fn: function () { drawBuilding(b, t); } });
+    });
+    state.guests.forEach(function (g) {
+      var rg = rotPt(g.x, g.y);
+      items.push({ d: rg.x + rg.y + 0.1, fn: function () { drawGuest(g, t); } });
+    });
+    state.boats.forEach(function (b) {
+      var rb = rotPt(b.x, b.y);
+      items.push({ d: rb.x + rb.y, fn: function () { drawBoat(b, t); } });
+    });
     items.sort(function (a, b2) { return a.d - b2.d; });
     items.forEach(function (it) { it.fn(); });
     state.guests.forEach(function (g) { drawBubble(g, t); });
@@ -1542,9 +1649,9 @@
     view.w = stage.clientWidth || window.innerWidth;
     view.h = stage.clientHeight || window.innerHeight;
     cam.z = clamp(view.w / 560, 0.6, 1.15);
-    var c0 = { wx: 0, wy: (CENTER + CENTER) * (TILE_H / 2) };
-    cam.x = view.w / 2 - c0.wx * cam.z;
-    cam.y = view.h / 2 - c0.wy * cam.z;
+    var rc = rotPt(CENTER, CENTER);
+    cam.x = view.w / 2 - ((rc.x - rc.y) * (TILE_W / 2)) * cam.z;
+    cam.y = view.h / 2 - ((rc.x + rc.y) * (TILE_H / 2)) * cam.z;
     resize();
     window.addEventListener("resize", resize);
 
@@ -1571,6 +1678,53 @@
       toast(s.music ? "🎵 Musica calypso on" : "🎵 Musica off");
     });
     document.getElementById("photo-btn").addEventListener("click", sharePhoto);
+    document.getElementById("rot-btn").addEventListener("click", function () {
+      state.rot = (state.rot + 1) % 4;
+      rebuildTiles();
+      clampCam();
+      Sound.play(500, 0.08, "triangle");
+      R2.buzz(8);
+      toast("🔄 Camera ruotata");
+    });
+    var savemenu = document.getElementById("save-menu");
+    document.getElementById("save-btn").addEventListener("click", function () {
+      savemenu.classList.toggle("hidden");
+    });
+    document.getElementById("export-btn").addEventListener("click", function () {
+      savemenu.classList.add("hidden");
+      save();
+      var data = JSON.stringify(R2.loadJSON(SAVE_KEY, {}), null, 2);
+      var blob = new Blob([data], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "isola-resort-save.json";
+      a.click();
+      toast("💾 Salvataggio esportato!");
+    });
+    var fileInput = document.getElementById("import-file");
+    document.getElementById("import-btn").addEventListener("click", function () {
+      savemenu.classList.add("hidden");
+      fileInput.click();
+    });
+    fileInput.addEventListener("change", function () {
+      var f = fileInput.files && fileInput.files[0];
+      fileInput.value = "";
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var data = JSON.parse(reader.result);
+          if (!data || data.v !== 1 || typeof data.coins !== "number") throw new Error("bad");
+          R2.saveJSON(SAVE_KEY, data);
+          toast("📥 Salvataggio importato!");
+          setTimeout(function () { location.reload(); }, 600);
+        } catch (e) {
+          Sound.error();
+          toast("❌ File di salvataggio non valido");
+        }
+      };
+      reader.readAsText(f);
+    });
     // browsers allow audio only after a gesture: kick the sequencer on first tap
     var kick = function () { Music.start(); document.removeEventListener("pointerdown", kick); };
     document.addEventListener("pointerdown", kick);

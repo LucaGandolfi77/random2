@@ -1,5 +1,5 @@
 /* ===== Isola Resort Tycoon — service worker ===== */
-const CACHE_NAME = "resort-pwa-v2";
+const CACHE_NAME = "resort-pwa-v3";
 const ASSETS = [
     "./",
     "./index.html",

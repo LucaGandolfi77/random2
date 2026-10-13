@@ -235,9 +235,18 @@ touch them**, so a bad run can never cost you progress.
   keyboard parity, haptics
 - Fully synthesised WebAudio — no audio assets. Zero art assets of any kind
 - Everything that churns is a fixed pool: no allocation in the draw or sim path
-- Headless tests: 111 simulation/economy checks and 67 render checks, including
-  a difficulty-curve test that runs the sector twice — as a rookie and as a
-  banked pilot — and asserts the intro is survivable and the late game is not
+- Hand-rolled facet-mesh renderer on Canvas 2D (no WebGL): two primitives,
+  flat-shaded through a sheared oblique projection, per-face lighting in one dot
+  product, back-face culling driven by the projection's own view vector
+- Headless tests: **284 checks across three suites** — simulation/economy,
+  render, and a full app boot against a fake DOM that drives menu → launch →
+  touch steering → dock → upgrade → repair → undock → die → relaunch without a
+  browser. The render suite compares every drawn polygon against an
+  independent projection, which is the only check that catches geometry that is
+  subtly wrong rather than broken; the boot suite asserts every button in the
+  markup is actually wired
+- Includes a difficulty-curve test that runs the sector twice, as a rookie and
+  as a banked pilot, asserting the intro is survivable and the late game is not
 
 **Files:** `index.html`, `styles.css`, `src/` (`config`, `storage`, `world`,
 `render`, `stations`, `input`, `player`, `npcs`, `audio`, `ui`, `main`),
@@ -317,8 +326,9 @@ che portano ospiti con desideri da soddisfare. Zero build step, zero asset.
 - **🎯 Catena di 10 missioni** con ricompense automatiche (dal "servi 5 ospiti"
   alla "cabana di livello 3"), mostrate nell'HUD
 - **🎵 Musica calypso generativa:** sequencer WebAudio senza file — basso,
-  marimba random-walk su scala pentatonica e luccichii; la notte la scala si
-  scurisce. Toggle 🎵 nell'HUD, rispetta le impostazioni globali
+  marimba random-walk su scala pentatonica e luccichii; tempo e scala seguono
+  notte e meteo (pioggia = più lenta e malinconica). Toggle 🎵 nell'HUD,
+  rispetta le impostazioni globali
 - **Ospiti vivi:** figure low-poly con camminata animata, bolla-desiderio e
   barra di pazienza; se aspettano troppo vanno via arrabbiati (−reputazione)
 - **7 costruzioni** in catalogo, ognuna disegnata a mano in geometria iso
@@ -326,6 +336,12 @@ che portano ospiti con desideri da soddisfare. Zero build step, zero asset.
   livelli** di potenziamento (capacità e prezzo +25% per livello) e vendita al 50%
 - **Espansione dell'isola:** compra gli anelli di sabbia (🔒 sull'acqua) per
   sbloccare nuovi lotti — 650 e 1600 monete
+- **🏨 Hotel** con ospiti overnight: entrate passive accumulate durante la
+  notte e incassate all'alba (200 × livello a notte), facciata con finestre
+  che si illuminano e bandiera sul tetto; conta anche per i guadagni offline
+- **🔄 Camera rotabile** su 4 orientazioni (roundtrip matematico verificato:
+  proiezione, picking e painter's algorithm seguono la rotazione)
+- **💾 Export/import del salvataggio** (file JSON validato) dal menu 💾
 - **Ciclo giorno/notte** (~2 min): alba, tramonto, stelle, finestre illuminate
   e fiaccole con alone luminoso; la notte gli arrivi rallentano
 - **Eventi giornalieri** da `R2.dailySeed()`: giornata di punta (+50% arrivi),
@@ -591,6 +607,9 @@ a PR — keep this list honest.
 
 ### ✅ Done
 
+- [x] **Isola Resort Tycoon wave 3:** hotel con entrate notturne, camera
+      rotabile su 4 orientazioni (roundtrip verificato su tutte le celle),
+      export/import del salvataggio, tempo musicale scalato su meteo/notte
 - [x] **Isola Resort Tycoon wave 2:** ospiti VIP (4× payout), meteo dinamico
       con tuoni, catena di 10 missioni, musica calypso generativa (WebAudio
       senza file), delfini, postcard condivisibili
@@ -602,8 +621,8 @@ a PR — keep this list honest.
       NPC tier escalation. Docking station with five upgrade tracks and a
       launch fee. 8 NPC tiers, destructible rock fields, energy crates,
       thumb-anchored stick + pads + soft auto-aim. Fixed pools throughout, DPR
-      capped at 2, quality auto-detected from measured frame time. 178 headless
-      checks across two suites, no build step, no dependencies
+      capped at 2, quality auto-detected from measured frame time. 284 headless
+      checks across three suites, no build step, no dependencies
 - [x] **Isola Resort Tycoon** — new game: isometric low-poly resort manager
       (Italian UI) with guest desires, reputation, upgrades, island expansion,
       day/night, daily events, offline earnings
@@ -654,8 +673,6 @@ a PR — keep this list honest.
 - [ ] Hub: extend theme sync so games follow the hub's dark/light choice
 - [ ] Hub: live daily-challenge standings (compare `snake-daily` highs
       across… friends? a static JSON? needs a design)
-- [ ] Isola Resort: camera rotation (4 orientations), save export/import,
-      weather-scaled music tempo, hotel building with overnight guests
 - [ ] Plane: end-of-wave boss encounters with attack patterns
 - [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
 - [ ] Farm: save-file export/import (download/upload JSON) for device migration

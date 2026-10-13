@@ -207,6 +207,25 @@ html, body {
 }
 #toast.hidden { display: none; }
 
+#save-menu {
+  position: fixed;
+  top: calc(118px + var(--sat));
+  right: max(10px, var(--sar));
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 10px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.7);
+}
+#save-menu.hidden { display: none; }
+#save-menu .btn { white-space: nowrap; }
+
 .overlay {
   position: fixed;
   inset: 0;

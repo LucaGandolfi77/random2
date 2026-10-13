@@ -26,6 +26,8 @@
       </div>
       <div class="hud-right">
         <button id="photo-btn" class="iconbtn" aria-label="Cartolina">📸</button>
+        <button id="rot-btn" class="iconbtn" aria-label="Ruota camera">🔄</button>
+        <button id="save-btn" class="iconbtn" aria-label="Salvataggio">💾</button>
         <button id="music-btn" class="iconbtn" aria-label="Musica">🎵</button>
         <button id="help-btn" class="iconbtn" aria-label="Aiuto">❓</button>
         <button id="sound-btn" class="iconbtn" aria-label="Audio">🔊</button>
@@ -63,6 +65,12 @@
     </footer>
 
     <div id="toast" class="hidden"></div>
+
+    <div id="save-menu" class="hidden">
+      <button id="export-btn" class="btn">💾 Esporta salvataggio</button>
+      <button id="import-btn" class="btn">📥 Importa salvataggio</button>
+    </div>
+    <input type="file" id="import-file" accept=".json,application/json" hidden>
 
     <div id="modal" class="overlay hidden">
       <div class="sheet">
