@@ -22,6 +22,7 @@
   - [LUMEN](#lumen)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
+  - [Isola Resort](#isola-resort)
   - [BUCIO](#bucio)
   - [Snap Cam](#snap-cam)
 - [The tools](#the-tools)
@@ -49,9 +50,10 @@
 | 5 | **LUMEN** | Bioluminescent .io survival | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/lumen-pwa/) |
 | 6 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
 | 7 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 8 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 9 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 10 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 8 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 9 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 10 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 11 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -187,14 +189,20 @@ creatures' glow halos long before their bodies, which is most of the tension.
   boost while they lie stunned
 - Corpses drop as edible meat worth 60% of mass, so you can watch your own death
   get scavenged by someone who was waiting for it
+- **Four depth zones** — Sunlit / Twilight / Midnight / Trenches. The darkness
+  itself is tinted per band, so depth reads through the fog; shallows are
+  bright but empty, the trenches dark but rich and crawling with jellyfish and
+  anglerfish
 - Fog of war via a light mask composited through `destination-out` radial
-  gradients, plus marine-snow parallax, bloom and depth-tracking synth drone
-- 3-second spectate of your killer, kill feed, live leaderboard, minimap
+  gradients, plus marine-snow parallax, bloom and a depth-tracking synth drone
+- Vertical depth meter, 3-second spectate of your killer, kill feed, live
+  leaderboard, minimap
 - Fully synthesised WebAudio — no audio assets at all
 
-**Files:** `index.html`, `styles.css`, `src/` (`config`, `storage`, `world`,
-`render`, `player`, `bots`, `audio`, `ui`, `main`), `manifest.json`,
-`service-worker.js`, `icons/`. See [`lumen-pwa/README.md`](lumen-pwa/README.md).
+**Files:** `index.html`, `styles.css`, `src/` (`config`, `zones`, `storage`,
+`world`, `render`, `player`, `bots`, `audio`, `ui`, `main`), `manifest.json`,
+`service-worker.js`, `icons/`, `tests/sim.test.js`. See
+[`lumen-pwa/README.md`](lumen-pwa/README.md).
 
 ### Mustang 1942
 
@@ -248,6 +256,40 @@ per few real seconds), so the farm keeps living while you plan.
 `service-worker.js`, `icons/`. See
 [`virtual-farm-pwa/README.md`](virtual-farm-pwa/README.md) for the full
 economy tables.
+
+### Isola Resort
+
+*Costruisci il resort dei sogni su un'isola low-poly.* 🏝️
+
+Un tycoon isometrico in italiano, interamente procedurale: acqua sfaccettata
+animata, isola con elevazione, ombrelloni, palme che ondeggiano, barche a vela
+che portano ospiti con desideri da soddisfare. Zero build step, zero asset.
+
+- **Loop tycoon completo:** le barche attraccano al molo con ospiti che vogliono
+  relax 🏖️, cibo 🍕 o drink 🍹 → costruisci ombrelloni, chioschi, beach bar,
+  piscine e cabane per servirli → ogni servizio pagato alza la **reputazione** →
+  arrivano più barche (e mance più ricche con reputazione ≥ 80)
+- **Ospiti vivi:** figure low-poly con camminata animata, bolla-desiderio e
+  barra di pazienza; se aspettano troppo vanno via arrabbiati (−reputazione)
+- **7 costruzioni** in catalogo, ognuna disegnata a mano in geometria iso
+  (tetti a piramide a strisce, ombrelloni, piscine con acqua animata), con **3
+  livelli** di potenziamento (capacità e prezzo +25% per livello) e vendita al 50%
+- **Espansione dell'isola:** compra gli anelli di sabbia (🔒 sull'acqua) per
+  sbloccare nuovi lotti — 650 e 1600 monete
+- **Ciclo giorno/notte** (~2 min): alba, tramonto, stelle, finestre illuminate
+  e fiaccole con alone luminoso; la notte gli arrivi rallentano
+- **Eventi giornalieri** da `R2.dailySeed()`: giornata di punta (+50% arrivi),
+  acqua colorata (+15% prezzi), festa del villaggio (+25% mance)
+- **Guadagni offline** (cap 8h, efficienza 40%) con pannello di benvenuto al
+  rientro, **bonus giornaliero** crescente e riepilogo a inizio giornata
+- **Camera:** trascina per esplorare, pinch/rotella per zoom, tap per
+  costruire o gestire; ghost-preview verde/rosso sul lotto
+- Autosave ogni 6s + su chiusura; statistiche (serviti/persi/guadagni) nel
+  dashboard dei record dell'hub
+
+**Files:** `index.html`, `styles.css`, `game.js` (~1000 righe vanilla),
+`manifest.json`, `service-worker.js`, `icons/` (SVG), `shared/arcade.js`
+tramite `../shared/`.
 
 ### BUCIO
 
@@ -414,6 +456,7 @@ random2/
 ├── mustang-pwa/            # static PWA, code split into src/ modules + tests
 ├── lumen-pwa/              # static PWA, src/ modules + headless sim test
 ├── snap-pwa/               # static PWA + vendored MediaPipe engine
+├── resort-pwa/             # isometric tycoon (Italian UI), vanilla Canvas 2D
 │
 ├── bucio/                  # three.js game, Vite project → dist/ on deploy
 │   ├── src/                #   ES modules (core, world, game, ui)
@@ -496,6 +539,9 @@ a PR — keep this list honest.
 
 ### ✅ Done
 
+- [x] **Isola Resort Tycoon** — new game: isometric low-poly resort manager
+      (Italian UI) with guest desires, reputation, upgrades, island expansion,
+      day/night, daily events, offline earnings
 - [x] Snake **daily challenge**: third game mode driven by `R2.dailySeed()` +
       a mulberry32 seeded RNG (food, power-ups and obstacle placement), with a
       per-day high score in `snake-daily`; the hub shows the live seed
@@ -511,8 +557,8 @@ a PR — keep this list honest.
       blip engine, particle system, JSON storage helpers, global
       sound/haptics settings and play-tracking — the four simple games now
       load it instead of carrying ~90 copied lines each
-- [x] Live animated mini-previews rendered inside hub card tiles (one rAF
-      loop, IntersectionObserver-gated, reduced-motion aware)
+- [x] Live animated mini-previews rendered inside hub card tiles — later
+      removed during the LUMEN hub rework (re-add is on the Planned list)
 - [x] Hub: keyboard grid navigation (arrows / Home / End / Enter) + ARIA live
       region announcing filter results
 - [x] Shared settings blob `random2-settings` (sound / haptics) with hub
@@ -539,17 +585,17 @@ a PR — keep this list honest.
 
 ### 🗺️ Planned
 
-- [ ] Hub: total-playtime stat (needs an opt-in per-game play timer)
+- [ ] Hub: re-add live tile previews (dropped during the LUMEN rework)
 - [ ] Hub: extend theme sync so games follow the hub's dark/light choice
 - [ ] Hub: live daily-challenge standings (compare `snake-daily` highs
       across… friends? a static JSON? needs a design)
+- [ ] Isola Resort: camera rotation (4 orientations), save export/import,
+      decorations with satisfaction auras, weather events
 - [ ] Plane: end-of-wave boss encounters with attack patterns
 - [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
 - [ ] Farm: save-file export/import (download/upload JSON) for device migration
 - [ ] Mustang: third front (Korea, 1951) reusing the existing stage engine
 - [ ] Lighthouse CI gate (perf ≥ 90, a11y ≥ 90) wired into the deploy workflow
-- [ ] iOS install coaching overlay: detect Safari + standalone=no and show the
-      Share → Add to Home Screen hint inside each game
 - [ ] Opt-in settings sync across games via a single `random2-settings` blob:
       theme preference inside games, difficulty presets, reduce-motion override
 - [ ] Snap Cam: video lenses (short clips) on top of the photo pipeline

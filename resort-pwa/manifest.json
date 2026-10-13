@@ -1,0 +1,18 @@
+{
+  "name": "Isola Resort Tycoon",
+  "short_name": "Isola Resort",
+  "description": "Costruisci il resort dei sogni su un'isola low-poly: ospiti, barche, cocktail e tramonti. Gioca offline, espandi l'isola, fai soddisfatti tutti.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#062a33",
+  "theme_color": "#0e7490",
+  "lang": "it",
+  "categories": ["games", "simulation"],
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

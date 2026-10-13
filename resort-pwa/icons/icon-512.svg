@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0e7490"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="112" fill="url(#sea)"/>
+  <circle cx="372" cy="122" r="48" fill="#fde68a"/>
+  <polygon points="256,196 406,278 256,358 106,278" fill="#fcd34d"/>
+  <polygon points="256,224 352,278 256,330 160,278" fill="#4ade80"/>
+  <path d="M256 278 Q278 208 266 165" stroke="#92400e" stroke-width="19" fill="none" stroke-linecap="round"/>
+  <path d="M266 165 L218 138 262 133 Z M266 165 L315 143 299 181 Z M266 165 L229 192 277 197 Z" fill="#22c55e"/>
+  <polygon points="160,368 256,330 352,368 256,394" fill="#fbbf24"/>
+</svg>

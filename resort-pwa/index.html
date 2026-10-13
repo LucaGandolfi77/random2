@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Isola Resort Tycoon</title>
+  <meta name="description" content="Costruisci il resort dei sogni su un'isola low-poly: ospiti, barche, cocktail e tramonti. Installabile e giocabile offline.">
+  <meta name="theme-color" content="#0e7490">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Isola Resort">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header id="hud">
+      <div class="hud-left">
+        <span class="pill coins">💰 <b id="coins">0</b></span>
+        <span class="pill">🧍 <b id="guests">0</b></span>
+        <span class="pill">🌸 <b id="beauty">0</b></span>
+      </div>
+      <div class="hud-right">
+        <button id="help-btn" class="iconbtn" aria-label="Aiuto">❓</button>
+        <button id="sound-btn" class="iconbtn" aria-label="Audio">🔊</button>
+      </div>
+      <div class="hud-row2">
+        <span id="day-label">☀️ Giorno 1</span>
+        <span class="repwrap" title="Reputazione"><span id="repbar"><i id="repfill"></i></span></span>
+        <span id="event-label"></span>
+      </div>
+    </header>
+
+    <main id="stage">
+      <canvas id="game"></canvas>
+    </main>
+
+    <footer id="dockui">
+      <div id="panel" class="hidden">
+        <div class="panel-head">
+          <span id="panel-emoji"></span>
+          <b id="panel-name"></b>
+          <span id="panel-lvl" class="lvl"></span>
+          <button id="panel-close" class="iconbtn" aria-label="Chiudi">✕</button>
+        </div>
+        <div class="panel-body">
+          <span id="panel-info"></span>
+          <div class="panel-actions">
+            <button id="panel-up" class="btn primary">⬆️ Migliora</button>
+            <button id="panel-sell" class="btn danger">💰 Vendi</button>
+          </div>
+        </div>
+      </div>
+      <nav id="buildbar" aria-label="Costruzioni"></nav>
+      <button id="cancel-build" class="btn ghost hidden">✕ Annulla</button>
+    </footer>
+
+    <div id="toast" class="hidden"></div>
+
+    <div id="modal" class="overlay hidden">
+      <div class="sheet">
+        <h2 id="modal-title"></h2>
+        <p id="modal-msg"></p>
+        <button id="modal-btn" class="btn primary">Va bene!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/arcade.js"></script>
+  <script src="game.js"></script>
+  <script src="service-worker.js"></script>
+</body>
+</html>
