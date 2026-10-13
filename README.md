@@ -21,6 +21,7 @@
   - [Snake](#snake)
   - [LUMEN](#lumen)
   - [SECTOR 7](#sector-7)
+  - [SINI](#sini)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
   - [Isola Resort](#isola-resort)
@@ -50,12 +51,13 @@
 | 4 | **Snake** | Retro arcade | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/snake-pwa/) |
 | 5 | **LUMEN** | Bioluminescent .io survival | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/lumen-pwa/) |
 | 6 | **SECTOR 7** | Low-poly space combat | Canvas 2D (facet meshes) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sector7-pwa/) |
-| 7 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 8 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 9 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 10 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 11 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 12 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 7 | **SINI** | Living-brushstroke .io (sumi-e) | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sini-pwa/) |
+| 8 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 9 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 10 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 11 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 12 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 13 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -210,9 +212,9 @@ creatures' glow halos long before their bodies, which is most of the tension.
 
 *Low-poly space combat, one thumb.* 🛰️
 
-A *Darkorbit*-flavoured single-player game: one ship, one sector, no clock.
+A *Darkorbit*-flavoured single-player game: one ship, four sectors, no clock.
 Harvest **energy** and **crystals**, shoot pirates across eight tiers, dock at
-the station and spend the proceeds on five upgrade tracks. Death costs you the
+the station and spend the proceeds on seven upgrade tracks. Death costs you the
 energy on your hull and nothing else — **crystals are banked the moment you
 touch them**, so a bad run can never cost you progress.
 
@@ -220,18 +222,32 @@ touch them**, so a bad run can never cost you progress.
   and it drops on your deck when you die (fly back and reclaim it before it
   expires); **crystals** are permanent, and they are also the **escalation
   dial** — the sector only spawns the tiers you have earned the right to fight
-- Space station: hold `DOCK` inside the ring to repair and upgrade. Docking is
-  a loan, not a gift — a slice of your energy is charged as the launch fee
-- Five module tracks (Blaster, Shield, Armor, Processor, Thruster) at ten
-  levels each, every one of them showing the concrete numbers it buys
-- **Destructible rock fields** hiding crystal caches, loose energy crates, and
-  eight NPC tiers with patrol / attack / flee AI that fight each other as well
-  as you — the sector keeps moving while you are docked
+- **Four sectors**, each with its own rock field, palette, NPC cap and payout
+  multiplier: ROOK (no hazard), KESTREL (ion storms that make the stick lie),
+  VANTA (nebulae that eat your regeneration), MAW (gravity wells that bend
+  every trajectory). Gated on *lifetime* crystals, so buying something can
+  never lock a map back up
+- Space station with four tabs: modules (energy), contracts (rotating
+  objectives paying crystals), refits (permanent perks — salvage rig, frame
+  plating, tractor field, survey suite, broker contact), and the sector map.
+  Docking is a loan, not a gift — a slice of your energy is charged on launch
+- **Bounty hunters**: a named rival arrives on a timer, knows where you are
+  from the moment it spawns, and its price climbs the longer it lives. The one
+  that killed you last time comes back
+- Seven module tracks (Blaster, Shield, Armor, Processor, Thruster, Missiles,
+  Mines) at ten levels each, every one of them showing the concrete numbers it
+  buys. Missiles are a lock-on burst that cuts through armour; mines are the
+  only defence that works while you are running away from something faster
+- **Destructible rock fields** — rocks holding a big crystal cache are visibly
+  marked, because an undifferentiated field tells you nothing about what is
+  worth shooting — plus loose energy crates, and eight NPC tiers with patrol /
+  attack / flee AI that fight each other as well as you
 - **Low-poly without WebGL**: every hull, rock, crate and the station is a facet
   mesh built from two primitives, drawn flat-shaded through an oblique
   projection. Per-face lighting is one dot product per face; the view vector is
   derived from the projection so back-face culling can never drift
-- Thumb-anchored virtual stick, `FIRE`/`DOCK` pads, soft turret auto-aim, full
+- Thumb-anchored virtual stick, `FIRE`/`MSL`/`MINE`/`DOCK` pads, soft turret
+  auto-aim, directional damage indicators, an off-screen station marker, full
   keyboard parity, haptics
 - Fully synthesised WebAudio — no audio assets. Zero art assets of any kind
 - Everything that churns is a fixed pool: no allocation in the draw or sim path
@@ -253,6 +269,42 @@ touch them**, so a bad run can never cost you progress.
 `manifest.json`, `service-worker.js`, `icons/`, `scripts/gen-icons.mjs`,
 `tests/sim.test.js`, `tests/render.test.js`. See
 [`sector7-pwa/README.md`](sector7-pwa/README.md).
+
+### SINI
+
+*Sei un tratto di inchiostro sumi vivo su carta di riso.* 🖌️
+
+Un .io calligrafico con un'estetica che quasi nessun gioco osa: carta beige
+con grana, inchiostro nero che sanguina, un solo sigillo rosso. Niente sprite,
+niente gradienti arcade — solo inchiostro, acqua e carta.
+
+- **Il hook — bagnato vs secco:** il tuo inchiostro secca col tempo. **Bagnato**
+  = scorri veloce, viri stretto, e la tua scia **evapora** senza lasciare traccia.
+  **Secco** = lasci segni **permanenti** che diventano trappole letali per tutti,
+  te compreso. Dipingere è l'unico modo di punteggiare — quindi l'avidità ti
+  secca letteralmente nel tuo stesso cimitero
+- **Punteggio = foglio dipinto:** la classifica misura la percentuale di carta
+  che hai coperto di inchiostro permanente; quando il foglio supera il 60% la
+  pergamena è completa e si inizia un nuovo foglio
+- **Il foglio è finito:** i bordi uccidono — una linea di seta rosso-marrone
+  visibile, cosa rarissima negli .io. L'inchiostro che tocca il bordo colasca
+  via per sempre
+- **Gocce d'acqua:** si telegrafano con un'ombra che cresce, poi cancellano i
+  segni in un raggio (la mappa si auto-pulisce) — e assorbono il tuo corpo se
+  ci finisci dentro. Troppo poco inchiostro = dissolvenza
+- **Pietre d'inchiostro** ⚫ per re-idratarti e allungare il tratto; **scatto**
+  (tieni premuto / SPAZIO / pulsante) che beve il tuo inchiostro
+- **🔴 Il sigillo rosso:** se raro, chi lo prende rende istantaneamente
+  permanente tutta la propria scia con bonus — il momento "maestro"
+- **Cimitero con firma:** quando muori, un sigillo rosso col tuo nome viene
+  timbrato dove sei caduto — e resta sul foglio per sempre
+- **6 bot calligrafi** (Bokuseki, Kami, Ichimonji…) con AI che dipinge, cerca
+  pietre e evita l'inchiostro secco — i loro cadaveri diventano ostacoli
+- Grana della carta procedural pattern, bordi che sanguinano, minimappa a
+  pergamena, HUD in stile sumi-e
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
 
 ### Mustang 1942
 
@@ -610,6 +662,10 @@ a PR — keep this list honest.
 - [x] **Isola Resort Tycoon wave 3:** hotel con entrate notturne, camera
       rotabile su 4 orientazioni (roundtrip verificato su tutte le celle),
       export/import del salvataggio, tempo musicale scalato su meteo/notte
+- [x] **SINI** — new game: living-brushstroke .io (sumi-e) with the wet/dry
+      ink mechanic, permanent lethal calligraphy, finite paper edges, erasing
+      water droplets, red seal stamp graveyard, painting-percentage scoring,
+      spatial-hash collisions and 6 painting bots
 - [x] **Isola Resort Tycoon wave 2:** ospiti VIP (4× payout), meteo dinamico
       con tuoni, catena di 10 missioni, musica calypso generativa (WebAudio
       senza file), delfini, postcard condivisibili
@@ -673,6 +729,12 @@ a PR — keep this list honest.
 - [ ] Hub: extend theme sync so games follow the hub's dark/light choice
 - [ ] Hub: live daily-challenge standings (compare `snake-daily` highs
       across… friends? a static JSON? needs a design)
+- [ ] **MYCEL** — the fungal network .io: sacrifice body length to sprout
+      2–3 steerable tendrils (one finger per tip), parasites, toxic zones,
+      bioluminescent hyphae in dark soil. Highest ceiling, highest risk
+- [ ] **STATIC** — pirate broadcast signal .io: crawl a dead cable network
+      eating packets and seizing CRTs; censor bands hunt you. Optional
+      same-WiFi notification hijack behind explicit user opt-in
 - [ ] Plane: end-of-wave boss encounters with attack patterns
 - [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
 - [ ] Farm: save-file export/import (download/upload JSON) for device migration

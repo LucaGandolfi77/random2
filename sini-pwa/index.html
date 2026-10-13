@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SINI — Inchiostro Vivo</title>
+  <meta name="description" content="Sei un tratto di inchiostro sumi vivo su carta di riso. L'inchiostro bagnato evapora, quello secco resta per sempre — e diventa una trappola. .io calligrafico.">
+  <meta name="theme-color" content="#191410">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SINI">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header id="hud">
+      <div class="hud-left">
+        <span class="pill ink">🖌️ <b id="painted">0.00%</b> <span class="lbl">del foglio</span></span>
+        <div class="wetwrap" title="Inchiostro bagnato">
+          <div id="wetbar"><i id="wetfill"></i></div>
+          <span class="wetlbl" id="wetlbl">bagnato</span>
+        </div>
+      </div>
+      <div class="hud-right">
+        <canvas id="minimap" width="96" height="128"></canvas>
+      </div>
+    </header>
+
+    <main id="stage">
+      <canvas id="game"></canvas>
+      <ol id="leaderboard" aria-label="Classifica"></ol>
+      <button id="dash-btn" aria-label="Scatto">⏩</button>
+    </main>
+
+    <div id="modal" class="overlay">
+      <div class="sheet">
+        <div class="titlewrap">
+          <h1 id="modal-title">SINI</h1>
+          <div id="death-seal" class="seal hidden"><span id="seal-name"></span></div>
+        </div>
+        <p id="modal-msg">Sei un tratto di inchiostro sumi vivo su carta di riso.</p>
+        <p class="howto" id="modal-howto">
+          • Muovi il dito o il mouse: il pennello ti segue<br>
+          • Tieni premuto (o SPAZIO) = scatto, ma beve il tuo inchiostro<br>
+          • L'inchiostro <b>bagnato</b> evapora: nessuna traccia, virate rapide<br>
+          • L'inchiostro <b>secco</b> resta per sempre — e diventa una trappola<br>
+          • Mangia le pietre d'inchiostro ⚫ per restare bagnato<br>
+          • Le gocce d'acqua cancellano i segni... e anche te<br>
+          • Dipingi il foglio, ma attenzione: l'avidità ti secca nel tuo stesso cimitero
+        </p>
+        <div id="modal-stats" class="stats hidden"></div>
+        <button id="modal-btn" class="btn">✍️ Inizia a scrivere</button>
+      </div>
+    </div>
+
+    <div id="toast" class="hidden"></div>
+  </div>
+
+  <script src="../shared/arcade.js"></script>
+  <script src="game.js"></script>
+  <script src="service-worker.js"></script>
+</body>
+</html>
