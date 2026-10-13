@@ -20,6 +20,7 @@
   - [Slot Machine](#slot-machine)
   - [Snake](#snake)
   - [LUMEN](#lumen)
+  - [SECTOR 7](#sector-7)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
   - [Isola Resort](#isola-resort)
@@ -48,12 +49,13 @@
 | 3 | **Slot Machine** | 3-reel casino | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/slot-pwa/) |
 | 4 | **Snake** | Retro arcade | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/snake-pwa/) |
 | 5 | **LUMEN** | Bioluminescent .io survival | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/lumen-pwa/) |
-| 6 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 7 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 8 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 9 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 10 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 11 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 6 | **SECTOR 7** | Low-poly space combat | Canvas 2D (facet meshes) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sector7-pwa/) |
+| 7 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 8 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 9 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 10 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 11 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 12 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -204,6 +206,45 @@ creatures' glow halos long before their bodies, which is most of the tension.
 `service-worker.js`, `icons/`, `tests/sim.test.js`. See
 [`lumen-pwa/README.md`](lumen-pwa/README.md).
 
+### SECTOR 7
+
+*Low-poly space combat, one thumb.* 🛰️
+
+A *Darkorbit*-flavoured single-player game: one ship, one sector, no clock.
+Harvest **energy** and **crystals**, shoot pirates across eight tiers, dock at
+the station and spend the proceeds on five upgrade tracks. Death costs you the
+energy on your hull and nothing else — **crystals are banked the moment you
+touch them**, so a bad run can never cost you progress.
+
+- Two currencies that pull against each other: **energy** is the upgrade fuel
+  and it drops on your deck when you die (fly back and reclaim it before it
+  expires); **crystals** are permanent, and they are also the **escalation
+  dial** — the sector only spawns the tiers you have earned the right to fight
+- Space station: hold `DOCK` inside the ring to repair and upgrade. Docking is
+  a loan, not a gift — a slice of your energy is charged as the launch fee
+- Five module tracks (Blaster, Shield, Armor, Processor, Thruster) at ten
+  levels each, every one of them showing the concrete numbers it buys
+- **Destructible rock fields** hiding crystal caches, loose energy crates, and
+  eight NPC tiers with patrol / attack / flee AI that fight each other as well
+  as you — the sector keeps moving while you are docked
+- **Low-poly without WebGL**: every hull, rock, crate and the station is a facet
+  mesh built from two primitives, drawn flat-shaded through an oblique
+  projection. Per-face lighting is one dot product per face; the view vector is
+  derived from the projection so back-face culling can never drift
+- Thumb-anchored virtual stick, `FIRE`/`DOCK` pads, soft turret auto-aim, full
+  keyboard parity, haptics
+- Fully synthesised WebAudio — no audio assets. Zero art assets of any kind
+- Everything that churns is a fixed pool: no allocation in the draw or sim path
+- Headless tests: 111 simulation/economy checks and 67 render checks, including
+  a difficulty-curve test that runs the sector twice — as a rookie and as a
+  banked pilot — and asserts the intro is survivable and the late game is not
+
+**Files:** `index.html`, `styles.css`, `src/` (`config`, `storage`, `world`,
+`render`, `stations`, `input`, `player`, `npcs`, `audio`, `ui`, `main`),
+`manifest.json`, `service-worker.js`, `icons/`, `scripts/gen-icons.mjs`,
+`tests/sim.test.js`, `tests/render.test.js`. See
+[`sector7-pwa/README.md`](sector7-pwa/README.md).
+
 ### Mustang 1942
 
 *Vertical WWII air shooter, 32 stages × 2 fronts.* 🛩️
@@ -269,6 +310,15 @@ che portano ospiti con desideri da soddisfare. Zero build step, zero asset.
   relax 🏖️, cibo 🍕 o drink 🍹 → costruisci ombrelloni, chioschi, beach bar,
   piscine e cabane per servirli → ogni servizio pagato alza la **reputazione** →
   arrivano più barche (e mance più ricche con reputazione ≥ 80)
+- **👑 Ospiti VIP:** turisti d'oro con corona che vogliono solo lusso (piscina o
+  cabana), pagano **4×** e valgono +2.5 reputazione — ma se li deludi sono -8
+- **🌧️ Meteo dinamico:** sole, nuvole e pioggia (con lampi, tuoni e arrivi -40%)
+  che tingono il cielo e cambiano ogni ~35–65 secondi
+- **🎯 Catena di 10 missioni** con ricompense automatiche (dal "servi 5 ospiti"
+  alla "cabana di livello 3"), mostrate nell'HUD
+- **🎵 Musica calypso generativa:** sequencer WebAudio senza file — basso,
+  marimba random-walk su scala pentatonica e luccichii; la notte la scala si
+  scurisce. Toggle 🎵 nell'HUD, rispetta le impostazioni globali
 - **Ospiti vivi:** figure low-poly con camminata animata, bolla-desiderio e
   barra di pazienza; se aspettano troppo vanno via arrabbiati (−reputazione)
 - **7 costruzioni** in catalogo, ognuna disegnata a mano in geometria iso
@@ -284,6 +334,8 @@ che portano ospiti con desideri da soddisfare. Zero build step, zero asset.
   rientro, **bonus giornaliero** crescente e riepilogo a inizio giornata
 - **Camera:** trascina per esplorare, pinch/rotella per zoom, tap per
   costruire o gestire; ghost-preview verde/rosso sul lotto
+- **🐬 Delfini** che saltano nell'acqua attorno all'isola e **📸 postcard
+  condivisibili** (Web Share API con fallback download, watermark incluso)
 - Autosave ogni 6s + su chiusura; statistiche (serviti/persi/guadagni) nel
   dashboard dei record dell'hub
 
@@ -539,6 +591,19 @@ a PR — keep this list honest.
 
 ### ✅ Done
 
+- [x] **Isola Resort Tycoon wave 2:** ospiti VIP (4× payout), meteo dinamico
+      con tuoni, catena di 10 missioni, musica calypso generativa (WebAudio
+      senza file), delfini, postcard condivisibili
+- [x] **SECTOR 7** — new game: low-poly space combat (Darkorbit-style)
+      single-player vs NPC. Hand-rolled facet-mesh renderer on Canvas 2D (no
+      WebGL): two primitives, flat-shaded through a sheared oblique
+      projection, per-face lighting in one dot product. Energy is the upgrade
+      currency and dies with the ship; crystals are banked on pickup and drive
+      NPC tier escalation. Docking station with five upgrade tracks and a
+      launch fee. 8 NPC tiers, destructible rock fields, energy crates,
+      thumb-anchored stick + pads + soft auto-aim. Fixed pools throughout, DPR
+      capped at 2, quality auto-detected from measured frame time. 178 headless
+      checks across two suites, no build step, no dependencies
 - [x] **Isola Resort Tycoon** — new game: isometric low-poly resort manager
       (Italian UI) with guest desires, reputation, upgrades, island expansion,
       day/night, daily events, offline earnings
@@ -590,7 +655,7 @@ a PR — keep this list honest.
 - [ ] Hub: live daily-challenge standings (compare `snake-daily` highs
       across… friends? a static JSON? needs a design)
 - [ ] Isola Resort: camera rotation (4 orientations), save export/import,
-      decorations with satisfaction auras, weather events
+      weather-scaled music tempo, hotel building with overnight guests
 - [ ] Plane: end-of-wave boss encounters with attack patterns
 - [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
 - [ ] Farm: save-file export/import (download/upload JSON) for device migration

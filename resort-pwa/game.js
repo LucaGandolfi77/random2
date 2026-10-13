@@ -41,6 +41,23 @@
     { label: "💎 Acqua colorata: prezzi +15%",     prices: 1.15 },
     { label: "🌮 Festa del villaggio: mance +25%", tips: 1.25 },
   ];
+  var WEATHERS = [
+    { id: "sole",    label: "☀️ Sole splendente",            arrivals: 1,    weight: 55 },
+    { id: "nuvole",  label: "☁️ Si alzano le nuvole",        arrivals: 0.85, weight: 27 },
+    { id: "pioggia", label: "🌧️ Raggi di pioggia: arrivi -40%", arrivals: 0.6,  weight: 18 },
+  ];
+  var MISSIONS = [
+    { desc: "Servi 5 ospiti",                        test: function () { return state.stats.served >= 5; },      reward: 100 },
+    { desc: "Costruisci un Beach Bar",               test: function () { return hasType("bar"); },               reward: 120 },
+    { desc: "Guadagna 1.000 monete in totale",       test: function () { return state.stats.earned >= 1000; },   reward: 150 },
+    { desc: "Espandi l'isola (primo anello)",        test: function () { return state.ringIndex >= 1; },         reward: 200 },
+    { desc: "Servi un ospite VIP 👑",                 test: function () { return state.stats.vipServed >= 1; },   reward: 250 },
+    { desc: "Raggiungi 80 di reputazione",           test: function () { return state.rep >= 80; },              reward: 300 },
+    { desc: "Servi 50 ospiti",                       test: function () { return state.stats.served >= 50; },     reward: 400 },
+    { desc: "Cabana di livello 3",                   test: function () { return hasLevel("cabana", 3); },        reward: 600 },
+    { desc: "Espandi l'isola al massimo",            test: function () { return state.ringIndex >= 2; },         reward: 800 },
+    { desc: "Guadagna 10.000 monete in totale",      test: function () { return state.stats.earned >= 10000; },  reward: 1500 },
+  ];
   var SKINS = ["#fcd9b8", "#f2b48c", "#d99a6c", "#a9714b", "#8a5a3b"];
   var OUTFITS = ["#f472b6", "#60a5fa", "#facc15", "#4ade80", "#c084fc", "#fb923c", "#f87171"];
   var WELCOME =
@@ -69,7 +86,15 @@
     lastSeen: Date.now(),
     dayEarned: 0,
     dayServed: 0,
-    stats: { served: 0, lost: 0, earned: 0 },
+    stats: { served: 0, lost: 0, earned: 0, vipServed: 0 },
+    weather: null,
+    weatherT: 30,
+    flash: 0,
+    boltT: 8,
+    missionIdx: 0,
+    missionT: 1,
+    dolphins: [],
+    dolphinT: 10,
   };
   var uid = 0;
   var cam = { x: 0, y: 0, z: 1 };
@@ -192,6 +217,12 @@
     });
     return Math.min(n, 30);
   }
+  function hasType(t) {
+    return state.buildings.some(function (b) { return b.type === t; });
+  }
+  function hasLevel(t, lvl) {
+    return state.buildings.some(function (b) { return b.type === t && b.level >= lvl; });
+  }
 
   /* ================= Sound & FX ================= */
   function initSound() {
@@ -205,6 +236,8 @@
       daily:   [523, 0.18, "triangle"],
       night:   [330, 0.35, "sine"],
       sell:    [300, 0.15, "triangle"],
+      rumble:  [55, 0.5, "sawtooth"],
+      vip:     [1319, 0.22, "triangle"],
     });
     Particles = R2.makeParticles();
   }
@@ -265,6 +298,7 @@
     for (var i = 0; i < state.buildings.length; i++) {
       var b = state.buildings[i];
       if (CATALOG[b.type].cat !== g.desire.cat) continue;
+      if (g.vip && b.type !== "pool" && b.type !== "cabana") continue;
       if (b.occ >= capOf(b)) continue;
       var load = b.occ / capOf(b);
       var d = Math.abs(b.gx - g.x) + Math.abs(b.gy - g.y);
@@ -295,7 +329,17 @@
       outfit: pick(OUTFITS),
       phase: Math.random() * 6.28,
       angry: false,
+      vip: false,
     };
+    // 👑 VIP: turista d'oro che vuole solo lusso (piscina o cabana)
+    if (Math.random() < clamp(state.rep / 100 * 0.25, 0, 0.35)) {
+      g.vip = true;
+      g.desire = { cat: "relax", emoji: "👑" };
+      g.patience = 12;
+      g.outfit = "#fbbf24";
+      Sound.vip();
+      toast("👑 È arrivato un ospite VIP!");
+    }
     if (!chooseTarget(g)) { g.state = "wait"; g.tx = CENTER + (Math.random() * 4 - 2); g.ty = 9 + Math.random() * 2.5; }
     state.guests.push(g);
   }
@@ -323,23 +367,30 @@
         if (g.reT <= 0) { g.reT = 2; if (chooseTarget(g)) { g.state = "walk"; continue; } }
         if (g.patience <= 0) {
           g.angry = true;
-          addRep(-4);
+          addRep(g.vip ? -8 : -4);
           state.stats.lost++;
           Sound.sad();
           R2.buzz(30);
-          spawnFloat(g.x, g.y, "-1★", "#fda4af");
+          spawnFloat(g.x, g.y, g.vip ? "-2★" : "-1★", "#fda4af");
           g.state = "leave";
           g.tx = CENTER; g.ty = 12;
         }
       } else if (g.state === "serve") {
         g.t -= dt;
         if (g.t <= 0) {
+          var mult = g.vip ? 4 : 1;
           var tip = state.rep >= 80 ? priceOf(g.bld) * 0.25 : 0;
           tip *= (state.event && state.event.tips) ? state.event.tips : 1;
-          earn(priceOf(g.bld) + Math.round(tip), g.bld.gx, g.bld.gy);
+          earn(Math.round((priceOf(g.bld) + Math.round(tip)) * mult), g.bld.gx, g.bld.gy);
+          if (g.vip) {
+            state.stats.vipServed++;
+            addRep(2.5);
+            spawnFloat(g.bld.gx, g.bld.gy - 0.5, "👑 VIP", "#fde68a");
+            R2.buzz([10, 20, 10]);
+          }
           g.bld.occ--;
           g.bld = null;
-          addRep(1.5);
+          if (!g.vip) addRep(1.5);
           state.stats.served++;
           state.dayServed++;
           g.state = "leave";
@@ -405,6 +456,153 @@
   /* ================= Day cycle & saves ================= */
   function isNight() { return state.dayTime * CYCLE >= DAY_LEN; }
 
+  /* ================= Weather ================= */
+  function pickWeather() {
+    var pool = WEATHERS.filter(function (w) { return w.id !== (state.weather && state.weather.id); });
+    var total = pool.reduce(function (s, w) { return s + w.weight; }, 0);
+    var r = Math.random() * total;
+    for (var i = 0; i < pool.length; i++) {
+      r -= pool[i].weight;
+      if (r <= 0) return pool[i];
+    }
+    return pool[0];
+  }
+  function updateWeather(dt) {
+    if (!state.weather) { state.weather = WEATHERS[0]; return; }
+    state.weatherT -= dt;
+    if (state.weatherT <= 0) {
+      state.weather = pickWeather();
+      state.weatherT = 35 + Math.random() * 30;
+      toast(state.weather.label);
+    }
+    if (state.weather.id === "pioggia") {
+      state.boltT -= dt;
+      if (state.boltT <= 0) {
+        state.flash = 1;
+        state.boltT = 6 + Math.random() * 9;
+        Sound.rumble();
+        R2.buzz(20);
+      }
+    }
+    state.flash = Math.max(0, state.flash - dt * 2.2);
+  }
+
+  /* ================= Missions ================= */
+  function checkMissions() {
+    var m = MISSIONS[state.missionIdx];
+    if (!m) return;
+    if (m.test()) {
+      state.missionIdx++;
+      state.coins += m.reward;
+      bumpCoins();
+      dailyArpeggio();
+      toast("🎯 Obiettivo: " + m.desc + " · +" + m.reward + " 💰");
+      Particles.spawn(view.w / 2, view.h * 0.3, "#86efac", 26);
+      save();
+    }
+  }
+
+  /* ================= Dolphins ================= */
+  function updateDolphins(dt) {
+    state.dolphinT -= dt;
+    if (state.dolphinT <= 0) {
+      state.dolphinT = 14 + Math.random() * 12;
+      var ang = Math.random() * 6.2832;
+      var r = R_MAX + 2.2;
+      state.dolphins.push({
+        gx: CENTER + Math.cos(ang) * r,
+        gy: CENTER + Math.sin(ang) * r,
+        dx: Math.random() < 0.5 ? -1 : 1,
+        u: 0,
+      });
+      if (!state.dolphinSeen) { state.dolphinSeen = true; toast("🐬 Delfini in vista!"); }
+    }
+    for (var i = state.dolphins.length - 1; i >= 0; i--) {
+      var d = state.dolphins[i];
+      d.u += dt / 2.4;
+      if (d.u >= 1) state.dolphins.splice(i, 1);
+    }
+  }
+  function drawDolphins() {
+    state.dolphins.forEach(function (d) {
+      var gx = d.gx + d.dx * d.u * 9;
+      var gy = d.gy + d.u * 2.4;
+      var lift = -2 - Math.sin(d.u * Math.PI) * 22;
+      var p = gridToScreen(gx, gy, lift);
+      var z = cam.z;
+      var slope = -Math.cos(d.u * Math.PI) * 0.9 * d.dx;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(slope);
+      ctx.fillStyle = "#7dd3fc";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 7 * z, 2.6 * z, 0, 0, 6.2832);
+      ctx.fill();
+      poly([{ x: -6 * z, y: 0 }, { x: -9.5 * z, y: -3.2 * z }, { x: -4 * z, y: -1 * z }], "#38bdf8");
+      poly([{ x: 0, y: -2 * z }, { x: 2 * z, y: -5.5 * z }, { x: 3 * z, y: -1.5 * z }], "#38bdf8");
+      ctx.fillStyle = "rgba(255,255,255,0.75)";
+      ctx.beginPath();
+      ctx.ellipse(1.5 * z, 0.9 * z, 3.4 * z, 1.1 * z, 0, 0, 6.2832);
+      ctx.fill();
+      ctx.restore();
+      if (d.u < 0.12 || d.u > 0.88) {
+        ctx.strokeStyle = "rgba(255,255,255,0.6)";
+        ctx.lineWidth = 1.4 * z;
+        ctx.beginPath();
+        ctx.arc(p.x, gridToScreen(gx, gy).y, 5 * z, 0, 6.2832);
+        ctx.stroke();
+      }
+    });
+  }
+
+  /* ================= Generative calypso ================= */
+  var Music = {
+    ctx: null, timer: null, step: 0,
+    DAY: [262, 294, 330, 392, 440, 523],
+    NIGHT: [220, 262, 294, 330, 392, 440],
+    ensure: function () {
+      if (!this.ctx) {
+        try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+      }
+      if (this.ctx && this.ctx.state === "suspended") this.ctx.resume();
+      return !!(this.ctx && this.ctx.state === "running");
+    },
+    note: function (f, dur, type, vol) {
+      if (!this.ctx) return;
+      try {
+        var o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = type;
+        o.frequency.value = f;
+        o.connect(g);
+        g.connect(this.ctx.destination);
+        var now = this.ctx.currentTime;
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(vol, now + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+        o.start(now);
+        o.stop(now + dur + 0.05);
+      } catch (e) {}
+    },
+    tick: function () {
+      if (!R2.getSettings().music || !R2.getSettings().sound) return;
+      if (document.hidden) return;
+      if (!this.ensure()) return;
+      var sc = isNight() ? this.NIGHT : this.DAY;
+      var s = this.step++;
+      if (s % 4 === 0) this.note(sc[0] / 2, 0.5, "sine", 0.05);
+      if (Math.random() < 0.72) {
+        var f = sc[Math.floor(Math.random() * sc.length)] * (Math.random() < 0.2 ? 2 : 1);
+        this.note(f, 0.22, "triangle", 0.04);
+      }
+      if (s % 8 === 4) this.note(sc[sc.length - 1] * 2, 0.12, "sine", 0.018);
+    },
+    start: function () {
+      if (this.timer) return;
+      var self = this;
+      this.timer = setInterval(function () { self.tick(); }, 310);
+    },
+  };
+
   function updateDay(dt) {
     var wasNight = isNight();
     state.dayTime += dt / CYCLE;
@@ -441,6 +639,7 @@
       dailySeed: state.dailySeed,
       dayEarned: state.dayEarned,
       dayServed: state.dayServed,
+      missionIdx: state.missionIdx,
       stats: state.stats,
       buildings: state.buildings.map(function (b) {
         return { t: b.type, x: b.gx, y: b.gy, l: b.level, i: b.invested };
@@ -462,7 +661,8 @@
     state.dayEarned = d.dayEarned || 0;
     state.dayServed = d.dayServed || 0;
     state.lastSeen = d.lastSeen || Date.now();
-    if (d.stats) state.stats = d.stats;
+    state.missionIdx = clamp(d.missionIdx || 0, 0, MISSIONS.length);
+    if (d.stats) state.stats = Object.assign({ served: 0, lost: 0, earned: 0, vipServed: 0 }, d.stats);
     (d.buildings || []).forEach(function (b) {
       if (!CATALOG[b.t]) return;
       state.buildings.push({
@@ -744,6 +944,11 @@
     set("guests", String(state.guests.length));
     set("beauty", "🌸 " + beauty());
     set("day-label", (isNight() ? "🌙" : "☀️") + " Giorno " + state.day);
+    var evTxt = (state.event ? state.event.label : "") +
+      (state.weather && state.weather.id !== "sole" ? " · " + state.weather.label : "");
+    set("event-label", evTxt);
+    var m = MISSIONS[state.missionIdx];
+    set("mission-label", m ? "🎯 " + m.desc : "🏆 Tutti gli obiettivi completati!");
     var rf = document.getElementById("repfill");
     var w = Math.round(state.rep) + "%";
     if (ui.lastHud.rep !== w) { ui.lastHud.rep = w; rf.style.width = w; }
@@ -761,6 +966,24 @@
     clampCam();
   }
 
+  var raindrops = [];
+  for (var ri = 0; ri < 130; ri++) {
+    raindrops.push({ x: Math.random(), y: Math.random(), spd: 0.9 + Math.random() * 0.7, off: Math.random() * 100 });
+  }
+  function drawRain(t) {
+    ctx.strokeStyle = "rgba(203,231,255,0.34)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var i = 0; i < raindrops.length; i++) {
+      var d = raindrops[i];
+      var x = (d.x * view.w + t * 30) % (view.w + 40) - 20;
+      var y = (d.y * view.h + t * 620 * d.spd + d.off) % (view.h + 20);
+      ctx.moveTo(x, y - 11);
+      ctx.lineTo(x - 3, y);
+    }
+    ctx.stroke();
+  }
+
   function drawSky(t) {
     var ph = state.dayTime * CYCLE;
     var top, bot, k = -1;
@@ -770,6 +993,14 @@
       else if (k > 0.86) { top = mix("#38bdf8", "#7c3aed", (k - 0.86) / 0.14); bot = mix("#bae6fd", "#fb923c", (k - 0.86) / 0.14); }
       else { top = "#38bdf8"; bot = "#bae6fd"; }
     } else { top = "#0b1026"; bot = "#1e293b"; }
+    // weather tints the sky
+    if (state.weather && state.weather.id === "nuvole") {
+      top = mix(hexOf(top), "#8ea3b8", 0.4);
+      bot = mix(hexOf(bot), "#b6c2cf", 0.4);
+    } else if (state.weather && state.weather.id === "pioggia") {
+      top = mix(hexOf(top), "#475569", 0.62);
+      bot = mix(hexOf(bot), "#64748b", 0.62);
+    }
     var grad = ctx.createLinearGradient(0, 0, 0, view.h);
     grad.addColorStop(0, top);
     grad.addColorStop(1, bot);
@@ -1110,7 +1341,7 @@
 
   function drawGuest(g, t) {
     var pos = gridToScreen(g.x, g.y);
-    var z = cam.z;
+    var z = cam.z * (g.vip ? 1.18 : 1);
     var walking = g.state === "walk" || g.state === "leave";
     var bob = Math.sin(t * 9 + g.phase) * (walking ? 1.2 : 0.5);
     circle(pos.x, pos.y + 1.5 * z, 4.6 * z, "rgba(0,0,0,0.16)");
@@ -1126,6 +1357,21 @@
     else ctx.rect(pos.x - 2.6 * z, pos.y - 10 * z + bob, 5.2 * z, 7.4 * z);
     ctx.fill();
     circle(pos.x, pos.y - 12 * z + bob, 2.7 * z, g.skin);
+    if (g.vip) {
+      // little golden crown on the head
+      poly([
+        { x: pos.x - 2.6 * z, y: pos.y - 13.5 * z + bob },
+        { x: pos.x - 2.6 * z, y: pos.y - 16.2 * z + bob },
+        { x: pos.x - 1.2 * z, y: pos.y - 14.6 * z + bob },
+        { x: pos.x, y: pos.y - 16.6 * z + bob },
+        { x: pos.x + 1.2 * z, y: pos.y - 14.6 * z + bob },
+        { x: pos.x + 2.6 * z, y: pos.y - 16.2 * z + bob },
+        { x: pos.x + 2.6 * z, y: pos.y - 13.5 * z + bob },
+      ], "#fbbf24");
+      if (Math.random() < 0.06) {
+        Particles.spawn(pos.x + (Math.random() * 16 - 8), pos.y - 14 * z, "#fde68a", 1);
+      }
+    }
     g._sx = pos.x; g._sy = pos.y - 15 * z + bob;
   }
 
@@ -1194,6 +1440,7 @@
     ctx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
     drawSky(t);
     drawWater(t);
+    drawDolphins();
     drawIsland(t);
     var items = [];
     state.buildings.forEach(function (b) { items.push({ d: b.gx + b.gy, fn: function () { drawBuilding(b, t); } }); });
@@ -1205,6 +1452,11 @@
     drawGhost();
     drawFloats(dt);
     Particles.draw(ctx);
+    if (state.weather && state.weather.id === "pioggia") drawRain(t);
+    if (state.flash > 0) {
+      ctx.fillStyle = "rgba(240,248,255," + (state.flash * 0.45).toFixed(3) + ")";
+      ctx.fillRect(0, 0, view.w, view.h);
+    }
   }
 
   /* ================= Main loop ================= */
@@ -1214,9 +1466,13 @@
     var dt = lastT ? Math.min(t - lastT, 0.05) : 0.016;
     lastT = t;
     updateDay(dt);
+    updateWeather(dt);
+    updateDolphins(dt);
     updateGuests(dt, t);
     updateBoats(dt, t);
     Particles.update(dt);
+    state.missionT -= dt;
+    if (state.missionT <= 0) { state.missionT = 1; checkMissions(); }
     state.saveT += dt;
     if (state.saveT > 6) { state.saveT = 0; save(); }
     render(t, dt);
@@ -1226,6 +1482,40 @@
   }
 
   /* ================= Init ================= */
+  function sharePhoto() {
+    try {
+      var tmp = document.createElement("canvas");
+      tmp.width = canvas.width;
+      tmp.height = canvas.height;
+      var c2 = tmp.getContext("2d");
+      c2.drawImage(canvas, 0, 0);
+      c2.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
+      c2.font = "bold 14px sans-serif";
+      c2.textAlign = "right";
+      c2.fillStyle = "rgba(255,255,255,0.85)";
+      c2.fillText("🏝️ Isola Resort Tycoon", view.w - 12, view.h - 12);
+      Sound.play(1250, 0.06, "square");
+      R2.buzz(10);
+      if (!tmp.toBlob) { toast("Foto non disponibile"); return; }
+      tmp.toBlob(function (blob) {
+        if (!blob) { toast("Foto non disponibile"); return; }
+        var file = new File([blob], "isola-resort.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: "Isola Resort Tycoon" }).catch(function () {});
+          toast("📸 Cartolina condivisa!");
+        } else {
+          var a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "isola-resort.png";
+          a.click();
+          toast("📸 Cartolina salvata!");
+        }
+      });
+    } catch (e) {
+      toast("Foto non disponibile");
+    }
+  }
+
   function init() {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
@@ -1273,6 +1563,17 @@
       sbtn.textContent = s.sound ? "🔊" : "🔇";
       toast(s.sound ? "🔊 Audio attivo" : "🔇 Audio spento");
     });
+    var mbtn = document.getElementById("music-btn");
+    mbtn.style.opacity = R2.getSettings().music ? "1" : "0.4";
+    mbtn.addEventListener("click", function () {
+      var s = R2.setSettings({ music: !R2.getSettings().music });
+      mbtn.style.opacity = s.music ? "1" : "0.4";
+      toast(s.music ? "🎵 Musica calypso on" : "🎵 Musica off");
+    });
+    document.getElementById("photo-btn").addEventListener("click", sharePhoto);
+    // browsers allow audio only after a gesture: kick the sequencer on first tap
+    var kick = function () { Music.start(); document.removeEventListener("pointerdown", kick); };
+    document.addEventListener("pointerdown", kick);
 
     if (firstRun) showModal("🏝️ Benvenuto all'Isola!", WELCOME, "Al lavoro!");
     R2.trackPlaytime("resort-pwa/");

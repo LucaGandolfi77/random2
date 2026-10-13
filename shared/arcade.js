@@ -60,7 +60,7 @@
 
   function getSettings() {
     if (!settingsCache) {
-      settingsCache = loadState(SETTINGS_KEY, { sound: true, haptics: true });
+      settingsCache = loadState(SETTINGS_KEY, { sound: true, haptics: true, music: true });
     }
     return settingsCache;
   }
@@ -274,6 +274,6 @@
     mulberry32: mulberry32,
     trackPlaytime: trackPlaytime,
     installHint: installHint,
-    version: "1.1.0"
+    version: "1.2.0"
   };
 })();
