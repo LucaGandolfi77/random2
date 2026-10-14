@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Pokédex — A contemplative collection of beings</title>
+<meta name="description" content="A contemplative Pokedex and catch experience. Select a being, launch a ball, and discover if it stays. Difficulty determines flight probability.">
+<meta name="theme-color" content="#1a1528">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="../shared/arcade.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Cinzel+Decorative:wght@400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Cormorant Garamond',Georgia,serif;}
+body{background:#0a0810;color:#c9b8a0;overflow:hidden;height:100vh;width:100vw;font-size:16px;letter-spacing:0.03em;}
+#game-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.22;pointer-events:none;}
+.main{position:relative;z-index:10;height:100vh;padding:2rem;display:flex;flex-direction:column;align-items:center;overflow-y:auto;}
+header{text-align:center;margin-bottom:1.5rem;}
+h1{font-family:'Cinzel Decorative',serif;font-size:2.2rem;color:#c9b0a0;font-weight:400;letter-spacing:0.1em;margin-bottom:0.2rem;}
+h2{font-family:'Cormorant Garamond',serif;font-size:0.85rem;color:#8a7b65;letter-spacing:0.15em;text-transform:uppercase;margin-top:0.2rem;}
+.pokedex{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.8rem;max-width:720px;width:100%;margin-bottom:1.5rem;}
+.poke-card{background:rgba(20,8,24,0.7);border:1px solid rgba(201,176,140,0.1);border-radius:10px;padding:0.9rem 0.7rem;cursor:pointer;transition:all 0.25s ease;text-align:center;}
+.poke-card:hover{border-color:rgba(201,176,140,0.35);transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.3);}
+.poke-card.selected{border-color:#c9a878;box-shadow:0 0 15px rgba(201,176,140,0.15);}
+.poke-card .emoji{font-size:2rem;margin-bottom:0.3rem;display:block;}
+.poke-card .name{font-size:0.85rem;color:#c9b8a0;letter-spacing:0.05em;}
+.poke-card .diff{font-size:0.65rem;color:#8a7b65;text-transform:uppercase;letter-spacing:0.05em;margin-top:0.15rem;}
+.stage{position:relative;max-width:420px;width:92%;height:320px;background:linear-gradient(135deg,#0e0a12 0%,#140e1a 100%);border:1px solid rgba(201,176,140,0.1);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.4);margin-bottom:1rem;overflow:hidden;}
+.stage-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 30%, rgba(201,176,140,0.08) 0%, transparent 70%);}
+.poke-display{font-size:5rem;filter:drop-shadow(0 0 15px rgba(201,176,140,0.3));margin-bottom:0.5rem;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+.poke-info{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:0.9rem;letter-spacing:0.08em;margin-bottom:0.3rem;}
+.poke-diff{font-size:0.75rem;color:#8a7b65;font-style:italic;margin-bottom:0.5rem;}
+.poke-btn{padding:0.7rem 2rem;background:#c9a87822;border:1px solid #c9a87855;color:#c9b8a8;border-radius:6px;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.95rem;cursor:pointer;transition:all 0.25s;margin-top:0.5rem;letter-spacing:0.03em;}
+.poke-btn:hover{background:#c9a87830;border-color:#c9a878;box-shadow:0 2px 12px rgba(201,176,140,0.2);}
+.result{font-size:1.5rem;font-family:'Cinzel Decorative',serif;color:#bfa07a;text-align:center;animation:fadeIn 0.6s ease;margin-top:0.5rem;}
+.result-caught{color:#bfa07a;}
+.result-flew{color:#8a7b65;font-style:italic;}
+.menu-screen{position:fixed;inset:0;background:#0a0810;z-index:50;display:flex;align-items:center;justify-content:center;padding:2rem;}
+.menu-panel{text-align:center;padding:2rem 1.5rem;max-width:480px;width:92%;}
+.menu-panel h1{font-family:'Cinzel Decorative',serif;font-size:2.5rem;color:#c9b0a0;margin-bottom:0.5rem;letter-spacing:0.08em;}
+.sub{font-style:italic;color:#9a8876;font-size:1rem;margin-bottom:2rem;line-height:1.5;}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<div class="main" id="main">
+  <header>
+    <h1>Pokédex — The Collection</h1>
+    <h2>A contemplative gathering of beings · Bilingual · By difficulty</h2>
+  </header>
+
+  <div class="pokedex" id="pokedex"></div>
+
+  <div class="stage" id="stage">
+    <div class="stage-bg"></div>
+    <div class="poke-display" id="poke-display">🐉</div>
+    <div class="poke-info" id="poke-info">Choose a being from the Pokedex</div>
+    <div class="poke-diff" id="poke-diff">Difficulty determines flight probability</div>
+    <button class="poke-btn" onclick="throwBall()" id="throw-btn">Launch Pokéball</button>
+    <div class="result hidden" id="result"></div>
+  </div>
+
+  <div class="stats-strip" style="margin-top:1rem;text-align:center;color:#8a7b65;font-size:0.85rem;letter-spacing:0.08em;font-family:'Cormorant Garamond',Georgia,serif;">
+    <span>Caught: <strong id="caught">0</strong></span>
+    <span>Flown: <strong id="flown">0</strong></span>
+    <span>Library: <strong id="library">0</strong></span>
+  </div>
+</div>
+
+<div id="start-menu" class="menu-screen hidden">
+  <div class="menu-panel">
+    <h1>The Collection</h1>
+    <p class="sub">Select beings from the Pokedex. Launch a ball. The more difficult the being, the more likely it flies away. Catch them if you can. All in English and Italian.</p>
+    <button class="menu-button" onclick="startGame()" style="background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;padding:0.8rem 1.5rem;font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;cursor:pointer;letter-spacing:0.03em;">Begin Collection — Inizia la Collezione</button>
+    <button class="menu-button" onclick="switchLang()" style="font-size:0.85rem;padding:0.5rem 1rem;">Lingua: English / Italiano</button>
+  </div>
+</div>
+
+<script src="../shared/arcade.js"></script>
+<script src="src/config.js"></script>
+<script src="src/storage.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

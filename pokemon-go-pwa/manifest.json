@@ -1,0 +1,12 @@
+{
+  "background_color":"#0a0810",
+  "description":"A contemplative Pokedex experience. Select beings from the collection, launch a Pokeball, discover if they stay or fly away. Difficulty determines fate.",
+  "display":"standalone",
+  "icons":[{"src":"icons/icon-192.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any"}],
+  "lang":"en",
+  "name":"Pokédex — The Collection",
+  "scope":"./",
+  "start_url":"./",
+  "theme_color":"#1a1528",
+  "categories":["games","story","collection"]
+}
