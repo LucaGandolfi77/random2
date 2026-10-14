@@ -30,6 +30,8 @@
     <div class="hud-stats">
       <div class="stat"><span id="hud-pct">0.0%</span><label>territorio</label></div>
       <div class="stat"><span id="hud-kill">0</span><label>eliminazioni</label></div>
+      <div class="stat"><span id="hud-bot">4</span><label>bot vivi</label></div>
+      <div class="stat"><span id="hud-modalita">classica</span><label>modalità</label></div>
     </div>
     <button id="pausa-btn" class="iconbtn" aria-label="Pausa">⏸</button>
     <div id="classifica" aria-label="Classifica live"></div>
@@ -49,6 +51,8 @@
       <p class="tagline">Lascia la scia, chiudi l'anello, conquista la griglia.<br>4 bot ti contesteranno ogni cella.</p>
       <p id="menu-record" class="record"></p>
       <button id="gioca-btn" class="btn-principale">▶&nbsp; Gioca</button>
+      <button id="arena-btn" class="btn-secondario">🏁&nbsp; Arena — una vita sola</button>
+      <p class="sottoarena">Nessuno risorge: elimina tutti e 4 per liberare la città.</p>
       <div class="regole">
         <p>👆 Trascina ovunque per sterzare</p>
         <p>🔄 Torna sul tuo colore per chiudere l'anello</p>
@@ -72,6 +76,7 @@
   <section id="fine" class="schermata">
     <div class="pannello">
       <h2 id="fine-titolo">Partita finita</h2>
+      <p id="fine-sottotitolo" class="tagline"></p>
       <div class="statistiche">
         <div class="stat-grande"><span id="fine-pct">0%</span><label>territorio max</label></div>
         <div class="stat-grande"><span id="fine-ucc">0</span><label>eliminazioni</label></div>

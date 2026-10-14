@@ -18,7 +18,7 @@
   var SPACING = 7;                   // px between trail points
   var HEAD_R = 7;
   var POINT_R = 4.4;                 // stroke half-width
-  var DRY_AGE = 1.6;                 // seconds before ink becomes lethal
+  var PERMA_LETHAL_AGE = 1.6;        // grace before a PERMANENT (dry) mark kills
   var WET_MAX = 100;
   var WET_DECAY = 1.05;              // + painting factor (see decayRate)
   var BOOST_DRAIN = 9;               // extra wetness/s while dashing
@@ -75,7 +75,7 @@
   /* ================= Ink economy ================= */
   function decayRate(p) {
     // painting dries you: the more you have baked, the faster you dry
-    return WET_DECAY + Math.min(2.4, p.paintedArea / 26000);
+    return WET_DECAY + Math.min(1.6, p.paintedArea / 26000);
   }
   function speedOf(p) { return 128 * (0.72 + 0.55 * p.wet / WET_MAX) * (p.stun > 0 ? 0.35 : 1); }
   function turnOf(p) { return 3.3 + 3.4 * p.wet / WET_MAX; }
@@ -136,7 +136,7 @@
   function spawnPointSafe() {
     for (var tries = 0; tries < 30; tries++) {
       var x = rand(220, W - 220), y = rand(220, H - 220);
-      if (!lethalAt(x, y, 130)) return { x: x, y: y };
+      if (!lethalAt(x, y, 180)) return { x: x, y: y };
     }
     return { x: rand(220, W - 220), y: rand(220, H - 220) };
   }
@@ -149,7 +149,7 @@
       wet: WET_MAX, boost: false,
       pts: [], body: BODY_START,
       paintedArea: 0, score: 0,
-      invuln: 1.6, stun: 0,
+      invuln: 3.0, stun: 0,
       lastPtD: 0, aiTarget: null, aiT: 0, respawnT: 0,
     };
     return p;
@@ -209,7 +209,12 @@
         for (var i = 0; i < arr.length; i++) {
           var pt = arr[i];
           var age = now - pt.born;
-          if (pt.life !== Infinity && age < DRY_AGE) continue;
+          // Solo l'inchiostro PERMANENTE uccide. L'inchiostro bagnato evapora
+          // (lifeOf) e non deve mai essere letale: prima bastava age>=1.6s,
+          // quindi la propria scia bagnata ti uccideva per tutta la sua vita
+          // utile (~6.5s a umidita piena) instead of just disappearing.
+          if (pt.life !== Infinity) continue;
+          if (age < PERMA_LETHAL_AGE) continue;
           if (dist2(x, y, pt.x, pt.y) < r2) return true;
         }
       }
@@ -226,7 +231,9 @@
           var s = spawnPointSafe();
           p.alive = true; p.x = s.x; p.y = s.y; p.dir = rand(0, 6.28);
           p.wet = WET_MAX; p.pts = []; p.body = BODY_START;
-          p.paintedArea = 0; p.score = 0; p.invuln = 1.6; p.stun = 0;
+          // azzera solo la partita corrente: azzerare anche score e area
+          // dipinta cancellava il progresso della run a ogni respawn
+          p.paintedArea = 0; p.invuln = 3.0; p.stun = 0;
         }
       }
       return;
@@ -251,7 +258,10 @@
     p.y += Math.sin(p.dir) * speedOf(p) * (boost ? 1.5 : 1) * dt;
 
     // wetness
-    p.wet -= decayRate(p) * dt * (boost ? 1 + BOOST_DRAIN / WET_DECAY : 1);
+    // BOOST_DRAIN e' un extra piano in umidita/s, non un moltiplicatore:
+    // prima lo scatto costava ~9.6x il decadimento (33/s a fondo campo).
+    var drain = decayRate(p) + (boost ? BOOST_DRAIN : 0);
+    p.wet -= Math.min(14, drain) * dt;
     if (p.wet <= 0) { p.wet = 0; killPlayer(p, "ink"); return; }
 
     // lay trail
@@ -293,7 +303,10 @@
         var o = state.players[pj];
         if (o === p || !o.alive || o.invuln > 0) continue;
         if (dist2(p.x, p.y, o.x, o.y) < (HEAD_R * 2.2) * (HEAD_R * 2.2)) {
-          if (p.body <= o.body) { killPlayer(p, "trap"); return; }
+          // A parita' di corporatura vince chi ha id piu alto: il giocatore
+          // umano e creato per ultimo, quindi i pareggi lo favoriscono.
+          var lose = p.body < o.body || (p.body === o.body && p.id > o.id);
+          if (lose) { killPlayer(p, "trap"); return; }
           else { killPlayer(o, "trap"); }
         }
       }
@@ -330,12 +343,19 @@
     // avoidance: probe ahead, steer away from lethal ink & edges
     var probeR = 42;
     var best = null, bestScore = -1e9;
-    for (var a = -1.1; a <= 1.1; a += 0.36) {
+    for (var a = -2.0; a <= 2.0; a += 0.25) {
       var ang = p.dir + a;
       var px = p.x + Math.cos(ang) * probeR, py = p.y + Math.sin(ang) * probeR;
       var sc = 0;
       if (px < EDGE + 30 || px > W - EDGE - 30 || py < EDGE + 30 || py > H - EDGE - 30) sc -= 500;
       if (lethalAt(px, py, 12)) sc -= 300;
+      // non finire addosso a un altro giocatore: l'urto frontale uccide
+      // e i bot non ne erano al corrente (solo inchiostro e bordi)
+      for (var q = 0; q < state.players.length; q++) {
+        var oth = state.players[q];
+        if (oth === p || !oth.alive) continue;
+        if (Math.hypot(px - oth.x, py - oth.y) < 46) { sc -= 220; break; }
+      }
       // prefer heading to target
       var want = Math.atan2(p.aiTarget.y - p.y, p.aiTarget.x - p.x);
       var dd = ang - want;
@@ -352,11 +372,11 @@
     state.dropT -= dt;
     if (state.dropT <= 0) {
       state.dropT = rand(3.5, 6.5);
-      var n = Math.random() < 0.25 ? 2 : 1;
+      var n = Math.random() < 0.12 ? 2 : 1;
       for (var k = 0; k < n; k++) {
         state.droplets.push({
           x: rand(120, W - 120), y: rand(120, H - 120),
-          t: 0, phase: "warn", r: rand(54, 76),
+          t: 0, phase: "warn", r: rand(46, 64),
         });
       }
     }
@@ -385,9 +405,10 @@
                 p.pts.splice(j, 1);
               }
             }
-            if (p.alive && p.invuln <= 0 && dist2(p.x, p.y, d.x, d.y) < r2) {
-              p.body -= 26;
+            if (p.alive && p.invuln <= 0 && p.stun <= 0 && dist2(p.x, p.y, d.x, d.y) < r2) {
+              p.body -= 16;
               p.stun = 0.6;
+              p.invuln = Math.max(p.invuln, 0.9); // una goccia = un morso
               spawnSplash(p.x, p.y, "#4a6a8a", 10);
               if (!p.bot) R2.buzz(40);
               if (p.body < BODY_MIN) killPlayer(p, "water");
@@ -447,7 +468,7 @@
             var sp = spawnPointSafe();
             p.alive = true; p.x = sp.x; p.y = sp.y; p.dir = rand(0, 6.28);
             p.wet = WET_MAX; p.pts = []; p.body = BODY_START;
-            p.paintedArea = 0; p.score = 0; p.invuln = 1.6; p.stun = 0;
+            p.paintedArea = 0; p.invuln = 3.0; p.stun = 0;
           });
           inkHash.clear();
           hideModal();
@@ -688,7 +709,8 @@
     var f = document.getElementById("wetfill");
     f.style.width = clamp(me.wet, 0, 100) + "%";
     var lbl = document.getElementById("wetlbl");
-    var txt = me.wet > 66 ? "bagnato — scorri veloce" : me.wet > 33 ? "si asciuga…" : "SECCO — lasci segni eterni";
+    // 28 e' la soglia reale di permanentza (lifeOf), non 33.
+    var txt = me.wet > 66 ? "bagnato — scorri veloce" : me.wet > 28 ? "si asciuga…" : "SECCO — lasci segni eterni";
     if (lbl.textContent !== txt) {
       lbl.textContent = txt;
       lbl.classList.toggle("dry", me.wet <= 33);
@@ -813,8 +835,8 @@
     me.alive = true;
     me.x = s.x; me.y = s.y; me.dir = rand(0, 6.28);
     me.wet = WET_MAX; me.pts = []; me.body = BODY_START;
-    me.paintedArea = 0; me.score = 0;
-    me.invuln = 2; me.stun = 0;
+    me.paintedArea = 0;
+    me.invuln = 3; me.stun = 0;
     hideModal();
   }
 

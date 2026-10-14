@@ -65,9 +65,12 @@ function toast(testo, colore = '#ffffff') {
 }
 
 /* ---------- avvio partita ---------- */
-function avvia() {
+function avvia(opts = {}) {
   suonoClick();
-  partita = creaPartita({ bot: 4 });
+  if (opts && opts.currentTarget) opts = {}; // chiamato direttamente da un listener
+  partita = creaPartita({ bot: 4, respawn: opts.respawn !== false });
+  $('#hud-bot').textContent = partita.giocatori.length - 1;
+  $('#hud-modalita').textContent = partita.respawn ? 'classica' : 'arena';
   $('#hud').hidden = false;
   $('#menu').classList.remove('visible');
   $('#fine').classList.remove('visible');
@@ -138,6 +141,16 @@ function drenaEventi() {
         );
         if (io) suonoUccisione();
       }
+    } else if (e.tipo === 'vittoria') {
+      statoUI = 'fine';
+      $('#fine-titolo').textContent = 'ARENA LIBERATA';
+      $('#fine-sottotitolo').textContent = `Hai eliminato tutti i ${e.uccisi} bot. Una vita sola.`;
+      salvaRecord(record = {
+        pct: Math.max(record.pct, partita.giocatori[0].stats.maxPct),
+        ucc: Math.max(record.ucc, partita.giocatori[0].stats.uccisioni),
+      });
+      suonoCattura();
+      $('#fine').classList.add('visible');
     }
     // 'respawn': nessun toast, si vede dalla minimappa
   }
@@ -152,6 +165,7 @@ function aggiornaHud(t) {
   const io = partita.giocatori[0];
   $('#hud-pct').textContent = pctDi(io).toFixed(1) + '%';
   $('#hud-kill').textContent = io.stats.uccisioni;
+  $('#hud-bot').textContent = partita.giocatori.filter((g) => g.idx && g.viva).length;
 
   // tappe celebrative
   const pct = pctDi(io);
@@ -269,8 +283,9 @@ function riprendi() {
 document.addEventListener('visibilitychange', () => { if (document.hidden) pausa(); });
 
 /* ---------- collegamenti UI ---------- */
-$('#gioca-btn').addEventListener('click', avvia);
-$('#rigioca-btn').addEventListener('click', avvia);
+$('#gioca-btn').addEventListener('click', () => avvia());
+$('#arena-btn').addEventListener('click', () => avvia({ respawn: false }));
+$('#rigioca-btn').addEventListener('click', () => avvia());
 $('#menu-btn').addEventListener('click', tornaAlMenu);
 $('#pausa-btn').addEventListener('click', pausa);
 $('#riprendi-btn').addEventListener('click', riprendi);

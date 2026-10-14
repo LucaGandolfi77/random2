@@ -26,9 +26,11 @@ const NOMI_BOT = ['Gallo', 'Rizzo', 'Falco', 'Nero', 'Brizio'];
 
 /* ---------- creazione partita ---------- */
 
-export function creaPartita({ bot = 4 } = {}) {
+export function creaPartita({ bot = 4, respawn = true } = {}) {
   const st = {
     t: 0,
+    // Modalità arena: i bot hanno una vita sola e non risorgono.
+    respawn: respawn !== false,
     proprietario: new Uint8Array(CELLE), // 0 = libero, i+1 = giocatore i
     sciaDi: new Int16Array(CELLE).fill(-1), // -1 = nessuna scia
     giocatori: [],
@@ -67,6 +69,7 @@ function creaGiocatore(st, idx, nome, colore, bot, [sx, sy]) {
     scia: [],
     celle: 0,
     rinascitaTra: 0,
+    morto: false, // fuori dalla partita per sempre (modalità arena)
     ultimaCX: sx, ultimaCY: sy,
     stats: { uccisioni: 0, maxPct: 0 },
   };
@@ -105,7 +108,7 @@ export function passo(st, dt) {
     if (p.viva) {
       const pct = pctDi(p);
       if (pct > p.stats.maxPct) p.stats.maxPct = pct;
-    } else {
+    } else if (!p.morto) {
       p.rinascitaTra -= dt;
       if (p.rinascitaTra <= 0) rinasci(st, p);
     }
@@ -234,11 +237,14 @@ function uccidi(st, vittima, killer) {
   const v = st.giocatori[vittima];
   if (!v.viva) return;
   v.viva = false;
-  v.rinascitaTra = RESPAWN_S;
+  v.morto = !st.respawn;
+  v.rinascitaTra = st.respawn ? RESPAWN_S : Infinity;
   for (const i of v.scia) st.sciaDi[i] = -1;
   v.scia.length = 0;
   if (killer !== vittima && st.giocatori[killer]?.viva) st.giocatori[killer].stats.uccisioni++;
   st.eventi.push({ tipo: 'uccisione', killer, vittima });
+  if (!st.respawn && vittima > 0 && st.giocatori.every((g) => g.idx === 0 || !g.viva))
+    st.eventi.push({ tipo: 'vittoria', uccisi: st.giocatori.length - 1 });
 }
 
 /* ---------- respawn ---------- */
@@ -278,6 +284,11 @@ function trovaSpawn(st) {
 
 function pensaBot(st, p, dt) {
   const ai = p.ai;
+  // In arena ogni eliminazione riduce i rivali: chi resta diventa più feroce.
+  if (st.respawn) {
+    const vivi = st.giocatori.filter((q) => !q.bot && !q.viva).length;
+    if (vivi > 0) ai.aggressivita = Math.min(0.95, ai.aggressivita + vivi * 0.05);
+  }
   ai.timer -= dt;
 
   const cx = Math.floor(p.px), cy = Math.floor(p.py);
