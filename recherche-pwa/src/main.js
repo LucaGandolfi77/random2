@@ -30,15 +30,36 @@ const SCENES = {
     speaker: { en: 'Marcel', it: 'Marcel' },
     text: { en: 'Albertine... she was the mystery itself. To possess her was impossible — to understand her, even less so. She existed in a world beyond my comprehension, and yet I loved her with all the intensity of a soul seeking to recover lost time.', it: 'Albertine... lei era il mistero stesso. Possederla era impossibile — comprenderla, ancora meno. Esisteva in un mondo oltre la mia comprensione, eppure la amavo con tutta l\'intensità di un\'anima che cerca di recuperare il tempo perduto.' },
     background: 'redemption',
-    next: 'art',
+    next: 'hawthorn',
     statEffect: { mem: 12, mel: 7, art: 6 }
   },
-  art: {
+  hawthorn: {
+    speaker: { en: 'Marcel', it: 'Marcel' },
+    text: { en: 'The hawthorn... its scent in Combray. Not just a smell — it was the very essence of a moment that had vanished, preserved like an amber bead, holding the past intact.', it: 'Il biancospino... il suo profumo a Combray. Non solo un odore — era l\'essenza stessa di un momento che era svanito, conservato come una perla d\'ambra, che teneva intatto il passato.' },
+    background: 'memory',
+    next: 'church',
+    statEffect: { mem: 8, mel: 3, art: 5 }
+  },
+  church: {
+    speaker: { en: 'Narrator', it: 'Narratore' },
+    text: { en: 'The church at Combray... its steeple pierced the sky like an arrow. From within, the sound of the organ — not mere sound, but architecture made audible, faith made material.', it: 'La chiesa di Combray... il suo campanile forava il cielo come una freccia. Dall\'interno, il suono dell\'organo — non un semplice suono, ma architettura resa udibile, fede resa materiale.' },
+    background: 'memory',
+    next: 'art_final',
+    statEffect: { mem: 6, mel: 3, art: 4 }
+  },
+  art_final: {
     speaker: { en: 'Marcel', it: 'Marcel' },
     text: { en: 'Art is the only way to recover the past. Not through ordinary memory — which is dead — but through involuntary recollection. Only art can capture what time has stolen, and return it to us in its true, luminous form.', it: 'L\'arte è l\'unico modo per recuperare il passato. Non attraverso la memoria ordinaria — che è morta — ma attraverso la ricordo involontario. Solo l\'arte può catturare ciò che il tempo ha rubato, e restituircelo nella sua vera, luminosa forma.' },
     background: 'redemption',
-    next: 'ending',
+    next: 'swann',
     statEffect: { mem: 15, mel: 3, art: 12 }
+  },
+  swann: {
+    speaker: { en: 'Marcel', it: 'Marcel' },
+    text: { en: 'Swann... he loved Odette as I loved Albertine — through an illusion created by art, by a sonata, by the light of a salon. And yet, through that very illusion, something true was born: art itself, the only real recovery of what time has lost.', it: 'Swann... amava Odette come io amavo Albertine — attraverso un\'illusione creata dall\'arte, da una sonata, dalla luce di un salotto. Eppure, proprio attraverso quella illusione, qualcosa di vero nacque: l\'arte stessa, l\'unico vero recupero di ciò che il tempo ha perduto.' },
+    background: 'memory',
+    next: 'ending',
+    statEffect: { mem: 10, mel: 4, art: 8 }
   },
   ending: {
     speaker: { en: 'Marcel', it: 'Marcel' },
