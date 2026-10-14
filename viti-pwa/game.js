@@ -621,8 +621,9 @@
       c.stroke();
     }
     grainPat = ctx.createPattern(g, "repeat");
+    return g;
   }
-  var grainPat = null;
+  var grainPat = null, grainCanvas = null;
 
   function resize() {
     var stage = document.getElementById("stage");

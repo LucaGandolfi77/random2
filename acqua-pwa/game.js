@@ -95,7 +95,7 @@
       { x: W, e: 162 },
     ];
     for (var i = 1; i < terrainPts.length - 1; i++) {
-      terrainPts[i].e += Math.sin(i * 12.9898 + seed) * 5;
+      terrainPts[i].e += Math.sin(i * 12.9898 + state.seed) * 5;
     }
   }
 

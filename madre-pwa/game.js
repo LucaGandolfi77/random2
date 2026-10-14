@@ -40,6 +40,7 @@
     notifyOn: false,
   };
   var uid = 0;
+  var Sound;
   var activeTab = "cantina";
   var activeRoom = "dispensa";
   var toastT = null;
@@ -514,7 +515,7 @@
   }
 
   function updateHUD() {
-    $("money").textContent = fmt(state.money);
+    $("money").textContent = Math.round(state.money);
     $("rep").textContent = state.rep;
     var day = Math.floor((Date.now() - (state.firstDay || Date.now())) / 86400000) + 1;
     $("daychip").textContent = "Giornata " + day;

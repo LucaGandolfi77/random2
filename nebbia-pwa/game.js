@@ -34,6 +34,7 @@
   };
   var PALETTE_SHIPS = ["#4a3a26", "#7a2e26", "#2c4a6e"];
   var canvas, ctx, grainPat = null;
+  var view = { w: 0, h: 0, dpr: 1, scale: 1, ox: 0, oy: 0 };
   var Sound, Particles;
   var toastT = null;
 
