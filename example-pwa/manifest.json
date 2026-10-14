@@ -1,0 +1,21 @@
+{
+    "background_color": "#0f172a",
+    "categories": ["games", "entertainment"],
+    "description": "A free browser space adventure game: pilot your ship through asteroid fields, collect crystals, and survive the cosmic void. Fully offline-capable once installed.",
+    "display": "standalone",
+    "display_override": ["standalone", "fullscreen"],
+    "icons": [
+        {"purpose": "any", "sizes": "192x192", "src": "icons/icon-192.svg", "type": "image/svg+xml"},
+        {"purpose": "any", "sizes": "512x512", "src": "icons/icon-512.svg", "type": "image/svg+xml"},
+        {"purpose": "any", "sizes": "192x192", "src": "icons/icon-192.png", "type": "image/png"},
+        {"purpose": "any", "sizes": "512x512", "src": "icons/icon-512.png", "type": "image/png"},
+        {"purpose": "maskable", "sizes": "512x512", "src": "icons/icon-512-maskable.png", "type": "image/png"}
+    ],
+    "lang": "en",
+    "name": "Star Explorer",
+    "orientation": "any",
+    "scope": "./",
+    "short_name": "Star Explorer",
+    "start_url": "./",
+    "theme_color": "#0f172a"
+}

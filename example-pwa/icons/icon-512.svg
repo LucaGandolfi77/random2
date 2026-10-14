@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+        </linearGradient>
+        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+        </linearGradient>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    <rect width="512" height="512" rx="64" fill="url(#grad1)" filter="url(#glow)"/>
+    <circle cx="256" cy="256" r="120" fill="url(#grad2)"/>
+    <path d="M200 216 L312 216 L312 296 L200 296 Z" fill="#0f172a"/>
+    <circle cx="200" cy="216" r="8" fill="#ffffff"/>
+    <circle cx="312" cy="216" r="8" fill="#ffffff"/>
+    <path d="M256 296 L256 384" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="256" cy="256" r="24" fill="rgba(255,255,255,0.2)"/>
+</svg>
