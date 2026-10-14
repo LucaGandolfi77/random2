@@ -27,6 +27,12 @@ export function initMain(){
     }
   };
   window.showAbout=()=>{document.getElementById('start-menu').classList.add('hidden');document.getElementById('start-menu').style.display='none';document.getElementById('about-menu').classList.remove('hidden');document.getElementById('about-menu').style.display='flex';};
+  window.showMultiverse=()=>{
+    document.getElementById('start-menu').classList.add('hidden');
+    document.getElementById('start-menu').style.display='none';
+    document.getElementById('start-menu').innerHTML='<h2 style="text-align:center;font-family:\'Cormorant Garamond\',serif;color:#bfa07a;margin-top:10vh;font-size:2.2rem;font-weight:300;letter-spacing:0.1em;">Multiversi</h2><p style="text-align:center;font-style:italic;color:#9a8876;margin-top:1rem;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.7;font-size:1rem;">Versioni alternative delle opere classiche — nuovi mondi, nuove situazioni, nuovi personaggi, ma la stessa profondità filosofica. Ogni universo esplora un\'altra faccia della verità.</p><button style="display:block;margin:3rem auto;padding:1rem 2rem;background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;font-family:\'Cormorant Garamond\',serif;font-size:1rem;cursor:pointer;transition:all 0.25s;" onclick="window.backToLibrary();">Ritorna — Back</button>';
+    document.getElementById('start-menu').classList.remove('hidden');
+  };
   window.backToLibrary=()=>{document.getElementById('about-menu').classList.add('hidden');document.getElementById('start-menu').classList.remove('hidden');document.getElementById('start-menu').style.display='flex';};
   document.getElementById('start-menu').classList.remove('hidden');
 }
