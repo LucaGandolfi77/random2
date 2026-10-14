@@ -110,7 +110,7 @@ function addChoiceButtons(ch){
   btnNext.textContent = (CONFIG.language === 'it') ? 'Prosegui nella Scrittura' : 'Continue in Scripture';
   btnNext.onclick = () => {
     if(ch.statEffect) applyStatEffect(ch.statEffect);
-    state.readTime += 20000; addNote('Scripture: ' + (ch.text.en || '').substring(0, 50));
+    state.readTime += 35000; addNote('Scripture: ' + (CONFIG.language === 'it' ? BIBLE_BOOKS[state.currentBook].title.it : BIBLE_BOOKS[state.currentBook].title.en) + ' — Chapter ' + (state.chapterIndex + 1));
     const bookName = state.currentBook;
     const nextIndex = state.chapterIndex + 1;
     const bookData = BIBLE_BOOKS[bookName];
@@ -143,6 +143,50 @@ function applyStatEffect(effect){
   state.mem = Math.max(0, Math.min(20, state.mem)); state.mel = Math.max(0, Math.min(20, state.mel)); state.art = Math.max(0, Math.min(20, state.art));
   saveState(state);
 }
+
+// ACTION SEQUENCES — interactive dramatic scenes
+function triggerActionSequence(actionType){
+  const overlay=document.createElement('div');
+  overlay.id='action-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(6,4,8,0.92);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2.5rem;animation:fadeIn 0.4s ease;';
+  let content='';
+  if(actionType==='red_sea'){
+    content='<h2 style="font-family:\'Cinzel Decorative\',serif;color:#bfa07a;font-size:2rem;margin-bottom:1rem;">The Sea Parts</h2><p style="font-style:italic;color:#c8b8a8;font-size:1.1rem;text-align:center;max-width:500px;line-height:1.7;margin-bottom:2rem;">Click rapidly to cross before the waters close. The people must pass before the walls fall.</p><button onclick="completeAction(\'red_sea\',5)" style="padding:1rem 2.5rem;background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;cursor:pointer;">Cross the Waters</button>';
+  }else if(actionType==='plagues'){
+    content='<h2 style="font-family:\'Cinzel Decorative\',serif;color:#bfa07a;font-size:2rem;margin-bottom:1rem;">The Plagues Descend</h2><p style="font-style:italic;color:#c8b8a8;font-size:1.1rem;text-align:center;max-width:500px;line-height:1.7;margin-bottom:2rem;">Choose quickly — the darkness, the hail, the fire. Each choice shapes the liberation.</p><div style="display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;">'+
+    '<button onclick="completeAction(\'plagues\',3,\'darkness\')" style="padding:0.7rem 1.2rem;background:#0e0a12;border:1px solid #4a3a25;color:#c8b8a8;border-radius:4px;cursor:pointer;font-family:\'Cormorant Garamond\',serif;">Darkness</button>'+
+    '<button onclick="completeAction(\'plagues\',3,\'hail\')" style="padding:0.7rem 1.2rem;background:#0e0a12;border:1px solid #6a5a35;color:#c8b8a8;border-radius:4px;cursor:pointer;font-family:\'Cormorant Garamond\',serif;">Hail</button>'+
+    '<button onclick="completeAction(\'plagues\',3,\'fire\')" style="padding:0.7rem 1.2rem;background:#0e0a12;border:1px solid #8a4a25;color:#c8b8a8;border-radius:4px;cursor:pointer;font-family:\'Cormorant Garamond\',serif;">Fire</button></div>';
+  }else if(actionType==='resurrection'){
+    content='<h2 style="font-family:\'Cinzel Decorative\',serif;color:#bfa07a;font-size:2rem;margin-bottom:1rem;">The Light Breaks Forth</h2><p style="font-style:italic;color:#c8b8a8;font-size:1.1rem;text-align:center;max-width:500px;line-height:1.7;margin-bottom:2rem;">The stone rolls away. Click to witness the empty tomb. Death is swallowed in victory.</p><button onclick="completeAction(\'resurrection\',10)" style="padding:1rem 2.5rem;background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;cursor:pointer;">Witness the Empty Tomb</button>';
+  }else if(actionType==='david'){
+    content='<h2 style="font-family:\'Cinzel Decorative\',serif;color:#bfa07a;font-size:2rem;margin-bottom:1rem;">The Stone Flies</h2><p style="font-style:italic;color:#c8b8a8;font-size:1.1rem;text-align:center;max-width:500px;line-height:1.7;margin-bottom:2rem;">Aim and click to release the stone. The small defeats the giant. Faith overcomes the impossible.</p><button onclick="completeAction(\'david\',6)" style="padding:1rem 2.5rem;background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;font-family:\'Cormorant Garamond\',serif;font-size:1.1rem;cursor:pointer;">Release the Stone</button>';
+  }else{
+    content='<h2 style="font-family:\'Cinzel Decorative\',serif;color:#bfa07a;font-size:2rem;margin-bottom:1rem;">The Moment Reveals Itself</h2><p style="font-style:italic;color:#c9b8a8;font-size:1.1rem;text-align:center;max-width:500px;line-height:1.7;margin-bottom:2rem;">Contemplate this scene slowly. Let the depth of the Scripture reveal itself through your patience and attention.</p><button onclick="closeAction()" style="padding:1rem 2rem;background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;font-family:\'Cormorant Garamond\',serif;font-size:1rem;cursor:pointer;">Continue Contemplating</button>';
+  }
+  overlay.innerHTML=content;
+  document.body.appendChild(overlay);
+}
+
+window.completeAction=(type,b,spec)=>{
+  const overlay=document.getElementById('action-overlay');
+  if(overlay)overlay.remove();
+  playTone(440,0.2);playTone(523,0.3);
+  const s=loadState();
+  s.mem += b||3; s.mel += Math.floor(b/3)||1; s.art += Math.floor(b/2)||1;
+  s.mem=Math.max(0,Math.min(20,s.mem));s.mel=Math.max(0,Math.min(20,s.mel));s.art=Math.max(0,Math.min(20,s.art));
+  saveState(s);
+  document.getElementById('mem').textContent=s.mem;
+  document.getElementById('mel').textContent=s.mel;
+  document.getElementById('art').textContent=s.art;
+  document.getElementById('memory-indicator').classList.remove('hidden');
+  document.getElementById('memory-indicator').textContent='Action Completed';
+  setTimeout(()=>{document.getElementById('memory-indicator').classList.add('hidden');},1500);
+};
+window.closeAction=()=>{
+  const overlay=document.getElementById('action-overlay');
+  if(overlay)overlay.remove();
+};
 
 function getNextBook(current){
   const order = ['genesis','exodus','psalms','gospels','acts','revelation'];
