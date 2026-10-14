@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Territorio PWA — Conquista la griglia</title>
+  <meta name="description" content="Arena paper.io-style: lascia la scia, chiudi l'anello, conquista la griglia contro 4 bot furbi. Installabile, offline, iPhone-first.">
+
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0a0d13">
+
+  <!-- iPhone / iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Territorio">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <canvas id="campo"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" hidden>
+    <div class="hud-stats">
+      <div class="stat"><span id="hud-pct">0.0%</span><label>territorio</label></div>
+      <div class="stat"><span id="hud-kill">0</span><label>eliminazioni</label></div>
+    </div>
+    <button id="pausa-btn" class="iconbtn" aria-label="Pausa">⏸</button>
+    <div id="classifica" aria-label="Classifica live"></div>
+  </div>
+
+  <!-- joystick virtuale -->
+  <div id="joystick-base" hidden><div id="joystick-stick"></div></div>
+
+  <!-- feed eliminazioni / eventi -->
+  <div id="feed" aria-live="polite"></div>
+
+  <!-- MENU -->
+  <section id="menu" class="schermata visible">
+    <div class="pannello">
+      <div class="logo" aria-hidden="true">🚩</div>
+      <h1>TER<em>RITO</em>RIO</h1>
+      <p class="tagline">Lascia la scia, chiudi l'anello, conquista la griglia.<br>4 bot ti contesteranno ogni cella.</p>
+      <p id="menu-record" class="record"></p>
+      <button id="gioca-btn" class="btn-principale">▶&nbsp; Gioca</button>
+      <div class="regole">
+        <p>👆 Trascina ovunque per sterzare</p>
+        <p>🔄 Torna sul tuo colore per chiudere l'anello</p>
+        <p>⚔️ Attraversa le scie altrui per eliminarli</p>
+        <p>💀 Non toccare le scie — nemmeno la tua!</p>
+      </div>
+      <p class="install-hint">On iPhone: <strong>Condividi → Aggiungi a Home</strong> per giocare in fullscreen.</p>
+    </div>
+  </section>
+
+  <!-- PAUSA -->
+  <section id="pausa" class="schermata">
+    <div class="pannello">
+      <h2>Pausa</h2>
+      <button id="riprendi-btn" class="btn-principale">▶&nbsp; Riprendi</button>
+      <button id="abbandona-btn" class="btn-secondario">Abbandona</button>
+    </div>
+  </section>
+
+  <!-- FINE PARTITA -->
+  <section id="fine" class="schermata">
+    <div class="pannello">
+      <h2 id="fine-titolo">Partita finita</h2>
+      <div class="statistiche">
+        <div class="stat-grande"><span id="fine-pct">0%</span><label>territorio max</label></div>
+        <div class="stat-grande"><span id="fine-ucc">0</span><label>eliminazioni</label></div>
+        <div class="stat-grande"><span id="fine-tempo">0s</span><label>durata</label></div>
+      </div>
+      <p id="fine-record" class="record"></p>
+      <button id="rigioca-btn" class="btn-principale">🔄&nbsp; Rigioca</button>
+      <button id="menu-btn" class="btn-secondario">Menu</button>
+    </div>
+  </section>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

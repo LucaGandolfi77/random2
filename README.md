@@ -27,6 +27,7 @@
   - [Farm Tycoon](#farm-tycoon)
   - [Isola Resort](#isola-resort)
   - [BUCIO](#bucio)
+  - [Territorio](#territorio)
   - [Snap Cam](#snap-cam)
 - [The tools](#the-tools)
   - [EADS Studio](#eads-studio)
@@ -59,7 +60,8 @@
 | 11 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
 | 12 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
 | 13 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 14 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 14 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 15 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -512,6 +514,24 @@ and a stack of image filters. Snaps live only on your device.
 ---
 
 ## The tools
+
+### Territorio
+
+*Paper.io-style arena vs bots.* 🚩
+
+A grid-territory .io game on an 80×80 arena: leave a trail outside your land,
+close a loop and claim everything inside (enemy cells included). Cross
+someone's trail and they're eliminated — cross your own and it's over.
+
+- 4 bots with a 3-mode AI (expand / return home / ambush) that plan loop
+  closures, avoid danger and cut your trail when you're careless
+- Live leaderboard, kill feed, capture flashes and a cached minimap
+- Touch joystick (drag anywhere) + WASD/arrows, records in `localStorage`
+- **Multiplayer-ready engine**: every player exposes only `input.dir`; phase 2
+  swaps bots for remote players over Supabase Realtime (host-authoritative,
+  quantized snapshots) without touching the game rules
+- Simulation is dependency-free and unit-tested: ring capture (BFS), trail
+  cutting, respawns and a 300-second stress run all pass in Node
 
 ### EADS Studio
 

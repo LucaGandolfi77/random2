@@ -1,0 +1,18 @@
+{
+  "name": "Territorio PWA — Conquista la griglia",
+  "short_name": "Territorio",
+  "description": "Arena paper.io-style: lascia la scia, chiudi l'anello, conquista la griglia contro 4 bot furbi.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0d13",
+  "theme_color": "#0a0d13",
+  "lang": "it",
+  "categories": ["games"],
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
+}
