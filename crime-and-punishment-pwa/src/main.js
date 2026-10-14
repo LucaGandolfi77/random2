@@ -1,6 +1,6 @@
 import CONFIG from './config.js';
 import { loadState, saveState, addNote } from './storage.js';
-import { initRender, clearScreen, drawDialogueText, drawSpeaker, showChoices } from './render.js';
+import { initRender, clearScreen, drawDialogueText, showChoices } from './render.js';
 import { playTone, playMood, initAudio, updateAudio } from './audio.js';
 
 const storyData = {
@@ -88,7 +88,7 @@ function renderScene(){clearScreen();const scene=storyData.scenes[state.scene];i
 function updateStats(){document.getElementById('conscience-val').textContent=state.conscience;document.getElementById('guilt-val').textContent=state.guilt;document.getElementById('hope-val').textContent=state.hope;}
 function drawSpeaker(s){document.getElementById('speaker').textContent=storyData.scenes[s]?.speaker||'Narrator';}
 
-export function initMain(){initAudio();clearScreen('dark');const saved=loadState();if(saved)state={...state,...saved};renderScene();if(scene===storyData.scenes.intro)playMood('dark');updateStats();addChoiceButtons();}
+export function initMain(){initRender();initAudio();clearScreen('dark');const saved=loadState();if(saved)state={...state,...saved};renderScene();if(state.scene==='intro')playMood('dark');updateStats();addChoiceButtons();}
 
 function addChoiceButtons(){
   const current=storyData.scenes[state.scene];
@@ -122,3 +122,7 @@ function applyChoice(choice){
 
 export function showDialogue(text,speaker='Narrator'){document.getElementById('dialogue-text').textContent=text;document.getElementById('speaker').textContent=speaker;}
 export default { initMain, showDialogue };
+
+/* Entry point: this file is loaded as a module, so nothing runs until we
+   call it explicitly. Module scripts are deferred, so the DOM is ready. */
+initMain();

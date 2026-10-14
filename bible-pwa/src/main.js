@@ -214,3 +214,7 @@ function getNextBook(current){
 }
 
 export default { initMain };
+
+/* Entry point: this file is loaded as a module, so nothing runs until we
+   call it explicitly. Module scripts are deferred, so the DOM is ready. */
+initMain();

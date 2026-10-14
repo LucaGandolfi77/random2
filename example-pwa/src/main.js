@@ -230,10 +230,10 @@ function gameOver() {
     }
 }
 
-function resetProgress() {
+async function resetProgress() {
     if (confirm('Reset all progress? This cannot be undone.')) {
-        const { resetProgress } = await import('./storage.js');
-        resetProgress();
+        const storage = await import('./storage.js');
+        storage.resetProgress();
         init();
     }
 }
@@ -287,3 +287,5 @@ export {
     generateAsteroids,
     saveGameState
 };
+/* Entry point: loaded as a module, so nothing runs until we call it. */
+init();
