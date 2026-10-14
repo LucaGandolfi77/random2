@@ -529,10 +529,15 @@
       position: relative;
       overflow: hidden;
       flex: 0 0 auto;
-      width: 58px; height: 58px;
+      /* 72px, not 58. The first pass kept the original size and the sketches
+         came out as a faint ring behind a 30px emoji: at 58px a tile simply
+         cannot carry both a glyph and a piece of living art. Widening it gives
+         the sketch 54% more area, and the card has room - the title and
+         tagline reflow to the right rather than wrapping. */
+      width: 72px; height: 72px;
       display: grid;
       place-items: center;
-      font-size: 30px;
+      font-size: 28px;
       border-radius: 17px;
       box-shadow: 0 6px 20px -6px var(--tile-glow, rgba(0, 0, 0, 0.5)),
                   inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -562,6 +567,15 @@
       position: relative;
       z-index: 1;
       will-change: transform;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+    }
+    /* Only when a live sketch exists behind it. A tile with no canvas - a
+       low-end device, or a browser that never ran the script - keeps the
+       full-size glyph, so the fallback is the design, not a degraded copy
+       of it. */
+    .tile.has-fx .tile-emoji {
+      font-size: 20px;
+      opacity: 0.85;
     }
     .card h2 {
       font-size: 19px;
@@ -1501,67 +1515,80 @@
 
     /* ---- The sketches ----------------------------------------------------
      * Each one draws into a box w x h at time t, given the tile's palette.
-     * They are deliberately written in the 58px box: nothing here scales,
-     * because a sketch that looks right at 58px and wrong at 92px is a
-     * sketch that was never looked at. */
+     *
+     * These are drawn for a 58px box, which is a much smaller canvas than it
+     * looks. On the first pass they were written at the size they have here in
+     * the source and came out as a faint circle with a dot for a ship: 173
+     * painted pixels out of 3249, a tile that reads as nothing at thumbnail
+     * size. Everything below is sized and weighted to fill the box - bodies
+     * are 14-20px, main strokes 2-2.5px, orbits touch the edge. A sketch that
+     * has to be squinted at is a sketch that is not there. */
     var SKETCH = {
 
       /* SECTOR 7: a low-poly ship on an orbit, engine flare, comet tail. */
       orbit: function (g, w, h, t) {
-        var cx = w / 2, cy = h / 2, R = w * 0.30, a = t * 1.15;
-        g.strokeStyle = "rgba(255,255,255,0.10)";
-        g.lineWidth = 1;
+        var cx = w / 2, cy = h / 2, R = w * 0.34, a = t * 1.15;
+        g.strokeStyle = "rgba(255,255,255,0.22)";
+        g.lineWidth = 1.4;
         g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
 
-        for (var i = 0; i < 13; i++) {
-          var aa = a - i * 0.06;
-          g.fillStyle = rgba(P2, (1 - i / 13) * 0.55);
-          g.beginPath();
-          g.arc(cx + Math.cos(aa) * (R - i * 0.4), cy + Math.sin(aa) * (R - i * 0.4),
-                Math.max(0.4, 2.2 - i * 0.13), 0, TAU);
-          g.fill();
+        /* Tapered tail, six strokes rather than thirteen dots: fewer marks,
+         * each big enough to see. */
+        g.lineCap = "round";
+        for (var i = 0; i < 6; i++) {
+          var a0 = a - i * 0.10, a1 = a - (i + 1) * 0.10;
+          var x0 = cx + Math.cos(a0) * R, y0 = cy + Math.sin(a0) * R;
+          var x1 = cx + Math.cos(a1) * R, y1 = cy + Math.sin(a1) * R;
+          g.strokeStyle = rgba(P2, (1 - i / 6) * 0.75);
+          g.lineWidth = 4.2 - i * 0.55;
+          g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
         }
+        g.lineCap = "butt";
+
         var x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
-        var fx = cx + Math.cos(a - 0.2) * (R - 1), fy = cy + Math.sin(a - 0.2) * (R - 1);
-        g.fillStyle = "rgba(255,214,120,0.9)";
-        g.beginPath(); g.arc(fx, fy, 1.9, 0, TAU); g.fill();
+        var fa = a - 0.34;
+        g.fillStyle = "rgba(255,206,110,0.95)";
+        g.beginPath();
+        g.arc(cx + Math.cos(fa) * R, cy + Math.sin(fa) * R, 3.2, 0, TAU);
+        g.fill();
+
         g.save(); g.translate(x, y); g.rotate(a + Math.PI / 2);
         g.fillStyle = rgba(P1, 1);
         g.beginPath();
-        g.moveTo(5.4, 0); g.lineTo(-3.6, 3.1); g.lineTo(-2, 0); g.lineTo(-3.6, -3.1);
+        g.moveTo(9.5, 0); g.lineTo(-6, 5.4); g.lineTo(-3, 0); g.lineTo(-6, -5.4);
         g.closePath(); g.fill();
         g.restore();
       },
 
       /* BUCIO: a black hole. Matter falls in, the disc is the event horizon. */
       vortex: function (g, w, h, t) {
-        var cx = w / 2, cy = h / 2, R = w * 0.30;
-        g.fillStyle = "rgba(3,4,10,0.9)";
+        var cx = w / 2, cy = h / 2, R = w * 0.24;
+        g.fillStyle = "rgba(2,4,10,0.88)";
         g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
-        for (var i = 0; i < 24; i++) {
-          var p = (t * 0.34 + i / 24) % 1;
-          var r = (w * 0.46) * (1 - p) + R * 0.5;
+        for (var i = 0; i < 16; i++) {
+          var p = (t * 0.34 + i / 16) % 1;
+          var r = (w * 0.50) * (1 - p) + R * 0.6;
           var a = i * 2.399 + t * 1.7 + p * 4.6;
-          g.fillStyle = rgba(i % 3 ? P2 : P1, (1 - p) * 0.85);
+          g.fillStyle = rgba(i % 3 ? P2 : P1, (1 - p) * 0.9);
           g.beginPath();
           g.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.62,
-                Math.max(0.4, 1.7 * (1 - p * 0.4)), 0, TAU);
+                Math.max(0.8, 2.6 * (1 - p * 0.4)), 0, TAU);
           g.fill();
         }
-        g.strokeStyle = rgba(P1, 0.55); g.lineWidth = 1.4;
+        g.strokeStyle = rgba(P1, 0.7); g.lineWidth = 2;
         g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
       },
 
       /* TERRITORIO / FORMICA: a trail walks a loop, then the loop fills. */
       grid: function (g, w, h, t, u) {
-        var m = w * 0.17, x0 = m, y0 = m, x1 = w - m, y1 = h - m;
+        var m = w * 0.13, x0 = m, y0 = m, x1 = w - m, y1 = h - m;
         var period = u.period || 5;
         var p = (t % period) / period;
         var corners = [[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]];
         var d = p < 0.6 ? (p / 0.6) * ((x1 - x0) + (y1 - y0)) : (x1 - x0) + (y1 - y0);
 
-        g.lineWidth = 2.2; g.lineJoin = "round"; g.lineCap = "round";
-        g.strokeStyle = rgba(P1, 0.95);
+        g.lineWidth = 2.8; g.lineJoin = "round"; g.lineCap = "round";
+        g.strokeStyle = rgba(P1, 1);
         g.beginPath(); g.moveTo(x0, y0);
         var walked = 0;
         for (var i = 0; i < 4; i++) {
@@ -1580,7 +1607,7 @@
         if (p >= 0.6) {
           var f = (p - 0.6) / 0.4;
           var a = f < 0.5 ? f * 2 : (1 - f) * 2;
-          g.fillStyle = rgba(P2, 0.5 * a);
+          g.fillStyle = rgba(P2, 0.55 * a);
           g.fillRect(x0, y0, x1 - x0, y1 - y0);
         }
       },
@@ -1590,72 +1617,72 @@
         var cx = w / 2, cy = h / 2;
         var period = u.period || 3.2;
         var b = 0.5 + 0.5 * Math.sin((t / period) * TAU);
-        var r = w * (0.13 + b * 0.16);
-        var grd = g.createRadialGradient(cx, cy, 0, cx, cy, r * 2.3);
+        var r = w * (0.15 + b * 0.24);
+        var grd = g.createRadialGradient(cx, cy, 0, cx, cy, r * 1.6);
         grd.addColorStop(0, rgba(P1, 0.95));
-        grd.addColorStop(0.35, rgba(P2, 0.45));
+        grd.addColorStop(0.45, rgba(P2, 0.5));
         grd.addColorStop(1, rgba(P2, 0));
         g.fillStyle = grd;
-        g.beginPath(); g.arc(cx, cy, r * 2.3, 0, TAU); g.fill();
-        g.fillStyle = "rgba(255,255,255,0.85)";
-        g.beginPath(); g.arc(cx, cy, w * 0.07 * (0.7 + b * 0.5), 0, TAU); g.fill();
+        g.beginPath(); g.arc(cx, cy, r * 1.6, 0, TAU); g.fill();
+        g.fillStyle = "rgba(255,255,255,0.9)";
+        g.beginPath(); g.arc(cx, cy, w * 0.085 * (0.7 + b * 0.5), 0, TAU); g.fill();
         for (var i = 0; i < 3; i++) {
           var a = t * 0.9 + i * TAU / 3;
-          g.fillStyle = rgba(P2, 0.8);
+          g.fillStyle = rgba(P2, 0.9);
           g.beginPath();
-          g.arc(cx + Math.cos(a) * w * 0.34, cy + Math.sin(a) * h * 0.34, 1.5, 0, TAU);
+          g.arc(cx + Math.cos(a) * w * 0.36, cy + Math.sin(a) * h * 0.36, 2.4, 0, TAU);
           g.fill();
         }
       },
 
       /* ALVEARE / VIRTUAL FARM: rows rise on the beat, rain falls. */
       grow: function (g, w, h, t, u) {
-        var n = 5, period = u.period || 4, top = h * 0.84;
-        g.strokeStyle = rgba(P2, 0.3); g.lineWidth = 1;
-        g.beginPath(); g.moveTo(w * 0.1, top + 1); g.lineTo(w * 0.9, top + 1); g.stroke();
+        var n = 4, period = u.period || 4, top = h * 0.80;
+        g.strokeStyle = rgba(P2, 0.45); g.lineWidth = 1.4;
+        g.beginPath(); g.moveTo(w * 0.08, top + 1); g.lineTo(w * 0.92, top + 1); g.stroke();
         for (var i = 0; i < n; i++) {
           var local = ((t / period) + i / n) % 1;
-          var x = w * 0.17 + i * (w * 0.66 / (n - 1));
-          var hgt = local * h * 0.52;
-          g.strokeStyle = rgba(i % 2 ? P2 : P1, 0.9);
-          g.lineWidth = 2;
+          var x = w * 0.20 + i * (w * 0.60 / (n - 1));
+          var hgt = local * h * 0.62;
+          g.strokeStyle = rgba(i % 2 ? P2 : P1, 1);
+          g.lineWidth = 3;
           g.beginPath(); g.moveTo(x, top); g.lineTo(x, top - hgt); g.stroke();
-          g.fillStyle = rgba(i % 2 ? P2 : P1, 0.9);
-          g.beginPath(); g.arc(x, top - hgt, 1.7, 0, TAU); g.fill();
+          g.fillStyle = rgba(i % 2 ? P2 : P1, 1);
+          g.beginPath(); g.arc(x, top - hgt, 2.6, 0, TAU); g.fill();
         }
         for (var k = 0; k < 4; k++) {
           var rx = w * 0.2 + k * (w * 0.2);
-          var ry = ((t * 70 + k * 29) % (h * 0.55));
-          g.fillStyle = rgba(P2, 0.45);
-          g.fillRect(rx, ry, 1, 4);
+          var ry = ((t * 80 + k * 31) % (h * 0.5));
+          g.fillStyle = rgba(P2, 0.55);
+          g.fillRect(rx, ry, 1.4, 5);
         }
       },
 
       /* KING SHOT / MUSTANG: an arrow on an arc, with a dotted guide. */
       arc: function (g, w, h, t, u) {
         var period = u.period || 2.2, p = (t % period) / period;
-        var x0 = w * 0.16, y0 = h * 0.84, x1 = w * 0.84, y1 = h * 0.24;
+        var x0 = w * 0.14, y0 = h * 0.86, x1 = w * 0.86, y1 = h * 0.20;
         function at(q) {
-          return [x0 + (x1 - x0) * q, y0 + (y1 - y0) * q - Math.sin(q * Math.PI) * h * 0.46];
+          return [x0 + (x1 - x0) * q, y0 + (y1 - y0) * q - Math.sin(q * Math.PI) * h * 0.50];
         }
-        g.strokeStyle = rgba(P2, 0.18); g.lineWidth = 1; g.setLineDash([2, 3]);
+        g.strokeStyle = rgba(P2, 0.3); g.lineWidth = 1.2; g.setLineDash([2, 3]);
         g.beginPath();
         g.moveTo(x0, y0);
         g.quadraticCurveTo((x0 + x1) / 2, Math.min(y0, y1) - h * 0.5, x1, y1);
         g.stroke(); g.setLineDash([]);
-        for (var i = 1; i <= 8; i++) {
-          var q = p - i * 0.022;
+        for (var i = 1; i <= 6; i++) {
+          var q = p - i * 0.028;
           if (q < 0) break;
           var pt = at(q);
-          g.fillStyle = rgba(P2, (1 - i / 8) * 0.6);
-          g.beginPath(); g.arc(pt[0], pt[1], Math.max(0.4, 2.2 - i * 0.18), 0, TAU); g.fill();
+          g.fillStyle = rgba(P2, (1 - i / 6) * 0.7);
+          g.beginPath(); g.arc(pt[0], pt[1], Math.max(0.8, 3.4 - i * 0.4), 0, TAU); g.fill();
         }
         var now = at(p), nxt = at(Math.min(1, p + 0.02));
         g.save(); g.translate(now[0], now[1]);
         g.rotate(Math.atan2(nxt[1] - now[1], nxt[0] - now[0]));
         g.fillStyle = rgba(P1, 1);
         g.beginPath();
-        g.moveTo(5.4, 0); g.lineTo(-4, 2.6); g.lineTo(-2, 0); g.lineTo(-4, -2.6);
+        g.moveTo(9, 0); g.lineTo(-7, 4.4); g.lineTo(-3, 0); g.lineTo(-7, -4.4);
         g.closePath(); g.fill();
         g.restore();
       },
@@ -1664,42 +1691,49 @@
       trail: function (g, w, h, t, u) {
         var period = u.period || 2.6, p = (t % period) / period;
         var dir = u.dir || 1;
-        var yAt = function (q) { return h * 0.5 + Math.sin(q * TAU) * h * 0.16; };
-        for (var i = 1; i <= 12; i++) {
-          var q = p - dir * i * 0.02;
+        var yAt = function (q) { return h * 0.5 + Math.sin(q * TAU) * h * 0.17; };
+        g.lineCap = "round";
+        for (var i = 1; i <= 8; i++) {
+          var q = p - dir * i * 0.025;
           if (q < 0 || q > 1) break;
-          g.fillStyle = rgba(P2, (1 - i / 12) * 0.55);
+          var qy = yAt(q);
+          g.strokeStyle = rgba(P2, (1 - i / 8) * 0.7);
+          g.lineWidth = 4.4 - i * 0.42;
           g.beginPath();
-          g.arc(dir > 0 ? q * w : w - q * w, yAt(q), Math.max(0.4, 2.6 - i * 0.16), 0, TAU);
-          g.fill();
+          var from = dir > 0 ? q * w : w - q * w;
+          var to = dir > 0 ? (q - 0.025) * w : w - (q - 0.025) * w;
+          g.moveTo(from, qy);
+          g.lineTo(to, yAt(q - dir * 0.025));
+          g.stroke();
         }
+        g.lineCap = "butt";
         var x = dir > 0 ? p * w : w - p * w, y = yAt(p);
         g.save(); g.translate(x, y); g.scale(dir, 1);
         g.fillStyle = rgba(P1, 1);
         g.beginPath();
-        g.moveTo(6, 0); g.lineTo(-5, 3.4); g.lineTo(-2.5, 0); g.lineTo(-5, -3.4);
+        g.moveTo(9, 0); g.lineTo(-7, 5.6); g.lineTo(-4, 0); g.lineTo(-7, -5.6);
         g.closePath(); g.fill();
         g.restore();
-        g.fillStyle = rgba(P1, 0.5);
-        for (var k = 0; k < 2; k++) g.fillRect(x + dir * (8 + k * 4), y - 1, 2.4, 2);
+        g.fillStyle = rgba(P1, 0.6);
+        for (var k = 0; k < 2; k++) g.fillRect(x + dir * (11 + k * 6), y - 1.4, 3.2, 2.8);
       },
 
       /* SLOT: three strips of symbols. */
       reel: function (g, w, h, t, u) {
-        var spd = u.speed || 1, cell = 15;
+        var spd = u.speed || 1, cell = 17;
         for (var c = 0; c < 3; c++) {
           var x = w * 0.24 + c * (w * 0.26);
-          var off = (t * 40 * spd + c * 11) % cell;
+          var off = (t * 44 * spd + c * 13) % cell;
           var n = Math.ceil(h / cell) + 2;
           for (var i = -1; i < n; i++) {
             var y = i * cell + off - cell;
             var sym = ((i + c + (t * 2 | 0)) % 3 + 3) % 3;
-            g.fillStyle = rgba(sym === 0 ? P1 : P2, 0.9);
-            if (sym === 0) { g.beginPath(); g.arc(x, y, 3.2, 0, TAU); g.fill(); }
-            else if (sym === 1) { g.fillRect(x - 3, y - 3, 6, 6); }
+            g.fillStyle = rgba(sym === 0 ? P1 : P2, 1);
+            if (sym === 0) { g.beginPath(); g.arc(x, y, 5, 0, TAU); g.fill(); }
+            else if (sym === 1) { g.fillRect(x - 4.4, y - 4.4, 8.8, 8.8); }
             else {
               g.beginPath();
-              g.moveTo(x, y - 3.6); g.lineTo(x + 3.4, y); g.lineTo(x, y + 3.6); g.lineTo(x - 3.4, y);
+              g.moveTo(x, y - 5.4); g.lineTo(x + 5, y); g.lineTo(x, y + 5.4); g.lineTo(x - 5, y);
               g.closePath(); g.fill();
             }
           }
@@ -1710,11 +1744,11 @@
       bloom: function (g, w, h, t, u) {
         var cx = w / 2, cy = h / 2;
         var period = u.period || 6, p = (t % period) / period;
-        var r = w * 0.46 * Math.min(1, p * 1.7);
+        var r = w * 0.48 * Math.min(1, p * 1.7);
         g.fillStyle = rgba(P1, 0.85 * (1 - p * 0.4));
-        g.beginPath(); g.arc(cx, cy, r * 0.55, 0, TAU); g.fill();
-        g.strokeStyle = rgba(P2, 0.9 * (1 - Math.max(0, (p - 0.5) / 0.5)));
-        g.lineWidth = 1.6;
+        g.beginPath(); g.arc(cx, cy, r * 0.6, 0, TAU); g.fill();
+        g.strokeStyle = rgba(P2, 0.95 * (1 - Math.max(0, (p - 0.5) / 0.5)));
+        g.lineWidth = 2.2;
         g.beginPath();
         for (var i = 0; i <= 18; i++) {
           var a = i / 18 * TAU;
@@ -1724,12 +1758,12 @@
         }
         g.closePath(); g.stroke();
         if (u.branch) {
-          g.lineWidth = 1; g.strokeStyle = rgba(P2, 0.7);
+          g.lineWidth = 1.8; g.strokeStyle = rgba(P2, 0.85);
           for (var k = 0; k < 3; k++) {
             var aa = t * 0.5 + k * TAU / 3;
             g.beginPath(); g.moveTo(cx, cy);
             g.quadraticCurveTo(cx + Math.cos(aa) * r * 0.7, cy + Math.sin(aa) * r * 0.7,
-              cx + Math.cos(aa + 0.5) * r * 1.05, cy + Math.sin(aa + 0.5) * r * 1.05);
+              cx + Math.cos(aa + 0.5) * r * 1.1, cy + Math.sin(aa + 0.5) * r * 1.1);
             g.stroke();
           }
         }
@@ -1737,41 +1771,41 @@
 
       /* STATIC: TV snow, a sweeping scanline, CRT raster lines. */
       noise: function (g, w, h, t) {
-        for (var i = 0; i < 90; i++) {
+        for (var i = 0; i < 120; i++) {
           var x = Math.abs(Math.sin(i * 12.9898 + t * 13.0) * 43758.5453 % 1) * w;
           var y = Math.abs(Math.sin(i * 78.233 + t * 7.0) * 12345.6789 % 1) * h;
           g.fillStyle = rgba(i % 4 === 0 ? P1 : [223, 230, 255],
-                             0.25 + Math.abs(Math.sin(i + t)) * 0.5);
-          g.fillRect(x, y, 1.6, 1.6);
+                             0.3 + Math.abs(Math.sin(i + t)) * 0.6);
+          g.fillRect(x, y, 2.2, 2.2);
         }
-        g.fillStyle = "rgba(0,0,0,0.35)";
-        for (var r = 0; r < h; r += 3) g.fillRect(0, r, w, 1);
-        g.fillStyle = rgba(P1, 0.22);
-        g.fillRect(0, (t * 0.28 % 1) * h, w, 2);
+        g.fillStyle = "rgba(0,0,0,0.4)";
+        for (var r = 0; r < h; r += 3) g.fillRect(0, r, w, 1.4);
+        g.fillStyle = rgba(P1, 0.3);
+        g.fillRect(0, (t * 0.28 % 1) * h, w, 2.6);
       },
 
       /* VITI: a screw turning, backing out of a panel. */
       screw: function (g, w, h, t, u) {
         var cx = w / 2, period = u.period || 4, p = (t % period) / period;
-        var y = h * 0.34 + p * h * 0.3, a = t * 3.4;
-        g.fillStyle = rgba(P2, 0.25);
-        g.fillRect(w * 0.14, h * 0.82, w * 0.72, 3);
-        g.strokeStyle = rgba(P1, 0.9); g.lineWidth = 3.2;
-        g.beginPath(); g.moveTo(cx, y + 6); g.lineTo(cx, h * 0.82); g.stroke();
-        g.lineWidth = 1.6;
+        var y = h * 0.32 + p * h * 0.34, a = t * 3.4;
+        g.fillStyle = rgba(P2, 0.4);
+        g.fillRect(w * 0.10, h * 0.82, w * 0.80, 4);
+        g.strokeStyle = rgba(P1, 1); g.lineWidth = 4.4;
+        g.beginPath(); g.moveTo(cx, y + 8); g.lineTo(cx, h * 0.82); g.stroke();
+        g.lineWidth = 2.2;
         for (var i = 0; i < 4; i++) {
-          var ty = y + 8 + i * 4;
-          g.strokeStyle = rgba(P1, 0.7);
+          var ty = y + 12 + i * 6;
+          g.strokeStyle = rgba(P1, 0.8);
           g.beginPath();
-          g.moveTo(cx - 3.4 * Math.cos(a), ty - 3.4 * Math.sin(a));
-          g.lineTo(cx + 3.4 * Math.cos(a), ty + 3.4 * Math.sin(a));
+          g.moveTo(cx - 5 * Math.cos(a), ty - 5 * Math.sin(a));
+          g.lineTo(cx + 5 * Math.cos(a), ty + 5 * Math.sin(a));
           g.stroke();
         }
         g.save(); g.translate(cx, y); g.rotate(a);
         g.fillStyle = rgba(P1, 1);
-        g.beginPath(); g.arc(0, 0, 5.4, 0, TAU); g.fill();
-        g.strokeStyle = "rgba(6,10,20,0.9)"; g.lineWidth = 1.8;
-        g.beginPath(); g.moveTo(-4, 0); g.lineTo(4, 0); g.stroke();
+        g.beginPath(); g.arc(0, 0, 8, 0, TAU); g.fill();
+        g.strokeStyle = "rgba(6,10,20,0.92)"; g.lineWidth = 2.4;
+        g.beginPath(); g.moveTo(-6, 0); g.lineTo(6, 0); g.stroke();
         g.restore();
       },
 
@@ -1780,7 +1814,7 @@
         var stops = [[0.16, 0.72], [0.38, 0.34], [0.6, 0.62], [0.86, 0.26]];
         var period = u.period || 5, p = (t % period) / period;
         var total = p * stops.length;
-        g.lineWidth = 2.2; g.lineCap = "round"; g.strokeStyle = rgba(P1, 0.95);
+        g.lineWidth = 3; g.lineCap = "round"; g.strokeStyle = rgba(P1, 1);
         g.beginPath();
         for (var i = 0; i < stops.length - 1; i++) {
           var ax = stops[i][0] * w, ay = stops[i][1] * h;
@@ -1792,22 +1826,83 @@
         g.stroke();
         for (var s = 0; s < stops.length; s++) {
           var on = s <= total;
-          g.fillStyle = rgba(on ? [255, 255, 255] : P2, on ? 0.95 : 0.4);
-          g.beginPath(); g.arc(stops[s][0] * w, stops[s][1] * h, 2.6, 0, TAU); g.fill();
+          g.fillStyle = rgba(on ? [255, 255, 255] : P2, on ? 1 : 0.5);
+          g.beginPath(); g.arc(stops[s][0] * w, stops[s][1] * h, on ? 4.2 : 2.6, 0, TAU); g.fill();
         }
+      },
+
+      /* NEBBIA: a nautical chart. The compass rose turns, a route is plotted,
+       * and the transcription error that sinks the client's ship pulses. */
+      chart: function (g, w, h, t, u) {
+        var cx = w * 0.5, cy = h * 0.5;
+        var period = u.period || 9;
+        var p = (t % period) / period;
+
+        g.strokeStyle = rgba(P2, 0.7); g.lineWidth = 1.8;
+        g.beginPath();
+        g.moveTo(-2, h * 0.74);
+        g.bezierCurveTo(w * 0.22, h * 0.62, w * 0.3, h * 0.86, w * 0.5, h * 0.78);
+        g.bezierCurveTo(w * 0.66, h * 0.72, w * 0.78, h * 0.9, w + 2, h * 0.8);
+        g.stroke();
+
+        g.strokeStyle = rgba(P2, 0.95); g.lineWidth = 1.6;
+        g.setLineDash([4, 3]);
+        g.lineDashOffset = -t * 14;
+        g.beginPath();
+        g.moveTo(w * 0.12, h * 0.88);
+        g.quadraticCurveTo(w * 0.46, h * 0.38, w * 0.86, h * 0.12);
+        g.stroke();
+        g.setLineDash([]);
+
+        var ex = w * 0.46, ey = h * 0.38;
+        var beat = 0.5 + 0.5 * Math.sin(t * 3.2);
+        g.strokeStyle = rgba([222, 66, 48], 0.6 + beat * 0.4);
+        g.lineWidth = 2.6;
+        g.beginPath();
+        g.moveTo(ex - 6, ey - 6); g.lineTo(ex + 6, ey + 6);
+        g.moveTo(ex + 6, ey - 6); g.lineTo(ex - 6, ey + 6);
+        g.stroke();
+
+        g.save();
+        g.translate(w * 0.76, h * 0.68);
+        g.rotate(t * 0.24);
+        g.strokeStyle = rgba(P2, 0.85); g.lineWidth = 1.4;
+        g.beginPath(); g.arc(0, 0, w * 0.22, 0, TAU); g.stroke();
+        for (var i = 0; i < 4; i++) {
+          var a = i / 4 * TAU;
+          var len = i === 0 ? w * 0.22 : w * 0.13;
+          g.fillStyle = rgba(i === 0 ? [222, 66, 48] : P2, i === 0 ? 1 : 0.8);
+          g.beginPath();
+          g.moveTo(Math.cos(a) * len, Math.sin(a) * len);
+          g.lineTo(Math.cos(a + 0.5) * 4, Math.sin(a + 0.5) * 4);
+          g.lineTo(Math.cos(a - 0.5) * 4, Math.sin(a - 0.5) * 4);
+          g.closePath(); g.fill();
+          g.beginPath();
+          g.moveTo(Math.cos(a + Math.PI) * len, Math.sin(a + Math.PI) * len);
+          g.lineTo(Math.cos(a + Math.PI + 0.5) * 4, Math.sin(a + Math.PI + 0.5) * 4);
+          g.lineTo(Math.cos(a + Math.PI - 0.5) * 4, Math.sin(a + Math.PI - 0.5) * 4);
+          g.closePath(); g.fill();
+        }
+        g.restore();
+
+        var q = (t / (period * 0.55)) % 1;
+        var sx = (1 - q) * (1 - q) * w * 0.12 + 2 * (1 - q) * q * w * 0.46 + q * q * w * 0.86;
+        var sy = (1 - q) * (1 - q) * h * 0.88 + 2 * (1 - q) * q * h * 0.38 + q * q * h * 0.12;
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath(); g.arc(sx, sy, 3.4, 0, TAU); g.fill();
       },
 
       /* SNAP: a shutter iris opening and closing. */
       shutter: function (g, w, h, t, u) {
         var cx = w / 2, cy = h / 2, period = u.period || 3.4, p = (t % period) / period;
         var open = 0.5 + 0.5 * Math.sin(p * TAU);
-        var R = w * 0.40, r = R * open;
-        g.strokeStyle = rgba(P1, 0.9); g.lineWidth = 2;
+        var R = w * 0.44, r = R * open;
+        g.strokeStyle = rgba(P1, 1); g.lineWidth = 2.4;
         g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
         for (var i = 0; i < 6; i++) {
           var a0 = i / 6 * TAU + t * 0.2, a1 = (i + 1) / 6 * TAU + t * 0.2;
           var am = (a0 + a1) / 2;
-          g.fillStyle = rgba(P2, 0.5);
+          g.fillStyle = rgba(P2, 0.65);
           g.beginPath();
           g.moveTo(cx + Math.cos(a0) * r, cy + Math.sin(a0) * r);
           g.lineTo(cx + Math.cos(a0) * R, cy + Math.sin(a0) * R);
@@ -1816,94 +1911,28 @@
           g.lineTo(cx + Math.cos(a1) * r, cy + Math.sin(a1) * r);
           g.closePath(); g.fill();
         }
-        g.fillStyle = "rgba(255,255,255," + (0.85 * (1 - open * 0.5)) + ")";
-        g.beginPath(); g.arc(cx, cy, r * 0.45, 0, TAU); g.fill();
-      },
-
-      /* NEBBIA: a nautical chart. The compass rose turns, a route is plotted,
-       * and the error that sinks the client's ship pulses where it is. */
-      chart: function (g, w, h, t, u) {
-        var cx = w * 0.5, cy = h * 0.5;
-        var period = u.period || 9;
-        var p = (t % period) / period;
-
-        /* coastline, drawn once per frame - it is two curves */
-        g.strokeStyle = rgba(P2, 0.5); g.lineWidth = 1.4;
-        g.beginPath();
-        g.moveTo(-2, h * 0.74);
-        g.bezierCurveTo(w * 0.22, h * 0.62, w * 0.3, h * 0.86, w * 0.5, h * 0.78);
-        g.bezierCurveTo(w * 0.66, h * 0.72, w * 0.78, h * 0.9, w + 2, h * 0.8);
-        g.stroke();
-
-        /* the plotted route: a dashed line from one corner to the other */
-        g.strokeStyle = rgba(P2, 0.8); g.lineWidth = 1.2;
-        g.setLineDash([3, 3]);
-        g.lineDashOffset = -t * 12;
-        g.beginPath();
-        g.moveTo(w * 0.12, h * 0.88);
-        g.quadraticCurveTo(w * 0.46, h * 0.4, w * 0.86, h * 0.14);
-        g.stroke();
-        g.setLineDash([]);
-
-        /* the transcription error: where the route crosses the shoal */
-        var ex = w * 0.46, ey = h * 0.4;
-        var beat = 0.5 + 0.5 * Math.sin(t * 3.2);
-        g.strokeStyle = rgba([214, 62, 48], 0.55 + beat * 0.45);
-        g.lineWidth = 1.8;
-        g.beginPath();
-        g.moveTo(ex - 4, ey - 4); g.lineTo(ex + 4, ey + 4);
-        g.moveTo(ex + 4, ey - 4); g.lineTo(ex - 4, ey + 4);
-        g.stroke();
-
-        /* compass rose, turning slowly */
-        g.save();
-        g.translate(w * 0.76, h * 0.7);
-        g.rotate(t * 0.24);
-        g.strokeStyle = rgba(P2, 0.75); g.lineWidth = 1.1;
-        g.beginPath(); g.arc(0, 0, w * 0.2, 0, TAU); g.stroke();
-        for (var i = 0; i < 4; i++) {
-          var a = i / 4 * TAU;
-          var len = i === 0 ? w * 0.2 : w * 0.11;
-          g.fillStyle = rgba(i === 0 ? [214, 62, 48] : P2, i === 0 ? 0.95 : 0.7);
-          g.beginPath();
-          g.moveTo(Math.cos(a) * len, Math.sin(a) * len);
-          g.lineTo(Math.cos(a + 0.5) * 3, Math.sin(a + 0.5) * 3);
-          g.lineTo(Math.cos(a - 0.5) * 3, Math.sin(a - 0.5) * 3);
-          g.closePath(); g.fill();
-          g.beginPath();
-          g.moveTo(Math.cos(a + Math.PI) * len, Math.sin(a + Math.PI) * len);
-          g.lineTo(Math.cos(a + Math.PI + 0.5) * 3, Math.sin(a + Math.PI + 0.5) * 3);
-          g.lineTo(Math.cos(a + Math.PI - 0.5) * 3, Math.sin(a + Math.PI - 0.5) * 3);
-          g.closePath(); g.fill();
-        }
-        g.restore();
-
-        /* a ship's wake crawling along the route */
-        var q = (t / (period * 0.55)) % 1;
-        var sx = (1 - q) * (1 - q) * w * 0.12 + 2 * (1 - q) * q * w * 0.46 + q * q * w * 0.86;
-        var sy = (1 - q) * (1 - q) * h * 0.88 + 2 * (1 - q) * q * h * 0.4 + q * q * h * 0.14;
-        g.fillStyle = rgba(P1, 0.95);
-        g.beginPath(); g.arc(sx, sy, 2.2, 0, TAU); g.fill();
+        g.fillStyle = "rgba(255,255,255," + (0.9 * (1 - open * 0.5)) + ")";
+        g.beginPath(); g.arc(cx, cy, r * 0.42, 0, TAU); g.fill();
       },
 
       /* RESORT: a sun sinking over wave lines. */
       horizon: function (g, w, h, t, u) {
         var period = u.period || 7, p = (t % period) / period;
         var cy = h * (0.78 - p * 0.5);
-        var grd = g.createRadialGradient(w / 2, cy, 0, w / 2, cy, w * 0.42);
-        grd.addColorStop(0, rgba(P1, 0.95));
-        grd.addColorStop(0.4, rgba(P1, 0.35));
+        var grd = g.createRadialGradient(w / 2, cy, 0, w / 2, cy, w * 0.46);
+        grd.addColorStop(0, rgba(P1, 1));
+        grd.addColorStop(0.4, rgba(P1, 0.4));
         grd.addColorStop(1, rgba(P1, 0));
         g.fillStyle = grd;
-        g.beginPath(); g.arc(w / 2, cy, w * 0.42, 0, TAU); g.fill();
-        g.fillStyle = rgba(P1, 0.9);
-        g.beginPath(); g.arc(w / 2, cy, w * 0.14, 0, TAU); g.fill();
+        g.beginPath(); g.arc(w / 2, cy, w * 0.46, 0, TAU); g.fill();
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath(); g.arc(w / 2, cy, w * 0.17, 0, TAU); g.fill();
         for (var i = 0; i < 3; i++) {
           var y = h * (0.62 + i * 0.12);
-          g.strokeStyle = rgba(P2, 0.5 - i * 0.12); g.lineWidth = 1.4;
+          g.strokeStyle = rgba(P2, 0.65 - i * 0.15); g.lineWidth = 1.8;
           g.beginPath();
           for (var x = 0; x <= w; x += 4) {
-            var yy = y + Math.sin(x * 0.16 + t * 1.6 + i) * 1.8;
+            var yy = y + Math.sin(x * 0.16 + t * 1.6 + i) * 2.2;
             if (x === 0) g.moveTo(x, yy); else g.lineTo(x, yy);
           }
           g.stroke();
@@ -1911,43 +1940,46 @@
       },
     };
 
-    /* Which sketch each game gets, and how. The palette comes from the card
-     * itself, so a game only has to say WHICH it is, not what colour it is -
-     * the colours are already there in --c1/--c2.
-     *
-     * Keys are normalised through slugOf() because the markup is not
-     * consistent about trailing slashes - most cards say "lumen-pwa/" and two
-     * say "mycel-pwa". A lookup that quietly returns undefined for those is a
-     * tile that silently never animates, which is the kind of thing nobody
-     * notices until somebody counts the canvases. */
     var SKETCH_BY_SLUG = {
-      "sector7-pwa/":     ["orbit",   null],
-      "bucio/":           ["vortex",  null],
-      "territorio-pwa/":  ["grid",    { period: 5.5 }],
-      "formica-pwa/":     ["grid",    { period: 3.2 }],
-      "lumen-pwa/":       ["pulse",   { period: 2.6 }],
-      "madre-pwa/":       ["pulse",   { period: 5.5 }],
-      "alveare-pwa/":     ["grow",    { period: 4.5 }],
-      "virtual-farm-pwa/":["grow",    { period: 3.4 }],
-      "king-shot-pwa/":   ["arc",     { period: 2.2 }],
-      "mustang-pwa/":     ["arc",     { period: 1.7 }],
-      "plane-pwa/":       ["trail",   { period: 2.8, dir: 1 }],
-      "snake-pwa/":       ["trail",   { period: 2.4, dir: 1 }],
-      "slot-pwa/":        ["reel",    { speed: 1 }],
-      "sini-pwa/":        ["bloom",   { period: 6 }],
-      "mycel-pwa/":       ["bloom",   { period: 5, branch: true }],
-      "static-pwa/":      ["noise",   null],
-      "viti-pwa/":        ["screw",   { period: 4 }],
-      "metro-pwa/":       ["lines",   { period: 5 }],
-      "snap-pwa/":        ["shutter", { period: 3.4 }],
-      "resort-pwa/":      ["horizon", { period: 7 }],
-      "nebbia-pwa/":      ["chart",   { period: 9 }]
+      "sector7-pwa":     ["orbit",   null],
+      "bucio":           ["vortex",  null],
+      "territorio-pwa":  ["grid",    { period: 5.5 }],
+      "formica-pwa":     ["grid",    { period: 3.2 }],
+      "lumen-pwa":       ["pulse",   { period: 2.6 }],
+      "madre-pwa":       ["pulse",   { period: 5.5 }],
+      "alveare-pwa":     ["grow",    { period: 4.5 }],
+      "virtual-farm-pwa":["grow",    { period: 3.4 }],
+      "king-shot-pwa":   ["arc",     { period: 2.2 }],
+      "mustang-pwa":     ["arc",     { period: 1.7 }],
+      "plane-pwa":       ["trail",   { period: 2.8, dir: 1 }],
+      "snake-pwa":       ["trail",   { period: 2.4, dir: 1 }],
+      "slot-pwa":        ["reel",    { speed: 1 }],
+      "sini-pwa":        ["bloom",   { period: 6 }],
+      "mycel-pwa":       ["bloom",   { period: 5, branch: true }],
+      "static-pwa":      ["noise",   null],
+      "viti-pwa":        ["screw",   { period: 4 }],
+      "metro-pwa":       ["lines",   { period: 5 }],
+      "snap-pwa":        ["shutter", { period: 3.4 }],
+      "resort-pwa":      ["horizon", { period: 7 }],
+      "nebbia-pwa":      ["chart",   { period: 9 }]
     };
 
     function tilePalette(card) {
       var c1 = parseHex(getComputedStyle(card).getPropertyValue("--c1"));
       var c2 = parseHex(getComputedStyle(card).getPropertyValue("--c2"));
-      return { c1: c1 || [110, 220, 250], c2: c2 || [120, 150, 210] };
+      return { c1: lighten(c1 || [110, 220, 250], 0.58),
+               c2: lighten(c2 || [120, 150, 210], 0.52) };
+    }
+
+    /* Lightened hard, not a little. Art drawn in the game's own colours on a
+     * gradient in nearly the same colours is art nobody can see - the first
+     * pass did that and produced a tile that looked unchanged. Pale tints of
+     * the accent read against the gradient while still looking like the
+     * game's colour, so a pastel tile and a midnight one behave the same. */
+    function lighten(c, amt) {
+      return [Math.round(c[0] + (255 - c[0]) * amt),
+              Math.round(c[1] + (255 - c[1]) * amt),
+              Math.round(c[2] + (255 - c[2]) * amt)];
     }
 
     /* "nebbia-pwa/" and "nebbia-pwa" are the same game. */
@@ -1985,6 +2017,7 @@
           canvas: cv, g: cv.getContext("2d"), fn: def, opts: key[1] || {},
           pal: tilePalette(card), w: 58, h: 58, visible: true
         };
+        tile.classList.add("has-fx");
         sizeTile(rec);
         tiles.push(rec);
         tileByCanvas.set(cv, rec);
@@ -2011,6 +2044,12 @@
         var T = tiles[i];
         if (!T.visible) continue;
         P1 = T.pal.c1; P2 = T.pal.c2;
+        T.g.clearRect(0, 0, T.w, T.h);
+        /* Scrim, drawn here rather than in each sketch so all fifteen get the
+         * same surface for free. Without it the art lands on the tile's own
+         * gradient in near-identical hues and simply disappears. */
+        T.g.fillStyle = "rgba(4,9,22,0.34)";
+        T.g.fillRect(0, 0, T.w, T.h);
         T.fn(T.g, T.w, T.h, tileClock, T.opts);
       }
     }
