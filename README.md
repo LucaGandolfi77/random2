@@ -22,6 +22,7 @@
   - [LUMEN](#lumen)
   - [SECTOR 7](#sector-7)
   - [SINI](#sini)
+  - [FORMICA](#formica)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
   - [Isola Resort](#isola-resort)
@@ -52,12 +53,13 @@
 | 5 | **LUMEN** | Bioluminescent .io survival | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/lumen-pwa/) |
 | 6 | **SECTOR 7** | Low-poly space combat | Canvas 2D (facet meshes) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sector7-pwa/) |
 | 7 | **SINI** | Living-brushstroke .io (sumi-e) | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sini-pwa/) |
-| 8 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 9 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 10 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 11 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 12 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 13 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 8 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 9 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 10 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 11 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 12 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 13 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 14 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -305,6 +307,55 @@ niente gradienti arcade — solo inchiostro, acqua e carta.
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
+### FORMICA
+
+*Sei una colonia di formiche su un tavolo di legno.* 🐜
+
+Un .io del territorio con un hook che nessun altro .io ti dà: **camminare
+dipinge**. Ogni formica deposita feromone; le celle del tavolo diventano tue,
+e rispondono a una sola legge — il territorio abbandonato decade, quello
+confinante si scioglie, e rubare è più lento che dipingere sul neutro.
+
+- **Il loop doppio:** dipingi il tavolo (paper.io) *e* ci porti le briciole
+  (agar.io). Le briciole depositate nel nido si trasformano in formiche — la
+  colonia cresce, dipinge più in fretta, e difende meglio
+- **Le razzie notturne:** di notte le colonie nemiche lanciano ondate di
+  formiche d'assalto che marciano lungo **i loro feromoni** verso il tuo nido.
+  Fuori dal loro territorio rallentano e vagano: la rete di strade è la loro
+  autostrada — e tagliargliela è una tattica, non un dettaglio
+- **L'anello di difesa:** la tua colonia parcheggiata sul nido respinge
+  l'assalto prima che il cratere venga toccato. Una colonia numerosa fa a
+  brandelli le formiche nemiche; una colonia lontana torna a casa e trova il
+  nido saccheggiato
+- **Annessione:** azzerare una colonia converte il suo nido in bottino — e il
+  suo territorio diventa carta da rubare. Fuori dal corpo a corpo, le colonie
+  muoiono annegate nelle gocce o dissolte nell'inchiostro, e il pericolo
+  cancella i feromoni attorno a sé: la mappa si ripulisce da sé
+- **Cinque colonie nemiche persistenti**, con nomi da roster congelato
+  (`Colonia Rossa_77`, `Colonia Corazzata404`…) e cinque caratteri —
+  espansione, agricoltura, razzia, difesa, cautela — che decidono davvero
+  come giocano. Una razzia in arrivo le richiama tutte a casa
+- **Quattro zone del tavolo** (Angolo del Pane, Macchia d'Inchiostro, Zona
+  d'Ombra, Tavola Calda): cosa ci cade, quanto è pericolosa, e di che colore
+  è il legno. La tinta sfuma ai confini, non taglia
+- **Ciclo giorno/notte** (~108 s): la notte tinge il tavolo, ispessisce la
+  vignette, accende l'unica luce calda — il tuo nido — e il ronzio del
+  tavolo scende di tono
+- Grana del legno procedurale (pattern tileabile), zero asset: formiche a tre
+  segmenti con sei zampe animate, briciole irregolari, cristalli di zucchero,
+  insetti con le zampe
+- HUD in italiano: briciole, formiche, territorio %, posizione, barra del
+  nido; minimappa a "tavolo" con il territorio per pixel-cella; banner quando
+  una razzia marcia su di te
+- WebAudio sintetizzato: scricchiolii delle briciole in combo, corno della
+  razzia, tonfo dell'inchiostro, annegamento, drone del tavolo che segue
+  giorno e notte
+
+**Files:** `index.html`, `styles.css`, `src/` (`config`, `zones`, `storage`,
+`world`, `render`, `player`, `bots`, `audio`, `ui`, `main`), `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `tests/sim.test.js`. See
+[`formica-pwa/README.md`](formica-pwa/README.md).
 
 ### Mustang 1942
 
@@ -659,6 +710,23 @@ a PR — keep this list honest.
 
 ### ✅ Done
 
+- [x] **FORMICA** — new game: ant-colony .io on a wooden table where walking
+      paints pheromone territory. Dual loop (paper.io painting + agar.io
+      carrying): crumbs deposited in the nest convert into workers, so the
+      colony grows, paints faster and defends better. Night raids march along
+      the raider's own pheromone roads toward your nest and slow down offroad
+      — cutting their roads is a tactic. Parked colony = defense ring outside
+      the crater; the bigger the colony the harder it bites. Annex a colony
+      and its nest becomes loot. Water drops drown and erase pheromones, ink
+      dissolves and burns territory, so the map self-cleans. 5 persistent
+      rival colonies with 5 blended characters (expansion / farming / raiding
+      / defense / caution) that all come home when a raid is incoming; 4
+      tabletop zones with tinted wood edges; ~108s day/night cycle with drone
+      tracking. Procedural wood-grain pattern, three-segment six-legged ants,
+      fully synthesised WebAudio. Headless sim suite: 65 checks (territory
+      paint & steal & decay, crumb economy, hazard lethality, clash maths,
+      annexation, raid defense & nest crash, day/night, grudges, ecology over
+      5 seeds, performance)
 - [x] **Isola Resort Tycoon wave 3:** hotel con entrate notturne, camera
       rotabile su 4 orientazioni (roundtrip verificato su tutte le celle),
       export/import del salvataggio, tempo musicale scalato su meteo/notte
