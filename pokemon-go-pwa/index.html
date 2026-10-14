@@ -3,86 +3,226 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Pokédex — A contemplative collection of beings</title>
-<meta name="description" content="A contemplative Pokedex and catch experience. Select a being, launch a ball, and discover if it stays. Difficulty determines flight probability.">
-<meta name="theme-color" content="#1a1528">
+<title>Pokémon GO — Low Poly Collection</title>
+<meta name="description" content="A low-poly Pokémon GO experience. Swipe to throw Poké Balls, use berries, collect Pokémon across biomes. Bilingual. Progressive Web App.">
+<meta name="theme-color" content="#0a0a14">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script src="../shared/arcade.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Cinzel+Decorative:wght@400&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Cormorant Garamond',Georgia,serif;}
-body{background:#0a0810;color:#c9b8a0;overflow:hidden;height:100vh;width:100vw;font-size:16px;letter-spacing:0.03em;}
-#game-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.22;pointer-events:none;}
-.main{position:relative;z-index:10;height:100vh;padding:2rem;display:flex;flex-direction:column;align-items:center;overflow-y:auto;}
-header{text-align:center;margin-bottom:1.5rem;}
-h1{font-family:'Cinzel Decorative',serif;font-size:2.2rem;color:#c9b0a0;font-weight:400;letter-spacing:0.1em;margin-bottom:0.2rem;}
-h2{font-family:'Cormorant Garamond',serif;font-size:0.85rem;color:#8a7b65;letter-spacing:0.15em;text-transform:uppercase;margin-top:0.2rem;}
-.pokedex{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0.8rem;max-width:720px;width:100%;margin-bottom:1.5rem;}
-.poke-card{background:rgba(20,8,24,0.7);border:1px solid rgba(201,176,140,0.1);border-radius:10px;padding:0.9rem 0.7rem;cursor:pointer;transition:all 0.25s ease;text-align:center;}
-.poke-card:hover{border-color:rgba(201,176,140,0.35);transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.3);}
-.poke-card.selected{border-color:#c9a878;box-shadow:0 0 15px rgba(201,176,140,0.15);}
-.poke-card .emoji{font-size:2rem;margin-bottom:0.3rem;display:block;}
-.poke-card .name{font-size:0.85rem;color:#c9b8a0;letter-spacing:0.05em;}
-.poke-card .diff{font-size:0.65rem;color:#8a7b65;text-transform:uppercase;letter-spacing:0.05em;margin-top:0.15rem;}
-.stage{position:relative;max-width:420px;width:92%;height:320px;background:linear-gradient(135deg,#0e0a12 0%,#140e1a 100%);border:1px solid rgba(201,176,140,0.1);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.4);margin-bottom:1rem;overflow:hidden;}
-.stage-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 30%, rgba(201,176,140,0.08) 0%, transparent 70%);}
-.poke-display{font-size:5rem;filter:drop-shadow(0 0 15px rgba(201,176,140,0.3));margin-bottom:0.5rem;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
-.poke-info{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:0.9rem;letter-spacing:0.08em;margin-bottom:0.3rem;}
-.poke-diff{font-size:0.75rem;color:#8a7b65;font-style:italic;margin-bottom:0.5rem;}
-.poke-btn{padding:0.7rem 2rem;background:#c9a87822;border:1px solid #c9a87855;color:#c9b8a8;border-radius:6px;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.95rem;cursor:pointer;transition:all 0.25s;margin-top:0.5rem;letter-spacing:0.03em;}
-.poke-btn:hover{background:#c9a87830;border-color:#c9a878;box-shadow:0 2px 12px rgba(201,176,140,0.2);}
-.result{font-size:1.5rem;font-family:'Cinzel Decorative',serif;color:#bfa07a;text-align:center;animation:fadeIn 0.6s ease;margin-top:0.5rem;}
-.result-caught{color:#bfa07a;}
-.result-flew{color:#8a7b65;font-style:italic;}
-.menu-screen{position:fixed;inset:0;background:#0a0810;z-index:50;display:flex;align-items:center;justify-content:center;padding:2rem;}
-.menu-panel{text-align:center;padding:2rem 1.5rem;max-width:480px;width:92%;}
-.menu-panel h1{font-family:'Cinzel Decorative',serif;font-size:2.5rem;color:#c9b0a0;margin-bottom:0.5rem;letter-spacing:0.08em;}
-.sub{font-style:italic;color:#9a8876;font-size:1rem;margin-bottom:2rem;line-height:1.5;}
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Cinzel+Decorative:wght@400;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:#0a0a14;color:#d4c5b0;height:100%;font-family:'Cormorant Garamond',Georgia,serif;overflow:hidden;letter-spacing:0.02em;}
+
+/* Layout */
+.app{height:100vh;display:flex;flex-direction:column;}
+.top-bar{height:44px;background:#12121f;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between;padding:0 0.8rem;font-size:0.82rem;gap:0.6rem;flex-shrink:0;z-index:30;}
+.tb-stat{color:#8a7b65;white-space:nowrap;}
+.tb-btn{background:none;border:none;color:#bfa07a;font-size:1.1rem;cursor:pointer;padding:0.2rem 0.4rem;border-radius:4px;}
+.tb-btn:active{background:#ffffff11;}
+
+/* Tabs */
+.tab-bar{height:52px;background:#12121f;border-bottom:1px solid #222;display:flex;flex-shrink:0;z-index:30;}
+.tab-btn{flex:1;background:none;border:none;color:#666;font-family:'Cinzel Decorative',serif;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent;}
+.tab-btn.active{color:#bfa07a;border-bottom-color:#bfa07a;}
+.tab-btn:active{background:#ffffff08;}
+
+/* Panels */
+.tab-panel{flex:1;overflow-y:auto;padding:1rem;display:none;}
+.tab-panel:not(.hidden){display:block;}
+
+/* Catch Stage */
+.stage-wrap{position:relative;width:100%;max-width:520px;margin:0 auto;height:420px;border-radius:16px;overflow:hidden;border:1px solid #222;background:#0e0e18;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
+#stage-canvas{display:block;width:100%;height:100%;touch-action:none;}
+.stage-overlay{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:0.8rem;}
+.stage-info{text-align:center;pointer-events:none;}
+.stage-controls{pointer-events:auto;display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;}
+.biome-bar{display:flex;gap:0.4rem;overflow-x:auto;padding:0.5rem 0;scrollbar-width:none;justify-content:center;}
+.biome-bar::-webkit-scrollbar{display:none;}
+.biome-btn{background:#1a1a2e;border:1px solid #333;color:#8a7b65;font-family:inherit;font-size:0.72rem;padding:0.35rem 0.7rem;border-radius:999px;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+.biome-btn.active{border-color:#bfa07a;color:#bfa07a;box-shadow:0 0 10px rgba(191,160,122,0.15);}
+
+.swipe-hint{text-align:center;color:#555;font-size:0.75rem;margin-top:0.4rem;font-style:italic;}
+
+/* Pokedex Grid */
+#pokedex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.7rem;max-width:900px;margin:0 auto;}
+.pd-card{background:#12121f;border:1px solid #222;border-radius:12px;padding:0.7rem;text-align:center;transition:all 0.2s;}
+.pd-card:hover{border-color:#333;transform:translateY(-2px);}
+.pd-card.seen{opacity:0.6;}
+.pd-card:not(.caught):not(.seen){filter:grayscale(1);}
+.pd-sprite{height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:0.3rem;}
+.pd-sprite canvas{max-width:100%;max-height:100%;}
+.pd-name{font-family:'Cinzel Decorative',serif;font-size:0.82rem;color:#c9b8a0;margin-bottom:0.2rem;}
+.pd-types{display:flex;gap:0.3rem;justify-content:center;flex-wrap:wrap;margin-bottom:0.3rem;}
+.type-tag{font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;}
+.pd-meta{font-size:0.65rem;color:#666;display:flex;justify-content:space-between;padding:0 0.3rem;}
+.pd-evolve{font-size:0.65rem;color:#666;margin-top:0.2rem;}
+.pd-evolve.ready{color:#81c784;}
+
+/* Inventory */
+#inventory-grid{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:1.2rem;}
+.inv-section h4{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:0.85rem;margin-bottom:0.5rem;letter-spacing:0.05em;}
+.inv-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:0.6rem;}
+.inv-item{background:#12121f;border:1px solid #222;border-radius:10px;padding:0.6rem;text-align:center;cursor:pointer;transition:all 0.2s;}
+.inv-item:hover{border-color:#333;}
+.inv-item.active{border-color:#bfa07a;box-shadow:0 0 12px rgba(191,160,122,0.1);}
+.inv-icon{font-size:1.6rem;}
+.inv-count{font-size:0.8rem;color:#c9b8a0;margin-top:0.15rem;}
+.inv-label{font-size:0.62rem;color:#666;}
+.inv-summary{text-align:center;color:#8a7b65;font-size:0.9rem;margin-top:0.5rem;}
+
+/* Trainer */
+#trainer-panel{max-width:600px;margin:0 auto;}
+.trainer-card{display:flex;gap:1rem;background:#12121f;border:1px solid #222;border-radius:12px;padding:1rem;margin-bottom:1rem;align-items:center;}
+.trainer-avatar{width:80px;height:80px;flex-shrink:0;}
+.trainer-info{flex:1;}
+.trainer-level{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:1.1rem;margin-bottom:0.3rem;}
+.trainer-xp-bar{height:6px;background:#222;border-radius:3px;overflow:hidden;margin-bottom:0.3rem;}
+.trainer-xp-fill{height:100%;background:linear-gradient(90deg,#bfa07a,#d4c5b0);border-radius:3px;transition:width 0.5s ease;}
+.trainer-xp-text{font-size:0.7rem;color:#666;}
+.trainer-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem;}
+.stat-box{background:#12121f;border:1px solid #222;border-radius:10px;padding:0.6rem;text-align:center;}
+.stat-num{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:1.2rem;}
+.stat-label{font-size:0.65rem;color:#666;text-transform:uppercase;letter-spacing:0.05em;}
+.trainer-achievements h4{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:0.85rem;margin-bottom:0.5rem;}
+.ach-row{display:flex;gap:0.6rem;align-items:center;background:#12121f;border:1px solid #222;border-radius:8px;padding:0.5rem 0.7rem;margin-bottom:0.4rem;}
+.ach-row.unlocked{border-color:#bfa07a44;}
+.ach-icon{font-size:1.1rem;color:#444;}
+.ach-row.unlocked .ach-icon{color:#ffd700;}
+.ach-title{font-size:0.8rem;color:#999;}
+.ach-row.unlocked .ach-title{color:#c9b8a0;}
+.ach-desc{font-size:0.65rem;color:#555;}
+
+/* Result Modal */
+.result-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(6px);}
+.result-modal.hidden{display:none;}
+.rm-panel{background:#12121f;border:1px solid #333;border-radius:16px;padding:1.5rem;text-align:center;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.rm-title{font-family:'Cinzel Decorative',serif;font-size:1.4rem;margin-bottom:0.8rem;}
+.rm-body{margin-bottom:1.2rem;line-height:1.4;}
+.rm-btn{background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;padding:0.6rem 1.8rem;border-radius:6px;font-family:inherit;font-size:0.95rem;cursor:pointer;transition:all 0.2s;}
+.rm-btn:hover{background:#bfa07a35;border-color:#bfa07a;}
+
+/* Start Menu */
+.menu-screen{position:fixed;inset:0;background:#0a0a14;z-index:200;display:flex;align-items:center;justify-content:center;padding:2rem;}
+.menu-screen.hidden{display:none;}
+.menu-panel{text-align:center;padding:2rem 1rem;max-width:460px;width:100%;}
+.menu-panel h1{font-family:'Cinzel Decorative',serif;font-size:2.6rem;color:#c9b0a0;margin-bottom:0.5rem;letter-spacing:0.06em;}
+.menu-panel .sub{font-style:italic;color:#9a8876;font-size:1rem;margin-bottom:2rem;line-height:1.5;}
+.menu-button{background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;padding:0.8rem 1.5rem;font-family:inherit;font-size:1rem;cursor:pointer;letter-spacing:0.03em;margin:0.3rem;transition:all 0.2s;}
+.menu-button:hover{background:#bfa07a35;border-color:#bfa07a;}
+.menu-cta{display:block;width:100%;max-width:320px;margin:0 auto 0.6rem;font-size:1.1rem;padding:1rem 1.5rem;}
+
+/* Settings */
+.settings-list{max-width:400px;margin:0 auto;display:flex;flex-direction:column;gap:0.8rem;}
+.setting-row{display:flex;justify-content:space-between;align-items:center;background:#12121f;border:1px solid #222;border-radius:10px;padding:0.8rem 1rem;}
+.setting-label{font-size:0.9rem;color:#c9b8a0;}
+.toggle{background:#333;border:none;width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;transition:background 0.2s;}
+.toggle.on{background:#bfa07a;}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left 0.2s;}
+.toggle.on::after{left:22px;}
+.danger-btn{background:#5c121222;border:1px solid #5c121255;color:#e57373;padding:0.6rem 1rem;border-radius:6px;font-family:inherit;cursor:pointer;width:100%;margin-top:1rem;}
+
+.hidden{display:none !important;}
+
+@media(max-width:420px){
+  .stage-wrap{height:340px;}
+  .menu-panel h1{font-size:2rem;}
+  #pokedex-grid{grid-template-columns:repeat(2,1fr);}
+  .trainer-stats{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
-<canvas id="bg-canvas"></canvas>
-
-<div class="main" id="main">
-  <header>
-    <h1>Pokédex — The Collection</h1>
-    <h2>A contemplative gathering of beings · Bilingual · By difficulty</h2>
-  </header>
-
-  <div class="pokedex" id="pokedex"></div>
-
-  <div class="stage" id="stage">
-    <div class="stage-bg"></div>
-    <div class="poke-display" id="poke-display">🐉</div>
-    <div class="poke-info" id="poke-info">Choose a being from the Pokedex</div>
-    <div class="poke-diff" id="poke-diff">Difficulty determines flight probability</div>
-    <button class="poke-btn" onclick="throwBall()" id="throw-btn">Launch Pokéball</button>
-    <div class="result hidden" id="result"></div>
+<div class="app">
+  <div class="top-bar" id="top-bar">
+    <span class="tb-stat">Pokémon GO — Low Poly</span>
+    <span style="flex:1"></span>
   </div>
 
-  <div class="stats-strip" style="margin-top:1rem;text-align:center;color:#8a7b65;font-size:0.85rem;letter-spacing:0.08em;font-family:'Cormorant Garamond',Georgia,serif;">
-    <span>Caught: <strong id="caught">0</strong></span>
-    <span>Flown: <strong id="flown">0</strong></span>
-    <span>Library: <strong id="library">0</strong></span>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="btn-catch" onclick="switchTab('catch')">Catch</button>
+    <button class="tab-btn" id="btn-pokedex" onclick="switchTab('pokedex')">Pokédex</button>
+    <button class="tab-btn" id="btn-inventory" onclick="switchTab('inventory')">Items</button>
+    <button class="tab-btn" id="btn-trainer" onclick="switchTab('trainer')">Trainer</button>
+  </div>
+
+  <!-- CATCH TAB -->
+  <div class="tab-panel" id="tab-catch">
+    <div class="biome-bar" id="biome-selector"></div>
+    <div class="stage-wrap">
+      <canvas id="stage-canvas"></canvas>
+      <div class="stage-overlay">
+        <div class="stage-info" id="stage-info">
+          <div style="font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:1.1rem;">Choose a biome</div>
+        </div>
+        <div class="stage-controls">
+          <button class="menu-button" style="font-size:0.8rem;padding:0.5rem 1rem;" onclick="spawnWildPokemon()">🔄 New Encounter</button>
+        </div>
+      </div>
+    </div>
+    <p class="swipe-hint">Swipe up from the bottom of the stage to throw a Poké Ball</p>
+  </div>
+
+  <!-- POKEDEX TAB -->
+  <div class="tab-panel hidden" id="tab-pokedex">
+    <div id="pokedex-grid"></div>
+  </div>
+
+  <!-- INVENTORY TAB -->
+  <div class="tab-panel hidden" id="tab-inventory">
+    <div id="inventory-grid"></div>
+  </div>
+
+  <!-- TRAINER TAB -->
+  <div class="tab-panel hidden" id="tab-trainer">
+    <div id="trainer-panel"></div>
+  </div>
+
+  <!-- SETTINGS (rendered inside trainer or accessible) -->
+  <div class="tab-panel hidden" id="tab-settings">
+    <div class="settings-list">
+      <div class="setting-row">
+        <span class="setting-label">Sound Effects</span>
+        <button class="toggle on" id="tog-sound" onclick="this.classList.toggle('on');toggleSound()"></button>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Haptics</span>
+        <button class="toggle on" id="tog-haptics" onclick="this.classList.toggle('on');toggleHaptics()"></button>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Language / Lingua</span>
+        <button class="menu-button" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="switchLang()">EN ↔ IT</button>
+      </div>
+      <button class="danger-btn" onclick="resetGame()">Reset All Progress</button>
+    </div>
   </div>
 </div>
 
-<div id="start-menu" class="menu-screen hidden">
+<!-- Result Modal -->
+<div id="result-modal" class="result-modal hidden">
+  <div class="rm-panel">
+    <div class="rm-title">Result</div>
+    <div class="rm-body"></div>
+    <button class="rm-btn" onclick="closeResult()">Continue</button>
+  </div>
+</div>
+
+<!-- Start Menu -->
+<div id="start-menu" class="menu-screen">
   <div class="menu-panel">
-    <h1>The Collection</h1>
-    <p class="sub">Select beings from the Pokedex. Launch a ball. The more difficult the being, the more likely it flies away. Catch them if you can. All in English and Italian.</p>
-    <button class="menu-button" onclick="startGame()" style="background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;padding:0.8rem 1.5rem;font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;cursor:pointer;letter-spacing:0.03em;">Begin Collection — Inizia la Collezione</button>
-    <button class="menu-button" onclick="switchLang()" style="font-size:0.85rem;padding:0.5rem 1rem;">Lingua: English / Italiano</button>
+    <h1>Pokémon GO</h1>
+    <p class="sub">A low-poly Pokémon GO experience. Swipe to throw Poké Balls. Use berries. Collect them all across different biomes. Bilingual English / Italiano.</p>
+    <button class="menu-button menu-cta" onclick="startGame()">Begin Adventure — Inizia l'Avventura</button>
+    <button class="menu-button" style="font-size:0.85rem;padding:0.5rem 1rem;" onclick="switchLang()">Lingua: English / Italiano</button>
   </div>
 </div>
 
+<script type="module" src="src/config.js"></script>
+<script type="module" src="src/storage.js"></script>
+<script type="module" src="src/renderer.js"></script>
+<script type="module" src="src/main.js"></script>
 <script src="../shared/arcade.js"></script>
-<script src="src/config.js"></script>
-<script src="src/storage.js"></script>
-<script src="src/main.js"></script>
 </body>
 </html>

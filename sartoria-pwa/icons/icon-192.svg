@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2a1430"/>
+      <stop offset="55%" stop-color="#180d1e"/>
+      <stop offset="100%" stop-color="#0d060f"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7e3ae"/>
+      <stop offset="50%" stop-color="#e8b96a"/>
+      <stop offset="100%" stop-color="#b8803a"/>
+    </linearGradient>
+    <linearGradient id="silk" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#f3b8cf"/>
+      <stop offset="100%" stop-color="#a83f6d"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="50%" cy="46%" r="44%">
+      <stop offset="0%" stop-color="#e8b96a" stop-opacity=".34"/>
+      <stop offset="100%" stop-color="#0d060f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="116" fill="url(#sky)"/>
+  <circle cx="256" cy="252" r="240" fill="url(#halo)"/>
+
+  <!-- manichino, di tre quarti: busto, gonna, testa -->
+  <g transform="translate(256 196)">
+    <!-- gonna: un prisma ampio -->
+    <polygon points="0,108 -70,208 70,208 0,108" fill="url(#silk)" opacity=".95"/>
+    <polygon points="0,108 70,208 0,208 0,108" fill="#7d2b50" opacity=".55"/>
+    <!-- busto -->
+    <polygon points="-34,-4 34,-4 26,116 -26,116" fill="url(#gold)"/>
+    <polygon points="34,-4 26,116 0,116 0,-4" fill="#a8762f" opacity=".65"/>
+    <!-- spalle -->
+    <polygon points="-52,-26 52,-26 34,-4 -34,-4" fill="#f2d79b"/>
+    <!-- collo e testa -->
+    <polygon points="-10,-34 10,-34 10,-26 -10,-26" fill="#e0b98e"/>
+    <polygon points="0,-96 26,-64 0,-30 -26,-64" fill="#eac39e"/>
+    <polygon points="26,-64 0,-30 0,-96" fill="#cd9f7c"/>
+    <!-- diadema -->
+    <polygon points="-24,-74 0,-84 24,-74 0,-64" fill="url(#gold)"/>
+    <circle cx="0" cy="-78" r="6" fill="#f7e3ae"/>
+  </g>
+
+  <!-- bobina di filo, in basso a sinistra: è una sartoria -->
+  <g transform="translate(120 392)">
+    <rect x="-26" y="-8" width="52" height="26" rx="6" fill="url(#gold)"/>
+    <rect x="-18" y="-14" width="36" height="10" rx="4" fill="#f7e3ae"/>
+    <rect x="-14" y="30" width="10" height="20" rx="3" fill="#c9964a"/>
+    <rect x="4" y="30" width="10" height="20" rx="3" fill="#c9964a"/>
+  </g>
+
+  <!-- forbici, in basso a destra -->
+  <g transform="translate(392 386) rotate(-18)">
+    <circle cx="-22" cy="0" r="15" fill="none" stroke="#e8b96a" stroke-width="7"/>
+    <circle cx="22" cy="0" r="15" fill="none" stroke="#e8b96a" stroke-width="7"/>
+    <line x1="-12" y1="10" x2="26" y2="60" stroke="#c9964a" stroke-width="7" stroke-linecap="round"/>
+    <line x1="12" y1="10" x2="-26" y2="60" stroke="#c9964a" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- stelle -->
+  <g fill="#f7e3ae">
+    <circle cx="70" cy="96" r="2.4" opacity=".8"/>
+    <circle cx="452" cy="140" r="2" opacity=".7"/>
+    <circle cx="96" cy="212" r="1.6" opacity=".6"/>
+    <circle cx="440" cy="248" r="1.8" opacity=".65"/>
+    <circle cx="120" cy="60" r="1.5" opacity=".5"/>
+  </g>
+</svg>

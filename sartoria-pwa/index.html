@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>SARTORIA — couture tycoon</title>
+<meta name="description" content="Un atelier che parte da un sottoscala e arriva alla settimana della moda. Vesti i manichini, rispetta i brief, azzecca i trend — e ogni stagione hai UNA sfilata sola.">
+<meta name="author" content="Luca Gandolfi">
+<meta name="theme-color" content="#120a14">
+<meta name="color-scheme" content="dark">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SARTORIA">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SARTORIA">
+<meta property="og:title" content="SARTORIA — couture tycoon">
+<meta property="og:description" content="Vesti i manichini, azzecca i trend, e spendi la tua unica sfilata di stagione bene.">
+<meta property="og:url" content="https://lucagandolfi77.github.io/random2/sartoria-pwa/">
+<meta property="og:image" content="https://lucagandolfi77.github.io/random2/sartoria-pwa/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+
+<!-- Il palco. Fisso dietro l'interfaccia: in atelier gira il manichino, in
+     sfilata corre la passerella. -->
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<div id="app" class="app">
+
+    <!-- ===== HUD ===== -->
+    <header class="hud">
+        <div class="hud-l">
+            <span class="hud-money"><b id="hud-money">0</b> €</span>
+            <span class="hud-fame">☆ <b id="hud-fame">0</b></span>
+        </div>
+        <div class="hud-c">
+            <span class="hud-lev">LIV <b id="hud-level">1</b></span>
+            <span class="hud-xp"><i id="hud-xp-fill"></i></span>
+        </div>
+        <div class="hud-r">
+            <span class="hud-season">ST <b id="hud-season">1</b></span>
+            <span class="hud-day">G <b id="hud-day">1</b></span>
+        </div>
+    </header>
+
+    <!-- ===== MENU ===== -->
+    <section id="scr-menu" class="screen">
+        <div class="panel">
+            <h1 class="logo">SARTORIA</h1>
+            <p class="tagline">Un atelier, un sottoscala, e una sola sfilata per stagione.<br>
+                La risorsa scarsa non sono i soldi: è il tempo.</p>
+            <div class="menu-stats">
+                <div><b id="m-shows">0</b><span>sfilate</span></div>
+                <div><b id="m-looks">0</b><span>look</span></div>
+                <div><b id="m-best">0</b><span>record</span></div>
+                <div><b id="m-fame">0</b><span>fama</span></div>
+            </div>
+            <button id="btn-play" class="btn primary" type="button">APRI L'ATELIER</button>
+            <button id="btn-wipe" class="btn ghost small" type="button">Azzera il salvataggio</button>
+            <p class="fine">© 2026 Luca Gandolfi · MIT</p>
+        </div>
+    </section>
+
+    <!-- ===== ATELIER ===== -->
+    <section id="scr-atelier" class="screen hidden">
+        <div class="brief" id="brief"></div>
+
+        <div class="slots" id="slots"></div>
+
+        <div class="scorecard" id="scorecard"></div>
+
+        <div class="atelier-actions">
+            <button id="btn-save-look" class="btn small" type="button">SALVA LOOK</button>
+            <button id="btn-deliver" class="btn primary small" type="button">CONSEGNA</button>
+        </div>
+    </section>
+
+    <!-- ===== GUARDAROBA ===== -->
+    <section id="scr-wardrobe" class="screen hidden">
+        <div class="wr-tabs" id="wr-tabs"></div>
+        <div class="wr-body" id="wr-body"></div>
+    </section>
+
+    <!-- ===== MODELLE ===== -->
+    <section id="scr-models" class="screen hidden">
+        <div class="wr-body" id="md-body"></div>
+    </section>
+
+    <!-- ===== SFILATA ===== -->
+    <section id="scr-show" class="screen hidden">
+        <div class="sh-block" id="sh-venue"></div>
+        <div class="sh-block" id="sh-type"></div>
+        <div class="sh-block" id="sh-looks"></div>
+        <div class="sh-block" id="sh-go"></div>
+    </section>
+
+    <!-- ===== CITTÀ ===== -->
+    <section id="scr-city" class="screen hidden">
+        <div class="wr-body" id="ct-body"></div>
+    </section>
+
+    <!-- ===== REPORT ===== -->
+    <section id="scr-report" class="screen hidden">
+        <div class="wr-body" id="rp-body"></div>
+    </section>
+
+    <!-- ===== NAV ===== -->
+    <nav class="nav" id="nav">
+        <button class="nav-btn is-on" data-nav="atelier" type="button">Atelier</button>
+        <button class="nav-btn" data-nav="wardrobe" type="button">Guardaroba</button>
+        <button class="nav-btn" data-nav="models" type="button">Modelle</button>
+        <button class="nav-btn" data-nav="show" type="button">Sfilata</button>
+        <button class="nav-btn" data-nav="city" type="button">Città</button>
+        <button class="nav-btn" data-nav="report" type="button">Diario</button>
+    </nav>
+
+    <!-- ===== PICKER ===== -->
+    <div id="picker" class="picker hidden">
+        <div class="picker-head">
+            <b id="picker-title">CAPO</b>
+            <button id="picker-close" class="btn ghost small" type="button">Chiudi</button>
+        </div>
+        <div class="picker-body" id="picker-body"></div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

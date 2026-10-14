@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Sitemap for https://LucaGandolfi77.github.io/random2/
-     One entry per game subfolder that actually has an index.html, plus
-     the hub. Keep <lastmod> in step with real changes: a stale date is
-     a signal the page is unmaintained, which is the opposite of the
-     point of having a sitemap at all. -->
+     One entry per game subfolder that is committed to git and has an
+     index.html, plus the hub. Only deployed URLs belong here: a
+     sitemap full of 404s is a negative signal, not a comprehensive one. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://lucagandolfi77.github.io/random2/</loc>
+    <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://lucagandolfi77.github.io/random2/acqua-pwa/</loc>
     <lastmod>2026-10-14</lastmod>
   </url>
   <url>
@@ -14,7 +17,23 @@
     <lastmod>2026-10-14</lastmod>
   </url>
   <url>
+    <loc>https://lucagandolfi77.github.io/random2/anthology-pwa/</loc>
+    <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://lucagandolfi77.github.io/random2/bible-pwa/</loc>
+    <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
     <loc>https://lucagandolfi77.github.io/random2/bucio/</loc>
+    <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://lucagandolfi77.github.io/random2/crime-and-punishment-pwa/</loc>
+    <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://lucagandolfi77.github.io/random2/example-pwa/</loc>
     <lastmod>2026-10-14</lastmod>
   </url>
   <url>
@@ -46,7 +65,19 @@
     <lastmod>2026-10-14</lastmod>
   </url>
   <url>
+    <loc>https://lucagandolfi77.github.io/random2/nebbia-pwa/</loc>
+    <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
     <loc>https://lucagandolfi77.github.io/random2/plane-pwa/</loc>
+    <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://lucagandolfi77.github.io/random2/pokemon-go-pwa/</loc>
+    <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://lucagandolfi77.github.io/random2/recherche-pwa/</loc>
     <lastmod>2026-10-14</lastmod>
   </url>
   <url>

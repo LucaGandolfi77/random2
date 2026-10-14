@@ -39,6 +39,24 @@ carrying a raidable base.
 Eight hulls, each with one passive that changes what the ship is: Wasp,
 Hauler, Warden, Bulwark, Vandal, Lance, Hound, Oracle.
 
+## SARTORIA
+
+A separate PWA in the same repo: <https://lucagandolfi77.github.io/random2/sartoria-pwa/>
+
+> Couture tycoon. Dress mannequins, respect client briefs, guess noisy
+> trends — and you get ONE runway show per season.
+
+The scarce resource is the season, not money: one collection per season per
+city, and the trend forecast publishes two tags while staying silent about a
+third. Betting on the wrong tag costs the whole season, and three rival
+designers read the same forecast.
+
+Systems: colour harmony computed on the wheel (complementary +24, analogous
++16, monochrome +9, clashing −14) · 96 garments across 6 slots · 8 style tags ·
+10 colours · 7 fabrics that cost money on every look · models whose stamina
+drops during a show · judges with individual bias and strictness · 6 cities ×
+3 venues · 4 show types that each change one scoring rule · 40 levels.
+
 ## Modes
 
 - **Patrol** — no clock. Mine, fight, bank.
