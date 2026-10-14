@@ -1,0 +1,18 @@
+{
+  "name": "LINEA ROSSA — Metro Planner",
+  "short_name": "LINEA ROSSA",
+  "description": "Tycoon del trasporto pubblico: traccia le linee della metro, gestisci treni, tariffe, interscambi e prestiti. La città cresce dove la porti — e genera la congestione che dovrai risolvere.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eef0e9",
+  "theme_color": "#e0342c",
+  "lang": "it",
+  "categories": ["games", "simulation"],
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

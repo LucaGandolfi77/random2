@@ -27,6 +27,7 @@
   - [STATIC](#static)
   - [ALVEARE](#alveare)
   - [MADRE](#madre)
+  - [LINEA ROSSA](#linea-rossa)
   - [FORMICA](#formica)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
@@ -64,14 +65,15 @@
 | 10 | **STATIC** | Pirate broadcast .io (CRT/VHS) | Canvas 2D + WebAudio + BroadcastChannel | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/static-pwa/) |
 | 11 | **ALVEARE** | Bee-tycoon con waggle dance disegnabile | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/alveare-pwa/) |
 | 12 | **MADRE** | Fermentation tycoon on real time | DOM UI + Canvas curves + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/madre-pwa/) |
-| 13 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
-| 14 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 15 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 16 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 17 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 18 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 19 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
-| 20 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 13 | **LINEA ROSSA** | Metro planner tycoon | Canvas 2D + gravity model + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/metro-pwa/) |
+| 14 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 15 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 16 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 17 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 18 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 19 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 20 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 21 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -465,6 +467,37 @@ continuano a invecchiare. L'offline progression ribaltata in rischio.
   lotti al picco, lotti a male, contratti scaduti
 - **Notifiche opt-in** quando un lotto entra nella finestra di picco
 - UI DOM professionale con mini-grafici canvas delle curve per lotto
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
+### LINEA ROSSA
+
+*La città cresce dove la porti.* 🚇
+
+Metro planner tycoon: la simulazione della domanda urbana usa un **gravity
+model** reale (residenti × uffici ÷ distanza), le rotte si calcolano con
+**BFS sul grafo delle linee** (fino a 2 interscambi) e la città cresce dove
+arriva la tua rete.
+
+- **Tracciamento linee:** tocchi i quartieri in sequenza — stazioni e scavo
+  costano, con **geologia variabile** per quartiere
+- **Domanda = gravity model:** flussi casa↔lavoro tra ogni coppia di
+  quartieri serviti, con onde di pendolari (mattina/sera asimmetriche)
+- **Interscambi:** le linee che condividono un quartiere si collegano — la
+  BFS assegna ogni coppia di quartieri alla rotta migliore, con penalità
+  per cambio linea
+- **Capienza vs domanda:** treni acquistabili per linea; barra
+  domanda/capienza con allarme sopraffollamento che **blocca la crescita**
+  del quartiere
+- **Feedback urbanistico:** i quartieri serviti crescono, ne nascono di
+  nuovi ai margini, quelli ignorati degradano
+- **Tariffa con elasticità:** più alta = più ricavi per passeggero ma meno
+  passeggeri
+- **Prestiti a interesse** (2%/giorno, rating limitato) e **bancarotta**
+  sotto −€ 400
+- Onde di pendolari visibili, passeggeri in attesa animati alle stazioni,
+  treni in movimento lungo le linee
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
@@ -885,8 +918,8 @@ Notes:
 ## Roadmap
 
 Everything below is a real TODO, tracked here. I concept tycoon non ancora
-implementati (MADRE, LINEA ROSSA, NEBBIA, ACQUA, STYX) sono specificati in
-**[TODOs.md](TODOs.md)**. Check something off by opening
+implementati (NEBBIA, ACQUA, STYX) sono specificati in
+**[TODOs.md](TODOs.md)** — MADRE e LINEA ROSSA sono stati implementati. Check something off by opening
 a PR — keep this list honest.
 
 ### ✅ Done
@@ -911,6 +944,9 @@ a PR — keep this list honest.
 - [x] **Isola Resort Tycoon wave 3:** hotel con entrate notturne, camera
       rotabile su 4 orientazioni (roundtrip verificato su tutte le celle),
       export/import del salvataggio, tempo musicale scalato su meteo/notte
+- [x] **LINEA ROSSA** — metro planner tycoon: gravity model demand, BFS
+      routing with transfers, urban growth feedback, fare elasticity, loans
+      with interest and bankruptcy
 - [x] **MADRE** — fermentation tycoon on real timestamps: maturation curves
       that keep running with the app closed, rooms as speed multipliers,
       daily-seed contracts, drifting market, offline report, peak notifications

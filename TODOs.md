@@ -68,9 +68,9 @@ nell'infrastruttura (`shared/arcade.js`). Canvas 2D, no fisica.
 
 ---
 
-## 2. LINEA ROSSA — Metro planner
+## 2. LINEA ROSSA — Metro planner ✅ IMPLEMENTATO
 
-> La metropolitana non serve la città: la cambia. Priorità consigliata: **2**.
+> Implementato in `metro-pwa/` (vedi README). Priorità consigliata: ~~2~~ completato.
 > O: alto · P: molto alto · R: medio · F: alto
 
 **Fantasy.** Progettare la rete metropolitana di una città che cresce, dal

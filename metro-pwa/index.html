@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>LINEA ROSSA — Metro Planner</title>
+  <meta name="description" content="Tycoon del trasporto pubblico: traccia le linee della metro, gestisci treni, tariffe, interscambi e prestiti. La città cresce dove la porti.">
+  <meta name="theme-color" content="#e0342c">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LINEA ROSSA">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header id="hud">
+      <div class="hud-left">
+        <span class="chip money">€ <b id="money">900</b></span>
+        <span class="chip">🧍 <b id="paxday">0</b><span class="lbl">/g</span></span>
+        <span class="chip" id="daychip">📅 Giorno 1</span>
+      </div>
+      <div class="hud-right">
+        <button id="fin-btn" class="iconbtn" aria-label="Finanza">💰</button>
+        <button id="help-btn" class="iconbtn" aria-label="Aiuto">❓</button>
+        <button id="sound-btn" class="iconbtn" aria-label="Audio">🔊</button>
+      </div>
+    </header>
+    <div id="waveline">🌅 Mattina — casa → lavoro</div>
+    <main id="stage"><canvas id="game"></canvas></main>
+    <footer id="dock"></footer>
+    <div id="modal" class="overlay hidden">
+      <div class="sheet"><h2 id="m-title"></h2><div id="m-body" class="body"></div><div id="m-btns"></div></div>
+    </div>
+    <div id="toast" class="hidden"></div>
+  </div>
+  <script src="../shared/arcade.js"></script>
+  <script src="game.js"></script>
+  <script src="service-worker.js"></script>
+</body>
+</html>
