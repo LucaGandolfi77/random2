@@ -2,7 +2,7 @@ const CONFIG = {
   canvas: { width: 900, height: 640 },
   language: 'en',
   library: [
-    { id: 'les_miserables', title: { en: 'Les Miserables', it: 'I Miserabili' }, author: { en: 'Victor Hugo', it: 'Victor Hugo' }, tags: ['French','Redemption','Justice'], scene: 'miserables_intro', statInit: { mem: 3, mel: 8, art: 2 } },
+    { id: 'les_miserables', title: { en: 'Les Miserables', it: 'I Miserabili' }, author: { en: 'Victor Hugo', it: 'Victor Hugo' }, tags: ['French','Redemption','Justice'], scene: 'miserables_intro', statInit: { mem: 3, mel: 8, art: 2 }, choices: [{ text: { en: 'Continue to Redemption — Original Path', it: 'Prosegui alla Redenzione — Sentiero originale' }, path: 'resort-pwa/', original: true }, { text: { en: 'Reflect on Justice — Sideways', it: 'Rifletti sulla Giustizia — Laterale' }, path: 'resort-pwa/', original: false, sideEffect: { mem: 5, mel: 3, art: 2 } }] },
     { id: 'crime_punishment', title: { en: 'Crime and Punishment', it: 'Delitto e Castigo' }, author: { en: 'Fyodor Dostoevsky', it: 'Fedor Dostoevskij' }, tags: ['Russian','Psychology','Guilt'], scene: 'crime_intro', statInit: { mem: 2, mel: 10, art: 1 } },
     { id: 'recherche', title: { en: 'A la recherche', it: 'Alla ricerca' }, author: { en: 'Marcel Proust', it: 'Marcel Proust' }, tags: ['French','Memory','Contemplation'], scene: 'recherche_intro', statInit: { mem: 8, mel: 6, art: 4 } },
     { id: 'brothers_karamazov', title: { en: 'The Brothers Karamazov', it: 'I Fratelli Karamazov' }, author: { en: 'Fyodor Dostoevsky', it: 'Fedor Dostoevskij' }, tags: ['Russian','Philosophy','Faith'], scene: 'karamazov_intro', statInit: { mem: 4, mel: 7, art: 3 } },
