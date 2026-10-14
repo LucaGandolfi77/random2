@@ -270,3 +270,147 @@ del lotto.
       (MADRE, ACQUA, NEBBIA)
 - [ ] Pattern UI "gestione" condiviso: pannelli, liste, bottoni di acquisto
       (MADRE, LINEA ROSSA, STYX)
+
+
+
+
+# Errors to correct:
+
+**Risolto** (2026-10-14). Le voci sotto sono state sistemate; i dettagli di
+ciascuna correzione sono nei rispettivi commit. Restano aperte solo quelle
+marcate `APERTO`.
+
+| Voce | Stato |
+|---|---|
+| `viti-pwa` ReferenceError `grainCanvas` | risolto |
+| `nebbia-pwa` ReferenceError `view` | risolto |
+| `madre-pwa` ReferenceError `Sound` (+ `fmt` latente) | risolto |
+| `acqua-pwa` ReferenceError `seed` | risolto |
+| `anthology-pwa` / `recherche-pwa` ESM caricati come script classici | risolto |
+| `virtual-farm-pwa` personaggi + soldi iniziali | risolto |
+| `territorio-pwa` modalità senza respawn | risolto |
+| `sini-pwa` morte troppo veloce | risolto |
+| `snap-pwa` effetti al contrario | risolto |
+| `mustang-pwa` più nemici | risolto |
+| `mycel-pwa` non si muove | risolto |
+| `alveare-pwa` non fa niente | risolto |
+| `metro-pwa` altri livelli | risolto |
+| `pokemon-go-pwa` pokedex completo + lancio come in Pokémon GO | APERTO |
+| `bible-pwa` 5 handler (`showIndex`, `showAbout`, `goToChapter`, `hideChapterMenu`, `backToLibrary`) chiamati dal markup ma non definiti | APERTO |
+| `example-pwa` importa `checkCollisions` da `world.js`, che non lo esporta e non lo definisce | APERTO |
+
+## Dettaglio delle segnalazioni risolte
+
+<details>
+<summary>Registro completo</summary>
+
+# Errors to correct:
+Uncaught ReferenceError: grainCanvas is not defined
+    at HTMLDocument.init (game.js:929:17)
+
+
+Aggiungere personaggi a virtual-farm e mettere soldi iniziali altrimenti non può iniziare a piantare
+
+
+Anthology-pwa:
+Uncaught SyntaxError: Unexpected token 'export'
+storage.js:1 Uncaught SyntaxError: Cannot use import statement outside a module
+render.js:1 Uncaught SyntaxError: Cannot use import statement outside a module
+main.js:1 Uncaught SyntaxError: Cannot use import statement outside a module
+anthology-pwa/:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
+anthology-pwa/:77 Uncaught ReferenceError: openVN is not defined
+    at HTMLAnchorElement.onclick (anthology-pwa/:77:98)
+anthology-pwa/:70 Uncaught ReferenceError: openVN is not defined
+    at HTMLElement.onclick (anthology-pwa/:70:69)
+anthology-pwa/:87 Uncaught ReferenceError: openVN is not defined
+    at HTMLAnchorElement.onclick (anthology-pwa/:87:91)
+anthology-pwa/:80 Uncaught ReferenceError: openVN is not defined
+    at HTMLElement.onclick (anthology-pwa/:80:62)
+anthology-pwa/:97 Uncaught ReferenceError: openVN is not defined
+    at HTMLAnchorElement.onclick (anthology-pwa/:97:100)
+anthology-pwa/:90 Uncaught ReferenceError: openVN is not defined
+    at HTMLElement.onclick (anthology-pwa/:90:71)
+anthology-pwa/:107 Uncaught ReferenceError: openVN is not defined
+    at HTMLAnchorElement.onclick (anthology-pwa/:107:95)
+anthology-pwa/:100 Uncaught ReferenceError: openVN is not defined
+    at HTMLElement.onclick (anthology-pwa/:100:66)
+anthology-pwa/:117 Uncaught ReferenceError: openVN is not defined
+    at HTMLAnchorElement.onclick (anthology-pwa/:117:91)
+anthology-pwa/:110 Uncaught ReferenceError: openVN is not defined
+    at HTMLElement.onclick (anthology-pwa/:110:62)
+anthology-pwa/:133 Uncaught ReferenceError: openVN is not defined
+    at HTMLAnchorElement.onclick (anthology-pwa/:133:93)
+anthology-pwa/:128 Uncaught ReferenceError: openVN is not defined
+    at HTMLElement.onclick (anthology-pwa/:128:64)
+anthology-pwa/:125 Uncaught ReferenceError: openVN is not defined
+    at HTMLAnchorElement.onclick (anthology-pwa/:125:95)
+anthology-pwa/:120 Uncaught ReferenceError: openVN is not defined
+    at HTMLElement.onclick (anthology-pwa/:120:66)
+anthology-pwa/:141 Uncaught ReferenceError: openVN is not defined
+    at HTMLAnchorElement.onclick (anthology-pwa/:141:93)
+anthology-pwa/:136 Uncaught ReferenceError: openVN is not defined
+    at HTMLElement.onclick (anthology-pwa/:136:64)
+
+
+territorio-pwa:
+Modalità che i nemici non respawnano
+
+sini-pwa:
+Muore troppo velocemente
+
+snap-pwa:
+alcuni effetti sono al contrario
+
+recerche-pwa:
+Uncaught SyntaxError: Unexpected token 'export'
+storage.js:1 Uncaught SyntaxError: Cannot use import statement outside a module
+render.js:1 Uncaught SyntaxError: Cannot use import statement outside a module
+audio.js:1 Uncaught SyntaxError: Cannot use import statement outside a module
+main.js:1 Uncaught SyntaxError: Cannot use import statement outside a module
+index.html:109 Live reload enabled.
+index.html:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
+index.html:60 Uncaught ReferenceError: startVN is not defined
+    at HTMLButtonElement.onclick (index.html:60:53)
+index.html:61 Uncaught ReferenceError: switchLanguage is not defined
+    at HTMLButtonElement.onclick (index.html:61:63)
+4index.html:60 Uncaught ReferenceError: startVN is not defined
+    at HTMLButtonElement.onclick (index.html:60:53)
+
+
+pokemon-go-pwa:
+implementa piu pokemon utto il pokedex e il lancio giusto come in pokemon go con potenza timing e giro
+
+
+nebbia-pwa:
+Uncaught ReferenceError: view is not defined
+    at resize (game.js:773:5)
+    at HTMLDocument.init (game.js:840:5)
+
+
+mycel-pwa:
+non si muove
+
+mustang-pwa:
+aggiungere piu nemici 
+
+
+metro-pwa:
+aggiungi altri livelli 
+
+madre-pwa:
+game.js:625 Uncaught ReferenceError: Sound is not defined
+    at initSound (game.js:625:11)
+    at HTMLDocument.init (game.js:644:5)
+
+
+alveare-pwa:
+non fa niente
+
+
+acqua-pwa:
+Live reload enabled.
+game.js:98 Uncaught ReferenceError: seed is not defined
+    at genTerrain (game.js:98:49)
+    at HTMLDocument.init (game.js:688:5)
+
+</details>

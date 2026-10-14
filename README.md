@@ -77,11 +77,11 @@
 | 20 | **ACQUA** | Roman aqueduct engineer (hydraulics) | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/acqua-pwa/) |
 | 21 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
 | 22 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 23 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 23 | **Farm Tycoon** | Idle farming sim, staff da assumere | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
 | 24 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
 | 25 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
 | 26 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 27 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 27 | **Territorio** | Paper.io vs bots, modalità arena senza respawn | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
 | 28 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
@@ -507,6 +507,24 @@ arriva la tua rete.
   sotto −€ 400
 - Onde di pendolari visibili, passeggeri in attesa animati alle stazioni,
   treni in movimento lungo le linee
+
+**6 mappe.** Il menu (`☰ Scegli la mappa`, o il pulsante `❓`) apre la
+selezione del livello, con blocchi progressivi e record per scenario:
+
+| # | Mappa | Il problema |
+|---|---|---|
+| 1 | Città libera | mappa generata, nessun vincolo: si impara sulle regole |
+| 2 | Prima linea | un solo centro, `geo` fino a 2.80: la stazione cara la paghi una volta |
+| 3 | Il Varo | un fiume e tre ponti: sotto acqua il tunnel costa ×3.2 |
+| 4 | Il Porto | due centri di lavoro separati da un bacino: la scorciatoia costa |
+| 5 | Meandrica | meandro con due soli ponti, la parte vecchia è la più cara |
+| 6 | Metropolix | 14 quartieri, 3 centri, 6 linee massime: la rete che regge tutto |
+
+L'acqua (fiumi e laghi) e i centri storici sono disegnati sulla mappa: un
+tracciato che taglia l'acqua costa **×3.2**, e **×1.8** se passa entro 40 px
+da un ponte. Ogni livello ha i suoi parametri (cassa iniziale, tariffa,
+capienza e costo dei treni, scavo, interesse, tetto di prestito, soglia di
+fallimento, cap di linee e quartieri).
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
