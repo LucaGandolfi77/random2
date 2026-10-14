@@ -10,6 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cormorant:ital,wght@1,300&display=swap');
@@ -73,10 +74,6 @@ body{background:#0d0912;color:#c9b8a8;overflow:hidden;height:100vh;width:100vw;f
 </div>
 
 <script src="../shared/arcade.js"></script>
-<script src="src/config.js"></script>
-<script src="src/storage.js"></script>
-<script src="src/render.js"></script>
-<script src="src/audio.js"></script>
-<script src="src/main.js"></script>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

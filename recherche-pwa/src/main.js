@@ -131,6 +131,7 @@ function addChoiceButtons(key){
     btn2.onclick=()=>{applyChoice(s);};
     container.appendChild(btn2);
   }
+  }
 }
 
 function applyChoice(scene){
@@ -173,3 +174,7 @@ const EXTRA_SCENES = {
     statEffect: { mem: 13, mel: 4, art: 9 }
   }
 };
+
+/* Entry point: this file is loaded as a module, so nothing runs until we
+   call it explicitly. Module scripts are deferred, so the DOM is ready. */
+initMain();

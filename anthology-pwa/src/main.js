@@ -37,3 +37,7 @@ export function initMain(){
   document.getElementById('start-menu').classList.remove('hidden');
 }
 function renderLibrary(){clearScreen();}
+
+/* Entry point: this file is loaded as a module, so nothing runs until we
+   call it explicitly. Module scripts are deferred, so the DOM is ready. */
+initMain();
