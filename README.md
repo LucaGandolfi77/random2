@@ -23,6 +23,8 @@
   - [SECTOR 7](#sector-7)
   - [SINI](#sini)
   - [Viti & Lastre](#viti--lastre)
+  - [MYCEL](#mycel)
+  - [STATIC](#static)
   - [FORMICA](#formica)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
@@ -56,14 +58,16 @@
 | 6 | **SECTOR 7** | Low-poly space combat | Canvas 2D (facet meshes) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sector7-pwa/) |
 | 7 | **SINI** | Living-brushstroke .io (sumi-e) | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sini-pwa/) |
 | 8 | **Viti & Lastre** | Screw-puzzle demolition | Canvas 2D (rigid body) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/viti-pwa/) |
-| 9 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
-| 10 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 11 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 12 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 13 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 14 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 15 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
-| 16 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 9 | **MYCEL** | Branching fungal network .io | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mycel-pwa/) |
+| 10 | **STATIC** | Pirate broadcast .io (CRT/VHS) | Canvas 2D + WebAudio + BroadcastChannel | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/static-pwa/) |
+| 11 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 12 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 13 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 14 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 15 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 16 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 17 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 18 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -341,6 +345,62 @@ cadono (engine OBB scritto a mano: SAT + impulsi sequenziali, solo box).
   fino a uscire dal pannello
 - **10 livelli** progressivi con par e stelle (3★ se entro il par), selezione
   livelli con sblocco progressivo, record salvato e statistiche nell'hub
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
+### MYCEL
+
+*Sei una rete di ife bioluminescenti nel suolo scuro.* 🍄
+
+L'.io con la meccanica più nuova dell'arcade: il **branching**. Non sei un
+serpente — sei un'intera rete fungina che si espande e sopravvive.
+
+- **Più punte, un dito per tendine:** sacrifici 45 di biomassa e far germogliare
+  un secondo, terzo, quarto tendine da un punto della rete esistente. Con il
+  touch ogni dito ne guida uno (assegnazione alla punta più vicina); col mouse
+  tutte seguono il cursore. La camera inquadra l'intera rete e zooma out mentre
+  ti espandi
+- **Economia della crescita:** mangiare spore da biomassa; crescere la costa
+  (0.4/px). Se la biomassa finisce le punte si fermano: il corpo è persistente,
+  quello che hai costruito resta sullo schermo
+- **Parassiti:** vermi magenta che raggiungono le tue punte e **mangiano la rete
+  all'indietro** — se divoram fino alla radice del tendine, la punta muore e con
+  lei tutti i rami che ne dipendono (la rete si sfilaccia)
+- **Zone tossiche:** chiazze viola pulsanti che drenano biomassa ed erodono la
+  punta mentre sei dentro
+- **Rocce sepolte:** poligoni procedurali che bloccano la crescita (le punte
+  le aggirano con probe-steering)
+- **3 bot micelii rivali** (Rizomorfo, Sporencia, MicelioNero) che competono
+  per le spore e ramificano anche loro; respawn alla morte
+- Estetica bioluminescente: ife con glow, suolo scuro procedurale, spore
+  pulsanti; punteggio = lunghezza totale della rete, con record e leaderboard
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
+### STATIC
+
+*Sei un segnale TV pirata intrufolato in una rete di cavi morti.* 📺
+
+Un .io su **grafo**: ti muovi solo lungo i cavi, agli incroci scegli la
+direzione. Estetica CRT/VHS integrale: scanline, ghosting cromatico, wobble
+VHS, neve, tracking band — tutto procedurale, zero filtri CSS.
+
+- **Pacchetti dati** che scorrono lungo i cavi: mangiali per punteggiare
+- **Conquista i televisori:** resta vicino a una TV per 1.2s per sequestrarla
+  (+100 punti, +1 segnale). I **2 segnali rivali** (Pirate-7, ANALOG) la
+  strangolano per primi se ti distratti
+- **Bande di censura:** tre barre nere che ti danno la caccia lungo il grafo
+  (pathfinding greedy), sempre più veloci. 3 contatti e il segnale muore —
+  conquistare una TV ripristina il segnale
+- **📹 Trasmissione locale (opt-in):** col pulsante ON AIR il gioco chiede il
+  permesso notifiche e ti avvisa degli eventi (TV conquistate, censure) anche
+  a schermo spento; via **BroadcastChannel** le altre schede aperte dello
+  stesso browser compaiono in classifica come segnali rivali. Sulla stessa WiFi
+  servirebbe un server relay: qui tutto resta onesto e sul dispositivo
+- Post-processing a 3 pass: mondo offscreen → ghosting 'lighter' offset,
+  scanline pattern, neve ciclica, banda tracking, vignetta
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
@@ -852,12 +912,13 @@ a PR — keep this list honest.
 - [ ] Hub: extend theme sync so games follow the hub's dark/light choice
 - [ ] Hub: live daily-challenge standings (compare `snake-daily` highs
       across… friends? a static JSON? needs a design)
-- [ ] **MYCEL** — the fungal network .io: sacrifice body length to sprout
-      2–3 steerable tendrils (one finger per tip), parasites, toxic zones,
-      bioluminescent hyphae in dark soil. Highest ceiling, highest risk
-- [ ] **STATIC** — pirate broadcast signal .io: crawl a dead cable network
-      eating packets and seizing CRTs; censor bands hunt you. Optional
-      same-WiFi notification hijack behind explicit user opt-in
+- [x] **MYCEL** — the fungal network .io: branching tendrils (one finger per
+      tip, up to 4), biomass economy, parasites that devour the network,
+      toxic zones, buried rocks, bioluminescent hyphae
+- [x] **STATIC** — pirate broadcast .io: graph-based movement on dead cables,
+      flowing data packets, TV seizure, hunting censor bands, full CRT/VHS
+      post-processing, opt-in local broadcast (Notifications + BroadcastChannel
+      across tabs)
 - [ ] Plane: end-of-wave boss encounters with attack patterns
 - [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
 - [ ] Farm: save-file export/import (download/upload JSON) for device migration

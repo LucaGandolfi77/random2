@@ -3,7 +3,7 @@
  * It deliberately does NOT intercept fetches for the sub-games: each game
  * ships its own service worker with its own cache. */
 
-const CACHE = "random2-hub-v8";
+const CACHE = "random2-hub-v9";
 
 const SHELL = [
   "./",

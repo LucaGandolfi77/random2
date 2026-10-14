@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>MYCEL — Rete Fungina</title>
+  <meta name="description" content="Sei una rete di ife bioluminescenti nel suolo scuro. Sacrifica biomassa per ramificare e guida più punte contemporaneamente, un dito per tendine.">
+  <meta name="theme-color" content="#0d0a08">
+  <meta name="color-scheme" content="dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MYCEL">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header id="hud">
+      <div class="hud-left">
+        <span class="pill">✨ <b id="bio">120</b> <span class="lbl">biomassa</span></span>
+        <span class="pill">🌿 <b id="len">0</b> <span class="lbl">rete</span></span>
+        <span class="pill">🍄 <b id="tips">1</b> <span class="lbl">puntes</span></span>
+      </div>
+      <div class="hud-right">
+        <button id="branch-btn" class="bigbtn">🌿 Ramo<br><small>-45</small></button>
+        <button id="sound-btn" class="iconbtn" aria-label="Audio">🔊</button>
+      </div>
+    </header>
+    <main id="stage"><canvas id="game"></canvas><ol id="leaderboard" aria-label="Classifica"></ol></main>
+    <div id="modal" class="overlay">
+      <div class="sheet">
+        <h2 id="m-title">MYCEL</h2>
+        <div id="m-body" class="body"></div>
+        <div id="m-btns"></div>
+      </div>
+    </div>
+    <div id="toast" class="hidden"></div>
+  </div>
+  <script src="../shared/arcade.js"></script>
+  <script src="game.js"></script>
+  <script src="service-worker.js"></script>
+</body>
+</html>
