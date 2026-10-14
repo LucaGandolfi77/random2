@@ -29,6 +29,7 @@
   - [MADRE](#madre)
   - [LINEA ROSSA](#linea-rossa)
   - [NEBBIA](#nebbia)
+  - [ACQUA](#acqua)
   - [FORMICA](#formica)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
@@ -68,14 +69,15 @@
 | 12 | **MADRE** | Fermentation tycoon on real time | DOM UI + Canvas curves + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/madre-pwa/) |
 | 13 | **LINEA ROSSA** | Metro planner tycoon | Canvas 2D + gravity model + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/metro-pwa/) |
 | 14 | **NEBBIA** | Cartographer guild, misinformation economy | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/nebbia-pwa/) |
-| 15 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
-| 16 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 17 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 18 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 19 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 20 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 21 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
-| 22 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 15 | **ACQUA** | Roman aqueduct engineer (hydraulics) | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/acqua-pwa/) |
+| 16 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 17 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 18 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 19 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 20 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 21 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 22 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 23 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -534,6 +536,36 @@ pericoli inventati. Le navi dei clienti navigano sui tuoi segni.
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
 
+### ACQUA
+
+*La pendenza è la meccanica.* ⛲
+
+Roma ha sete. La sorgente è sul monte, la città nel vallone: colungi l'acqua
+con la **sola gravità** su un profilo altimetrico 1D.
+
+- **Tre tecniche romane:** <b>canale</b> a terra (economico, segue il
+  rilievo), <b>arco</b> sopra i valli (costoso, quota costante con pilastri),
+  <b>cunicolo</b> sotto le colline (carissimo). Il tipo dipende da DOVE
+  tocchi: sopra il terreno, sul terreno, sotto la superficie
+- **Sim idraulica onesta:** la portata dell'intero acquedotto è il **minimo
+  delle capacità dei segmenti** — un solo tratto malato strozza tutto.
+  Pendenza < 0.04 → ristagno e sabbione; > 0.55 → erosione; finestra
+  ideale 0.09–0.35 sempre leggibile sul profilo
+- **Usura e manutenzione:** calcare, sabbione ed erosione degradano i
+  segmenti nel tempo; rotture casuali sui tratti logori; riparazioni
+  toccando il segmento
+- **Città che cresce al castellum:** decidi TU dove termina l'acqua;
+  fontane, insulae, taverne e terme spuntano se la soddisfazione regge e
+ pagano tasse proporzionali all'acqua servita
+- **Eventi:** siccità (la sorgente a metà), rotture, malcontento che porta
+  alla rivolta
+- Estetica: profilo altimetrico con cielo romano, archi a tutto sesto,
+  acqua animata lungo i canali, etichette di pendenza colorate per
+  regime
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
 ### FORMICA
 
 *Sei una colonia di formiche su un tavolo di legno.* 🐜
@@ -976,6 +1008,10 @@ a PR — keep this list honest.
 - [x] **Isola Resort Tycoon wave 3:** hotel con entrate notturne, camera
       rotabile su 4 orientazioni (roundtrip verificato su tutte le celle),
       export/import del salvataggio, tempo musicale scalato su meteo/notte
+- [x] **ACQUA** — Roman aqueduct engineer: 1D altimetric profile, honest
+      hydraulics (flow = min of segment capacities), slope bands with
+      stagnation/erosion, ground channels + arches + tunnels, lime decay,
+      breaks, droughts, city growth at the castellum
 - [x] **NEBBIA** — cartographer guild: truth vs mis-transcribed guild map,
       expeditions into fog, cartographer skill driving transcription errors,
       navigator wrecks revealing the truth, verification purchases

@@ -159,9 +159,9 @@ Fog of war su griglia esagonale o libera.
 
 ---
 
-## 4. ACQUA — L'ingegnere degli acquedotti
+## 4. ACQUA — L'ingegnere degli acquedotti ✅ IMPLEMENTATO
 
-> La pendenza è la meccanica. Priorità consigliata: **4**.
+> Implementato in `acqua-pwa/` (vedi README). Priorità consigliata: ~~4~~ completato.
 > O: alto · P: alto · R: medio-alto · F: alto
 
 **Fantasy.** Roma. Portare l'acqua in una città che cresce, con la sola

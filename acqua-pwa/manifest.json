@@ -1,0 +1,18 @@
+{
+  "name": "ACQUA — L'ingegnere degli acquedotti",
+  "short_name": "ACQUA",
+  "description": "Roma. Porta l'acqua in città con la sola gravità: traccia canali, archi e cunicoli. Pendenza giusta = fontane; troppo piano = ristagno, troppo ripido = erosione. Il profilo altimetrico è il gioco.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#cfe3ea",
+  "theme_color": "#3a7ca8",
+  "lang": "it",
+  "categories": ["games", "simulation"],
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
