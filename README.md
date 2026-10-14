@@ -22,6 +22,7 @@
   - [LUMEN](#lumen)
   - [SECTOR 7](#sector-7)
   - [SINI](#sini)
+  - [Viti & Lastre](#viti--lastre)
   - [FORMICA](#formica)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
@@ -54,14 +55,15 @@
 | 5 | **LUMEN** | Bioluminescent .io survival | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/lumen-pwa/) |
 | 6 | **SECTOR 7** | Low-poly space combat | Canvas 2D (facet meshes) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sector7-pwa/) |
 | 7 | **SINI** | Living-brushstroke .io (sumi-e) | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sini-pwa/) |
-| 8 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
-| 9 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 10 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 11 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 12 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 13 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 14 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
-| 15 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 8 | **Viti & Lastre** | Screw-puzzle demolition | Canvas 2D (rigid body) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/viti-pwa/) |
+| 9 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 10 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 11 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 12 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 13 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 14 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 15 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 16 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -306,6 +308,39 @@ niente gradienti arcade — solo inchiostro, acqua e carta.
   pietre e evita l'inchiostro secco — i loro cadaveri diventano ostacoli
 - Grana della carta procedural pattern, bordi che sanguinano, minimappa a
   pergamena, HUD in stile sumi-e
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
+### Viti & Lastre
+
+*Svita, sposta e riavvita: giù tutto.* 🪛
+
+Il puzzle di demolizione alla *Bolts & Nuts* portato al massimo: lastre di legno,
+metallo e vetro imbullonate su un pannello, con **fisica rigida vera** quando
+cadono (engine OBB scritto a mano: SAT + impulsi sequenziali, solo box).
+
+- **Il loop:** tocca una vite → si svita nel **portaviti** (solo 4 slot!).
+  Tocca un foro libero → la vite si riavvita lì. Una lasta senza viti che la
+  trattengono **cade con la fisica**: rotola, si ribalta, tonfa sul banco e
+  si dissolve in polvere
+- **Viti lunghe:** una vite attraversa più laste sovrapposte e le blocca
+  insieme — l'ordine di smontaggio è il puzzle
+- **Viti coperte:** quelle sotto una lasta superiore non si toccano finché
+  non la fai scendere (sono disegnate sotto, si intravedono)
+- **Colori:** le viti entrano solo nei fori dello stesso colore — col portaviti
+  piccolo, riordinarle è metà del gioco
+- **Viti speciali:** 🟠 **arrugginite** (3 tocchi), 🌀 **a molla** (se resta
+  l'ultima vite, lancia la lasta in aria!), 🔧 **universale** (entra in qualsiasi
+  foro)
+- **Materiali:** il **metallo** che cade da forte **fa saltare le viti** delle
+  lastre che colpisce → reazioni a catena; il **vetro** si rompe sopra una
+  certa velocità d'impatto — nei livelli "vetro protetto" romperlo significa
+  perdere
+- **Rotelle:** alcune lastre, invece di cadere, scivolano lungo una rotaia
+  fino a uscire dal pannello
+- **10 livelli** progressivi con par e stelle (3★ se entro il par), selezione
+  livelli con sblocco progressivo, record salvato e statistiche nell'hub
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
