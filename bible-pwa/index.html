@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>The Whole Bible — A Visual Novel of Scripture</title>
+<meta name="description" content="A very long and accurate visual novel of the entire Bible — Genesis to Revelation — in English and Italian. Contemplative, melancholic, faithful.">
+<meta name="theme-color" content="#0e0a12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
+<script src="../shared/arcade.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Cormorant Garamond',Georgia,serif;}
+body{background:#0e0a12;color:#c8b6a0;overflow:hidden;height:100vh;width:100vw;font-size:17px;line-height:1.7;letter-spacing:0.02em;}
+#bg-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0.12;pointer-events:none;z-index:0;}
+.dialogue-wrapper{position:absolute;bottom:0;left:0;right:0;z-index:10;padding:2.5rem 2rem 4.5rem;background:linear-gradient(to top,rgba(14,10,18,0.97),rgba(14,10,18,0.85) 60%,transparent);border-top:1px solid rgba(201,176,140,0.06);}
+.speaker-name{font-family:'Cinzel Decorative',serif;font-size:0.85rem;color:#bfa07a;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:0.25rem;font-weight:400;opacity:0.9;}
+.dialogue-text{font-size:1.1rem;color:#d4c4a8;max-width:700px;line-height:1.85;text-shadow:0 1px 4px rgba(0,0,0,0.5);font-style:italic;}
+.choices{display:flex;flex-direction:column;gap:0.55rem;margin-top:1rem;max-width:620px;}
+.choices button{background:rgba(201,176,140,0.05);border:1px solid rgba(201,176,140,0.14);color:#c9b8a8;border-radius:5px;padding:0.75rem 1.2rem;font-size:0.9rem;font-family:'Cormorant Garamond',Georgia,serif;cursor:pointer;transition:all 0.25s ease;text-align:center;letter-spacing:0.02em;}
+.choices button:hover{background:rgba(201,176,140,0.1);border-color:rgba(201,176,140,0.35);color:#e0c8a8;box-shadow:0 2px 12px rgba(0,0,0,0.25);}
+.stats-strip{position:absolute;top:0.9rem;right:1rem;z-index:20;font-size:0.7rem;color:#8a7b65;display:flex;gap:1rem;letter-spacing:0.08em;text-transform:uppercase;font-family:'Cinzel Decorative',serif;}
+.stats-strip span{color:#bfa07a;font-weight:700;margin-left:0.15rem;}
+.menu-screen{position:fixed;inset:0;background:linear-gradient(to bottom,#0e0a12 0%,#130e1a 60%,#0e0a12 100%);z-index:50;display:none;align-items:center;justify-content:center;padding:2rem;animation:fadeIn 0.6s ease;}
+.menu-screen:not(.hidden){display:flex;}
+.menu-panel{text-align:center;padding:2.5rem 2rem;max-width:520px;width:92%;}
+.menu-panel h1{font-size:3rem;color:#c9b0a0;font-family:'Cinzel Decorative',serif;margin-bottom:0.6rem;letter-spacing:0.08em;line-height:1.15;font-weight:400;text-shadow:0 2px 25px rgba(201,168,144,0.1);}
+.subtitle{font-style:italic;font-size:1.05rem;color:#9a8876;margin-bottom:2rem;line-height:1.65;letter-spacing:0.04em;}
+.menu-button{display:block;width:100%;padding:0.85rem 1.5rem;margin:0.35rem 0;background:rgba(201,176,140,0.05);border:1px solid rgba(201,176,140,0.15);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.05rem;cursor:pointer;transition:all 0.25s ease;letter-spacing:0.03em;}
+.menu-button:hover{background:rgba(201,176,140,0.1);border-color:rgba(201,176,140,0.35);color:#e0c8a8;box-shadow:0 4px 18px rgba(0,0,0,0.3);}
+.language-switch{position:absolute;top:0.9rem;left:1.2rem;z-index:25;font-size:0.7rem;color:#8a7860;border:1px solid rgba(201,176,140,0.12);border-radius:4px;padding:0.3rem 0.6rem;background:rgba(14,10,18,0.5);cursor:pointer;transition:all 0.25s;}
+.language-switch:hover{border-color:rgba(201,176,140,0.35);color:#b8a898;background:rgba(20,10,22,0.7);}
+.hidden{display:none!important;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="dialogue-wrapper">
+  <div class="speaker-name" id="speaker">Genesis</div>
+  <div class="dialogue-text" id="dialogue-text">In the beginning, God created the heavens and the earth. Now hear the whole story — from creation to revelation — in contemplation.</div>
+  <div class="choices" id="choices"></div>
+</div>
+<div class="stats-strip">
+  <span>Book: <strong id="book-label">Genesis</strong></span>
+  <span>Chapter: <strong id="ch-label">1</strong></span>
+  <span>Verse: <strong id="vs-label">1</strong></span>
+  <span>Memory: <strong id="mem">0</strong></span>
+</div>
+
+<div id="start-menu" class="menu-screen hidden">
+  <div class="menu-panel">
+    <h1>The Bible</h1>
+    <p class="subtitle">A very long and accurate visual novel of Scripture — from Genesis through Revelation — in English and Italian.</p>
+    <button class="menu-button" onclick="startBible()">Begin — Genesis 1</button>
+    <button class="menu-button" onclick="showIndex()">Choose Chapter</button>
+    <button class="menu-button" onclick="showAbout()">About This Work</button>
+  </div>
+</div>
+
+<div id="chapter-menu" class="menu-screen hidden">
+  <div class="menu-panel">
+    <h2>Choose Your Chapter</h2>
+    <button class="menu-button" onclick="goToChapter('genesis')">Genesis — Creation</button>
+    <button class="menu-button" onclick="goToChapter('exodus')">Exodus — Liberation</button>
+    <button class="menu-button" onclick="goToChapter('psalms')">Psalms — Prayer</button>
+    <button class="menu-button" onclick="goToChapter('gospels')">Gospels — The Word</button>
+    <button class="menu-button" onclick="goToChapter('acts')">Acts — The Spirit</button>
+    <button class="menu-button" onclick="goToChapter('revelation')">Revelation — The End</button>
+    <button class="menu-button" onclick="hideChapterMenu()">Back</button>
+  </div>
+</div>
+
+<div id="about-menu" class="menu-screen hidden">
+  <div class="menu-panel">
+    <h2>About This Work</h2>
+    <p style="font-style:italic;font-size:0.95rem;color:#9a8876;line-height:1.7;margin-bottom:1.5rem;">This is a very long and accurate adaptation of the Holy Bible as a contemplative visual novel. Every major book is represented with accurate verses, themes, and narrative flow — in both English and Italian. It is designed as a slow, meditative reading experience rather than an action game. Memory statistics track your journey through Scripture.</p>
+    <button class="menu-button" onclick="backToLibrary()">Back — Ritorna</button>
+  </div>
+</div>
+
+<script src="../shared/arcade.js"></script>
+<script src="src/config.js"></script>
+<script src="src/storage.js"></script>
+<script src="src/render.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

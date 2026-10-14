@@ -1,0 +1,12 @@
+{
+  "background_color":"#0e0a12",
+  "description":"A very long and accurate visual novel of the Holy Bible — from Genesis through Revelation — in English and Italian. Contemplative, accurate, bilingual.",
+  "display":"standalone",
+  "icons":[{"src":"icons/icon-192.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any"}],
+  "lang":"en",
+  "name":"The Bible",
+  "scope":"./",
+  "start_url":"./",
+  "theme_color":"#0e0a12",
+  "categories":["games","books","religion","story"]
+}
