@@ -114,9 +114,9 @@ linee), nessuna fisica. La difficoltà è il bilanciamento.
 
 ---
 
-## 3. NEBBIA — La gilda dei cartografi
+## 3. NEBBIA — La gilda dei cartografi ✅ IMPLEMENTATO
 
-> L'informazione come merce rischiosa. Priorità consigliata: **3**.
+> Implementato in `nebbia-pwa/` (vedi README). Priorità consigliata: ~~3~~ completato.
 > O: alto · P: alto · R: medio · F: alto
 
 **Fantasy.** Seicento. Un continente avvolto nella nebbia. La gilda vende

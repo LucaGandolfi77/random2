@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="192" height="192" rx="80" fill="#ede3cc"/>
+  <rect x="37" y="37" width="438" height="438" rx="48" fill="none" stroke="#4a3a26" stroke-width="11"/>
+  <rect x="69" y="69" width="374" height="374" rx="21" fill="none" stroke="#4a3a26" stroke-width="4"/>
+  <path d="M107 400 C160 373 213 384 256 352 C299 320 341 325 405 299" stroke="#4a3a26" stroke-width="3" fill="none"/>
+  <path d="M405 299 C363 256 352 203 373 149" stroke="#4a3a26" stroke-width="3" fill="none"/>
+  <path d="M315 203 M315 203 L336 245 M336 245 L299 267 M299 267 L331 288" stroke="#4a3a26" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <g stroke="#4a3a26" stroke-width="3" stroke-linecap="round">
+    <path d="M160 176 M160 176 L192 208 M192 176 L160 208"/>
+    <path d="M224 256 M224 256 L256 288 M256 256 L224 288"/>
+  </g>
+  <circle cx="256" cy="256" r="91" fill="none" stroke="#b3382c" stroke-width="2" opacity="0.6"/>
+  <path d="M256 144 M256 144 L272 235 L256 256 L240 235 Z" fill="#b3382c"/>
+  <path d="M256 256 M256 256 L331 272 M256 256 L219 331" stroke="#b3382c" stroke-width="2" fill="none"/>
+  <circle cx="256" cy="256" r="9" fill="#4a3a26"/>
+  <text x="256" y="112" font-family="serif" font-size="32" font-weight="bold" fill="#4a3a26" text-anchor="middle">N</text>
+</svg>

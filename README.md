@@ -28,6 +28,7 @@
   - [ALVEARE](#alveare)
   - [MADRE](#madre)
   - [LINEA ROSSA](#linea-rossa)
+  - [NEBBIA](#nebbia)
   - [FORMICA](#formica)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
@@ -66,14 +67,15 @@
 | 11 | **ALVEARE** | Bee-tycoon con waggle dance disegnabile | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/alveare-pwa/) |
 | 12 | **MADRE** | Fermentation tycoon on real time | DOM UI + Canvas curves + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/madre-pwa/) |
 | 13 | **LINEA ROSSA** | Metro planner tycoon | Canvas 2D + gravity model + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/metro-pwa/) |
-| 14 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
-| 15 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 16 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 17 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 18 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 19 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 20 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
-| 21 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 14 | **NEBBIA** | Cartographer guild, misinformation economy | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/nebbia-pwa/) |
+| 15 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 16 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 17 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 18 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 19 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 20 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 21 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 22 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -498,6 +500,36 @@ arriva la tua rete.
   sotto −€ 400
 - Onde di pendolari visibili, passeggeri in attesa animati alle stazioni,
   treni in movimento lungo le linee
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
+### NEBBIA
+
+*L'informazione è merce rischiosa.* 🗺️
+
+Seicento. La gilda vende mappe di un continente avvolto nella nebbia. Il
+mondo vero esiste — scogli, secche, isole generati dal daily seed — ma la
+**tua carta ha errori di trascrizione**: segni spostati, scogli omessi,
+pericoli inventati. Le navi dei clienti navigano sui tuoi segni.
+
+- **Il hook:** uno scoglio dimenticato è un naufragio (−15 ⭐, −€ 150 di
+  risarcimento); uno scoglio inventato fa solo perdere tempo alle navi.
+  **Sotto-marking uccide, over-marking spreca** — e tu vedi solo la tua mappa,
+  mai la verità
+- **Esplorazioni:** finanzia spedizioni che rivelano la nebbia e riportano un
+  bozzo; i **cartografi** (abilità variabile, assumibili) trascrivono
+  applicando gli errori in base alla loro abilità
+- **🔍 Verifica:** paga per confrontare mappa e realtà in un'area: correzioni,
+  aggiunte e rimozione dei segni fantasma — comprare certezza prima di
+  vendere un'edizione costosa
+- **Naufragi come inchiesta:** ogni relitto rivela la verità di quel punto
+  (la correzione entra in mappa) e lascia il simbolo del relitto
+- **Quasi-naufragi** dei navigatori segnalano pericoli sfiorati: −3 ⭐ ma la
+  mappa si corregge da sola
+- **Contratti dal daily seed:** coprire una baia, vendere N edizioni
+- Estetica carta nautica: pergamena con grana, inchiostro, rosa dei venti
+  procedurale, relitti segnati a croce, e "HIC SVNT DRACONES" nella nebbia
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
@@ -944,6 +976,9 @@ a PR — keep this list honest.
 - [x] **Isola Resort Tycoon wave 3:** hotel con entrate notturne, camera
       rotabile su 4 orientazioni (roundtrip verificato su tutte le celle),
       export/import del salvataggio, tempo musicale scalato su meteo/notte
+- [x] **NEBBIA** — cartographer guild: truth vs mis-transcribed guild map,
+      expeditions into fog, cartographer skill driving transcription errors,
+      navigator wrecks revealing the truth, verification purchases
 - [x] **LINEA ROSSA** — metro planner tycoon: gravity model demand, BFS
       routing with transfers, urban growth feedback, fare elasticity, loans
       with interest and bankruptcy

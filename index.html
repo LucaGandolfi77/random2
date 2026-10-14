@@ -478,6 +478,16 @@
     .card {
       --mx: 50%;
       --my: 50%;
+      /* Tilt and lift are custom properties so that `transform` stays ONE
+         declaration. It used to be written as an inline string from the
+         pointer handler, which meant the pointer silently overwrote the hover
+         lift and the scroll-reveal transform with something assembled in
+         JavaScript - three rules fighting over one property. Now the hover
+         only moves --lift and the pointer only moves --rx/--ry, and the
+         composition happens in exactly one place. */
+      --lift: 0px;
+      --rx: 0deg;
+      --ry: 0deg;
       position: relative;
       display: flex;
       flex-direction: column;
@@ -488,6 +498,7 @@
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease, opacity 0.4s ease;
+      transform: translateY(var(--lift)) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
       transform-style: preserve-3d;
       will-change: transform;
     }
@@ -624,14 +635,30 @@
     .empty .big { font-size: 42px; display: block; margin-bottom: 10px; }
 
     /* ---- Scroll reveal ---- */
+    /* .reveal and .reveal.in both set `transform`, which is why the tilt had
+       to move into custom properties: `.reveal.in` outspecifies `.card`, so a
+       plain `transform: none` here would wipe the tilt off every revealed
+       card the moment it finished animating in. They compose the same
+       declaration instead. */
     .reveal {
       opacity: 0;
       transform: translateY(18px) scale(0.985);
     }
     .reveal.in {
       opacity: 1;
-      transform: none;
+      transform: translateY(var(--lift)) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
       transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    /* While the launch warp runs, nothing else may move. The hover lift and
+       the tilt are the offenders: a card rising 4px during the flash reads as
+       a rendering fault rather than a transition. */
+    body.is-warping .card,
+    body.is-warping .card::before,
+    body.is-warping .btn,
+    body.is-warping .tile::after {
+      transition: none !important;
+      animation: none !important;
     }
 
     /* ---- Footer ---- */
@@ -1087,6 +1114,21 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="sim strategy" data-playable="nebbia-pwa/" style="--c1:#4a3a26; --c2:#ede3cc; --tile-glow:rgba(74,58,38,.5); --shimmer-delay:2.2s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#ede3cc,#b3382c)">🗺️</div>
+            <h2>NEBBIA</h2>
+          </div>
+          <p class="tagline">Gilda dei cartografi, Seicento: le tue mappe hanno errori di trascrizione e le navi dei clienti ci vanno in pezzi. Verificare costa, vendere uccide.</p>
+          <div class="chips"><span class="chip">TYCOON</span><span class="chip">CARTA NAUTICA</span><span class="chip">PWA</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="nebbia-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/nebbia-pwa" aria-label="NEBBIA source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="tool" style="--c1:#64748b; --c2:#0ea5e9; --tile-glow:rgba(100,116,139,.55); --shimmer-delay:1.75s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#64748b,#0ea5e9)">🛠️</div>
@@ -1146,23 +1188,10 @@
       canvas.style.width = W + "px"; canvas.style.height = H + "px";
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       build();
-    }
-
-    function build() {
-      stars = [];
-      var count = Math.min(160, Math.floor((W * H) / 9000));
-      for (var i = 0; i < count; i++) {
-        stars.push({
-          x: Math.random() * W,
-          y: Math.random() * H,
-          r: Math.random() * 1.4 + 0.3,
-          a: Math.random() * 0.55 + 0.12,
-          tw: Math.random() * Math.PI * 2,      // twinkle phase
-          ts: 0.4 + Math.random() * 1.2,        // twinkle speed
-          d: Math.random() * 0.6 + 0.2,         // depth (parallax factor)
-          vy: 4 + Math.random() * 12            // slow upward drift
-        });
-      }
+      /* Tiles are re-measured too: a 58px tile on a rotated phone is still
+       * 58px, but the backing store has to follow the device pixel ratio,
+       * and resize is the only signal we get that it changed. */
+      for (var i = 0; i < tiles.length; i++) sizeTile(tiles[i]);
     }
 
     var last = 0;
@@ -1172,33 +1201,173 @@
       px += (tx - px) * 0.045;
       py += (ty - py) * 0.045;
       ctx.clearRect(0, 0, W, H);
-      for (var i = 0; i < stars.length; i++) {
+       for (var i = 0; i < stars.length; i++) {
         var s = stars[i];
         s.y -= s.vy * dt;
         if (s.y < -4) { s.y = H + 4; s.x = Math.random() * W; }
+        var sx = s.x + px * 18 * s.d, sy = s.y + py * 12 * s.d;
         var tw = 0.55 + 0.45 * Math.sin(s.tw + t * 0.001 * s.ts);
         ctx.globalAlpha = s.a * tw;
-        ctx.fillStyle = "#dfe4ff";
+        ctx.fillStyle = rgba(s.c, 1);
         ctx.beginPath();
-        ctx.arc(s.x + px * 18 * s.d, s.y + py * 12 * s.d, s.r, 0, Math.PI * 2);
+        ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.globalAlpha = 1;
+
+      drawLinks(t);
+      updateMeteors(dt, t);
+      drawMotes(dt);
+      if (warp > 0) drawWarp(t);
+
+      /* The tiles ride the same rAF rather than owning one. Two loops on a
+       * page whose other job is scrolling is one loop too many, and the tile
+       * clock is throttled to 15fps inside drawTiles anyway. */
+      drawTiles(dt);
+
       if (!document.hidden) requestAnimationFrame(frame);
+    }
+
+    /* Constellation lines. The neighbour list is precomputed in linkStars();
+     * all this does is fade them, which is what makes them look alive rather
+     * than plotted. The pointer brightens the lines near it, so moving the
+     * mouse wakes the sky up. */
+    function drawLinks(t) {
+      var mxp = (tx * 0.5 + 0.5) * W, myp = (ty * 0.5 + 0.5) * H;
+      ctx.lineWidth = 1;
+      for (var i = 0; i < links.length; i++) {
+        var L = links[i], a = stars[L.a], b = stars[L.b];
+        var ax = a.x + px * 18 * a.d, ay = a.y + py * 12 * a.d;
+        var bx = b.x + px * 18 * b.d, by = b.y + py * 12 * b.d;
+        var base = (1 - L.d / LINK_MAX) * (0.10 + 0.05 * Math.sin(L.f + t * 0.0009));
+        /* Pointer proximity, measured to the link's midpoint. */
+        var cdx = (ax + bx) / 2 - mxp, cdy = (ay + by) / 2 - myp;
+        var near = Math.max(0, 1 - Math.sqrt(cdx * cdx + cdy * cdy) / 220);
+        var al = base + near * 0.28;
+        if (al <= 0.01) continue;
+        ctx.strokeStyle = rgba(a.c, al);
+        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+      }
+    }
+
+    function updateMeteors(dt, t) {
+      meteorTimer -= dt;
+      if (meteorTimer <= 0) {
+        meteorTimer = 6 + Math.random() * 8;
+        if (meteors.length < 3) spawnMeteor();
+      }
+      for (var i = meteors.length - 1; i >= 0; i--) {
+        var m = meteors[i];
+        m.life += dt;
+        m.x += m.vx * dt;
+        m.y += m.vy * dt;
+        if (m.life > m.ttl || m.x > W + 80 || m.y > H + 80) {
+          meteors.splice(i, 1);
+          continue;
+        }
+        var fade = 1 - m.life / m.ttl;
+        var gx = m.x - m.vx * 0.14, gy = m.y - m.vy * 0.14;
+        var grd = ctx.createLinearGradient(m.x, m.y, gx, gy);
+        grd.addColorStop(0, "rgba(255,255,255," + (0.85 * fade) + ")");
+        grd.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.strokeStyle = grd;
+        ctx.lineWidth = 1.6;
+        ctx.lineCap = "round";
+        ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(gx, gy); ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255," + (0.9 * fade) + ")";
+        ctx.beginPath(); ctx.arc(m.x, m.y, 1.6, 0, TAU); ctx.fill();
+      }
+      void t;
+    }
+
+    function drawMotes(dt) {
+      if (!motes.length) return;
+      for (var i = motes.length - 1; i >= 0; i--) {
+        var m = motes[i];
+        m.life -= dt * 1.5;
+        if (m.life <= 0) { motes.splice(i, 1); continue; }
+        m.x += m.vx * dt;
+        m.y += m.vy * dt;
+        m.vy += 26 * dt;   /* a slow settle, so the trail falls rather than drifts */
+        ctx.fillStyle = rgba(P1, m.life * 0.5);
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.life * 2.6, 0, TAU);
+        ctx.fill();
+      }
+    }
+
+    /* The launch. Stars pull outward from the centre into streaks and the
+     * navigation happens inside the flash. */
+    function drawWarp(t) {
+      var cx = W / 2, cy = H / 2;
+      ctx.lineCap = "round";
+      for (var i = 0; i < stars.length; i++) {
+        var s = stars[i];
+        var dx = s.x + px * 18 * s.d - cx, dy = s.y + py * 12 * s.d - cy;
+        var k = 1 + warp * 8;
+        ctx.strokeStyle = rgba(s.c, s.a * (1 - warp * 0.35));
+        ctx.lineWidth = Math.max(0.6, s.r * (1 + warp * 2.4));
+        ctx.beginPath();
+        ctx.moveTo(cx + dx, cy + dy);
+        ctx.lineTo(cx + dx * k, cy + dy * k);
+        ctx.stroke();
+      }
+      if (warp > 0.82) {
+        ctx.fillStyle = "rgba(255,255,255," + (((warp - 0.82) / 0.18) * 0.9) + ")";
+        ctx.fillRect(0, 0, W, H);
+      }
+      void t;
+    }
+
+    /* Pause the tiles nobody is looking at. Twenty canvases is nothing while
+     * they are on screen and a great deal while they are below the fold on a
+     * phone, and an IntersectionObserver is the cheap way to tell the
+     * difference. */
+    function pauseOffscreen() {
+      if (!("IntersectionObserver" in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          var rec = tileByCanvas.get(entries[i].target);
+          if (rec) rec.visible = entries[i].isIntersecting;
+        }
+      }, { rootMargin: "120px 0px" });
+      for (var i = 0; i < tiles.length; i++) io.observe(tiles[i].canvas);
     }
 
     function startStars() {
       resize();
       window.addEventListener("resize", resize);
-      if (reduceMotion) { // single static paint
+      initTiles();
+
+      /* The one cheap adaptation available: on a low-core device the starfield
+       * stays - it is 160 dots - and the twenty tiles paint a single frame
+       * each and then stop. The games still read as themselves; they just do
+       * not move. hardwareConcurrency is a blunt instrument and it is also
+       * the only signal there is. */
+      var lowEnd = (navigator.hardwareConcurrency || 8) <= 4;
+      if (lowEnd) {
+        for (var q = 0; q < tiles.length; q++) tiles[q].visible = false;
+      }
+
+      if (reduceMotion || lowEnd) {
+        /* Single static paint of both layers. */
         for (var i = 0; i < stars.length; i++) {
           var s = stars[i];
-          ctx.globalAlpha = s.a; ctx.fillStyle = "#dfe4ff";
+          ctx.globalAlpha = s.a; ctx.fillStyle = rgba(s.c, 1);
           ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
         }
         ctx.globalAlpha = 1;
+        for (var k = 0; k < tiles.length; k++) {
+          var T = tiles[k];
+          P1 = T.pal.c1; P2 = T.pal.c2;
+          T.fn(T.g, T.w, T.h, 0, T.opts);
+        }
+        if (reduceMotion) return;   /* nothing moves at all */
+        requestAnimationFrame(frame); /* low-end: stars still live */
         return;
       }
+
+      pauseOffscreen();
       document.addEventListener("visibilitychange", function () {
         if (!document.hidden) requestAnimationFrame(frame);
       });
@@ -1222,10 +1391,21 @@
           card.style.setProperty("--my", my + "px");
           var rx = ((my / r.height) - 0.5) * -4;
           var ry = ((mx / r.width) - 0.5) * 4;
-          card.style.transform = "translateY(-4px) perspective(900px) rotateX(" + rx + "deg) rotateY(" + ry + "deg)";
+          /* --rx/--ry, not style.transform. Assembling the whole transform
+           * string here used to stomp the hover lift, and later the FLIP
+           * animation, because all three were fighting over one property.
+           * The composition now lives in one CSS declaration. */
+          card.style.setProperty("--rx", rx + "deg");
+          card.style.setProperty("--ry", ry + "deg");
         });
         card.addEventListener("pointerleave", function () {
-          card.style.transform = "";
+          /* Back to 50%/50%, not left where the pointer was: --mx/--my start
+           * as percentages and were being written as pixels, so the sheen
+           * froze in the last place you hovered and stayed lit. */
+          card.style.setProperty("--mx", "50%");
+          card.style.setProperty("--my", "50%");
+          card.style.setProperty("--rx", "0deg");
+          card.style.setProperty("--ry", "0deg");
         });
       });
     }
@@ -1281,6 +1461,722 @@
     var emptyEl = document.getElementById("empty");
     var activeCat = localStorage.getItem("random2-cat") || "all";
 
+    /* =====================================================================
+     * LIVE TILES
+     *
+     * Every game on this shelf already declares two accent colours and an
+     * emoji. `.tile-fx` and `.tile-emoji` were in the stylesheet from the
+     * start and never used - the intent was always here. This is it: each
+     * 58px tile becomes a tiny procedural animation of the game's own
+     * mechanic, coloured from that game's own palette, so the shelf shows
+     * you what the game IS instead of telling you with a picture of a
+     * satellite.
+     *
+     * One sketch per game, thirteen sketches in total, drawn from a table.
+     * A new game is a row, not a branch.
+     * ===================================================================== */
+
+    var TAU = Math.PI * 2;
+    var TILE_FPS = 15;          /* see the note on cost below */
+    var tileDPR = Math.min(window.devicePixelRatio || 1, 2);
+    var tiles = [];             /* live tile records */
+    var tileClock = 0;
+    var tileAcc = 0;
+    var tileByCanvas = new Map();
+
+    function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+    function parseHex(h) {
+      h = String(h || "").trim().replace("#", "");
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      if (h.length !== 6) return null;
+      var n = parseInt(h, 16);
+      if (!isFinite(n)) return null;
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+
+    function rgba(c, a) {
+      return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + a + ")";
+    }
+
+    /* ---- The sketches ----------------------------------------------------
+     * Each one draws into a box w x h at time t, given the tile's palette.
+     * They are deliberately written in the 58px box: nothing here scales,
+     * because a sketch that looks right at 58px and wrong at 92px is a
+     * sketch that was never looked at. */
+    var SKETCH = {
+
+      /* SECTOR 7: a low-poly ship on an orbit, engine flare, comet tail. */
+      orbit: function (g, w, h, t) {
+        var cx = w / 2, cy = h / 2, R = w * 0.30, a = t * 1.15;
+        g.strokeStyle = "rgba(255,255,255,0.10)";
+        g.lineWidth = 1;
+        g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
+
+        for (var i = 0; i < 13; i++) {
+          var aa = a - i * 0.06;
+          g.fillStyle = rgba(P2, (1 - i / 13) * 0.55);
+          g.beginPath();
+          g.arc(cx + Math.cos(aa) * (R - i * 0.4), cy + Math.sin(aa) * (R - i * 0.4),
+                Math.max(0.4, 2.2 - i * 0.13), 0, TAU);
+          g.fill();
+        }
+        var x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R;
+        var fx = cx + Math.cos(a - 0.2) * (R - 1), fy = cy + Math.sin(a - 0.2) * (R - 1);
+        g.fillStyle = "rgba(255,214,120,0.9)";
+        g.beginPath(); g.arc(fx, fy, 1.9, 0, TAU); g.fill();
+        g.save(); g.translate(x, y); g.rotate(a + Math.PI / 2);
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath();
+        g.moveTo(5.4, 0); g.lineTo(-3.6, 3.1); g.lineTo(-2, 0); g.lineTo(-3.6, -3.1);
+        g.closePath(); g.fill();
+        g.restore();
+      },
+
+      /* BUCIO: a black hole. Matter falls in, the disc is the event horizon. */
+      vortex: function (g, w, h, t) {
+        var cx = w / 2, cy = h / 2, R = w * 0.30;
+        g.fillStyle = "rgba(3,4,10,0.9)";
+        g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
+        for (var i = 0; i < 24; i++) {
+          var p = (t * 0.34 + i / 24) % 1;
+          var r = (w * 0.46) * (1 - p) + R * 0.5;
+          var a = i * 2.399 + t * 1.7 + p * 4.6;
+          g.fillStyle = rgba(i % 3 ? P2 : P1, (1 - p) * 0.85);
+          g.beginPath();
+          g.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.62,
+                Math.max(0.4, 1.7 * (1 - p * 0.4)), 0, TAU);
+          g.fill();
+        }
+        g.strokeStyle = rgba(P1, 0.55); g.lineWidth = 1.4;
+        g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
+      },
+
+      /* TERRITORIO / FORMICA: a trail walks a loop, then the loop fills. */
+      grid: function (g, w, h, t, u) {
+        var m = w * 0.17, x0 = m, y0 = m, x1 = w - m, y1 = h - m;
+        var period = u.period || 5;
+        var p = (t % period) / period;
+        var corners = [[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]];
+        var d = p < 0.6 ? (p / 0.6) * ((x1 - x0) + (y1 - y0)) : (x1 - x0) + (y1 - y0);
+
+        g.lineWidth = 2.2; g.lineJoin = "round"; g.lineCap = "round";
+        g.strokeStyle = rgba(P1, 0.95);
+        g.beginPath(); g.moveTo(x0, y0);
+        var walked = 0;
+        for (var i = 0; i < 4; i++) {
+          var ax = corners[i][0], ay = corners[i][1];
+          var bx = corners[i + 1][0], by = corners[i + 1][1];
+          var seg = Math.hypot(bx - ax, by - ay);
+          if (walked + seg <= d) { g.lineTo(bx, by); walked += seg; }
+          else {
+            var k = seg > 0 ? (d - walked) / seg : 0;
+            g.lineTo(ax + (bx - ax) * k, ay + (by - ay) * k);
+            break;
+          }
+        }
+        g.stroke();
+
+        if (p >= 0.6) {
+          var f = (p - 0.6) / 0.4;
+          var a = f < 0.5 ? f * 2 : (1 - f) * 2;
+          g.fillStyle = rgba(P2, 0.5 * a);
+          g.fillRect(x0, y0, x1 - x0, y1 - y0);
+        }
+      },
+
+      /* LUMEN / MADRE: a glow that breathes, with three drifting motes. */
+      pulse: function (g, w, h, t, u) {
+        var cx = w / 2, cy = h / 2;
+        var period = u.period || 3.2;
+        var b = 0.5 + 0.5 * Math.sin((t / period) * TAU);
+        var r = w * (0.13 + b * 0.16);
+        var grd = g.createRadialGradient(cx, cy, 0, cx, cy, r * 2.3);
+        grd.addColorStop(0, rgba(P1, 0.95));
+        grd.addColorStop(0.35, rgba(P2, 0.45));
+        grd.addColorStop(1, rgba(P2, 0));
+        g.fillStyle = grd;
+        g.beginPath(); g.arc(cx, cy, r * 2.3, 0, TAU); g.fill();
+        g.fillStyle = "rgba(255,255,255,0.85)";
+        g.beginPath(); g.arc(cx, cy, w * 0.07 * (0.7 + b * 0.5), 0, TAU); g.fill();
+        for (var i = 0; i < 3; i++) {
+          var a = t * 0.9 + i * TAU / 3;
+          g.fillStyle = rgba(P2, 0.8);
+          g.beginPath();
+          g.arc(cx + Math.cos(a) * w * 0.34, cy + Math.sin(a) * h * 0.34, 1.5, 0, TAU);
+          g.fill();
+        }
+      },
+
+      /* ALVEARE / VIRTUAL FARM: rows rise on the beat, rain falls. */
+      grow: function (g, w, h, t, u) {
+        var n = 5, period = u.period || 4, top = h * 0.84;
+        g.strokeStyle = rgba(P2, 0.3); g.lineWidth = 1;
+        g.beginPath(); g.moveTo(w * 0.1, top + 1); g.lineTo(w * 0.9, top + 1); g.stroke();
+        for (var i = 0; i < n; i++) {
+          var local = ((t / period) + i / n) % 1;
+          var x = w * 0.17 + i * (w * 0.66 / (n - 1));
+          var hgt = local * h * 0.52;
+          g.strokeStyle = rgba(i % 2 ? P2 : P1, 0.9);
+          g.lineWidth = 2;
+          g.beginPath(); g.moveTo(x, top); g.lineTo(x, top - hgt); g.stroke();
+          g.fillStyle = rgba(i % 2 ? P2 : P1, 0.9);
+          g.beginPath(); g.arc(x, top - hgt, 1.7, 0, TAU); g.fill();
+        }
+        for (var k = 0; k < 4; k++) {
+          var rx = w * 0.2 + k * (w * 0.2);
+          var ry = ((t * 70 + k * 29) % (h * 0.55));
+          g.fillStyle = rgba(P2, 0.45);
+          g.fillRect(rx, ry, 1, 4);
+        }
+      },
+
+      /* KING SHOT / MUSTANG: an arrow on an arc, with a dotted guide. */
+      arc: function (g, w, h, t, u) {
+        var period = u.period || 2.2, p = (t % period) / period;
+        var x0 = w * 0.16, y0 = h * 0.84, x1 = w * 0.84, y1 = h * 0.24;
+        function at(q) {
+          return [x0 + (x1 - x0) * q, y0 + (y1 - y0) * q - Math.sin(q * Math.PI) * h * 0.46];
+        }
+        g.strokeStyle = rgba(P2, 0.18); g.lineWidth = 1; g.setLineDash([2, 3]);
+        g.beginPath();
+        g.moveTo(x0, y0);
+        g.quadraticCurveTo((x0 + x1) / 2, Math.min(y0, y1) - h * 0.5, x1, y1);
+        g.stroke(); g.setLineDash([]);
+        for (var i = 1; i <= 8; i++) {
+          var q = p - i * 0.022;
+          if (q < 0) break;
+          var pt = at(q);
+          g.fillStyle = rgba(P2, (1 - i / 8) * 0.6);
+          g.beginPath(); g.arc(pt[0], pt[1], Math.max(0.4, 2.2 - i * 0.18), 0, TAU); g.fill();
+        }
+        var now = at(p), nxt = at(Math.min(1, p + 0.02));
+        g.save(); g.translate(now[0], now[1]);
+        g.rotate(Math.atan2(nxt[1] - now[1], nxt[0] - now[0]));
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath();
+        g.moveTo(5.4, 0); g.lineTo(-4, 2.6); g.lineTo(-2, 0); g.lineTo(-4, -2.6);
+        g.closePath(); g.fill();
+        g.restore();
+      },
+
+      /* PLANE / SNAKE: something crossing with a streaming tail. */
+      trail: function (g, w, h, t, u) {
+        var period = u.period || 2.6, p = (t % period) / period;
+        var dir = u.dir || 1;
+        var yAt = function (q) { return h * 0.5 + Math.sin(q * TAU) * h * 0.16; };
+        for (var i = 1; i <= 12; i++) {
+          var q = p - dir * i * 0.02;
+          if (q < 0 || q > 1) break;
+          g.fillStyle = rgba(P2, (1 - i / 12) * 0.55);
+          g.beginPath();
+          g.arc(dir > 0 ? q * w : w - q * w, yAt(q), Math.max(0.4, 2.6 - i * 0.16), 0, TAU);
+          g.fill();
+        }
+        var x = dir > 0 ? p * w : w - p * w, y = yAt(p);
+        g.save(); g.translate(x, y); g.scale(dir, 1);
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath();
+        g.moveTo(6, 0); g.lineTo(-5, 3.4); g.lineTo(-2.5, 0); g.lineTo(-5, -3.4);
+        g.closePath(); g.fill();
+        g.restore();
+        g.fillStyle = rgba(P1, 0.5);
+        for (var k = 0; k < 2; k++) g.fillRect(x + dir * (8 + k * 4), y - 1, 2.4, 2);
+      },
+
+      /* SLOT: three strips of symbols. */
+      reel: function (g, w, h, t, u) {
+        var spd = u.speed || 1, cell = 15;
+        for (var c = 0; c < 3; c++) {
+          var x = w * 0.24 + c * (w * 0.26);
+          var off = (t * 40 * spd + c * 11) % cell;
+          var n = Math.ceil(h / cell) + 2;
+          for (var i = -1; i < n; i++) {
+            var y = i * cell + off - cell;
+            var sym = ((i + c + (t * 2 | 0)) % 3 + 3) % 3;
+            g.fillStyle = rgba(sym === 0 ? P1 : P2, 0.9);
+            if (sym === 0) { g.beginPath(); g.arc(x, y, 3.2, 0, TAU); g.fill(); }
+            else if (sym === 1) { g.fillRect(x - 3, y - 3, 6, 6); }
+            else {
+              g.beginPath();
+              g.moveTo(x, y - 3.6); g.lineTo(x + 3.4, y); g.lineTo(x, y + 3.6); g.lineTo(x - 3.4, y);
+              g.closePath(); g.fill();
+            }
+          }
+        }
+      },
+
+      /* SINI / MYCEL: ink that spreads and dries at the edge. */
+      bloom: function (g, w, h, t, u) {
+        var cx = w / 2, cy = h / 2;
+        var period = u.period || 6, p = (t % period) / period;
+        var r = w * 0.46 * Math.min(1, p * 1.7);
+        g.fillStyle = rgba(P1, 0.85 * (1 - p * 0.4));
+        g.beginPath(); g.arc(cx, cy, r * 0.55, 0, TAU); g.fill();
+        g.strokeStyle = rgba(P2, 0.9 * (1 - Math.max(0, (p - 0.5) / 0.5)));
+        g.lineWidth = 1.6;
+        g.beginPath();
+        for (var i = 0; i <= 18; i++) {
+          var a = i / 18 * TAU;
+          var rr = r * (0.8 + 0.2 * Math.sin(a * 5 + t * 1.5) + 0.08 * Math.sin(a * 3 - t * 0.8));
+          var x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr;
+          if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+        }
+        g.closePath(); g.stroke();
+        if (u.branch) {
+          g.lineWidth = 1; g.strokeStyle = rgba(P2, 0.7);
+          for (var k = 0; k < 3; k++) {
+            var aa = t * 0.5 + k * TAU / 3;
+            g.beginPath(); g.moveTo(cx, cy);
+            g.quadraticCurveTo(cx + Math.cos(aa) * r * 0.7, cy + Math.sin(aa) * r * 0.7,
+              cx + Math.cos(aa + 0.5) * r * 1.05, cy + Math.sin(aa + 0.5) * r * 1.05);
+            g.stroke();
+          }
+        }
+      },
+
+      /* STATIC: TV snow, a sweeping scanline, CRT raster lines. */
+      noise: function (g, w, h, t) {
+        for (var i = 0; i < 90; i++) {
+          var x = Math.abs(Math.sin(i * 12.9898 + t * 13.0) * 43758.5453 % 1) * w;
+          var y = Math.abs(Math.sin(i * 78.233 + t * 7.0) * 12345.6789 % 1) * h;
+          g.fillStyle = rgba(i % 4 === 0 ? P1 : [223, 230, 255],
+                             0.25 + Math.abs(Math.sin(i + t)) * 0.5);
+          g.fillRect(x, y, 1.6, 1.6);
+        }
+        g.fillStyle = "rgba(0,0,0,0.35)";
+        for (var r = 0; r < h; r += 3) g.fillRect(0, r, w, 1);
+        g.fillStyle = rgba(P1, 0.22);
+        g.fillRect(0, (t * 0.28 % 1) * h, w, 2);
+      },
+
+      /* VITI: a screw turning, backing out of a panel. */
+      screw: function (g, w, h, t, u) {
+        var cx = w / 2, period = u.period || 4, p = (t % period) / period;
+        var y = h * 0.34 + p * h * 0.3, a = t * 3.4;
+        g.fillStyle = rgba(P2, 0.25);
+        g.fillRect(w * 0.14, h * 0.82, w * 0.72, 3);
+        g.strokeStyle = rgba(P1, 0.9); g.lineWidth = 3.2;
+        g.beginPath(); g.moveTo(cx, y + 6); g.lineTo(cx, h * 0.82); g.stroke();
+        g.lineWidth = 1.6;
+        for (var i = 0; i < 4; i++) {
+          var ty = y + 8 + i * 4;
+          g.strokeStyle = rgba(P1, 0.7);
+          g.beginPath();
+          g.moveTo(cx - 3.4 * Math.cos(a), ty - 3.4 * Math.sin(a));
+          g.lineTo(cx + 3.4 * Math.cos(a), ty + 3.4 * Math.sin(a));
+          g.stroke();
+        }
+        g.save(); g.translate(cx, y); g.rotate(a);
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath(); g.arc(0, 0, 5.4, 0, TAU); g.fill();
+        g.strokeStyle = "rgba(6,10,20,0.9)"; g.lineWidth = 1.8;
+        g.beginPath(); g.moveTo(-4, 0); g.lineTo(4, 0); g.stroke();
+        g.restore();
+      },
+
+      /* LINEA ROSSA: a line drawing itself between stations. */
+      lines: function (g, w, h, t, u) {
+        var stops = [[0.16, 0.72], [0.38, 0.34], [0.6, 0.62], [0.86, 0.26]];
+        var period = u.period || 5, p = (t % period) / period;
+        var total = p * stops.length;
+        g.lineWidth = 2.2; g.lineCap = "round"; g.strokeStyle = rgba(P1, 0.95);
+        g.beginPath();
+        for (var i = 0; i < stops.length - 1; i++) {
+          var ax = stops[i][0] * w, ay = stops[i][1] * h;
+          var bx = stops[i + 1][0] * w, by = stops[i + 1][1] * h;
+          var k = clamp(total - i, 0, 1);
+          if (i === 0) g.moveTo(ax, ay);
+          g.lineTo(ax + (bx - ax) * k, ay + (by - ay) * k);
+        }
+        g.stroke();
+        for (var s = 0; s < stops.length; s++) {
+          var on = s <= total;
+          g.fillStyle = rgba(on ? [255, 255, 255] : P2, on ? 0.95 : 0.4);
+          g.beginPath(); g.arc(stops[s][0] * w, stops[s][1] * h, 2.6, 0, TAU); g.fill();
+        }
+      },
+
+      /* SNAP: a shutter iris opening and closing. */
+      shutter: function (g, w, h, t, u) {
+        var cx = w / 2, cy = h / 2, period = u.period || 3.4, p = (t % period) / period;
+        var open = 0.5 + 0.5 * Math.sin(p * TAU);
+        var R = w * 0.40, r = R * open;
+        g.strokeStyle = rgba(P1, 0.9); g.lineWidth = 2;
+        g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.stroke();
+        for (var i = 0; i < 6; i++) {
+          var a0 = i / 6 * TAU + t * 0.2, a1 = (i + 1) / 6 * TAU + t * 0.2;
+          var am = (a0 + a1) / 2;
+          g.fillStyle = rgba(P2, 0.5);
+          g.beginPath();
+          g.moveTo(cx + Math.cos(a0) * r, cy + Math.sin(a0) * r);
+          g.lineTo(cx + Math.cos(a0) * R, cy + Math.sin(a0) * R);
+          g.lineTo(cx + Math.cos(am) * R * 1.05, cy + Math.sin(am) * R * 1.05);
+          g.lineTo(cx + Math.cos(a1) * R, cy + Math.sin(a1) * R);
+          g.lineTo(cx + Math.cos(a1) * r, cy + Math.sin(a1) * r);
+          g.closePath(); g.fill();
+        }
+        g.fillStyle = "rgba(255,255,255," + (0.85 * (1 - open * 0.5)) + ")";
+        g.beginPath(); g.arc(cx, cy, r * 0.45, 0, TAU); g.fill();
+      },
+
+      /* NEBBIA: a nautical chart. The compass rose turns, a route is plotted,
+       * and the error that sinks the client's ship pulses where it is. */
+      chart: function (g, w, h, t, u) {
+        var cx = w * 0.5, cy = h * 0.5;
+        var period = u.period || 9;
+        var p = (t % period) / period;
+
+        /* coastline, drawn once per frame - it is two curves */
+        g.strokeStyle = rgba(P2, 0.5); g.lineWidth = 1.4;
+        g.beginPath();
+        g.moveTo(-2, h * 0.74);
+        g.bezierCurveTo(w * 0.22, h * 0.62, w * 0.3, h * 0.86, w * 0.5, h * 0.78);
+        g.bezierCurveTo(w * 0.66, h * 0.72, w * 0.78, h * 0.9, w + 2, h * 0.8);
+        g.stroke();
+
+        /* the plotted route: a dashed line from one corner to the other */
+        g.strokeStyle = rgba(P2, 0.8); g.lineWidth = 1.2;
+        g.setLineDash([3, 3]);
+        g.lineDashOffset = -t * 12;
+        g.beginPath();
+        g.moveTo(w * 0.12, h * 0.88);
+        g.quadraticCurveTo(w * 0.46, h * 0.4, w * 0.86, h * 0.14);
+        g.stroke();
+        g.setLineDash([]);
+
+        /* the transcription error: where the route crosses the shoal */
+        var ex = w * 0.46, ey = h * 0.4;
+        var beat = 0.5 + 0.5 * Math.sin(t * 3.2);
+        g.strokeStyle = rgba([214, 62, 48], 0.55 + beat * 0.45);
+        g.lineWidth = 1.8;
+        g.beginPath();
+        g.moveTo(ex - 4, ey - 4); g.lineTo(ex + 4, ey + 4);
+        g.moveTo(ex + 4, ey - 4); g.lineTo(ex - 4, ey + 4);
+        g.stroke();
+
+        /* compass rose, turning slowly */
+        g.save();
+        g.translate(w * 0.76, h * 0.7);
+        g.rotate(t * 0.24);
+        g.strokeStyle = rgba(P2, 0.75); g.lineWidth = 1.1;
+        g.beginPath(); g.arc(0, 0, w * 0.2, 0, TAU); g.stroke();
+        for (var i = 0; i < 4; i++) {
+          var a = i / 4 * TAU;
+          var len = i === 0 ? w * 0.2 : w * 0.11;
+          g.fillStyle = rgba(i === 0 ? [214, 62, 48] : P2, i === 0 ? 0.95 : 0.7);
+          g.beginPath();
+          g.moveTo(Math.cos(a) * len, Math.sin(a) * len);
+          g.lineTo(Math.cos(a + 0.5) * 3, Math.sin(a + 0.5) * 3);
+          g.lineTo(Math.cos(a - 0.5) * 3, Math.sin(a - 0.5) * 3);
+          g.closePath(); g.fill();
+          g.beginPath();
+          g.moveTo(Math.cos(a + Math.PI) * len, Math.sin(a + Math.PI) * len);
+          g.lineTo(Math.cos(a + Math.PI + 0.5) * 3, Math.sin(a + Math.PI + 0.5) * 3);
+          g.lineTo(Math.cos(a + Math.PI - 0.5) * 3, Math.sin(a + Math.PI - 0.5) * 3);
+          g.closePath(); g.fill();
+        }
+        g.restore();
+
+        /* a ship's wake crawling along the route */
+        var q = (t / (period * 0.55)) % 1;
+        var sx = (1 - q) * (1 - q) * w * 0.12 + 2 * (1 - q) * q * w * 0.46 + q * q * w * 0.86;
+        var sy = (1 - q) * (1 - q) * h * 0.88 + 2 * (1 - q) * q * h * 0.4 + q * q * h * 0.14;
+        g.fillStyle = rgba(P1, 0.95);
+        g.beginPath(); g.arc(sx, sy, 2.2, 0, TAU); g.fill();
+      },
+
+      /* RESORT: a sun sinking over wave lines. */
+      horizon: function (g, w, h, t, u) {
+        var period = u.period || 7, p = (t % period) / period;
+        var cy = h * (0.78 - p * 0.5);
+        var grd = g.createRadialGradient(w / 2, cy, 0, w / 2, cy, w * 0.42);
+        grd.addColorStop(0, rgba(P1, 0.95));
+        grd.addColorStop(0.4, rgba(P1, 0.35));
+        grd.addColorStop(1, rgba(P1, 0));
+        g.fillStyle = grd;
+        g.beginPath(); g.arc(w / 2, cy, w * 0.42, 0, TAU); g.fill();
+        g.fillStyle = rgba(P1, 0.9);
+        g.beginPath(); g.arc(w / 2, cy, w * 0.14, 0, TAU); g.fill();
+        for (var i = 0; i < 3; i++) {
+          var y = h * (0.62 + i * 0.12);
+          g.strokeStyle = rgba(P2, 0.5 - i * 0.12); g.lineWidth = 1.4;
+          g.beginPath();
+          for (var x = 0; x <= w; x += 4) {
+            var yy = y + Math.sin(x * 0.16 + t * 1.6 + i) * 1.8;
+            if (x === 0) g.moveTo(x, yy); else g.lineTo(x, yy);
+          }
+          g.stroke();
+        }
+      },
+    };
+
+    /* Which sketch each game gets, and how. The palette comes from the card
+     * itself, so a game only has to say WHICH it is, not what colour it is -
+     * the colours are already there in --c1/--c2.
+     *
+     * Keys are normalised through slugOf() because the markup is not
+     * consistent about trailing slashes - most cards say "lumen-pwa/" and two
+     * say "mycel-pwa". A lookup that quietly returns undefined for those is a
+     * tile that silently never animates, which is the kind of thing nobody
+     * notices until somebody counts the canvases. */
+    var SKETCH_BY_SLUG = {
+      "sector7-pwa/":     ["orbit",   null],
+      "bucio/":           ["vortex",  null],
+      "territorio-pwa/":  ["grid",    { period: 5.5 }],
+      "formica-pwa/":     ["grid",    { period: 3.2 }],
+      "lumen-pwa/":       ["pulse",   { period: 2.6 }],
+      "madre-pwa/":       ["pulse",   { period: 5.5 }],
+      "alveare-pwa/":     ["grow",    { period: 4.5 }],
+      "virtual-farm-pwa/":["grow",    { period: 3.4 }],
+      "king-shot-pwa/":   ["arc",     { period: 2.2 }],
+      "mustang-pwa/":     ["arc",     { period: 1.7 }],
+      "plane-pwa/":       ["trail",   { period: 2.8, dir: 1 }],
+      "snake-pwa/":       ["trail",   { period: 2.4, dir: 1 }],
+      "slot-pwa/":        ["reel",    { speed: 1 }],
+      "sini-pwa/":        ["bloom",   { period: 6 }],
+      "mycel-pwa/":       ["bloom",   { period: 5, branch: true }],
+      "static-pwa/":      ["noise",   null],
+      "viti-pwa/":        ["screw",   { period: 4 }],
+      "metro-pwa/":       ["lines",   { period: 5 }],
+      "snap-pwa/":        ["shutter", { period: 3.4 }],
+      "resort-pwa/":      ["horizon", { period: 7 }],
+      "nebbia-pwa/":      ["chart",   { period: 9 }]
+    };
+
+    function tilePalette(card) {
+      var c1 = parseHex(getComputedStyle(card).getPropertyValue("--c1"));
+      var c2 = parseHex(getComputedStyle(card).getPropertyValue("--c2"));
+      return { c1: c1 || [110, 220, 250], c2: c2 || [120, 150, 210] };
+    }
+
+    /* "nebbia-pwa/" and "nebbia-pwa" are the same game. */
+    function slugOf(v) { return String(v || "").replace(/\/+$/, ""); }
+
+    /* The palette the sketches are called with, and the two shortcut names
+     * they use. Assigned per draw so the sketch bodies stay readable - they
+     * say P1, not "look up the record and read its palette". */
+    var P1 = [110, 220, 250], P2 = [120, 150, 210];
+
+    /* Build every tile. The emoji is wrapped in .tile-emoji and the canvas
+     * goes in behind it, which is what the stylesheet always expected: the
+     * sketch is decoration, the glyph is the fallback and stays on top. */
+    function initTiles() {
+      var cards = document.querySelectorAll("[data-playable]");
+      for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var key = SKETCH_BY_SLUG[slugOf(card.getAttribute("data-playable"))];
+        var tile = card.querySelector(".tile");
+        if (!key || !tile) continue;
+        var def = SKETCH[key[0]];
+        if (!def) continue;
+
+        var span = document.createElement("span");
+        span.className = "tile-emoji";
+        while (tile.firstChild) span.appendChild(tile.firstChild);
+        tile.appendChild(span);
+
+        var cv = document.createElement("canvas");
+        cv.className = "tile-fx";
+        cv.setAttribute("aria-hidden", "true");
+        tile.insertBefore(cv, tile.firstChild);
+
+        var rec = {
+          canvas: cv, g: cv.getContext("2d"), fn: def, opts: key[1] || {},
+          pal: tilePalette(card), w: 58, h: 58, visible: true
+        };
+        sizeTile(rec);
+        tiles.push(rec);
+        tileByCanvas.set(cv, rec);
+      }
+    }
+
+    function sizeTile(rec) {
+      var r = rec.canvas.getBoundingClientRect();
+      rec.w = Math.max(24, Math.round(r.width || 58));
+      rec.h = Math.max(24, Math.round(r.height || 58));
+      rec.canvas.width = Math.round(rec.w * tileDPR);
+      rec.canvas.height = Math.round(rec.h * tileDPR);
+      rec.g.setTransform(tileDPR, 0, 0, tileDPR, 0, 0);
+    }
+
+    function drawTiles(dt) {
+      if (!tiles.length) return;
+      tileAcc += dt;
+      if (tileAcc < 1 / TILE_FPS) return;
+      var step = tileAcc;
+      tileAcc = 0;
+      tileClock += step;
+      for (var i = 0; i < tiles.length; i++) {
+        var T = tiles[i];
+        if (!T.visible) continue;
+        P1 = T.pal.c1; P2 = T.pal.c2;
+        T.fn(T.g, T.w, T.h, tileClock, T.opts);
+      }
+    }
+
+    /* ---- Starfield -------------------------------------------------------
+     * Rewritten from a sky of pale dots into a sky made of the games on the
+     * page: each star is coloured from the shelf's own palette, nearby stars
+     * are linked into constellations, and meteors cross occasionally.
+     *
+     * The constellation graph is built ONCE per resize, not per frame. With
+     * 160 stars a per-frame all-pairs pass is 12800 distance checks at 60fps,
+     * which is precisely the sort of thing that turns a phone from smooth
+     * into a slideshow while looking free on a desktop. */
+    function gamePalette() {
+      var out = [];
+      var cards = document.querySelectorAll("[data-playable]");
+      for (var i = 0; i < cards.length; i++) {
+        var a = parseHex(getComputedStyle(cards[i]).getPropertyValue("--c1"));
+        var b = parseHex(getComputedStyle(cards[i]).getPropertyValue("--c2"));
+        if (a) out.push(a);
+        if (b) out.push(b);
+      }
+      return out.length ? out : [[223, 228, 255]];
+    }
+
+    var PALETTE = gamePalette();
+    var links = [];
+    var meteors = [];
+    var meteorTimer = 5;
+    var motes = [];
+
+    function build() {
+      stars = [];
+      var count = Math.min(160, Math.floor((W * H) / 9000));
+      for (var i = 0; i < count; i++) {
+        stars.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.4 + 0.3,
+          a: Math.random() * 0.55 + 0.12,
+          tw: Math.random() * Math.PI * 2,
+          ts: 0.4 + Math.random() * 1.2,
+          d: Math.random() * 0.6 + 0.2,
+          vy: 4 + Math.random() * 12,
+          c: PALETTE[(Math.random() * PALETTE.length) | 0]
+        });
+      }
+      linkStars();
+    }
+
+    /* Neighbour list, built once. Each star keeps at most two links and a
+     * link is only made inside LINK_MAX, so the sky reads as sparse
+     * constellations rather than a hairball. */
+    var LINK_MAX = 98;
+    function linkStars() {
+      links = [];
+      for (var i = 0; i < stars.length; i++) {
+        var made = 0;
+        for (var j = i + 1; j < stars.length && made < 2; j++) {
+          var dx = stars[i].x - stars[j].x, dy = stars[i].y - stars[j].y;
+          var d2 = dx * dx + dy * dy;
+          if (d2 < LINK_MAX * LINK_MAX) {
+            links.push({ a: i, b: j, d: Math.sqrt(d2), f: Math.random() * Math.PI * 2 });
+            made++;
+          }
+        }
+      }
+    }
+
+    function spawnMeteor() {
+      meteors.push({
+        x: Math.random() * W * 1.2 - W * 0.1,
+        y: -30,
+        vx: 90 + Math.random() * 150,
+        vy: 180 + Math.random() * 170,
+        ttl: 1.0 + Math.random() * 0.8,
+        life: 0,
+        len: 55 + Math.random() * 70
+      });
+    }
+
+    /* Pointer comet. Fine pointers only: on a touch screen there is no cursor
+     * to trail, and the pointermove events during a scroll would just be
+     * chaff. */
+    if (fine && !reduceMotion) {
+      var lastSpawn = 0;
+      window.addEventListener("pointermove", function (e) {
+        var now = performance.now();
+        if (now - lastSpawn < 28) return;
+        lastSpawn = now;
+        if (motes.length > 36) motes.shift();
+        motes.push({
+          x: e.clientX, y: e.clientY,
+          vx: (Math.random() - 0.5) * 24,
+          vy: (Math.random() - 0.5) * 24 + 10,
+          life: 1
+        });
+      }, { passive: true });
+    }
+
+    /* =====================================================================
+     * WARP
+     *
+     * Launching used to be a hard page cut. Now the same star array is
+     * stretched into streaks and the navigation happens at the flash, so the
+     * one moment the hub shares with SECTOR 7 is the one moment it looks
+     * like SECTOR 7.
+     * ===================================================================== */
+    var warp = 0;
+    var warping = false;
+
+    function warpTo(url) {
+      if (warping) return;
+      if (reduceMotion) { window.location.href = url; return; }
+      warping = true;
+      var t0 = performance.now(), DUR = 520;
+      document.body.classList.add("is-warping");
+      /* A safety net: rAF does not fire in a hidden tab, and a launch that
+       * never completes because the user backgrounded the page is a dead
+       * end. If the animation is still unfinished half a second after it
+       * should have been, navigate anyway. */
+      var guard = setTimeout(function () {
+        if (warping) window.location.href = url;
+      }, DUR + 600);
+      (function step(now) {
+        warp = Math.min((now - t0) / DUR, 1);
+        if (warp < 1) { requestAnimationFrame(step); return; }
+        clearTimeout(guard);
+        window.location.href = url;
+      })(t0);
+    }
+
+    /* =====================================================================
+     * FLIP
+     *
+     * Filtering used to hide and show cards in place, so the grid jumped.
+     * Measuring before and after and animating the delta makes the cards
+     * slide to their new homes instead.
+     *
+     * Only revealed cards take part: an unrevealed one still carries the
+     * .reveal transform, and moving it would cancel its entrance animation.
+     * ===================================================================== */
+    function flip(apply) {
+      if (reduceMotion) { apply(); return; }
+      var all = document.querySelectorAll("#grid .card");
+      var before = [];
+      for (var i = 0; i < all.length; i++) {
+        var c = all[i];
+        if (c.classList.contains("hidden-card")) continue;
+        if (!c.classList.contains("in")) continue;
+        var r = c.getBoundingClientRect();
+        before.push({ el: c, left: r.left, top: r.top });
+      }
+      apply();
+      for (var j = 0; j < before.length; j++) {
+        var e = before[j], n = e.el.getBoundingClientRect();
+        var dx = e.left - n.left, dy = e.top - n.top;
+        if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+        if (typeof e.el.animate !== "function") continue;
+        e.el.animate(
+          [{ transform: "translate(" + dx + "px," + dy + "px)" }, { transform: "none" }],
+          { duration: 420, easing: "cubic-bezier(.2,.7,.2,1)" }
+        );
+      }
+    }
+
     function applyFilter() {
       var q = searchEl.value.trim().toLowerCase();
       var visible = 0;
@@ -1304,10 +2200,10 @@
         activeCat = btn.dataset.cat;
         localStorage.setItem("random2-cat", activeCat);
         catButtons.forEach(function (b) { b.setAttribute("aria-pressed", b === btn ? "true" : "false"); });
-        applyFilter();
+        flip(applyFilter);
       });
     });
-    searchEl.addEventListener("input", applyFilter);
+    searchEl.addEventListener("input", function () { flip(applyFilter); });
     document.addEventListener("keydown", function (e) {
       if (e.key === "/" && document.activeElement !== searchEl) {
         e.preventDefault();
@@ -1354,8 +2250,20 @@
       btn.textContent = "🎯 " + (pick.querySelector("h2").textContent) + "!";
       btn.disabled = true;
       setTimeout(function () {
-        window.location.href = dest;
+        warpTo(dest);
       }, 420);
+    });
+
+    /* ---------- Launch warp ----------
+     * Every Play link goes through the warp. The listener is on click rather
+     * than wired into the markup so that the keyboard path (Enter on the
+     * link, which the grid navigation triggers with play.click()) gets the
+     * same transition as the mouse. */
+    document.querySelectorAll(".btn-play").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        warpTo(a.getAttribute("href"));
+      });
     });
 
     /* ---------- Install prompt ---------- */
@@ -1453,7 +2361,8 @@
       { slug: "static-pwa/",     name: "STATIC",      emoji: "📺", key: "static-pwa" },
       { slug: "alveare-pwa/",    name: "ALVEARE",     emoji: "🐝", key: "alveare-pwa" },
       { slug: "madre-pwa/",      name: "MADRE",       emoji: "🫙", key: "madre-pwa" },
-      { slug: "metro-pwa/",      name: "LINEA ROSSA", emoji: "🚇", key: "metro-pwa" }
+      { slug: "metro-pwa/",      name: "LINEA ROSSA", emoji: "🚇", key: "metro-pwa" },
+      { slug: "nebbia-pwa/",     name: "NEBBIA",      emoji: "🗺️", key: "nebbia-pwa" }
     ];
     function readJSON(key) { return R2.loadJSON(key, null); }
     function timeAgo(ts) {

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="30" fill="#ede3cc"/>
+  <rect x="14" y="14" width="164" height="164" rx="18" fill="none" stroke="#4a3a26" stroke-width="4"/>
+  <rect x="26" y="26" width="140" height="140" rx="8" fill="none" stroke="#4a3a26" stroke-width="1.5"/>
+  <path d="M40 150 C60 140 80 144 96 132 C112 120 128 122 152 112" stroke="#4a3a26" stroke-width="3" fill="none"/>
+  <path d="M152 112 C136 96 132 76 140 56" stroke="#4a3a26" stroke-width="3" fill="none"/>
+  <path d="M118 76 L126 92 M126 92 L112 100 M112 100 L124 108" stroke="#4a3a26" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <g stroke="#4a3a26" stroke-width="3" stroke-linecap="round">
+    <path d="M60 66 L72 78 M72 66 L60 78"/>
+    <path d="M84 96 L96 108 M96 96 L84 108"/>
+  </g>
+  <circle cx="96" cy="96" r="34" fill="none" stroke="#b3382c" stroke-width="2" opacity="0.6"/>
+  <path d="M96 54 L102 88 L96 96 L90 88 Z" fill="#b3382c"/>
+  <path d="M96 96 L124 102 L96 96 L82 124" stroke="#b3382c" stroke-width="2" fill="none"/>
+  <circle cx="96" cy="96" r="3.4" fill="#4a3a26"/>
+  <text x="96" y="42" font-family="serif" font-size="12" font-weight="bold" fill="#4a3a26" text-anchor="middle">N</text>
+</svg>
