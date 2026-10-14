@@ -204,6 +204,28 @@
             kind: "boss", w: 96, h: 104, r: 26, hp: 120, pts: 20000, weight: 20,
             speed: 46, ai: "boss", fire: 0.9, fireSpeed: 1.0, art: "boss",
         },
+
+        /* --- aggiunti: cinque IA nuove --- */
+        charger: {
+            kind: "air", w: 24, h: 28, r: 6.5, hp: 4, pts: 2000, weight: 4,
+            speed: 170, ai: "charge", fire: 0.9, fireSpeed: 1.0, art: "heavy",
+        },
+        gunner: {
+            kind: "air", w: 20, h: 24, r: 6, hp: 3, pts: 1800, weight: 3,
+            speed: 120, ai: "strafe", fire: 1.1, fireSpeed: 0.9, art: "radial",
+        },
+        splitter: {
+            kind: "air", w: 30, h: 32, r: 8, hp: 6, pts: 2500, weight: 5,
+            speed: 140, ai: "weave", fire: 1.4, fireSpeed: 1.0, art: "bomber",
+        },
+        flanker: {
+            kind: "air", w: 22, h: 26, r: 6, hp: 3, pts: 2200, weight: 4,
+            speed: 230, ai: "flank", fire: 0.7, fireSpeed: 1.2, art: "light",
+        },
+        battery: {
+            kind: "ground", w: 28, h: 16, r: 11, hp: 6, pts: 400, weight: 3,
+            speed: 16, ai: "ground", fire: 1.8, fireSpeed: 0.9, art: "gun",
+        },
     };
 
     const groundArt = ["tank", "truck", "gun", "flak", "radar"];
@@ -320,14 +342,16 @@
                 tank: "Panzer IV", halftrack: "Sd.Kfz.251", truck: "Opel Blitz",
                 artillery: "10.5cm leFH", flak: "Flak 88", radar: "Würzburg",
                 ship: "Battleship", sub: "U-boat", patrol: "E-boat", boss: "Giant Bomber",
+                charger: "Fw 190 Dive", gunner: "Stuka Stalker", splitter: "G-6 Rocket",
+                flanker: "Blohm & Voss", battery: "88mm AT Gun",
             },
             rows: eurRows,
             cadence: { sea: 3.2, land: 2.6, mixed: 3.8 },
             shapes: ["line", "line", "v", "column", "stream", "echelon"],
             roster: {
-                sea: ["zero", "fighter", "sub", "patrol", "ship", "kamikaze"],
-                land: ["zero", "fighter", "tank", "halftrack", "truck", "artillery", "flak", "radar", "diver"],
-                mixed: ["zero", "fighter", "heavy", "tank", "flak", "sub", "diver"],
+                sea: ["zero", "fighter", "jet", "sub", "patrol", "ship", "kamikaze", "gunner", "flanker"],
+                land: ["zero", "fighter", "jet", "ace", "tank", "halftrack", "truck", "artillery", "flak", "radar", "diver", "battery"],
+                mixed: ["zero", "fighter", "jet", "ace", "heavy", "tank", "flak", "sub", "diver", "charger", "gunner", "splitter", "flanker"],
             },
         },
         rising: {
@@ -346,14 +370,16 @@
                 tank: "M10 Tank Buster", halftrack: "Dingo Scout", truck: "Supply Truck",
                 artillery: "155mm Gun", flak: "AA Battery", radar: "SC-2 Radar",
                 ship: "Destroyer", sub: "PT Boat", patrol: "Patrol Boat", boss: "Super Fortress",
+                charger: "Dive Bomber", gunner: "Strafing Fury", splitter: "Multi-Aircraft",
+                flanker: "Turner-Hale", battery: "105mm Howitzer",
             },
             rows: pacRows,
             cadence: { sea: 2.7, land: 3.6, mixed: 3.0 },
             shapes: ["line", "v", "v", "column", "stream", "column"],
             roster: {
-                sea: ["zero", "fighter", "sub", "patrol", "ship", "kamikaze", "bomber"],
-                land: ["zero", "fighter", "tank", "halftrack", "truck", "artillery", "flak", "radar", "diver"],
-                mixed: ["zero", "fighter", "heavy", "tank", "flak", "sub", "diver", "bomber"],
+                sea: ["zero", "fighter", "jet", "sub", "patrol", "ship", "kamikaze", "bomber", "gunner", "flanker"],
+                land: ["zero", "fighter", "jet", "ace", "tank", "halftrack", "truck", "artillery", "flak", "radar", "diver", "battery"],
+                mixed: ["zero", "fighter", "jet", "ace", "heavy", "tank", "flak", "sub", "diver", "bomber", "charger", "gunner", "splitter", "flanker"],
             },
         },
     };

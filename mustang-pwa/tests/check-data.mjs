@@ -43,9 +43,10 @@ for (const [name, th] of Object.entries(D.themes)) {
 
 /* ===== Archetypes ===== */
 section("archetypes");
-const airKeys = ["zero", "fighter", "heavy", "jet", "diver", "bomber", "ace", "kamikaze"];
+const airKeys = ["zero", "fighter", "heavy", "jet", "diver", "bomber", "ace", "kamikaze",
+    "charger", "gunner", "splitter", "flanker"];
 const specialKeys = ["yashichi"];
-const groundKeys = ["tank", "halftrack", "truck", "artillery", "flak", "radar"];
+const groundKeys = ["tank", "halftrack", "truck", "artillery", "flak", "radar", "battery"];
 const seaKeys = ["ship", "sub", "patrol"];
 for (const id of [...airKeys, ...specialKeys, ...groundKeys, ...seaKeys, "boss"]) {
     const a = D.archetypes[id];
@@ -89,6 +90,18 @@ for (const [acc, pts] of probes) ok("bonusFor(" + acc + ") = " + pts, D.bonusFor
 ok("bonusFor(100) is SPECIAL", D.bonusFor(100).label === "SPECIAL");
 
 /* ===== Theatres and stage tables ===== */
+section("roster reachability");
+{
+    // un archetyp definito ma assente da ogni roster non puo' mai apparire
+    const reachable = new Set();
+    for (const id of Object.keys(D.theatres)) {
+        for (const st of D.allStages[id]) for (const u of st.roster) reachable.add(u);
+    }
+    const orphans = Object.keys(D.archetypes).filter((k) =>
+        k !== "yashichi" && k !== "boss" && !reachable.has(k));
+    ok("every archetype is reachable from some stage roster", orphans.length === 0, orphans.join(","));
+}
+
 section("theatres and stages");
 const theatreIds = Object.keys(D.theatres);
 ok("two theatres", theatreIds.length === 2, theatreIds.join(","));

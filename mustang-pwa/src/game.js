@@ -395,7 +395,7 @@
     }
 
     /* ===== Enemy spawning ===== */
-    function spawnEnemy(unitId, x, y, delay, group) {
+    function spawnEnemy(unitId, x, y, delay, group, opts) {
         const arch = archetypes[unitId];
         if (!arch) return null;
         const diff = D.difficulty[state.difficulty];
@@ -423,15 +423,21 @@
             flash: 0,
             group: group || null,
             leaving: false,
+            child: !!(opts && opts.child),
         };
         if (e.ai === "cross") {
             const dir = x < W / 2 ? 1 : -1;
             e.vx = dir * e.speed;
             e.vy = 20;
             e.angle = dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+        } else if (e.ai === "charge") {
+            e.phaseName = "aim";           // fissa la rotta, poi scatta
+            e.facing = x < W / 2 ? 1 : -1;
+        } else if (e.ai === "flank") {
+            e.phaseName = "climb";
         }
         state.enemies.push(e);
-        state.weightTotal += arch.weight;
+        if (!e.child) state.weightTotal += arch.weight;
         return e;
     }
 
@@ -482,7 +488,11 @@
                 pow: powAt.has(i) ? powAt.get(i) : null,
                 force: false,
             });
-            t += Math.max(1.5, (stage.cadence * (4.4 - i * 0.1)) / stage.density);
+            // Piu' ondate per palco (era 4.4/1.5): aumentare la pressione
+            // con la cadenza, non con la dimensione della formazione.
+            // Formazioni piu' alte falliscono biomeReadyFor() per terra/mare
+            // e nel misurato riducono perfino i nemici presenti.
+            t += Math.max(1.1, (stage.cadence * (3.4 - i * 0.1)) / stage.density);
         }
         if (stage.yashichi) {
             plan.push({ t: state.stageTarget * 0.42, unit: "yashichi", count: 1, shape: "single", pow: null });
@@ -492,6 +502,11 @@
     }
 
     function launchWave(wave) {
+        // config.maxEnemies esisteva ma non era mai letto: nulla limitava i
+        // nemici vivi. Restituisco true perche' il chiamante avanza
+        // waveIndex: restituire false entra nella riserva dei 2.5s che
+        // converte l'onda in uno "zero".
+        if (state.enemies.length >= config.maxEnemies) return true;
         if (wave.unit === "yashichi") {
             const side = Math.random() < 0.5 ? -1 : 1;
             spawnEnemy("yashichi", side < 0 ? 28 : W - 28, H + 20, 0, null);
@@ -686,6 +701,11 @@
             return;
         }
         if (!award) return;
+
+        // lo splitter si divide in due kamikaze (figli: niente peso formazione)
+        if (e.unit === "splitter") {
+            for (const dx of [-18, 18]) spawnEnemy("kamikaze", e.x + dx, e.y, 0, null, { child: true });
+        }
 
         let pts = e.pts;
         if (e.unit === "bomber") {
@@ -890,6 +910,46 @@
                 e.x += e.vx * dt;
                 e.y += e.vy * dt;
                 e.angle = Math.atan2(e.vy, e.vx) + Math.PI / 2;
+                break;
+            }
+            case "charge": {
+                // fissa la rotta, lampeggia un istante, poi scatta dritto addosso
+                if (e.phaseName === "aim") {
+                    const a = Math.atan2(targetY - e.y, targetX - e.x);
+                    e.angle = a + Math.PI / 2;
+                    if (e.t > 0.35) {
+                        e.phaseName = "dash"; e.t = 0;
+                        e.vx = Math.cos(a) * 460; e.vy = Math.sin(a) * 460;
+                    }
+                } else {
+                    e.x += e.vx * dt;
+                    e.y += e.vy * dt;
+                    if (e.y > H + 30 || e.x < -40 || e.x > W + 40) e.leaving = true;
+                }
+                break;
+            }
+            case "strafe": {
+                // si stabilizza a quota e spara scrollendo
+                e.y += (120 - e.y) * Math.min(1, dt * 2);
+                e.x += (e.facing || 1) * 90 * dt;
+                e.angle = e.facing > 0 ? Math.PI / 2 : -Math.PI / 2;
+                if (e.x < -40 || e.x > W + 40) e.leaving = true;
+                break;
+            }
+            case "flank": {
+                // sale fuori asse poi attraversa anticipando il giocatore
+                if (e.phaseName !== "cut" && e.y < 200) {
+                    e.y += e.speed * 0.7 * dt;
+                    e.x = e.ox + (e.facing || 1) * 150 * dt;
+                } else {
+                    e.phaseName = "cut";
+                    const pvx = (p && p.vx) || 0;
+                    const a = Math.atan2(targetY - e.y, targetX + pvx * 0.35 - e.x);
+                    e.x += Math.cos(a) * e.speed * dt;
+                    e.y += Math.sin(a) * e.speed * dt;
+                    e.angle = a + Math.PI / 2;
+                    if (e.y > H + 30 || e.x < -40 || e.x > W + 40) e.leaving = true;
+                }
                 break;
             }
             case "climb":

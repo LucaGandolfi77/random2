@@ -21,6 +21,10 @@
         ace: { body: "#d8dce2", wing: "#8b939d", trim: "#ff3b2f" },
         kamikaze: { body: "#b0b6be", wing: "#767d87", trim: "#e04b3a" },
         yashichi: { body: "#6fbf4a", wing: "#3f7a28", trim: "#e8f5d0" },
+        charger: { body: "#7f8794", wing: "#565d68", trim: "#ff6a2c" },
+        gunner: { body: "#c2a05a", wing: "#7d6634", trim: "#e04b3a" },
+        splitter: { body: "#6f7a86", wing: "#454d58", trim: "#e0a63a" },
+        flanker: { body: "#9aa6b4", wing: "#5c6773", trim: "#4ec9e0" },
     };
 
     const ALLIED = {
@@ -33,6 +37,10 @@
         ace: { body: "#a8c4e0", wing: "#5c7fa6", trim: "#d94a3a" },
         kamikaze: { body: "#88a8c6", wing: "#4e6f8f", trim: "#d94a3a" },
         yashichi: { body: "#6fbf4a", wing: "#3f7a28", trim: "#e8f5d0" },
+        charger: { body: "#6f93ba", wing: "#3f6188", trim: "#ff9a4c" },
+        gunner: { body: "#c9b47a", wing: "#8a7444", trim: "#d94a3a" },
+        splitter: { body: "#88a8c6", wing: "#4e6f8f", trim: "#e0a63a" },
+        flanker: { body: "#a8c4e0", wing: "#5c7fa6", trim: "#7fe8f5" },
     };
 
     const EARTH = {
