@@ -89,6 +89,17 @@ export function initMain(){
   window.loadSlot=()=>{const saved=loadState();if(saved){state={...state,...saved};CONFIG.language=state.language||'en';renderScene(state.scene);addChoiceButtons(state.scene);document.getElementById('start-menu').classList.add('hidden');}};
   window.showAbout=()=>{document.getElementById('start-menu').classList.add('hidden');document.getElementById('about-menu').classList.remove('hidden');};
   window.backToMenu=()=>{document.getElementById('about-menu').classList.add('hidden');document.getElementById('start-menu').classList.remove('hidden');};
+  if(window.R2 && window.R2.play) window.R2.play(220,0.1,'triangle');
+  // Additional scene navigation for expanded content
+  window.openExtra = (key) => {
+    if(EXTRA_SCENES[key]){
+      document.getElementById('speaker').textContent = EXTRA_SCENES[key].speaker.en;
+      document.getElementById('dialogue-text').textContent = (CONFIG.language === 'it' && EXTRA_SCENES[key].text.it) ? EXTRA_SCENES[key].text.it : EXTRA_SCENES[key].text.en;
+      document.getElementById('memory-indicator').classList.remove('hidden');
+      document.getElementById('memory-indicator').textContent = 'Memory — Expanded';
+      window.addEventListener('click',()=>{if(window.EXTRA_SCENES && EXTRA_SCENES[key]){state.mem+=EXTRA_SCENES[key].statEffect.mem||0;state.mel+=EXTRA_SCENES[key].statEffect.mel||0;state.art+=EXTRA_SCENES[key].statEffect.art||0;document.getElementById('mem').textContent=state.mem;document.getElementById('mel').textContent=state.mel;document.getElementById('art').textContent=state.art;saveState(state);}});
+    }
+  };
   document.getElementById('start-menu').classList.remove('hidden');
 }
 
@@ -137,3 +148,28 @@ function applyChoice(scene){
 }
 
 export default { initMain };
+
+// ADDITIONAL SCENES — expanded Proust content
+const EXTRA_SCENES = {
+  vantueil: {
+    speaker: { en: 'Marcel', it: 'Marcel' },
+    text: { en: 'Vinteuil\'s sonata — the music was not just sound. It was the recovery of a feeling I had not known I had lost. The first notes brought back not a memory, but the very sensation of memory itself.', it: 'La sonata di Vinteuil — la musica non era solo suono. Era il recupero di un sentimento che non sapevo di aver perduto. Le prime note riportarono non un ricordo, ma la stessa sensazione del ricordo.' },
+    background: 'redemption',
+    next: 'swann_name',
+    statEffect: { mem: 14, mel: 2, art: 13 }
+  },
+  swann_name: {
+    speaker: { en: 'Swann', it: 'Swann' },
+    text: { en: 'The name of Gilberte — just hearing it transforms everything. The ordinary becomes luminous. The past, which I believed lost, returns not as a picture but as a breath of air, a color of light.', it: 'Il nome di Gilberte — solo sentirlo trasforma tutto. L\'ordinario diventa luminoso. Il passato, che credevo perduto, ritorna non come un\'immagine ma come un alito d\'aria, un colore di luce.' },
+    background: 'memory',
+    next: 'balbec',
+    statEffect: { mem: 11, mel: 3, art: 7 }
+  },
+  balbec: {
+    speaker: { en: 'Marcel', it: 'Marcel' },
+    text: { en: 'The beach at Balbec — the sea, vast and indifferent, and the girls in white dresses walking along the shore. The air smelled of salt and time. I felt as if I had returned to a place that never existed except in my longing.', it: 'La spiaggia di Balbec — il mare, vasto e indifferente, e le ragazze in abito bianco che camminavano lungo la riva. L\'aria odorava di sale e di tempo. Mi sembrava di aver ritrovato un luogo che non era mai esistito se non nel mio desiderio.' },
+    background: 'redemption',
+    next: 'ending',
+    statEffect: { mem: 13, mel: 4, art: 9 }
+  }
+};
