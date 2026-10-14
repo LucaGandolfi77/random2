@@ -149,6 +149,11 @@ function addChoiceButtons(ch){
     setTimeout(() => document.getElementById('memory-indicator').classList.add('hidden'), 800);
   };
   container.appendChild(btnReflect);
+  const btnPrayer = document.createElement('button');
+  btnPrayer.textContent = (CONFIG.language === 'it') ? 'Preghiera Silenziosa' : 'Silent Prayer';
+  btnPrayer.style.cssText = 'margin-top:0.5rem;padding:0.6rem 1rem;background:rgba(201,176,140,0.08);border:1px solid rgba(200,180,150,0.2);color:#c8b8a8;border-radius:4px;font-family:\'Cormorant Garamond\',serif;font-size:0.85rem;cursor:pointer;letter-spacing:0.03em;transition:all 0.25s;';
+  btnPrayer.onclick = () => { playSound(440, 0.2, 'sine'); document.getElementById('dialogue-text').textContent = (CONFIG.language === 'it') ? 'Nel silenzio, la parola diventa preghiera...' : 'In silence, the Word becomes prayer...'; addNote('Silent prayer — Scripture: ' + (CONFIG.language === 'it' ? BIBLE_BOOKS[state.currentBook].title.it : BIBLE_BOOKS[state.currentBook].title.en)); if(ch.statEffect) applyStatEffect({mem: 2, mel: -2, art: 3}); };
+  container.appendChild(btnPrayer);
 }
 
 function applyStatEffect(effect){
