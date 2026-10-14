@@ -254,15 +254,19 @@
       }
     }
     // cresci (costa biomassa)
+    // La distanza percorsa va accumulata: misurandola a ogni frame dall'ultimo
+    // punto salvato si otterrebbe sempre SPEED*dt, mai >= SPACING.
     if (n.B >= GROW_COST) {
-      var nx = head.x + Math.cos(t.dir) * SPEED * dt;
-      var ny = head.y + Math.sin(t.dir) * SPEED * dt;
-      if (dist2(nx, ny, head.x, head.y) >= SPACING * SPACING) {
+      t.acc = (t.acc || 0) + SPEED * dt;
+      var nx = head.x + Math.cos(t.dir) * t.acc;
+      var ny = head.y + Math.sin(t.dir) * t.acc;
+      if (t.acc >= SPACING) {
         if (!inRock(nx, ny, 0)) {
           t.path.push({ x: clamp(nx, 24, W - 24), y: clamp(ny, 24, H - 24) });
           n.B -= GROW_COST;
           if (!n.bot && Math.random() < 0.04) Sound.grow();
         }
+        t.acc = 0;
       }
     }
     // zone tossiche: erodono la punta
@@ -326,6 +330,8 @@
       var t = me.tips[tc.tip];
       if (!t || !t.alive) touches.splice(i, 1);
     }
+    // lo splice sposta gli indici: riallinea i claim
+    claimTouches();
     // rami orfani dopo l'erosione
     state.nets.forEach(function (n) {
       n.tips.forEach(function (b, bi) {
@@ -563,6 +569,11 @@
 
   /* ===== Input: un dito per tendine ===== */
   function claimTouches() {
+    // Ricostruisce entrambe le direzioni: tocco -> punta e punta -> tocco.
+    // updateTip() legge t.claim (indice in touches), quindi senza questo
+    // back-reference i dita non guiderebbero nulla sui touch.
+    // Ripartire da zero rende la funzione idempotente dopo ogni splice.
+    me.tips.forEach(function (t) { t.claim = null; });
     touches.forEach(function (tc) {
       var t = me.tips[tc.tip];
       if (!t || !t.alive) tc.tip = -1;
@@ -581,6 +592,7 @@
         me.tips.forEach(function (t, ti) { if (best < 0 && t.alive) best = ti; });
       }
       tc.tip = best;
+      if (best >= 0) me.tips[best].claim = touches.indexOf(tc);
     });
   }
   function toWorld(e) {

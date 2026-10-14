@@ -162,9 +162,15 @@
         return;
       }
       var speed = 120 * dt;
-      sc.x += Math.cos(sc.dir) * speed;
-      sc.y += Math.sin(sc.dir) * speed;
-      sc.travel += speed;
+      // Il passo verso l'esterno va applicato SOLO in fase "out": una
+      // scopritrice parte sempre dall'alveare su una diritta fissa, quindi
+      // il passo di ritorno lo annullerebbe esattamente e resterebbe
+      // bloccata per sempre senza mai consegnare il suo rapporto.
+      if (sc.phase !== "return") {
+        sc.x += Math.cos(sc.dir) * speed;
+        sc.y += Math.sin(sc.dir) * speed;
+        sc.travel += speed;
+      }
       if (!sc.found) {
         state.patches.forEach(function (p, idx) {
           if (p.discovered || sc.found !== null) return;
@@ -377,7 +383,10 @@
       Sound.recruit();
       R2.buzz([8, 15, 8]);
       if (acc >= 0.35 && p.type.key !== "vespaio") {
-        addSquad({ x: p.x, y: p.y }, p.rate, acc, recruits, p);
+        // `rate` è solo un flag "sciame su un campo vero": il rendimento lo
+        // calcola updateSquads con patchRateEff(), che applica p.rate una
+        // volta sola. Passare p.rate qui lo applicava due volte (rate²).
+        addSquad({ x: p.x, y: p.y }, 1, acc, recruits, p);
       } else if (acc >= 0.35 && p.type.key === "vespaio") {
         // il giocatore ha deciso di mandarle comunque: suo onere e rischio
         addSquad({ x: p.x, y: p.y }, 0, 1, recruits, p);

@@ -2,15 +2,25 @@
 class VirtualFarmTycoon {
   constructor() {
     this.gameState = {
-      coins: 0,
+      // Serve denaro iniziale: senza, ogni entrata richiede un raccolto che
+      // richiede una semina che richiede denaro — il gioco non può iniziare.
+      coins: 250,
       day: 1,
       weather: '☀️',
       weatherCycle: ['☀️', '☀️', '🌧️', '⛈️', '☁️', '🌧️', '❄️', '☀️'],
       landSize: { rows: 1, cols: 1 },
       maxLand: { rows: 5, cols: 5 },
       farm: [],
+      // Personaggi: il primo contadino è incluso, gli altri si assumono.
+      workers: [{ id: 1, type: 'field', since: 1 }],
       inventory: {
-        crops: { corn: { count: 5, price: 10 }, wheat: { count: 5, price: 8 }, tomato: { count: 5, price: 12 } },
+        crops: {
+          corn: { count: 5, price: 10 },
+          wheat: { count: 5, price: 8 },
+          tomato: { count: 5, price: 12 },
+          carrot: { count: 3, price: 9 },
+          potato: { count: 3, price: 11 }
+        },
         animals: { chicken: { count: 2, feedCost: 5 }, cow: { count: 0, feedCost: 15 } },
         tools: { hoe: { count: 1, cost: 50 }, water_can: { count: 1, cost: 30 }, harvester: { count: 0, cost: 200 } }
       },
@@ -18,17 +28,25 @@ class VirtualFarmTycoon {
     }
     
     this.cropTypes = {
-      corn: { growthTime: 3, harvestAmount: 2, sellPrice: 10, icon: '🌽' },
-      wheat: { growthTime: 2, harvestAmount: 3, sellPrice: 8, icon: '🌾' },
-      tomato: { growthTime: 4, harvestAmount: 1, sellPrice: 12, icon: '🍅' },
-      carrot: { growthTime: 3, harvestAmount: 2, sellPrice: 9, icon: '🥕' },
-      potato: { growthTime: 2, harvestAmount: 3, sellPrice: 11, icon: '🥔' }
+      corn: { growthTime: 3, harvestAmount: 2, sellPrice: 10, seedCost: 5, icon: '🌽' },
+      wheat: { growthTime: 2, harvestAmount: 3, sellPrice: 8, seedCost: 4, icon: '🌾' },
+      tomato: { growthTime: 4, harvestAmount: 1, sellPrice: 12, seedCost: 6, icon: '🍅' },
+      carrot: { growthTime: 3, harvestAmount: 2, sellPrice: 9, seedCost: 5, icon: '🥕' },
+      potato: { growthTime: 2, harvestAmount: 3, sellPrice: 11, seedCost: 6, icon: '🥔' }
     }
     
     this.animalTypes = {
       chicken: { feedCost: 5, produce: 2, icon: '🐔', needsFeed: true },
       cow: { feedCost: 15, produce: 5, icon: '🐄', needsFeed: true },
       sheep: { feedCost: 10, produce: 3, icon: '🐑', needsFeed: true }
+    }
+
+    // I personaggi danno una spinta alla crescita: con un solo contadino la
+    // fattoria avanza, ma assumere aiutanti la fa andare più veloce.
+    this.farmerTypes = {
+      field:  { name: 'Campagnolo', icon: '🧑‍🌾', cost: 0,   boost: 0.00 },
+      helper: { name: 'Aiutante',   icon: '👩‍🌾', cost: 40,  boost: 0.25 },
+      expert: { name: 'Mastro',     icon: '🧑‍🔬', cost: 120, boost: 0.60 },
     }
     
     this.weatherEffects = {
@@ -59,7 +77,12 @@ class VirtualFarmTycoon {
     
     // Initialize UI
     this.renderUI()
-    
+
+    // La griglia va costruita SEMPRE. Prima dipendeva da hideOverlay(), che
+    // gira una sola volta: a ogni visita successiva restava una griglia
+    // vuota, senza celle cliccabili, quindi impossibile piantare.
+    this.createFarmGrid()
+
     // Show overlay if first visit
     if (this.gameState.day === 1 && !localStorage.getItem('visited')) {
       this.showOverlay()
@@ -201,7 +224,7 @@ class VirtualFarmTycoon {
             <div style="text-align: center; cursor: pointer; padding: 10px; border: 2px solid #4caf50; border-radius: 8px;" onclick="game.plantCrop('${type}', ${row}, ${col})">
               <div style="font-size: 2em;">${data.icon}</div>
               <div style="font-size: 0.8em;">${type}</div>
-              <div style="font-size: 0.7em; color: #666;">Cost: ${data.sellPrice * 0.5} coins</div>
+              <div style="font-size: 0.7em; color: #666;">${(this.gameState.inventory.crops[type]?.count || 0) > 0 ? 'in dispensa' : data.seedCost + ' coins'}</div>
             </div>
           `).join('')}
         </div>
@@ -265,12 +288,26 @@ class VirtualFarmTycoon {
   }
   
   plantCrop(cropType, row, col) {
-    if (this.gameState.coins < this.cropTypes[cropType].sellPrice * 0.5) {
-      this.showMessage('Not enough coins to plant!')
+    const def = this.cropTypes[cropType]
+    if (!def) return
+
+    if (this.gameState.farm.some(p => p.row === row && p.col === col)) {
+      this.showMessage('That plot is already used!')
       return
     }
-    
-    this.gameState.coins -= this.cropTypes[cropType].sellPrice * 0.5
+
+    // Un seme già in dispensa è gratis; altrimenti si compra al prezzo.
+    const stock = this.gameState.inventory.crops[cropType]
+    if (stock && stock.count > 0) {
+      stock.count--
+    } else {
+      if (this.gameState.coins < def.seedCost) {
+        this.showMessage('Not enough coins to plant!')
+        return
+      }
+      this.gameState.coins -= def.seedCost
+    }
+
     this.gameState.farm.push({
       type: 'crop',
       cropType: cropType,
@@ -280,9 +317,15 @@ class VirtualFarmTycoon {
       plantedDay: this.gameState.day,
       watered: false
     })
-    
+
     this.saveGame()
     this.createFarmGrid()
+  }
+
+  // I raccolti non maturi non fruttano nulla: senza questo controllo
+  // harvestCrop() e sellAllCrops() pagavano a pieno prezzo appena piantato.
+  isRipe(plot) {
+    return plot.type === 'crop' && plot.growth >= this.cropTypes[plot.cropType].growthTime
   }
   
   waterCrop(row, col) {
@@ -300,11 +343,19 @@ class VirtualFarmTycoon {
     
     const plot = this.gameState.farm[plotIndex]
     if (plot.type !== 'crop') return
-    
+
+    if (!this.isRipe(plot)) {
+      this.showMessage('🌱 Not ripe yet — let it grow!')
+      return
+    }
+
     const cropData = this.cropTypes[plot.cropType]
     const harvestAmount = cropData.harvestAmount
-    
+
     this.gameState.coins += harvestAmount * cropData.sellPrice
+    // il raccolto torna in dispensa come sementi
+    const stock = this.gameState.inventory.crops[plot.cropType]
+    if (stock) stock.count += 1
     
     // Check for achievements
     if (!this.gameState.achievements.first_harvest) {
@@ -353,17 +404,25 @@ class VirtualFarmTycoon {
   }
   
   sellAllCrops() {
-    const cropsToSell = this.gameState.farm.filter(p => p.type === 'crop')
+    const cropsToSell = this.gameState.farm.filter(p => this.isRipe(p))
     let totalEarnings = 0
-    
+
     cropsToSell.forEach(plot => {
       const cropData = this.cropTypes[plot.cropType]
       const harvestAmount = cropData.harvestAmount
       totalEarnings += harvestAmount * cropData.sellPrice
+      const stock = this.gameState.inventory.crops[plot.cropType]
+      if (stock) stock.count += 1
     })
-    
+
+    if (totalEarnings === 0) {
+      this.showMessage('Nothing ripe to sell yet.')
+      return
+    }
+
     this.gameState.coins += totalEarnings
-    this.gameState.farm = this.gameState.farm.filter(p => p.type !== 'crop')
+    const sold = new Set(cropsToSell)
+    this.gameState.farm = this.gameState.farm.filter(p => !sold.has(p))
     
     this.showMessage(`Sold all crops for ${totalEarnings} coins!`)
     this.saveGame()
@@ -384,11 +443,35 @@ class VirtualFarmTycoon {
     }
     
     emptyCells.forEach((cell, index) => {
-      if (index < this.gameState.inventory.crops.corn.count) {
-        const cropType = cropTypes[index % cropTypes.length]
-        this.plantCrop(cropType, cell.row, cell.col)
-      }
+      const cropType = cropTypes[index % cropTypes.length]
+      this.plantCrop(cropType, cell.row, cell.col)
     })
+  }
+
+  // Spinta alla crescita data dai personaggi: 0 con il solo contadino iniziale.
+  workerBoost() {
+    const list = this.gameState.workers || []
+    return list.reduce((a, w) => a + (this.farmerTypes[w.type]?.boost || 0), 0)
+  }
+
+  hireWorker(type) {
+    const def = this.farmerTypes[type]
+    if (!def) return
+    const list = this.gameState.workers || (this.gameState.workers = [])
+    if (list.length >= 4) {
+      this.showMessage('The farm is fully staffed!')
+      return
+    }
+    if (def.cost > 0 && this.gameState.coins < def.cost) {
+      this.showMessage(`Hiring a ${def.name} costs ${def.cost} coins.`)
+      return
+    }
+    this.gameState.coins -= def.cost
+    list.push({ id: list.length + 1, type: type, since: this.gameState.day })
+    this.showMessage(`👋 ${def.name} joins the farm.`)
+    this.saveGame()
+    this.renderStaff()
+    this.renderUI()
   }
   
   startDailyCycle() {
@@ -411,11 +494,11 @@ class VirtualFarmTycoon {
         
         // Apply weather effects
         const weatherEffect = this.weatherEffects[this.gameState.weather]
-        const growthRate = weatherEffect.growthBoost
-        
+        const growthRate = weatherEffect.growthBoost * (1 + this.workerBoost())
+
         // Check if crop needs water
         if (!plot.watered && plot.growth > 0) {
-          this.gameState.coins -= 5 // Water cost
+          this.gameState.coins = Math.max(0, this.gameState.coins - 5) // Water cost
         }
         
         plot.growth += growthRate
@@ -531,6 +614,30 @@ class VirtualFarmTycoon {
     document.getElementById('day').textContent = this.gameState.day
     document.getElementById('weather').textContent = this.gameState.weather
     document.getElementById('land-size').textContent = `${this.gameState.landSize.rows}x${this.gameState.landSize.cols}`
+    const sc = document.getElementById('staff-count')
+    if (sc) sc.textContent = (this.gameState.workers || []).length
+    this.renderStaff()
+  }
+
+  // La squadra: i personaggi che danno la spinta alla crescita.
+  renderStaff() {
+    const el = document.getElementById('farm-staff')
+    if (!el) return
+    const list = this.gameState.workers || []
+    const names = Object.entries(this.farmerTypes)
+      .filter(([, d]) => d.cost > 0)
+      .map(([key, d]) =>
+        `<button class="btn sm" onclick="game.hireWorker('${key}')" ` +
+        `title="+${Math.round(d.boost * 100)}% growth">${d.icon} Hire ${d.name} · ${d.cost}</button>`
+      ).join('')
+    el.innerHTML =
+      `<div class="staff-row">👥 <strong>${list.length}</strong> · ` +
+      list.map(w => {
+        const d = this.farmerTypes[w.type]
+        return `<span class="worker-chip" title="${d.name}">${d.icon}</span>`
+      }).join('') +
+      ` <small style="opacity:.6">growth +${Math.round(this.workerBoost() * 100)}%</small></div>` +
+      `<div class="staff-hire">${names || '<small>Fully staffed</small>'}</div>`
   }
   
   showMessage(message) {
@@ -573,11 +680,11 @@ class VirtualFarmTycoon {
   }
   
   saveGame() {
-    localStorage.setItem('farmTycoonSave', JSON.stringify(this.gameState))
+    localStorage.setItem('farmTycoonSave-v2', JSON.stringify(this.gameState))
   }
-  
+
   loadGame() {
-    const saved = localStorage.getItem('farmTycoonSave')
+    const saved = localStorage.getItem('farmTycoonSave-v2')
     if (saved) {
       try {
         this.gameState = { ...this.gameState, ...JSON.parse(saved) }
@@ -585,6 +692,14 @@ class VirtualFarmTycoon {
         console.error('Failed to load saved game:', e)
       }
     }
+    // I salvataggi pre-v2 hanno zero monete e nessun personaggio: senza
+    // ripartire da zero il gioco resta irraggiungibile per sempre.
+    if (!this.gameState.workers || !this.gameState.workers.length) {
+      this.gameState.workers = [{ id: 1, type: 'field', since: 1 }]
+    }
+    if (this.gameState.coins === 0) this.gameState.coins = 250
+    this.gameState.inventory.crops.carrot ||= { count: 3, price: 9 }
+    this.gameState.inventory.crops.potato ||= { count: 3, price: 11 }
   }
 }
 
@@ -604,15 +719,18 @@ window.expandLand = () => game.expandLand()
 window.buyAnimal = (animalType) => game.buyAnimal(animalType)
 window.buyCrop = (cropType) => game.buyCrop(cropType)
 window.buyTool = (toolType) => game.buyTool(toolType)
+window.hireWorker = (type) => game.hireWorker(type)
 
 // Buy crop method
 game.buyCrop = function(cropType) {
-  if (this.gameState.coins < 50) {
+  const def = this.cropTypes[cropType]
+  const cost = def ? def.seedCost : 50
+  if (this.gameState.coins < cost) {
     this.showMessage('Not enough coins!')
     return
   }
   
-  this.gameState.coins -= 50
+  this.gameState.coins -= cost
   this.gameState.inventory.crops[cropType].count++
   this.saveGame()
   this.renderInventory()
