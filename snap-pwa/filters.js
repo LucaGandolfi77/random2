@@ -73,11 +73,16 @@ export const FILTRI = [
   { id: 'noir',     nome: 'Noir',      emoji: '🎩', css: 'grayscale(1) contrast(1.4) brightness(0.88)', op: 'noir' },
   { id: 'seppia',   nome: 'Seppia',    emoji: '🟤', css: 'sepia(0.85) contrast(1.05)', op: 'seppia' },
   { id: 'vivido',   nome: 'Vivido',    emoji: '🌈', css: 'saturate(1.65) contrast(1.12)', op: 'vivido' },
-  { id: 'freddo',   nome: 'Freddo',    emoji: '🧊', css: 'saturate(1.15) hue-rotate(-18deg)', op: 'freddo' },
+  // NB: una hue-rotate verso il blu renderebbe il cielo arancione e la
+  // pelle più rossa: Freddo si fa desaturando verso la luminanza e
+  // sollevando il blu (stessa idea della versione pixel, sotto).
+  { id: 'freddo',   nome: 'Freddo',    emoji: '🧊', css: 'saturate(0.45) brightness(1.06) sepia(0.25) hue-rotate(172deg) saturate(1.6)', op: 'freddo' },
   { id: 'caldo',    nome: 'Caldo',     emoji: '🔥', css: 'sepia(0.35) saturate(1.35) hue-rotate(-12deg)', op: 'caldo' },
   { id: 'negativo', nome: 'Negativo',  emoji: '🌓', css: 'invert(1)', op: 'negativo' },
   { id: 'duotone',  nome: 'Duotone',   emoji: '🟣', css: 'grayscale(1) sepia(1) hue-rotate(225deg) saturate(2.6) contrast(1.05)', op: 'duotone' },
-  { id: 'termica',  nome: 'Termica',   emoji: '🌡️', css: 'grayscale(1) sepia(1) hue-rotate(-50deg) saturate(6) contrast(1.25)', op: 'termica' },
+  // `live: true` = l'anteprima usa la stessa rampa della foto (in bassa
+  // risoluzione); senza, il CSS mostrava una mappa termica rossa col nero.
+  { id: 'termica',  nome: 'Termica',   emoji: '🌡️', css: 'none', live: true, op: 'termica' },
   { id: 'sogno',    nome: 'Sogno',     emoji: '☁️', css: 'brightness(1.1) saturate(1.25) contrast(0.92)', cornice: 'bloom' },
   { id: 'psichedelico', nome: 'Psichedelico', emoji: '🌀', animato: true, op: 'psichedelico' },
 ];
@@ -313,7 +318,11 @@ export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
   const larghezzaVolto = dist(P(LM.guanciaSx), P(LM.guanciaDx));
   const altezzaVolto = dist(P(LM.fronte), P(LM.mento));
   const angolo = Math.atan2(occhioDx[1] - occhioSx[1], occhioDx[0] - occhioSx[0]);
-  const fc = { P, occhioSx, occhioDx, larghezzaVolto, altezzaVolto, angolo };
+  const fc = { P, occhioSx, occhioDx, larghezzaVolto, altezzaVolto, angolo, specchio };
+  // Con la frontale il proiettore specchia le coordinate: il landmark 234
+  // (guanciaSx) finisce a destra sullo schermo. Senza questo, orecchie e
+  // altri accessori disegnati verso il lato finivano dentro il viso.
+  fc.latoSchermo = (lato) => lato * (specchio ? -1 : 1);
 
   if (filtro.quiz) return disegnaQuiz(ctx, fc, filtro, t);
 
@@ -341,11 +350,12 @@ function disegnaCagnolino(ctx, fc) {
   // orecchie: sopra le guance, inclinate verso l'esterno
   for (const lato of [-1, 1]) {
     const g = P(lato < 0 ? LM.guanciaSx : LM.guanciaDx);
-    const ex = g[0] + lato * lv * 0.10;
+    const s = fc.latoSchermo(lato); // lato come appare a schermo
+    const ex = g[0] + s * lv * 0.10;
     const ey = g[1] - av * 0.52;
     ctx.save();
     ctx.translate(ex, ey);
-    ctx.rotate(lato * (0.45 + angolo));
+    ctx.rotate(s * (0.45 + angolo));
     ellisse(ctx, 0, 0, lv * 0.145, av * 0.19, '#8a5a33');
     ellisse(ctx, 0, av * 0.03, lv * 0.08, av * 0.11, '#e8a0b4');
     ctx.restore();
@@ -497,9 +507,10 @@ function disegnaGatto(ctx, fc) {
 
   for (const lato of [-1, 1]) {
     const g = P(lato < 0 ? LM.guanciaSx : LM.guanciaDx);
+    const s = fc.latoSchermo(lato); // lato come appare a schermo
     ctx.save();
-    ctx.translate(g[0] + lato * lv * 0.06, g[1] - av * 0.50);
-    ctx.rotate(lato * (0.30 + angolo));
+    ctx.translate(g[0] + s * lv * 0.06, g[1] - av * 0.50);
+    ctx.rotate(s * (0.30 + angolo));
     ctx.beginPath();
     ctx.moveTo(-lv * 0.13, av * 0.10);
     ctx.lineTo(0, -av * 0.20);
@@ -886,7 +897,12 @@ const OPS_PIXEL = {
     const l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2];
     return [l + (d[0] - l) * 1.7, l + (d[1] - l) * 1.7, l + (d[2] - l) * 1.7].map((v) => (v - 128) * 1.08 + 126);
   },
-  freddo(d) { return applicaMatrice(d, matriceHue(-18 * Math.PI / 180), [0, 4, 14]); },
+  // Freddo: desatura verso la luminanza e alza il blu. Con hue-rotate(-18)
+  // la pelle (hue ~19°) finiva a ~354°, cioè PIÙ rossa: l'effetto era caldo.
+  freddo(d) {
+    const l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2];
+    return [l * 0.86 - 6, l * 0.95 + 4, l * 1.02 + 26].map((v) => (v < 0 ? 0 : v > 255 ? 255 : Math.round(v)));
+  },
   caldo(d)  { return applicaMatrice(d, matriceHue(-12 * Math.PI / 180), [14, 4, -10]); },
   negativo(d) { return [255 - d[0], 255 - d[1], 255 - d[2]]; },
   duotone(d) {
@@ -894,26 +910,7 @@ const OPS_PIXEL = {
     // viola profondo → rosa brillante
     return [18 + 218 * t, 7 + 99 * t, 58 + 158 * t];
   },
-  termica(d) {
-    const t = clamp01((0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255);
-    // rampa: nero → viola → rosso → arancio → quasi bianco
-    const stop = [
-      [0.00, [5, 0, 30]],
-      [0.25, [80, 0, 160]],
-      [0.50, [235, 45, 32]],
-      [0.75, [255, 180, 0]],
-      [1.00, [255, 250, 210]],
-    ];
-    for (let i = 1; i < stop.length; i++) {
-      if (t <= stop[i][0]) {
-        const [t0, c0] = stop[i - 1];
-        const [t1, c1] = stop[i];
-        const k = (t - t0) / (t1 - t0);
-        return [c0[0] + (c1[0] - c0[0]) * k, c0[1] + (c1[1] - c0[1]) * k, c0[2] + (c1[2] - c0[2]) * k];
-      }
-    }
-    return [255, 250, 210];
-  },
+  termica(d) { return rampaTermica(luma01(d)); },
   psichedelico(d, t) {
     const rad = ((t * 60) % 360) * Math.PI / 180;
     return applicaMatrice(d, matriceHue(rad), [0, 0, 0]);
@@ -943,6 +940,58 @@ export function applicaFiltroPixel(ctx, filtro, W, H, t) {
     d[i] = clamp255(r); d[i + 1] = clamp255(g); d[i + 2] = clamp255(b);
   }
   ctx.putImageData(img, 0, 0);
+}
+
+const luma01 = (d) => clamp01((0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255);
+
+// Rampa termica condivisa fra anteprima e foto: nero → viola → rosso →
+// arancio → quasi bianco. L'anteprima CSS precedente mappava invece tutto
+// su rosso caldo con ombre nere, cioè il contrario di quello che si vedeva
+// nella foto salvata.
+const RAMPA_TERMICA = [
+  [0.00, [5, 0, 30]],
+  [0.25, [80, 0, 160]],
+  [0.50, [235, 45, 32]],
+  [0.75, [255, 180, 0]],
+  [1.00, [255, 250, 210]],
+];
+function rampaTermica(t) {
+  for (let i = 1; i < RAMPA_TERMICA.length; i++) {
+    if (t <= RAMPA_TERMICA[i][0]) {
+      const [t0, c0] = RAMPA_TERMICA[i - 1];
+      const [t1, c1] = RAMPA_TERMICA[i];
+      const k = (t - t0) / (t1 - t0);
+      return [c0[0] + (c1[0] - c0[0]) * k, c0[1] + (c1[1] - c0[1]) * k, c0[2] + (c1[2] - c0[2]) * k];
+    }
+  }
+  return RAMPA_TERMICA[RAMPA_TERMICA.length - 1][1];
+}
+
+/**
+ * Termica per il video: la rampa dipende solo dalla luminanza ed è a bassa
+ * frequenza, quindi si calcola su una copia ridotta (1/6) e si riscala.
+ * ~36x più economico del per-pixel a piena risoluzione, e visivamente
+ * identico perché la rampa non ha bordi netti.
+ */
+export function applicaTermicaVivo(ctx, W, H) {
+  const f = 6;
+  const w = Math.max(1, Math.ceil(W / f)), h = Math.max(1, Math.ceil(H / f));
+  const piccolo = document.createElement('canvas');
+  piccolo.width = w; piccolo.height = h;
+  const pc = piccolo.getContext('2d');
+  pc.drawImage(ctx.canvas, 0, 0, w, h);
+  const img = pc.getImageData(0, 0, w, h);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const [r, g, b] = rampaTermica(luma01([d[i], d[i + 1], d[i + 2]]));
+    d[i] = clamp255(r); d[i + 1] = clamp255(g); d[i + 2] = clamp255(b);
+  }
+  pc.putImageData(img, 0, 0);
+  ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(piccolo, 0, 0, W, H);
+  ctx.restore();
 }
 
 function mosaico(ctx, W, H) {

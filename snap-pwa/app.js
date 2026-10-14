@@ -4,7 +4,7 @@
  */
 
 import {
-  FILTRI, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, resetQuizStati,
+  FILTRI, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
 } from './filters.js';
 
 /* ---------- riferimenti DOM ---------- */
@@ -193,9 +193,12 @@ function disegnaFotogramma(ctx, W, H, t, modalita) {
   ctx.filter = 'none';
   ctx.restore();
 
-  // 2. filtro colore: pixel per la foto; solo mosaico (già veloce) per il video
+  // 2. filtro colore: pixel per la foto; per il video solo i filtri con un
+  //    percorso economico (mosaico, termica a risoluzione ridotta)
   if (modalita === 'foto' || filtro.pixel) {
     applicaFiltroPixel(ctx, filtro, W, H, t);
+  } else if (filtro.live) {
+    applicaTermicaVivo(ctx, W, H);
   }
 
   // 3. cornice + accessori volto, con le stesse coordinate dell'anteprima
