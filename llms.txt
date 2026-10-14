@@ -1,0 +1,67 @@
+# SECTOR 7
+
+> Free, offline-capable space combat game. No build step, no dependencies, no
+> art assets — everything is drawn procedurally on a canvas.
+
+SECTOR 7 is a browser game in which energy is a physical cargo: you mine it
+from asteroids, carry it in a hold, and it is only yours once you have docked
+at the station and banked it. If your hull goes out in the field, the hold
+goes with it.
+
+## Canonical
+
+https://lucagandolfi77.github.io/random2/sector7-pwa/
+
+## The one rule the game is built on
+
+Shields and armour are two separate pools, and armour is not touched while any
+shield remains. A laser eats armour and bounces off shields; the capacitor
+round is the reverse. Which gun is correct is therefore a property of what you
+are shooting, not of which one you upgraded last — and no upgrade in the game
+may change that ratio.
+
+## Factions
+
+Six, each with its own shield fraction and its own behaviour: Raider (no
+shields, swarm), Drone (faint shields, fast, never breaks off), Pirate
+(half-shielded, either weapon works), Cruiser (light shields on a big hull,
+fights at long range), Alien (shield-dominant — bring ammo), Hive (almost pure
+shield, spawns its own). They are also hostile to each other.
+
+## Maps
+
+Ten: four frontier sectors (Rook, Kestrel, Vanta, Maw) and one territory per
+faction (Scrapyard, The Pin, Pogo Reach, Long Reach, Demaner, The Hive), each
+carrying a raidable base.
+
+## Ships
+
+Eight hulls, each with one passive that changes what the ship is: Wasp,
+Hauler, Warden, Bulwark, Vandal, Lance, Hound, Oracle.
+
+## Modes
+
+- **Patrol** — no clock. Mine, fight, bank.
+- **Wave** — survive 8 escalating waves from a portal, paid in crystals.
+- **Haul** — land a full payload at the station before the timer runs out.
+
+## Controls
+
+| Action | Touch | Keyboard |
+|---|---|---|
+| Fly | left thumb, anywhere — the stick appears where you press | `WASD` / arrows |
+| Blaster | `FIRE` (hold) | `Space` |
+| Ammo | `AMMO` — one press, one capacitor round | `X` |
+| Missiles | `MSL` | `M` |
+| Mines | `MINE` | `B` |
+| CPU | `CPU` | `F` |
+| Target | tap right of screen; `T` cycles | `T` |
+| Dock | hold `DOCK` in the station ring | hold `E` |
+
+## Author
+
+Luca Gandolfi — https://github.com/LucaGandolfi77
+
+## Licence
+
+MIT. See https://github.com/LucaGandolfi77/random2/blob/main/LICENSE

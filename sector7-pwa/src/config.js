@@ -76,6 +76,18 @@
             deathRespawn: 3.0,
         },
 
+        /* Cargo. Energy is not a number on a ship, it is a load: it has to
+         * be carried somewhere, and the somewhere is the hold. */
+        cargo: {
+            /* Level 1 carries two crate-loads. Deliberately tight - the first
+             * trips are about learning that you have to go back. */
+            base: 200,
+            step: 200,
+            /* A wrecked hold spills into a readable pile rather than one
+             * absurd pickup nobody can steer for. */
+            maxChunks: 14,
+        },
+
         player: {
             startEnergy: 250,
             /* Per the genre: energy is lost with the wreck and has to be
@@ -96,6 +108,35 @@
             /* Kept inside the fitted view span: the turret should never snap
              * onto something the player cannot see. */
             aimAssistRange: 430,
+            /* The ammo round is the answer to shields, not a second blaster.
+             * Its reach sits inside the view span too, or the weapon that
+             * exists to beat big targets would be the one you cannot aim at
+             * anything with. */
+            ammoSpeed: 900,
+            ammoLife: 0.55,
+            ammoRadius: 7,
+        },
+
+        /* Shields come back, armour never does. That gap is what creates the
+         * rhythm of breaking contact and returning rather than duelling to
+         * the death every time. */
+        shield: {
+            /* Seconds out of combat before a shield starts refilling. */
+            regenDelay: 3.2,
+            regenRate: 7.0,
+            regenMin: 0.25,
+        },
+
+        /* CPUs: active abilities. One is fitted at a time. */
+        cpu: {
+            warpDistance: 300,
+            warpInvuln: 0.85,
+            radarTime: 9,
+            instaShield: 3.0,
+            leechTime: 10,
+            repairTime: 6,
+            leechFraction: 0.25,
+            repairPerSec: 6.5,
         },
 
         npc: {
@@ -109,6 +150,21 @@
              * the aggro range below, or an NPC would reacquire a target and
              * immediately drop it again the moment it arrived. */
             preferredRange: 190,
+            /* Other pilots. They are counted separately from maxAlive on
+             * purpose: a map of five miners is not a map with eighteen
+             * hostiles, and the population cap is a balance number for
+             * hostiles. */
+            pilots: 5,
+            /* A pilot only takes the player on when it is clearly the
+             * stronger ship. One tier is not enough - every raider in the
+             * shallow sector outclasses a fresh pilot, and the intro has to
+             * stay survivable. */
+            pilotAggression: 2,
+            /* How close a pilot has to get to a rock to start cutting it. */
+            mineRange: 230,
+            /* How close to the station it banks. */
+            dockRange: 260,
+            mineTime: 0.42,
         },
 
         /* Energy is the upgrade currency; crystals are progress + score and
@@ -138,6 +194,7 @@
 
         pools: {
             bullets: 360,
+            ammo: 60,
             missiles: 120,
             mines: 40,
             pickups: 320,
@@ -158,19 +215,24 @@
     };
 
     /* ===== Modules =====
-     * Five upgrade tracks, levels 1..10. Level 1 is free and is what you
-     * respawn with, so there is never a dead end.
+     * Upgrade tracks, levels 1..10. Level 1 is free and is what you respawn
+     * with, so there is never a dead end.
      */
     S.MODULES = [
         {
             key: "blaster", name: "Blaster", glyph: "⌖",
             base: 30, mul: 1.44,
-            blurb: "Bigger hits, shorter gaps between shots.",
+            blurb: "Bigger hits, shorter gaps between shots. Cuts armour, shrugs off shields.",
+        },
+        {
+            key: "ammo", name: "Ammo", glyph: "▮",
+            base: 62, mul: 1.46,
+            blurb: "Heavy capacitor shot. Slow, brutal against shields, poor against armour.",
         },
         {
             key: "shield", name: "Shield", glyph: "◈",
             base: 34, mul: 1.44,
-            blurb: "More hull, and a faster out-of-combat trickle-back.",
+            blurb: "Absorbs incoming fire and refills once you are out of the fight.",
         },
         {
             key: "armor", name: "Armor", glyph: "▤",
@@ -180,7 +242,7 @@
         {
             key: "processor", name: "Processor", glyph: "◎",
             base: 36, mul: 1.46,
-            blurb: "Lifts the energy you pull out of every wreck.",
+            blurb: "Lifts the energy you pull out of every wreck and every crate.",
         },
         {
             key: "thruster", name: "Thruster", glyph: "➤",
@@ -188,9 +250,14 @@
             blurb: "Raw speed and a tighter turn.",
         },
         {
+            key: "cargo", name: "Cargo", glyph: "▣",
+            base: 30, mul: 1.42,
+            blurb: "How much energy you can carry at once. Bigger trips, bigger wrecks.",
+        },
+        {
             key: "missiles", name: "Missiles", glyph: "⋀",
             base: 70, mul: 1.46,
-            blurb: "Lock-on burst. The answer to armour: burst damage ignores it.",
+            blurb: "Lock-on burst. Splash damage cuts through a formation.",
         },
         {
             key: "mines", name: "Mines", glyph: "◉",
@@ -290,43 +357,678 @@
         return total;
     };
 
+    /* ===== Weapon profiles =====
+     * The whole reason shields and armour are two separate pools instead of
+     * one bigger hull: no single weapon is good at both.
+     *
+     * A `shield` coefficient above 1 means the weapon leans into energy
+     * shields and only partly reaches the hull; below 1 means the shot mostly
+     * bounces off a shielded target and lands once the shields are down.
+     *
+     * The laser is free - it is bolted to every ship. The ammo track costs
+     * real energy, so its job is to be the answer to a specific problem, not
+     * to be a strictly better gun. content.test.js asserts the crossover
+     * exists and that it sits in the upper tiers, so these numbers cannot
+     * quietly drift until one weapon is simply better.
+     */
+    S.WEAPONS = {
+        blaster: { key: "blaster", name: "Laser", shield: 0.25, armor: 1.00 },
+        ammo:    { key: "ammo", name: "Ammo", shield: 3.00, armor: 0.65 },
+        missile: { key: "missile", name: "Missile", shield: 0.60, armor: 1.10 },
+        mine:    { key: "mine", name: "Mine", shield: 2.00, armor: 0.50 },
+    };
+
+    /* Build a damage packet for a weapon profile at a given raw damage
+     * number. Every source of damage in the game goes through here, so a new
+     * weapon cannot accidentally ship as shield-only or armour-only by
+     * forgetting a field. */
+    S.packet = function (weapon, damage) {
+        var w = S.WEAPONS[weapon] || S.WEAPONS.blaster;
+        return { shield: damage * w.shield, armor: damage * w.armor };
+    };
+
+    /* ===== Pilots =====
+     * Other ships. They fly the same hulls you can buy, wear a pilot's paint
+     * rather than a faction's, and they mine the same rocks you do - which is
+     * the point. Before them the player was the only economic agent in the
+     * world and every rock was free.
+     *
+     * Deliberately a palette of their own, checked against all six faction
+     * colours: a pilot must never be mistakable for a hostile at a glance,
+     * because the difference between "another miner" and "a Demaner" is the
+     * whole reason they are worth looking at. */
+    S.PILOT_COLORS = [
+        "#5b7fb8", "#7a6fc0", "#4f8fa8", "#8c6f9e", "#6a8f7c",
+        "#9a7a5c", "#6f7fb0", "#8a8f5c",
+    ];
+
+    /* ===== Modes =====
+     * A mode is a sector VARIANT, not a new map. Same rocks, same station,
+     * same contract board - different question. That is why it costs one row
+     * instead of a second world generator, and why four sectors times three
+     * modes is twelve ways to play out of the tables we already have.
+     */
+    S.MODES = [
+        {
+            id: "patrol", name: "PATROL", glyph: "◇",
+            blurb: "No clock. Mine, fight, bank, come back when you want.",
+            detail: "free run",
+        },
+        {
+            id: "wave", name: "WAVE", glyph: "⋀",
+            blurb: "A portal opens and keeps opening. Survive every wave to be paid.",
+            detail: "8 waves · paid in crystals",
+            waves: 8,
+            /* Seconds between one wave clearing and the next opening. */
+            gap: 16,
+            /* How many hostiles ride in on wave one, and how many more each
+             * wave after. A ramp, not a multiplier: wave 8 should feel like a
+             * different fight, not the same one louder. */
+            firstCount: 3,
+            perWave: 2,
+            /* Which faction answers the portal. Leaving it null means the
+             * sector's own tier mix rolls it, so a Hive map really does send
+             * you Hive. */
+            faction: null,
+            reward: 220,
+        },
+        {
+            id: "haul", name: "HAUL", glyph: "▣",
+            blurb: "One timer, one payload. Fill the hold and get back before it runs out.",
+            detail: "150s · pay double for a full hold",
+            time: 150,
+            /* Fraction of the hold you have to land for the full payout. */
+            payload: 0.7,
+            rewardMul: 2.4,
+        },
+    ];
+
+    S.mode = function (id) {
+        if (!id) return S.MODES[0];
+        for (var i = 0; i < S.MODES.length; i++) {
+            if (S.MODES[i].id === id) return S.MODES[i];
+        }
+        return S.MODES[0];
+    };
+
+    /* ===== Hulls and parts =====
+     * Two layers on top of the module tracks.
+     *
+     * The tracks are the broad stat engine you always end up buying. A HULL
+     * is the silhouette: one passive that changes what the ship IS. A PART is
+     * one fitted component per slot, owned across the whole hangar and
+     * swappable between hulls for free.
+     *
+     * The rule that keeps the Ammo track alive is the one at the bottom of
+     * this block: parts and hulls scale raw damage, and the shield/armour
+     * packets are REBUILT from that raw damage afterwards. Nothing in the
+     * hangar can shift a weapon's role, so no purchase can make the laser
+     * strictly better than the round or the other way round.
+     */
+    S.HULL_SLOTS = ["engine", "laser", "shield"];
+
+    /* Stats a hull or part multiplier is allowed to touch. Counts and
+     * cooldowns are in here on purpose - "faster" has to be reachable -
+     * but the damage PACKETS deliberately are not, and are rebuilt after. */
+    S.SCALABLE = [
+        "damage", "fireInterval",
+        "ammoDamage", "ammoCooldown",
+        "missiles", "missileDamage", "missileCooldown",
+        "mineCapacity", "mineDamage", "mineCooldown",
+        "maxShield", "shieldRegen",
+        "maxHull", "regen",
+        "reduction",
+        "holdMax", "energyBonus",
+        "speed", "turn",
+    ];
+
+    /* Counts round to whole numbers; everything else is a continuous stat.
+     * Without this a +0.9 speed engine would end up firing zero missiles. */
+    S.INTEGER_STATS = {
+        missiles: 1, mineCapacity: 1, maxShield: 1, maxHull: 1, holdMax: 1, reduction: 1,
+    };
+
+    S.applyMods = function (stats, mods) {
+        if (!mods) return stats;
+        for (var i = 0; i < S.SCALABLE.length; i++) {
+            var k = S.SCALABLE[i];
+            var m = mods[k];
+            if (!Number.isFinite(m)) continue;
+            stats[k] = (stats[k] || 0) * m;
+        }
+        return stats;
+    };
+
+    S.applyGain = function (stats, gain, level) {
+        if (!gain || !Number.isFinite(level)) return stats;
+        for (var k in gain) {
+            if (Number.isFinite(stats[k])) stats[k] += gain[k] * level;
+        }
+        return stats;
+    };
+
+    /* Rebuild every damage packet from the (possibly scaled) raw numbers.
+     * This is what makes the whole hangar system safe: a part can double the
+     * size of a shot and the shot is still, exactly, the same shot. */
+    S.resealPackets = function (stats) {
+        stats.blasterPacket = S.packet("blaster", stats.damage);
+        stats.ammoPacket = S.packet("ammo", stats.ammoDamage);
+        stats.missilePacket = S.packet("missile", stats.missileDamage);
+        stats.minePacket = S.packet("mine", stats.mineDamage);
+        for (var k in S.INTEGER_STATS) {
+            if (Number.isFinite(stats[k])) stats[k] = Math.max(0, Math.round(stats[k]));
+        }
+        return stats;
+    };
+
+    S.hull = function (id) {
+        if (!id) return S.HULLS[0];
+        for (var i = 0; i < S.HULLS.length; i++) {
+            if (S.HULLS[i].id === id) return S.HULLS[i];
+        }
+        return S.HULLS[0];
+    };
+
+    S.part = function (key) {
+        if (!key) return null;
+        for (var i = 0; i < S.PARTS.length; i++) {
+            if (S.PARTS[i].key === key) return S.PARTS[i];
+        }
+        return null;
+    };
+
+    S.partsForSlot = function (slot) {
+        return S.PARTS.filter(function (p) { return p.slot === slot; });
+    };
+
+    /* ----- Hulls ----- */
+    S.HULLS = [
+        {
+            id: "wasp", name: "WASP", tag: "INTR", glyph: "⌁",
+            cost: 0, color: "#e2604f",
+            passive: "Needle",
+            blurb: "Half a cargo bay and the fastest hull in the hangar.",
+            detail: "hold −35% · speed +20% · turn +35%",
+            mods: { holdMax: 0.65, speed: 1.20, turn: 1.35 },
+        },
+        {
+            id: "hauler", name: "HAULER", tag: "CARGO", glyph: "▤",
+            cost: 700, color: "#3f9ed4",
+            passive: "Deep Hold",
+            blurb: "Built to bring energy home, and to survive the trip.",
+            detail: "hold +65% · shield −22% · speed −10%",
+            mods: { holdMax: 1.65, maxShield: 0.78, speed: 0.90 },
+        },
+        {
+            id: "warden", name: "WARDEN", tag: "PATROL", glyph: "◈",
+            cost: 900, color: "#43b58c",
+            passive: "Recovery",
+            blurb: "Shields that come back faster than anything else flies.",
+            detail: "shield regen ×2.1 · hull −8%",
+            mods: { shieldRegen: 2.10, maxHull: 0.92 },
+        },
+        {
+            id: "bulwark", name: "BULWARK", tag: "HEAVY", glyph: "▦",
+            cost: 1300, color: "#c25fb0",
+            passive: "Plated",
+            blurb: "Slow, wide, and extremely difficult to hurry.",
+            detail: "hull +28% · +6 armour · speed −14%",
+            mods: { maxHull: 1.28, speed: 0.86 },
+            bonus: { reduction: 6 },
+        },
+        {
+            id: "vandal", name: "VANDAL", tag: "GUNBOAT", glyph: "⌖",
+            cost: 1500, color: "#e8913f",
+            passive: "Overbore",
+            blurb: "Trades its own plating for a heavier gun.",
+            detail: "both guns +6 · shield −20% · hull +6%",
+            mods: { maxShield: 0.80, maxHull: 1.06 },
+            /* Symmetric on purpose: an asymmetric flat bonus would tilt the
+             * laser-versus-round comparison, and this hull is in the hangar
+             * matrix test for exactly that reason. */
+            bonus: { damage: 6, ammoDamage: 6 },
+        },
+        {
+            id: "lance", name: "LANCE", tag: "ESCORT", glyph: "◇",
+            cost: 2000, color: "#5a76d6",
+            passive: "Close Cover",
+            blurb: "Keeps a bigger field and refills it faster. An escort that can pay for itself.",
+            detail: "shield +15% · regen +20% · speed +6%",
+            mods: { maxShield: 1.15, shieldRegen: 1.20, speed: 1.06 },
+        },
+        {
+            id: "hound", name: "HOUND", tag: "BRAWLER", glyph: "✖",
+            cost: 2400, color: "#d94f76",
+            passive: "Brawler",
+            blurb: "Turns like a wasp and hits like a door. Holds almost nothing.",
+            detail: "hull +15% · turn +20% · +4 armour · hold −15%",
+            mods: { maxHull: 1.15, turn: 1.20, holdMax: 0.85 },
+            bonus: { reduction: 4 },
+        },
+        {
+            id: "oracle", name: "ORACLE", tag: "PROSPECTOR", glyph: "◎",
+            /* The economic hull, and deliberately the only late hull that
+             * touches nothing to do with guns: one that boosted a weapon
+             * would have to boost BOTH of them symmetrically to leave the
+             * laser-versus-round comparison alone, and "mines rocks richer"
+             * is a far more interesting identity than "shoots 6% harder".
+             * It plays with the cargo hold instead. */
+            cost: 2800, color: "#7fc45a",
+            passive: "Prospector",
+            blurb: "Reads the rock. Every crate and every wreck comes back a third richer.",
+            detail: "loot yield ×1.35 · hold +20% · shield −10%",
+            mods: { energyBonus: 1.35, holdMax: 1.20, maxShield: 0.90 },
+        },
+    ];
+
+    /* ----- Parts: three fitted components, nine in total -----
+     *
+     * THE LASER SLOT RULE. A weapon part may change rate and damage freely,
+     * but it must apply THE SAME FACTORS to the blaster and to the capacitor
+     * round. Because both builds then scale by the same factor, the
+     * laser-versus-round comparison is preserved exactly - and that
+     * comparison is the only thing keeping the Ammo track alive.
+     *
+     * It is also what these parts physically mean: the slot is the weapon
+     * MOUNT, and it upgrades everything bolted to it. An earlier draft made
+     * Pulse and Rail speed up the blaster alone, and content.test.js caught
+     * it immediately: 90 of 135 fit-outs had the round stop being worth
+     * buying, purely because of which gun a cosmetic part happened to buff.
+     */
+    S.PARTS = [
+        {
+            key: "needle", slot: "engine", name: "Needle", glyph: "➤",
+            cost: 260,
+            blurb: "Thin, fast, and almost no torque past the halfway mark.",
+            detail: "speed ×1.18 · turn ×1.25 · hold ×0.80",
+            mods: { speed: 1.18, turn: 1.25, holdMax: 0.80 },
+            gain: { speed: 6, turn: 0.14 },
+        },
+        {
+            key: "haulerdrive", slot: "engine", name: "Hauler Drive", glyph: "▣",
+            cost: 300,
+            blurb: "Nothing clever. Just carries an enormous amount of nothing.",
+            detail: "hold ×1.45 · speed ×0.90",
+            mods: { holdMax: 1.45, speed: 0.90 },
+            gain: { holdMax: 70 },
+        },
+        {
+            key: "anvil", slot: "engine", name: "Anvil", glyph: "▦",
+            cost: 320,
+            blurb: "A drive bolted to a brick. Turns like a filing cabinet.",
+            detail: "hull ×1.20 · speed ×0.92",
+            mods: { maxHull: 1.20, speed: 0.92, turn: 0.94 },
+            gain: { maxHull: 9, reduction: 1.2 },
+        },
+
+        {
+            key: "pulse", slot: "laser", name: "Pulse", glyph: "⌖",
+            cost: 240,
+            blurb: "Spits small rounds very, very quickly. Shreds swarms.",
+            detail: "both guns: rate ×1.61 · damage ×1.08",
+            mods: {
+                fireInterval: 0.62, damage: 1.08,
+                ammoCooldown: 0.62, ammoDamage: 1.08,
+            },
+            gain: { damage: 1.1, ammoDamage: 1.1 },
+        },
+        {
+            key: "rail", slot: "laser", name: "Rail", glyph: "▮",
+            cost: 380,
+            blurb: "One enormous bolt, a long time between them. Built for elites.",
+            detail: "both guns: rate ×0.65 · damage ×1.85",
+            mods: {
+                fireInterval: 1.55, damage: 1.85,
+                ammoCooldown: 1.55, ammoDamage: 1.85,
+            },
+            gain: { damage: 2.6, ammoDamage: 2.6 },
+        },
+        {
+            key: "splitter", slot: "laser", name: "Splitter", glyph: "⋀",
+            cost: 420,
+            blurb: "A wide bus split across both mounts. No weakness either way.",
+            detail: "both guns: rate ×1.25 · damage ×1.18",
+            mods: {
+                fireInterval: 0.80, damage: 1.18,
+                ammoCooldown: 0.80, ammoDamage: 1.18,
+            },
+            gain: { damage: 1.6, ammoDamage: 1.6 },
+        },
+
+        {
+            key: "deflector", slot: "shield", name: "Deflector", glyph: "◈",
+            cost: 280,
+            blurb: "A very big pool that takes its time filling back up.",
+            detail: "shield ×1.40 · regen ×0.70",
+            mods: { maxShield: 1.40, shieldRegen: 0.70 },
+            gain: { maxShield: 11 },
+        },
+        {
+            key: "reactive", slot: "shield", name: "Reactive", glyph: "✦",
+            cost: 300,
+            blurb: "Small, fast, and almost always back before you need it.",
+            detail: "shield ×0.78 · regen ×2.30",
+            mods: { maxShield: 0.78, shieldRegen: 2.30 },
+            gain: { shieldRegen: 1.4 },
+        },
+        {
+            key: "ablative", slot: "shield", name: "Ablative", glyph: "▤",
+            cost: 340,
+            blurb: "No field at all. Just plate, and the armour to use it.",
+            detail: "shield ×0.60 · +4 armour, rising with level",
+            mods: { maxShield: 0.60 },
+            gain: { reduction: 4, maxShield: 5 },
+        },
+    ];
+
+    /* Part levels cost like module levels: a flat base scaled by a shared
+     * multiplier, so the hangar competes for the same energy as everything
+     * else instead of sitting outside the economy. */
+    S.PART_MAX = 10;
+
+    S.partCost = function (key, level) {
+        var p = S.part(key);
+        if (!p) return Infinity;
+        if (level >= S.PART_MAX) return Infinity;
+        return Math.round(p.cost * Math.pow(1.38, level));
+    };
+
+    /* ===== Factions =====
+     * Six kinds of hostile, distinguished by colour so the map reads at a
+     * glance instead of being an undifferentiated mob. They are also hostile
+     * to each other, which is what stops a quiet corner from staying quiet.
+     *
+     * `shieldFrac` is the load-bearing number in the whole table: it is what
+     * decides whether the laser or the capacitor round is the right gun, and
+     * the hangar matrix test walks every one of them to prove it still flips.
+     *
+     * `ai` picks the behaviour branch in npcs.js. A seventh faction means a
+     * row here, not an edit to the AI.
+     */
+    S.FACTIONS = [
+        {
+            key: "raider", name: "Raider", tag: "RAID",
+            color: "#f4a23f", hue: 32,
+            blurb: "Scrap hulls and loose guns.",
+            note: "No shields at all. The laser answers these.",
+            shieldFrac: 0.00, ai: "swarm",
+            dmgMul: 1.00, hullMul: 0.85, speedMul: 1.00,
+        },
+        {
+            key: "drone", name: "Drone", tag: "DRN",
+            color: "#9ae66e", hue: 88,
+            blurb: "Pins. Fragile, endless, and unwilling to stop.",
+            note: "Faint shields. Cheap to kill, ruinous in numbers.",
+            shieldFrac: 0.30, ai: "swarm",
+            /* The swarm trade: paper hulls that hit softly, so all of the
+             * danger is in how many of them arrive at once. */
+            dmgMul: 0.70, hullMul: 0.55, speedMul: 1.35,
+        },
+        {
+            key: "pirate", name: "Pirate", tag: "PIR",
+            color: "#ff5470", hue: 350,
+            blurb: "Pogo-faction raiders. Shielded, and they hit hard.",
+            note: "Half-shielded. Either weapon wins — that is the point.",
+            shieldFrac: 0.50, ai: "brawl",
+            dmgMul: 1.05, hullMul: 1.00, speedMul: 1.00,
+        },
+        {
+            key: "cruiser", name: "Cruiser", tag: "CRS",
+            color: "#4a9fe0", hue: 205,
+            blurb: "Long guns and long legs. Fights at the far edge of range.",
+            note: "Light shields on a big hull. Keep your distance.",
+            shieldFrac: 0.35, ai: "kite",
+            dmgMul: 1.00, hullMul: 1.30, speedMul: 1.15,
+        },
+        {
+            key: "alien", name: "Alien", tag: "ALI",
+            color: "#8a5fd0", hue: 275,
+            blurb: "Deep-space Demaner. Enormous shields, thin armour.",
+            note: "Shield-dominant. Bring ammo, not lasers.",
+            shieldFrac: 0.80, ai: "wall",
+            /* Slow, but each one landed hurts like a warlord. */
+            dmgMul: 1.15, hullMul: 0.80, speedMul: 0.92,
+        },
+        {
+            key: "hive", name: "Hive", tag: "HIV",
+            color: "#e05fa8", hue: 325,
+            blurb: "A structure that fights back. It builds its own.",
+            note: "Almost pure shield. Nothing but the round gets through.",
+            shieldFrac: 0.95, ai: "boss",
+            dmgMul: 1.60, hullMul: 2.20, speedMul: 0.75,
+        },
+    ];
+
+    S.faction = function (key) {
+        for (var i = 0; i < S.FACTIONS.length; i++) {
+            if (S.FACTIONS[i].key === key) return S.FACTIONS[i];
+        }
+        return S.FACTIONS[0];
+    };
+
+    /* Every faction is hostile to every other one and to the player. That is
+     * the genre default, and it is also what lets the sector run its own
+     * wars while you are docked. */
+    S.factionHostile = function (a, b) {
+        if (!a || !b) return false;
+        return a !== b;
+    };
+
+    /* Shield pool for a hostile: a fraction of its hull, set by faction.
+     *
+     * This is the knob that makes the Ammo track a decision rather than an
+     * upgrade. A raider is bare, so lasers delete it and ammo is dead
+     * weight; an alien is shield-dominant, so lasers bounce and ammo is the
+     * only thing that works. Pirates sit deliberately on the crossover.
+     *
+     * content.test.js computes time-to-kill for both weapons at equal
+     * investment and asserts the direction flips between raider and alien,
+     * so these fractions cannot drift until one weapon is simply better. */
+    S.npcShieldFor = function (hull, factionKey) {
+        return Math.round(hull * S.faction(factionKey).shieldFrac);
+    };
+
+    /* Which factions turn up at which tier. The deeper you fly, the more of
+     * the sector is Demaner, so escalation is not only "bigger numbers" - it
+     * is also "the thing that punishes the build you already have". */
+    S.FACTION_MIX = [
+        null,
+        { raider: 0.80, pirate: 0.20, alien: 0.00 },
+        { raider: 0.62, pirate: 0.34, alien: 0.04 },
+        { raider: 0.48, pirate: 0.38, alien: 0.14 },
+        { raider: 0.36, pirate: 0.40, alien: 0.24 },
+        { raider: 0.26, pirate: 0.40, alien: 0.34 },
+        { raider: 0.18, pirate: 0.36, alien: 0.46 },
+        { raider: 0.12, pirate: 0.30, alien: 0.58 },
+        { raider: 0.08, pirate: 0.24, alien: 0.68 },
+    ];
+
+    S.pickFaction = function (tier, rng) {
+        var mix = S.FACTION_MIX[S.clamp(tier | 0, 1, S.FACTION_MIX.length - 1)];
+        var r = (rng || Math.random)();
+        var acc = 0;
+        for (var i = 0; i < S.FACTIONS.length; i++) {
+            acc += mix[S.FACTIONS[i].key] || 0;
+            if (r <= acc) return S.FACTIONS[i];
+        }
+        return S.FACTIONS[0];
+    };
+
+    /* ===== CPUs =====
+     * Active abilities, bought once and equipped one at a time. One slot is
+     * not a limitation to work around, it is the decision: which tool you
+     * are carrying when you undock.
+     */
+    S.CPUS = [
+        {
+            key: "insta", name: "Insta-Shield", glyph: "◉",
+            cost: 320,
+            cooldown: 40,
+            energy: 0,
+            blurb: "Total invulnerability for three seconds.",
+            detail: function () { return S.CONFIG.cpu.instaShield + "s invulnerable · " + "40s cooldown"; },
+        },
+        {
+            key: "radar", name: "Radar", glyph: "◎",
+            cost: 260,
+            cooldown: 34,
+            energy: 15,
+            blurb: "Every hostile on the minimap, including ones you cannot see.",
+            detail: function () { return S.CONFIG.cpu.radarTime + "s reveal · 15 ⚡ per use"; },
+        },
+        {
+            key: "warp", name: "Warp", glyph: "➤",
+            cost: 240,
+            cooldown: 11,
+            energy: 20,
+            blurb: "Jump three hundred units along your nose. Brief immunity in transit.",
+            detail: function () { return "300u dash · 11s cooldown · 20 ⚡"; },
+        },
+        {
+            key: "leech", name: "Energy Leech", glyph: "✦",
+            cost: 480,
+            cooldown: 44,
+            energy: 0,
+            blurb: "A quarter of everything you damage comes back as shield.",
+            detail: function () { return "25% damage leeched · 44s cooldown"; },
+        },
+        {
+            key: "repair", name: "Repair Patch", glyph: "✚",
+            cost: 400,
+            cooldown: 50,
+            energy: 30,
+            blurb: "Patch the hull back together while you keep flying.",
+            detail: function () { return "6.5 hull/s · 50s cooldown · 30 ⚡"; },
+        },
+    ];
+
+    S.cpu = function (key) {
+        if (!key) return null;
+        for (var i = 0; i < S.CPUS.length; i++) {
+            if (S.CPUS[i].key === key) return S.CPUS[i];
+        }
+        return null;
+    };
+
+    S.cpuCost = function (key) {
+        var c = S.cpu(key);
+        return c ? c.cost : Infinity;
+    };
+
     /* ===== Derived ship stats =====
      * One place that turns module levels into the numbers the sim reads, so
      * the station screen and the physics can never disagree.
      */
-    S.statsFor = function (lv, refits) {
-        /* `lv` may come from an older save that predates the missiles and
-         * mines tracks; treat a missing level as 1 rather than NaN. */
+    S.statsFor = function (lv, refits, parts, hullId) {
+        /* `lv` may come from an older save that predates the ammo and cargo
+         * tracks; treat a missing level as 1 rather than NaN. */
         var g = function (k) { return S.moduleLevel(lv, k); };
-        return {
-            damage: 3 + g("blaster") * 2.3,
+
+        var blasterDmg = 3 + g("blaster") * 2.3;
+        var missileDmg = 6 + g("missiles") * 5.5;
+        var mineDmg = 10 + g("mines") * 8;
+        /* The capacitor round. Big per shot, slow between shots, and scaled
+         * so that it answers a tier-6+ shield rather than quietly replacing
+         * the laser as the best gun in the game. */
+        var ammoDmg = 14 + g("ammo") * 10;
+
+        /* Frame Plating is multiplicative on purpose: it stays the
+         * cheapest-per-point option once Shield is invested in, which
+         * is the decision a player is actually making. */
+        var maxHull = Math.round((58 + g("shield") * 27) * (1 + S.refitLevel(refits, "hull") * 0.04));
+
+        /* Built into a named binding, not returned inline: the hangar layers
+         * below have to fold into these numbers before anything sees them. */
+        var stats = {
+            /* Damage packets, resolved once here so the station screen and
+             * the physics read the same numbers and can never disagree. */
+            damage: blasterDmg,
+            blasterPacket: S.packet("blaster", blasterDmg),
+            ammoDamage: ammoDmg,
+            ammoPacket: S.packet("ammo", ammoDmg),
+            ammoCooldown: Math.max(0.9, 2.6 - g("ammo") * 0.16),
             fireInterval: Math.max(0.1, 0.44 - g("blaster") * 0.032),
             /* Missiles: a burst rather than a stream. Count and per-missile
              * damage scale together, so the track keeps mattering at level 10
              * instead of being a one-shot unlock. */
             missiles: Math.round(g("missiles") * 0.9),
-            missileDamage: 6 + g("missiles") * 5.5,
+            missileDamage: missileDmg,
+            missilePacket: S.packet("missile", missileDmg),
             missileCooldown: Math.max(1.1, 6.5 - g("missiles") * 0.55),
             /* Mines: how many fit in the field and how much one hurts. */
             mineCapacity: Math.round(g("mines") * 0.8),
-            mineDamage: 10 + g("mines") * 8,
+            mineDamage: mineDmg,
+            minePacket: S.packet("mine", mineDmg),
             mineRadius: 90 + g("mines") * 8,
             mineSpeed: 118,
             mineCooldown: Math.max(0.7, 3.2 - g("mines") * 0.25),
-            /* Frame Plating is multiplicative on purpose: it stays the
-             * cheapest-per-point option once Shield is invested in, which is
-             * the decision a player is actually making. */
-            maxHull: Math.round((58 + g("shield") * 27) * (1 + S.refitLevel(refits, "hull") * 0.04)),
+            /* Shields absorb, armour does not. Both ride the Shield track: a
+             * pilot who invested in staying alive should get the whole
+             * survival package, not half of it. */
+            maxShield: Math.round(maxHull * (0.45 + g("shield") * 0.035)),
+            shieldRegen: S.CONFIG.shield.regenRate * (0.7 + g("shield") * 0.06),
+
+            maxHull: maxHull,
             /* Regen only trickles back once Shield 3 is fitted, so the first
              * two shield levels feel like the real purchases. */
             regen: g("shield") >= 3 ? 0.9 + (g("shield") - 2) * 0.75 : 0.55,
             /* Flat cut, deliberately allowed to exceed a cheap NPC's whole
              * shot - armour is an anti-elite tool, not an anti-tier-1 tool. */
             reduction: g("armor") * 3.4,
+            /* The hold. Energy is carried, not owned: this is the ceiling on
+             * one trip, not a number that grows on its own. */
+            holdMax: Math.round(S.CONFIG.cargo.base + (g("cargo") - 1) * S.CONFIG.cargo.step),
+
             energyBonus: 1 + g("processor") * 0.075,
             speed: 122 + g("thruster") * 7.5,
             turn: 3.0 + g("thruster") * 0.17,
         };
+
+        /* The hangar layers, in a fixed order so a hull's silhouette always
+         * reads as the hull rather than as whichever part is bolted on.
+         *
+         *   1. flat gain per part level   (an engine's raw numbers)
+         *   2. part multipliers           (what the component IS)
+         *   3. hull multipliers           (what the ship IS)
+         *
+         * Hull last on purpose: a Wasp's short hold is the Wasp's defining
+         * problem, and a Hauler Drive should not be able to pretend it is
+         * not. If the hull went first, buying the best engine would quietly
+         * erase the cost of picking the wrong ship. */
+        if (parts) {
+            for (var s = 0; s < S.HULL_SLOTS.length; s++) {
+                var fitted = parts[S.HULL_SLOTS[s]];
+                if (!fitted) continue;
+                var def = S.part(fitted.key);
+                if (!def) continue;
+                S.applyGain(stats, def.gain, fitted.level);
+                S.applyMods(stats, def.mods);
+            }
+        }
+
+        /* Strict lookup, deliberately NOT S.hull(): that falls back to the
+         * first hull, which would silently hand the Wasp's hold penalty and
+         * speed bonus to every one-argument statsFor call in the codebase -
+         * price screens, the sim test, the balance notes. A call that does
+         * not name a hull gets no hull. */
+        for (var h = 0; h < S.HULLS.length; h++) {
+            if (S.HULLS[h].id !== hullId) continue;
+            S.applyGain(stats, S.HULLS[h].bonus, 1);
+            S.applyMods(stats, S.HULLS[h].mods);
+            break;
+        }
+
+        /* Last, and never optional: the packets are rebuilt from the scaled
+         * raw damage, so every hull and part combination produces a shot
+         * with exactly the shield/armour split its weapon is defined to
+         * have. Nothing bought in the hangar can change what a gun is FOR. */
+        return S.resealPackets(stats);
+    };
+
+    /* The four things a ship's stats depend on, read off the ship itself.
+     * One call site so a live ship and a price screen can never disagree. */
+    S.shipStats = function (ship) {
+        return S.statsFor(ship.modules, ship.refits, ship.parts, ship.hullId);
     };
 
     S.levelSum = function (lv) {
@@ -380,16 +1082,15 @@
     };
 
     /* ===== Hull colours =====
+     * Hostile hulls used to be picked at random from a ten-entry palette,
+     * which meant a sector was a confetti bag: nothing on screen told you
+     * what you were shooting or whether it was the same mob as the thing
+     * that shot you two seconds ago. Hull colour is now the faction's, read
+     * off S.FACTIONS, so the map reads at a glance.
+     *
      * Facet shading multiplies these, so they are picked a shade darker than
      * you want them to read on screen.
      */
-    S.SHIP_COLORS = [
-        "#e2604f", "#e8913f", "#d9c046", "#7fc45a", "#43b58c",
-        "#3f9ed4", "#5a76d6", "#8a5fd0", "#c25fb0", "#d94f76",
-    ];
-
-    S.PALETTE = S.SHIP_COLORS;
-
     S.COLORS = {
         void: "#05070f",
         deep: "#0a1020",

@@ -146,7 +146,7 @@ global.document = {
     readyState: "complete",
 };
 
-for (const f of ["config.js", "storage.js", "sectors.js", "world.js", "render.js", "stations.js", "npcs.js"]) {
+for (const f of ["config.js", "storage.js", "sectors.js", "modes.js", "world.js", "render.js", "stations.js", "npcs.js"]) {
     (0, eval)(fs.readFileSync(path.join(SRC, f), "utf8"));
 }
 
@@ -213,6 +213,18 @@ section("meshes");
         scout: M.hullScout(),
         gunship: M.hullGunship(),
         heavy: M.hullHeavy(),
+        /* All five hangar hulls. They are built from the same two primitives
+         * as everything else, so they get exactly the same geometric
+         * scrutiny as the NPC silhouettes - a new ship that nobody pushed
+         * through drawMesh is a new ship that can be silently wrong. */
+        wasp: M.hullWasp(),
+        hauler: M.hullHauler(),
+        warden: M.hullWarden(),
+        bulwark: M.hullBulwark(),
+        vandal: M.hullVandal(),
+        lance: M.hullLance(),
+        hound: M.hullHound(),
+        oracle: M.hullOracle(),
         "station core": station.core,
         "station ring": station.ring,
     };
@@ -529,6 +541,20 @@ section("drawMesh matches the projection");
           x: 2400, y: 2400, z: 6, heading: 1.9, zoom: 0.46 },
         { name: "scout hull", mesh: M.hullScout(),
           x: 120, y: 4600, z: 3, heading: 0, zoom: 1.1 },
+        { name: "hauler hull", mesh: M.hullHauler(),
+          x: 2400, y: 2400, z: 9, heading: 0.7, zoom: 0.46 },
+        { name: "warden hull", mesh: M.hullWarden(),
+          x: 2400, y: 2400, z: 9, heading: -2.2, zoom: 0.46 },
+        { name: "bulwark hull", mesh: M.hullBulwark(),
+          x: 2400, y: 2400, z: 14, heading: 1.2, zoom: 0.46 },
+        { name: "vandal hull", mesh: M.hullVandal(),
+          x: 2400, y: 2400, z: 14, heading: 3.4, zoom: 0.46 },
+        { name: "lance hull", mesh: M.hullLance(),
+          x: 2400, y: 2400, z: 10, heading: 0.15, zoom: 0.46 },
+        { name: "hound hull", mesh: M.hullHound(),
+          x: 2400, y: 2400, z: 10, heading: -0.6, zoom: 0.46 },
+        { name: "oracle hull", mesh: M.hullOracle(),
+          x: 2400, y: 2400, z: 16, heading: 2.05, zoom: 0.46 },
     ];
 
     let mismatches = 0;

@@ -118,6 +118,32 @@ body { user-select: none; -webkit-user-select: none; }
 }
 @keyframes hull-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
+/* Shield sits directly under armour and is deliberately the same width, so
+   the two pools read as one instrument rather than two unrelated bars. */
+.shield-line { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+.shield-line span {
+    font: 700 11px var(--mono);
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+    min-width: 76px;
+}
+.shield-track {
+    width: 128px;
+    height: 6px;
+    border-radius: 4px;
+    background: rgba(4, 10, 20, 0.8);
+    border: 1px solid rgba(125, 211, 252, 0.25);
+    overflow: hidden;
+}
+#shield-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #3b82f6, #7dd3fc);
+    transition: width 0.1s linear;
+}
+.st-bar .shield-track { width: 92px; height: 5px; }
+#st-shield-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #7dd3fc); transition: width 0.12s linear; }
+
 .stat { display: flex; align-items: baseline; gap: 8px; line-height: 1.15; }
 .stat-label { font-size: 10px; letter-spacing: 0.16em; color: var(--dim); width: 62px; }
 .stat-value {
@@ -129,6 +155,17 @@ body { user-select: none; -webkit-user-select: none; }
 .stat-value.is-small { font-size: 15px; color: var(--dim); text-shadow: none; }
 .stat-value.is-energy { color: var(--energy); text-shadow: 0 0 18px rgba(255, 209, 102, 0.35); }
 .stat-value.is-crystal { color: var(--crystal); text-shadow: 0 0 18px rgba(125, 211, 252, 0.35); }
+/* The hold is the number the player acts on, so it is amber like energy but
+   flagged when it saturates. */
+.stat-value.is-hold {
+    color: var(--energy);
+    font-size: 18px;
+    text-shadow: none;
+}
+.stat-value.is-hold.is-full {
+    color: #ff9f6f;
+    animation: hull-pulse 0.8s ease-in-out infinite;
+}
 
 .hud-tr {
     position: absolute;
@@ -184,6 +221,10 @@ body { user-select: none; -webkit-user-select: none; }
 @media (max-width: 380px) {
     #minimap { width: 104px; height: 104px; }
     .hull-track { width: 96px; }
+    /* Shield has to shrink with the hull bar or the header grows past the
+       contract strip on a 320px screen. */
+    .shield-track { width: 96px; }
+    .target-panel { width: 148px; margin-top: 166px; }
     .stat-label { width: 54px; }
 }
 
@@ -398,6 +439,22 @@ body:not(.is-touch) .stick { opacity: 0.22; }
 
 .fine { font-size: 11px; color: var(--dim); margin-top: 12px; }
 .fine.dim { opacity: 0.6; margin-top: 14px; }
+
+/* Copyright line. It sits at the foot of the menu panel, which is the one
+   screen that is on display when the page loads - so it is genuinely readable
+   rather than markup a crawler finds and no player ever sees. A real <a> and
+   not a span, because rel="me" is what ties the author to the GitHub profile. */
+.credits {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(110, 170, 220, 0.12);
+    font-size: 10px;
+    line-height: 1.5;
+    color: var(--dim);
+    opacity: 0.55;
+}
+.credits a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.credits-sep { opacity: 0.5; padding: 0 2px; }
 
 .how {
     margin-top: 18px;
@@ -656,6 +713,290 @@ body:not(.is-touch) .stick { opacity: 0.22; }
 }
 .pad-btn.pad-sm:active, .pad-btn.pad-sm.is-down {
     background: radial-gradient(circle at 35% 30%, rgba(125, 211, 252, 0.9), rgba(12, 60, 90, 0.9));
+}
+
+/* AMMO shares the small-pad treatment but wears the ammo violet, so the
+   shield weapon is findable by colour before you have read the label. */
+.pad-btn#btn-ammo { border-color: rgba(192, 132, 252, 0.5); color: #d8b4fe; }
+.pad-btn#btn-ammo:active, .pad-btn#btn-ammo.is-down {
+    background: radial-gradient(circle at 35% 30%, rgba(192, 132, 252, 0.9), rgba(48, 20, 80, 0.9));
+}
+
+/* CPU sits beside FIRE rather than in the stack: it is a press, not a hold,
+   and it is the one button you use when you are not shooting. */
+.pad-row { display: flex; align-items: center; gap: 8px; }
+.pad-btn.pad-wide {
+    width: 62px;
+    height: 62px;
+    font-size: 9px;
+    border-color: rgba(94, 234, 212, 0.45);
+    color: var(--cyan);
+}
+.pad-btn.pad-wide:active, .pad-btn.pad-wide.is-down {
+    background: radial-gradient(circle at 35% 30%, rgba(94, 234, 212, 0.85), rgba(8, 50, 55, 0.9));
+}
+
+/* ===== Target panel =====
+   Sits under the minimap, out of the left thumb's way and directly above the
+   reticle it describes. Hidden by default: nothing about an unlocked fight
+   should cost permanent screen space.
+ */
+.target-panel {
+    position: absolute;
+    top: calc(12px + env(safe-area-inset-top));
+    right: calc(12px + env(safe-area-inset-right));
+    margin-top: 172px;
+    width: 168px;
+    padding: 8px 10px 9px;
+    background: rgba(4, 10, 20, 0.78);
+    border: 1px solid rgba(103, 232, 249, 0.28);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+.target-panel.hidden { display: none; }
+.tgt-head {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.tgt-tag {
+    font: 800 9px var(--font);
+    letter-spacing: 0.1em;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.08);
+}
+.tgt-name {
+    flex: 1;
+    font: 700 12px var(--mono);
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.tgt-dist { font: 700 10px var(--mono); color: var(--dim); }
+.tgt-bars { display: flex; flex-direction: column; gap: 3px; }
+.tgt-row { display: flex; align-items: center; gap: 6px; }
+.tgt-lbl { font: 700 9px var(--font); color: var(--dim); width: 22px; }
+.tgt-track {
+    flex: 1;
+    height: 5px;
+    border-radius: 3px;
+    background: rgba(4, 10, 20, 0.85);
+    border: 1px solid var(--line);
+    overflow: hidden;
+}
+.tgt-track > div { height: 100%; transition: width 0.1s linear; }
+.tgt-note {
+    margin: 6px 0 0;
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--dim);
+}
+
+/* ===== Status chips ===== */
+.hold-full {
+    position: absolute;
+    left: 50%;
+    top: calc(84px + env(safe-area-inset-top));
+    transform: translateX(-50%);
+    padding: 5px 12px;
+    font: 800 10px var(--font);
+    letter-spacing: 0.14em;
+    color: #ff9f6f;
+    background: rgba(30, 10, 4, 0.85);
+    border: 1px solid rgba(255, 159, 111, 0.5);
+    border-radius: 999px;
+    pointer-events: none;
+}
+.hold-full.hidden { display: none; }
+.hold-full.is-blink { opacity: 0.45; }
+
+.cpu-chip {
+    position: absolute;
+    right: calc(12px + env(safe-area-inset-right));
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    font: 700 10px var(--mono);
+    letter-spacing: 0.06em;
+    color: var(--cyan);
+    background: rgba(4, 10, 20, 0.8);
+    border: 1px solid rgba(103, 232, 249, 0.3);
+    border-radius: 999px;
+    pointer-events: none;
+}
+.cpu-chip.hidden { display: none; }
+.cpu-chip #cpu-timer { color: var(--dim); }
+.cpu-chip.is-cooling { border-color: rgba(125, 211, 252, 0.18); color: var(--dim); }
+
+/* ===== Modes ===== */
+.mode-tabs { margin: 12px 0 4px; background: transparent; border: 0; padding: 0; gap: 6px; }
+.mode-detail { font: 700 10px var(--mono); color: var(--cyan); }
+.st-row.mode.is-on { border-color: rgba(103, 232, 249, 0.5); }
+
+/* The mode banner is the only permanently-visible clock in the game, and it
+   only exists while a mode run is live. PATROL leaves nothing behind. */
+.mode-banner {
+    position: absolute;
+    left: 50%;
+    top: calc(12px + env(safe-area-inset-top));
+    transform: translateX(-50%);
+    width: min(280px, 62vw);
+    padding: 8px 12px 9px;
+    background: rgba(6, 10, 26, 0.86);
+    border: 1px solid rgba(196, 181, 253, 0.35);
+    border-radius: 10px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    pointer-events: none;
+}
+.mode-banner.hidden { display: none; }
+.mb-row { display: flex; align-items: baseline; gap: 8px; }
+.mb-tag {
+    font: 800 9px var(--font);
+    letter-spacing: 0.14em;
+    color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.18);
+    border-radius: 3px;
+    padding: 2px 5px;
+}
+.mb-main { font: 800 15px var(--mono); color: var(--text); }
+.mb-side { margin-left: auto; font: 700 10px var(--mono); color: var(--dim); }
+.mb-track {
+    margin-top: 6px;
+    height: 4px;
+    border-radius: 3px;
+    background: rgba(4, 10, 20, 0.85);
+    border: 1px solid var(--line);
+    overflow: hidden;
+}
+.mb-track > div {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #8b5cf6, #c4b5fd);
+    transition: width 0.15s linear;
+}
+.mb-note { margin: 6px 0 0; font-size: 10px; line-height: 1.3; color: var(--dim); }
+
+/* A map row carries a badge: SECTOR for the frontier, or the faction's own
+   tag in its own colour, so a faction territory is never mistaken for one
+   more stretch of the frontier. */
+.st-badge {
+    font: 800 8px var(--font);
+    letter-spacing: 0.1em;
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: var(--dim);
+    background: rgba(148, 176, 200, 0.12);
+    border: 1px solid rgba(148, 176, 200, 0.25);
+    white-space: nowrap;
+}
+.st-badge.is-faction { background: rgba(255, 255, 255, 0.06); }
+.st-row.sector.is-faction { border-left: 2px solid rgba(255, 255, 255, 0.16); }
+
+/* ===== Hangar ===== */
+.hg-tabs { margin-top: 10px; }
+/* The hangar strip carries its own class so the two tab handlers can never
+   bind each other's buttons. The look is shared deliberately. */
+.hg-tab {
+    flex: 1;
+    padding: 8px 6px;
+    font: 800 10px var(--font);
+    letter-spacing: 0.1em;
+    color: var(--dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    cursor: pointer;
+}
+.hg-tab.is-on { color: var(--cyan); background: rgba(103, 232, 249, 0.1); border-color: rgba(103, 232, 249, 0.3); }
+.st-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Hull cards are a row of silhouettes rather than a scrolling list: the whole
+   point is comparing five ships, and a list hides four of them. */
+#hg-hulls { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 8px; }
+.hull-card {
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(4, 10, 20, 0.6);
+    border: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.hull-card.is-active { border-color: var(--cyan); box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.25) inset; }
+.hull-card.is-locked { opacity: 0.72; }
+.hull-card .hc-head { display: flex; align-items: baseline; gap: 6px; }
+.hull-card .hc-glyph { font-size: 15px; color: var(--dim); }
+.hull-card .hc-name { font: 800 13px var(--font); letter-spacing: 0.08em; }
+.hull-card .hc-tag { font: 700 9px var(--mono); color: var(--dim); margin-left: auto; }
+.hull-card .hc-passive { font: 700 11px var(--mono); color: var(--energy); }
+.hull-card .hc-blurb { margin: 0; font-size: 11px; line-height: 1.35; color: var(--dim); }
+.hull-card .hc-detail { font: 700 10px var(--mono); color: var(--crystal); }
+
+/* One slot, one row of three. Fitted wears a colour chip; the others are
+   visibly empty so an unfitted slot never reads as a working one. */
+.slot-label {
+    font: 800 10px var(--font);
+    letter-spacing: 0.16em;
+    color: var(--dim);
+    margin: 14px 0 6px;
+}
+.slot-label:first-child { margin-top: 4px; }
+.part-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.part-card {
+    padding: 9px;
+    border-radius: 9px;
+    background: rgba(4, 10, 20, 0.6);
+    border: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.part-card.is-fitted { border-color: rgba(103, 232, 249, 0.55); }
+.part-card.is-empty { opacity: 0.5; }
+.part-card .pc-name { font: 800 12px var(--font); letter-spacing: 0.06em; }
+.part-card .pc-detail { font: 700 10px var(--mono); color: var(--crystal); line-height: 1.3; }
+.part-card .pc-foot { font: 700 11px var(--mono); color: var(--energy); }
+.part-card:disabled { cursor: default; opacity: 0.45; }
+.part-card.is-fitted:disabled { opacity: 0.9; }
+
+/* Sandbox: visually separate on purpose. It is a cheat and it should look
+   like one, not sit next to the economy pretending to be part of it. */
+#hg-panel-sandbox .st-hint { color: #ffb45e; }
+#hg-sandbox-body { margin-top: 12px; }
+#hg-sandbox-body .st-row { border-color: rgba(255, 180, 94, 0.3); }
+.sandbox-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.sandbox-row .st-buy { width: 100%; }
+
+.is-hidden { display: none; }
+/* A CPU row in the station: fitted rows carry a cyan edge so "what am I
+   carrying right now" is answerable at a glance across a scrolling list. */
+.st-row.cpu.is-fitted { border-color: rgba(103, 232, 249, 0.5); }
+.st-row.cpu.is-locked .st-name { color: var(--dim); }
+.st-buy.is-ghost {
+    background: transparent;
+    border-color: rgba(148, 176, 200, 0.35);
+    color: var(--dim);
 }
 
 /* ===== Station tabs ===== */

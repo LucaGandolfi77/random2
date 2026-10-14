@@ -3,10 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SECTOR 7 · space combat</title>
-    <meta name="description" content="A low-poly space combat game for your pocket. Harvest energy, shoot pirates, dock at the station and upgrade your ship — against the sector, not a clock.">
+
+    <!-- ===== SEO =====
+         The title is under 60 characters and says what it is and that it is
+         free, because the two things somebody searches for are the genre and
+         the price. The description tracks what the game ACTUALLY ships, hull
+         count included - a meta description that still advertises an earlier
+         build is worse than none, because a snippet is a promise.
+
+         The same rule applies to the copy in the menu panel, and for a
+         sharper reason: text in the DOM is text a model reads. If the page
+         says five hulls and there are eight, the number that gets quoted is
+         the wrong one. -->
+    <title>SECTOR 7 — free space combat game in the browser</title>
+    <meta name="description" content="SECTOR 7 is a free browser space combat game: mine energy from asteroids, dock to bank it, and pick laser or capacitor round. 8 hulls, 6 factions, wave and haul modes, fully offline.">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="author" content="Luca Gandolfi">
+    <meta name="copyright" content="© 2026 Luca Gandolfi">
     <meta name="theme-color" content="#05070f">
     <meta name="color-scheme" content="dark">
+
+    <!-- Absolute, not relative: everything else here is a relative path
+         because the game is served from a subfolder of a project page, but a
+         canonical URL only means anything if it names one specific place. -->
+    <link rel="canonical" href="https://lucagandolfi77.github.io/random2/sector7-pwa/">
+    <link rel="license" href="https://github.com/LucaGandolfi77/random2/blob/main/LICENSE">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
@@ -14,8 +35,87 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SECTOR 7">
+
+    <!-- ===== Social cards =====
+         og:image and twitter:image are absolute and 1200x630, which is the
+         one size every platform crops to. summary_large_image is the card
+         type that actually shows the art; a plain "summary" thumbnail crops
+         it to a stamp. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SECTOR 7">
+    <meta property="og:title" content="SECTOR 7 — free space combat game in the browser">
+    <meta property="og:description" content="Mine energy from asteroids, dock to bank it, and pick the right gun. 8 hulls, 6 factions, fully offline.">
+    <meta property="og:url" content="https://lucagandolfi77.github.io/random2/sector7-pwa/">
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/sector7-pwa/og-cover.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="SECTOR 7 — a low-poly fighter over an asteroid field, with a crystal and an energy bolt">
+    <meta property="og:locale" content="en">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SECTOR 7 — free space combat game in the browser">
+    <meta name="twitter:description" content="Mine energy from asteroids, dock to bank it, and pick the right gun. 8 hulls, 6 factions, fully offline.">
+    <meta name="twitter:image" content="https://lucagandolfi77.github.io/random2/sector7-pwa/og-cover.png">
+
+    <!-- ===== Structured data =====
+         VideoGame rather than WebApplication, because this is a game and the
+         rich-result rules differ. There is deliberately NO aggregateRating:
+         an invented rating is fabricated data, and Google has issued manual
+         actions for exactly that. isAccessibleForFree and a zero-price offer
+         say the true version of the same thing.
+
+         dateModified is hand-maintained. If it goes stale it stops being a
+         signal of freshness and becomes a signal of a page nobody looks at. -->
+    <script type="application/ld+json">{
+      "@context": "https://schema.org",
+      "@graph": [{
+        "@type": "VideoGame",
+        "@id": "https://lucagandolfi77.github.io/random2/sector7-pwa/#game",
+        "name": "SECTOR 7",
+        "alternateName": "SECTOR SEVEN",
+        "url": "https://lucagandolfi77.github.io/random2/sector7-pwa/",
+        "image": "https://lucagandolfi77.github.io/random2/sector7-pwa/og-cover.png",
+        "description": "A free browser space combat game. Mine energy from asteroids, dock at the station to bank it, and pick between the armour-chewing laser and the shield-breaking capacitor round. 8 hulls, 6 factions, wave and haul modes.",
+        "genre": ["Action", "Arcade", "Space combat"],
+        "gamePlatform": "Web browser",
+        "playMode": "SinglePlayer",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any modern browser",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "datePublished": "2026-10-13",
+        "dateModified": "2026-10-14",
+        "author": {
+          "@type": "Person",
+          "name": "Luca Gandolfi",
+          "url": "https://github.com/LucaGandolfi77"
+        },
+        "publisher": { "@type": "Person", "name": "Luca Gandolfi" },
+        "sameAs": [
+          "https://github.com/LucaGandolfi77/random2/tree/main/sector7-pwa"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        }
+      }, {
+        "@type": "WebSite",
+        "@id": "https://lucagandolfi77.github.io/random2/#website",
+        "name": "PWA Arcade",
+        "url": "https://lucagandolfi77.github.io/random2/"
+      }]
+    }</script>
 </head>
 <body class="in-menu">
+
+    <!-- One landmark for the whole app. The canvas and the four screens are
+         all "the page" as far as anything reading it is concerned, and a
+         single main landmark is what lets a crawler tell the content from the
+         chrome. Nothing here is layout: the canvas and every .screen are
+         position:fixed against the viewport, so wrapping them changes no
+         pixel and no selector. -->
+    <main id="app">
 
     <canvas id="game-canvas"></canvas>
 
@@ -26,6 +126,17 @@
             <div class="hull-line">
                 <div class="hull-track"><div id="hull-fill"></div></div>
                 <span id="stat-hull">0 / 0</span>
+            </div>
+            <!-- Shields sit above the hull line because they are what absorb
+                 first and what comes back on its own. Same order the damage
+                 packets resolve in. -->
+            <div class="shield-line">
+                <div class="shield-track"><div id="shield-fill"></div></div>
+                <span id="stat-shield">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">HOLD</span>
+                <span class="stat-value is-hold" id="stat-hold">0 / 0</span>
             </div>
             <div class="stat">
                 <span class="stat-label">ENERGY</span>
@@ -39,6 +150,28 @@
                 <span class="stat-label">KILLS</span>
                 <span class="stat-value is-small" id="stat-kills">0</span>
             </div>
+        </div>
+
+        <!-- Explicit target panel. The aim assist tells you what the turret
+             happened to find; this tells you what you locked on, with both
+             of its pools and which faction it belongs to. -->
+        <div id="target-panel" class="target-panel hidden">
+            <div class="tgt-head">
+                <span class="tgt-tag" id="tgt-faction">RAID</span>
+                <span class="tgt-name" id="tgt-name">—</span>
+                <span class="tgt-dist" id="tgt-dist">0</span>
+            </div>
+            <div class="tgt-bars">
+                <div class="tgt-row">
+                    <span class="tgt-lbl">SHD</span>
+                    <div class="tgt-track"><div id="tgt-shield"></div></div>
+                </div>
+                <div class="tgt-row">
+                    <span class="tgt-lbl">ARM</span>
+                    <div class="tgt-track"><div id="tgt-hull"></div></div>
+                </div>
+            </div>
+            <p class="tgt-note" id="tgt-note">No shields. Lasers.</p>
         </div>
 
         <div class="hud-tr">
@@ -71,6 +204,27 @@
 
         <div id="storm-warn" class="storm-warn hidden">ION STORM</div>
 
+        <!-- Mode banner. Only one of the two bodies is ever shown, and only
+             while a mode run is live; PATROL shows nothing at all. -->
+        <div id="mode-banner" class="mode-banner hidden">
+            <div class="mb-row">
+                <span class="mb-tag" id="mode-tag">WAVE</span>
+                <span class="mb-main" id="mode-main">0 / 8</span>
+                <span class="mb-side" id="mode-side"></span>
+            </div>
+            <div class="mb-track"><div id="mode-fill"></div></div>
+            <p class="mb-note" id="mode-note"></p>
+        </div>
+
+        <!-- Two chips that are information, not controls. The hold-full one
+             matters most: a full hold silently refusing every pickup reads
+             as a bug, and this is the line between "broken" and "go home". -->
+        <div id="hold-full" class="hold-full hidden">HOLD FULL · RETURN TO STATION</div>
+        <div id="cpu-chip" class="cpu-chip hidden">
+            <span id="cpu-name">—</span>
+            <span id="cpu-timer"></span>
+        </div>
+
         <div id="dock-hint" class="dock-hint hidden">
             <div class="dock-track"><div id="dock-bar"></div></div>
         </div>
@@ -80,10 +234,14 @@
         <div class="pad-right">
             <button id="btn-dock" class="pad-btn pad-dock" type="button">DOCK</button>
             <div class="pad-stack">
+                <button id="btn-ammo" class="pad-btn pad-sm" type="button">AMMO</button>
                 <button id="btn-missile" class="pad-btn pad-sm" type="button">MSL</button>
                 <button id="btn-mine" class="pad-btn pad-sm" type="button">MINE</button>
             </div>
-            <button id="btn-fire" class="pad-btn pad-fire" type="button">FIRE</button>
+            <div class="pad-row">
+                <button id="btn-cpu" class="pad-btn pad-wide" type="button">CPU</button>
+                <button id="btn-fire" class="pad-btn pad-fire" type="button">FIRE</button>
+            </div>
         </div>
 
     </div>
@@ -92,7 +250,9 @@
     <div id="screen-menu" class="screen">
         <div class="panel">
             <h1 class="logo">SECTOR<span>7</span></h1>
-            <p class="tagline">Energy buys upgrades and dies with you.<br>Crystals are yours forever — and the sector gets harder the more you take.</p>
+            <p class="tagline">Energy is a cargo: scoop it up, dock to bank it, and it dies with you<br>if you don't. Shields and armour are two different problems — pick the right gun.</p>
+
+            <p class="fine dim">Eight hulls, six factions, one fitted CPU.</p>
 
             <div class="field">
                 <input id="name-input" type="text" maxlength="14" autocomplete="off"
@@ -105,16 +265,32 @@
 
             <div class="how">
                 <div class="how-row"><span class="key">Left thumb</span><span>fly — anywhere you press is the stick</span></div>
-                <div class="how-row"><span class="key">FIRE</span><span>blaster; the turret finds targets for you</span></div>
-                <div class="how-row"><span class="key">DOCK</span><span>hold it inside the station ring</span></div>
-                <div class="how-row"><span class="key">Gather</span><span>crack asteroids for crystals, loot crates for energy</span></div>
+                <div class="how-row"><span class="key">FIRE</span><span>laser — fast, chews armour, bounces off shields</span></div>
+                <div class="how-row"><span class="key">AMMO</span><span>capacitor round — slow, brutal against shields</span></div>
+                <div class="how-row"><span class="key">DOCK</span><span>hold it inside the station ring — your hold banks here</span></div>
+                <div class="how-row"><span class="key">Tap right</span><span>lock a target; <b>T</b> cycles</span></div>
+                <div class="how-row"><span class="key">Mode</span><span>patrol, or a wave to survive, or a haul against the clock</span></div>
             </div>
 
             <div class="row-actions">
+                <button id="btn-hangar" class="btn ghost" type="button">Hangar</button>
                 <button id="btn-sound" class="btn ghost" type="button">🔊 Sound</button>
             </div>
 
-            <p class="fine dim">One ship. One sector. Every upgrade you can afford.</p>
+            <p class="fine dim">Eight hulls. Ten maps. Every upgrade you can afford.</p>
+
+            <!-- Copyright lives in the menu panel rather than at the foot of
+                 the document because the menu is the screen that is actually
+                 on display. A footer bolted below the install prompt would be
+                 inside a position:fixed layout nobody scrolls to, so the text
+                 would be in the DOM and on no screen. -->
+            <footer class="credits">
+                <span class="credits-copy">© 2026 <a href="https://github.com/LucaGandolfi77" rel="me">Luca Gandolfi</a></span>
+                <span class="credits-sep">·</span>
+                <span>All rights reserved</span>
+                <span class="credits-sep">·</span>
+                <span>code under <a href="https://github.com/LucaGandolfi77/random2/blob/main/LICENSE">MIT</a></span>
+            </footer>
         </div>
     </div>
 
@@ -129,19 +305,26 @@
             </header>
 
             <div class="st-bar">
-                <div class="st-hull-text">HULL <b id="st-hull">0 / 0</b></div>
+                <div class="st-hull-text">ARMOUR <b id="st-hull">0 / 0</b></div>
                 <div class="hull-track"><div id="st-hull-fill"></div></div>
                 <button id="st-repair-btn" class="btn small" type="button">REPAIR</button>
             </div>
+            <div class="st-bar">
+                <div class="st-hull-text">SHIELD <b id="st-shield">0 / 0</b></div>
+                <div class="shield-track"><div id="st-shield-fill"></div></div>
+            </div>
             <p class="st-repair-note" id="st-repair">Hull is intact.</p>
 
-            <p class="st-tier-line">SHIP TIER <b id="st-tier">1</b><span id="st-tier-note">· seven tracks, ten levels each</span></p>
+            <p class="st-tier-line">SHIP TIER <b id="st-tier">1</b><span id="st-tier-note">· nine tracks, ten levels each</span></p>
+
+            <nav class="st-tabs mode-tabs" id="st-modes"></nav>
 
             <nav class="st-tabs" id="st-tabs">
                 <button id="tab-modules" class="st-tab is-on" data-tab="modules" type="button">MODULES</button>
                 <button id="tab-contracts" class="st-tab" data-tab="contracts" type="button">CONTRACTS</button>
+                <button id="tab-cpus" class="st-tab" data-tab="cpus" type="button">CPUs</button>
                 <button id="tab-refits" class="st-tab" data-tab="refits" type="button">REFITS</button>
-                <button id="tab-sectors" class="st-tab" data-tab="sectors" type="button">SECTORS</button>
+                <button id="tab-sectors" class="st-tab" data-tab="sectors" type="button">MAPS</button>
             </nav>
 
             <div id="st-panel-modules" class="st-tabpanel">
@@ -150,6 +333,11 @@
 
             <div id="st-panel-contracts" class="st-tabpanel is-hidden">
                 <div id="st-contracts" class="st-rows"></div>
+            </div>
+
+            <div id="st-panel-cpus" class="st-tabpanel is-hidden">
+                <p class="st-hint">One fitted at a time. Buying installs it; swapping is free and you can swap as often as you like.</p>
+                <div id="st-cpus" class="st-rows"></div>
             </div>
 
             <div id="st-panel-refits" class="st-tabpanel is-hidden">
@@ -163,13 +351,61 @@
             </div>
 
             <div class="st-foot">
-                <p class="st-note">You keep every crystal you have ever touched. Your energy is on the deck where you died.</p>
-                <button id="st-launch" class="btn primary" type="button">LAUNCH</button>
-                <button id="st-close" class="btn ghost small" type="button">Back to menu</button>
+                <p class="st-note" id="st-hold-note">Your hold is empty. Everything you scoop up is docked when you launch.</p>
+                <div class="st-actions">
+                    <button id="st-hangar" class="btn ghost small" type="button">HANGAR</button>
+                    <button id="st-launch" class="btn primary" type="button">LAUNCH</button>
+                    <button id="st-close" class="btn ghost small" type="button">Back to menu</button>
+                </div>
                 <p class="st-fee-line">Docking fee <b id="st-fee">0</b> ⚡</p>
             </div>
 
             <div id="st-toast" class="st-toast is-hidden"></div>
+        </div>
+    </div>
+
+    <!-- ===== Hangar =====
+         A separate screen rather than a fifth-plus station tab: the tab bar
+         is already at five and a phone cannot scroll six lists without the
+         one you want becoming the one you cannot find. -->
+    <div id="screen-hangar" class="screen hidden">
+        <div class="panel panel-wide">
+            <header class="st-head">
+                <h2>HANGAR<span class="st-sub" id="hg-active">WASP</span></h2>
+                <div class="st-wallet">
+                    <span class="st-coin">⚡<b id="hg-energy">0</b></span>
+                    <span class="st-coin">◈<b id="hg-crystals">0</b></span>
+                </div>
+            </header>
+
+            <nav class="st-tabs hg-tabs">
+                <button id="hg-tab-hulls" class="hg-tab is-on" data-hgtab="hulls" type="button">HULLS</button>
+                <button id="hg-tab-parts" class="hg-tab" data-hgtab="parts" type="button">FIT OUT</button>
+                <button id="hg-tab-sandbox" class="hg-tab" data-hgtab="sandbox" type="button">SANDBOX</button>
+            </nav>
+
+            <div id="hg-panel-hulls" class="st-tabpanel">
+                <p class="st-hint">Every hull has one passive that changes what the ship <em>is</em>. Upgrades and crystals are shared across the whole garage.</p>
+                <div id="hg-hulls" class="st-rows"></div>
+            </div>
+
+            <div id="hg-panel-parts" class="st-tabpanel is-hidden">
+                <p class="st-hint" id="hg-fit-hint">Three slots. Buying a component installs it; swapping is free and you can swap as often as you like.</p>
+                <div id="hg-parts" class="st-rows"></div>
+            </div>
+
+            <!-- The cheat. Off by default and it says so, because a panel
+                 that silently hands out crystals would push a pilot into the
+                 hardest sector on a level-1 hull and that reads as a bug. -->
+            <div id="hg-panel-sandbox" class="st-tabpanel is-hidden">
+                <p class="st-hint" id="hg-sandbox-note">Sandbox is <b>off</b>. Turn it on to grant currency and unlock everything — it writes to this save like anything else.</p>
+                <button id="hg-sandbox-toggle" class="btn ghost" type="button">SANDBOX OFF</button>
+                <div id="hg-sandbox-body" class="st-rows is-hidden"></div>
+            </div>
+
+            <div class="st-foot">
+                <button id="hg-close" class="btn primary" type="button">BACK</button>
+            </div>
         </div>
     </div>
 
@@ -202,10 +438,13 @@
         </div>
     </div>
 
+    </main>
+
     <script src="../shared/arcade.js"></script>
     <script src="src/config.js"></script>
     <script src="src/storage.js"></script>
     <script src="src/sectors.js"></script>
+    <script src="src/modes.js"></script>
     <script src="src/world.js"></script>
     <script src="src/render.js"></script>
     <script src="src/stations.js"></script>

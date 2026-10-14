@@ -19,12 +19,19 @@
     };
 
     function create(save) {
-        var stats = S.statsFor(save.modules);
+        var hull = S.hull(save.hullId);
+        /* The hull sets the ship's paint. It is the only thing about the
+         * silhouette that is not derivable from stats, and having it read
+         * wrong on the minimap would undercut the whole point of choosing. */
+        var stats = S.statsFor(save.modules, save.refits, save.parts, save.hullId);
         var ship = S.World.spawnShip({
             isPlayer: true,
             name: save.name || "YOU",
-            color: S.COLORS.player,
+            color: hull.color,
+            faction: "you",
             maxHull: stats.maxHull,
+            maxShield: stats.maxShield,
+            holdMax: stats.holdMax,
             stats: stats,
             reduction: stats.reduction,
             radius: 16,
@@ -40,10 +47,29 @@
          * violation. */
         ship.refits = save.refits || { crystals: 0 };
         ship.sector = S.World.world.sectorId;
-        ship.stats = S.statsFor(ship.modules, ship.refits);
+        ship.cpus = save.cpus || {};
+        ship.cpu = ship.cpus[save.cpu] ? save.cpu : null;
+        /* Hangar: which hull, which components. statsFor already folded both
+         * into the numbers above. */
+        ship.hangar = save.hangar || null;
+        ship.hullId = save.hullId || hull.id;
+        /* `hullDef`, NOT `hull`: `ship.hull` is the armour pool everywhere
+         * in the codebase and overwriting it with a definition object would
+         * turn the health bar into NaN the moment anything read it. */
+        ship.hullDef = S.hull(ship.hullId);
+        ship.parts = save.parts || {};
+        ship.stats = S.shipStats(ship);
         ship.reduction = ship.stats.reduction;
         ship.maxHull = ship.stats.maxHull;
+        ship.maxShield = ship.stats.maxShield;
+        ship.holdMax = ship.stats.holdMax;
+        ship.shield = ship.maxShield;
         ship.hull = ship.maxHull;
+        /* The hold always launches empty. Anything left in it was energy you
+         * never docked, so it died with the ship - carrying it forward would
+         * be a free re-roll on the worst possible moment. */
+        ship.hold = 0;
+        ship.lastDeposit = 0;
 
         var lp = S.World.launchPoint();
         ship.x = lp.x;
@@ -52,6 +78,7 @@
         ship.aim = lp.heading;
 
         S.World.world.player = ship;
+        S.World.clearTarget();
         reset();
         return ship;
     }
@@ -62,6 +89,7 @@
         player.dockReady = false;
         player.undockLock = 0;
         player.firingWas = false;
+        player.lastCpuKey = null;
     }
 
     /* The blaster is a turret, not a gun bolted to the nose: it will swing
@@ -91,13 +119,27 @@
         }
     }
 
+    /* An explicit lock wins over the soft assist. The assist is a convenience
+     * that re-picks every frame; the lock is a decision, so it is the one
+     * that gets to move the turret - as long as the target is still there and
+     * still inside the turret arc. */
     function aim(dt, ship, st, assist) {
         var base = ship.heading;
-        var target = assist ? S.World.coneTarget(ship, C.combat.aimCone, C.combat.aimAssistRange) : null;
+        var locked = S.World.world.target;
+        var target = null;
+
+        if (locked && locked.alive && !locked.docked && locked !== ship) {
+            /* Drop the lock rather than swing the muzzle through the hull to
+             * reach something behind you. */
+            var toLocked = Math.atan2(locked.y - ship.y, locked.x - ship.x);
+            if (Math.abs(S.angleDiff(base, toLocked)) <= AIM_SWING) target = locked;
+        }
+        if (!target && assist) {
+            target = S.World.coneTarget(ship, C.combat.aimCone, C.combat.aimAssistRange);
+        }
 
         if (target) {
             var want = Math.atan2(target.y - ship.y, target.x - ship.x);
-            /* Clamp the turret to its arc around the nose. */
             var off = S.clamp(S.angleDiff(base, want), -AIM_SWING, AIM_SWING);
             ship.aim = S.lerpAngle(ship.aim, base + off, S.damp(dt, 0.055));
             ship.lockTarget = target;
@@ -151,9 +193,11 @@
         aim(dt, ship, inputState, assist);
         regen(dt, ship);
         updateDocking(dt, ship, inputState);
+        updateTargeting(inputState);
 
         S.Audio.setThrottle(ship.throttle);
         if (inputState.firing) S.World.fire(ship, ship.aim);
+        if (inputState.ammoEdge) S.World.fireAmmo(ship, ship.aim);
 
         if (inputState.missileEdge) {
             S.World.fireMissiles(ship, lockTargets(ship, 3), 0);
@@ -162,6 +206,40 @@
             /* Dropped rather than fired: a mine behind you is the point. */
             S.World.dropMine(ship);
         }
+        if (inputState.cpuEdge) useCpu(ship);
+    }
+
+    /* ===== Targeting =====
+     * Tapping a ship locks it; T cycles to the next one in range. On touch
+     * the tap doubles as a target-lock, which is the whole reason the stick
+     * ignores the right half of the screen.
+     */
+    function updateTargeting(inputState) {
+        var W = S.World.world;
+        if (inputState.targetEdge) {
+            W.target = W.target
+                ? null
+                : (S.World.nearestHostile(W.player, C.combat.aimAssistRange * 1.6) || null);
+        }
+        if (inputState.cycleEdge) {
+            W.target = S.World.cycleTarget(W.player, C.combat.aimAssistRange * 2.2);
+        }
+        /* A lock on something that just died, or that is now a rock, is not a
+         * lock. Clear it here rather than leaving the panel showing a ghost. */
+        if (W.target && (!W.target.alive || W.target.docked)) W.target = null;
+    }
+
+    function useCpu(ship) {
+        var res = S.World.activateCpu(ship);
+        if (!res.ok) {
+            S.Audio.error();
+            S.UI.toast(res.reason.toUpperCase(), true);
+            return res;
+        }
+        S.Audio.upgrade();
+        var def = S.cpu(res.key);
+        S.UI.toast((def ? def.name : res.key.toUpperCase()) + " ACTIVE");
+        return res;
     }
 
     /* ===== Docking =====
@@ -201,10 +279,20 @@
         ship.vx = 0;
         ship.vy = 0;
 
+        /* Docking is where the hold becomes money. This has to happen on the
+         * way in, not on the way out, so the station panel can show the real
+         * balance and a player who undocks twice in a row cannot deposit the
+         * same cargo twice. */
+        var dep = S.Stations.deposit(ship);
+        /* Kept on the ship so the station panel can say what the trip paid
+         * instead of showing a hold that is now, necessarily, zero. */
+        ship.lastDeposit = dep.deposited;
+
         S.World.world.docked = true;
+        S.World.clearTarget();
         S.Audio.dock();
         S.shake(5);
-        S.World.world.events.push({ type: "dock" });
+        S.World.world.events.push({ type: "dock", deposited: dep.deposited });
     }
 
     function undock() {
@@ -212,6 +300,13 @@
         var W = S.World.world;
         var ship = W.player;
         if (!ship || !ship.alive) return null;
+
+        /* Whatever the pilot changed in the hangar has to reach the live
+         * ship now. Undocking does not rebuild the ship, so without this a
+         * hull bought two minutes ago would still fly the old silhouette and
+         * the old hold. */
+        S.Stations.applyHangar(ship);
+        S.Stations.refreshStats(ship);
 
         var fee = S.Stations.payFee(ship);
         var saved = S.Stations.bank(ship);
@@ -246,13 +341,16 @@
         player.docked = false;
         player.dockReady = false;
         player.dockProgress = 0;
+        player.undockLock = 0;
         S.World.world.docked = false;
+        S.World.clearTarget();
     }
 
     S.Player = {
         create: create,
         reset: reset,
         update: update,
+        useCpu: useCpu,
         dock: dock,
         undock: undock,
         onDeath: onDeath,

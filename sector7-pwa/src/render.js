@@ -194,20 +194,6 @@
      * All hulls point along +x, so heading 0 is nose-right.
      */
 
-    /* Player interceptor: long diamond fuselage, swept wings, canopy,
-     * twin engines. */
-    function hullFighter() {
-        return merge([
-            scaleMesh(prism(4, 5.2, 2.6, 3.0), 2.9, 1, 1),
-            offsetMesh(scaleMesh(prism(4, 3.0, 1.4, 2.4), 1.5, 0.8, 0.9), 3.0, 0, 1.9),
-            rotZMesh(offsetMesh(box(11, 13, 1.1), -2.5, 0, -0.6), 0.5),
-            offsetMesh(box(4, 2.2, 3.2), -7.5, 4.6, 1.2),
-            offsetMesh(box(4, 2.2, 3.2), -7.5, -4.6, 1.2),
-            offsetMesh(box(4.4, 2.6, 2.6), -8.6, 3.0, 0),
-            offsetMesh(box(4.4, 2.6, 2.6), -8.6, -3.0, 0),
-        ]);
-    }
-
     /* NPC scout: stubbier, blunter, one wide wing. */
     function hullScout() {
         return merge([
@@ -242,25 +228,142 @@
         ]);
     }
 
+    /* ----- Player hulls: one silhouette per hangar ship -----
+     * Five hulls, each assembled from the same two primitives. They are
+     * built from the same vocabulary deliberately: the difference between a
+     * Wasp and a Hauler should be a silhouette you can name at a glance,
+     * not a different art style.
+     */
+    function hullWasp() {
+        return merge([
+            scaleMesh(prism(4, 5.2, 2.6, 3.0), 2.9, 1, 1),
+            offsetMesh(scaleMesh(prism(4, 3.0, 1.4, 2.4), 1.5, 0.8, 0.9), 3.0, 0, 1.9),
+            rotZMesh(offsetMesh(box(11, 13, 1.1), -2.5, 0, -0.6), 0.5),
+            offsetMesh(box(4, 2.2, 3.2), -7.5, 4.6, 1.2),
+            offsetMesh(box(4, 2.2, 3.2), -7.5, -4.6, 1.2),
+            offsetMesh(box(4.4, 2.6, 2.6), -8.6, 3.0, 0),
+            offsetMesh(box(4.4, 2.6, 2.6), -8.6, -3.0, 0),
+        ]);
+    }
+
+    /* Hauler: a stub with cargo blisters bolted along the spine. */
+    function hullHauler() {
+        return merge([
+            scaleMesh(prism(6, 5.0, 3.6, 3.4), 1.5, 1, 1),
+            offsetMesh(scaleMesh(prism(6, 1.8, 0.5, 1.8), 1, 1, 1), 5.6, 0, 2.4),
+            offsetMesh(box(9, 13, 1.0), -1.2, 0, -0.5),
+            offsetMesh(box(9.5, 4.4, 3.6), -4.0, 5.4, 0.6),
+            offsetMesh(box(9.5, 4.4, 3.6), -4.0, -5.4, 0.6),
+            offsetMesh(box(4.0, 3.0, 2.4), -8.2, 3.4, 0),
+            offsetMesh(box(4.0, 3.0, 2.4), -8.2, -3.4, 0),
+        ]);
+    }
+
+    /* Warden: a patrol boat with a heavy collar and a single big engine. */
+    function hullWarden() {
+        return merge([
+            scaleMesh(prism(6, 6.2, 4.6, 4.2), 1.5, 1, 1),
+            offsetMesh(scaleMesh(prism(6, 2.4, 0.6, 2.0), 1, 1, 1), 8.6, 0, 1.4),
+            offsetMesh(box(5.0, 17, 1.4), -0.5, 0, -0.3),
+            offsetMesh(box(6.0, 3.0, 3.0), -1.0, 7.4, 0.4),
+            offsetMesh(box(6.0, 3.0, 3.0), -1.0, -7.4, 0.4),
+            offsetMesh(box(5.4, 4.6, 3.4), -9.0, 0, 0),
+        ]);
+    }
+
+    /* Bulwark: a slab. Widest wing in the hangar, and it looks it. */
+    function hullBulwark() {
+        return merge([
+            scaleMesh(prism(6, 6.6, 5.2, 4.4), 1.5, 1, 1),
+            offsetMesh(scaleMesh(prism(6, 3.0, 0.6, 2.6), 1, 1, 1), 10.0, 0, 0),
+            offsetMesh(box(16, 4.6, 2.2), -0.5, 8.8, -0.5),
+            offsetMesh(box(16, 4.6, 2.2), -0.5, -8.8, -0.5),
+            offsetMesh(box(5.0, 5.2, 3.8), -10.5, 5.2, 0),
+            offsetMesh(box(5.0, 5.2, 3.8), -10.5, -5.2, 0),
+        ]);
+    }
+
+    /* Vandal: nose-heavy gunboat, all business at the front. */
+    function hullVandal() {
+        return merge([
+            scaleMesh(prism(6, 4.4, 3.4, 3.2), 2.1, 1, 1),
+            offsetMesh(scaleMesh(prism(6, 5.2, 0.7, 2.6), 1, 1, 1), 8.0, 0, 0.6),
+            offsetMesh(box(3.2, 2.8, 2.6), 10.4, 3.2, 0.4),
+            offsetMesh(box(3.2, 2.8, 2.6), 10.4, -3.2, 0.4),
+            rotZMesh(offsetMesh(box(10, 11, 1.0), -2.0, 0, -0.7), 0.42),
+            offsetMesh(box(4.2, 3.2, 2.6), -8.0, 3.6, 0),
+            offsetMesh(box(4.2, 3.2, 2.6), -8.0, -3.6, 0),
+        ]);
+    }
+
+    /* Lance: an escort. Long and even, with a collar around the waist and a
+     * pair of outrigger field emitters. */
+    function hullLance() {
+        return merge([
+            scaleMesh(prism(6, 6.0, 3.2, 3.0), 1.8, 1, 1),
+            offsetMesh(scaleMesh(prism(6, 2.2, 0.6, 2.0), 1, 1, 1), 9.4, 0, 1.2),
+            offsetMesh(box(3.4, 15, 1.2), -1.6, 0, -0.4),
+            offsetMesh(box(4.6, 3.0, 3.2), -0.4, 7.6, 0.2),
+            offsetMesh(box(4.6, 3.0, 3.2), -0.4, -7.6, 0.2),
+            offsetMesh(box(4.0, 4.0, 3.0), -8.6, 3.8, 0),
+            offsetMesh(box(4.0, 4.0, 3.0), -8.6, -3.8, 0),
+        ]);
+    }
+
+    /* Hound: a brawler. Squat, nose low, wings swept hard forward. */
+    function hullHound() {
+        return merge([
+            scaleMesh(prism(5, 4.2, 4.4, 3.4), 1.9, 1, 1),
+            offsetMesh(scaleMesh(prism(5, 3.4, 0.8, 2.4), 1, 1, 1), 7.2, 0, 0.2),
+            rotZMesh(offsetMesh(box(10, 12, 1.2), -1.0, 0, -0.5), 0.62),
+            offsetMesh(box(3.0, 2.6, 2.4), 8.0, 3.6, -0.2),
+            offsetMesh(box(3.0, 2.6, 2.4), 8.0, -3.6, -0.2),
+            offsetMesh(box(4.6, 4.2, 3.2), -7.6, 0, 0),
+        ]);
+    }
+
+    /* Oracle: a prospector. A deep cargo spine with sensor dishes fore and
+     * aft - the shape of a ship built to read rock rather than to fight. */
+    function hullOracle() {
+        return merge([
+            scaleMesh(prism(8, 5.4, 4.4, 4.0), 1.6, 1, 1),
+            offsetMesh(scaleMesh(prism(8, 1.8, 0.5, 2.0), 1, 1, 1), 8.2, 0, 2.2),
+            offsetMesh(box(7.0, 12, 4.2), -5.2, 0, 0.6),
+            offsetMesh(box(6.0, 2.4, 2.6), 8.0, 4.4, 0),
+            offsetMesh(box(6.0, 2.4, 2.6), 8.0, -4.4, 0),
+            offsetMesh(box(5.2, 4.4, 3.4), -10.0, 4.2, 0),
+            offsetMesh(box(5.2, 4.4, 3.4), -10.0, -4.2, 0),
+        ]);
+    }
+
+    var HULL_MESH = {
+        wasp: hullWasp, hauler: hullHauler, warden: hullWarden,
+        bulwark: hullBulwark, vandal: hullVandal,
+        lance: hullLance, hound: hullHound, oracle: hullOracle,
+    };
+
     /* Hull meshes are geometry data, not per-entity state, so there are only
-     * ever five of them. Building one per ship was the single most wasteful
-     * thing in the renderer: 13 NPCs each rebuilding identical hulls on
-     * their first frame. */
-    function hullFor(tier, isPlayer) {
-        var key = isPlayer ? "hullPlayer"
-            : tier <= 2 ? "hullScout"
-            : tier <= 4 ? "hullGunship"
-            : "hullHeavy";
+     * ever a handful of them. Building one per ship was the single most
+     * wasteful thing in the renderer: 13 NPCs each rebuilding identical
+     * hulls on their first frame. */
+    function hullFor(tier, isPlayer, hullId) {
+        var key, build;
+        if (isPlayer) {
+            /* Keyed by hull id, so buying a Hauler changes the silhouette
+             * rather than just the paint. */
+            key = "hullPlayer:" + (hullId || "wasp");
+            build = HULL_MESH[hullId] || hullWasp;
+        } else {
+            key = tier <= 2 ? "hullScout"
+                : tier <= 4 ? "hullGunship" : "hullHeavy";
+            build = tier <= 2 ? hullScout
+                : tier <= 4 ? hullGunship : hullHeavy;
+        }
         if (!meshCache[key]) {
-            var m = isPlayer ? hullFighter()
-                : tier <= 2 ? hullScout()
-                : tier <= 4 ? hullGunship()
-                : hullHeavy();
-            meshCache[key] = scaleMesh(m, HULL_SCALE, HULL_SCALE, HULL_SCALE);
+            meshCache[key] = scaleMesh(build(), HULL_SCALE, HULL_SCALE, HULL_SCALE);
         }
         return meshCache[key];
     }
-
     /* A gem: two pyramids base to base. Reads as a crystal from any angle. */
     function hullGem(r) {
         return merge([
@@ -691,6 +794,7 @@
         }
 
         var frac = ship.hull / ship.maxHull;
+        var sFrac = ship.maxShield ? S.clamp(ship.shield / ship.maxShield, 0, 1) : 0;
 
         /* Lock-on bracket: tells you what the soft aim has latched onto. */
         if (ship.isPlayer && ship.lockTarget && ship.lockTarget.alive) {
@@ -712,8 +816,8 @@
             ctx.stroke();
         }
 
-        /* Hull bar under each NPC: you should never lose track of what you are
-         * shooting, or how close it is to dying. */
+        /* Two bars per hostile, because it has two pools. Shield sits on top
+         * so "am I nearly through its shields" is a glance, not a sum. */
         if (!ship.isPlayer) {
             var sp = project(ship.x, ship.y, ship.z - 15);
             var bw = Math.max(20, ship.radius * 2) * cam.zoom;
@@ -721,6 +825,28 @@
             ctx.fillRect(sp[0] - bw / 2, sp[1], bw, 3);
             ctx.fillStyle = frac > 0.5 ? "#ff8a5c" : "#ff5470";
             ctx.fillRect(sp[0] - bw / 2, sp[1], bw * S.clamp(frac, 0, 1), 3);
+            if (ship.maxShield) {
+                var sy2 = sp[1] - 3.5;
+                ctx.fillStyle = "rgba(0,0,0,0.6)";
+                ctx.fillRect(sp[0] - bw / 2, sy2, bw, 2.5);
+                ctx.fillStyle = "#7dd3fc";
+                ctx.fillRect(sp[0] - bw / 2, sy2, bw * sFrac, 2.5);
+            }
+        } else if (ship.maxShield) {
+            /* The player's own shield is a ring around the hull rather than
+             * another bar, so it never competes with the damage numbers. */
+            if (sFrac > 0.001 && sFrac < 0.999) {
+                var pp = project(ship.x, ship.y, ship.z);
+                ctx.save();
+                ctx.globalCompositeOperation = "lighter";
+                ctx.strokeStyle = "rgba(125,211,252," + (0.18 + 0.22 * (1 - sFrac)).toFixed(3) + ")";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(pp[0], pp[1], (ship.radius + 9) * cam.zoom, -Math.PI / 2,
+                    -Math.PI / 2 + Math.PI * 2 * sFrac);
+                ctx.stroke();
+                ctx.restore();
+            }
         }
     }
 
@@ -798,6 +924,43 @@
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
             ctx.arc(p[0], p[1], Math.max(1.2, r * 0.45), 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    /* The capacitor round. Drawn as a bright core plus a trailing streak so it
+     * is unmistakably a different weapon on a phone screen where a blaster
+     * pulse and an ammo shot are both small moving dots. */
+    function drawAmmo(world) {
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        var list = world.ammo;
+        for (var i = 0; i < list.length; i++) {
+            var a = list[i];
+            if (!a.on) continue;
+
+            var p = project(a.x, a.y, a.z);
+            if (p[0] < -40 || p[0] > W + 40 || p[1] < -40 || p[1] > H + 40) continue;
+
+            var r = a.r * cam.zoom * 2.4;
+            glow(p[0], p[1], r * 3.6, [192, 132, 252], 0.7);
+
+            /* Streak, length scaled by how fast the round is travelling on
+             * screen. Cheap: two segments, no gradient. */
+            var tail = Math.min(26, 6 + Math.abs(a.vx) * 0.006) * cam.zoom;
+            var ang = Math.atan2(a.vy, a.vx);
+            ctx.strokeStyle = "rgba(216,180,254,0.55)";
+            ctx.lineWidth = Math.max(1.4, r * 0.42);
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            ctx.moveTo(p[0], p[1]);
+            ctx.lineTo(p[0] - Math.cos(ang) * tail, p[1] - Math.sin(ang) * tail * P.ySquash);
+            ctx.stroke();
+
+            ctx.fillStyle = "#f5f3ff";
+            ctx.beginPath();
+            ctx.arc(p[0], p[1], Math.max(1.6, r * 0.5), 0, Math.PI * 2);
             ctx.fill();
         }
         ctx.restore();
@@ -1046,6 +1209,143 @@
             ctx.stroke();
             ctx.setLineDash([]);
         }
+        ctx.restore();
+    }
+
+    /* ===== Faction base =====
+     * A structure, not a ship: a ringed drum with a rotating collar and a
+     * core light that dims as its shields go down. Built from the same two
+     * primitives as everything else, so it inherits the same per-face
+     * lighting for free.
+     */
+    function baseMesh() {
+        return merge([
+            scaleMesh(prism(8, 26, 30, 22), 1, 1, 1),
+            offsetMesh(scaleMesh(prism(8, 8, 40, 30), 1, 1, 1), 22, 0, 4),
+            offsetMesh(box(30, 96, 8), -6, 0, 18),
+            offsetMesh(box(22, 20, 16), -18, 26, 0),
+            offsetMesh(box(22, 20, 16), -18, -26, 0),
+            offsetMesh(box(18, 16, 14), -22, 0, 0),
+        ]);
+    }
+
+    function drawBase(world, dt) {
+        var b = world.base;
+        if (!b) return;
+        if (!meshCache.baseMesh) meshCache.baseMesh = baseMesh();
+
+        var p = project(b.x, b.y, b.z);
+        var e = edgePoint(p[0], p[1], 90);
+        var col = b.color;
+
+        ctx.save();
+
+        /* Off-screen: a chevron and a name, because a raid you cannot find
+         * is the same as no raid. */
+        if (!e.inside) {
+            var c = project(world.player ? world.player.x : p[0],
+                world.player ? world.player.y : p[1], 0);
+            chevron(e.x, e.y, Math.atan2(e.y - c[1], e.x - c[0]), 16, col);
+            ctx.font = "800 10px ui-monospace, monospace";
+            ctx.textAlign = "center";
+            ctx.fillStyle = col;
+            ctx.fillText(b.name, e.x, e.y + 30);
+            ctx.restore();
+            return;
+        }
+
+        if (b.hitFlash > 0) col = mixTo(parseHex(b.color), [255, 255, 255], 0.6);
+        var rgb = b.alive ? parseHex(col) : [70, 74, 84];
+        drawMesh(meshCache.baseMesh, b.x, b.y, b.z, b.spin, rgb);
+
+        /* A collar ring that spins the other way, so the structure reads as
+         * alive even before it shoots at you. */
+        ctx.globalCompositeOperation = "lighter";
+        ctx.strokeStyle = b.alive ? col : "rgba(90,96,110,0.5)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([14, 12]);
+        ctx.lineDashOffset = -world.time * 30;
+        ctx.beginPath();
+        ctx.ellipse(p[0], p[1], b.r * cam.zoom * 0.86,
+            b.r * cam.zoom * 0.86 * P.ySquash, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        /* Shield ring. This is the read the whole base exists for: it is the
+         * only marker in the game that says "the laser will not work here". */
+        var sFrac = b.maxShield > 0 ? S.clamp(b.shield / b.maxShield, 0, 1) : 0;
+        ctx.strokeStyle = sFrac > 0.02 ? "rgba(125,211,252,0.9)" : "rgba(125,211,252,0.22)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], b.r * cam.zoom * 0.7, -Math.PI / 2,
+            -Math.PI / 2 + Math.PI * 2 * sFrac);
+        ctx.stroke();
+
+        if (b.alive && sFrac > 0.02) {
+            glow(p[0], p[1], b.r * cam.zoom * 1.1, [125, 211, 252], 0.10 + 0.16 * sFrac);
+        }
+        ctx.globalCompositeOperation = "source-over";
+
+        /* Two bars under it, same order the damage resolves in. */
+        var hp = S.clamp(b.hull / b.maxHull, 0, 1);
+        var bw = Math.max(90, b.r * 1.5) * cam.zoom;
+        var by = p[1] + b.r * cam.zoom * 0.55;
+        ctx.fillStyle = "rgba(0,0,0,0.65)";
+        ctx.fillRect(p[0] - bw / 2, by, bw, 5);
+        ctx.fillStyle = hp > 0.35 ? col : "#ff5470";
+        ctx.fillRect(p[0] - bw / 2, by, bw * hp, 5);
+        ctx.fillStyle = "rgba(0,0,0,0.65)";
+        ctx.fillRect(p[0] - bw / 2, by - 6, bw, 4);
+        ctx.fillStyle = sFrac > 0.02 ? "#7dd3fc" : "rgba(125,211,252,0.22)";
+        ctx.fillRect(p[0] - bw / 2, by - 6, bw * sFrac, 4);
+
+        ctx.font = "800 10px ui-monospace, monospace";
+        ctx.textAlign = "center";
+        ctx.fillStyle = b.alive ? col : "#6a7280";
+        ctx.fillText(b.name, p[0], by + 18);
+        ctx.restore();
+        void dt;
+    }
+
+    /* ===== Wave portal =====
+     * Only drawn while a WAVE run is live. It is the one thing in the game
+     * you are told to watch, so it is the one thing drawn at full strength
+     * from anywhere on the map.
+     */
+    function drawPortal(world) {
+        var m = S.Modes.status();
+        if (!m || !m.active || m.id !== "wave" || !m.portal) return;
+        var pt = m.portal;
+        var p = project(pt.x, pt.y, 18);
+
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        var pulse = 0.5 + 0.5 * Math.sin(pt.pulse * 2.4);
+        var r = pt.r * cam.zoom * (0.55 + pulse * 0.12);
+
+        glow(p[0], p[1], r * 1.6, [167, 139, 250], 0.22 + 0.12 * pulse);
+
+        ctx.strokeStyle = "rgba(196,181,253,0.9)";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        /* A rotating inner ring, so it reads as open rather than painted. */
+        ctx.strokeStyle = "rgba(139,92,246,0.75)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([10, 16]);
+        ctx.lineDashOffset = -pt.pulse * 40;
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], r * 0.62, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.globalCompositeOperation = "source-over";
+        ctx.font = "800 11px ui-monospace, monospace";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#c4b5fd";
+        ctx.fillText("PORTAL", p[0], p[1] - r - 10);
         ctx.restore();
     }
 
@@ -1298,15 +1598,97 @@
 
         drawParticles(world);
         drawBullets(world);
+        drawAmmo(world);
         drawMissiles(world);
         drawMines(world);
         drawBountyMarker(world);
+        drawTargetMarker(world);
+        drawRadarSweep(world);
+        drawBase(world, dt);
+        drawPortal(world);
         drawFloaters(world);
         drawDamageMarks(world);
         drawDockRing(world);
         drawBounds(world);
         drawHitFlash(world);
         drawStationPointer(world);
+    }
+
+    /* ===== Target and radar =====
+     * The lock is the player's explicit decision, so it gets a bracket that
+     * is clearly heavier than the aim assist's hint, plus an edge chevron
+     * when the target is off-screen. Without the chevron, locking something
+     * that flies behind you reads as the game losing your target.
+     */
+    function drawTargetMarker(world) {
+        var t = world.target;
+        var ship = world.player;
+        if (!t || !t.alive || !ship || !ship.alive) return;
+
+        var p = project(t.x, t.y, t.z);
+        var e = edgePoint(p[0], p[1], 54);
+        ctx.save();
+
+        if (!e.inside) {
+            var c = project(ship.x, ship.y, ship.z);
+            chevron(e.x, e.y, Math.atan2(e.y - c[1], e.x - c[0]), 13, "#67e8f9");
+            ctx.font = "800 10px ui-monospace, monospace";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#a5f3fc";
+            ctx.fillText("TARGET", e.x, e.y + 26);
+            ctx.restore();
+            return;
+        }
+
+        var rr = (t.radius + 18) * cam.zoom;
+        ctx.strokeStyle = "rgba(103,232,249,0.95)";
+        ctx.lineWidth = 2;
+        var arm = rr * 0.42;
+        /* Four corner brackets rather than a full box: it frames the hull
+         * without hiding it. */
+        for (var q = 0; q < 4; q++) {
+            var cx = q & 1 ? 1 : -1;
+            var cy = q & 2 ? 1 : -1;
+            ctx.beginPath();
+            ctx.moveTo(p[0] + cx * rr, p[1] + cy * rr - cy * arm);
+            ctx.lineTo(p[0] + cx * rr, p[1] + cy * rr);
+            ctx.lineTo(p[0] + cx * rr - cx * arm, p[1] + cy * rr);
+            ctx.stroke();
+        }
+
+        /* Shield ring on the lock, so "am I through its shields" is visible
+         * on the thing you are actually aiming at. */
+        if (t.maxShield > 0) {
+            var sf = S.clamp(t.shield / t.maxShield, 0, 1);
+            ctx.strokeStyle = sf > 0.02 ? "rgba(125,211,252,0.85)" : "rgba(125,211,252,0.25)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(p[0], p[1], rr * 0.82, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * sf);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    /* The Radar CPU: while it runs, the player gets a live sweep ring. It is
+     * purely feedback - what it actually reveals is drawn on the minimap,
+     * which is where the player is already looking. */
+    function drawRadarSweep(world) {
+        var ship = world.player;
+        if (!ship || !ship.alive || ship.cpuKey !== "radar" || ship.cpuTimer <= 0) return;
+        var p = project(ship.x, ship.y, ship.z);
+        var maxR = (C.camera.viewSpan * cam.zoom) * 0.62;
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        var k = S.clamp(ship.cpuTimer / S.CONFIG.cpu.radarTime, 0, 1);
+        for (var i = 0; i < 2; i++) {
+            var frac = (world.time * 0.8 + i * 0.5) % 1;
+            ctx.strokeStyle = "rgba(103,232,249," + (0.20 * k * (1 - frac)).toFixed(3) + ")";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(p[0], p[1], maxR * frac, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        ctx.restore();
     }
 
     /* ===== Minimap =====
@@ -1366,12 +1748,56 @@
         mctx.arc(mx(world.station.x), my(world.station.y), 3.5, 0, Math.PI * 2);
         mctx.fill();
 
+        /* Normally the minimap only shows hostiles inside the camera's view span -
+         * revealing the whole sector for free would delete the Radar CPU. While
+         * the radar is running that rule is lifted, which is exactly what the
+         * player paid energy for. */
+        var radar = !!(player && player.cpuKey === "radar" && player.cpuTimer > 0);
+        /* Off the radar, only hostiles you could plausibly see on screen.
+         * C.camera.viewSpan is the same number the camera is fitted to, so
+         * the minimap can never promise contact the view will not deliver. */
+        var reach = C.camera.viewSpan / 2;
+        var reach2 = reach * reach;
+
         for (i = 0; i < world.ships.length; i++) {
             var ship = world.ships[i];
             if (ship.isPlayer) continue;
+
+            if (!radar) {
+                var ddx = ship.x - ox, ddy = ship.y - oy;
+                if (ddx * ddx + ddy * ddy > reach2) continue;
+            }
+
             mctx.fillStyle = ship.color;
             mctx.beginPath();
-            mctx.arc(mx(ship.x), my(ship.y), 2.8, 0, Math.PI * 2);
+            mctx.arc(mx(ship.x), my(ship.y), ship.isBounty ? 3.6 : 2.8, 0, Math.PI * 2);
+            mctx.fill();
+
+            /* The lock is ringed on the radar too, so a target you cannot
+             * see is still findable. */
+            if (world.target === ship) {
+                mctx.strokeStyle = "#a5f3fc";
+                mctx.lineWidth = 1.4;
+                mctx.beginPath();
+                mctx.arc(mx(ship.x), my(ship.y), 5.5, 0, Math.PI * 2);
+                mctx.stroke();
+            }
+        }
+
+        /* A faction base is on the radar always, shaded or not: it is the reason
+         * you came to this map and you should never have to hunt for it. */
+        if (world.base) {
+            var bx = mx(world.base.x), by = my(world.base.y);
+            mctx.strokeStyle = world.base.alive
+                ? world.base.color : "rgba(110,118,134,0.5)";
+            mctx.lineWidth = 1.5;
+            mctx.beginPath();
+            mctx.arc(bx, by, 7, 0, Math.PI * 2);
+            mctx.stroke();
+            mctx.fillStyle = world.base.alive
+                ? world.base.color : "rgba(110,118,134,0.5)";
+            mctx.beginPath();
+            mctx.arc(bx, by, 3, 0, Math.PI * 2);
             mctx.fill();
         }
 
@@ -1419,7 +1845,7 @@
 
     function prepareShip(ship) {
         if (ship.mesh) return;
-        ship.mesh = hullFor(ship.tier, ship.isPlayer);
+        ship.mesh = hullFor(ship.tier, ship.isPlayer, ship.hullId);
         /* Bigger tiers get bigger hulls, but not linearly - a Reaper should
          * feel like a threat, not a postage stamp. */
         ship.scale = ship.isPlayer ? 1 : 0.8 + Math.min(1.4, ship.tier * 0.1);
@@ -1493,8 +1919,16 @@
             drawMesh: drawMesh,
             box: box, prism: prism, merge: merge, roughen: roughen,
             scaleMesh: scaleMesh, offsetMesh: offsetMesh, rotZMesh: rotZMesh,
-            hullFighter: hullFighter, hullScout: hullScout,
-            hullGunship: hullGunship, hullHeavy: hullHeavy, buildStation: buildStation,
+            hullFighter: hullWasp, hullScout: hullScout,
+            hullGunship: hullGunship, hullHeavy: hullHeavy,
+            /* Every hangar hull is exported so the geometry test can push all
+             * five through the real drawMesh. A new silhouette that nobody
+             * checked against the projection is a new silhouette that can be
+             * silently wrong. */
+            hullWasp: hullWasp, hullHauler: hullHauler, hullWarden: hullWarden,
+            hullBulwark: hullBulwark, hullVandal: hullVandal,
+            hullLance: hullLance, hullHound: hullHound, hullOracle: hullOracle,
+            buildStation: buildStation,
         },
     };
 

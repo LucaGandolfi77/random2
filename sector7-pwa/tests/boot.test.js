@@ -64,7 +64,16 @@ function makeEl(id, tag) {
         get textContent() { return this._text; },
         set textContent(v) { this._text = String(v); },
         get innerHTML() { return this._html; },
-        set innerHTML(v) { this._html = String(v); },
+        set innerHTML(v) {
+            this._html = String(v);
+            /* Drop cached selector results. A real DOM re-queries every time,
+             * and the station panels rebuild their whole markup on every
+             * purchase - so a cache here silently returns the PREVIOUS
+             * generation of buttons, with the previous generation's markup
+             * and the previous generation's handlers. Node identity still
+             * survives, because matchNode keys off markup in a global map. */
+            this._qsaCache = null;
+        },
 
         classList: {
             add: (c) => classes.add(c),
@@ -111,6 +120,9 @@ function makeEl(id, tag) {
             return out;
         },
         querySelector(sel) { return this.querySelectorAll(sel)[0] || null; },
+        /* input.js uses this to keep a tap on the right half of the canvas
+         * from being swallowed by an action pad that happens to overlap it. */
+        closest() { return null; },
     };
     el.width = 132;
     el.height = 132;
@@ -217,7 +229,7 @@ Object.defineProperty(globalThis, "navigator", {
 
 /* Load order matters: config first (everything reads it), then storage and
  * sectors (world and station depend on them). */
-const FILES = ["config.js", "storage.js", "sectors.js", "world.js", "render.js",
+const FILES = ["config.js", "storage.js", "sectors.js", "modes.js", "world.js", "render.js",
     "stations.js", "contracts.js", "bounty.js", "input.js", "player.js",
     "npcs.js", "audio.js", "ui.js", "main.js"];
 for (const f of FILES) (0, eval)(fs.readFileSync(path.join(SRC, f), "utf8"));
@@ -382,7 +394,7 @@ section("station");
         buyResult && buyResult.spent);
 
     /* And it must be persisted immediately, not only on undock. */
-    const saved = JSON.parse(store.get("sector7.v1.ship"));
+    const saved = JSON.parse(store.get("sector7.v2.ship"));
     check("the purchase is written to storage straight away",
         saved.modules[Object.keys(saved.modules)[0]] >= 1 && saved.crystals >= 0);
 
@@ -422,6 +434,301 @@ section("station");
         !els.get("screen-menu").classList.contains("hidden"));
 }
 
+/* ---------- cargo, ammo, CPUs ---------- */
+/* The new systems are mostly UI, and boot.test.js exists precisely because
+ * the other suites deliberately skip the browser layer: a renamed id or an
+ * unwired button would otherwise only surface by opening a browser. */
+section("cargo, ammo and CPUs");
+{
+    let err = null;
+    let result = {};
+    try {
+        els.get("btn-play")._listeners.click[0]();
+        for (let i = 0; i < 20; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+
+        const p = S.World.world.player;
+
+        /* --- cargo: a loaded hold has to dock into the tank ---------- */
+        p.hold = 420;
+        p.energy = 100;
+        p.x = S.World.world.station.x;
+        p.y = S.World.world.station.y;
+        const dockBtn = els.get("btn-dock");
+        dockBtn._listeners.pointerdown[0]({
+            pointerId: 9, clientX: 340, clientY: 700,
+            preventDefault() {}, stopPropagation() {},
+        });
+        for (let i = 0; i < 200 && !S.Player.state.docked; i++) {
+            const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7);
+        }
+        dockBtn._listeners.pointerup[0]({ pointerId: 9, preventDefault() {}, stopPropagation() {} });
+        result.dockedEnergy = p.energy;
+        result.holdAfterDock = p.hold;
+        result.lastDeposit = p.lastDeposit;
+    } catch (e) { err = e; }
+    check("a loaded hold docks and banks into the tank", !err && result.dockedEnergy >= 520,
+        err ? (err.stack || err.message) : ("energy " + result.dockedEnergy));
+    check("the hold is empty after docking", result.holdAfterDock === 0);
+    check("the station reports what the trip paid", result.lastDeposit === 420,
+        result.lastDeposit);
+
+    /* --- CPUs: buy one, fit it, and use it in flight ---------- */
+    err = null;
+    result = {};
+    try {
+        const p = S.World.world.player;
+        p.energy = 5000;
+        els.get("tab-cpus")._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+
+        /* The fake DOM understands `[attr]` but not `[attr="value"]`, so the
+         * row is located by reading its attribute rather than by querying a
+         * compound selector the harness would silently mis-resolve. */
+        const cpuRow = (key) => {
+            const rows = els.get("st-cpus").querySelectorAll("[data-cpu]");
+            return rows.find((b) => b.getAttribute("data-cpu") === key) || null;
+        };
+
+        const buy = cpuRow("radar");
+        const before = p.energy;
+        buy._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.key = "radar";
+        result.installed = !!p.cpus.radar;
+        result.fitted = p.cpu === "radar";
+        result.spent = before - p.energy === S.cpuCost("radar");
+
+        /* Buying a second one must fit it too, and swapping back has to be
+         * free - a choice you cannot take back is not a choice. */
+        const energyBefore = p.energy;
+        cpuRow("warp")._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.secondFitted = p.cpu === "warp";
+        result.boughtBoth = !!p.cpus.warp;
+        result.swapCost = energyBefore - p.energy === S.cpuCost("warp");
+
+        const fitBack = els.get("st-cpus").querySelectorAll("[data-fit]")
+            .find((b) => b.getAttribute("data-fit") === "radar");
+        const energyBeforeSwap = p.energy;
+        fitBack._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.swappedBack = p.cpu === "radar";
+        result.swapFree = p.energy === energyBeforeSwap;
+
+        els.get("st-launch")._listeners.click[0]();
+        for (let i = 0; i < 10; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+    } catch (e) { err = e; }
+    check("buying a CPU installs and fits it",
+        !err && result.installed && result.fitted && result.spent,
+        err ? (err.stack || err.message) : JSON.stringify(result));
+    check("a second CPU can be bought and takes the slot",
+        result.secondFitted && result.boughtBoth && result.swapCost,
+        JSON.stringify(result));
+    check("swapping between owned CPUs is free",
+        result.swappedBack && result.swapFree, JSON.stringify(result));
+
+    /* --- the CPU button and the ammo button in flight ---------- */
+    err = null;
+    result = {};
+    try {
+        const p = S.World.world.player;
+        p.energy = 5000;
+        /* Fit it explicitly: the swap sequence above ran while docked and the
+         * live ship is what carries the slot into flight. */
+        p.cpu = "insta";
+        p.cpus.insta = true;
+        p.cooldownCpu = 0;
+        p.invuln = 0;
+        els.get("btn-cpu")._listeners.pointerdown[0]({
+            pointerId: 11, clientX: 300, clientY: 690,
+            preventDefault() {}, stopPropagation() {},
+        });
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        els.get("btn-cpu")._listeners.pointerup[0]({
+            pointerId: 11, preventDefault() {}, stopPropagation() {},
+        });
+        result.cpuUsed = p.cooldownCpu > 0 || p.invuln > 0;
+
+        /* The capacitor round has to actually leave the pool. */
+        p.cooldownAmmo = 0;
+        const ammoBtn = els.get("btn-ammo");
+        ammoBtn._listeners.pointerdown[0]({
+            pointerId: 12, clientX: 340, clientY: 620,
+            preventDefault() {}, stopPropagation() {},
+        });
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        ammoBtn._listeners.pointerup[0]({
+            pointerId: 12, preventDefault() {}, stopPropagation() {},
+        });
+        result.ammoFired = p.cooldownAmmo > 0 || S.World.world.ammo.some((a) => a.on);
+    } catch (e) { err = e; }
+    check("the CPU button fires the fitted CPU", !err && result.cpuUsed,
+        err ? (err.stack || err.message) : JSON.stringify(result));
+    check("the AMMO button fires the capacitor round", result.ammoFired);
+
+    /* --- targeting: a tap on the right half locks, a second clears ---- */
+    err = null;
+    result = {};
+    try {
+        const canvas = els.get("game-canvas");
+        const hostile = S.World.nearestHostile(S.World.world.player, 4000);
+        S.World.world.player.x = hostile.x + 200;
+        S.World.world.player.y = hostile.y;
+        const tap = {
+            pointerId: 21, clientX: Math.round(window.innerWidth * 0.8), clientY: 400,
+            target: canvas, preventDefault() {}, stopPropagation() {},
+        };
+        /* Both canvas pointerdown handlers see the event in a real browser:
+         * the stick first (which declines the right half) and then the
+         * target tap. Dispatching only one would test neither honestly. */
+        const fireTap = () => {
+            for (const fn of canvas._listeners.pointerdown) fn(tap);
+        };
+        fireTap();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.locked = S.World.world.target !== null;
+        result.panelVisible = !els.get("target-panel").classList.contains("hidden");
+        result.note = els.get("tgt-note").textContent;
+        fireTap();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.cleared = S.World.world.target === null;
+    } catch (e) { err = e; }
+    check("tapping the right half locks a target", !err && result.locked,
+        err ? (err.stack || err.message) : JSON.stringify(result));
+    check("the target panel appears while a lock is held", result.panelVisible);
+    check("the target panel says which gun to use", !!result.note && result.note.length > 0,
+        result.note);
+    check("tapping again clears the lock", result.cleared);
+}
+
+/* ---------- hangar ---------- */
+/* The hangar is almost entirely UI, which is exactly the surface the other
+   three suites cannot see. Buy a hull, fit a part, open the cheat. */
+section("hangar");
+{
+    let err = null;
+    let r = {};
+    try {
+        els.get("btn-play")._listeners.click[0]();
+        for (let i = 0; i < 20; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        W.player.energy = 20000;
+        els.get("st-hangar")._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+    } catch (e) { err = e; }
+    check("the hangar opens from the station", !err && !els.get("screen-hangar").classList.contains("hidden"),
+        err && (err.stack || err.message));
+
+    /* Buy a hull through the rendered row, not through the model. */
+    err = null;
+    try {
+        const row = els.get("hg-hulls").querySelectorAll("[data-hull]")
+            .find((b) => b.getAttribute("data-hull") === "hauler");
+        const before = W.player.energy;
+        row._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.energySpent = before - W.player.energy;
+        r.hullId = W.player.hullId;
+        r.holdGrew = W.player.holdMax;
+    } catch (e) { err = e; }
+    check("buying a hull runs clean", !err, err && (err.stack || err.message));
+    check("the hull is bought, paid for and now active",
+        r.energySpent > 0 && r.hullId === "hauler", JSON.stringify(r));
+    check("the hull's passive changed the ship", r.holdGrew > 200, r.holdGrew);
+
+    /* Fit a part, then swap it: the swap must be free. */
+    err = null;
+    try {
+        const rail = els.get("hg-parts").querySelectorAll("[data-part]")
+            .find((b) => b.getAttribute("data-part") === "rail");
+        rail._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.fittedRail = W.player.parts.laser && W.player.parts.laser.key;
+
+        const pulse = els.get("hg-parts").querySelectorAll("[data-part]")
+            .find((b) => b.getAttribute("data-part") === "pulse");
+        pulse._listeners.click[0]();  // buy + fit
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        const energyBeforeSwap = W.player.energy;
+        r.fittedPulse = W.player.parts.laser && W.player.parts.laser.key;
+        r.swapFree = W.player.energy === energyBeforeSwap;
+    } catch (e) { err = e; }
+    check("buying a part installs it", !err && r.fittedRail === "rail", JSON.stringify(r));
+    check("a second part swaps into the same slot", r.fittedPulse === "pulse", JSON.stringify(r));
+
+    /* The cheat. While it is off the panel renders no buttons at all, so the
+   guard inside the handler is what has to stop it - and that guard is only
+     reachable by keeping hold of a real rendered button and firing it after
+     the toggle goes back off. */
+    err = null;
+    try {
+        els.get("hg-sandbox-toggle")._listeners.click[0]();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.sandboxOn = !!(W.player.hangar && W.player.hangar.sandbox);
+        r.bodyVisible = !els.get("hg-sandbox-body").classList.contains("is-hidden");
+
+        const grant = els.get("hg-sandbox-body").querySelectorAll("[data-cheat]")
+            .find((b) => (b.getAttribute("data-cheat") || "").startsWith("grant:energy"));
+        r.grantHandler = grant._listeners.click[0];
+
+        /* Fire it while on: it must work. */
+        const energyBefore = W.player.energy;
+        r.grantHandler();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.granted = W.player.energy > energyBefore;
+
+        /* Turn it off, then fire the very same handler again. */
+        els.get("hg-sandbox-toggle")._listeners.click[0]();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.sandboxOff = !(W.player.hangar && W.player.hangar.sandbox);
+        const energyAfterToggle = W.player.energy;
+        r.grantHandler();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.cheatBlocked = W.player.energy === energyAfterToggle;
+    } catch (e) { err = e; }
+    check("the sandbox toggle turns the cheat on",
+        !err && r.sandboxOn && r.bodyVisible, err ? (err.stack || err.message) : JSON.stringify(r));
+    check("an enabled cheat grants energy", r.granted);
+    check("the toggle turns it back off", r.sandboxOff);
+    check("the cheat refuses to run while sandbox is off", r.cheatBlocked);
+
+    /* Back on for the undock check, so the config under test is stable. */
+    err = null;
+    try {
+        els.get("hg-sandbox-toggle")._listeners.click[0]();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+    } catch (e) { err = e; }
+    check("the toggle is reversible", !err && W.player.hangar.sandbox);
+
+    /* The hangar tabs are wired generically, the same way the station tabs
+       are, so nothing references their ids by name. Click one to prove the
+       generic path actually switches panels. */
+    err = null;
+    try {
+        els.get("hg-tab-sandbox")._listeners.click[0]();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.tabSwitched = !els.get("hg-panel-sandbox").classList.contains("is-hidden") &&
+            els.get("hg-panel-hulls").classList.contains("is-hidden");
+    } catch (e) { err = e; }
+    check("a hangar tab switches the panel", !err && r.tabSwitched,
+        err ? (err.stack || err.message) : JSON.stringify(r));
+
+    /* Undocking must push the new configuration onto the live ship. */
+    err = null;
+    try {
+        els.get("hg-close")._listeners.click[0]();
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        els.get("st-launch")._listeners.click[0]();
+        for (let i = 0; i < 10; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.flyingHull = W.player.hullId;
+        r.flyingParts = JSON.stringify(W.player.parts);
+        r.flyingHold = W.player.holdMax;
+    } catch (e) { err = e; }
+    check("undocking carries the new configuration into flight",
+        !err && r.flyingHull === "hauler" && r.flyingHold > 200,
+        err ? (err.stack || err.message) : JSON.stringify(r));
+    check("the fitted parts survive undock", (r.flyingParts || "").indexOf("pulse") >= 0, r.flyingParts);
+}
+
 /* ---------- death and relaunch ---------- */
 section("death and relaunch");
 {
@@ -431,7 +738,12 @@ section("death and relaunch");
         els.get("btn-play")._listeners.click[0]();
         for (let i = 0; i < 20; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
         W.player.invuln = 0;
-        S.World.damageShip(W.player, 1e9);
+        /* A damage packet, not a bare number: damageShip takes shield and
+         * armour components, and an armour-only packet is held off entirely
+         * while a shield is up - which would leave this ship very much alive
+         * and the rest of the section testing nothing. */
+        W.player.shield = 0;
+        S.World.damageShip(W.player, { shield: 0, armor: 1e9 });
         for (let i = 0; i < 400; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
     } catch (e) { err = e; }
     check("dying and reaching the run-over panel runs clean", !err, err && (err.stack || err.message));

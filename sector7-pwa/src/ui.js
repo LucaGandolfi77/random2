@@ -35,6 +35,9 @@
         D.hud = el("hud");
         D.hullBar = el("hull-fill");
         D.hullText = el("stat-hull");
+        D.shieldBar = el("shield-fill");
+        D.shieldText = el("stat-shield");
+        D.hold = el("stat-hold");
         D.energy = el("stat-energy");
         D.crystals = el("stat-crystals");
         D.tier = el("stat-tier");
@@ -48,12 +51,25 @@
         D.bountyFill = el("bounty-fill");
         D.contractTrack = el("contract-track");
         D.stormWarn = el("storm-warn");
+        D.holdFull = el("hold-full");
+        D.cpuChip = el("cpu-chip");
+        D.cpuName = el("cpu-name");
+        D.cpuTimer = el("cpu-timer");
         D.dockHint = el("dock-hint");
         D.dockBar = el("dock-bar");
+
+        D.targetPanel = el("target-panel");
+        D.tgtFaction = el("tgt-faction");
+        D.tgtName = el("tgt-name");
+        D.tgtDist = el("tgt-dist");
+        D.tgtShield = el("tgt-shield");
+        D.tgtHull = el("tgt-hull");
+        D.tgtNote = el("tgt-note");
 
         D.screenMenu = el("screen-menu");
         D.screenDeath = el("screen-death");
         D.screenStation = el("screen-station");
+        D.screenHangar = el("screen-hangar");
 
         D.nameInput = el("name-input");
         D.menuBest = el("menu-best");
@@ -64,10 +80,46 @@
         D.osBest = el("os-best");
         D.osDeaths = el("os-deaths");
 
-        /* Station panel pieces are static; the rows inside them are rebuilt
+        /* One tab strip, wired the same way everywhere.
+     *
+     * `root` is the nav element, `sel` the class that marks its buttons, `attr`
+     * the data attribute that names the panel, and `prefix` the panel id
+     * prefix. Passing them in is what lets the station and the hangar share
+     * this instead of keeping two copies that have to stay in step forever.
+     *
+     * The two strips deliberately do NOT share a class. In a browser
+     * `querySelectorAll` is scoped to its element so sharing would be safe,
+     * but two tab handlers bound to each other's buttons is exactly the kind
+     * of latent collision that only shows up once one of them grows.
+     *
+     * One panel is visible at a time because the station panel already
+     * scrolls on a short phone and four full lists stacked on top of each
+     * other is unusable. */
+    function wireTabs(root, sel, attr, prefix, onChange) {
+        if (!root) return;
+        var tabs = root.querySelectorAll(sel);
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].addEventListener("click", (function (name) {
+                return function () {
+                    S.Audio.ui();
+                    for (var k = 0; k < tabs.length; k++) {
+                        var tabName = tabs[k].getAttribute(attr);
+                        tabs[k].classList.toggle("is-on", tabName === name);
+                        var panel = el(prefix + tabName);
+                        if (panel) panel.classList.toggle("is-hidden", tabName !== name);
+                    }
+                    if (onChange) onChange(name);
+                };
+            })(tabs[i].getAttribute(attr)));
+        }
+    }
+
+    /* Station panel pieces are static; the rows inside them are rebuilt
          * on every refresh. */
         D.stEnergy = el("st-energy");
         D.stHull = el("st-hull");
+        D.stShield = el("st-shield");
+        D.stShieldFill = el("st-shield-fill");
         D.stRows = el("st-rows");
         D.stRepair = el("st-repair");
         D.stRepairBtn = el("st-repair-btn");
@@ -77,11 +129,34 @@
         D.stTier = el("st-tier");
         D.stTabs = el("st-tabs");
         D.stContracts = el("st-contracts");
+        D.stCpus = el("st-cpus");
         D.stRefits = el("st-refits");
         D.stSectors = el("st-sectors");
         D.stSectorHint = el("st-sector-hint");
+        D.stHoldNote = el("st-hold-note");
         D.tab = "modules";
         D.assistToggle = el("btn-dock-toggle");
+
+        /* Hangar elements. */
+        D.hgActive = el("hg-active");
+        D.hgEnergy = el("hg-energy");
+        D.hgCrystals = el("hg-crystals");
+        D.hgHulls = el("hg-hulls");
+        D.hgParts = el("hg-parts");
+        D.hgFitHint = el("hg-fit-hint");
+        D.hgSandboxToggle = el("hg-sandbox-toggle");
+        D.hgSandboxNote = el("hg-sandbox-note");
+        D.hgSandboxBody = el("hg-sandbox-body");
+        D.hgTab = "hulls";
+
+        /* Mode strip and banner. */
+        D.stModes = el("st-modes");
+        D.modeBanner = el("mode-banner");
+        D.modeTag = el("mode-tag");
+        D.modeMain = el("mode-main");
+        D.modeSide = el("mode-side");
+        D.modeFill = el("mode-fill");
+        D.modeNote = el("mode-note");
 
         el("btn-play").addEventListener("click", function () { S.Audio.ui(); emit("play"); });
         el("btn-again").addEventListener("click", function () { S.Audio.ui(); emit("relaunch"); });
@@ -97,27 +172,24 @@
          * LAUNCH completely inert. */
         el("st-launch").addEventListener("click", function () { S.Audio.ui(); emit("undock"); });
 
-        /* Station tabs. One panel is visible at a time because the station
-         * panel already scrolls on a short phone and four full lists stacked
-         * on top of each other is unusable. */
-        var tabs = D.stTabs.querySelectorAll(".st-tab");
-        for (var i = 0; i < tabs.length; i++) {
-            tabs[i].addEventListener("click", (function (name) {
-                return function () {
-                    S.Audio.ui();
-                    D.tab = name;
-                    for (var k = 0; k < tabs.length; k++) {
-                        tabs[k].classList.toggle("is-on", tabs[k].getAttribute("data-tab") === name);
-                        var panel = el("st-panel-" + tabs[k].getAttribute("data-tab"));
-                        if (panel) panel.classList.toggle("is-hidden", tabs[k].getAttribute("data-tab") !== name);
-                    }
-                    refreshStation();
-                };
-            })(tabs[i].getAttribute("data-tab")));
-        }
+        /* Station tabs. */
+        wireTabs(D.stTabs, ".st-tab", "data-tab", "st-panel-", function () { refreshStation(); });
+
         el("st-close").addEventListener("click", function () { S.Audio.ui(); emit("menu"); });
         el("st-repair-btn").addEventListener("click", function () { emit("repair"); });
         D.assistToggle.addEventListener("click", function () { emit("toggleAssist"); });
+
+        /* Hangar: reachable from the station (buying needs the live ship) and
+         * from the menu (so a pilot can look at what they own before flying). */
+        el("st-hangar").addEventListener("click", function () { S.Audio.ui(); emit("hangar"); });
+        el("btn-hangar").addEventListener("click", function () { S.Audio.ui(); emit("hangar"); });
+        el("hg-close").addEventListener("click", function () { S.Audio.ui(); emit("hangarClose"); });
+        el("hg-sandbox-toggle").addEventListener("click", function () { S.Audio.ui(); emit("sandbox"); });
+
+        /* The hangar reuses the station's .st-tab class. A real DOM scopes
+         * querySelectorAll to its element so the two strips never collide,
+         * but relying on that twice is how the same bug comes back. */
+        wireTabs(D.screenHangar, ".hg-tab", "data-hgtab", "hg-panel-", function () { refreshHangar(); });
 
         var settings = S.Storage.getSettings();
         updateSoundButton(settings.sound);
@@ -147,15 +219,51 @@
 
     function update(world, dt) {
         var p = world.player;
+        /* The haul readout needs the live hold, and the banner is refreshed
+         * once a frame, so hand it the ship rather than looking one up. */
+        D.modeShip = p;
 
         if (p) {
             var frac = S.clamp(p.hull / p.maxHull, 0, 1);
             D.hullBar.style.width = (frac * 100).toFixed(1) + "%";
             D.hullBar.classList.toggle("is-critical", frac < 0.3);
             setText(D.hullText, Math.ceil(p.hull) + " / " + p.maxHull);
+
+            var sFrac = p.maxShield ? S.clamp(p.shield / p.maxShield, 0, 1) : 0;
+            D.shieldBar.style.width = (sFrac * 100).toFixed(1) + "%";
+            setText(D.shieldText, Math.ceil(p.shield) + " / " + p.maxShield);
+
+            /* Hold and tank are two different numbers and the player has to be
+             * able to tell them apart at a glance - one is spendable now, the
+             * other only after a dock. */
+            var holdFrac = p.holdMax ? S.clamp(p.hold / p.holdMax, 0, 1) : 0;
+            setText(D.hold, S.fmt(p.hold) + " / " + S.fmt(p.holdMax));
+            D.hold.classList.toggle("is-full", holdFrac > 0.995);
+
             setText(D.energy, S.fmt(p.energy));
             setText(D.crystals, S.fmt(p.crystals));
             setText(D.kills, p.kills);
+
+            /* A hold that silently refuses every pickup is the single
+             * most confusing thing this game can do, so it gets said out
+             * loud and it flashes. */
+            var full = holdFrac > 0.995;
+            D.holdFull.classList.toggle("hidden", !full);
+            if (full) {
+                D.holdFull.classList.toggle("is-blink", ((world.time * 3) | 0) % 2 === 0);
+            }
+
+            /* CPU chip: what is fitted, and whether it is ready. */
+            var def = S.cpu(p.cpu);
+            if (def) {
+                D.cpuChip.classList.remove("hidden");
+                setText(D.cpuName, def.glyph + " " + def.name.toUpperCase());
+                var busy = p.cooldownCpu > 0;
+                D.cpuChip.classList.toggle("is-cooling", busy);
+                setText(D.cpuTimer, busy ? Math.ceil(p.cooldownCpu) + "s" : "READY");
+            } else {
+                D.cpuChip.classList.add("hidden");
+            }
 
             /* Sector threat tier: what the sector has escalated to, which is
              * driven entirely by the crystals you have banked. */
@@ -169,6 +277,9 @@
                 D.dockHint.classList.add("hidden");
             }
         }
+
+        updateTarget(world);
+        updateMode();
 
         /* Bounty: the single most important piece of information on the
          * screen while it is live, because it is worth crystals and it is
@@ -202,6 +313,81 @@
         if (statTimer <= 0) {
             statTimer = 1;
             S.Render.drawMinimap(D.minimapCtx, world);
+        }
+    }
+
+    /* ===== Target panel =====
+     * The explicit lock, with both of the target's pools and the faction that
+     * decides which gun works on it.
+     *
+     * The note under the bars is the part that earns the panel: it tells the
+     * player what to DO, not just what they are looking at. "No shields.
+     * Lasers." is the difference between a target readout and advice.
+     */
+    function updateTarget(world) {
+        var t = world.target;
+        var p = world.player;
+        if (!t || !t.alive || !p) {
+            D.targetPanel.classList.add("hidden");
+            return;
+        }
+        D.targetPanel.classList.remove("hidden");
+
+        var fac = S.faction(t.faction);
+        setText(D.tgtFaction, t.isBounty ? "WANTED" : fac.tag);
+        D.tgtFaction.style.color = t.isBounty ? "#ff5470" : fac.color;
+        setText(D.tgtName, t.name);
+
+        var d = Math.sqrt(S.dist2(p.x, p.y, t.x, t.y));
+        setText(D.tgtDist, Math.round(d) + "");
+
+        var sFrac = t.maxShield ? S.clamp(t.shield / t.maxShield, 0, 1) : 0;
+        var hFrac = t.maxHull ? S.clamp(t.hull / t.maxHull, 0, 1) : 0;
+        D.tgtShield.style.width = (sFrac * 100).toFixed(1) + "%";
+        D.tgtHull.style.width = (hFrac * 100).toFixed(1) + "%";
+        D.tgtShield.style.background = sFrac > 0.02 ? "#7dd3fc" : "rgba(125,211,252,0.22)";
+        D.tgtHull.style.background = hFrac > 0.35 ? "#ff9f6f" : "#ff5470";
+
+        /* Read the faction's shield fraction rather than the live pool, so
+         * the advice stays true for the whole fight instead of flipping
+         * halfway through when the shields come down. */
+        var frac = fac.shieldFrac;
+        setText(D.tgtNote, frac <= 0.001
+            ? "No shields. Lasers."
+            : frac < 0.6
+                ? "Part-shielded. Either gun works."
+                : "Shield wall. Ammo, not lasers.");
+    }
+
+    /* ===== Mode banner =====
+     * Hidden entirely in PATROL. A mode with no clock should not leave a
+     * permanent strip on the screen pretending there is one. */
+    function updateMode() {
+        var r = S.Modes.status();
+        if (!r || !r.active) {
+            D.modeBanner.classList.add("hidden");
+            return;
+        }
+        D.modeBanner.classList.remove("hidden");
+
+        if (r.id === "wave") {
+            setText(D.modeTag, "WAVE");
+            setText(D.modeMain, r.wave + " / " + r.waves);
+            setText(D.modeSide, r.left > 0 ? r.left + " LEFT" : "INCOMING");
+            D.modeFill.style.width =
+                (S.clamp(r.wave / r.waves, 0, 1) * 100).toFixed(0) + "%";
+            setText(D.modeNote, r.state === "briefing"
+                ? "The portal opens in " + Math.ceil(r.brief)
+                : "Kill everything the portal sends. Clear all " + r.waves + " to be paid.");
+        } else if (r.id === "haul") {
+            setText(D.modeTag, "HAUL");
+            setText(D.modeMain, Math.ceil(Math.max(0, r.timeLeft)) + "s");
+            var ship = D.modeShip;
+            var held = ship && ship.hold ? ship.hold : 0;
+            setText(D.modeSide, Math.floor(held) + " / " + r.payload);
+            D.modeFill.style.width =
+                (S.clamp(held / r.payload, 0, 1) * 100).toFixed(0) + "%";
+            setText(D.modeNote, "Land " + r.payload + " ⚡ at the station before the clock runs out.");
         }
     }
 
@@ -270,6 +456,10 @@
         D.screenMenu.classList.toggle("hidden", name !== "menu");
         D.screenDeath.classList.toggle("hidden", name !== "death");
         D.screenStation.classList.toggle("hidden", name !== "station");
+        D.screenHangar.classList.toggle("hidden", name !== "hangar");
+        /* The hangar keeps the HUD visible: it is a place you go while
+         * docked, and hiding the hull readout there would hide the thing
+         * whose numbers the slots are about to change. */
         D.hud.classList.toggle("hidden", name === "menu" || name === "death");
         document.body.classList.toggle("in-menu", name === "menu");
     }
@@ -291,6 +481,168 @@
         if (p) p.classList.remove("hidden");
     }
 
+    /* ===== Hangar =====
+     * A screen, not a station tab, so the station keeps five. It reads the
+     * live ship while docked and a projection of the save while docked is
+     * not available - see main.js, which always hands it a live ship.
+     */
+    function showHangar(ship) {
+        stationShip = ship;
+        refreshHangar();
+        showScreen("hangar");
+    }
+
+    function refreshHangar() {
+        if (!stationShip) return;
+        var q = S.Stations.hangarQuote(stationShip);
+        var hull = S.hull(q.active);
+
+        setText(D.hgActive, hull.name);
+        setText(D.hgEnergy, S.fmt(stationShip.energy));
+        setText(D.hgCrystals, S.fmt(stationShip.crystals));
+
+        /* --- hulls --- */
+        var hulls = "";
+        for (var i = 0; i < q.hulls.length; i++) {
+            var h = q.hulls[i];
+            var style = h.color ? ' style="color:' + h.color + '"' : "";
+            var action;
+            if (h.active) action = '<span class="st-cost is-max">ACTIVE</span>';
+            else if (h.owned) action = '<button class="st-buy" data-hull="' + escapeHtml(h.id) + '">FLY</button>';
+            else action = '<button class="st-buy" data-hull="' + escapeHtml(h.id) + '"' +
+                (h.affordable ? "" : " disabled") + ">" + S.fmt(h.cost) + " ⚡</button>";
+
+            hulls +=
+                '<div class="hull-card' + (h.active ? " is-active" : "") +
+                    (h.owned ? "" : " is-locked") + '">' +
+                    '<div class="hc-head"' + style + ">" +
+                        '<span class="hc-glyph">' + h.glyph + "</span>" +
+                        '<span class="hc-name">' + escapeHtml(h.name) + "</span>" +
+                        '<span class="hc-tag">' + escapeHtml(h.tag) + "</span>" +
+                    "</div>" +
+                    '<span class="hc-passive">' + escapeHtml(h.passive) + "</span>" +
+                    '<p class="hc-blurb">' + escapeHtml(h.blurb) + "</p>" +
+                    '<span class="hc-detail">' + escapeHtml(h.detail) + "</span>" +
+                    '<div class="st-row-foot">' + action + "</div>" +
+                "</div>";
+        }
+        if (D.hgHulls._html !== hulls) {
+            D.hgHulls.innerHTML = hulls;
+            var hullBtns = D.hgHulls.querySelectorAll("[data-hull]");
+            for (var h2 = 0; h2 < hullBtns.length; h2++) {
+                hullBtns[h2].addEventListener("click", (function (id) {
+                    return function () { emit("hull", id); };
+                })(hullBtns[h2].getAttribute("data-hull")));
+            }
+        }
+
+        /* --- parts --- */
+        var parts = "";
+        for (var s = 0; s < q.slots.length; s++) {
+            var slot = q.slots[s];
+            parts += '<p class="slot-label">' + slot.slot.toUpperCase() + "</p><div class=\"part-row\">";
+            for (var p = 0; p < slot.options.length; p++) {
+                var o = slot.options[p];
+                /* A fitted part is shown as pressed and costs nothing: the
+                 * whole point of the panel is that swapping is free. */
+                var label = o.fitted ? "FITTED"
+                    : !o.owned ? S.fmt(o.cost) + " ⚡"
+                    : o.maxed ? "MAX"
+                    : "LV" + o.level + " → " + S.fmt(o.cost) + " ⚡";
+                var cls = "part-card" + (o.fitted ? " is-fitted" : (o.owned ? "" : " is-empty"));
+                var disabled = o.fitted || (!o.owned && !o.affordable) || (o.owned && o.maxed);
+                parts +=
+                    '<button class="' + cls + '" data-part="' + escapeHtml(o.key) + '"' +
+                        (disabled ? " disabled" : "") + ' title="' + escapeHtml(o.blurb) + '">' +
+                        '<span class="pc-name">' + o.glyph + " " + escapeHtml(o.name) + "</span>" +
+                        '<span class="pc-detail">' + escapeHtml(o.detail) + "</span>" +
+                        '<span class="pc-foot">' + label + "</span>" +
+                    "</button>";
+            }
+            parts += "</div>";
+        }
+        if (D.hgParts._html !== parts) {
+            D.hgParts.innerHTML = parts;
+            var partBtns = D.hgParts.querySelectorAll("[data-part]");
+            for (var b = 0; b < partBtns.length; b++) {
+                partBtns[b].addEventListener("click", (function (key) {
+                    return function () { emit("part", key); };
+                })(partBtns[b].getAttribute("data-part")));
+            }
+        }
+        setText(D.hgFitHint,
+            "Fitting " + hull.name + ". Three slots; buying a component installs it, and swapping is free.");
+
+        /* --- sandbox --- */
+        var on = !!(stationShip.hangar && stationShip.hangar.sandbox);
+        D.hgSandboxToggle.textContent = on ? "SANDBOX ON" : "SANDBOX OFF";
+        D.hgSandboxToggle.classList.toggle("is-on", on);
+        setText(D.hgSandboxNote, on
+            ? "Sandbox is <b>on</b>. These write to this save exactly like anything else — crystals raise the sector gate, so a big crystal grant drops you into a harder map."
+            : "Sandbox is <b>off</b>. Turn it on to grant currency and unlock everything.");
+        D.hgSandboxBody.classList.toggle("is-hidden", !on);
+
+        if (on) {
+            var srows = "";
+            var grants = [
+                { key: "energy", label: "+500 energy", value: 500 },
+                { key: "energy", label: "+2500 energy", value: 2500 },
+                { key: "crystals", label: "+250 crystals", value: 250 },
+                { key: "crystals", label: "+5000 crystals", value: 5000 },
+            ];
+            srows += '<div class="sandbox-row">';
+            for (var g = 0; g < grants.length; g++) {
+                srows += '<button class="st-buy" data-cheat="grant:' + grants[g].key +
+                    ':' + grants[g].value + '">' + grants[g].label + "</button>";
+            }
+            srows += "</div>";
+            srows += '<div class="sandbox-row">' +
+                '<button class="st-buy" data-cheat="unlock">Unlock all hulls &amp; parts</button>' +
+                '<button class="st-buy" data-cheat="max">Max every module &amp; part</button>' +
+                "</div>";
+            if (D.hgSandboxBody._html !== srows) {
+                D.hgSandboxBody.innerHTML = srows;
+                var cheatBtns = D.hgSandboxBody.querySelectorAll("[data-cheat]");
+                for (var c = 0; c < cheatBtns.length; c++) {
+                    cheatBtns[c].addEventListener("click", (function (spec) {
+                        return function () { emit("cheat", spec); };
+                    })(cheatBtns[c].getAttribute("data-cheat")));
+                }
+            }
+        }
+    }
+
+    /* ===== Modes =====
+     * A mode is a variant of the sector, so it sits above the tabs rather
+     * than inside one: it changes what you are doing, not what you are
+     * buying. Selecting one is free and takes effect on launch. */
+    function renderModes(ship) {
+        var rows = "";
+        for (var i = 0; i < S.MODES.length; i++) {
+            var m = S.MODES[i];
+            var on = (ship.mode || "patrol") === m.id;
+            rows +=
+                '<div class="st-row mode' + (on ? " is-on" : "") + '">' +
+                    '<div class="st-row-head">' +
+                        '<span class="st-glyph">' + m.glyph + "</span>" +
+                        '<span class="st-name">' + escapeHtml(m.name) + "</span>" +
+                        (on ? '<span class="st-cost is-max">SELECTED</span>'
+                            : '<button class="st-buy" data-mode="' + escapeHtml(m.id) + '">PICK</button>') +
+                    "</div>" +
+                    '<p class="st-blurb">' + escapeHtml(m.blurb) + "</p>" +
+                    '<span class="mode-detail">' + escapeHtml(m.detail) + "</span>" +
+                "</div>";
+        }
+        if (D.stModes._html === rows) return;
+        D.stModes.innerHTML = rows;
+        var btns = D.stModes.querySelectorAll("[data-mode]");
+        for (var b = 0; b < btns.length; b++) {
+            btns[b].addEventListener("click", (function (id) {
+                return function () { emit("mode", id); };
+            })(btns[b].getAttribute("data-mode")));
+        }
+    }
+
     /* ===== Station panel ===== */
 
     function showStation(ship) {
@@ -305,11 +657,23 @@
 
         setText(D.stEnergy, S.fmt(q.energy));
         setText(D.stHull, Math.ceil(q.hull) + " / " + q.maxHull);
+        setText(D.stShield, Math.ceil(q.shield) + " / " + q.maxShield);
         setText(D.stTier, S.tierForShip(stationShip.modules));
 
         var hullFrac = S.clamp(q.hull / Math.max(1, q.maxHull), 0, 1);
         D.stHullFill.style.width = (hullFrac * 100).toFixed(1) + "%";
         D.stHullFill.classList.toggle("is-critical", hullFrac < 0.3);
+
+        var shFrac = S.clamp(q.shield / Math.max(1, q.maxShield), 0, 1);
+        D.stShieldFill.style.width = (shFrac * 100).toFixed(1) + "%";
+
+        /* The hold has already been deposited by the time the panel opens,
+         * so the note describes what the trip just paid rather than a live
+         * number. Saying "0" there would read as a loss. */
+        setText(D.stHoldNote, stationShip.lastDeposit > 0
+            ? "Docked with " + S.fmt(stationShip.lastDeposit) +
+              " ⚡ in the hold. Crystals are yours forever; the tank is only yours until you wreck."
+            : "Your hold is empty. Everything you scoop up is docked when you launch.");
 
         var rows = "";
         for (var i = 0; i < q.modules.length; i++) {
@@ -363,8 +727,60 @@
         setText(D.stFee, S.fmt(q.fee));
 
         renderContracts(stationShip);
+        renderModes(stationShip);
+        renderCpus(stationShip);
         renderRefits(stationShip);
         renderSectors();
+    }
+
+    /* ===== CPUs =====
+     * One slot. Buying installs and fits; the FIT/UNEQUIP button is free and
+     * always live, because a choice you cannot take back is not a choice.
+     */
+    function renderCpus(ship) {
+        var q = S.Stations.cpuQuote(ship);
+        var rows = "";
+        for (var i = 0; i < q.length; i++) {
+            var c = q[i];
+            var state = c.fitted ? " is-fitted" : (c.owned ? "" : " is-locked");
+            rows +=
+                '<div class="st-row cpu' + state + '">' +
+                    '<div class="st-row-head">' +
+                        '<span class="st-glyph">' + c.glyph + "</span>" +
+                        '<span class="st-name">' + escapeHtml(c.name) + "</span>" +
+                        (c.fitted ? '<span class="st-cost is-max">FITTED</span>'
+                                  : c.owned ? '<span class="st-level">OWNED</span>' : "") +
+                    "</div>" +
+                    '<p class="st-blurb">' + escapeHtml(c.blurb) + "</p>" +
+                    '<div class="st-row-foot">' +
+                        '<span class="st-delta">' + escapeHtml(c.detail) + "</span>" +
+                        (c.fitted
+                            ? '<button class="st-buy is-ghost" data-fit="">UNEQUIP</button>'
+                            : c.owned
+                                ? '<button class="st-buy" data-fit="' + escapeHtml(c.key) + '">FIT</button>'
+                                : '<button class="st-buy" data-cpu="' + escapeHtml(c.key) + '"' +
+                                  (c.affordable ? "" : " disabled") + ">" +
+                                  S.fmt(c.cost) + " ⚡</button>") +
+                    "</div>" +
+                "</div>";
+        }
+        if (D.stCpus._html === rows) return;
+        D.stCpus.innerHTML = rows;
+
+        var buys = D.stCpus.querySelectorAll("[data-cpu]");
+        for (var i = 0; i < buys.length; i++) {
+            buys[i].addEventListener("click", (function (key) {
+                return function () { emit("buyCpu", key); };
+            })(buys[i].getAttribute("data-cpu")));
+        }
+        var fits = D.stCpus.querySelectorAll("[data-fit]");
+        for (var i = 0; i < fits.length; i++) {
+            fits[i].addEventListener("click", (function (key) {
+                /* An empty attribute means "unequip", which is a real state
+                 * and not a missing value. */
+                return function () { emit("fitCpu", key || null); };
+            })(fits[i].getAttribute("data-fit")));
+        }
     }
 
     /* ===== Contracts ===== */
@@ -443,14 +859,18 @@
         }
     }
 
-    /* ===== Sectors ===== */
+    /* ===== Maps =====
+     * One list for both kinds. A frontier sector and a faction's territory
+     * are the same thing to the generator and to the station, so they are
+     * the same thing here - the badge is there so you can tell at a glance
+     * that THE HIVE is somebody's home and not a stretch of frontier. */
     function renderSectors() {
         var stats = S.Storage.getStats();
         var save = S.Storage.getShip();
         var here = S.World.world.sectorId || "rook";
         var prog = S.Sector.unlockProgress(stats.crystalsAllTime);
         setText(D.stSectorHint, prog.done
-            ? "All sectors open. Lifetime crystals: " + S.fmt(stats.crystalsAllTime) + " ◈"
+            ? "All maps open. Lifetime crystals: " + S.fmt(stats.crystalsAllTime) + " ◈"
             : "Lifetime crystals: " + S.fmt(stats.crystalsAllTime) + " ◈  ·  " +
               S.fmt(prog.short) + " more for " + prog.next.name);
 
@@ -460,20 +880,33 @@
             var open = S.Sector.isUnlocked(sec.id, stats.crystalsAllTime);
             var isHere = sec.id === here;
             var best = save.sectorBest[sec.id] || 0;
+            var isFaction = sec.kind === "faction";
+            var fac = isFaction ? S.faction(sec.faction) : null;
+
+            var badge = isFaction
+                ? '<span class="st-badge is-faction" style="color:' + fac.color +
+                    ';border-color:' + fac.color + '">' + escapeHtml(fac.tag) + "</span>"
+                : '<span class="st-badge">SECTOR</span>';
+
+            var extra = isFaction
+                ? " · " + escapeHtml(fac.note)
+                : " · tier " + sec.tierCap;
 
             rows +=
                 '<div class="st-row sector' + (open ? "" : " is-locked") +
-                    (isHere ? " is-here" : "") + '">' +
+                    (isHere ? " is-here" : "") +
+                    (isFaction ? " is-faction" : "") + '">' +
                     '<div class="st-row-head">' +
+                        badge +
                         '<span class="st-name">' + escapeHtml(sec.name) + "</span>" +
-                        (isHere ? '<span class="st-cost is-max">IN SECTOR</span>'
+                        (isHere ? '<span class="st-cost is-max">HERE</span>'
                                 : open ? '<span class="st-level">◈ ×' + sec.payout.toFixed(2) + "</span>"
                                        : '<span class="st-level">LOCKED</span>') +
                     "</div>" +
                     '<div class="st-row-foot">' +
                         '<span class="st-delta">' + escapeHtml(sec.subtitle) +
                             (best ? " · best " + S.fmt(best) + " ◈" : "") +
-                            " · tier " + sec.tierCap + "</span>" +
+                            extra + "</span>" +
                         (open && !isHere
                             ? '<button class="st-buy" data-travel="' + escapeHtml(sec.id) + '">LAUNCH</button>'
                             : "") +
@@ -515,6 +948,9 @@
         showDeath: showDeath,
         showStation: showStation,
         refreshStation: refreshStation,
+        showHangar: showHangar,
+        refreshHangar: refreshHangar,
+        updateMode: updateMode,
         toast: toast,
         updateSoundButton: updateSoundButton,
         updateAssistButton: updateAssistButton,

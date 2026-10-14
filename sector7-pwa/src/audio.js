@@ -261,6 +261,40 @@
         noise(0.5, 0.05, "highpass", 1800, 600);
     }
 
+    /* The capacitor round: a hard, low capacitor discharge rather than a
+     * blip. It has to sound like a different weapon from the laser, because
+     * the whole point of the Ammo track is that it is a different weapon. */
+    function ammo() {
+        if (!audio.ctx || !audio.enabled) return;
+        blip(180, 0.22, "sawtooth", 0.11, 70);
+        noise(0.16, 0.07, "bandpass", 900, 220);
+    }
+
+    /* One signature per CPU, so the player learns the sounds instead of
+     * reading the chip. */
+    function cpu(key) {
+        if (!audio.ctx || !audio.enabled) return;
+        switch (key) {
+            case "insta":
+                blip(300, 0.3, "sine", 0.1, 1500);
+                break;
+            case "radar":
+                blip(700, 0.22, "sine", 0.09, 1900);
+                break;
+            case "warp":
+                blip(240, 0.18, "square", 0.09, 1400);
+                break;
+            case "leech":
+                blip(520, 0.3, "triangle", 0.08, 900);
+                break;
+            case "repair":
+                blip(440, 0.26, "sine", 0.08, 700);
+                break;
+            default:
+                blip(600, 0.14, "sine", 0.08);
+        }
+    }
+
     function error() {
         blip(180, 0.16, "square", 0.07, 120);
     }
@@ -280,6 +314,8 @@
         rockBreak: rockBreak,
         salvo: salvo,
         mineDrop: mineDrop,
+        ammo: ammo,
+        cpu: cpu,
         explosion: explosion,
         bounty: bounty,
         storm: storm,

@@ -7,8 +7,19 @@
 (function (S) {
     "use strict";
 
-    var NS = "sector7.v1.";
+    /* v2, not v1. Shields, the cargo hold, the ammo track, factions and CPUs
+     * all changed the shape of a ship, and there is no honest way to read a
+     * v1 save into them - the old "energy" number has no single new home,
+     * because part of it is now a hold that has to be docked. Starting fresh
+     * is the only conversion that cannot silently lose a pilot's record, so
+     * the old keys are dropped rather than half-read.
+     *
+     * `wipe()` removes the v1 keys too, so a device that played v1 cannot end
+     * up with two saves disagreeing about how much energy it has. */
+    var NS = "sector7.v2.";
+    var OLD_NS = "sector7.v1.";
     var SHIP_KEY = NS + "ship";
+    var HANGAR_KEY = NS + "hangar";
     var STATS_KEY = NS + "stats";
     var SETTINGS_KEY = NS + "settings";
     var SEED_KEY = NS + "seed";
@@ -65,16 +76,26 @@
              * crystal balance as everything else - levels only, no separate
              * budget to keep in step. */
             refits: {},
+            /* CPUs bought with energy, and which one is fitted. The hold is
+             * deliberately NOT saved: energy is deposited at the dock and a
+             * half-full hold is only ever lost energy, so persisting it would
+             * let a crash return loot the player never docked. */
+            cpus: {},
+            cpu: null,
         };
     }
 
     function getShip() {
         var raw = read(SHIP_KEY, null);
         var d = defaultShip();
-        if (!raw || typeof raw !== "object") return d;
+        /* The hangar is projected on EVERY path out of here, including the
+         * no-save one. Returning early without it produced a ship with
+         * hullId undefined, which statsFor correctly reads as "no hull" and
+         * which made a brand new pilot fly the Wasp without its passive. */
+        if (!raw || typeof raw !== "object") return withHangar(d, null);
 
         var out = { name: "", modules: {}, crystals: 0, energy: d.energy,
-                    sector: d.sector, sectorBest: {}, refits: {} };
+                    sector: d.sector, sectorBest: {}, refits: {}, cpus: {}, cpu: null };
         if (typeof raw.name === "string") out.name = raw.name.slice(0, 14);
         out.crystals = Number.isFinite(raw.crystals) ? Math.max(0, Math.floor(raw.crystals)) : 0;
         out.energy = Number.isFinite(raw.energy) ? Math.max(0, Math.floor(raw.energy)) : d.energy;
@@ -90,6 +111,17 @@
                 ? S.clamp(Math.floor(rv), 0, S.REFITS[ri].max)
                 : 0;
         }
+
+        /* A CPU is only owned if it is one that still exists and it was paid
+         * for; an unknown key in a save is dropped rather than granted. */
+        for (var ci = 0; ci < S.CPUS.length; ci++) {
+            var ck = S.CPUS[ci].key;
+            out.cpus[ck] = !!(raw.cpus && raw.cpus[ck]);
+        }
+        /* The fitted CPU has to be one you own. A save claiming a CPU that
+         * was never bought would otherwise equip it for free. */
+        out.cpu = out.cpus[raw.cpu] ? raw.cpu : null;
+
         if (raw.sectorBest && typeof raw.sectorBest === "object") {
             for (var sid in raw.sectorBest) {
                 var v = raw.sectorBest[sid];
@@ -105,10 +137,128 @@
             var v = lv[k];
             out.modules[k] = Number.isFinite(v) ? S.clamp(Math.floor(v), 1, S.MODULE_MAX) : 1;
         }
-        return out;
+
+        /* The hangar is projected onto the flat ship rather than stored in it:
+         * every module downstream - player.create, the station, all four test
+         * suites - keeps reading the same shape it always read. This is the
+         * seam that makes a multi-ship game a storage change instead of a
+         * rewrite. */
+        return withHangar(out, raw.hangar);
+    }
+
+    /* One projection, two entry paths, so the no-save ship and a restored
+     * one can never end up with different hulls. */
+    function withHangar(ship, inline) {
+        var hangar = (inline && typeof inline === "object") ? inline : getHangar();
+        ship.hangar = hangar;
+        ship.hullId = hangar.active;
+        ship.hullDef = S.hull(hangar.active);
+        ship.parts = resolveFit(hangar, hangar.active);
+        return ship;
     }
 
     function saveShip(ship) { write(SHIP_KEY, ship); }
+
+    /* ===== Hangar =====
+     * Hulls you own, the parts you own, and how each hull is currently
+     * fitted. Stored under its own key so the flat ship save keeps the shape
+     * every other module already reads.
+     *
+     * Owned parts are account-level and fitted parts are per-hull: you buy
+     * the Needle once and can bolt it onto the Wasp or the Hauler, which is
+     * the same "buy once, swap free" rule the CPUs already use.
+     */
+    function defaultHangar() {
+        return {
+            active: S.HULLS[0].id,
+            hulls: {},
+            parts: {},
+            sandbox: false,
+        };
+    }
+
+    function getHangar() {
+        var raw = read(HANGAR_KEY, null);
+        var out = defaultHangar();
+        if (!raw || typeof raw !== "object") {
+            /* A pilot with no hangar at all still owns the starter hull,
+             * otherwise a fresh save could not fly. */
+            out.hulls[S.HULLS[0].id] = { parts: defaultFit() };
+            return out;
+        }
+
+        var owned = raw.hulls && typeof raw.hulls === "object" ? raw.hulls : {};
+
+        /* Ownership is what decides who may be flown, so it is stored as
+         * presence and presence ONLY. Creating an entry for every hull in the
+         * table would make ownsHull() return true for the whole catalogue. */
+        for (var i = 0; i < S.HULLS.length; i++) {
+            var id = S.HULLS[i].id;
+            var h = owned[id];
+            var isStarter = id === S.HULLS[0].id;
+            if (!h && !isStarter) continue;
+
+            var cfg = defaultFit();
+            if (h && typeof h === "object") {
+                for (var s = 0; s < S.HULL_SLOTS.length; s++) {
+                    var slot = S.HULL_SLOTS[s];
+                    var key = h.parts ? h.parts[slot] : null;
+                    /* A fitted part must exist AND be owned. The save is not
+                     * assumed to have been written by this version. */
+                    if (S.part(key) && Number.isFinite(raw.parts && raw.parts[key]) &&
+                        raw.parts[key] >= 1) {
+                        cfg[slot] = key;
+                    }
+                }
+            }
+            out.hulls[id] = { parts: cfg };
+        }
+
+        /* An active hull the pilot does not own is not an active hull. */
+        out.active = out.hulls[raw.active] ? raw.active : S.HULLS[0].id;
+
+        for (var p = 0; p < S.PARTS.length; p++) {
+            var pk = S.PARTS[p].key;
+            var lv = raw.parts && raw.parts[pk];
+            out.parts[pk] = Number.isFinite(lv) ? S.clamp(Math.floor(lv), 0, S.PART_MAX) : 0;
+        }
+        out.sandbox = !!raw.sandbox;
+        return out;
+    }
+
+    /* A bare fit: no components in any slot. An empty slot is a legal ship,
+     * it is just a worse one - there is no "must fill three slots" rule to
+     * trip over. */
+    function defaultFit() {
+        var fit = {};
+        for (var i = 0; i < S.HULL_SLOTS.length; i++) fit[S.HULL_SLOTS[i]] = null;
+        return fit;
+    }
+
+    function saveHangar(hangar) { write(HANGAR_KEY, hangar); }
+
+    /* Does the pilot own this hull? The starter is never "bought", so it is
+     * owned by definition rather than by a level in the save. */
+    function ownsHull(hangar, id) {
+        if (id === S.HULLS[0].id) return true;
+        return !!(hangar && hangar.hulls && hangar.hulls[id]);
+    }
+
+    /* Turn a hangar fit into the `{ key, level }` shape statsFor reads. */
+    function resolveFit(hangar, hullId) {
+        var out = {};
+        var hull = hangar && hangar.hulls ? hangar.hulls[hullId] : null;
+        if (!hull) return out;
+        for (var i = 0; i < S.HULL_SLOTS.length; i++) {
+            var slot = S.HULL_SLOTS[i];
+            var key = hull.parts ? hull.parts[slot] : null;
+            if (!key) continue;
+            var level = hangar.parts ? hangar.parts[key] : 0;
+            if (!Number.isFinite(level) || level < 1) continue;
+            out[slot] = { key: key, level: level };
+        }
+        return out;
+    }
 
     /* ===== Stats ===== */
     function defaultStats() {
@@ -201,7 +351,12 @@
     function wipe() {
         try {
             localStorage.removeItem(SHIP_KEY);
+            localStorage.removeItem(HANGAR_KEY);
             localStorage.removeItem(STATS_KEY);
+            /* v1 keys go too. Leaving them would mean a wiped device that
+             * later downgrades the app still reads a stale pilot. */
+            localStorage.removeItem(OLD_NS + "ship");
+            localStorage.removeItem(OLD_NS + "stats");
         } catch (e) { /* ignore */ }
     }
 
@@ -210,6 +365,13 @@
         getShip: getShip,
         saveShip: saveShip,
         defaultShip: defaultShip,
+        /* Hangar. Kept beside the ship accessors so a caller that owns one
+         * obviously owns the other. */
+        getHangar: getHangar,
+        saveHangar: saveHangar,
+        defaultHangar: defaultHangar,
+        resolveFit: resolveFit,
+        ownsHull: ownsHull,
         getStats: getStats,
         saveStats: saveStats,
         bump: bump,

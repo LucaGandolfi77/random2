@@ -47,7 +47,7 @@ global.localStorage = {
 };
 
 for (const f of [
-    "config.js", "storage.js", "sectors.js", "world.js", "stations.js",
+    "config.js", "storage.js", "sectors.js", "modes.js", "world.js", "stations.js",
     "contracts.js", "bounty.js", "player.js", "npcs.js",
 ]) {
     (0, eval)(fs.readFileSync(path.join(SRC, f), "utf8"));
@@ -339,19 +339,26 @@ const splashPlayer = S.Player.create(S.Storage.getShip());
 splashPlayer.modules.missiles = 10;
 S.Stations.refreshStats(splashPlayer);
 S.NPCs.clear();
+/* Shields are zero here on purpose: this section is about splash geometry,
+ * and a shield that absorbs the missile's shield component would mask the
+ * hull damage it is trying to observe. The NPC_TIERS row is data, not a stat
+ * block, so the weapons get their packets from a real level-1 build. */
+const splashStats = S.statsFor({ blaster: 1, shield: 1, armor: 1, processor: 1, thruster: 1, ammo: 1 });
 const victim = S.World.spawnShip({
-    x: 600, y: 600, z: 10, heading: 0, maxHull: 400,
-    stats: S.NPC_TIERS[1], reduction: 0,
+    x: 600, y: 600, z: 10, heading: 0, maxHull: 400, maxShield: 0,
+    faction: "raider",
+    stats: splashStats, reduction: 0,
 });
 const bystander = S.World.spawnShip({
-    x: 640, y: 600, z: 10, heading: 0, maxHull: 400,
-    stats: S.NPC_TIERS[1], reduction: 0,
+    x: 640, y: 600, z: 10, heading: 0, maxHull: 400, maxShield: 0,
+    faction: "raider",
+    stats: splashStats, reduction: 0,
 });
 S.World.world.player = null;
 const m = W.missiles.find((x) => !x.on);
 m.on = true;
 m.x = 620; m.y = 600; m.z = 10; m.vx = 0; m.vy = 0;
-m.life = 2; m.arm = 0; m.dmg = 100; m.splash = 90; m.ownerId = 99999; m.ownerIsPlayer = false;
+m.life = 2; m.arm = 0; m.ds = 100; m.da = 100; m.splash = 90; m.ownerId = 99999; m.ownerIsPlayer = false;
 m.targetId = 0;
 const hullBefore = victim.hull + bystander.hull;
 S.World.step(DT);
@@ -413,29 +420,53 @@ check("an unarmed mine does not hurt anything",
 
 check("an armed mine detonates on proximity",
     (() => {
+        /* No shields and an explicit damage packet: the mine's whole point is
+         * draining shields, and this assertion is about the proximity
+         * trigger, not about how much of which pool it ate. */
         const victim = S.World.spawnShip({
-            x: 200, y: 200, z: 10, heading: 0, maxHull: 500, stats: S.NPC_TIERS[1],
+            x: 200, y: 200, z: 10, heading: 0, maxHull: 500, maxShield: 0,
+            faction: "raider", stats: splashStats,
         });
         const mine = W.mines.find((m) => !m.on);
         if (!mine) return false;
         mine.on = true;
         mine.x = victim.x + 10; mine.y = victim.y; mine.z = 10;
         mine.vx = 0; mine.vy = 0; mine.life = 20; mine.arm = 0;
-        mine.dmg = 100; mine.radius = 90; mine.ownerId = 99999;
+        mine.ds = 60; mine.da = 40; mine.radius = 90; mine.ownerId = 99999;
         S.World.step(DT);
         return victim.hull === 400 && !mine.on;
+    })());
+
+check("a mine really does drain shields before armour",
+    (() => {
+        /* Well clear of the ships the missile section left standing: a
+         * proximity mine detonates on the first hull inside its radius, so
+         * a stale ship a few dozen units away would swallow the test. */
+        const shielded = S.World.spawnShip({
+            x: 3000, y: 3000, z: 10, heading: 0, maxHull: 500, maxShield: 300,
+            faction: "raider", stats: splashStats,
+        });
+        const mine = W.mines.find((m) => !m.on);
+        if (!mine) return false;
+        mine.on = true;
+        mine.x = shielded.x + 10; mine.y = shielded.y; mine.z = 10;
+        mine.vx = 0; mine.vy = 0; mine.life = 20; mine.arm = 0;
+        mine.ds = 100; mine.da = 100; mine.radius = 90; mine.ownerId = 99999;
+        S.World.step(DT);
+        return shielded.shield < 300 && shielded.hull === 500;
     })());
 
 check("a mine cannot kill its own owner",
     (() => {
         const owner = S.World.spawnShip({
-            x: 400, y: 400, z: 10, heading: 0, maxHull: 500, stats: S.NPC_TIERS[1],
+            x: 400, y: 400, z: 10, heading: 0, maxHull: 500, maxShield: 0,
+            faction: "raider", stats: splashStats,
         });
         const mine = W.mines.find((m) => !m.on);
         mine.on = true;
         mine.x = owner.x; mine.y = owner.y; mine.z = 10;
         mine.vx = 0; mine.vy = 0; mine.life = 20; mine.arm = 0;
-        mine.dmg = 9999; mine.radius = 90; mine.ownerId = owner.id;
+        mine.ds = 9999; mine.da = 9999; mine.radius = 90; mine.ownerId = owner.id;
         S.World.step(DT);
         return owner.alive && owner.hull === 500;
     })());
@@ -723,6 +754,928 @@ check("a save predating the new tracks still produces sane stats",
     })());
 check("a save predating the new tracks still has a sane tier",
     Number.isFinite(S.tierForShip({ blaster: 4, shield: 3, armor: 2, processor: 5, thruster: 2 })));
+
+/* =========================================================================
+ * The Ammo track: is it actually a decision?
+ *
+ * This is the load-bearing claim of the whole two-pool damage model. A laser
+ * chews armour, a capacitor round chews shields, and neither is strictly
+ * better - so a pilot's sector, not their taste, decides which gun matters.
+ *
+ * It is asserted here rather than in the simulation because it is a
+ * closed-form property of three tables and not a stochastic outcome. sim.test
+ * cannot test it: in the starting sector a level-1 hull wrecks almost every
+ * run whatever it is carrying, so a survival comparison between builds is
+ * noise. Computing time-to-kill from the same numbers the physics reads
+ * cannot flake, and it fails the instant someone retunes a coefficient until
+ * one weapon is simply better than the other.
+ * ====================================================================== */
+head("weapon identity: shields and armour are two different problems");
+
+/* Two builds, not two guns.
+ *
+ * The comparison a player actually makes is "spend my levels on the laser,
+ * or on the capacitor round" - so both sides must be a full build, not a
+ * maxed gun sitting next to a level-1 one. Each side below puts the same
+ * number of levels into its chosen track.
+ */
+const BUILD_LASER = { blaster: 10, ammo: 1 };
+const BUILD_AMMO = { blaster: 1, ammo: 10 };
+
+/* Time to kill a target, at a given shot interval, using the same two rules
+ * world.js enforces: the shield component is eaten by whatever shield is
+ * left, and the armour component is held off entirely while a shield
+ * remains. Armour's flat subtraction is left out because it is a constant
+ * that would add the same time to both builds and only blur the comparison.
+ *
+ * It deliberately duplicates the model rather than calling damageShip in a
+ * loop: this test is about whether the WEAPON TABLE produces a crossover, and
+ * it is far more readable as closed-form arithmetic than as a fight. */
+function timeToKill(packet, interval, target) {
+    let shield = target.shield;
+    let hull = target.hull;
+    let t = 0;
+    /* Bounded so a mis-tuned coefficient fails the check instead of hanging
+     * the suite. */
+    for (let shot = 0; shot < 200000; shot++) {
+        if (shield > 0) {
+            const absorbed = Math.min(shield, packet.shield);
+            shield -= absorbed;
+            const spill = packet.shield - absorbed;
+            hull -= shield > 0 ? spill : spill + packet.armor;
+        } else {
+            hull -= packet.armor;
+        }
+        t += interval;
+        if (hull <= 0) return t;
+    }
+    return Infinity;
+}
+
+function ttk(modules, weapon, hull, shieldFrac) {
+    const st = S.statsFor(modules);
+    return timeToKill(
+        weapon === "ammo" ? st.ammoPacket : st.blasterPacket,
+        weapon === "ammo" ? st.ammoCooldown : st.fireInterval,
+        { hull, shield: Math.round(hull * shieldFrac) },
+    );
+}
+
+/* `ratio` is laser-time over ammo-time: below 1 the laser is faster. */
+function race(tier, faction) {
+    const hull = S.NPC_TIERS[tier].hull;
+    const laser = ttk(BUILD_LASER, "blaster", hull, faction.shieldFrac);
+    const ammo = ttk(BUILD_AMMO, "ammo", hull, faction.shieldFrac);
+    return { laser, ammo, ratio: laser / ammo };
+}
+
+const RAIDER = S.faction("raider"), PIRATE = S.faction("pirate"), ALIEN = S.faction("alien");
+
+check("the laser is armour-specialised and the round is shield-specialised",
+    S.WEAPONS.blaster.shield < 1 && S.WEAPONS.blaster.armor >= 1 &&
+    S.WEAPONS.ammo.shield > 1 && S.WEAPONS.ammo.armor < 1);
+check("no weapon profile is missing a coefficient",
+    Object.values(S.WEAPONS).every((w) => Number.isFinite(w.shield) && Number.isFinite(w.armor)));
+
+/* The tiers where a shield is a wall rather than decoration.
+ *
+ * Tier 1 is deliberately excluded and that exclusion is itself a design
+ * statement: a hull of 34 with 27 shields dies inside the capacitor round's
+ * minimum cooldown, so the cheap gun wins on chaff no matter who is flying
+ * it. Nobody's build decision should ever turn on a scrap drone, and tuning
+ * a coefficient until it does would wreck the relationship that actually
+ * matters at tiers 4 and 8. */
+for (const tier of [4, 8]) {
+    const r = race(tier, RAIDER);
+    check(`tier ${tier} raider: the laser build wins decisively`,
+        r.ratio < 0.7, `laser ${r.laser.toFixed(2)}s vs ammo ${r.ammo.toFixed(2)}s (x${r.ratio.toFixed(2)})`);
+
+    const a = race(tier, ALIEN);
+    check(`tier ${tier} alien: the ammo build wins decisively`,
+        a.ratio > 1.15, `laser ${a.laser.toFixed(2)}s vs ammo ${a.ammo.toFixed(2)}s (x${a.ratio.toFixed(2)})`);
+}
+
+/* Chaff is a laser fight no matter what is in the sector - the cheap gun
+ * outpaces the capacitor round's cooldown floor against anything small. */
+check("tier 1 is a laser fight regardless of faction",
+    race(1, RAIDER).ratio < 1 && race(1, ALIEN).ratio < 1,
+    `raider x${race(1, RAIDER).ratio.toFixed(2)} alien x${race(1, ALIEN).ratio.toFixed(2)}`);
+check("the capacitor round has a cooldown floor it can never beat",
+    S.statsFor({ ammo: 10 }).ammoCooldown >= 0.9);
+
+/* The two wins must be large in opposite directions, or the tracks are not
+ * a choice - one of them is simply the better gun and the sector does not
+ * get a say. */
+check("the crossover is real: the winner flips between raiders and aliens",
+    race(8, RAIDER).ratio < 0.7 && race(8, ALIEN).ratio > 1.15,
+    `raider x${race(8, RAIDER).ratio.toFixed(2)} alien x${race(8, ALIEN).ratio.toFixed(2)}`);
+
+/* Pirates exist to be the crossover. If one build always beat the other the
+ * middle faction would be decorative, and the mid tiers lean on it hardest. */
+{
+    const p = race(8, PIRATE);
+    check("pirates sit on the crossover: neither build wins by much",
+        Math.abs(p.ratio - 1) < 0.25,
+        `laser ${p.laser.toFixed(2)}s vs ammo ${p.ammo.toFixed(2)}s (x${p.ratio.toFixed(2)})`);
+}
+
+/* A bare hull must not reward the shield gun at all, or a pilot who meets
+ * nothing but raiders pays the Ammo track's energy for nothing. */
+check("a bare hull is never an ammo target",
+    ttk(BUILD_AMMO, "ammo", S.NPC_TIERS[8].hull, 0) >
+    ttk(BUILD_LASER, "blaster", S.NPC_TIERS[8].hull, 0) * 1.5);
+
+/* ---- factions ----------------------------------------------------------- */
+
+head("factions");
+
+check("there are at least three factions", S.FACTIONS.length >= 3);
+check("faction keys are unique",
+    new Set(S.FACTIONS.map((f) => f.key)).size === S.FACTIONS.length);
+check("every faction has a name, a tag, a colour and a blurb",
+    S.FACTIONS.every((f) => f.name && f.tag && f.color && f.blurb && f.note));
+check("shield fractions rise from raider to alien",
+    RAIDER.shieldFrac < PIRATE.shieldFrac && PIRATE.shieldFrac < ALIEN.shieldFrac);
+check("every faction's shield pool is computable and finite",
+    S.FACTIONS.every((f) => Number.isFinite(S.npcShieldFor(640, f.key)) &&
+        S.npcShieldFor(640, f.key) <= 640));
+check("factions are mutually hostile, and nothing is hostile to itself",
+    S.factionHostile("raider", "alien") && S.factionHostile("alien", "raider") &&
+    !S.factionHostile("raider", "raider"));
+check("an unknown faction falls back rather than returning undefined",
+    S.faction("nonsense") === S.FACTIONS[0]);
+
+check("every tier has a faction mix, and they sum to one",
+    S.FACTION_MIX.slice(1).every((mix) => {
+        const total = S.FACTIONS.reduce((sum, f) => sum + (mix[f.key] || 0), 0);
+        return Math.abs(total - 1) < 1e-9;
+    }));
+check("aliens are absent from the shallowest sector and common in the deepest",
+    S.FACTION_MIX[1].alien === 0 && S.FACTION_MIX[S.FACTION_MIX.length - 1].alien > 0.5);
+check("faction mix only ever shifts toward aliens as tiers climb",
+    S.FACTION_MIX.slice(1).every((mix, i, all) =>
+        i === 0 || mix.alien >= all[i - 1].alien - 1e-9));
+check("pickFaction only ever returns a real faction", (() => {
+    const r = S.mulberry32(99);
+    for (let i = 0; i < 4000; i++) {
+        const f = S.pickFaction(1 + ((r() * 8) | 0), r);
+        if (!S.FACTIONS.includes(f)) return false;
+    }
+    return true;
+})());
+
+check("every spawned NPC belongs to a real faction and wears its colour", (() => {
+    const { player } = newRun(31337, "rook");
+    for (let i = 0; i < 60; i++) {
+        const n = S.NPCs.spawnOne(player);
+        const f = S.faction(n.faction);
+        if (!f || f.key !== n.faction) return false;
+        if (n.color !== f.color) return false;
+        /* The shield pool has to match the faction, or the whole two-weapon
+         * design is only true for hand-made ships. */
+        if (n.maxShield !== S.npcShieldFor(S.NPC_TIERS[n.tier].hull, n.faction)) return false;
+    }
+    return true;
+})());
+
+check("every NPC carries the same damage packets the player's guns use",
+    (() => {
+        const { player } = newRun(4242, "rook");
+        for (let i = 0; i < 20; i++) {
+            const n = S.NPCs.spawnOne(player);
+            if (!n.stats.blasterPacket || !n.stats.ammoPacket) return false;
+            if (!n.stats.missilePacket || !n.stats.minePacket) return false;
+        }
+        return true;
+    })());
+
+/* ---- cargo -------------------------------------------------------------- */
+
+head("cargo hold");
+
+check("the Cargo track exists and has a module row",
+    S.MODULES.some((m) => m.key === "cargo"));
+check("the Ammo track exists and has a module row",
+    S.MODULES.some((m) => m.key === "ammo"));
+check("hold capacity grows with the track and starts small",
+    S.statsFor({ cargo: 1 }).holdMax < S.statsFor({ cargo: 5 }).holdMax &&
+    S.statsFor({ cargo: 5 }).holdMax < S.statsFor({ cargo: 10 }).holdMax);
+check("a level-1 hold is deliberately tight enough to force a return",
+    S.statsFor({ cargo: 1 }).holdMax <= S.CONFIG.cargo.base,
+    S.statsFor({ cargo: 1 }).holdMax);
+
+newRun(777, "rook");
+{
+    const { player } = newRun(777, "rook");
+    const cap = player.holdMax;
+    const loaded = S.World.loadEnergy(player, cap);
+    check("a hold fills to exactly its capacity", loaded === cap && player.hold === cap);
+    check("a full hold refuses further cargo", S.World.loadEnergy(player, 50) === 0);
+    check("a partial hold banks the part that fits",
+        (() => {
+            player.hold = cap - 30;
+            return S.World.loadEnergy(player, 100) === 30 && player.hold === cap;
+        })());
+    check("an empty hold banks a whole pickup",
+        (() => {
+            player.hold = 0;
+            return S.World.loadEnergy(player, 40) === 40;
+        })());
+}
+
+check("docking moves the hold into the tank and empties itself", (() => {
+    const { player } = newRun(555, "rook");
+    player.energy = 100;
+    player.hold = 640;
+    const res = S.Stations.deposit(player);
+    return res.deposited === 640 && player.energy === 740 && player.hold === 0;
+})());
+
+check("depositing an empty hold is a no-op, not a subtraction", (() => {
+    const { player } = newRun(556, "rook");
+    player.energy = 100;
+    player.hold = 0;
+    S.Stations.deposit(player);
+    return player.energy === 100;
+})());
+
+check("docking twice cannot pay for the same cargo", (() => {
+    const { player } = newRun(557, "rook");
+    player.energy = 0;
+    player.hold = 300;
+    S.Stations.deposit(player);
+    S.Stations.deposit(player);
+    return player.energy === 300;
+})());
+
+/* ---- CPUs --------------------------------------------------------------- */
+
+head("CPUs");
+
+check("there is a CPU table", S.CPUS.length >= 4, S.CPUS.length);
+check("CPU keys are unique and unique against the module tracks",
+    new Set(S.CPUS.map((c) => c.key)).size === S.CPUS.length &&
+    !S.CPUS.some((c) => S.moduleIndex(c.key) >= 0));
+check("every CPU has a cost, a cooldown and a blurb",
+    S.CPUS.every((c) => c.cost > 0 && c.cooldown > 0 && c.blurb && c.detail && c.glyph));
+check("every CPU detail string is non-empty", S.CPUS.every((c) => c.detail().length > 0));
+check("an unknown CPU key resolves to null rather than throwing",
+    S.cpu("nonsense") === null && S.cpu(undefined) === null);
+
+check("buying a CPU charges energy once and fits it", (() => {
+    const { player } = newRun(901, "rook");
+    player.energy = 5000;
+    const before = player.energy;
+    const res = S.Stations.buyCpu(player, "radar");
+    return res.ok && player.energy === before - S.cpuCost("radar") &&
+        player.cpus.radar === true && player.cpu === "radar";
+})());
+
+check("buying the same CPU twice fails and charges nothing", (() => {
+    const { player } = newRun(902, "rook");
+    player.energy = 5000;
+    S.Stations.buyCpu(player, "radar");
+    const after = player.energy;
+    const res = S.Stations.buyCpu(player, "radar");
+    return !res.ok && player.energy === after;
+})());
+
+check("a CPU you cannot afford fails and charges nothing", (() => {
+    const { player } = newRun(903, "rook");
+    player.energy = 10;
+    const res = S.Stations.buyCpu(player, "leech");
+    return !res.ok && !player.cpus.leech;
+})());
+
+check("fitting an unowned CPU is refused", (() => {
+    const { player } = newRun(904, "rook");
+    return !S.Stations.fitCpu(player, "warp").ok && player.cpu === null;
+})());
+
+check("swapping between owned CPUs is free", (() => {
+    const { player } = newRun(905, "rook");
+    player.energy = 5000;
+    S.Stations.buyCpu(player, "radar");
+    S.Stations.buyCpu(player, "warp");
+    const before = player.energy;
+    S.Stations.fitCpu(player, "radar");
+    return player.cpu === "radar" && player.energy === before;
+})());
+
+check("unequipping is a legal state, not an error", (() => {
+    const { player } = newRun(906, "rook");
+    player.energy = 5000;
+    S.Stations.buyCpu(player, "radar");
+    return S.Stations.fitCpu(player, null).ok && player.cpu === null;
+})());
+
+check("the save never grants a CPU the pilot did not pay for", (() => {
+    store.set("sector7.v2.ship", JSON.stringify({ cpu: "leech", cpus: {} }));
+    const loaded = S.Storage.getShip();
+    return loaded.cpu === null;
+})());
+
+check("the save drops a CPU key that no longer exists", (() => {
+    store.set("sector7.v2.ship", JSON.stringify({ cpu: "obsolete", cpus: { obsolete: true } }));
+    return S.Storage.getShip().cpu === null;
+})());
+
+check("insta-shield really does make the ship untouchable", (() => {
+    const { player } = newRun(907, "rook");
+    player.cpu = "insta";
+    player.cpus.insta = true;
+    player.energy = 100;
+    const res = S.World.activateCpu(player);
+    const after = S.World.damageShip(player, { shield: 0, armor: 999 });
+    return res.ok && player.invuln >= S.CONFIG.cpu.instaShield && after.hull === 0;
+})());
+
+check("a CPU on cooldown refuses and charges nothing", (() => {
+    const { player } = newRun(908, "rook");
+    player.cpu = "warp";
+    player.cpus.warp = true;
+    player.energy = 500;
+    S.World.activateCpu(player);
+    const after = player.energy;
+    const res = S.World.activateCpu(player);
+    return !res.ok && player.energy === after;
+})());
+
+check("a CPU you cannot afford refuses and does not move the ship", (() => {
+    const { player } = newRun(909, "rook");
+    player.cpu = "warp";
+    player.cpus.warp = true;
+    player.energy = 1;
+    const x = player.x, y = player.y;
+    const res = S.World.activateCpu(player);
+    return !res.ok && player.x === x && player.y === y;
+})());
+
+check("warp jumps forward and stays inside the sector", (() => {
+    const { player } = newRun(910, "rook");
+    player.cpu = "warp";
+    player.cpus.warp = true;
+    player.energy = 500;
+    player.x = W.size / 2;
+    player.y = W.size / 2;
+    const before = S.dist2(player.x, player.y, W.station.x, W.station.y);
+    S.World.activateCpu(player);
+    const moved = S.dist2(player.x, player.y, W.station.x, W.station.y);
+    return moved > before && player.x > 0 && player.x < W.size && player.y > 0 && player.y < W.size;
+})());
+
+check("repair patches the hull only while it is running", (() => {
+    const { player } = newRun(911, "rook");
+    player.cpu = "repair";
+    player.cpus.repair = true;
+    player.energy = 500;
+    player.hull = 10;
+    S.World.activateCpu(player);
+    for (let i = 0; i < 60; i++) S.World.step(DT);
+    const patched = player.hull;
+    player.cpuTimer = 0;
+    player.hull = 10;
+    for (let i = 0; i < 60; i++) S.World.step(DT);
+    return patched > 10 && player.hull === 10;
+})());
+
+check("energy leech returns damage to the shooter, not the target", (() => {
+    const { player } = newRun(912, "rook");
+    const target = S.World.spawnShip({
+        name: "LEECH-TEST", faction: "alien", x: player.x + 400, y: player.y,
+        maxHull: 500, maxShield: 200,
+        stats: S.statsFor({ blaster: 1, shield: 1, armor: 1, processor: 1, thruster: 1, ammo: 1 }),
+    });
+    player.cpu = "leech";
+    player.cpuKey = "leech";
+    player.cpuTimer = S.CONFIG.cpu.leechTime;
+    player.shield = 0;
+    S.World.applyLeech(player, target, 40);
+    return player.shield > 0 && target.shield === target.maxShield;
+})());
+
+/* ---- targeting ---------------------------------------------------------- */
+
+head("targeting");
+
+newRun(5555, "rook");
+{
+    const { player } = newRun(5555, "rook");
+    for (let i = 0; i < 5; i++) S.NPCs.spawnOne(player);
+
+    check("the player starts with no lock", W.target === null);
+    const nearest = S.World.nearestHostile(player, 5000);
+    check("the nearest hostile can be found", !!nearest && nearest.isPlayer === false);
+    check("cycling locks something", !!S.World.cycleTarget(player, 5000));
+
+    /* Cycling is asserted on a controlled star of hostiles at known bearings,
+     * not on whatever the sector happened to roll - an ordering assertion
+     * that depends on the spawn RNG fails roughly one run in eight. */
+    {
+        S.World.clearTarget();
+        /* Copy first: removeShip splices, and walking the live array while
+         * splicing skips every other ship - which left stragglers at random
+         * bearings and made this whole block flake. */
+        for (const s of W.ships.slice()) if (!s.isPlayer) S.World.removeShip(s);
+        player.x = W.station.x;
+        player.y = W.station.y;
+
+        const mkAt = (dx, dy, name) => S.World.spawnShip({
+            name, faction: "raider", x: player.x + dx, y: player.y + dy,
+            maxHull: 50, maxShield: 0, radius: 14,
+            stats: S.statsFor({ blaster: 1, shield: 1, armor: 1, processor: 1, thruster: 1, ammo: 1 }),
+        });
+        const east = mkAt(300, 0, "EAST");
+        const south = mkAt(0, 300, "SOUTH");
+        const west = mkAt(-300, 0, "WEST");
+
+        W.target = east;
+        check("cycling steps clockwise past the current lock",
+            S.World.cycleTarget(player, 2000) === south);
+        W.target = south;
+        check("cycling wraps past the end of the arc",
+            S.World.cycleTarget(player, 2000) === west);
+        W.target = west;
+        check("cycling from the last bearing returns to the first",
+            S.World.cycleTarget(player, 2000) === east);
+
+        /* With a single hostile in range there is nothing to cycle to, and
+         * the press must not blank the lock. */
+        S.World.removeShip(east);
+        S.World.removeShip(west);
+        W.target = south;
+        check("cycling with one hostile left keeps the lock",
+            S.World.cycleTarget(player, 2000) === south && W.target === south);
+    }
+
+    S.World.clearTarget();
+    check("the lock can be cleared", W.target === null);
+
+    check("a ship is never hostile to itself", S.World.isHostileTo(player, player) === false);
+    check("every NPC is hostile to the player",
+        W.ships.filter((s) => !s.isPlayer).every((s) => S.World.isHostileTo(s, player)));
+    check("hostiles of different factions fight each other", (() => {
+        const raider = W.ships.find((s) => s.faction === "raider");
+        const alien = W.ships.find((s) => s.faction === "alien");
+        if (!raider || !alien) return true;
+        return S.World.isHostileTo(raider, alien) && S.World.isHostileTo(alien, raider);
+    })());
+    check("a dead target is dropped rather than left dangling", (() => {
+        const victim = S.World.spawnShip({
+            name: "LOCKME", faction: "raider", x: player.x + 120, y: player.y,
+            maxHull: 10, maxShield: 0,
+            stats: S.statsFor({ blaster: 1, shield: 1, armor: 1, processor: 1, thruster: 1, ammo: 1 }),
+        });
+        W.target = victim;
+        S.World.killShip(victim, null);
+        return W.target === null;
+    })());
+}
+
+/* ---- hangar: hulls and parts -------------------------------------------- */
+
+head("hangar: hulls");
+
+check("the hangar starts with a hull the pilot can actually fly",
+    S.Storage.ownsHull(S.Storage.getHangar(), S.HULLS[0].id));
+check("every hull has a passive, a blurb and a cost",
+    S.HULLS.every((h) => h.passive && h.blurb && h.detail && Number.isFinite(h.cost)));
+check("hull ids are unique and unique against the module tracks",
+    new Set(S.HULLS.map((h) => h.id)).size === S.HULLS.length &&
+    !S.HULLS.some((h) => S.moduleIndex(h.id) >= 0));
+check("exactly one hull is free to start with", S.HULLS.filter((h) => h.cost === 0).length === 1);
+check("the starter hull is the first one, because it is the fallback",
+    S.HULLS[0].cost === 0);
+check("every hull actually changes the ship", S.HULLS.every((h) =>
+    Object.keys(h.mods || {}).length > 0 || Object.keys(h.bonus || {}).length > 0));
+
+check("an unknown hull id falls back rather than returning undefined",
+    S.hull("nonsense") === S.HULLS[0] && S.hull(undefined) === S.HULLS[0]);
+check("a hull with no modifiers in statsFor is inert, not the first hull", (() => {
+    /* The Wasp is first and has the strongest hold penalty of the lot. If
+     * an unnamed hull silently became the Wasp, every one-argument
+     * statsFor call in the codebase would inherit it. */
+    const bare = S.statsFor({ thruster: 1 });
+    const wasp = S.statsFor({ thruster: 1 }, {}, null, "wasp");
+    return bare.holdMax !== wasp.holdMax && bare.speed !== wasp.speed;
+})());
+
+check("the Wasp really is a small fast ship", (() => {
+    const w = S.statsFor({}, {}, null, "wasp");
+    const b = S.statsFor({});
+    return w.holdMax < b.holdMax && w.speed > b.speed && w.turn > b.turn;
+})());
+check("the Hauler really is a big slow ship", (() => {
+    const h = S.statsFor({}, {}, null, "hauler");
+    const b = S.statsFor({});
+    return h.holdMax > b.holdMax * 1.4 && h.speed < b.speed;
+})());
+check("the Warden trades hull for shield recovery", (() => {
+    const w = S.statsFor({}, {}, null, "warden");
+    const b = S.statsFor({});
+    return w.shieldRegen > b.shieldRegen * 1.8 && w.maxHull < b.maxHull;
+})());
+check("the Bulwark is the tankiest hull and pays for it in speed", (() => {
+    const b = S.statsFor({}, {}, null, "bulwark");
+    const n = S.statsFor({});
+    return b.maxHull > n.maxHull * 1.2 && b.speed < n.speed && b.reduction > n.reduction;
+})());
+check("the Vandal is the only hull that adds raw damage",
+    S.HULLS.filter((h) => h.bonus && h.bonus.damage > 0).length === 1 &&
+    S.HULLS.find((h) => h.id === "vandal").bonus.damage > 0);
+check("the Vandal's damage bonus is symmetric across both guns", (() => {
+    const v = S.HULLS.find((h) => h.id === "vandal");
+    return v.bonus.damage === v.bonus.ammoDamage;
+})());
+
+head("hangar: parts");
+
+check("three slots, three components each", (() => {
+    if (S.HULL_SLOTS.length !== 3) return false;
+    for (const slot of S.HULL_SLOTS) {
+        if (S.partsForSlot(slot).length !== 3) return false;
+    }
+    return true;
+})());
+check("part keys are unique and unique against hull ids and modules",
+    new Set(S.PARTS.map((p) => p.key)).size === S.PARTS.length &&
+    !S.PARTS.some((p) => S.moduleIndex(p.key) >= 0 || S.hull(p.key) !== S.HULLS[0] || p.key === S.HULLS[0].id));
+check("every part belongs to a real slot and has a blurb",
+    S.PARTS.every((p) => S.HULL_SLOTS.includes(p.slot) && p.blurb && p.detail && p.glyph));
+check("a part costs more at every level", S.PARTS.every((p) => {
+    let prev = 0;
+    for (let lv = 0; lv < S.PART_MAX; lv++) {
+        const c = S.partCost(p.key, lv);
+        if (!Number.isFinite(c) || c <= prev) return false;
+        prev = c;
+    }
+    return true;
+}));
+check("a maxed part costs Infinity", S.PARTS.every((p) => S.partCost(p.key, S.PART_MAX) === Infinity));
+check("an unknown part key resolves to null", S.part("nonsense") === null);
+
+check("fitting a part changes the ship", (() => {
+    const bare = S.statsFor({ blaster: 5, thruster: 5, shield: 5 });
+    const fitted = S.statsFor({ blaster: 5, thruster: 5, shield: 5 },
+        {}, { laser: { key: "rail", level: 1 } }, null);
+    return fitted.damage > bare.damage && fitted.fireInterval > bare.fireInterval;
+})());
+check("a part level makes the same component better", (() => {
+    const one = S.statsFor({}, {}, { engine: { key: "haulerdrive", level: 1 } });
+    const ten = S.statsFor({}, {}, { engine: { key: "haulerdrive", level: 10 } });
+    return ten.holdMax > one.holdMax;
+})());
+check("the hull overrides the part, on purpose", (() => {
+    /* A Wasp with a Hauler Drive is still a Wasp: the hull is the last
+     * word, so buying the best engine cannot erase the cost of picking the
+     * wrong ship. */
+    const haulerDriveOnWasp = S.statsFor({}, {}, { engine: { key: "haulerdrive", level: 5 } }, "wasp");
+    const plainWasp = S.statsFor({}, {}, null, "wasp");
+    const bigEngineOnWasp = S.statsFor({}, {}, { engine: { key: "haulerdrive", level: 5 } }, "hauler");
+    return haulerDriveOnWasp.holdMax < bigEngineOnWasp.holdMax &&
+        haulerDriveOnWasp.holdMax > plainWasp.holdMax;
+})());
+check("an unknown part in a fit is ignored rather than crashing",
+    (() => {
+        const st = S.statsFor({}, {}, { engine: { key: "nonsense", level: 3 } });
+        return Number.isFinite(st.speed) && Number.isFinite(st.holdMax);
+    })());
+check("an unknown hull id applies no hull at all", (() => {
+    const st = S.statsFor({}, {}, null, "nonsense");
+    const bare = S.statsFor({});
+    return st.holdMax === bare.holdMax && st.speed === bare.speed;
+})());
+
+/* ---- the invariant the whole hangar hangs off ---- */
+head("hangar: weapons stay weapons");
+
+/* The rule that makes the matrix below provable rather than lucky: every
+   weapon part, and the one hull that touches damage, must apply the SAME
+   factor to the blaster and the capacitor round. Two builds then scale
+   identically and the comparison between them cannot move. */
+check("every weapon part scales both guns by the same factor", S.PARTS
+    .filter((p) => p.slot === "laser")
+    .every((p) => p.mods.fireInterval === p.mods.ammoCooldown &&
+        p.mods.damage === p.mods.ammoDamage &&
+        p.gain.damage === p.gain.ammoDamage));
+check("every hull that touches damage scales both guns identically", S.HULLS
+    .filter((h) => h.bonus && h.bonus.damage)
+    .every((h) => h.bonus.damage === h.bonus.ammoDamage));
+check("no engine or shield part touches a weapon at all", S.PARTS
+    .filter((p) => p.slot !== "laser")
+    .every((p) => !("damage" in (p.mods || {})) && !("ammoDamage" in (p.mods || {})) &&
+        !("fireInterval" in (p.mods || {})) && !("ammoCooldown" in (p.mods || {})) &&
+        !("damage" in (p.gain || {})) && !("ammoDamage" in (p.gain || {}))));
+
+check("no part or hull touches a weapon's shield/armour split", (() => {
+    /* Damage packets are rebuilt from raw damage after every multiplier, so
+     * a part can double the SIZE of a shot but never change what the shot is
+     * for. If this ever fails, buying a part would quietly kill the Ammo
+     * track. */
+    const base = { blaster: 10, ammo: 1, shield: 10, armor: 10, thruster: 10 };
+    const plain = S.statsFor(base);
+    const w = S.WEAPONS.blaster, a = S.WEAPONS.ammo;
+    return Math.abs(plain.blasterPacket.shield / plain.blasterPacket.armor - w.shield / w.armor) < 1e-9 &&
+        Math.abs(plain.ammoPacket.shield / plain.ammoPacket.armor - a.shield / a.armor) < 1e-9;
+})());
+
+check("the split is intact across every hull, part and level", (() => {
+    const base = { blaster: 6, ammo: 6, shield: 6, armor: 6, thruster: 6 };
+    const w = S.WEAPONS.blaster, a = S.WEAPONS.ammo;
+    for (const hull of S.HULLS) {
+        for (const e of S.partsForSlot("engine")) {
+            for (const l of S.partsForSlot("laser")) {
+                for (const s of S.partsForSlot("shield")) {
+                    const fit = {
+                        engine: { key: e.key, level: S.PART_MAX },
+                        laser: { key: l.key, level: S.PART_MAX },
+                        shield: { key: s.key, level: S.PART_MAX },
+                    };
+                    const st = S.statsFor(base, {}, fit, hull.id);
+                    if (Math.abs(st.blasterPacket.shield / st.blasterPacket.armor - w.shield / w.armor) > 1e-9) return false;
+                    if (Math.abs(st.ammoPacket.shield / st.ammoPacket.armor - a.shield / a.armor) > 1e-9) return false;
+                }
+            }
+        }
+    }
+    return true;
+})());
+
+/* The load-bearing consequence. Across the whole 135-configuration matrix, a
+   shield-heavy target must still flip the winner between the two builds,
+   and a bare hull must still be a laser fight. If a future part makes the
+   round universally better, this fails - which is the point. */
+check("across ALL 135 fit-outs, the ammo build still wins on aliens", (() => {
+    const buildL = { blaster: 10, ammo: 1, shield: 10, armor: 10, thruster: 10 };
+    const buildA = { blaster: 1, ammo: 10, shield: 10, armor: 10, thruster: 10 };
+    const hull = S.NPC_TIERS[8].hull;
+    const alien = S.faction("alien").shieldFrac;
+    for (const hd of S.HULLS) {
+        for (const e of S.partsForSlot("engine")) {
+            for (const l of S.partsForSlot("laser")) {
+                for (const s of S.partsForSlot("shield")) {
+                    const fit = {
+                        engine: { key: e.key, level: S.PART_MAX },
+                        laser: { key: l.key, level: S.PART_MAX },
+                        shield: { key: s.key, level: S.PART_MAX },
+                    };
+                    const target = { hull, shield: Math.round(hull * alien) };
+                    const laser = timeToKill(
+                        S.statsFor(buildL, {}, fit, hd.id).blasterPacket,
+                        S.statsFor(buildL, {}, fit, hd.id).fireInterval, target);
+                    const ammo = timeToKill(
+                        S.statsFor(buildA, {}, fit, hd.id).ammoPacket,
+                        S.statsFor(buildA, {}, fit, hd.id).ammoCooldown, target);
+                    if (!(ammo < laser)) return false;
+                }
+            }
+        }
+    }
+    return true;
+})());
+
+check("across ALL 135 fit-outs, a bare hull is still a laser fight", (() => {
+    const buildL = { blaster: 10, ammo: 1, shield: 10, armor: 10, thruster: 10 };
+    const buildA = { blaster: 1, ammo: 10, shield: 10, armor: 10, thruster: 10 };
+    const hull = S.NPC_TIERS[8].hull;
+    const target = { hull, shield: 0 };
+    for (const hd of S.HULLS) {
+        for (const e of S.partsForSlot("engine")) {
+            for (const l of S.partsForSlot("laser")) {
+                for (const s of S.partsForSlot("shield")) {
+                    const fit = {
+                        engine: { key: e.key, level: S.PART_MAX },
+                        laser: { key: l.key, level: S.PART_MAX },
+                        shield: { key: s.key, level: S.PART_MAX },
+                    };
+                    const laser = timeToKill(
+                        S.statsFor(buildL, {}, fit, hd.id).blasterPacket,
+                        S.statsFor(buildL, {}, fit, hd.id).fireInterval, target);
+                    const ammo = timeToKill(
+                        S.statsFor(buildA, {}, fit, hd.id).ammoPacket,
+                        S.statsFor(buildA, {}, fit, hd.id).ammoCooldown, target);
+                    if (!(laser < ammo)) return false;
+                }
+            }
+        }
+    }
+    return true;
+})());
+
+check("no fit-out produces a negative or non-finite stat", (() => {
+    for (const hd of S.HULLS) {
+        for (const e of S.partsForSlot("engine")) {
+            for (const l of S.partsForSlot("laser")) {
+                for (const s of S.partsForSlot("shield")) {
+                    const fit = {
+                        engine: { key: e.key, level: S.PART_MAX },
+                        laser: { key: l.key, level: S.PART_MAX },
+                        shield: { key: s.key, level: S.PART_MAX },
+                    };
+                    const st = S.statsFor(
+                        { blaster: 10, ammo: 10, shield: 10, armor: 10, thruster: 10, cargo: 10 },
+                        { hull: 3, tow: 2 }, fit, hd.id);
+                    for (const k of S.SCALABLE) {
+                        if (!Number.isFinite(st[k]) || st[k] < 0) return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+})());
+check("every fit-out still carries a usable hold and a live gun", (() => {
+    for (const hd of S.HULLS) {
+        for (const s of S.partsForSlot("shield")) {
+            const st = S.statsFor({}, {},
+                { shield: { key: s.key, level: S.PART_MAX } }, hd.id);
+            if (!(st.holdMax > 0)) return false;
+            if (!(st.damage > 0 && st.fireInterval > 0)) return false;
+            if (!(st.ammoDamage > 0 && st.ammoCooldown > 0)) return false;
+        }
+    }
+    return true;
+})());
+
+/* ---- hangar transactions ---------------------------------------------- */
+
+head("hangar transactions");
+
+{
+    const { player } = newRun(7001, "rook");
+    player.energy = 100000;
+
+    check("buying a hull charges energy and fits it",
+        (() => {
+            const before = player.energy;
+            const r = S.Stations.buyHull(player, "bulwark");
+            return r.ok && before - player.energy === S.hull("bulwark").cost &&
+                player.hullId === "bulwark";
+        })());
+    check("buying the same hull twice fails and charges nothing", (() => {
+        const before = player.energy;
+        const r = S.Stations.buyHull(player, "bulwark");
+        return !r.ok && player.energy === before;
+    })());
+    check("an unaffordable hull fails and charges nothing", (() => {
+        player.energy = 1;
+        const r = S.Stations.buyHull(player, "hauler");
+        player.energy = 100000;
+        return !r.ok && !S.Storage.ownsHull(player.hangar, "hauler");
+    })());
+    check("an unknown hull fails", !S.Stations.buyHull(player, "nonsense").ok);
+}
+
+check("selecting an owned hull is free and reversible", (() => {
+    const { player } = newRun(7002, "rook");
+    player.energy = 100000;
+    S.Stations.buyHull(player, "warden");
+    const before = player.energy;
+    S.Stations.setActiveHull(player, "wasp");
+    const back = S.Stations.setActiveHull(player, "warden");
+    return back.ok && player.energy === before && player.hullId === "warden";
+})());
+
+check("selecting a hull you do not own is refused", (() => {
+    const { player } = newRun(7003, "rook");
+    return !S.Stations.setActiveHull(player, "vandal").ok && player.hullId === "wasp";
+})());
+
+check("buying a part installs it into its slot", (() => {
+    const { player } = newRun(7004, "rook");
+    player.energy = 100000;
+    const r = S.Stations.buyPart(player, "pulse");
+    return r.ok && r.level === 1 && player.hangar.parts.pulse === 1 &&
+        player.parts.laser.key === "pulse";
+})());
+
+check("a second purchase is a level, not a duplicate", (() => {
+    const { player } = newRun(7005, "rook");
+    player.energy = 100000;
+    S.Stations.buyPart(player, "pulse");
+    const r = S.Stations.buyPart(player, "pulse");
+    return r.ok && r.level === 2 && player.hangar.parts.pulse === 2;
+})());
+
+check("swapping a part is free and repeatable", (() => {
+    const { player } = newRun(7006, "rook");
+    player.energy = 100000;
+    S.Stations.buyPart(player, "pulse");
+    S.Stations.buyPart(player, "rail");
+    const before = player.energy;
+    S.Stations.fitPart(player, "pulse", "laser");
+    S.Stations.fitPart(player, "rail", "laser");
+    S.Stations.fitPart(player, "pulse", "laser");
+    return player.energy === before && player.parts.laser.key === "pulse";
+})());
+
+check("fitting a part you do not own is refused", (() => {
+    const { player } = newRun(7007, "rook");
+    const before = player.parts.laser ? player.parts.laser.key : null;
+    return !S.Stations.fitPart(player, "splitter", "laser").ok &&
+        (player.parts.laser ? player.parts.laser.key : null) === before;
+})());
+
+check("fitting a part into the wrong slot is refused", (() => {
+    const { player } = newRun(7008, "rook");
+    player.energy = 100000;
+    S.Stations.buyPart(player, "pulse");
+    return !S.Stations.fitPart(player, "pulse", "engine").ok;
+})());
+
+check("emptying a slot is a legal state, not an error", (() => {
+    const { player } = newRun(7009, "rook");
+    player.energy = 100000;
+    S.Stations.buyPart(player, "pulse");
+    const r = S.Stations.fitPart(player, null, "laser");
+    return r.ok && !player.parts.laser && Number.isFinite(player.stats.damage);
+})());
+
+check("a maxed part refuses further purchases", (() => {
+    const { player } = newRun(7010, "rook");
+    player.energy = 1000000;
+    for (let i = 0; i < S.PART_MAX; i++) S.Stations.buyPart(player, "pulse");
+    const before = player.energy;
+    const r = S.Stations.buyPart(player, "pulse");
+    return !r.ok && player.energy === before;
+})());
+
+check("a failed purchase leaves the ship exactly as it was", (() => {
+    const { player } = newRun(7011, "rook");
+    player.energy = 10;
+    const snap = JSON.stringify({
+        e: player.energy, hull: player.hullId, parts: player.parts,
+        stats: player.stats,
+    });
+    S.Stations.buyHull(player, "vandal");
+    S.Stations.buyPart(player, "splitter");
+    S.Stations.fitPart(player, "splitter", "laser");
+    return JSON.stringify({
+        e: player.energy, hull: player.hullId, parts: player.parts,
+        stats: player.stats,
+    }) === snap;
+})());
+
+check("the hangar survives a save and reload", (() => {
+    const { player } = newRun(7012, "rook");
+    player.energy = 100000;
+    S.Stations.buyHull(player, "hauler");
+    S.Stations.buyPart(player, "needle");
+    S.Stations.buyPart(player, "splitter");
+    S.Storage.saveShip(S.Stations.bank(player));
+    S.Storage.saveHangar(player.hangar);
+
+    const reloaded = S.Storage.getShip();
+    return reloaded.hullId === "hauler" &&
+        reloaded.parts.engine && reloaded.parts.engine.key === "needle" &&
+        reloaded.parts.laser && reloaded.parts.laser.key === "splitter";
+})());
+
+check("upgrades stay shared across hulls", (() => {
+    const { player } = newRun(7013, "rook");
+    player.energy = 100000;
+    S.Stations.buyModule(player, "thruster");
+    const level = player.modules.thruster;
+    S.Stations.buyHull(player, "bulwark");
+    return player.modules.thruster === level && level === 2;
+})());
+
+check("a save cannot grant a hull the pilot never bought", (() => {
+    store.set("sector7.v2.hangar", JSON.stringify({
+        active: "vandal", hulls: {}, parts: {}, sandbox: false,
+    }));
+    const h = S.Storage.getHangar();
+    return h.active === S.HULLS[0].id && !S.Storage.ownsHull(h, "vandal");
+})());
+
+check("a save cannot grant a part the pilot never bought", (() => {
+    store.set("sector7.v2.hangar", JSON.stringify({
+        active: "hauler", hulls: { hauler: { parts: { engine: "needle" } } },
+        parts: {}, sandbox: false,
+    }));
+    const fit = S.Storage.resolveFit(S.Storage.getHangar(), "hauler");
+    return !fit.engine;
+})());
+
+check("a save cannot equip a part that was deleted from the game", (() => {
+    store.set("sector7.v2.hangar", JSON.stringify({
+        active: "hauler", hulls: { hauler: { parts: { engine: "obsolete" } } },
+        parts: { obsolete: 5 }, sandbox: false,
+    }));
+    const fit = S.Storage.resolveFit(S.Storage.getHangar(), "hauler");
+    return !fit.engine;
+})());
+
+check("wiping the save wipes the hangar too", (() => {
+    const { player } = newRun(7014, "rook");
+    player.energy = 100000;
+    S.Stations.buyHull(player, "warden");
+    S.Storage.saveHangar(player.hangar);
+    S.Storage.saveShip(S.Stations.bank(player));
+    S.Storage.wipe();
+    const h = S.Storage.getHangar();
+    return h.active === S.HULLS[0].id && Object.keys(h.hulls).length === 1;
+})());
 
 /* ---- summary ------------------------------------------------------------ */
 

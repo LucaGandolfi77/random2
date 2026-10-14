@@ -72,6 +72,11 @@
         state = "flying";
         respawnTimer = 0;
 
+        /* The mode run starts with the flight, not with the sector: a WAVE
+         * portal belongs to the attempt, and a new attempt gets a new one. */
+        S.Modes.reset();
+        S.Modes.start(save.mode || "patrol", S.World.world, ship);
+
         S.Render.snap(ship.x, ship.y);
         S.Render.prepareShip(ship);
         S.UI.clearFeed();
@@ -98,6 +103,12 @@
         state = "dead";
         respawnTimer = C.world.deathRespawn;
         lastKiller = killer;
+
+        /* A mode run ends with the run. A wave you died in is not paid, and a
+         * haul whose timer was still ticking stops ticking - carrying on would
+         * mean a dead pilot still had a countdown. */
+        var mode = S.Modes.abort();
+        if (mode) S.UI.toast(S.mode(mode.id).name + " RUN ENDED", true);
 
         /* An unfinished survive contract dies with the run. Everything else
          * keeps its progress: you did that work before the wreck. */
@@ -263,9 +274,55 @@
                     vibrate([60, 30, 60]);
                     break;
 
+                case "baseAlarm": {
+                    /* The base calls its OWN faction out. Spawning it here
+                     * rather than inside world.js keeps entity creation in
+                     * the system that owns it, and means the sim test can run
+                     * a faction map without dragging main.js in. */
+                    var called = S.NPCs.callDefenders(e.base, e.guards);
+                    S.Audio.bounty();
+                    S.UI.toast(e.base.name + " CALLS " + called.length + " DEFENDERS");
+                    S.UI.addKill("WARNED", e.base.color, e.base.name, e.base.color);
+                    vibrate([40, 30, 40]);
+                    break;
+                }
+
+                case "baseDown":
+                    S.Audio.explosion();
+                    S.UI.toast(e.base.name + " DOWN  ·  +" + e.reward + " ◈ ON THE DECK");
+                    S.UI.addKill("RAIDED", "#67e8f9", e.base.name, "#67e8f9");
+                    vibrate([30, 40, 120]);
+                    break;
+
+                case "waveOpen":
+                    S.Audio.bounty();
+                    S.UI.toast("WAVE " + e.wave + " / " + e.waves + "  ·  " + e.count + " INCOMING");
+                    vibrate([40, 25, 40]);
+                    break;
+
+                case "modeStart":
+                    S.UI.toast(e.text);
+                    break;
+
                 case "dock":
+                    /* The hold was banked by Player.dock before the event was
+                     * queued, so the panel opens on the real balance. */
                     S.UI.showStation(S.World.world.player);
                     state = "docked";
+                    break;
+
+                case "cpu": {
+                    var def = S.cpu(e.key);
+                    if (e.ship.isPlayer) {
+                        S.Audio.cpu(e.key);
+                        vibrate(24);
+                        if (def) S.UI.toast(def.name.toUpperCase() + " ACTIVE");
+                    }
+                    break;
+                }
+
+                case "ammo":
+                    if (e.ship.isPlayer) { S.Audio.ammo(); vibrate(30); }
                     break;
 
                 case "undock":
@@ -337,6 +394,219 @@
         S.UI.refreshStation();
     }
 
+    function buyCpu(key) {
+        var ship = S.World.world.player;
+        var res = S.Stations.buyCpu(ship, key);
+
+        if (!res.ok) {
+            S.Audio.error();
+            S.UI.toast(res.reason.toUpperCase(), true);
+            return;
+        }
+
+        S.Audio.upgrade();
+        S.UI.toast((S.cpu(key) ? S.cpu(key).name.toUpperCase() : key) + " INSTALLED");
+
+        /* Banked immediately, for the same reason every other purchase is:
+         * a phone browser tab is not guaranteed to survive a background kill
+         * while docked. */
+        S.Storage.saveShip(S.Stations.bank(ship));
+        S.UI.refreshStation();
+    }
+
+    function fitCpu(key) {
+        var ship = S.World.world.player;
+        var res = S.Stations.fitCpu(ship, key);
+
+        if (!res.ok) {
+            S.Audio.error();
+            S.UI.toast(res.reason.toUpperCase(), true);
+            return;
+        }
+
+        S.Audio.ui();
+        S.Storage.saveShip(S.Stations.bank(ship));
+        S.UI.refreshStation();
+    }
+
+    /* ===== Hangar ===== */
+
+    /* The station has a live ship, so buying is straightforward. From the
+     * menu there is no ship in the world - build a throwaway one so the
+     * hangar can be browsed, and make buying from there write straight to
+     * storage. Browsing must never require flying. */
+    function hangarShip() {
+        var live = S.World.world.player;
+        if (live && live.alive) return live;
+        var save = S.Storage.getShip();
+        var scratch = {
+            energy: save.energy,
+            crystals: save.crystals,
+            modules: save.modules,
+            refits: save.refits,
+            cpus: save.cpus,
+            cpu: save.cpu,
+            hangar: save.hangar,
+            hullId: save.hullId,
+            parts: save.parts,
+        };
+        S.Stations.refreshStats(scratch);
+        return scratch;
+    }
+
+    function openHangar() {
+        S.UI.showHangar(hangarShip());
+    }
+
+    function closeHangar() {
+        /* Back where it was opened from: the station if the ship is docked,
+         * otherwise the menu. Guessing wrong would strand a pilot in a screen
+         * with no way back. */
+        if (state === "docked") S.UI.showStation(S.World.world.player);
+        else S.UI.showScreen("menu");
+    }
+
+    function persistHangar() {
+        var ship = S.World.world.player;
+        if (!ship || !ship.alive) return;
+        S.Stations.bank(ship);
+        S.Storage.saveShip(ship.saved);
+        S.Storage.saveHangar(ship.hangar);
+    }
+
+    function selectHull(id) {
+        var ship = hangarShip();
+        var hangar = ship.hangar;
+        var owned = S.Storage.ownsHull(hangar, id);
+
+        var res;
+        if (owned) {
+            res = S.Stations.setActiveHull(ship, id);
+        } else {
+            res = S.Stations.buyHull(ship, id);
+            if (!res.ok) {
+                S.Audio.error();
+                S.UI.toast(res.reason.toUpperCase(), true);
+                S.UI.refreshHangar();
+                return;
+            }
+            S.Audio.upgrade();
+            S.UI.toast(S.hull(id).name + " ACQUIRED");
+        }
+        if (!res.ok) {
+            S.Audio.error();
+            S.UI.toast(res.reason.toUpperCase(), true);
+            S.UI.refreshHangar();
+            return;
+        }
+        persistHangar();
+        S.UI.refreshHangar();
+    }
+
+    function buyPart(key) {
+        var ship = hangarShip();
+        var def = S.part(key);
+        var owned = ship.hangar.parts[key] > 0;
+        var res = S.Stations.buyPart(ship, key);
+
+        if (!res.ok) {
+            S.Audio.error();
+            S.UI.toast(res.reason.toUpperCase(), true);
+            S.UI.refreshHangar();
+            return;
+        }
+        /* Buying and fitting are the same click on purpose: opening the
+         * hangar twice to see what you just paid for is a tax, and the slot
+         * was empty anyway in the common case. */
+        if (!owned) {
+            S.Stations.fitPart(ship, key, def ? def.slot : null);
+            S.Audio.upgrade();
+            S.UI.toast((def ? def.name : key).toUpperCase() + " FITTED");
+        } else {
+            S.Stations.fitPart(ship, key, def ? def.slot : null);
+            S.Audio.ui();
+            S.UI.toast((def ? def.name : key).toUpperCase() + " LV" + res.level);
+        }
+        persistHangar();
+        S.UI.refreshHangar();
+    }
+
+    /* ===== Sandbox =====
+     * A cheat, deliberately behind a toggle that is off by default and that
+     * says what it will do. It goes through the same station transactions
+     * where it can, so it cannot manufacture a state the rest of the game
+     * does not know how to read.
+     */
+    function toggleSandbox() {
+        var ship = hangarShip();
+        ship.hangar.sandbox = !ship.hangar.sandbox;
+        S.Audio.ui();
+        persistHangar();
+        S.UI.refreshHangar();
+    }
+
+    function cheat(spec) {
+        var ship = hangarShip();
+        if (!ship.hangar.sandbox) {
+            S.Audio.error();
+            S.UI.toast("SANDBOX IS OFF", true);
+            return;
+        }
+        var bits = String(spec || "").split(":");
+
+        if (bits[0] === "grant") {
+            var amount = parseInt(bits[2], 10);
+            if (!Number.isFinite(amount) || amount <= 0) return;
+            ship[bits[1]] = Math.max(0, (ship[bits[1]] || 0) + amount);
+            S.Audio.upgrade();
+            S.UI.toast("+" + S.fmt(amount) + (bits[1] === "crystals" ? " ◈" : " ⚡"));
+        } else if (bits[0] === "unlock") {
+            /* Grants the ships and components outright rather than charging
+             * for them, which is the whole point of a sandbox. */
+            for (var i = 0; i < S.HULLS.length; i++) {
+                var id = S.HULLS[i].id;
+                if (!ship.hangar.hulls[id]) ship.hangar.hulls[id] = { parts: {} };
+            }
+            for (var p = 0; p < S.PARTS.length; p++) {
+                if (!ship.hangar.parts[S.PARTS[p].key]) ship.hangar.parts[S.PARTS[p].key] = 1;
+            }
+            S.Audio.upgrade();
+            S.UI.toast("EVERYTHING UNLOCKED");
+        } else if (bits[0] === "max") {
+            for (var m = 0; m < S.MODULES.length; m++) {
+                ship.modules[S.MODULES[m].key] = S.MODULE_MAX;
+            }
+            for (var r = 0; r < S.REFITS.length; r++) {
+                ship.refits[S.REFITS[r].key] = S.REFITS[r].max;
+            }
+            for (var q = 0; q < S.PARTS.length; q++) {
+                ship.hangar.parts[S.PARTS[q].key] = S.PART_MAX;
+            }
+            ship.hangar.sandbox = true;
+            S.Audio.upgrade();
+            S.UI.toast("EVERYTHING MAXED");
+        } else {
+            return;
+        }
+
+        S.Stations.refreshStats(ship);
+        persistHangar();
+        S.UI.refreshHangar();
+    }
+
+    function setMode(id) {
+        var ship = S.World.world.player;
+        if (!ship) return;
+        if (!S.mode(id)) return;
+        ship.mode = id;
+        /* Free and always allowed: choosing a mode is a decision you can
+         * take back before you commit to it. */
+        S.Storage.saveShip(S.Stations.bank(ship));
+        S.Audio.ui();
+        S.UI.toast(S.mode(id).name + " SELECTED");
+        S.UI.refreshStation();
+    }
+
     function claimContract(id) {
         var pay = S.Contracts.claim(id);
         if (pay === null) { S.Audio.error(); return; }
@@ -397,6 +667,29 @@
         S.NPCs.update(dt);
         S.Bounty.update(W, S.Sector.get(W.sectorId), player, dt);
         for (i = 0; i < W.ships.length; i++) S.World.moveShip(W.ships[i], dt);
+
+        /* Ticked between movement and the world step so a wave can spawn
+         * hostiles that then move and fight on the same frame they arrive. */
+        if (player && player.alive && state !== "menu") {
+            var modeEvents = S.Modes.update(dt, W, player);
+            if (modeEvents) {
+                for (var m = 0; m < modeEvents.length; m++) {
+                    var me = modeEvents[m];
+                    if (me.type === "modeWon") {
+                        /* Straight to the crystal balance: crystals are banked
+                         * on pickup by design and are the one thing that can
+                         * never be lost off a wreck. */
+                        player.crystals += me.crystals;
+                        S.UI.toast(S.mode(me.mode).name + " CLEARED  +" + me.crystals + " ◈");
+                        S.Audio.upgrade();
+                        vibrate([30, 40, 90]);
+                    } else if (me.type === "modeLost") {
+                        S.UI.toast("THE CLOCK BEAT YOU", true);
+                        S.Audio.error();
+                    }
+                }
+            }
+        }
 
         var flying = state === "flying" && player && player.alive;
         /* Contracts keep their own clock whether or not the player is
@@ -485,7 +778,16 @@
         S.UI.on("buy", buyModule);
         S.UI.on("repair", buyRepair);
         S.UI.on("refit", buyRefit);
+        S.UI.on("buyCpu", buyCpu);
+        S.UI.on("fitCpu", fitCpu);
+        S.UI.on("hangar", openHangar);
+        S.UI.on("hangarClose", closeHangar);
+        S.UI.on("hull", selectHull);
+        S.UI.on("part", buyPart);
+        S.UI.on("sandbox", toggleSandbox);
+        S.UI.on("cheat", cheat);
         S.UI.on("claim", claimContract);
+        S.UI.on("mode", setMode);
         S.UI.on("travel", travelTo);
         S.UI.on("undock", undock);
         S.UI.on("toggleAssist", function () {

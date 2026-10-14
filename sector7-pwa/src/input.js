@@ -23,6 +23,14 @@
         missileEdge: false,
         mineHeld: false,
         mineEdge: false,
+        ammoHeld: false,
+        ammoEdge: false,
+        cpuHeld: false,
+        cpuEdge: false,
+        /* Targeting: one press locks or unlocks, one press cycles. Both are
+         * edge-triggered so holding the screen never thrashes the lock. */
+        targetEdge: false,
+        cycleEdge: false,
         keys: {},
         touchActive: false,
         stickId: null,
@@ -123,6 +131,22 @@
     function consumeEdges() {
         input.missileEdge = false;
         input.mineEdge = false;
+        input.ammoEdge = false;
+        input.cpuEdge = false;
+        input.targetEdge = false;
+        input.cycleEdge = false;
+    }
+
+    /* A tap on the right half that misses every button is a target press. The
+     * right half is otherwise dead space, so this costs nothing on a phone
+     * and gives a mouse player the same lock a keyboard player gets. */
+    function onCanvasTap(e) {
+        if (input.stickId !== null) return;
+        if (e.clientX <= window.innerWidth * 0.52) return;
+        /* Anything sitting under a pad belongs to that pad. */
+        var t = e.target;
+        if (t && t.closest && t.closest(".pad-right")) return;
+        pressWeapon("target");
     }
 
     /* ===== Buttons ===== */
@@ -166,6 +190,9 @@
         if (e.key === "e" || e.key === "E") input.docking = true;
         if (e.key === "m" || e.key === "M") pressWeapon("missile");
         if (e.key === "b" || e.key === "B") pressWeapon("mine");
+        if (e.key === "x" || e.key === "X") pressWeapon("ammo");
+        if (e.key === "f" || e.key === "F") pressWeapon("cpu");
+        if (e.key === "t" || e.key === "T") pressWeapon("cycle");
         if (KEY_VECTORS[e.key]) e.preventDefault();
     }
 
@@ -175,6 +202,8 @@
         if (e.key === "e" || e.key === "E") input.docking = false;
         if (e.key === "m" || e.key === "M") input.missileHeld = false;
         if (e.key === "b" || e.key === "B") input.mineHeld = false;
+        if (e.key === "x" || e.key === "X") input.ammoHeld = false;
+        if (e.key === "f" || e.key === "F") input.cpuHeld = false;
     }
 
     /* Keyboard and stick are summed, then clamped once, so a diagonal on the
@@ -216,12 +245,15 @@
         els.fire = document.getElementById("btn-fire");
         els.missile = document.getElementById("btn-missile");
         els.mine = document.getElementById("btn-mine");
+        els.ammo = document.getElementById("btn-ammo");
+        els.cpu = document.getElementById("btn-cpu");
         els.dock = document.getElementById("btn-dock");
 
         var d = defaultBase();
         placeBase(d.x, d.y);
 
         canvas.addEventListener("pointerdown", onStickDown, { passive: false });
+        canvas.addEventListener("pointerdown", onCanvasTap, { passive: false });
         canvas.addEventListener("pointermove", onStickMove, { passive: false });
         window.addEventListener("pointerup", onStickUp);
         window.addEventListener("pointercancel", onStickUp);
@@ -239,6 +271,14 @@
         holdButton(els.mine, function (v) {
             if (v) pressWeapon("mine");
             input.mineHeld = v;
+        });
+        holdButton(els.ammo, function (v) {
+            if (v) pressWeapon("ammo");
+            input.ammoHeld = v;
+        });
+        holdButton(els.cpu, function (v) {
+            if (v) pressWeapon("cpu");
+            input.cpuHeld = v;
         });
         holdButton(els.dock, function (v) {
             input.docking = v;
@@ -263,6 +303,10 @@
         input.docking = false;
         input.missileHeld = input.missileEdge = false;
         input.mineHeld = input.mineEdge = false;
+        input.ammoHeld = input.ammoEdge = false;
+        input.cpuHeld = input.cpuEdge = false;
+        input.targetEdge = false;
+        input.cycleEdge = false;
         input.stickId = null;
         input.keys = {};
         showStick(false);

@@ -28,6 +28,7 @@
         player: null,
         ships: [],          // player + npcs, alive only
         bullets: [],
+        ammo: [],
         missiles: [],
         mines: [],
         pickups: [],
@@ -37,7 +38,18 @@
         crates: [],
         stars: [],
         nebulae: [],
+        /* A faction's base, on a faction map. It is a STRUCTURE, not a ship:
+         * it cannot be locked, it cannot be docked at, and it is not in
+         * world.ships - so none of the ship-targeting code has to learn about
+         * it. On a frontier sector this is null and every base code path is
+         * skipped. */
+        base: null,
         events: [],
+
+        /* The player's explicit lock. Distinct from the soft aim assist:
+         * this is a choice the player made and it survives losing the target
+         * to radar range. */
+        target: null,
 
         roster: [],
         /* Recent hits on the player, for the directional damage indicator.
@@ -63,18 +75,21 @@
 
     function initPools() {
         world.bullets = makePool(C.pools.bullets, function () {
-            return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, life: 0, dmg: 0, r: 4, friendly: true, ownerId: 0, color: "#fff" };
+            return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, life: 0, ds: 0, da: 0, r: 4, friendly: true, ownerId: 0, color: "#fff", heavy: false };
+        });
+        world.ammo = makePool(C.pools.ammo, function () {
+            return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, life: 0, ds: 0, da: 0, r: 7, ownerId: 0, friendly: true };
         });
         world.pickups = makePool(C.pools.pickups, function () {
             return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, kind: "energy", value: 0, life: 0, spin: 0, seed: 0 };
         });
         world.missiles = makePool(C.pools.missiles, function () {
             return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, life: 0,
-                     dmg: 0, splash: 0, ownerId: 0, ownerIsPlayer: true, targetId: 0, arm: 0 };
+                     ds: 0, da: 0, splash: 0, ownerId: 0, ownerIsPlayer: true, targetId: 0, arm: 0 };
         });
         world.mines = makePool(C.pools.mines, function () {
             return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, life: 0,
-                     dmg: 0, radius: 90, ownerId: 0, ownerIsPlayer: true, arm: 0 };
+                     ds: 0, da: 0, radius: 90, ownerId: 0, ownerIsPlayer: true, arm: 0 };
         });
         world.particles = makePool(C.pools.particles, function () {
             return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, life: 0, max: 1, size: 3, color: "#fff", grav: 0, kind: "spark" };
@@ -107,6 +122,12 @@
 
             /* Keep the station's approach lanes clear. */
             if (S.dist2(x, y, world.station.x, world.station.y) < C.world.clearRadius * C.world.clearRadius) continue;
+            /* And keep the base's footprint clear, or the structure comes up
+             * out of a rock field and reads as scenery. */
+            if (world.base) {
+                var br = world.base.r + 120;
+                if (S.dist2(x, y, world.base.x, world.base.y) < br * br) continue;
+            }
 
             var r = 24 + rng() * 30;
             var clash = false;
@@ -237,6 +258,59 @@
         return list;
     }
 
+    /* ===== Faction bases =====
+     * One per faction map: a big structure you raid.
+     *
+     * It is shield-dominant on purpose, and it is shield-dominant *through
+     * the same rule every ship obeys* - the armour component is held off
+     * while a shield is up. A Hive base at 95% shields is therefore
+     * effectively laser-proof, and the only way through is the capacitor
+     * round. That is the Ammo track's payoff moment, and it is why the base
+     * is built on the shared damage model rather than on its own.
+     *
+     * Deliberately NOT a station: you cannot dock here. If you could, a
+     * faction territory would be a free teleport hub and travelling between
+     * maps would stop being a decision.
+     */
+    function buildBase(sec) {
+        if (!sec || sec.kind !== "faction" || !sec.faction) return null;
+        var fac = S.faction(sec.faction);
+        var rng = world.rng;
+
+        /* Placed well off the station and off dead centre, so the dock ring
+         * and the camera's opening shot are never about the base. */
+        var a = 0.4 + rng() * Math.PI * 2;
+        var d = world.size * (0.26 + rng() * 0.08);
+        var x = S.clamp(world.station.x + Math.cos(a) * d, 320, world.size - 320);
+        var y = S.clamp(world.station.y + Math.sin(a) * d, 320, world.size - 320);
+
+        var r = sec.baseRadius || 260;
+        var hull = Math.round(900 + sec.tierCap * 260);
+        var maxShield = S.npcShieldFor(hull, fac.key);
+
+        return {
+            x: x, y: y, z: 26,
+            r: r,
+            faction: fac.key,
+            color: fac.color,
+            name: fac.name.toUpperCase() + " BASE",
+            hull: hull,
+            maxHull: hull,
+            shield: maxShield,
+            maxShield: maxShield,
+            alive: true,
+            respawn: 0,
+            hitFlash: 0,
+            called: false,
+            /* Defenders it throws when you first hit it. Cleared once, and
+             * never re-armed: the second attempt is on a rebuilt base. */
+            guards: sec.raids || 1,
+            reward: sec.baseReward || 60,
+            seed: Math.floor(rng() * 100000),
+            spin: 0,
+        };
+    }
+
     /* Named rivals, frozen per seed: the same roster hunts you every run. */
     function buildRoster(seed) {
         /* Derived from the seed rather than the world stream, so generating
@@ -244,10 +318,15 @@
         var rng = S.mulberry32(S.hashString("sector7-roster:" + seed));
         var list = [];
         for (var i = 0; i < C.npc.maxAlive * 3; i++) {
+            /* Faction is per-pilot and fixed for the seed, so Ash-9 is the
+             * same Demaner every run rather than a different colour each
+             * time you dock. */
+            var fac = S.pickFaction(1 + Math.floor(rng() * (S.FACTION_MIX.length - 1)), rng);
             list.push({
                 id: "n" + i,
                 name: S.randomCallsign(rng),
-                color: S.SHIP_COLORS[(rng() * S.SHIP_COLORS.length) | 0],
+                color: fac.color,
+                faction: fac.key,
                 skill: 0.25 + rng() * 0.75,
                 greed: 0.2 + rng() * 0.8,
                 phase: rng() * Math.PI * 2,
@@ -264,12 +343,18 @@
         world.rng = S.mulberry32(world.seed);
 
         world.size = sec ? sec.size : C.world.size;
-        /* The station stays dead centre in every sector: the dock ring, the
-         * minimap and the "fly back to the station" affordance all assume it. */
+        /* The station stays dead centre in EVERY map, frontier or faction
+         * alike: the dock ring, the minimap and the "fly back to the station"
+         * affordance all assume it, and it is the one thing every map shares. */
         world.station = { x: Math.round(world.size / 2), y: Math.round(world.size / 2) };
         world.tierCap = sec ? sec.tierCap : C.npc.maxTier;
         world.npcMax = sec ? sec.npcMax : C.npc.maxAlive;
         world.payout = sec ? sec.payout : 1;
+        world.mapKind = sec ? sec.kind : "sector";
+        /* Built BEFORE the rock field so the field can leave its footprint
+         * clear - and exactly once, because a second call would burn an RNG
+         * draw and leave the rocks laid out around a base nobody can see. */
+        world.base = buildBase(sec);
         world.hazards = buildHazards(sec);
         world.time = 0;
         world.ships.length = 0;
@@ -278,6 +363,7 @@
         world.shake = 0;
         world.killCount = 0;
         world.player = null;
+        world.target = null;
         nextId = 1;
 
         initPools();
@@ -290,12 +376,20 @@
     /* ===== Ships ===== */
 
     function makeShip(opts) {
+        var maxHull = opts.maxHull;
+        var maxShield = opts.maxShield === undefined
+            ? Math.round(maxHull * 0.45)
+            : opts.maxShield;
         return {
             id: nextId++,
             isPlayer: !!opts.isPlayer,
             name: opts.name || "Unknown",
             color: opts.color || S.COLORS.player,
             tier: opts.tier || 1,
+            /* Which mob this hull belongs to. The player is "you"; every NPC
+             * is one of S.FACTIONS, and that decides its shield pool and
+             * which weapons it will point at you. */
+            faction: opts.faction || "you",
 
             x: opts.x || 0,
             y: opts.y || 0,
@@ -305,23 +399,41 @@
             aim: opts.heading || 0,
             throttle: 0,
 
-            hull: opts.maxHull,
-            maxHull: opts.maxHull,
+            /* Two pools, not one. Shields absorb and refill; armour never
+             * comes back on its own. */
+            shield: maxShield,
+            maxShield: maxShield,
+            hull: maxHull,
+            maxHull: maxHull,
             radius: opts.radius || 15,
             stats: opts.stats,
             armor: opts.reduction || 0,
 
+            /* The hold. Energy is carried, not owned. */
+            hold: 0,
+            holdMax: opts.holdMax === undefined ? 200 : opts.holdMax,
+
             cooldown: 0,
+            cooldownAmmo: 0,
             cooldownMissiles: 0,
             cooldownMine: 0,
+            cooldownCpu: 0,
             alive: true,
             docked: false,
             invuln: opts.invuln || 0,
             hitFlash: 0,
+            /* Set by damageShip on every hit; shield regen reads it. */
+            sinceHit: 99,
             idleFor: 0,
             kills: 0,
             energy: opts.energy || 0,
             crystals: 0,
+
+            /* CPU state. Only the player ever has a fitted CPU, but the
+             * fields live on every ship so the tick loop has one shape. */
+            cpu: null,
+            cpuKey: null,
+            cpuTimer: 0,
 
             /* AI-only fields; harmless on the player. */
             state: "patrol",
@@ -351,11 +463,17 @@
             if (world.ships[j].target === ship) world.ships[j].target = null;
         }
         ship.target = null;
+        if (world.target === ship) world.target = null;
     }
 
-    /* ===== Combat ===== */
+    /* ===== Combat =====
+     * Every shot carries a packet - some damage to shields, some to armour -
+     * rather than a single number. `S.packet` builds them, so a weapon's
+     * identity lives in one table (config.js) instead of being retyped at
+     * every call site.
+     */
 
-    function fire(ship, dirAngle) {
+    function fire(ship, dirAngle, opts) {
         if (!ship.alive || ship.cooldown > 0) return false;
         var st = ship.stats;
 
@@ -371,7 +489,17 @@
         b.vx = Math.cos(a) * C.combat.bulletSpeed;
         b.vy = Math.sin(a) * C.combat.bulletSpeed;
         b.life = C.combat.bulletLife;
-        b.dmg = st.damage;
+        b.ds = st.blasterPacket.shield;
+        b.da = st.blasterPacket.armor;
+        b.heavy = false;
+        /* A mining round only ever hits rock. A pilot cutting an asteroid is
+         * not shooting at the player who happens to fly through the beam -
+         * you block its cut, you do not get shot for it - and without this a
+         * map with five miners put a bullet into the rookie roughly every
+         * second by pure accident, which is how the intro stopped being
+         * survivable. A pilot that has been provoked stops mining and starts
+         * shooting for real. */
+        b.mining = !!(opts && opts.mining);
         b.r = ship.isPlayer ? C.combat.bulletRadius : C.combat.npcBulletRadius;
         b.friendly = ship.isPlayer;
         b.ownerId = ship.id;
@@ -379,6 +507,78 @@
 
         world.events.push({ type: "shoot", ship: ship });
         return true;
+    }
+
+    /* The capacitor round: one heavy shot, shield-first, on a long cooldown.
+     * It is deliberately not a second blaster - it trades rate of fire for
+     * the ability to hurt a shielded hull at all. */
+    function fireAmmo(ship, dirAngle) {
+        if (!ship.alive || ship.cooldownAmmo > 0) return false;
+        var st = ship.stats;
+
+        ship.cooldownAmmo = st.ammoCooldown;
+        var a = dirAngle === undefined ? ship.aim : dirAngle;
+        var b = claim(world.ammo);
+        if (!b) return false;
+
+        var muzzle = ship.radius + 10;
+        b.x = ship.x + Math.cos(a) * muzzle;
+        b.y = ship.y + Math.sin(a) * muzzle;
+        b.z = ship.z;
+        b.vx = Math.cos(a) * C.combat.ammoSpeed;
+        b.vy = Math.sin(a) * C.combat.ammoSpeed;
+        b.life = C.combat.ammoLife;
+        b.ds = st.ammoPacket.shield;
+        b.da = st.ammoPacket.armor;
+        b.r = C.combat.ammoRadius;
+        b.ownerId = ship.id;
+        b.friendly = ship.isPlayer;
+
+        world.events.push({ type: "ammo", ship: ship });
+        return true;
+    }
+
+    function stepAmmo(dt) {
+        var ships = world.ships;
+        for (var i = 0; i < world.ammo.length; i++) {
+            var a = world.ammo[i];
+            if (!a.on) continue;
+
+            a.life -= dt;
+            if (a.life <= 0) { a.on = false; continue; }
+
+            a.x += a.vx * dt;
+            a.y += a.vy * dt;
+            if (a.x < 0 || a.y < 0 || a.x > world.size || a.y > world.size) {
+                a.on = false;
+                continue;
+            }
+
+            for (var j = 0; j < ships.length; j++) {
+                var ship = ships[j];
+                if (ship.id === a.ownerId || !ship.alive || ship.docked) continue;
+                if (!a.friendly && !ship.isPlayer && ship.target !== a.ownerId) continue;
+
+                var sr = ship.radius + a.r;
+                if (S.dist2(a.x, a.y, ship.x, ship.y) > sr * sr) continue;
+
+                var owner = ownerById(a.ownerId);
+                var res = damageShip(ship, { shield: a.ds, armor: a.da });
+                applyLeech(owner, ship, res.hull);
+                provoke(ship, owner);
+                a.on = false;
+                explode(a.x, a.y, a.z, "#c084fc", 7, "spark", 110);
+                world.events.push({ type: "hit", ship: ship, dmg: res.hull, absorbed: res.absorbed });
+                if (ship.isPlayer) {
+                    floater(ship.x, ship.y, ship.z + 14, "-" + res.hull, "#ff8a9b");
+                }
+                if (ship.hull <= 0) {
+                    if (ship.isPlayer) killPlayer(ship, owner);
+                    else killShip(ship, owner);
+                }
+                break;
+            }
+        }
     }
 
     /* ===== Missiles and mines =====
@@ -415,7 +615,8 @@
             m.vx = Math.cos(a) * 300;
             m.vy = Math.sin(a) * 300;
             m.life = 2.6;
-            m.dmg = st.missileDamage;
+            m.ds = st.missilePacket.shield;
+            m.da = st.missilePacket.armor;
             /* Splash scales with the track too, so level 10 is a weapon that
              * can clear a formation rather than a bigger single hit. */
             m.splash = 42 + st.missiles * 6;
@@ -451,7 +652,8 @@
         m.vx = ship.vx * 0.4;
         m.vy = ship.vy * 0.4;
         m.life = 26;
-        m.dmg = st.mineDamage;
+        m.ds = st.minePacket.shield;
+        m.da = st.minePacket.armor;
         m.radius = st.mineRadius;
         m.ownerId = ship.id;
         m.ownerIsPlayer = ship.isPlayer;
@@ -508,7 +710,8 @@
     }
 
     /* Splash: the primary target at full damage, anything else inside the
-     * blast at a falloff. Armour cuts it exactly as it cuts a bullet. */
+     * blast at a falloff. Shields and armour scale the falloff exactly as
+     * they scale a direct hit. */
     function detonateMissile(m) {
         m.on = false;
         explode(m.x, m.y, m.z, "#ffd166", 8, "spark", 130);
@@ -519,9 +722,13 @@
             if (ship.id === m.ownerId || !ship.alive) continue;
             var d = Math.sqrt(S.dist2(m.x, m.y, ship.x, ship.y));
             if (d > m.splash) continue;
-            var dealt = damageShip(ship, m.dmg * S.clamp(1 - (d / m.splash) * 0.6, 0.25, 1));
-            world.events.push({ type: "hit", ship: ship, dmg: dealt });
-            if (ship.isPlayer) floater(ship.x, ship.y, ship.z + 14, "-" + dealt, "#ff8a9b");
+            var k = S.clamp(1 - (d / m.splash) * 0.6, 0.25, 1);
+            var owner = ownerById(m.ownerId);
+            var res = damageShip(ship, { shield: m.ds * k, armor: m.da * k });
+            applyLeech(owner, ship, res.hull);
+                provoke(ship, owner);
+            world.events.push({ type: "hit", ship: ship, dmg: res.hull, absorbed: res.absorbed });
+            if (ship.isPlayer) floater(ship.x, ship.y, ship.z + 14, "-" + res.hull, "#ff8a9b");
             if (ship.hull <= 0) {
                 if (ship.isPlayer) killPlayer(ship, ownerById(m.ownerId));
                 else killShip(ship, ownerById(m.ownerId));
@@ -554,9 +761,12 @@
                 m.on = false;
                 explode(m.x, m.y, m.z, "#ffb45e", 12, "spark", 150);
                 world.shake = Math.max(world.shake, 4);
-                var dealt = damageShip(ship, m.dmg);
-                world.events.push({ type: "hit", ship: ship, dmg: dealt });
-                if (ship.isPlayer) floater(ship.x, ship.y, ship.z + 14, "-" + dealt, "#ff8a9b");
+                var owner = ownerById(m.ownerId);
+                var res = damageShip(ship, { shield: m.ds, armor: m.da });
+                applyLeech(owner, ship, res.hull);
+                provoke(ship, owner);
+                world.events.push({ type: "hit", ship: ship, dmg: res.hull, absorbed: res.absorbed });
+                if (ship.isPlayer) floater(ship.x, ship.y, ship.z + 14, "-" + res.hull, "#ff8a9b");
                 if (ship.hull <= 0) {
                     if (ship.isPlayer) killPlayer(ship, ownerById(m.ownerId));
                     else killShip(ship, ownerById(m.ownerId));
@@ -573,16 +783,148 @@
         return null;
     }
 
-    /* Armour is a flat cut and can zero a weak NPC's shot outright - that is
-     * the point of the module, and it never lets damage go negative. */
-    function damageShip(ship, amount) {
-        if (!ship.alive || ship.invuln > 0) return 0;
-        var dealt = Math.max(1, Math.round(amount - ship.armor));
+    /* ===== CPUs =====
+     * One fitted at a time, activated by a single button. The cost model is
+     * deliberate: the purchase is the commitment, the cooldown is the
+     * throttle, and the per-use energy cost is small enough that a pilot who
+     * has bought Insta-Shield is never confused about why it did nothing.
+     */
+    function activateCpu(ship) {
+        var def = S.cpu(ship.cpu);
+        if (!def) return { ok: false, reason: "no CPU fitted" };
+        if (ship.cooldownCpu > 0) return { ok: false, reason: "CPU recharging" };
+        if (ship.energy < def.energy) return { ok: false, reason: "not enough energy" };
+
+        ship.energy -= def.energy;
+        ship.cooldownCpu = def.cooldown;
+        ship.cpuKey = def.key;
+
+        switch (def.key) {
+            case "insta":
+                ship.invuln = Math.max(ship.invuln, C.cpu.instaShield);
+                ship.cpuTimer = C.cpu.instaShield;
+                break;
+            case "radar":
+                ship.cpuTimer = C.cpu.radarTime;
+                break;
+            case "leech":
+                ship.cpuTimer = C.cpu.leechTime;
+                break;
+            case "repair":
+                ship.cpuTimer = C.cpu.repairTime;
+                break;
+            case "warp": {
+                /* Jump along the nose, not through the world boundary: a
+                 * warp into a wall is a death the player cannot read coming. */
+                var a = ship.heading;
+                var m = 40, hi = world.size - m;
+                ship.x = S.clamp(ship.x + Math.cos(a) * C.cpu.warpDistance, m, hi);
+                ship.y = S.clamp(ship.y + Math.sin(a) * C.cpu.warpDistance, m, hi);
+                ship.vx = Math.cos(a) * ship.stats.speed;
+                ship.vy = Math.sin(a) * ship.stats.speed;
+                ship.invuln = Math.max(ship.invuln, C.cpu.warpInvuln);
+                explode(ship.x, ship.y, ship.z, "#a5f3fc", 14, "spark", 160);
+                world.shake = Math.max(world.shake, 4);
+                ship.cpuTimer = 0;
+                break;
+            }
+            default:
+                break;
+        }
+
+        world.events.push({ type: "cpu", ship: ship, key: def.key });
+        return { ok: true, key: def.key };
+    }
+
+    /* Is a CPU effect running right now? Drives the HUD chip and the render
+     * pass for the radar sweep. */
+    function cpuActive(ship) {
+        return !!(ship && ship.cpuTimer > 0 && ship.cpuKey);
+    }
+
+    /* Energy Leech: a share of what you land on a hostile comes back as
+     * shield. Applied by the hit paths, which know both ends of the trade -
+     * damageShip deliberately does not, because it cannot see the shooter. */
+    function applyLeech(owner, victim, dealt) {
+        if (!owner || !owner.isPlayer || !victim || victim.isPlayer) return 0;
+        if (owner.cpuKey !== "leech" || owner.cpuTimer <= 0) return 0;
+        if (!dealt) return 0;
+        var before = owner.shield;
+        owner.shield = Math.min(owner.maxShield, owner.shield + dealt * C.cpu.leechFraction);
+        var gained = owner.shield - before;
+        if (gained > 0) {
+            floater(owner.x, owner.y, owner.z + 18, "+" + Math.round(gained), "#5eead4");
+        }
+        return gained;
+    }
+
+    /* ===== Damage resolution =====
+     * The one place damage turns into hull loss. Every source - bullets, the
+     * capacitor round, missile splash, mines, hazards - goes through here.
+     *
+     * The model is the genre one, and it is the reason there are two pools
+     * at all:
+     *
+     *   - A shot carries a SHIELD component and an ARMOUR component.
+     *   - The shield component is eaten by whatever shield is left.
+     *   - The armour component is HELD OFF entirely while any shield remains.
+     *
+     * That last rule is the load-bearing one. Without it a fast armour weapon
+     * simply kills through a shield wall - it strips nothing, it just outlasts
+     * the shield by killing the hull underneath it - and the whole reason the
+     * Ammo track exists evaporates. With it, a shielded hull genuinely has to
+     * be answered with shield damage, and which gun you carry stops being a
+     * matter of taste.
+     *
+     * Three invariants are asserted in the sim test:
+     *
+     *   1. A shield that absorbs everything takes ZERO hull damage.
+     *   2. Armour damage does not land while a shield is still up.
+     *   3. Anything that gets past the shield still lands at least one point,
+     *      so stacked armour can never make a hull permanently unkillable.
+     */
+    function damageShip(ship, packet) {
+        var out = { shield: 0, hull: 0, absorbed: 0, raw: 0, blocked: 0 };
+        if (!ship.alive || ship.invuln > 0) return out;
+
+        var sDmg = Math.max(0, packet && packet.shield || 0);
+        var aDmg = Math.max(0, packet && packet.armor || 0);
+
+        var maxS = ship.maxShield || 0;
+        var absorbed = maxS > 0 ? Math.min(ship.shield, sDmg) : 0;
+        if (absorbed > 0) ship.shield -= absorbed;
+        out.absorbed = absorbed;
+
+        /* A shot that a shield swallows entirely still counts as being hit.
+         * Returning before this is what let a pilot regenerate straight
+         * through incoming fire: the shield absorbed every round, `sinceHit`
+         * never moved, and the regen delay never started. */
+        if (absorbed > 0 || sDmg > 0 || aDmg > 0) {
+            ship.hitFlash = C.player.hitFlashTime;
+            ship.idleFor = 0;
+            ship.sinceHit = 0;
+        }
+
+        var spill = sDmg - absorbed;
+        var raw;
+        if (ship.shield > 0) {
+            /* Still shielded: the armour component has nowhere to land. */
+            out.blocked = aDmg;
+            raw = spill;
+        } else {
+            /* Shield is down (or was never up): the shot lands in full. */
+            raw = spill + aDmg;
+        }
+        out.raw = raw;
+        if (raw <= 0) return out;
+
+        /* Armour can zero a weak attack outright - that is the point of the
+         * module. But only for an attack that actually got through. */
+        var dealt = Math.max(1, Math.round(raw - ship.armor));
         if (dealt > ship.hull) dealt = ship.hull;
         ship.hull -= dealt;
-        ship.hitFlash = C.player.hitFlashTime;
-        ship.idleFor = 0;
-        return dealt;
+        out.hull = dealt;
+        return out;
     }
 
     function dropPickup(x, y, z, kind, value) {
@@ -678,17 +1020,26 @@
         removeShip(ship);
     }
 
-    /* Player death is special: energy is the *whole* run, so it hits the
-     * deck as collectable loot you can fly back out and reclaim. */
+    /* Player death is special: everything you were carrying is the *whole* run,
+     * so the tank and the hold both hit the deck as collectable loot you can
+     * fly back out and reclaim.
+     *
+     * The Salvage Rig pulls a share clear of BOTH before the wreck goes up,
+     * which is what makes it worth buying early: the bigger your hold, the
+     * more there is for it to save. What it recovers stays on the ship and is
+     * banked with it; only the remainder spills.
+     *
+     * scatterEnergy divides exactly, so spilled + banked === tank + hold
+     * holds to the point. The sim test asserts it. */
     function killPlayer(ship, killer) {
-        /* Salvage Rig: part of the tank is wrenched clear before the wreck
-         * goes up. What is recovered stays on the ship and is banked with
-         * it; only the remainder hits the deck as loot. */
         var rig = S.refitLevel(ship.refits, "salvage");
-        var recovered = Math.floor(ship.energy * rig * 0.14);
-        var total = Math.floor((ship.energy - recovered) * C.player.energyDropFraction);
+        var carried = Math.floor(ship.energy) + Math.floor(ship.hold);
+        var recovered = Math.floor(carried * rig * 0.14);
+        var total = Math.floor((carried - recovered) * C.player.energyDropFraction);
         ship.energy = recovered;
-        scatterEnergy(ship.x, ship.y, ship.z, total, S.clamp(Math.round(total / 40), 1, 12));
+        ship.hold = 0;
+        scatterEnergy(ship.x, ship.y, ship.z, total,
+            S.clamp(Math.round(total / 40), 1, C.cargo.maxChunks));
         explode(ship.x, ship.y, ship.z, S.COLORS.player, 30, "shard", 190);
         world.shake = 30;
         removeShip(ship);
@@ -741,11 +1092,56 @@
         if (ship.y > hi) { ship.y = hi; ship.vy = -Math.abs(ship.vy) * 0.4; }
 
         if (ship.cooldown > 0) ship.cooldown -= dt;
+        if (ship.cooldownAmmo > 0) ship.cooldownAmmo -= dt;
         if (ship.cooldownMissiles > 0) ship.cooldownMissiles -= dt;
         if (ship.cooldownMine > 0) ship.cooldownMine -= dt;
+        if (ship.cooldownCpu > 0) ship.cooldownCpu -= dt;
         if (ship.invuln > 0) ship.invuln -= dt;
         if (ship.hitFlash > 0) ship.hitFlash -= dt;
+        if (ship.cpuTimer > 0) ship.cpuTimer -= dt;
         ship.idleFor += dt;
+        ship.sinceHit += dt;
+    }
+
+    /* Repair Patch is the one CPU with a continuous effect, so it needs a tick.
+     * It patches the hull while you keep flying, which means it competes with
+     * dodging rather than with aiming - deliberately a different shape of
+     * button press from the other four. */
+    function stepCpu(dt) {
+        var ships = world.ships;
+        for (var i = 0; i < ships.length; i++) {
+            var s = ships[i];
+            if (!s.isPlayer || !s.alive || s.docked) continue;
+            if (s.cpuTimer <= 0 || s.cpuKey !== "repair") continue;
+            if (s.hull >= s.maxHull) continue;
+            s.hull = Math.min(s.maxHull, s.hull + C.cpu.repairPerSec * dt);
+        }
+    }
+
+    /* ===== Shield regeneration =====
+     * Shields come back, armour never does, and the gap between them is the
+     * whole reason to break contact instead of fighting to the death.
+     *
+     * It is gated on `sinceHit`, not on whether the ship is moving, because
+     * a player who is being shot at in a straight line is not "out of
+     * combat" and should not out-trade a firefight by holding still in it.
+     */
+    function stepShields(dt) {
+        var ships = world.ships;
+        var delay = C.shield.regenDelay;
+        for (var i = 0; i < ships.length; i++) {
+            var s = ships[i];
+            if (!s.alive || s.docked || !s.maxShield) continue;
+            if (s.shield >= s.maxShield) { s.shield = s.maxShield; continue; }
+            if (s.sinceHit < delay) continue;
+            /* VANTA's dead nebulae eat regeneration - shields included. Out
+             * there a shield is something you bought, not something you get
+             * back for free. */
+            if (hazardAt(s.x, s.y, "void") > 0.25) continue;
+            var st = s.stats;
+            var rate = st && st.shieldRegen ? st.shieldRegen : C.shield.regenRate * 0.7;
+            s.shield = Math.min(s.maxShield, s.shield + rate * dt);
+        }
     }
 
     /* ===== Step ===== */
@@ -756,14 +1152,18 @@
         if (world.shake > 0) world.shake = Math.max(0, world.shake - C.camera.shakeDecay * 26 * dt);
 
         stepBullets(dt);
+        stepAmmo(dt);
         stepMissiles(dt);
         stepMines(dt);
         stepPickups(dt);
         stepRocks(dt);
         stepCrates(dt);
+        stepBase(dt);
         stepParticles(dt);
         stepFloaters(dt);
         stepHazards(dt);
+        stepShields(dt);
+        stepCpu(dt);
         stepHitMarks();
         stepZeroHull();
         resolveShipCollisions();
@@ -818,7 +1218,10 @@
                 var rr = rock.r + reach;
                 if (S.dist2(b.x, b.y, rock.x, rock.y) > rr * rr) continue;
 
-                rock.hull -= b.dmg;
+                /* Rocks have no shields - they are a hull with a crystal cache inside, and
+         * mining them is a single-pool problem. The whole packet counts, so
+         * a capacitor round cracks one open as fast as it cracks a raider. */
+                rock.hull -= (b.ds + b.da);
                 rock.hitFlash = 0.16;
                 explode(b.x, b.y, b.z, "#cbd5e1", 3, "spark", 70);
                 if (rock.hull <= 0) breakRock(rock, b.friendly);
@@ -826,6 +1229,24 @@
                 break;
             }
             if (!b.on) continue;
+
+            /* A mining round stops at the rock it was aimed at. */
+            if (b.mining) continue;
+
+            /* A faction base is a structure, not a ship: it sits outside
+             * world.ships, so it is a separate check rather than a special
+             * case inside the ship loop. Anything that can shoot a rock can
+             * shoot this - which is exactly the point. */
+            var base = world.base;
+            if (base && base.alive) {
+                var br = base.r + reach;
+                if (S.dist2(b.x, b.y, base.x, base.y) <= br * br) {
+                    damageBase({ shield: b.ds, armor: b.da });
+                    explode(b.x, b.y, b.z, base.color, 3, "spark", 70);
+                    b.on = false;
+                    continue;
+                }
+            }
 
             for (var s = 0; s < ships.length; s++) {
                 var ship = ships[s];
@@ -842,10 +1263,14 @@
                     if (world.hitMarks.length > 8) world.hitMarks.shift();
                 }
 
-                var dealt = damageShip(ship, b.dmg);
+                var res = damageShip(ship, { shield: b.ds, armor: b.da });
+                applyLeech(ownerOf(b, ships), ship, res.hull);
+                provoke(ship, ownerOf(b, ships));
                 explode(b.x, b.y, b.z, b.color, 3, "spark", 80);
-                world.events.push({ type: "hit", ship: ship, dmg: dealt });
-                if (ship.isPlayer) floater(ship.x, ship.y, ship.z + 14, "-" + dealt, "#ff8a9b");
+                world.events.push({ type: "hit", ship: ship, dmg: res.hull, absorbed: res.absorbed });
+                if (ship.isPlayer) {
+                    floater(ship.x, ship.y, ship.z + 14, "-" + res.hull, "#ff8a9b");
+                }
 
                 if (ship.hull <= 0) {
                     if (ship.isPlayer) {
@@ -926,12 +1351,16 @@
                 if (d2 > magR * magR) continue;
 
                 if (d2 <= takeR * takeR) {
+                    var mult = ship.isPlayer ? ship.stats.energyBonus : 1;
+                    var want = Math.round(crate.value * mult * (world.payout || 1));
+                    var value = loadEnergy(ship, want);
+                    /* A full hold does not consume the crate: it stays out
+                     * there for whoever comes back with room. */
+                    if (value <= 0) break;
+
                     crate.alive = false;
                     crate.respawn = C.world.crateRespawn;
 
-                    var mult = ship.isPlayer ? ship.stats.energyBonus : 1;
-                    var value = Math.round(crate.value * mult * (world.payout || 1));
-                    ship.energy += value;
                     floater(crate.x, crate.y, crate.z + 14, "+" + value, S.COLORS.energy);
                     explode(crate.x, crate.y, crate.z, S.COLORS.energy, 8, "spark", 90);
 
@@ -988,33 +1417,130 @@
                 p.vy += ((ship.y - p.y) / d) * pull * 780 * dt;
 
                 if (d2 <= takeR * takeR) {
-                    p.on = false;
-                    collect(ship, p);
+                    /* collect() refuses when the hold is full. Only clear the
+                     * pickup if it actually took something, so a full hold
+                     * leaves the loot on the ground instead of eating it. */
+                    if (collect(ship, p)) p.on = false;
                     break;
                 }
             }
         }
     }
 
-    function collect(ship, p) {
-        var mult = ship.isPlayer ? ship.stats.energyBonus : 1;
-        var value = p.kind === "energy" ? Math.round(p.value * mult) : p.value;
+    /* ===== Base damage =====
+     * The base resolves damage through exactly the same two-pool rule a ship
+     * does, which is the point: a shield-dominant base is laser-proof for
+     * the same reason a Demaner is.
+     */
+    function damageBase(packet) {
+        var b = world.base;
+        if (!b || !b.alive) return null;
 
+        /* First contact calls the defenders out. Once. */
+        if (!b.called && (packet.shield > 0 || packet.armor > 0)) {
+            b.called = true;
+            world.events.push({ type: "baseAlarm", base: b, guards: b.guards });
+        }
+
+        var absorbed = b.maxShield > 0 ? Math.min(b.shield, packet.shield) : 0;
+        if (absorbed > 0) b.shield -= absorbed;
+
+        var spill = packet.shield - absorbed;
+        /* Held off entirely while any shield remains, exactly like a ship. */
+        var raw = b.shield > 0 ? spill : spill + packet.armor;
+        if (raw <= 0) return { shield: absorbed, hull: 0 };
+
+        var dealt = Math.max(1, Math.round(raw));
+        if (dealt > b.hull) dealt = b.hull;
+        b.hull -= dealt;
+        b.hitFlash = C.player.hitFlashTime;
+        if (b.hull <= 0) breakBase(b);
+        return { shield: absorbed, hull: dealt };
+    }
+
+    function breakBase(b) {
+        b.alive = false;
+        b.respawn = 45;
+        b.shield = 0;
+        b.called = false;
+        b.guards = 0;
+        explode(b.x, b.y, b.z, b.color, 34, "shard", 210);
+        explode(b.x, b.y, b.z, "#ffe6a0", 20, "spark", 240);
+        S.shake(22);
+        world.shake = Math.max(world.shake, 22);
+        /* The payout is a single crystal pickup rather than an instant
+         * credit, so it can be lost if the run goes badly wrong - the same
+         * rule as everything else you carry. */
+        dropPickup(b.x, b.y, b.z, "crystal", b.reward);
+        world.events.push({ type: "baseDown", base: b, reward: b.reward });
+    }
+
+    function stepBase(dt) {
+        var b = world.base;
+        if (!b) return;
+        b.spin += dt * 0.35;
+        if (b.hitFlash > 0) b.hitFlash -= dt;
+        if (b.alive) return;
+        b.respawn -= dt;
+        if (b.respawn <= 0) {
+            /* Rebuilt, and armed again: the second attempt at a Hive base is
+             * meant to be a different fight from the first. */
+            b.alive = true;
+            b.hull = b.maxHull;
+            b.shield = b.maxShield;
+            b.called = false;
+            b.guards = world.sector && world.sector.raids ? world.sector.raids : 1;
+        }
+    }
+
+    /* ===== Cargo =====
+     * Energy is carried, not owned. Everything you scoop up goes into the
+     * hold; the hold goes into the tank when you dock, and the hold goes onto
+     * the deck when you die. One rule, three places, and it is the reason
+     * there is a station to go back to.
+     */
+
+    /* How much of `value` actually fits. Returns 0 when the hold is full, so
+     * the caller can leave the pickup where it is rather than silently
+     * destroying it - the player should be able to see the crate they could
+     * not fit and go and dock. */
+    function loadEnergy(ship, value) {
+        var room = ship.holdMax - ship.hold;
+        if (room <= 0) return 0;
+        var take = Math.min(room, value);
+        ship.hold += take;
+        return take;
+    }
+
+    function holdFull(ship) {
+        return ship.hold >= ship.holdMax - 0.5;
+    }
+
+    function collect(ship, p) {
         if (p.kind === "energy") {
-            ship.energy += value;
+            var mult = ship.isPlayer ? ship.stats.energyBonus : 1;
+            var want = Math.round(p.value * mult);
+            /* Half the value, or whatever fits - so a full hold still banks
+             * the change rather than refusing the whole pickup. */
+            var value = loadEnergy(ship, want);
+            if (value <= 0) return false;
             if (ship.isPlayer) {
                 world.events.push({ type: "pickup", kind: "energy", value: value, ship: ship });
             }
-        } else {
-            ship.crystals += value;
-            if (ship.isPlayer) {
-                /* Crystals are banked immediately: unlike energy, progress
-                 * can never be lost off your wreck. */
-                world.events.push({ type: "pickup", kind: "crystal", value: value, ship: ship });
-            }
+            floater(p.x, p.y, p.z + 10, "+" + value, S.COLORS.energy);
+            explode(p.x, p.y, p.z, S.COLORS.energy, 4, "spark", 60);
+            return true;
         }
-        floater(p.x, p.y, p.z + 10, "+" + value, p.kind === "energy" ? S.COLORS.energy : S.COLORS.crystal);
-        explode(p.x, p.y, p.z, p.kind === "energy" ? S.COLORS.energy : S.COLORS.crystal, 4, "spark", 60);
+
+        /* Crystals are banked, not carried: they go straight to the score
+         * and can never be lost off a wreck. */
+        ship.crystals += p.value;
+        if (ship.isPlayer) {
+            world.events.push({ type: "pickup", kind: "crystal", value: p.value, ship: ship });
+        }
+        floater(p.x, p.y, p.z + 10, "+" + p.value, S.COLORS.crystal);
+        explode(p.x, p.y, p.z, S.COLORS.crystal, 4, "spark", 60);
+        return true;
     }
 
     function stepParticles(dt) {
@@ -1174,6 +1700,110 @@
         return best;
     }
 
+    /* ===== Targeting =====
+     * An explicit lock, separate from the aim assist. The assist picks
+     * whatever is convenient this frame; the lock is the ship the player
+     * chose and it survives losing the assist.
+     */
+    /* Hostility.
+     *
+     * Faction NPCs are hostile to everything, as always. Pilots are not:
+     * they are working, and a map where five miners decide to lynch you on
+     * sight is not a mining map. A pilot takes you on when you have hit it,
+     * or when it is CLEARLY the stronger ship - two tiers, not one, because
+     * at one tier every raider in the shallow sector outclasses a fresh
+     * pilot and the intro stops being survivable.
+     *
+     * Pilots never chase: acquire() is range-bounded and nothing in the AI
+     * paths toward the player, so being interesting buys you a fight, not a
+     * chase. */
+    function outclasses(a, b) {
+        return a.tier >= b.tier + C.npc.pilotAggression;
+    }
+
+    function isHostileTo(ship, other) {
+        if (!other || !other.alive) return false;
+        /* Self-check first. Losing it is how a ship ends up trying to strafe
+         * at its own position. */
+        if (ship === other) return false;
+        if (ship.isPlayer) return true;
+        if (ship.isPilot) {
+            /* Shot me, or I can take you. */
+            if (other.provokedBy === ship.id || ship.provokedBy === other.id) return true;
+            return outclasses(ship, other);
+        }
+        /* Not a pilot, so: faction war, plus the player, who is hostile to
+         * everything. */
+        if (other.isPlayer) return true;
+        return S.factionHostile(ship.faction, other.faction);
+    }
+
+    /* Mark a pilot as having shot at somebody, so the pilot's own hostility
+     * check can see it on the next think tick. Called from the hit paths,
+     * which are the only place both ends of the shot are known. */
+    function provoke(victim, shooter) {
+        if (!victim || !victim.isPilot || !shooter) return;
+        victim.provokedBy = shooter.id;
+    }
+
+    /* Nearest hostile to the player, optionally restricted to one faction. */
+    function nearestHostile(from, maxDist, faction) {
+        var best = null, bestD = maxDist * maxDist;
+        for (var i = 0; i < world.ships.length; i++) {
+            var s = world.ships[i];
+            if (s === from || !s.alive || s.docked) continue;
+            if (faction && s.faction !== faction) continue;
+            var d2 = S.dist2(from.x, from.y, s.x, s.y);
+            if (d2 < bestD) { bestD = d2; best = s; }
+        }
+        return best;
+    }
+
+    /* Cycle to the next hostile in range, ordered by bearing from the current
+     * nose so the target moves the way the player is looking.
+     *
+     * Two guarantees, both of which the UI depends on: pressing cycle with
+     * two or more hostiles in range always lands on a DIFFERENT one, and
+     * pressing it with a single hostile leaves that hostile alone. Returning
+     * the current lock from the wrap-around made the second press a no-op
+     * whenever the sort happened to put the current target first. */
+    function cycleTarget(from, maxDist) {
+        if (!from) return null;
+        var hostiles = [];
+        var r2 = maxDist * maxDist;
+        for (var i = 0; i < world.ships.length; i++) {
+            var s = world.ships[i];
+            if (s === from || !s.alive || s.docked) continue;
+            var d2 = S.dist2(from.x, from.y, s.x, s.y);
+            if (d2 > r2) continue;
+            hostiles.push({ s: s, a: Math.atan2(s.y - from.y, s.x - from.x) });
+        }
+        if (!hostiles.length) return null;
+        hostiles.sort(function (p, q) { return p.a - q.a; });
+
+        var cur = world.target;
+        if (!cur || cur === from || !cur.alive) return hostiles[0].s;
+        var curA = Math.atan2(cur.y - from.y, cur.x - from.x);
+
+        /* First pass: anything clockwise from the current lock. */
+        for (var k = 0; k < hostiles.length; k++) {
+            if (hostiles[k].s !== cur && S.angleDiff(curA, hostiles[k].a) > 0) {
+                return hostiles[k].s;
+            }
+        }
+        /* Wrapped past the end: restart from the beginning, still skipping
+         * the current lock so the press is never swallowed. */
+        for (k = 0; k < hostiles.length; k++) {
+            if (hostiles[k].s !== cur) return hostiles[k].s;
+        }
+        /* Only one hostile in range: nothing to cycle to. */
+        return cur;
+    }
+
+    function clearTarget() {
+        world.target = null;
+    }
+
     function inDockZone(x, y) {
         var r = C.world.dockRadius;
         return S.dist2(x, y, world.station.x, world.station.y) <= r * r;
@@ -1194,9 +1824,10 @@
     }
 
     /* A valid spawn point for an NPC: away from the station, away from the
-     * player, and not on top of another hull. */
+     * player, not on top of another hull, and not inside a faction base. */
     function spawnPoint() {
         var size = world.size;
+        var base = world.base;
         for (var i = 0; i < 40; i++) {
             var x = 90 + Math.random() * (size - 180);
             var y = 90 + Math.random() * (size - 180);
@@ -1204,6 +1835,12 @@
                 C.world.clearRadius * C.world.clearRadius) continue;
             if (world.player &&
                 S.dist2(x, y, world.player.x, world.player.y) < 420 * 420) continue;
+            /* Spawning inside a 300-unit structure would put a pilot inside
+             * a wall of geometry with no way to tell what happened. */
+            if (base && base.alive) {
+                var br = base.r + 140;
+                if (S.dist2(x, y, base.x, base.y) < br * br) continue;
+            }
 
             var clash = false;
             for (var j = 0; j < world.ships.length; j++) {
@@ -1219,7 +1856,9 @@
         world.ships.length = 0;
         world.events.length = 0;
         world.player = null;
+        world.target = null;
         for (var i = 0; i < world.bullets.length; i++) world.bullets[i].on = false;
+        for (var ai = 0; ai < world.ammo.length; ai++) world.ammo[ai].on = false;
         for (var mi = 0; mi < world.missiles.length; mi++) world.missiles[mi].on = false;
         for (var ni = 0; ni < world.mines.length; ni++) world.mines[ni].on = false;
         for (var j = 0; j < world.pickups.length; j++) world.pickups[j].on = false;
@@ -1235,15 +1874,29 @@
         removeShip: removeShip,
         moveShip: moveShip,
         fire: fire,
+        fireAmmo: fireAmmo,
         fireMissiles: fireMissiles,
         dropMine: dropMine,
         damageShip: damageShip,
+        damageBase: damageBase,
+        activateCpu: activateCpu,
+        cpuActive: cpuActive,
+        applyLeech: applyLeech,
         killPlayer: killPlayer,
+        killShip: killShip,
         dropPickup: dropPickup,
         explode: explode,
         floater: floater,
         nearestShip: nearestShip,
         coneTarget: coneTarget,
+        isHostileTo: isHostileTo,
+        provoke: provoke,
+        outclasses: outclasses,
+        nearestHostile: nearestHostile,
+        cycleTarget: cycleTarget,
+        clearTarget: clearTarget,
+        loadEnergy: loadEnergy,
+        holdFull: holdFull,
         inDockZone: inDockZone,
         hitMarkTtl: function () { return HIT_MARK_TTL; },
         hazardAt: hazardAt,

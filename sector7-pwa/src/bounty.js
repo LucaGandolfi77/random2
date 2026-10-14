@@ -95,28 +95,50 @@
         var rng = bounty.rng || Math.random;
         var idx = (rng() * HUNTER_NAMES.length) | 0;
 
+        /* A hunter is a pirate, so it fights like one: shields and all. The
+         * bounty banner already says "wanted", so it does not need its own
+         * colour to be legible. */
+        var fac = S.faction("pirate");
+        var hull = def.hull * 1.4;
+        var mDmg = def.damage * 3;
+        var nDmg = def.damage * 3.5;
+        var aDmg = def.damage * 3.2;
+
         var pt = S.World.spawnPoint();
         var ship = S.World.spawnShip({
             name: HUNTER_NAMES[idx],
-            color: "#ff5470",
+            color: fac.color,
+            faction: fac.key,
             tier: tier,
             x: pt.x,
             y: pt.y,
             z: 10,
             heading: Math.atan2(player.y - pt.y, player.x - pt.x),
-            maxHull: def.hull * 1.4,
+            maxHull: hull,
+            maxShield: S.npcShieldFor(hull, fac.key),
             stats: {
                 damage: def.damage * 1.25,
+                blasterPacket: S.packet("blaster", def.damage * 1.25),
                 fireInterval: def.fire * 0.85,
                 speed: def.speed * 1.12,
                 turn: def.turn * 1.1,
-                maxHull: def.hull * 1.4,
+                maxHull: hull,
+                maxShield: S.npcShieldFor(hull, fac.key),
+                shieldRegen: 0,
                 regen: 0,
+                holdMax: 200,
                 missiles: 3,
-                missileDamage: def.damage * 3,
+                missileDamage: mDmg,
+                missilePacket: S.packet("missile", mDmg),
                 missileCooldown: 4.5,
+                /* A hunter that can strip your shields is the reason the
+                 * late game is not a laser duel. */
+                ammoDamage: aDmg,
+                ammoPacket: S.packet("ammo", aDmg),
+                ammoCooldown: 2.6,
                 mineCapacity: 2,
-                mineDamage: def.damage * 3.5,
+                mineDamage: nDmg,
+                minePacket: S.packet("mine", nDmg),
                 mineRadius: 100,
                 mineCooldown: 5,
             },

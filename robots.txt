@@ -1,0 +1,11 @@
+# robots.txt for https://LucaGandolfi77.github.io/random2/
+#
+# The whole site is a set of playable games with no accounts, no tracking and
+# no gated content, so everything is allowed. The only thing worth saying
+# explicitly is the sitemap, and that the source-viewing URLs are fine too:
+# there is nothing behind them but the same JavaScript the game loads.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://lucagandolfi77.github.io/random2/sitemap.xml
