@@ -26,6 +26,7 @@
   - [MYCEL](#mycel)
   - [STATIC](#static)
   - [ALVEARE](#alveare)
+  - [MADRE](#madre)
   - [FORMICA](#formica)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
@@ -62,14 +63,15 @@
 | 9 | **MYCEL** | Branching fungal network .io | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mycel-pwa/) |
 | 10 | **STATIC** | Pirate broadcast .io (CRT/VHS) | Canvas 2D + WebAudio + BroadcastChannel | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/static-pwa/) |
 | 11 | **ALVEARE** | Bee-tycoon con waggle dance disegnabile | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/alveare-pwa/) |
-| 12 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
-| 13 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 14 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 15 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 16 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 17 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 18 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
-| 19 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 12 | **MADRE** | Fermentation tycoon on real time | DOM UI + Canvas curves + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/madre-pwa/) |
+| 13 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 14 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 15 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 16 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 17 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 18 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 19 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 20 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -434,6 +436,35 @@ la danza** che istruisce le operaie.
   con pesticidi che avvelenano le squadre
 - Segnala-tipo: nome del campo, distanza in metri, angolo in gradi "a destra/
   sinistra del sole" — tradurlo in danza è il gioco
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
+### MADRE
+
+*Il tempo reale è l'ingrediente.* 🫙
+
+Casa madre di fermentazioni: kombucha, yogurt, formaggi. Le curve di
+maturazione sono valutate da **timestamp reali** — chiudi l'app e i lotti
+continuano a invecchiare. L'offline progression ribaltata in rischio.
+
+- **Curva di ogni lotto:** salita → picco → degrado → marciume. Vendere al
+  picco è tutto; dimenticare è una decisione economica (il marciume resta in
+  cantina come lezione, da scartare a mano)
+- **Camere con microclimi:** Dispensa (×1.0), Cantina fresca (×0.6: allunga
+  la finestra di vendita), Locale caldo (×1.6: corre verso il picco) — la
+  stessa ricetta ha tempistiche diverse a seconda di dove la metti
+- **Cicli reali in parallelo:** Kefir al picco in 5 minuti, Kombucha 30
+  minuti, Yogurt 4 ore, Formaggio 24 ore, Pecorino riserva 4 giorni
+- **Contratti dal daily seed:** ordini della città con quantità, soglia di
+  qualità (≥ 65%) e scadenza reale; consegnare alza la reputazione che
+  moltiplica i ricompense, i contratti scaduti la mangiano
+- **Mercato a random walk:** il moltiplicatore si muove ogni 5 minuti reali,
+  anche offline (con ritorno alla media)
+- **Report offline:** al rientro, il riepilogo di ciò che il tempo ha fatto:
+  lotti al picco, lotti a male, contratti scaduti
+- **Notifiche opt-in** quando un lotto entra nella finestra di picco
+- UI DOM professionale con mini-grafici canvas delle curve per lotto
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
@@ -880,6 +911,9 @@ a PR — keep this list honest.
 - [x] **Isola Resort Tycoon wave 3:** hotel con entrate notturne, camera
       rotabile su 4 orientazioni (roundtrip verificato su tutte le celle),
       export/import del salvataggio, tempo musicale scalato su meteo/notte
+- [x] **MADRE** — fermentation tycoon on real timestamps: maturation curves
+      that keep running with the app closed, rooms as speed multipliers,
+      daily-seed contracts, drifting market, offline report, peak notifications
 - [x] **ALVEARE** — bee-tycoon with the waggle dance drawn by hand: angle
       from the sun encodes direction, stroke length encodes distance; seasons
       with lethal winters, brood/comb economy, wasp raids and pesticide events

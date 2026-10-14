@@ -21,9 +21,10 @@ Fit PWA (F). Scala: basso / medio / alto / massimo.
 
 ---
 
-## 1. MADRE — Casa di fermentazione
+## 1. MADRE — Casa di fermentazione ✅ IMPLEMENTATO
 
-> L'ingrediente principale è il tempo reale. Priorità consigliata: **1**.
+> Implementato in `madre-pwa/` (vedi README). La checklist sotto resta come
+> riferimento di design. Priorità consigliata: ~~1~~ completato.
 > O: alto · P: alto · R: medio-basso · F: massimo
 
 **Fantasy.** Una casa madre di fermentazioni: formaggi, koji, kombucha, aceti.
