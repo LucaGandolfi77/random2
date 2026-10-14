@@ -18,10 +18,167 @@
   var LOAN_INTEREST_DAY = 0.02;
   var MAX_LINES = 6;
   var MAX_DISTRICTS = 22;
+  // impostati da loadLevel() dai parametri del livello
+  var LOAN_CAP = 5000, BANKRUPT_AT = -400, GROWTH_CAP = 1500, SPAWN_CHANCE = 0.22;
   var PALETTE = ["#e0342c", "#2c7be0", "#22a55e", "#e8a924", "#9b59d0", "#e07d2c"];
   var LNAMES = ["Linea Rossa", "Linea Azzurra", "Linea Verde", "Linea Gialla", "Linea Viola", "Linea Arancio"];
   var NPRE = ["Porta ", "Borgo ", "Ponte ", "Campo ", "Villa ", "Piazza ", "Vico ", "Mura "];
   var NSUF = ["Nuova", "Vecchia", "Alta", "Stella", "Fiore", "Serena", "Lunga", "Rota", "Mare", "Colle"];
+
+  /* ===== Livelli =====
+   * district: {name,x,y,pop,jobs,geo}   geo = costo scavo/stazione
+   * water:    {kind:'river',w,pts:[[x,y]..]} | {kind:'lake',x,y,rx,ry}
+   * bridge:   {name,x,y,r}  passare vicino a un ponte annulla il sovrapprezzo
+   * params:   sovrascrivono le costanti globali per quel livello
+   */
+  var LEVELS = [
+    {
+      id: "libera", name: "Città libera", subtitle: "Mappa generata",
+      blurb: "Nessuna geologia, nessun fiume: la città si genera ogni volta. Impara le regole su una mappa qualsiasi.",
+      hint: "Ogni quartiere servito cresce, e dalla sua crescita nascono altri quartieri da servire.",
+      par: 2, goal: { paxDay: 9000, days: 14 }, procedural: true,
+      params: {},
+      centers: [], water: [], bridges: [], districts: [],
+    },
+    {
+      id: "borgo", name: "Prima linea", subtitle: "Borgo Piccolo",
+      blurb: "Sei quartieri, un solo centro. La prima linea che apri in città.",
+      hint: "Il centro storico costa il triplo, ma la stazione la paghi una volta sola: poi allunghi da lì.",
+      par: 2, goal: { paxDay: 8000, days: 14, servedMin: 5 },
+      params: { money: 1200, fare: 1.2, maxLines: 4, maxDistricts: 14,
+                stationBase: 80, tunnelPerPx: 0.9, trainCap: 120, trainCost: 150,
+                trainSpeed: 220, day: 150, loanCap: 5000, interest: 0.02,
+                bankruptAt: -400, growthCap: 1500, spawnChance: 0.18 },
+      centers: [{ name: "Centro storico", x: 850, y: 850, r: 240 }],
+      water: [], bridges: [],
+      districts: [
+        { name: "Porta Vecchia",  x: 850,  y: 850,  pop: 900, jobs: 520, geo: 2.80 },
+        { name: "Campo Nuova",   x: 850,  y: 545,  pop: 640, jobs: 210, geo: 1.20 },
+        { name: "Vico Lunga",    x: 850,  y: 1160, pop: 620, jobs: 180, geo: 1.10 },
+        { name: "Mura Alta",     x: 575,  y: 850,  pop: 560, jobs: 260, geo: 1.90 },
+        { name: "Ponte Serena",  x: 1130, y: 850,  pop: 580, jobs: 240, geo: 1.30 },
+        { name: "Colle Stella",  x: 850,  y: 300,  pop: 420, jobs: 120, geo: 0.85 },
+      ],
+    },
+    {
+      id: "varo", name: "Il Varo", subtitle: "Due rive",
+      blurb: "Il fiume divide la città in due. Tre ponti — solo uno è comodo.",
+      hint: "Sott'acqua il tunnel costa ×3.2: passa dal ponte e risparmi due terzi.",
+      par: 3, goal: { paxDay: 9000, days: 16, servedMin: 7 },
+      params: { money: 1000, fare: 1.2, maxLines: 5, maxDistricts: 16,
+                stationBase: 85, tunnelPerPx: 0.9, trainCap: 150, trainCost: 150,
+                trainSpeed: 220, day: 150, loanCap: 5000, interest: 0.02,
+                bankruptAt: -400, growthCap: 1600, spawnChance: 0.20 },
+      centers: [{ name: "Centro storico", x: 700, y: 850, r: 250 }],
+      water: [{ kind: "river", w: 64, pts: [[830,-40],[880,320],[820,700],[870,1050],[830,1400],[880,1740]] }],
+      bridges: [{ name: "Ponte Alto", x: 860, y: 480 },
+                { name: "Ponte Mezzo", x: 862, y: 860 },
+                { name: "Ponte Basso", x: 846, y: 1250 }],
+      districts: [
+        { name: "Mura Vecchia",  x: 600,  y: 850,  pop: 820, jobs: 480, geo: 2.60 },
+        { name: "Borgo Stella",  x: 360,  y: 560,  pop: 600, jobs: 230, geo: 1.20 },
+        { name: "Colle Nuova",   x: 400,  y: 1180, pop: 560, jobs: 180, geo: 1.00 },
+        { name: "Vico Sereno",   x: 640,  y: 1330, pop: 480, jobs: 150, geo: 0.90 },
+        { name: "Porta Alta",    x: 300,  y: 870,  pop: 520, jobs: 200, geo: 1.10 },
+        { name: "Ponte Vecchia", x: 1090, y: 850,  pop: 780, jobs: 520, geo: 2.40 },
+        { name: "Via Lunga",     x: 1200, y: 540,  pop: 620, jobs: 240, geo: 1.25 },
+        { name: "Mura Nuova",    x: 1270, y: 1180, pop: 580, jobs: 210, geo: 1.05 },
+        { name: "Campo Fiora",   x: 1130, y: 1330, pop: 500, jobs: 170, geo: 0.95 },
+        { name: "Villa Rotta",   x: 1400, y: 840,  pop: 460, jobs: 150, geo: 0.85 },
+      ],
+    },
+    {
+      id: "porto", name: "Il Porto", subtitle: "Due centri",
+      blurb: "Centro storico a nord-ovest, porto a sud-est. Il bacino d'acqua taglia in mezzo i due.",
+      hint: "Il collegamento diretto centro↔porto passa dentro il bacino: costa ×3.2. Il molo lo aggira.",
+      par: 3, goal: { paxDay: 13000, days: 18, servedMin: 8 },
+      params: { money: 950, fare: 1.3, maxLines: 5, maxDistricts: 18,
+                stationBase: 85, tunnelPerPx: 0.95, trainCap: 160, trainCost: 160,
+                trainSpeed: 220, day: 150, loanCap: 5000, interest: 0.025,
+                bankruptAt: -500, growthCap: 1700, spawnChance: 0.22 },
+      centers: [{ name: "Centro storico", x: 760, y: 620, r: 230 },
+                { name: "Porto",         x: 1270, y: 1180, r: 260 }],
+      water: [{ kind: "lake", x: 930, y: 880, rx: 230, ry: 165 }],
+      bridges: [{ name: "Ponte del Molo", x: 1150, y: 880, r: 40 }],
+      districts: [
+        { name: "Piazza Alta",    x: 760,  y: 620,  pop: 940, jobs: 520, geo: 2.90 },
+        { name: "Vico Nuova",     x: 520,  y: 420,  pop: 640, jobs: 210, geo: 1.30 },
+        { name: "Mura Lunga",     x: 400,  y: 800,  pop: 600, jobs: 180, geo: 1.05 },
+        { name: "Campo Sereno",   x: 620,  y: 900,  pop: 520, jobs: 160, geo: 1.00 },
+        { name: "Colle Stella",   x: 980,  y: 380,  pop: 560, jobs: 200, geo: 0.90 },
+        { name: "Porto Vecchio",  x: 1270, y: 1180, pop: 880, jobs: 560, geo: 2.20 },
+        { name: "Mura Marina",    x: 1460, y: 1000, pop: 620, jobs: 300, geo: 1.40 },
+        { name: "Via Rotta",      x: 1500, y: 1400, pop: 520, jobs: 220, geo: 1.15 },
+        { name: "Ponte Nuova",    x: 1060, y: 1420, pop: 560, jobs: 190, geo: 1.00 },
+        { name: "Villa Alta",     x: 1180, y: 760,  pop: 480, jobs: 150, geo: 0.85 },
+      ],
+    },
+    {
+      id: "meandrica", name: "Meandrica", subtitle: "Tre isole",
+      blurb: "Il fiume serpeggia e lascia due soli ponti. La parte vecchia è la più cara della città.",
+      hint: "Nord e sud si toccano solo ai due ponti: scegli dove spendi i soldi.",
+      par: 4, goal: { paxDay: 13000, days: 20, servedMin: 9 },
+      params: { money: 850, fare: 1.3, maxLines: 6, maxDistricts: 18,
+                stationBase: 90, tunnelPerPx: 1.0, trainCap: 170, trainCost: 170,
+                trainSpeed: 230, day: 150, loanCap: 6000, interest: 0.025,
+                bankruptAt: -500, growthCap: 1700, spawnChance: 0.22 },
+      centers: [{ name: "Centro storico", x: 850, y: 700, r: 220 },
+                { name: "Isola del Lattaio", x: 1250, y: 850, r: 200 }],
+      water: [{ kind: "river", w: 70, pts: [[-40,1120],[320,1060],[640,1150],[980,1080],[1300,1000],[1740,1060]] }],
+      bridges: [{ name: "Ponte del Centro", x: 796, y: 1080, r: 40 },
+                { name: "Ponte Basso",      x: 1216, y: 1015, r: 40 }],
+      districts: [
+        { name: "Piazza Vecchia",  x: 850,  y: 700,  pop: 980, jobs: 540, geo: 3.00 },
+        { name: "Mura Alta",       x: 620,  y: 520,  pop: 640, jobs: 220, geo: 1.50 },
+        { name: "Vico Nuova",      x: 560,  y: 860,  pop: 580, jobs: 180, geo: 1.10 },
+        { name: "Colle Serena",    x: 1120, y: 560,  pop: 620, jobs: 240, geo: 1.20 },
+        { name: "Lattaio Vecchio", x: 1250, y: 850,  pop: 860, jobs: 480, geo: 2.70 },
+        { name: "Campo Nuova",     x: 1430, y: 700,  pop: 540, jobs: 180, geo: 1.00 },
+        { name: "Villa Marina",    x: 1560, y: 900,  pop: 480, jobs: 150, geo: 0.85 },
+        { name: "Vico Basso",      x: 400,  y: 1300, pop: 560, jobs: 180, geo: 0.90 },
+        { name: "Campo Stella",    x: 760,  y: 1330, pop: 600, jobs: 200, geo: 0.95 },
+        { name: "Ponte Rotta",     x: 1150, y: 1330, pop: 520, jobs: 160, geo: 1.00 },
+        { name: "Via Marina",      x: 1500, y: 1300, pop: 520, jobs: 160, geo: 0.90 },
+      ],
+    },
+    {
+      id: "metropolix", name: "Metropolix", subtitle: "La città matura",
+      blurb: "Tre centri di lavoro, un fiume, quattordici quartieri. La rete che regge tutto.",
+      hint: "Quattro ponti, ma solo due collegano il nord ai quartieri nuovi: il resto è ghepardo.",
+      par: 5, goal: { paxDay: 20000, days: 24, servedMin: 10 },
+      params: { money: 800, fare: 1.4, maxLines: 6, maxDistricts: 22,
+                stationBase: 95, tunnelPerPx: 1.05, trainCap: 180, trainCost: 180,
+                trainSpeed: 230, day: 150, loanCap: 7000, interest: 0.03,
+                bankruptAt: -600, growthCap: 1800, spawnChance: 0.24 },
+      centers: [{ name: "Centro storico",      x: 850,  y: 620,  r: 220 },
+                { name: "Isola del Lattaio",   x: 1280, y: 1230, r: 200 },
+                { name: "Città della Ricerca", x: 420,  y: 420,  r: 200 }],
+      water: [{ kind: "river", w: 64, pts: [[-40,980],[320,930],[620,1010],[900,940],[1180,990],[1500,930],[1740,960]] }],
+      bridges: [{ name: "Ponte Ovest",     x: 470,  y: 965, r: 40 },
+                { name: "Ponte Nord",      x: 778,  y: 960, r: 40 },
+                { name: "Ponte del Porto", x: 1160, y: 988, r: 40 },
+                { name: "Ponte Sud",       x: 1374, y: 960, r: 40 }],
+      districts: [
+        { name: "Piazza Vecchia",  x: 850,  y: 620,  pop: 1000, jobs: 560, geo: 3.00 },
+        { name: "Mura Alta",       x: 640,  y: 470,  pop: 660,  jobs: 240, geo: 1.60 },
+        { name: "Vico Nuova",      x: 580,  y: 780,  pop: 620,  jobs: 200, geo: 1.15 },
+        { name: "Ricerca Vecchia", x: 420,  y: 420,  pop: 820,  jobs: 520, geo: 2.50 },
+        { name: "Borgo Stella",    x: 300,  y: 700,  pop: 560,  jobs: 180, geo: 0.95 },
+        { name: "Campo Serena",    x: 360,  y: 1150, pop: 600,  jobs: 190, geo: 0.90 },
+        { name: "Vico Basso",      x: 700,  y: 1330, pop: 620,  jobs: 210, geo: 1.00 },
+        { name: "Ponte Rotta",     x: 1080, y: 1330, pop: 640,  jobs: 220, geo: 1.05 },
+        { name: "Lattaio Vecchio", x: 1280, y: 1230, pop: 900,  jobs: 500, geo: 2.70 },
+        { name: "Mura Lunga",      x: 1180, y: 900,  pop: 640,  jobs: 260, geo: 1.40 },
+        { name: "Villa Nuova",     x: 1500, y: 760,  pop: 600,  jobs: 230, geo: 1.20 },
+        { name: "Campo Fiora",     x: 1520, y: 1100, pop: 540,  jobs: 180, geo: 1.00 },
+        { name: "Via Marina",      x: 1540, y: 1400, pop: 520,  jobs: 160, geo: 0.90 },
+        { name: "Colle Alto",      x: 1080, y: 520,  pop: 580,  jobs: 210, geo: 1.30 },
+      ],
+    },
+  ];
+  var LEVEL = LEVELS[1];
+  var PROGRESS_KEY = "metro-levels";
+
 
   var state = {
     money: 900, fare: 1.2, loan: 0,
@@ -81,13 +238,13 @@
     }
     return "Quartiere " + (state.districts.length + 1);
   }
-  function addDistrict(x, y, pop, jobs) {
+  function addDistrict(x, y, pop, jobs, name, geo) {
     var d = {
       id: state.districts.length,
-      name: distName(),
+      name: name || distName(),
       x: x, y: y,
       pop: Math.round(pop), jobs: Math.round(jobs),
-      geo: rand(0.85, 1.8),
+      geo: geo != null ? geo : rand(0.85, 1.8),
       seed: rand(0, 6.2832),
       served: false, stress: 1, wait: 0,
       blob: [],
@@ -96,6 +253,42 @@
     state.districts.push(d);
     return d;
   }
+  /* ===== Acqua & ponti ===== */
+  function segDist(px, py, ax, ay, bx, by) {
+    var dx = bx - ax, dy = by - ay;
+    var l2 = dx * dx + dy * dy;
+    var t = l2 ? clamp(((px - ax) * dx + (py - ay) * dy) / l2, 0, 1) : 0;
+    return Math.sqrt(dist2(px, py, ax + dx * t, ay + dy * t));
+  }
+  function inWater(x, y) {
+    return LEVEL.water.some(function (w) {
+      if (w.kind === "lake") {
+        var nx = (x - w.x) / w.rx, ny = (y - w.y) / w.ry;
+        return nx * nx + ny * ny <= 1;
+      }
+      for (var i = 1; i < w.pts.length; i++) {
+        if (segDist(x, y, w.pts[i - 1][0], w.pts[i - 1][1], w.pts[i][0], w.pts[i][1]) <= w.w / 2) return true;
+      }
+      return false;
+    });
+  }
+  function nearBridge(x, y) {
+    return LEVEL.bridges.some(function (b) {
+      return Math.sqrt(dist2(x, y, b.x, b.y)) <= (b.r || 40);
+    });
+  }
+  // Il tracciato che taglia l'acqua costa x3.2; se passa su un ponte x1.8.
+  function waterMult(a, b) {
+    if (!LEVEL.water.length) return 1;
+    var N = 24, mult = 1;
+    for (var i = 1; i <= N; i++) {
+      var k = i / N;
+      var x = a.x + (b.x - a.x) * k, y = a.y + (b.y - a.y) * k;
+      if (inWater(x, y)) mult = Math.max(mult, nearBridge(x, y) ? 1.8 : 3.2);
+    }
+    return mult;
+  }
+
   function genCity() {
     var center = { x: W / 2, y: H / 2 };
     for (var i = 0; i < 8; i++) {
@@ -105,6 +298,51 @@
       var y = clamp(center.y + Math.sin(ang) * dist, 130, H - 130);
       addDistrict(x, y, i < 2 ? rand(650, 900) : rand(320, 780), rand(150, 520));
     }
+  }
+
+  /* ===== Caricamento livello ===== */
+  function loadLevel(idx) {
+    LEVEL = LEVELS[clamp(idx, 0, LEVELS.length - 1)];
+    var q = LEVEL.params;
+    // le costanti globali diventano i parametri del livello: tutto il resto
+    // del gioco continua a usarle senza sapere che esistono i livelli
+    DAY = q.day || 150;
+    TRAIN_SPEED = q.trainSpeed || 220;
+    TRAIN_CAP = q.trainCap || 120;
+    TRAIN_COST = q.trainCost || 150;
+    STATION_BASE = q.stationBase || 80;
+    TUNNEL_PER_PX = q.tunnelPerPx || 0.9;
+    LOAN_INTEREST_DAY = q.interest || 0.02;
+    LOAN_CAP = q.loanCap || 5000;
+    BANKRUPT_AT = q.bankruptAt != null ? q.bankruptAt : -400;
+    GROWTH_CAP = q.growthCap || 1500;
+    SPAWN_CHANCE = q.spawnChance != null ? q.spawnChance : 0.22;
+    MAX_LINES = q.maxLines || 6;
+    MAX_DISTRICTS = q.maxDistricts || 22;
+
+    state.money = q.money != null ? q.money : 900;
+    state.fare = q.fare || 1.2;
+    state.districts = [];
+    state.lines = [];
+    state.usedNames = {};
+    state.day = 1;
+    state.tod = 0.08;
+    state.time = 0;
+    state.loan = 0;
+    state.totalPax = 0;
+    state.deliveredDay = 0;
+    state.over = false;
+    state.sel = null;
+    state.build = null;
+    state.finance = false;
+
+    if (LEVEL.procedural) {
+      genCity();
+    } else {
+      LEVEL.districts.forEach(function (d) { addDistrict(d.x, d.y, d.pop, d.jobs, d.name, d.geo); });
+    }
+    recomputeDemand();
+    renderDock();
   }
 
   /* ===== Linee ===== */
@@ -247,8 +485,8 @@
       d.pop = Math.max(80, d.pop * (1 + g));
       d.jobs = Math.max(40, d.jobs * (1 + g * 0.9));
     });
-    state.districts.filter(function (d) { return d.pop > 1500; }).forEach(function (d) {
-      if (Math.random() < 0.22 && state.districts.length < MAX_DISTRICTS) {
+    state.districts.filter(function (d) { return d.pop > GROWTH_CAP; }).forEach(function (d) {
+      if (Math.random() < SPAWN_CHANCE && state.districts.length < MAX_DISTRICTS) {
         for (var tries = 0; tries < 24; tries++) {
           var ang = rand(0, 6.2832), dist = rand(190, 250);
           var x = clamp(d.x + Math.cos(ang) * dist, 110, W - 110);
@@ -275,7 +513,7 @@
       state.loan += interest * dt;
       state.money -= interest * dt;
     }
-    if (state.money < -400 && !state.over) bankrupt();
+    if (state.money < BANKRUPT_AT && !state.over) bankrupt();
   }
   function bankrupt() {
     state.over = true;
@@ -284,7 +522,7 @@
     if (state.totalPax > best) { localStorage.setItem("metro-best", String(Math.floor(state.totalPax))); best = Math.floor(state.totalPax); }
     R2.saveJSON("metro-pwa", { highScore: Math.floor(state.totalPax) });
     showModal("BANCAROTTA",
-      "Il bilancio è andato sotto −€ 400 e i creditori hanno sequestrato la rete.<br><br>Passeggeri trasportati: <b>" + fmtNum(state.totalPax) + "</b> (record: " + fmtNum(best) + ")<br>Giorni di servizio: <b>" + state.day + "</b><br><br>" +
+      "Il bilancio è andato sotto " + fmtMoney(BANKRUPT_AT) + " e i creditori hanno sequestrato la rete.<br><br>Passeggeri trasportati: <b>" + fmtNum(state.totalPax) + "</b> (record: " + fmtNum(best) + ")<br>Giorni di servizio: <b>" + state.day + "</b><br><br>" +
       "Consiglio: tariffe più alte portano meno passeggeri — trova l'equilibrio prima di indebitarti.",
       [{ t: "↺ Nuova città", f: function () { location.reload(); }, primary: true }]);
   }
@@ -304,7 +542,8 @@
   function buildCost(fromD, toD) {
     var d = Math.sqrt(dist2(fromD.x, fromD.y, toD.x, toD.y));
     var geo = (fromD.geo + toD.geo) / 2;
-    return Math.round(STATION_BASE * toD.geo + d * TUNNEL_PER_PX * geo);
+    var w = waterMult(fromD, toD);
+    return Math.round(STATION_BASE * toD.geo + d * TUNNEL_PER_PX * geo * w);
   }
   function tryBuildAt(d) {
     var b = state.build;
@@ -373,7 +612,7 @@
 
   /* ===== Prestiti ===== */
   function takeLoan(amount) {
-    if (state.loan + amount > 5000) { Sound.error(); toast("Il rating non copre più debito."); return; }
+    if (state.loan + amount > LOAN_CAP) { Sound.error(); toast("Il rating non copre più debito."); return; }
     state.loan += amount;
     state.money += amount;
     Sound.loan();
@@ -465,6 +704,40 @@
     ctx.save();
     ctx.translate(view.ox, view.oy);
     ctx.scale(view.scale, view.scale);
+
+    // acqua
+    LEVEL.water.forEach(function (w) {
+      ctx.strokeStyle = "rgba(96,164,214,0.55)";
+      ctx.fillStyle = "rgba(96,164,214,0.32)";
+      if (w.kind === "lake") {
+        ctx.beginPath();
+        ctx.ellipse(w.x, w.y, w.rx, w.ry, 0, 0, 6.2832);
+        ctx.fill();
+      } else {
+        ctx.lineWidth = w.w;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(w.pts[0][0], w.pts[0][1]);
+        for (var i = 1; i < w.pts.length; i++) ctx.lineTo(w.pts[i][0], w.pts[i][1]);
+        ctx.stroke();
+      }
+    });
+    // centri storici: qui la geologia (e quindi lo scavo) è cara
+    LEVEL.centers.forEach(function (c) {
+      ctx.strokeStyle = "rgba(180,120,60,0.45)";
+      ctx.setLineDash([7, 7]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, 6.2832);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(150,100,50,0.75)";
+      ctx.font = "italic 12px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(c.name, c.x, c.y - c.r - 7);
+    });
+
     state.districts.forEach(function (d) {
       var r = 26 + Math.sqrt(d.pop) * 0.42;
       ctx.beginPath();
@@ -496,6 +769,19 @@
         ctx.fillText("non servito", d.x, d.y + r + 14);
       }
     });
+    LEVEL.bridges.forEach(function (b) {
+      ctx.strokeStyle = "rgba(70,70,78,0.9)";
+      ctx.lineWidth = 7;
+      ctx.beginPath();
+      ctx.moveTo(b.x - 26, b.y - 12);
+      ctx.lineTo(b.x + 26, b.y + 12);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(40,40,48,0.95)";
+      ctx.font = "9px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(b.name, b.x, b.y + 26);
+    });
+
     state.lines.forEach(function (l) {
       var pts = linePath(l);
       ctx.strokeStyle = l.color;
@@ -655,6 +941,68 @@
   }
   function hideModal() { $("modal").classList.add("hidden"); }
 
+  function progress() { return R2.loadJSON(PROGRESS_KEY, { done: {}, best: {} }); }
+  function levelUnlocked(i) {
+    if (i === 0) return true;
+    var pr = progress();
+    // il livello precedente deve essere stato completato almeno una volta
+    return !!pr.done[LEVELS[i - 1].id];
+  }
+  function suonoClick() { if (Sound) Sound.click && Sound.click(); }
+  function showLevels() {
+    var pr = progress();
+    var cards = "";
+    for (var i = 0; i < LEVELS.length; i++) {
+      var L = LEVELS[i];
+      var unlocked = levelUnlocked(i);
+      var best = pr.best[L.id];
+      cards += unlocked
+        ? '<button class="lvcard" data-i="' + i + '">' +
+            '<span class="lvnum">' + (i + 1) + '</span>' +
+            '<span class="lvname">' + L.name + '</span>' +
+            '<span class="lvsub">' + L.subtitle + '</span>' +
+            '<span class="lvmeta">' + (best ? fmtK(best) + " pax/g · " : "") + "par " + L.par + "</span>" +
+          "</button>"
+        : '<button class="lvcard locked"><span class="lvnum">🔒</span><span class="lvname">?</span><span class="lvsub">' + L.subtitle + "</span></button>";
+    }
+    showModal("LINEA ROSSA — Metro Planner",
+      '<div class="lvgrid">' + cards + '</div>' +
+      '<div class="body">Sei l\'ingegnere della prima metropolitana della città.<br><br>' +
+      "• <b>➕ Nuova linea</b>: tocca i quartieri in sequenza per tracciarla (scavo e stazioni costano — la geologia conta)<br>" +
+      "• I <b>quartieri serviti</b> crescono e ne nascono di nuovi: la città segue la tua rete<br>" +
+      "• La <b>domanda</b> segue la gravity model: più residenti e uffici collegati = più passeggeri<br>" +
+      "• Gli <b>interscambi</b> tra linee ampliano la copertura, ma costano in tempo ai passeggeri<br>" +
+      "• <b>Tariffa alta</b> = più ricavi, meno passeggeri. <b>Treni</b> = capienza<br>" +
+      "• <b>Sott'acqua</b> il tunnel costa ×3.2: un <b>ponte</b> lo riduce a ×1.8<br>" +
+      "• I <b>prestiti</b> hanno interesse quotidiano: la bancarotta è vicina",
+      [{ t: "Chiudi", f: hideModal, ghost: true }]);
+    document.querySelectorAll(".lvcard[data-i]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        hideModal();
+        startLevel(Number(b.dataset.i));
+      });
+    });
+  }
+  function startLevel(i) {
+    loadLevel(i);
+    var L = LEVELS[i];
+    if (!L.procedural) {
+      showModal(L.name.toUpperCase() + " — " + L.subtitle,
+        L.blurb + "<br><br><b>Obiettivo</b>: " + fmtK(L.goal.paxDay) + " passeggeri/giorno entro " + L.goal.days + " giorni, " +
+        "almeno " + L.goal.servedMin + " quartieri serviti.<br><br>💡 " + L.hint,
+        [{ t: "🚇 Apri il cantiere", f: hideModal, primary: true }]);
+    }
+  }
+  function showFinance() {
+    showModal("Finanza",
+      "Cassa: <b>" + fmtMoney(state.money) + "</b><br>" +
+      "Debito: <b>" + fmtMoney(state.loan) + "</b> (interesse " + (LOAN_INTEREST_DAY * 100).toFixed(1) + "%/giorno, tetto " + fmtMoney(LOAN_CAP) + ")<br>" +
+      "Tariffa: <b>" + state.fare.toFixed(2) + "</b> — più alta porta più ricavi ma meno passeggeri<br>" +
+      "Treno: <b>" + fmtMoney(TRAIN_COST) + "</b> · capacità " + TRAIN_CAP + " passeggeri<br><br>" +
+      "La bancarotta scatta sotto " + fmtMoney(BANKRUPT_AT) + ".",
+      [{ t: "Chiudi", f: hideModal, ghost: true }]);
+  }
+
   function showStart() {
     showModal("LINEA ROSSA — Metro Planner",
       "Sei l'ingegnere della prima metropolitana della città.<br><br>" +
@@ -665,7 +1013,8 @@
       "• <b>Tariffa alta</b> = più ricavi, meno passeggeri. <b>Treni</b> = capienza<br>" +
       "• Sopraffollamento permanente blocca la crescita del quartiere<br>" +
       "• I <b>prestiti</b> hanno interesse 2%/giorno: la bancarotta è sotto −€ 400",
-      [{ t: "🚇 Apri il cantiere", f: function () { hideModal(); }, primary: true }]);
+      [{ t: "🚇 Apri il cantiere", f: function () { hideModal(); }, primary: true },
+       { t: "☰ Scegli la mappa", f: showLevels, ghost: true }]);
   }
 
   /* ===== Loop ===== */
@@ -716,11 +1065,14 @@
     initSound();
     resize();
     window.addEventListener("resize", resize);
-    genCity();
-    recomputeDemand();
     setupInput();
-    renderDock();
-    showStart();
+    // si parte dal primo livello sbloccato, poi si sceglie la mappa
+    var start = 0;
+    for (var i = LEVELS.length - 1; i > 0; i--) { if (levelUnlocked(i)) { start = i; break; } }
+    loadLevel(start);
+    setupHudButtons();
+    if (!LEVEL.procedural) startLevel(start);
+    else showStart();
     R2.trackPlaytime("metro-pwa/");
     R2.installHint();
     R2.markPlayed("metro-pwa/");
@@ -728,6 +1080,19 @@
       navigator.serviceWorker.register("./service-worker.js").catch(function () {});
     }
     requestAnimationFrame(loop);
+  }
+
+  function setupHudButtons() {
+    var hb = $("help-btn"), fb = $("fin-btn"), sb = $("sound-btn");
+    if (hb) hb.addEventListener("click", function () { suonoClick(); showLevels(); });
+    if (fb) fb.addEventListener("click", function () { suonoClick(); showFinance(); });
+    if (sb) {
+      sb.textContent = R2.getSettings().sound ? "🔊" : "🔇";
+      sb.addEventListener("click", function () {
+        var st = R2.setSettings({ sound: !R2.getSettings().sound });
+        sb.textContent = st.sound ? "🔊" : "🔇";
+      });
+    }
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

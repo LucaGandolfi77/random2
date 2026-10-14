@@ -141,3 +141,33 @@ input[type="range"] { width: 100%; accent-color: var(--red); }
 }
 #toast.hidden { display: none; }
 @media (max-width: 380px) { .chip { font-size: 11px; padding: 4px 8px; } }
+
+/* ===== Livelli ===== */
+.lvgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+.lvcard {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  text-align: left;
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid #2b2f36;
+  background: #fbfaf6;
+  color: #1a1d24;
+  cursor: pointer;
+  transition: transform .12s ease, border-color .12s ease;
+}
+.lvcard:hover { border-color: #e0342c; transform: translateY(-2px); }
+.lvcard.locked { opacity: .5; cursor: default; background: #e9e7e0; }
+.lvcard.locked:hover { transform: none; border-color: #2b2f36; }
+.lvnum { font-weight: 800; font-size: 15px; color: #e0342c; }
+.lvname { font-weight: 700; font-size: 15px; }
+.lvsub { font-size: 11px; opacity: .65; font-style: italic; }
+.lvmeta { font-size: 11px; opacity: .8; }

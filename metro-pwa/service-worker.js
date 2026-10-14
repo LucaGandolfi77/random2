@@ -1,5 +1,5 @@
 /* ===== LINEA ROSSA service worker ===== */
-const CACHE_NAME = "metro-pwa-v1";
+const CACHE_NAME = "metro-pwa-v2";
 const ASSETS = [
     "./", "./index.html", "./styles.css", "./game.js",
     "../shared/arcade.js", "./manifest.json",
