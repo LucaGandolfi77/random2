@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>À la recherche du temps perdu — A Proustian Visual Novel</title>
+<meta name="description" content="Enter the world of Marcel Proust. Memory, time, art, and the madeleine. A visual novel in English and Italian.">
+<meta name="theme-color" content="#1a1528">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cormorant:ital,wght@1,300&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Cormorant Garamond',Georgia,serif;}
+body{background:#0d0912;color:#c9b8a8;overflow:hidden;height:100vh;width:100vw;font-size:17px;line-height:1.7;letter-spacing:0.03em;}
+#game-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0.18;pointer-events:none;z-index:0;}
+.dialogue-wrapper{position:absolute;bottom:0;left:0;right:0;z-index:10;padding:3rem 2.5rem 5rem;background:linear-gradient(to top,rgba(13,9,18,0.96),rgba(13,9,18,0.88) 50%,transparent);border-top:1px solid rgba(201,184,168,0.1);}
+.memory-indicator{position:absolute;top:1.2rem;right:1.5rem;background:rgba(201,184,168,0.08);border:1px solid rgba(201,184,168,0.15);border-radius:20px;padding:0.35rem 0.9rem;font-size:0.7rem;color:#b8a898;letter-spacing:0.15em;text-transform:uppercase;font-family:'Cormorant',Georgia,serif;z-index:20;transition:opacity 0.3s;}
+.memory-indicator.active{background:rgba(218,165,120,0.15);border-color:rgba(218,165,120,0.35);color:#e0c8a8;opacity:1;}
+.speaker-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:0.95rem;color:#bfa07a;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem;font-weight:400;opacity:0.9;}
+.dialogue-text{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.15rem;color:#d4c4a8;max-width:680px;line-height:1.85;text-shadow:0 1px 6px rgba(0,0,0,0.5);font-style:italic;}
+.dialogue-text:not(.italic-text){font-style:normal;}
+.choices{display:flex;flex-direction:column;gap:0.6rem;margin-top:1.2rem;max-width:580px;}
+.choices button{background:rgba(201,184,168,0.04);border:1px solid rgba(201,184,168,0.14);color:#c9b8a8;border-radius:4px;padding:0.75rem 1.2rem;font-size:0.95rem;font-family:'Cormorant Garamond',Georgia,serif;cursor:pointer;transition:all 0.3s ease;text-align:center;letter-spacing:0.03em;}
+.choices button:hover{background:rgba(201,184,168,0.1);border-color:rgba(201,184,168,0.3);color:#e0c8a8;box-shadow:0 2px 15px rgba(0,0,0,0.25);}
+.menu-screen{position:absolute;inset:0;background:#0d0912;z-index:30;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2.5rem;}
+.menu-panel{text-align:center;padding:2.5rem 2rem;max-width:480px;width:92%;}
+.menu-panel h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:2.8rem;color:#c9b0a0;letter-spacing:0.1em;margin-bottom:0.4rem;font-weight:300;line-height:1.2;text-shadow:0 2px 20px rgba(201,176,160,0.15);}
+.menu-panel .subtitle{font-style:italic;font-size:1.05rem;color:#9a8876;margin-bottom:2rem;letter-spacing:0.04em;opacity:0.85;line-height:1.5;}
+.menu-button{display:block;width:100%;padding:0.8rem 1.5rem;margin:0.35rem 0;background:rgba(201,184,168,0.05);border:1px solid rgba(201,184,168,0.18);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;cursor:pointer;transition:all 0.3s ease;letter-spacing:0.03em;text-align:center;}
+.menu-button:hover{background:rgba(201,184,168,0.1);border-color:rgba(201,184,168,0.35);color:#e0c8a8;box-shadow:0 4px 18px rgba(0,0,0,0.3);}
+.menu-button.sm{font-size:0.85rem;padding:0.5rem 1rem;}
+.stats-row{position:absolute;bottom:1rem;left:1.5rem;z-index:20;font-size:0.7rem;color:#8a7b65;display:flex;gap:1.2rem;letter-spacing:0.08em;text-transform:uppercase;font-family:'Cormorant Garamond',Georgia,serif;opacity:0.8;}
+.hidden{display:none!important;opacity:0!important;}
+</style>
+</head>
+<body>
+<canvas id="game-canvas"></canvas>
+
+<div class="dialogue-wrapper">
+  <div class="speaker-name" id="speaker">Marcel</div>
+  <div class="dialogue-text" id="dialogue-text">The madeleine... the taste of it brought back everything. Not like a photograph — something deeper, something that lived inside me, waiting.</div>
+  <div class="choices" id="choices"></div>
+</div>
+
+<div class="memory-indicator" id="memory-indicator">Involuntary Memory</div>
+
+<div class="stats-row">
+  <span>Memory: <span id="mem">0</span></span>
+  <span>Melancholy: <span id="mel">0</span></span>
+  <span>Art: <span id="art">0</span></span>
+</div>
+
+<div id="start-menu" class="menu-screen">
+  <div class="menu-panel">
+    <h1>À la recherche</h1>
+    <p class="subtitle">A Proustian meditation on memory, time, and the art of recollection.</p>
+    <button class="menu-button" onclick="startVN()">Begin — Enter Memory</button>
+    <button class="menu-button sm" onclick="switchLanguage()">Lingua: Italiano</button>
+    <button class="menu-button sm" onclick="loadSlot()">Continue — Load Memory</button>
+    <button class="menu-button sm" onclick="showAbout()">About — The Work</button>
+  </div>
+</div>
+
+<div id="about-menu" class="menu-screen hidden">
+  <div class="menu-panel">
+    <h1>About</h1>
+    <p class="subtitle" style="font-style:normal;font-size:0.95rem;line-height:1.6;color:#b8a898;">This interactive experience draws from Marcel Proust's À la recherche du temps perdu. Memory, involuntary recollection, art, music, love, and the passage of time are explored through choice and contemplation. Available in English and Italian.</p>
+    <button class="menu-button" onclick="backToMenu()">Return to Memory</button>
+  </div>
+</div>
+
+<script src="../shared/arcade.js"></script>
+<script src="src/config.js"></script>
+<script src="src/storage.js"></script>
+<script src="src/render.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

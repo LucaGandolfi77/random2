@@ -1,0 +1,14 @@
+{
+  "background_color": "#0d0912",
+  "description": "A Proustian visual novel on memory, time, art, and the recovery of lost time. Bilingual English and Italian.",
+  "display": "standalone",
+  "display_override": ["standalone","fullscreen"],
+  "icons": [{"src":"icons/icon-192.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any"},{"src":"icons/icon-192.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any"}],
+  "lang": "en",
+  "name": "A la recherche",
+  "orientation": "any",
+  "scope": "./",
+  "short_name": "Recherche",
+  "start_url": "./",
+  "theme_color": "#1a1528"
+}
