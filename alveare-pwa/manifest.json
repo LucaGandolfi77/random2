@@ -1,0 +1,18 @@
+{
+  "name": "ALVEARE — Waggle Dance",
+  "short_name": "ALVEARE",
+  "description": "Sei la mente dell'alveare: gli esploratori scoprono i campi, tu disegni la danza dell'oscillazione per instradare le operaie. Miele, stagioni, inverni da sopravvivere.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1206",
+  "theme_color": "#e8a924",
+  "lang": "it",
+  "categories": ["games", "simulation"],
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

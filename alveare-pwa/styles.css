@@ -1,0 +1,171 @@
+:root {
+  --honey: #e8a924;
+  --honey-deep: #b57b12;
+  --comb: #f7d774;
+  --ink: #2b1d0a;
+  --paper: #fdf3dd;
+  --danger: #c0392b;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  height: 100%; overflow: hidden;
+  background: #7aa04c; color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
+}
+#app { height: 100dvh; display: flex; flex-direction: column; }
+
+#hud {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: calc(8px + var(--sat)) max(10px, var(--sar)) 6px max(10px, var(--sal));
+  z-index: 10; position: relative;
+  background: linear-gradient(180deg, rgba(43, 29, 10, 0.55), transparent);
+}
+.hud-left { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip {
+  background: rgba(253, 243, 221, 0.92);
+  border: 1px solid rgba(43, 29, 10, 0.3);
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 12.5px; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.chip.honey b { color: var(--honey-deep); font-size: 14px; }
+#seasonbar {
+  width: 90px; height: 6px;
+  background: rgba(43, 29, 10, 0.25);
+  border-radius: 999px; overflow: hidden;
+}
+#seasonfill { display: block; height: 100%; width: 0; background: var(--honey); border-radius: 999px; }
+.hud-right { display: flex; gap: 8px; }
+.iconbtn {
+  width: 36px; height: 36px; border-radius: 10px;
+  border: 1px solid rgba(43, 29, 10, 0.35);
+  background: rgba(253, 243, 221, 0.92);
+  font-size: 15px; cursor: pointer;
+}
+.iconbtn:active { transform: scale(0.92); }
+
+#squads {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 0 max(10px, var(--sar)) 4px max(10px, var(--sal));
+  z-index: 9; position: relative;
+}
+.squadchip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(253, 243, 221, 0.9);
+  border: 1px solid rgba(43, 29, 10, 0.3);
+  border-radius: 999px;
+  padding: 4px 6px 4px 11px;
+  font-size: 11.5px; font-weight: 700;
+}
+.squadchip button {
+  border: none; background: rgba(192, 57, 43, 0.15);
+  color: var(--danger); font-weight: 800;
+  width: 20px; height: 20px; border-radius: 50%;
+  cursor: pointer; font-size: 11px;
+}
+.squadchip button:active { transform: scale(0.9); }
+
+#stage { flex: 1; position: relative; min-height: 0; }
+#game { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+
+#actions {
+  display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  padding: 8px max(10px, var(--sar)) calc(10px + var(--sab)) max(10px, var(--sal));
+  background: linear-gradient(0deg, rgba(43, 29, 10, 0.55), transparent);
+  z-index: 10; position: relative;
+}
+.abtn {
+  font: inherit; font-weight: 800; font-size: 12.5px;
+  color: var(--ink);
+  background: var(--comb);
+  border: 2px solid var(--honey-deep);
+  border-radius: 13px;
+  padding: 9px 14px;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(43, 29, 10, 0.35);
+  text-align: center; line-height: 1.25;
+}
+.abtn small { font-weight: 700; opacity: 0.75; font-size: 11px; }
+.abtn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(43, 29, 10, 0.35); }
+.abtn:disabled { opacity: 0.45; }
+.abtn.primary {
+  background: linear-gradient(135deg, #f7c548, #e8a924);
+  position: relative;
+}
+.abtn em {
+  position: absolute; top: -8px; right: -8px;
+  background: var(--danger); color: #fff;
+  font-style: normal; font-size: 11px;
+  border-radius: 999px; padding: 2px 7px;
+}
+#dance-btn { min-width: 110px; }
+#dance-btn:disabled { filter: grayscale(0.6); }
+#queuebadge.hidden { display: none; }
+
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(30, 20, 5, 0.82);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100; padding: 16px;
+}
+.overlay.hidden { display: none; }
+.sheet {
+  background: var(--paper);
+  border: 3px solid var(--honey-deep);
+  border-radius: 18px;
+  padding: 20px 18px;
+  max-width: 420px; width: 100%;
+  text-align: center;
+  max-height: 92dvh; overflow-y: auto;
+}
+.sheet h2 { font-size: 24px; margin-bottom: 8px; }
+.sheet h3 { font-size: 18px; margin-bottom: 8px; }
+.body { font-size: 13.5px; line-height: 1.65; color: var(--muted); margin-bottom: 14px; white-space: pre-line; }
+.body b { color: var(--ink); }
+#m-btns { display: flex; flex-direction: column; gap: 9px; }
+.btn {
+  font: inherit; font-weight: 700; font-size: 14.5px;
+  padding: 11px 16px; border-radius: 12px;
+  border: 2px solid var(--honey-deep);
+  background: var(--comb); color: var(--ink);
+  cursor: pointer;
+}
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: linear-gradient(135deg, #f7c548, #e8a924); }
+.btn.ghost { background: transparent; }
+
+.scoutcard {
+  background: #fff8e6;
+  border: 1.5px dashed var(--honey-deep);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 10px;
+  line-height: 1.55;
+  text-align: left;
+}
+.scoutcard b { color: var(--honey-deep); }
+.scoutcard .warn { color: var(--danger); font-weight: 800; }
+#dance { border-radius: 14px; border: 2px solid var(--honey-deep); touch-action: none; cursor: crosshair; background: #f7d774; }
+#dance-result { font-size: 13.5px; font-weight: 700; min-height: 20px; margin: 8px 0 4px; }
+#dance-result .good { color: #1e8e3e; }
+#dance-result .bad { color: var(--danger); }
+#dance-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+#toast {
+  position: fixed; top: calc(70px + var(--sat)); left: 50%;
+  transform: translateX(-50%); z-index: 60;
+  background: rgba(43, 29, 10, 0.93); color: var(--paper);
+  padding: 9px 16px; border-radius: 11px;
+  font-size: 12.5px; font-weight: 600;
+  pointer-events: none; max-width: 86vw; text-align: center;
+}
+#toast.hidden { display: none; }
+@media (max-width: 380px) { .chip { font-size: 11px; padding: 4px 8px; } .abtn { font-size: 11px; padding: 8px 10px; } }

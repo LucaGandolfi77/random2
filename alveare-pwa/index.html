@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ALVEARE — Waggle Dance</title>
+  <meta name="description" content="Sei la mente dell'alveare: gli esploratori scoprono i campi, tu disegni la danza dell'oscillazione per instradare le operaie. Miele, stagioni, inverni da sopravvivere.">
+  <meta name="theme-color" content="#e8a924">
+  <meta name="color-scheme" content="light">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ALVEARE">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header id="hud">
+      <div class="hud-left">
+        <span class="chip honey">🍯 <b id="honey">40</b></span>
+        <span class="chip">🐝 <b id="pop">10</b>/<span id="slots">10</span></span>
+        <span class="chip" id="season">🌸 Primavera · Anno 1</span>
+        <div id="seasonbar"><i id="seasonfill"></i></div>
+      </div>
+      <div class="hud-right">
+        <button id="levels-btn" class="iconbtn" aria-label="Aiuto">❓</button>
+        <button id="sound-btn" class="iconbtn" aria-label="Audio">🔊</button>
+      </div>
+    </header>
+
+    <div id="squads"></div>
+
+    <main id="stage"><canvas id="game"></canvas></main>
+
+    <footer id="actions">
+      <button id="dance-btn" class="abtn primary" disabled>💃 Danza <em id="queuebadge" class="hidden">0</em></button>
+      <button id="brood-btn" class="abtn">🥚 Operaia<br><small>25 🍯</small></button>
+      <button id="expand-btn" class="abtn">🔮 Espandi<br><small>80 🍯</small></button>
+      <button id="scout-btn" class="abtn">🧭 Esploratrice<br><small>60 🍯</small></button>
+    </footer>
+
+    <div id="dance-modal" class="overlay hidden">
+      <div class="sheet">
+        <h3>La danza dell'oscillazione</h3>
+        <div id="scout-card" class="scoutcard"></div>
+        <canvas id="dance" width="320" height="320"></canvas>
+        <div id="dance-result"></div>
+        <div id="dance-btns"></div>
+      </div>
+    </div>
+
+    <div id="modal" class="overlay hidden">
+      <div class="sheet">
+        <h2 id="m-title">ALVEARE</h2>
+        <div id="m-body" class="body"></div>
+        <div id="m-btns"></div>
+      </div>
+    </div>
+
+    <div id="toast" class="hidden"></div>
+  </div>
+  <script src="../shared/arcade.js"></script>
+  <script src="game.js"></script>
+  <script src="service-worker.js"></script>
+</body>
+</html>

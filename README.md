@@ -25,6 +25,7 @@
   - [Viti & Lastre](#viti--lastre)
   - [MYCEL](#mycel)
   - [STATIC](#static)
+  - [ALVEARE](#alveare)
   - [FORMICA](#formica)
   - [Mustang 1942](#mustang-1942)
   - [Farm Tycoon](#farm-tycoon)
@@ -60,14 +61,15 @@
 | 8 | **Viti & Lastre** | Screw-puzzle demolition | Canvas 2D (rigid body) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/viti-pwa/) |
 | 9 | **MYCEL** | Branching fungal network .io | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mycel-pwa/) |
 | 10 | **STATIC** | Pirate broadcast .io (CRT/VHS) | Canvas 2D + WebAudio + BroadcastChannel | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/static-pwa/) |
-| 11 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
-| 12 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 13 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 14 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 15 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 16 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 17 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
-| 18 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 11 | **ALVEARE** | Bee-tycoon con waggle dance disegnabile | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/alveare-pwa/) |
+| 12 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 13 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 14 | **Farm Tycoon** | Idle farming sim | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 15 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 16 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 17 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 18 | **Territorio** | Paper.io-style arena vs bots | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 19 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -401,6 +403,37 @@ VHS, neve, tracking band — tutto procedurale, zero filtri CSS.
   servirebbe un server relay: qui tutto resta onesto e sul dispositivo
 - Post-processing a 3 pass: mondo offscreen → ghosting 'lighter' offset,
   scanline pattern, neve ciclica, banda tracking, vignetta
+
+**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
+`service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
+
+### ALVEARE
+
+*Sei la mente dell'alveare.* 🐝
+
+Il tycoon con la meccanica della **danza dell'oscillazione** reale (waggle
+dance): le esploratrici scoprono i campi, tornano all'alveare e **tu disegni
+la danza** che istruisce le operaie.
+
+- **Il hook:** sulla tavola del favo disegni un tratto partendo dal centro —
+  **l'angolo rispetto al sole** (sempre in alto) codifica la direzione del
+  campo, **la lunghezza del tratto** codifica la distanza (scala sugli anelli:
+  300/600/900/1200 m). La biologia della waggle dance diventata interfaccia
+- **Precisione = reclutamento:** angolo entro ±14° e lunghezza entro ±15%
+  arruolano tutte le operaie richieste; errori crescenti mandano una frazione
+  crescente di api **nel vuoto** (dove consumano il corpo per niente)
+- **Squadre persistenti:** una danza crea un'assegnazione permanente che
+  navetta alveare ↔ campo finché non la richiami; i chip in alto mostrano le
+  squadre attive con richiamo istantaneo
+- **Economia:** miele → covata (api), espansione celle, nuove esploratrici;
+  consumo continuo dell'alveare proporzionale alla popolazione
+- **Stagioni vere:** primavera/estate raccolgono, autunno scema, e l'**inverno
+  blocca il foraggiamento mentre il consumo continua**: le riserve devono
+  durare, e peggiorano anno dopo anno
+- **Pericoli:** vespai da non inseguire, **rapine di vespe**, campi trattati
+  con pesticidi che avvelenano le squadre
+- Segnala-tipo: nome del campo, distanza in metri, angolo in gradi "a destra/
+  sinistra del sole" — tradurlo in danza è il gioco
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG), `shared/arcade.js` via `../shared/`.
@@ -820,7 +853,9 @@ Notes:
 
 ## Roadmap
 
-Everything below is a real TODO, tracked here. Check something off by opening
+Everything below is a real TODO, tracked here. I concept tycoon non ancora
+implementati (MADRE, LINEA ROSSA, NEBBIA, ACQUA, STYX) sono specificati in
+**[TODOs.md](TODOs.md)**. Check something off by opening
 a PR — keep this list honest.
 
 ### ✅ Done
@@ -845,6 +880,9 @@ a PR — keep this list honest.
 - [x] **Isola Resort Tycoon wave 3:** hotel con entrate notturne, camera
       rotabile su 4 orientazioni (roundtrip verificato su tutte le celle),
       export/import del salvataggio, tempo musicale scalato su meteo/notte
+- [x] **ALVEARE** — bee-tycoon with the waggle dance drawn by hand: angle
+      from the sun encodes direction, stroke length encodes distance; seasons
+      with lethal winters, brood/comb economy, wasp raids and pesticide events
 - [x] **SINI** — new game: living-brushstroke .io (sumi-e) with the wet/dry
       ink mechanic, permanent lethal calligraphy, finite paper edges, erasing
       water droplets, red seal stamp graveyard, painting-percentage scoring,
