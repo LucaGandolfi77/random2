@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Crime and Punishment — A Melancholic Visual Novel</title>
+    <meta name="description" content="A melancholic visual novel exploring guilt, conscience, and redemption through Dostoevskys Crime and Punishment. Fully offline-capable once installed.">
+    <meta name="theme-color" content="#0f0c15">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <script src="../shared/arcade.js"></script>
+</head>
+<body>
+    <canvas id="game-canvas"></canvas>
+    <div id="dialogue-overlay" class="dialogue-area">
+        <div class="speaker-name" id="speaker">Raskolnikov</div>
+        <div class="dialogue-text" id="dialogue-text">The heat in the room was stifling... A room like this... for a crime.</div>
+        <div class="choices" id="choices"></div>
+    </div>
+    <div id="stats-bar" class="stats-bar">
+        <span>Conscience:</span> <span id="conscience-val">12</span>
+        <span>Guilt:</span> <span id="guilt-val">85</span>
+        <span>Hope:</span> <span id="hope-val">8</span>
+    </div>
+    <div id="save-indicator" class="save-indicator hidden">💾 Saved</div>
+
+    <script src="src/config.js"></script>
+    <script src="src/storage.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>
