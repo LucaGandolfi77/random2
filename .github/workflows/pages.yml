@@ -26,10 +26,18 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: bucio/package-lock.json
+          cache-dependency-path: |
+            bucio/package-lock.json
+            new-star-soccer/package-lock.json
 
       - name: Build BUCIO (Vite + PWA)
         working-directory: bucio
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build NEW STAR SOCCER (Vite + PWA)
+        working-directory: new-star-soccer
         run: |
           npm ci
           npm run build
@@ -38,11 +46,12 @@ jobs:
         run: |
           mkdir -p _site
           # Everything except git metadata, CI config, analysis tooling and
-          # the BUCIO sources. `tools/` is dev-only (Python/Node) and has no
-          # business being published to Pages.
-          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' ./ _site/
-          # Deploy the built BUCIO output under /bucio/
+          # the build-tool sources. `tools/` is dev-only (Python/Node) and has
+          # no business being published to Pages.
+          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' ./ _site/
+          # Deploy the built app output under their own paths
           cp -R bucio/dist/ _site/bucio/
+          cp -R new-star-soccer/dist/ _site/new-star-soccer/
           touch _site/.nojekyll
 
       - name: Setup Pages

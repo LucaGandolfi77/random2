@@ -70,6 +70,7 @@
 | 13 | **A la recherche** | Proust: memory and lost time | Canvas 2D + WebAudio | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/recherche-pwa/) |
 | 14 | **Star Explorer** | Space adventure: asteroids and crystals | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/example-pwa/) |
 | 15 | **STATIC** | Pirate broadcast .io (CRT/VHS) | Canvas 2D + WebAudio + BroadcastChannel | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/static-pwa/) |
+| 16 | **New Star Soccer** | Football career RPG: matches, transfers, life | TypeScript + Canvas 2D + WebAudio (Vite) | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/new-star-soccer/) |
 | 16 | **ALVEARE** | Bee-tycoon con waggle dance disegnabile | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/alveare-pwa/) |
 | 17 | **MADRE** | Fermentation tycoon on real time | DOM UI + Canvas curves + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/madre-pwa/) |
 | 18 | **LINEA ROSSA** | Metro planner tycoon | Canvas 2D + gravity model + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/metro-pwa/) |
@@ -84,7 +85,7 @@
 | 27 | **Territorio** | Paper.io vs bots, modalità arena senza respawn | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
 | 29 | **STATS** | Play-data dashboard | Canvas 2D (charts) | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/stats-pwa/) |
 | 28 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
-| 30 | **CENSUS** | Sampling-theory tycoon | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/census-pwa/) |
+| 30 | **CENSUS** | Sampling-theory tycoon | Canvas 2D | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/census-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -102,10 +103,11 @@ python3 -m http.server 8080
 # open http://localhost:8080
 ```
 
-That's it for every game except BUCIO (see [Local development](#local-development)).
+That's it for every game except BUCIO and NEW STAR SOCCER (see [Local development](#local-development)).
 All games are plain static files with relative paths — no build step, no
-bundlers, no dependencies. BUCIO is the one exception (Vite + three.js), and it
-is compiled by CI before publishing.
+bundlers, no dependencies. BUCIO and New Star Soccer are the two exceptions
+(Vite; three.js and TypeScript respectively), and both are compiled by CI
+before publishing.
 
 ## Installing as an app (PWA)
 

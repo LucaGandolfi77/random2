@@ -98,6 +98,7 @@ jobs:
           node tools/selftest.mjs
           node metro-pwa/sim.test.mjs
           node census-pwa/sim.test.mjs
+          node new-star-soccer/sim.test.mjs
 
       - name: Analysis tooling tests
         run: |
