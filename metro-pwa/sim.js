@@ -10,7 +10,9 @@
  * headless sessions and report where the difficulty curve actually sits.
  *
  * Keep in sync with game.js: every rule here must match the rule there.
- * tools/balance/check-parity.mjs exists to catch it when they drift.
+ * Drift is caught by sim.test.mjs, which pins the behaviours both files are
+ * supposed to share — the demand split, the growth bands, the economy, the
+ * line costs and the goal adjudication.
  *
  * Exposes window.MetroSim (plain script, no modules, so game.js and the
  * Node harness can load the same file).
