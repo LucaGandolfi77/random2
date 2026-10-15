@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- A census return: a sheet of ruled paper with a figure on it, and the
+       tally marks beneath. Drawn as shapes, not text, so it renders the
+       same everywhere. -->
+  <rect width="512" height="512" fill="#15140f"/>
+
+  <g transform="translate(256 250)">
+    <rect x="-116" y="-140" width="232" height="272" rx="8" fill="#e9e3d3"/>
+    <g fill="#c4bca6">
+      <rect x="-92" y="-112" width="184" height="7" rx="3"/>
+      <rect x="-92" y="-88" width="140" height="7" rx="3"/>
+      <rect x="-92" y="-64" width="164" height="7" rx="3"/>
+    </g>
+    <!-- the figure on the return -->
+    <text x="0" y="24" text-anchor="middle" font-family="Georgia, serif"
+          font-size="56" fill="#15140f">23,719</text>
+    <!-- a check, and the interval beneath it -->
+    <path d="M-84 58 l16 16 l30 -34" fill="none" stroke="#6a9a5b"
+          stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#b8b09a">
+      <rect x="-30" y="52" width="120" height="7" rx="3"/>
+      <rect x="-30" y="72" width="86" height="7" rx="3"/>
+    </g>
+  </g>
+
+  <!-- tally marks: five bars, the fourth crossed -->
+  <g transform="translate(256 448)" stroke="#c9a227" stroke-width="9" stroke-linecap="round">
+    <path d="M-58 0 v-40 M-29 0 v-40 M0 0 v-40 M29 0 v-40 M58 0 v-40"/>
+    <path d="M-44 -34 L44 -6" stroke-width="8"/>
+  </g>
+</svg>

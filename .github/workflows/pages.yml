@@ -37,8 +37,10 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site
-          # Everything except git metadata, CI config and the BUCIO sources
-          rsync -a --exclude='.git' --exclude='.github' --exclude='bucio' ./ _site/
+          # Everything except git metadata, CI config, analysis tooling and
+          # the BUCIO sources. `tools/` is dev-only (Python/Node) and has no
+          # business being published to Pages.
+          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' ./ _site/
           # Deploy the built BUCIO output under /bucio/
           cp -R bucio/dist/ _site/bucio/
           touch _site/.nojekyll

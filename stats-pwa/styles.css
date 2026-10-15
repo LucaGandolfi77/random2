@@ -1,0 +1,325 @@
+/* Stats — local play-data dashboard
+   Shares the hub's visual language: same radius scale, same ink, and the
+   same light/dark pair driven by [data-theme] on <html> so the toggle here
+   and the toggle on the hub cannot disagree. */
+
+:root {
+  --bg: #0d0f16;
+  --surface: #12141c;
+  --surface-2: #171b27;
+  --ink: #e8eaf2;
+  --dim: #8b93a7;
+  --line: #232838;
+  --accent: #5b8def;
+  --accent-2: #e8a924;
+  --danger: #e0342c;
+  --r: 14px;
+  --r-sm: 10px;
+
+  /* Chart tokens, read by shared/chart.js through getComputedStyle. */
+  --chart-ink: var(--ink);
+  --chart-dim: var(--dim);
+  --chart-grid: rgba(255, 255, 255, 0.07);
+  --chart-axis: rgba(255, 255, 255, 0.22);
+  --chart-surface: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="light"] {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-2: #f0f2f8;
+  --ink: #171a24;
+  --dim: #6a7285;
+  --line: #e2e6f0;
+  --accent: #3567d6;
+  --accent-2: #b47b06;
+  --chart-grid: rgba(20, 24, 36, 0.08);
+  --chart-axis: rgba(20, 24, 36, 0.24);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+/* ---------- header ---------- */
+
+.top {
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface), transparent);
+  padding: 28px 0 20px;
+  margin-bottom: 20px;
+}
+
+.top-in {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.kicker {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1 { margin: 0; font-size: 30px; letter-spacing: -0.02em; }
+
+.sub { margin: 6px 0 0; color: var(--dim); font-size: 13.5px; max-width: 56ch; }
+
+.top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+}
+
+.btn:hover { border-color: var(--accent); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
+.btn[hidden] { display: none; }
+
+/* ---------- privacy strip ---------- */
+
+.privacy {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font-size: 13.5px;
+}
+
+.privacy b { color: var(--ink); }
+.privacy span { color: var(--dim); }
+
+/* ---------- tiles ---------- */
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+}
+
+.tile b {
+  display: block;
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.tile span {
+  font-size: 11.5px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 20px;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 10px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 42px;
+}
+
+.tab.on { color: var(--ink); border-bottom-color: var(--accent); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* ---------- panels & cards ---------- */
+
+.panel { display: none; }
+.panel.on { display: block; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.card {
+  margin: 0;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  min-width: 0;
+}
+
+.card.wide { grid-column: 1 / -1; }
+
+.card figcaption {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 12px;
+}
+
+.card h2 { font-size: 13px; margin: 18px 0 6px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--dim); }
+.card h2:first-child { margin-top: 0; }
+.card p { font-size: 13.5px; color: var(--dim); margin: 0 0 8px; }
+
+canvas { display: block; width: 100%; max-width: 100%; }
+
+.note { font-size: 12.5px !important; color: var(--dim) !important; margin: 10px 0 0 !important; }
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; }
+
+.plain { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--dim); }
+.plain li { margin-bottom: 5px; }
+.plain code { color: var(--ink); font-size: 12.5px; }
+
+.pick { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.pick label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dim); }
+
+select {
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 12px;
+  min-height: 40px;
+}
+
+/* ---------- tables ---------- */
+
+.tablewrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+
+th, td {
+  text-align: right;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+
+th {
+  color: var(--dim);
+  font-weight: 700;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+
+td { font-variant-numeric: tabular-nums; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--surface-2); }
+
+td.mono, .mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--dim);
+  font-size: 13.5px;
+}
+
+/* ---------- footer ---------- */
+
+.foot {
+  margin-top: 40px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.foot p { font-size: 12.5px; color: var(--dim); }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+
+[hidden] { display: none !important; }
+
+/* Reduced motion: shared/chart.js reads the same media query, so the two
+   cannot disagree about whether anything is allowed to animate. */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 560px) {
+  .wrap { padding: 0 14px; }
+  h1 { font-size: 25px; }
+  .cards { grid-template-columns: 1fr; }
+  .tiles { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); }
+  .tile b { font-size: 20px; }
+}

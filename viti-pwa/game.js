@@ -320,6 +320,7 @@
     state.fly = [];
     state.ended = false;
     state.popCd = 0;
+    state.attemptStart = Date.now();
     Particles.clear();
     // corpi statici del mondo
     wallBodies = [
@@ -432,6 +433,14 @@
     var old = state.stars[state.lvl] || 0;
     state.stars[state.lvl] = Math.max(old, n);
     R2.saveJSON("viti-pwa", { stars: state.stars, highScore: totalStars() });
+    R2.stats.run({
+      slug: "viti-pwa/",
+      score: n * 100 - state.ops,
+      durMs: Date.now() - (state.attemptStart || Date.now()),
+      wave: state.lvl,
+      outcome: "win",
+      meta: { stars: n, ops: state.ops, par: LEVELS[state.lvl].par }
+    });
     var starsTxt = "★★★".slice(0, n) + "☆☆☆".slice(0, 3 - n);
     dailyArp();
     var btns = [];
@@ -445,6 +454,14 @@
   }
   function loseLevel(msg) {
     state.ended = true;
+    R2.stats.run({
+      slug: "viti-pwa/",
+      score: 0,
+      durMs: Date.now() - (state.attemptStart || Date.now()),
+      wave: state.lvl,
+      outcome: "loss",
+      meta: { ops: state.ops, par: LEVELS[state.lvl].par }
+    });
     showModal("Rivista ignominiosa", msg, [{ t: "↺ Riprova", f: function () { hideModal(); loadLevel(state.lvl); } }, { t: "☰ Livelli", f: showLevels }]);
     Sound.error();
   }

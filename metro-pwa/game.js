@@ -335,6 +335,8 @@
     state.sel = null;
     state.build = null;
     state.finance = false;
+    state.runStart = Date.now();
+    state.bestDay = 0;
 
     if (LEVEL.procedural) {
       genCity();
@@ -475,6 +477,7 @@
   /* ===== Giornata & crescita ===== */
   function dayRollover() {
     state.day++;
+    state.bestDay = Math.max(state.bestDay || 0, state.deliveredDay || 0);
     state.districts.forEach(function (d) {
       var q = d.served ? clamp(1 / Math.max(d.stress, 0.8), 0, 1.2) : 0;
       var g;
@@ -521,10 +524,31 @@
     var best = Number(localStorage.getItem("metro-best") || 0);
     if (state.totalPax > best) { localStorage.setItem("metro-best", String(Math.floor(state.totalPax))); best = Math.floor(state.totalPax); }
     R2.saveJSON("metro-pwa", { highScore: Math.floor(state.totalPax) });
+    recordRun("loss");
     showModal("BANCAROTTA",
       "Il bilancio è andato sotto " + fmtMoney(BANKRUPT_AT) + " e i creditori hanno sequestrato la rete.<br><br>Passeggeri trasportati: <b>" + fmtNum(state.totalPax) + "</b> (record: " + fmtNum(best) + ")<br>Giorni di servizio: <b>" + state.day + "</b><br><br>" +
       "Consiglio: tariffe più alte portano meno passeggeri — trova l'equilibrio prima di indebitarti.",
       [{ t: "↺ Nuova città", f: function () { location.reload(); }, primary: true }]);
+  }
+
+  /* ===== Stats ===== */
+  /* One place that knows how a finished run is described, so bankruptcy
+     and the level-complete path cannot drift apart. */
+  function recordRun(outcome) {
+    var goal = LEVELS[state.lvl] ? LEVELS[state.lvl].goal : null;
+    R2.stats.run({
+      slug: "metro-pwa/",
+      score: Math.floor(state.totalPax),
+      durMs: Date.now() - (state.runStart || Date.now()),
+      wave: state.lvl,
+      outcome: outcome,
+      meta: {
+        day: state.day,
+        lines: state.lines.length,
+        goalPax: goal ? goal.paxDay : null,
+        bestDay: Math.floor(state.bestDay || 0)
+      }
+    });
   }
 
   /* ===== Costruzione ===== */

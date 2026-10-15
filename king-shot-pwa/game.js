@@ -272,6 +272,7 @@
         state.gameOver = false;
         state.tickAccumulator = 0;
         state.frame = 0;
+        state.runStart = Date.now();
         spawnEnemy();
     }
 
@@ -406,6 +407,13 @@
         state.gameOver = true;
         state.paused = true;
         saveHighScore();
+        R2.stats.run({
+            slug: "king-shot-pwa/",
+            score: state.score,
+            durMs: Date.now() - (state.runStart || Date.now()),
+            wave: state.level,
+            outcome: "loss"
+        });
     }
 
     /* ===== Rendering ===== */

@@ -1,0 +1,9 @@
+# Analysis output — regenerate with the tools
+tools/balance/out/
+tools/corpora/out/
+__pycache__/
+*.pyc
+
+# Generated screenshots (regenerate with <app>/shot.mjs or <app>/smoke.mjs)
+*/shots/
+*/smoke-*.png

@@ -79,3 +79,82 @@ jobs:
                      -not -path '*/node_modules/*' -not -path '*/.venv/*' \
                      -not -path '*/dist/*' -not -path './EADS/*')
           exit $fail
+
+      - name: arcade.js exists only in shared/
+        run: |
+          set -euo pipefail
+          fail=0
+          while IFS= read -r f; do
+            echo "FAIL $f is a fork — load ../shared/arcade.js instead" ; fail=1
+          done < <(find . -name 'arcade.js' \
+                     -not -path './shared/arcade.js' \
+                     -not -path '*/node_modules/*')
+          [ "$fail" -eq 0 ] && echo "OK   shared/arcade.js is the only copy"
+          exit $fail
+
+      - name: Shared libraries and self-tests
+        run: |
+          set -euo pipefail
+          node tools/selftest.mjs
+          node metro-pwa/sim.test.mjs
+          node census-pwa/sim.test.mjs
+
+      - name: Analysis tooling tests
+        run: |
+          set -euo pipefail
+          python3 tools/balance/test.py
+          python3 tools/corpora/test.py
+
+      - name: Corpus extract stays in sync
+        # The extractor reads the literary PWAs' source with regexes, so a
+        # rewrite of a corpus file can silently empty it. This asserts the
+        # extractor still finds prose, which is the failure that matters.
+        run: |
+          set -euo pipefail
+          node tools/corpora/extract.mjs --out /tmp/corpus-check.json
+          python3 - <<'PY'
+          import json, sys
+          d = json.load(open("/tmp/corpus-check.json"))
+          paired = sum(len(s["paired"]) for s in d["sources"])
+          singles = sum(len(s["singles"]) for s in d["sources"])
+          total = paired + singles
+          print(f"extracted {paired} paired + {singles} single-language strings")
+          if total < 20:
+              sys.exit(f"FAIL only {total} strings extracted - has a corpus "
+                       f"file changed shape?")
+          PY
+
+      - name: In-browser smoke tests
+        # These check that pixels move, which cannot be checked from node
+        # alone. A missing browser makes them skip rather than fail, so they
+        # can never be the reason CI goes red.
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8099 --directory . >/tmp/http.log 2>&1 &
+          sleep 2
+          for app in stats-pwa census-pwa; do
+            out=$(node "$app/smoke.mjs" http://localhost:8099 2>&1) || {
+              echo "$out"
+              echo "FAIL  $app smoke test"
+              exit 1
+            }
+            echo "$out" | tail -3
+          done
+
+      - name: Balance report on PRs
+        # A smaller session count than the full run: CI needs a verdict in
+        # about a minute, and the distributions are already stable at this
+        # size. The point is to catch a rules change that moves the numbers,
+        # not to publish an exact measurement.
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          node tools/balance/run.mjs --sessions 1200 \
+            --out tools/balance/out/ci-runs.csv --quiet
+          {
+            echo '## LINEA ROSSA balance'
+            echo
+            python3 tools/balance/report.py tools/balance/out/ci-runs.csv --quiet
+            python3 tools/balance/report.py tools/balance/out/ci-runs.csv \
+              | sed -n '/^policy/,/^wrote/p'
+          } >> "$GITHUB_STEP_SUMMARY"

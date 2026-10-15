@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stats — random2</title>
+<meta name="description" content="Your arcade, measured. Charts over the play data every game already stores on this device. Offline, no trackers.">
+<meta name="theme-color" content="#0d0f16">
+<meta name="color-scheme" content="dark">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stats">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div>
+      <p class="kicker">random2 · local only</p>
+      <h1>Stats</h1>
+      <p class="sub">Every game already writes your records, playtime and runs
+        to this device. This page reads them and draws them. Nothing leaves
+        the browser.</p>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="theme-btn" type="button" aria-pressed="false">🌓<span id="theme-label">Light</span></button>
+      <button class="btn" id="export-btn" type="button">↗<span>Export</span></button>
+      <button class="btn" id="install-btn" type="button" hidden>⬇︎<span>Install</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="privacy" id="privacy">
+    <b>Where this data lives</b>
+    <span id="privacy-detail">Checking…</span>
+  </section>
+
+  <section class="tiles" aria-label="Summary">
+    <div class="tile"><b id="t-runs">0</b><span>Runs recorded</span></div>
+    <div class="tile"><b id="t-time">—</b><span>Time played</span></div>
+    <div class="tile"><b id="t-games">0</b><span>Games touched</span></div>
+    <div class="tile"><b id="t-days">0</b><span>Days active</span></div>
+    <div class="tile"><b id="t-best">—</b><span>Top score</span></div>
+  </section>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" class="tab on" data-panel="p-overview" aria-selected="true">Overview</button>
+    <button role="tab" class="tab" data-panel="p-runs" aria-selected="false">Runs</button>
+    <button role="tab" class="tab" data-panel="p-time" aria-selected="false">Time</button>
+    <button role="tab" class="tab" data-panel="p-library" aria-selected="false">Library</button>
+    <button role="tab" class="tab" data-panel="p-records" aria-selected="false">Records</button>
+    <button role="tab" class="tab" data-panel="p-data" aria-selected="false">Data</button>
+  </nav>
+
+  <!-- Overview -->
+  <section class="panel on" id="p-overview" role="tabpanel">
+    <div class="cards">
+      <figure class="card">
+        <figcaption>Runs per day</figcaption>
+        <canvas id="c-runsday" height="200"></canvas>
+        <p class="note" id="n-runsday"></p>
+      </figure>
+      <figure class="card">
+        <figcaption>Time played per day</figcaption>
+        <canvas id="c-timeday" height="200"></canvas>
+        <p class="note" id="n-timeday"></p>
+      </figure>
+      <figure class="card wide">
+        <figcaption>Score distribution</figcaption>
+        <canvas id="c-hist" height="230"></canvas>
+        <p class="note" id="n-hist">Every run you have finished, binned by
+          score. The dashed line is the mean.</p>
+      </figure>
+      <figure class="card">
+        <figcaption>Best score over time</figcaption>
+        <canvas id="c-best" height="200"></canvas>
+        <p class="note" id="n-best"></p>
+      </figure>
+      <figure class="card">
+        <figcaption>Runs by outcome</figcaption>
+        <canvas id="c-outcome" height="200"></canvas>
+        <p class="note" id="n-outcome"></p>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Runs -->
+  <section class="panel" id="p-runs" role="tabpanel">
+    <div class="pick">
+      <label for="run-game">Game</label>
+      <select id="run-game"></select>
+    </div>
+    <div class="cards">
+      <figure class="card wide">
+        <figcaption id="t-hist-title">Score distribution</figcaption>
+        <canvas id="c-g-hist" height="230"></canvas>
+        <p class="note" id="n-g-hist"></p>
+      </figure>
+      <figure class="card">
+        <figcaption>Runs by outcome</figcaption>
+        <canvas id="c-g-outcome" height="200"></canvas>
+      </figure>
+      <figure class="card">
+        <figcaption>Wave reached</figcaption>
+        <canvas id="c-g-wave" height="200"></canvas>
+        <p class="note" id="n-g-wave"></p>
+      </figure>
+      <figure class="card wide">
+        <figcaption>Run length against score</figcaption>
+        <canvas id="c-g-scatter" height="230"></canvas>
+        <p class="note">Each point is one run. The dashed line is the least
+          squares fit; a shallow slope means longer runs buy little.</p>
+      </figure>
+    </div>
+    <div class="tablewrap">
+      <table id="t-runs-table">
+        <thead><tr><th>When</th><th>Game</th><th>Score</th><th>Length</th><th>Wave</th><th>Outcome</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Time -->
+  <section class="panel" id="p-time" role="tabpanel">
+    <div class="cards">
+      <figure class="card wide">
+        <figcaption>When you play — hour of day by day of week</figcaption>
+        <canvas id="c-heat" height="300"></canvas>
+        <p class="note" id="n-heat">Rows are Monday to Sunday, columns are
+          00:00 to 23:00. Brighter cells are longer sessions.</p>
+      </figure>
+      <figure class="card">
+        <figcaption>Time by hour</figcaption>
+        <canvas id="c-hour" height="200"></canvas>
+      </figure>
+      <figure class="card">
+        <figcaption>Time by weekday</figcaption>
+        <canvas id="c-day" height="200"></canvas>
+      </figure>
+      <figure class="card wide">
+        <figcaption>Share of time per game</figcaption>
+        <canvas id="c-share" height="200"></canvas>
+        <p class="note" id="n-share"></p>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Library -->
+  <section class="panel" id="p-library" role="tabpanel">
+    <div class="tablewrap">
+      <table id="t-lib">
+        <thead><tr><th>Game</th><th>Runs</th><th>Best</th><th>Mean</th><th>Median</th><th>Time</th><th>Last played</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note">Sorted by runs. Games appear once they have recorded a
+      run, so this list grows as you play.</p>
+  </section>
+
+  <!-- Records -->
+  <section class="panel" id="p-records" role="tabpanel">
+    <p class="note">Every game keeps its own save file with its own shape.
+      These are the raw numbers, read as-is — which is why some rows are
+      sparse.</p>
+    <div class="tablewrap">
+      <table id="t-legacy">
+        <thead><tr><th>Save key</th><th>Contents</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Data -->
+  <section class="panel" id="p-data" role="tabpanel">
+    <div class="cards">
+      <figure class="card">
+        <h2>What is stored</h2>
+        <ul class="plain" id="d-keys"></ul>
+      </figure>
+      <figure class="card">
+        <h2>Move it</h2>
+        <p>Export writes every key this page reads to a JSON file. Import
+          reads one back. Both stay on the device — the file only goes
+          somewhere if you send it.</p>
+        <div class="row">
+          <button class="btn" id="d-export" type="button">Export JSON</button>
+          <button class="btn" id="d-import" type="button">Import JSON</button>
+          <input type="file" id="d-file" accept="application/json" hidden>
+        </div>
+        <h2>Erase</h2>
+        <p>Removes the run log, the daily rollup and the event counters.
+          Personal records written by the games themselves are left alone.</p>
+        <button class="btn danger" id="d-clear" type="button">Erase run data</button>
+        <p class="note" id="d-status" role="status"></p>
+      </figure>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap foot">
+  <p>Charts by <code>shared/chart.js</code>. Records from
+    <code>shared/arcade.js</code>. No network requests, no analytics, no
+    cookies — the pages you see here are the only pages that run.</p>
+</footer>
+
+<script src="../shared/arcade.js"></script>
+<script src="../shared/chart.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

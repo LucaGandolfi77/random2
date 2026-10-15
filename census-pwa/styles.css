@@ -1,0 +1,166 @@
+/* CENSUS — paper and ink, the way a Registrar General's office would
+   have printed it. Serif throughout, warm paper rather than the arcade's
+   usual dark glass, so it reads as a different kind of game. */
+
+:root {
+  --paper: #15140f;
+  --card: #1d1b15;
+  --ink: #e9e3d3;
+  --dim: #a89f8c;
+  --rule: #3a362a;
+  --gold: #c9a227;
+  --bad: #b8503f;
+  --r: 10px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--paper);
+}
+
+body {
+  margin: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background:
+    radial-gradient(ellipse at 50% 0%, #1c1a13 0%, var(--paper) 70%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font: 15px/1.6 Georgia, "Times New Roman", Times, serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* ---------- header ---------- */
+
+.top { padding: 26px 0 14px; }
+
+.top-in {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.kicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: normal;
+  letter-spacing: 0.1em;
+}
+
+.sub { margin: 6px 0 0; color: var(--dim); font-size: 14px; max-width: 62ch; }
+
+.btn {
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: rgba(233, 227, 211, 0.06);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 9px 16px;
+  cursor: pointer;
+  min-height: 42px;
+}
+
+.btn:hover { border-color: var(--gold); }
+.btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+/* ---------- canvas ---------- */
+
+main { padding-bottom: 12px; }
+
+#city {
+  display: block;
+  width: 100%;
+  height: min(66vh, 620px);
+  min-height: 380px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  touch-action: none;
+  cursor: crosshair;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hint {
+  margin: 12px 0 0;
+  color: var(--dim);
+  font-size: 13px;
+  min-height: 1.6em;
+  font-style: italic;
+}
+
+/* ---------- help dialog ---------- */
+
+dialog {
+  max-width: 620px;
+  width: calc(100vw - 32px);
+  max-height: 85vh;
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: var(--r);
+  background: var(--card);
+  color: var(--ink);
+}
+
+dialog::backdrop { background: rgba(10, 9, 6, 0.78); }
+
+dialog article { padding: 26px 28px 22px; }
+
+dialog h2 {
+  margin: 0 0 16px;
+  font-weight: normal;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+}
+
+dialog h3 {
+  margin: 22px 0 8px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+dialog p, dialog li { font-size: 14.5px; color: #cdc6b6; }
+dialog ul { padding-left: 20px; }
+dialog li { margin-bottom: 9px; }
+dialog b { color: var(--ink); }
+dialog code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  color: var(--gold);
+}
+
+.close-hint {
+  margin: 22px 0 14px;
+  font-style: italic;
+  color: var(--dim);
+}
+
+@media (max-width: 560px) {
+  .wrap { padding: 0 14px; }
+  h1 { font-size: 26px; }
+  #city { height: 72vh; }
+  dialog article { padding: 20px 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}

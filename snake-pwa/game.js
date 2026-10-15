@@ -232,6 +232,10 @@
         state.tickAccumulator = 0;
         state.gameOver = false;
         state.timeLeft = 60;
+        /* Run clock for the stats dashboard: a run lasts from here until
+           die(), and resetGame() is the single entry point for both a fresh
+           game and a restart, so this needs no extra call site. */
+        state.runStart = Date.now();
         placeFood();
     }
 
@@ -405,6 +409,14 @@
         buzz([60, 40, 80]);
         state.gameOver = true;
         state.paused = true;
+        R2.stats.run({
+            slug: "snake-pwa/",
+            score: state.score,
+            durMs: Date.now() - (state.runStart || Date.now()),
+            wave: state.level,
+            outcome: "loss",
+            meta: { mode: state.mode, eaten: state.eaten }
+        });
     }
 
     /* ===== Rendering ===== */

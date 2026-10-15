@@ -82,7 +82,9 @@
 | 25 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
 | 26 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
 | 27 | **Territorio** | Paper.io vs bots, modalità arena senza respawn | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 29 | **STATS** | Play-data dashboard | Canvas 2D (charts) | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/stats-pwa/) |
 | 28 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 30 | **CENSUS** | Sampling-theory tycoon | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/census-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -792,6 +794,34 @@ and a stack of image filters. Snaps live only on your device.
 
 ---
 
+### CENSUS
+
+*A game about sampling.* 📋
+
+You are the chief enumerator of a city nobody has counted, and nobody will
+tell you the population until after you have committed a number to paper. You
+have a purse of a few hundred pounds, a deadline, and the city divided into
+wards.
+
+- **The arithmetic is real.** The margin of error is `z·√(p(1−p)/n)` over the
+  households that answered, combined in quadrature with the sampling error in
+  the mean household size. Nothing is faked to flatter the game.
+- **Non-response is selective, not random.** The wards that refuse are
+  systematically the ones with larger households, so a sample from them reads
+  low — and no number of extra enumerators fixes it while the bias is there.
+- **Wards you never visit are omitted from your total**, and the page says
+  which ones. A hole in the return is named, not filled in with a guess.
+- **Five levels, 1841–1881**, from a first rough count to a ten-ward census
+  with a fifth of the houses reachable.
+- Measured coverage: a stated 95% interval contains the truth about **92%** of
+  the time when nothing biases the sample, and about **75%** when non-response
+  is selective. That gap is the game.
+
+```bash
+python3 -m http.server 8080
+# open http://localhost:8080/census-pwa/
+```
+
 ## The tools
 
 ### Territorio
@@ -812,9 +842,37 @@ someone's trail and they're eliminated — cross your own and it's over.
 - Simulation is dependency-free and unit-tested: ring capture (BFS), trail
   cutting, respawns and a 300-second stress run all pass in Node
 
-### EADS Studio
+### STATS
 
-*Embedded Analysis & Debug Studio.* 🛠️
+*Your arcade, measured.* 📊
+
+Every game in this repo already writes your records, playtime and run history
+to this device — STATS reads all of it and draws it. It makes the
+"zero trackers" claim checkable: the data is on the device, and the page can
+hand it to you as JSON.
+
+- **Score distributions** — histograms per game and across the whole log, with
+  the mean marked and the median stated
+- **Best over time** — the running maximum, which is the number a player
+  actually cares about
+- **When you play** — an hour-of-day by day-of-week heatmap, plus hour and
+  weekday marginals
+- **Library** — every game with runs, its best, mean and median, and how much
+  time has gone into it
+- **Records** — the per-game save files as they are, with no shared schema
+- **Data** — export/import JSON, and an erase button that wipes the run log
+  while leaving the games' own records alone
+
+Charts come from `shared/chart.js`, a zero-dependency Canvas 2D library with
+line, area, bar, histogram, scatter, boxplot, heatmap and sparkline primitives,
+DPR-aware and following the hub's light/dark toggle.
+
+```bash
+python3 -m http.server 8080
+# open http://localhost:8080/stats-pwa/
+```
+
+### EADS Studio
 
 A **Python** desktop application (not a web game) for embedded C/C++ work:
 a Flask-served studio UI that drives the whole analyze-build-debug loop.
