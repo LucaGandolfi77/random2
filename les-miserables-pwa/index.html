@@ -1,1 +1,62 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Library Story</title><link rel="manifest" href="manifest.json"></head><body style="background:#0d0912;color:#c9b8a8;font-family:Georgia,serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;line-height:1.7;letter-spacing:0.02em;"><h2 style="font-family:'Cinzel Decorative',serif;color:#c9b0a0;font-size:2.2rem;font-weight:300;letter-spacing:0.1em;margin-bottom:1.5rem;">From the Library</h2><p style="font-style:italic;color:#9a8876;max-width:480px;font-size:1.05rem;line-height:1.7;margin-bottom:2rem;">This story is part of the anthology library. The full contemplative visual novel experience is available through the main library interface, where all works are presented with bilingual support, atmospheric design, and interactive narrative choices.</p><a href="../anthology-pwa/" style="display:inline-block;padding:0.8rem 2rem;background:rgba(201,176,140,0.1);border:1px solid rgba(201,176,140,0.25);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',serif;font-size:0.95rem;text-decoration:none;transition:all 0.3s ease;">Return to Library — Ritorna alla Biblioteca</a></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Les Misérables — Act II · The Library</title>
+<meta name="description" content="The Factory Door — Les Misérables continues: Fantine, Javert, and the promise made at Montfermeil. Bilingual visual novel scene.">
+<meta name="theme-color" content="#0a060e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<style>
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
+.ls-foot{text-align:center;margin-top:3rem;}
+.ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
+.ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
+</style>
+</head>
+<body>
+<div class="ls-wrap">
+  <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
+  <h1 class="ls-heading">Les Misérables — Act II</h1>
+  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <div id="scene"></div>
+  <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
+</div>
+<script src="../shared/scene-reader.js"></script>
+<script>
+var N = { en: "Narrator", it: "Narratore" };
+LibraryScene.open({
+  mount: document.getElementById("scene"),
+  title: { en: "The Factory Door", it: "La porta della fabbrica" },
+  place: { en: "Montreuil-sur-Mer, 1823", it: "Montreuil-sur-Mer, 1823" },
+  backHref: "../anthology-pwa/",
+  lines: [
+    { s: N, t: { en: "Montreuil-sur-Mer, 1823. The town owes its black pearl industry — and its whole fortune — to a silent grey-haired manufacturer whom everyone calls Father Madeleine.", it: "Montreuil-sur-Mer, 1823. La città deve la sua industria delle perle nere — e tutta la sua fortuna — a un silenzioso fabbricante dai capelli grigi che tutti chiamano padre Madeleine." } },
+    { s: "Madeleine", t: { en: "I have one law in my factory: the workshop door is open to anyone who works. The past stays outside.", it: "Ho una sola legge nella mia fabbrica: la porta dell'officina è aperta a chiunque lavori. Il passato resta fuori." } },
+    { s: { en: "Foreman", it: "Il Caporeparto" }, t: { en: "Father Madeleine, a woman was dismissed for having a child out of wedlock. The forewomen demanded it. Her name is Fantine.", it: "Padre Madeleine, una donna è stata licenziata per avere una figlia nata fuori dal matrimonio. Le capo-operaie l'hanno voluto. Si chiama Fantine." } },
+    { s: N, t: { en: "Ten years of a town's prosperity, weighed against one dismissal slip. Javert watches from the corner of the yard, hat low, memory longer.", it: "Dieci anni di prosperità di una città, messi sul piatto contro un foglio di congedo. Javert osserva dall'angolo del cortile, col cappello basso e la memoria più lunga." } },
+    { s: "Javert", t: { en: "Monsieur le Maire, I know a man who broke his parole. Chain, yellow passport, the toll of the law. Men like that do not change. They only wait.", it: "Monsieur le Maire, io conosco un uomo che ha rotto la libertà condizionale. La catena, il passaporto giallo, il pedaggio della legge. Gli uomini così non cambiano. Aspettano soltanto." } },
+    { s: "Madeleine", t: { en: "And what does the law say about a woman who sold her hair, her teeth, and then herself, for one child's winter?", it: "E che cosa dice la legge di una donna che ha venduto i capelli, i denti, e poi se stessa, per un inverno di una sola bambina?" } },
+    { s: "Javert", t: { en: "The law says she is a prostitute. The law is always perfectly clear, Monsieur le Maire. That is why I serve it.", it: "La legge dice che è una prostituta. La legge è sempre perfettamente chiara, Monsieur le Maire. È per questo che la servo." } },
+    { s: N, t: { en: "In the infirmary, Fantine coughs white on grey. Her last sentence is not a curse: it is a name — Cosette — repeated like a prayer with nobody listening.", it: "Nell'infirmeria, Fantine tossisce bianco sul grigio. La sua ultima frase non è una bestemmia: è un nome — Cosette — ripetuto come una preghiera che nessuno ascolta." } },
+    { s: "Madeleine", t: { en: "Then I will go to Montfermeil myself. There is a child out there with a redoubtable faith in a future that has given her nothing.", it: "Allora andrò io stesso a Montfermeil. Là fuori c'è una bambina con una fede tenace in un futuro che non le ha dato niente." } }
+  ],
+  choices: [
+    { text: { en: "Face Javert: tell him who you are — not yet, but soon.", it: "Affronta Javert: digli chi sei — non ancora, ma presto." }, lines: [
+      { s: "Javert", t: { en: "When you are ready to confess, Monsieur le Maire, I will be waiting. I have waited eight years; I can wait eight more.", it: "Quando sarà pronto a confessare, Monsieur le Maire, io aspetterò. Aspetto da otto anni; posso aspettarne altri otto." } },
+      { s: N, t: { en: "The bishop's debt takes on a second interest rate: a life owed to Fantine, a truth owed to the law.", it: "Il debito verso il vescovo matura un secondo interesse: una vita dovuta a Fantine, una verità dovuta alla legge." } }
+    ] },
+    { text: { en: "Go to Montfermeil now, tonight, for the child.", it: "Vai a Montfermeil adesso, stanotte, per la bambina." }, lines: [
+      { s: N, t: { en: "The road is long and dark, and in the dark of Montfermeil a little girl is sent out at night to fetch water for tavern strangers. Somewhere on that road, a heavy man makes a promise he will keep with his whole remaining life.", it: "La strada è lunga e buia, e nel buio di Montfermeil una bambina viene mandata di notte a prendere l'acqua per gli ospiti dell'osteria. Da qualche parte su quella strada, un uomo pesante fa una promessa che terrà con tutta la vita che gli resta." } }
+    ] }
+  ],
+  outro: { en: "A promise made to the dying is the only contract the law cannot draft.", it: "Una promessa fatta a un morente è l'unico contratto che la legge non sa scrivere." }
+});
+</script>
+</body>
+</html>

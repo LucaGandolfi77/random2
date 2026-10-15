@@ -1,12 +1,25 @@
 {
-  "background_color":"#06040a",
-  "description":"A collection of literary classics as contemplative visual novels — Proust, Dostoevsky, Hugo, Dante, Kafka — bilingual English and Italian.",
-  "display":"standalone",
-  "icons":[{"src":"icons/icon-192.svg","sizes":"192x192","type":"image/svg+xml","purpose":"any"}],
-  "lang":"en",
-  "name":"The Library",
-  "scope":"./",
-  "start_url":"./",
-  "theme_color":"#0a060e",
-  "categories":["games","story","books","visual-novel"]
+  "background_color": "#06040a",
+  "description": "Dorian Gray, Act II — a bilingual contemplative visual novel scene from the random2 anthology. English and Italian, offline.",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "lang": "en",
+  "name": "The Library — Dorian Gray",
+  "scope": "./",
+  "start_url": "./",
+  "theme_color": "#0a060e",
+  "categories": [
+    "games",
+    "story",
+    "books",
+    "visual-novel"
+  ],
+  "short_name": "Dorian Gray"
 }

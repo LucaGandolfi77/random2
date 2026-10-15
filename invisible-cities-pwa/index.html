@@ -1,1 +1,60 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Library Story</title><link rel="manifest" href="manifest.json"></head><body style="background:#0d0912;color:#c9b8a8;font-family:Georgia,serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;line-height:1.7;letter-spacing:0.02em;"><h2 style="font-family:'Cinzel Decorative',serif;color:#c9b0a0;font-size:2.2rem;font-weight:300;letter-spacing:0.1em;margin-bottom:1.5rem;">From the Library</h2><p style="font-style:italic;color:#9a8876;max-width:480px;font-size:1.05rem;line-height:1.7;margin-bottom:2rem;">This story is part of the anthology library. The full contemplative visual novel experience is available through the main library interface, where all works are presented with bilingual support, atmospheric design, and interactive narrative choices.</p><a href="../anthology-pwa/" style="display:inline-block;padding:0.8rem 2rem;background:rgba(201,176,140,0.1);border:1px solid rgba(201,176,140,0.25);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',serif;font-size:0.95rem;text-decoration:none;transition:all 0.3s ease;">Return to Library — Ritorna alla Biblioteca</a></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Invisible Cities — Act II · The Library</title>
+<meta name="description" content="Euphemia — Invisible Cities continues: the trading city where goods and words are sold at the same stalls. Bilingual visual novel scene.">
+<meta name="theme-color" content="#0a060e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<style>
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
+.ls-foot{text-align:center;margin-top:3rem;}
+.ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
+.ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
+</style>
+</head>
+<body>
+<div class="ls-wrap">
+  <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
+  <h1 class="ls-heading">Invisible Cities — Act II</h1>
+  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <div id="scene"></div>
+  <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
+</div>
+<script src="../shared/scene-reader.js"></script>
+<script>
+var N = { en: "Narrator", it: "Narratore" };
+LibraryScene.open({
+  mount: document.getElementById("scene"),
+  title: { en: "Euphemia", it: "Eufemia" },
+  place: { en: "A trading city on the winter route", it: "Una città di scambi sulla rotta d'inverno" },
+  backHref: "../anthology-pwa/",
+  lines: [
+    { s: N, t: { en: "A trading city on the winter caravan route: seven days' camel ride in any direction, and water so scarce it is remembered rather than drunk.", it: "Una città di scambi sulla rotta invernale delle carovane: sette giorni di cammello in tutte le direzioni, e acqua così scarsa che viene ricordata più che bevuta." } },
+    { s: "Marco Polo", t: { en: "In Euphemia, goods and words are traded at the same stalls. The caravans arrive, and for seven days the city inventories not only salt and fish, but everything that happened between one moon and the next.", it: "A Eufemia le merci e le parole si scambiano negli stessi banchi. Le carovane arrivano, e per sette giorni la città fa l'inventario non solo del sale e del pesce, ma di tutto ciò che è accaduto tra una luna e l'altra." } },
+    { s: "Kublai Khan", t: { en: "And when the caravans leave?", it: "E quando le carovane partono?" } },
+    { s: "Marco Polo", t: { en: "The city keeps only what can be said again. Its memory is the memory of a market: crowded, competitive, wrong in detail, indispensable.", it: "La città conserva soltanto ciò che si può dire di nuovo. La sua memoria è la memoria di un mercato: affollata, competitiva, sbagliata nei dettagli, indispensabile." } },
+    { s: N, t: { en: "By evening, strangers who met at dawn are bargaining over a wolf-pack's strategy, a marriage in a far oasis, the price of a rumor about a river that moved.", it: "Sera: sconosciuti incontrati all'alba contrattano la strategia di un branco di lupi, un matrimonio in un'oasi lontana, il prezzo di una voce su un fiume che si è spostato." } },
+    { s: "Marco Polo", t: { en: "Some stories are traded so often they lose their owner. In Euphemia there are tales with no author left, walking the alleys like stray dogs, fed by everyone.", it: "Alcune storie sono scambiate così spesso che perdono il proprietario. A Eufemia ci sono racconti rimasti senza autore, che camminano per i vicoli come cani randagi, nutriti da tutti." } },
+    { s: "Kublai Khan", t: { en: "And what of the traveler who has nothing to tell?", it: "E il viaggiatore che non ha niente da raccontare?" } },
+    { s: "Marco Polo", t: { en: "He pays with listening. The city mints a coin for silence too; it is the rarest currency on the route.", it: "Paga con l'ascolto. La città conia una moneta anche per il silenzio; è la valuta più rara della rotta." } }
+  ],
+  choices: [
+    { text: { en: "Trade the story of your own city.", it: "Scambia la storia della tua città." }, lines: [
+      { s: "Marco Polo", t: { en: "I gave them Venice — the canals, the ferryman's oaths, the city that is afraid of drowning in beauty. They paid in a storm on the Chinese sea and a grandmother's recipe. We were richer than at dawn, and no ledger would show it.", it: "Ho dato loro Venezia — i canali, gli improperi del traghettatore, la città che teme di annegare nella bellezza. Hanno pagato con una tempesta sul mar Cinese e la ricetta di una nonna. Eravamo più ricchi che all'alba, e nessun registro lo mostrerebbe." } }
+    ] },
+    { text: { en: "Pay with listening, all seven days.", it: "Paga con l'ascolto, per tutti e sette i giorni." }, lines: [
+      { s: N, t: { en: "He says nothing for a week. On the eighth day he knows the route better than any map — every waterhole is a sentence, every pass a punctuation. The Khan receives a report that is mostly silence, and understands it completely.", it: "Non dice niente per una settimana. L'ottavo giorno conosce la rotta meglio di qualsiasi mappa — ogni pozza d'acqua è una frase, ogni valico una punteggiatura. Il Khan riceve un rapporto fatto soprattutto di silenzio, e lo comprende del tutto." } }
+    ] }
+  ],
+  outro: { en: "Trade is the oldest way of remembering out loud.", it: "Il commercio è il modo più antico di ricordare ad alta voce." }
+});
+</script>
+</body>
+</html>

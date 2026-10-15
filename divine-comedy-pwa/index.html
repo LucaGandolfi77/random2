@@ -1,1 +1,60 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Library Story</title><link rel="manifest" href="manifest.json"></head><body style="background:#0d0912;color:#c9b8a8;font-family:Georgia,serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;line-height:1.7;letter-spacing:0.02em;"><h2 style="font-family:'Cinzel Decorative',serif;color:#c9b0a0;font-size:2.2rem;font-weight:300;letter-spacing:0.1em;margin-bottom:1.5rem;">From the Library</h2><p style="font-style:italic;color:#9a8876;max-width:480px;font-size:1.05rem;line-height:1.7;margin-bottom:2rem;">This story is part of the anthology library. The full contemplative visual novel experience is available through the main library interface, where all works are presented with bilingual support, atmospheric design, and interactive narrative choices.</p><a href="../anthology-pwa/" style="display:inline-block;padding:0.8rem 2rem;background:rgba(201,176,140,0.1);border:1px solid rgba(201,176,140,0.25);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',serif;font-size:0.95rem;text-decoration:none;transition:all 0.3s ease;">Return to Library — Ritorna alla Biblioteca</a></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Divina Commedia — Act II · The Library</title>
+<meta name="description" content="Acheron — the Divine Comedy continues: the gate of Hell, the neutral angels, and the crossing with Charon. Bilingual visual novel scene.">
+<meta name="theme-color" content="#0a060e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<style>
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
+.ls-foot{text-align:center;margin-top:3rem;}
+.ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
+.ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
+</style>
+</head>
+<body>
+<div class="ls-wrap">
+  <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
+  <h1 class="ls-heading">Divina Commedia — Act II</h1>
+  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <div id="scene"></div>
+  <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
+</div>
+<script src="../shared/scene-reader.js"></script>
+<script>
+var N = { en: "Narrator", it: "Narratore" };
+LibraryScene.open({
+  mount: document.getElementById("scene"),
+  title: { en: "Acheron", it: "Acheronte" },
+  place: { en: "The gate of Hell", it: "La porta dell'Inferno" },
+  backHref: "../anthology-pwa/",
+  lines: [
+    { s: N, t: { en: "The gate reads itself aloud: THROUGH ME YOU PASS INTO THE CITY OF WOE. Above it, the neutral angels who chose neither rebellion nor fidelity, stung by flies, at the banks of a river that is not a river.", it: "La porta si legge da sola: PER ME SI VA NELLA CITTÀ DOLENTE. Sopra, gli angeli neutri che non scelsero né ribellione né fedeltà, punto dalle mosche, alle rive di un fiume che fiume non è." } },
+    { s: "Virgil", t: { en: "Do not ask about these wretches, Dante. The darkest places of hell are reserved for those who, in moral crisis, kept their neutrality.", it: "Non domandare di questi miseri, Dante. I luoghi più cupi dell'inferno sono riservati a coloro che, nella crisi morale, tesero alla neutralità." } },
+    { s: "Dante", t: { en: "And the old man in the boat — his hair is white, his eyes are coals.", it: "E il vecchio nella barca — i capelli bianchi, gli occhi carbone." } },
+    { s: "Virgil", t: { en: "Charon. Souls, not bodies, cross here. He will object to a living passenger; heaven permits it, and heaven outranks him.", it: "Caronte. Qui passano le anime, non i corpi. Opporrà resistenza a un passeggero vivo; il cielo lo permette, e il cielo gli sta sopra." } },
+    { s: { en: "Charon", it: "Caronte" }, t: { en: "You who live, stand back from those who are dead! Your road is not mine. Shall I ferry a warm heart among my cold cargo?", it: "O tu che sei vivo, statti da parte da questi che son morti! La tua via non è la mia. Devo trasportare un cuore caldo tra il mio carico gelato?" } },
+    { s: "Dante", t: { en: "I tremble, and the trembling is honest. Guide, the ground is dark and I would kneel.", it: "Tremo, e il tremare è onesto. Guida, il suolo è cupo e vorrei inginocchiarmi." } },
+    { s: "Virgil", t: { en: "Sleep will come at the crossing. It is not a mercy; it is a custom — the living arrive at the farther shore carried, like children.", it: "Il sonno verrà nella traversata. Non è una pietà; è un costume — i vivi arrivano all'altra riva portati, come bambini." } },
+    { s: N, t: { en: "A wind rises from the tears of the virtuous unbaptized, the sighing First Circle. Far below, something answers the thunder with thunder.", it: "Si leva un vento dalle lacrime dei virtuosi non battezzati, il Primo Cerchio che sospira. Molto sotto, qualcosa risponde al tuono con il tuono." } }
+  ],
+  choices: [
+    { text: { en: "Board, and sleep the crossing.", it: "Sali a bordo, e dormi la traversata." }, lines: [
+      { s: "Virgil", t: { en: "Sleep, then. When you wake, the air will not scream yet — we have six circles of quiet before the city of Dis. Learn the order of the map: even pain is architecture.", it: "Dormi, allora. Al risveglio l'aria non urlerà ancora — abbiamo sei cerchi di silenzio prima della città di Dite. Impara l'ordine della mappa: perfino il dolore è architettura." } }
+    ] },
+    { text: { en: "Ask who the sighing ones were.", it: "Chieda chi erano quelli che sospirano." }, lines: [
+      { s: "Virgil", t: { en: "The virtuous pagans — Homer, your Aristotle, the unbaptized babies. They committed no fault, and for that alone they are denied the sight of God. You will feel it as longing, not flame. Sometimes hell is simply an absence, properly lit.", it: "I virtuosi pagani — Omero, il tuo Aristotele, i bambini non battezzati. Non commisero colpa, e per quello solo è negata loro la vista di Dio. Lo sentirai come desiderio, non come fiamma. A volte l'inferno è semplicemente un'assenza, illuminata a dovere." } }
+    ] }
+  ],
+  outro: { en: "The map of the deep is also a map of the choices you already made.", it: "La mappa dell'abisso è anche la mappa delle scelte che hai già fatto." }
+});
+</script>
+</body>
+</html>

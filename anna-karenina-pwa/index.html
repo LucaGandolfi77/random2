@@ -1,1 +1,60 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Library Story</title><link rel="manifest" href="manifest.json"></head><body style="background:#0d0912;color:#c9b8a8;font-family:Georgia,serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;line-height:1.7;letter-spacing:0.02em;"><h2 style="font-family:'Cinzel Decorative',serif;color:#c9b0a0;font-size:2.2rem;font-weight:300;letter-spacing:0.1em;margin-bottom:1.5rem;">From the Library</h2><p style="font-style:italic;color:#9a8876;max-width:480px;font-size:1.05rem;line-height:1.7;margin-bottom:2rem;">This story is part of the anthology library. The full contemplative visual novel experience is available through the main library interface, where all works are presented with bilingual support, atmospheric design, and interactive narrative choices.</p><a href="../anthology-pwa/" style="display:inline-block;padding:0.8rem 2rem;background:rgba(201,176,140,0.1);border:1px solid rgba(201,176,140,0.25);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',serif;font-size:0.95rem;text-decoration:none;transition:all 0.3s ease;">Return to Library — Ritorna alla Biblioteca</a></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Anna Karenina — Act II · The Library</title>
+<meta name="description" content="The Race — Anna Karenina continues: the Moscow racecourse, the fall of Gladiator, and the word irregular. Bilingual visual novel scene.">
+<meta name="theme-color" content="#0a060e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<style>
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
+.ls-foot{text-align:center;margin-top:3rem;}
+.ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
+.ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
+</style>
+</head>
+<body>
+<div class="ls-wrap">
+  <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
+  <h1 class="ls-heading">Anna Karenina — Act II</h1>
+  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <div id="scene"></div>
+  <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
+</div>
+<script src="../shared/scene-reader.js"></script>
+<script>
+var N = { en: "Narrator", it: "Narratore" };
+LibraryScene.open({
+  mount: document.getElementById("scene"),
+  title: { en: "The Race", it: "La corsa" },
+  place: { en: "The Moscow racecourse", it: "L'ippodromo di Mosca" },
+  backHref: "../anthology-pwa/",
+  lines: [
+    { s: N, t: { en: "The officers' race at the Moscow course. Vronsky rides Gladiator — one stride behind, one heartbeat ahead of himself.", it: "La corsa degli ufficiali all'ippodromo di Mosca. Vronskij monta Gladiator — un passo dietro, un battito davanti a se stesso." } },
+    { s: "Anna", t: { en: "I should not have come. I am visible; the opera glasses of a whole society are aimed at my face.", it: "Non dovevo venire. Sono visibile; i binocoli da opera di un'intera società sono puntati sul mio volto." } },
+    { s: "Karenin", t: { en: "You are pale. Your eyes follow the rider who is not your husband, and every lorgnette in the stand follows you.", it: "Sei pallida. I tuoi occhi seguono il fantino che non è tuo marito, e ogni lorgnette del palco segue te." } },
+    { s: "Anna", t: { en: "Then let them look. For one hour today, Alexei Alexandrovich, I am not a wife, not a mother, not a name on a visiting card. I am only a heartbeat in a crowd.", it: "E allora guardino. Per un'ora, oggi, Aleksej Aleksandrovic, non sono una moglie, non sono una madre, non sono un nome su un biglietto da visita. Sono soltanto un battito in mezzo alla folla." } },
+    { s: N, t: { en: "The third hurdle: Gladiator's back breaks like a branch under snow. The horse falls; the rider is — up, limping, alive. The stands exhale. One woman cannot.", it: "Il terzo ostacolo: la schiena di Gladiator si spezza come un ramo sotto la neve. Il cavallo cade; il fantino è — in piedi, zoppicando, vivo. La tribuna riprende fiato. Una donna no." } },
+    { s: "Anna", t: { en: "He lives. God, what a terrible thing to be glad of — I was glad the fall was not his end, and ashamed that the fall was his.", it: "Vive. Dio, che cosa terribile da esser lieti — ero lieta che la caduta non fosse la sua fine, e in vergogna che la caduta fosse sua." } },
+    { s: "Karenin", t: { en: "Compose yourself. People are looking. This display of feeling is — irregular.", it: "Componiti. La gente guarda. Questa esposizione di sentimenti è — irregolare." } },
+    { s: "Anna", t: { en: "Irregular. Yes. That word is my whole life, Alexei Alexandrovich, and I begin to prefer it to yours.", it: "Irregolare. Sì. Quella parola è tutta la mia vita, Aleksej Aleksandrovic, e comincio a preferirla alla tua." } }
+  ],
+  choices: [
+    { text: { en: "Tell Karenin the truth tonight, in the carriage.", it: "Dì la verità a Karenin stanotte, in carrozza." }, lines: [
+      { s: N, t: { en: "The carriage lamps cut two small cones of light. She says the word 'love' and he hears 'scandal'. He answers with a memorandum of society's rules and asks for seven days' silence. The sentence of the family court is drafted in that silence, unsigned.", it: "I fanali della carrozza tagliano due piccoli coni di luce. Lei dice la parola «amore» e lui sente «scandalo». Risponde con un memoriale delle regole della società e chiede sette giorni di silenzio. La sentenza del tribunale di famiglia viene redatta in quel silenzio, senza firma." } }
+    ] },
+    { text: { en: "Keep the wall standing a season longer.", it: "Tieni in piedi il muro ancora una stagione." }, lines: [
+      { s: N, t: { en: "The wall holds, and each of them stations a sentry on it — she of glances, he of principle. The child inside her will be born into a war he did not choose, and the race will run again every season, faster.", it: "Il muro tiene, e ciascuno dei due vi posta una sentinella — lei di sguardi, lui di principio. Il figlio che porta in grembo nascerà in una guerra che non ha scelto, e la corsa correrà ancora ogni stagione, più veloce." } }
+    ] }
+  ],
+  outro: { en: "A society watches the race and pretends not to see the woman.", it: "La società guarda la corsa e finge di non vedere la donna." }
+});
+</script>
+</body>
+</html>

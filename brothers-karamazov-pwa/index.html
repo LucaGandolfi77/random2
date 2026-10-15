@@ -1,1 +1,61 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Library Story</title><link rel="manifest" href="manifest.json"></head><body style="background:#0d0912;color:#c9b8a8;font-family:Georgia,serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;line-height:1.7;letter-spacing:0.02em;"><h2 style="font-family:'Cinzel Decorative',serif;color:#c9b0a0;font-size:2.2rem;font-weight:300;letter-spacing:0.1em;margin-bottom:1.5rem;">From the Library</h2><p style="font-style:italic;color:#9a8876;max-width:480px;font-size:1.05rem;line-height:1.7;margin-bottom:2rem;">This story is part of the anthology library. The full contemplative visual novel experience is available through the main library interface, where all works are presented with bilingual support, atmospheric design, and interactive narrative choices.</p><a href="../anthology-pwa/" style="display:inline-block;padding:0.8rem 2rem;background:rgba(201,176,140,0.1);border:1px solid rgba(201,176,140,0.25);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',serif;font-size:0.95rem;text-decoration:none;transition:all 0.3s ease;">Return to Library — Ritorna alla Biblioteca</a></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Brothers Karamazov — Act II · The Library</title>
+<meta name="description" content="The Cana of Galilee — The Brothers Karamazov continues: the elder's death, the whisper, and Alyosha's night of joy. Bilingual visual novel scene.">
+<meta name="theme-color" content="#0a060e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<style>
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
+.ls-foot{text-align:center;margin-top:3rem;}
+.ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
+.ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
+</style>
+</head>
+<body>
+<div class="ls-wrap">
+  <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
+  <h1 class="ls-heading">The Brothers Karamazov — Act II</h1>
+  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <div id="scene"></div>
+  <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
+</div>
+<script src="../shared/scene-reader.js"></script>
+<script>
+var N = { en: "Narrator", it: "Narratore" };
+LibraryScene.open({
+  mount: document.getElementById("scene"),
+  title: { en: "The Cana of Galilee", it: "Le nozze di Cana" },
+  place: { en: "The monastery, the night after the elder's death", it: "Il monastero, la notte dopo la morte dell'anziano" },
+  backHref: "../anthology-pwa/",
+  lines: [
+    { s: N, t: { en: "Father Zosima has been dead three days, and the monastery whispers: the body of a righteous man should smell of sanctity. It smells of ordinary death.", it: "Padre Zosima è morto da tre giorni, e il monastero mormora: il corpo di un giusto dovrebbe odorare di santità. Odora di morte comune." } },
+    { s: { en: "Voices", it: "Le Voci" }, t: { en: "He fasted, he prayed — and look at him. Perhaps he was not righteous after all.", it: "Ha digiunato, ha pregato — e guardate. Forse non era affatto un giusto." } },
+    { s: "Alyosha", t: { en: "Ivan is smiling. My brother the logician heard the whisper, and smiled.", it: "Ivan sorride. Mio fratello il logico ha sentito il mormorio, e sorride." } },
+    { s: "Ivan", t: { en: "One miracle is worth a thousand arguments, Alyosha. And one odour is worth a thousand miracles. Good night, little brother.", it: "Un miracolo vale mille argomenti, Alëša. E un odore vale mille miracoli. Buonanotte, fratellino." } },
+    { s: N, t: { en: "Alyosha keeps vigil alone, the Gospel open, the candle down to its last hour. 'And there was a marriage in Cana of Galilee…'", it: "Alëša veglia da solo, il Vangelo aperto, la candela ridotta alla sua ultima ora. «E si fecero le nozze in Cana di Galilea…»" } },
+    { s: "Alyosha", t: { en: "He was at the marriage. He was at the feast. Why am I not weeping — why do I want to dance?", it: "Lui era alle nozze. Era al banchetto. Perché non sto piangendo — perché mi viene da ballare?" } },
+    { s: N, t: { en: "The dream comes like warm water: the feast of Cana, and the old elder among the poor guests, laughing, calling him: 'Why have you gone away, Alyosha?'", it: "Il sogno arriva come acqua tiepida: il banchetto di Cana, e il vecchio anziano tra gli ospiti poveri, che ride e lo chiama: «Perché te ne sei andato, Alëša?»" } },
+    { s: { en: "Father Zosima", it: "Padre Zosima" }, t: { en: "We are not separated, my quiet boy. Run out and rejoice — do not fear life. Life is greater than the meaning of it.", it: "Non siamo separati, mio ragazzo silenzioso. Corri fuori e rallegrati — non temere la vita. La vita è più grande del suo significato." } },
+    { s: N, t: { en: "Alyosha wakes, goes out, falls to the earth, kisses it, weeps and laughs at once. A soldier-boy runs up to ask for alms and receives the whole night's joy.", it: "Alëša si sveglia, esce, cade a terra, la bacia, piange e ride insieme. Un giovanotto soldato gli corre incontro a chiedere l'elemosina e riceve tutta la gioia della notte." } }
+  ],
+  choices: [
+    { text: { en: "Carry the joy back to the brothers tomorrow.", it: "Riporta la gioia ai fratelli, domani." }, lines: [
+      { s: N, t: { en: "In the morning he will make peace at the funeral, feed the boys, and hold the monastery and the town together with a thread of quiet gladness. Grief kept company becomes bread.", it: "La mattina farà pace ai funerali, sfamerà i ragazzi, e terrà insieme monastero e città con un filo di letizia tranquilla. Il dolore in compagnia diventa pane." } }
+    ] },
+    { text: { en: "Go at once to Ivan — joy is strongest shared with the doubter.", it: "Vai subito da Ivan — la gioia è più forte se condivisa col dubitante." }, lines: [
+      { s: N, t: { en: "He finds Ivan asleep over Lermontov, notes on theodicy in the margins. Alyosha lays a blanket over him and prays for the argument he cannot yet win. The joy keeps; the argument will keep longer.", it: "Lo trova addormentato sopra Lermontov, appunti sulla teodicea a margine. Alëša gli stende una coperta e prega per l'argomento che non può ancora vincere. La gioia si conserva; l'argomento si conserva di più." } }
+    ] }
+  ],
+  outro: { en: "Do not fear life. That is the whole gospel, read at a funeral.", it: "Non temere la vita. È tutto il vangelo, letto a un funerale." }
+});
+</script>
+</body>
+</html>

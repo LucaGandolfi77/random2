@@ -1,1 +1,60 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Library Story</title><link rel="manifest" href="manifest.json"></head><body style="background:#0d0912;color:#c9b8a8;font-family:Georgia,serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;line-height:1.7;letter-spacing:0.02em;"><h2 style="font-family:'Cinzel Decorative',serif;color:#c9b0a0;font-size:2.2rem;font-weight:300;letter-spacing:0.1em;margin-bottom:1.5rem;">From the Library</h2><p style="font-style:italic;color:#9a8876;max-width:480px;font-size:1.05rem;line-height:1.7;margin-bottom:2rem;">This story is part of the anthology library. The full contemplative visual novel experience is available through the main library interface, where all works are presented with bilingual support, atmospheric design, and interactive narrative choices.</p><a href="../anthology-pwa/" style="display:inline-block;padding:0.8rem 2rem;background:rgba(201,176,140,0.1);border:1px solid rgba(201,176,140,0.25);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',serif;font-size:0.95rem;text-decoration:none;transition:all 0.3s ease;">Return to Library — Ritorna alla Biblioteca</a></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Picture of Dorian Gray — Act II · The Library</title>
+<meta name="description" content="The Confession of Basil — Dorian Gray continues: the sheet comes off the portrait, and a painter asks to pray over his own work. Bilingual visual novel scene.">
+<meta name="theme-color" content="#0a060e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<style>
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
+.ls-foot{text-align:center;margin-top:3rem;}
+.ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
+.ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
+</style>
+</head>
+<body>
+<div class="ls-wrap">
+  <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
+  <h1 class="ls-heading">The Picture of Dorian Gray — Act II</h1>
+  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <div id="scene"></div>
+  <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
+</div>
+<script src="../shared/scene-reader.js"></script>
+<script>
+var N = { en: "Narrator", it: "Narratore" };
+LibraryScene.open({
+  mount: document.getElementById("scene"),
+  title: { en: "The Confession of Basil", it: "La confessione di Basil" },
+  place: { en: "The locked schoolroom, years later", it: "La scuola chiusa a chiave, anni dopo" },
+  backHref: "../anthology-pwa/",
+  lines: [
+    { s: N, t: { en: "Thirty-eight years old, and the mirrors still flatter a boy of twenty. Upstairs, under the sheet, something has grown old for two.", it: "Trentotto anni, e gli specchi adulano ancora un ragazzo di vent'anni. Al piano di sopra, sotto il lenzuolo, qualcosa è invecchiato per due." } },
+    { s: "Basil", t: { en: "Before I leave for Paris, Dorian, show me the picture. I ask as the man who made you twice — once of paint, once of fear.", it: "Prima di partire per Parigi, Dorian, mostrami il quadro. Te lo chiedo come l'uomo che ti ha fatto due volte — una volta di vernice, una volta di paura." } },
+    { s: "Dorian", t: { en: "You would not recognize it. Some nights I do not. There is a smile on it I never wore; there are hands on it I never washed.", it: "Non lo riconosceresti. Qualche notte non lo riconosco nemmeno io. C'è un sorriso che non ho mai portato; ci sono mani che non ho mai lavato." } },
+    { s: "Basil", t: { en: "Then it is worse than a portrait. It is a ledger. Show me, and let me pray over it — over you.", it: "Allora è peggio di un ritratto. È un registro contabile. Mostramelo, e lasciami pregare su di esso — su di te." } },
+    { s: N, t: { en: "The sheet comes off. Basil, who painted every saint with the same calm light, steps back as if the room had tilted.", it: "Il lenzuolo cade. Basil, che ha dipinto ogni santo con la stessa luce calma, fa un passo indietro come se la stanza si fosse inclinata." } },
+    { s: "Basil", t: { en: "Christ, what a face! It has your eyes and a stranger's crimes. Dorian — if this is true, then prayer can still reach you. 'Though your sins be as scarlet…'", it: "Cristo, che volto! Ha i tuoi occhi e i delitti di un estraneo. Dorian — se questo è vero, allora la preghiera può ancora raggiungerti. «Anche se i vostri peccati fossero come scarlatto…»" } },
+    { s: "Dorian", t: { en: "Do not quote the ivory book at me, Basil. You see the ledger; he taught me the interest. It was you who painted a wish into a soul.", it: "Non citarmi il libro d'avorio, Basil. Tu vedi il registro; lui mi ha insegnato gli interessi. Sei stato tu a dipingere un desiderio dentro un'anima." } },
+    { s: "Basil", t: { en: "Then let me paint it back. One more canvas, on my knees, and we hang this one where only God audits it.", it: "Allora lasciami dipingerlo indietro. Un'altra tela, in ginocchio, e quest'ultima la appendiamo dove la controlla solo Dio." } }
+  ],
+  choices: [
+    { text: { en: "Let Basil pray over the portrait — one night.", it: "Lascia che Basil preghi sul ritratto — una notte." }, lines: [
+      { s: N, t: { en: "They kneel together in the schoolroom, the young face and the old one lit by the same candle. Nothing visibly changes. But Dorian sleeps, and the smile on the canvas is, by one line, less cruel. Ledgers can be softened; few know they can.", it: "Inginoocchiati insieme nella scuola, il volto giovane e il vecchio accesi dalla stessa candela. Nulla cambia visibilmente. Però Dorian dorme, e il sorriso sulla tela è, di una linea, meno crudele. I registri si possono addolcire; in pochi lo sanno." } }
+    ] },
+    { text: { en: "Show him the door — the knife stays where it is, for now.", it: "Mostragli la porta — il coltello resta dov'è, per ora." }, lines: [
+      { s: N, t: { en: "Basil leaves with his prayer refused and his paints packed. In Paris he will be safe; in this house the sheet goes back over the canvas, and the house grows one room darker. The knife stays in the drawer — an omen with a handle.", it: "Basil se ne va con la preghiera rifiutata e le tempere imballate. A Parigi sarà al sicuro; in questa casa il lenzuolo torna sulla tela, e la casa diventa più buia di una stanza. Il coltello resta nel cassetto — un presagio con il manico." } }
+    ] }
+  ],
+  outro: { en: "Every portrait is an unfinished argument with its sitter.", it: "Ogni ritratto è una lite incompiuta col proprio modello." }
+});
+</script>
+</body>
+</html>

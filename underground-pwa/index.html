@@ -1,1 +1,61 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Library Story</title><link rel="manifest" href="manifest.json"></head><body style="background:#0d0912;color:#c9b8a8;font-family:Georgia,serif;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;line-height:1.7;letter-spacing:0.02em;"><h2 style="font-family:'Cinzel Decorative',serif;color:#c9b0a0;font-size:2.2rem;font-weight:300;letter-spacing:0.1em;margin-bottom:1.5rem;">From the Library</h2><p style="font-style:italic;color:#9a8876;max-width:480px;font-size:1.05rem;line-height:1.7;margin-bottom:2rem;">This story is part of the anthology library. The full contemplative visual novel experience is available through the main library interface, where all works are presented with bilingual support, atmospheric design, and interactive narrative choices.</p><a href="../anthology-pwa/" style="display:inline-block;padding:0.8rem 2rem;background:rgba(201,176,140,0.1);border:1px solid rgba(201,176,140,0.25);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',serif;font-size:0.95rem;text-decoration:none;transition:all 0.3s ease;">Return to Library — Ritorna alla Biblioteca</a></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Notes from Underground — Act II · The Library</title>
+<meta name="description" content="Liza — Notes from Underground continues: the visit, the banknote on the table, and the one stair that goes up. Bilingual visual novel scene.">
+<meta name="theme-color" content="#0a060e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<style>
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
+.ls-foot{text-align:center;margin-top:3rem;}
+.ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
+.ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
+</style>
+</head>
+<body>
+<div class="ls-wrap">
+  <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
+  <h1 class="ls-heading">Notes from Underground — Act II</h1>
+  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <div id="scene"></div>
+  <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
+</div>
+<script src="../shared/scene-reader.js"></script>
+<script>
+var N = { en: "Narrator", it: "Narratore" };
+var U = { en: "Underground Man", it: "L'uomo del sottosuolo" };
+LibraryScene.open({
+  mount: document.getElementById("scene"),
+  title: { en: "Liza", it: "Liza" },
+  place: { en: "A corner room, two weeks later", it: "Una stanza d'angolo, due settimane dopo" },
+  backHref: "../anthology-pwa/",
+  lines: [
+    { s: N, t: { en: "Two weeks after the billiard hall, she comes. A prostitute with a green shawl and eyes that have decided something. He had bet money she would not.", it: "Due settimane dopo il biliardo, lei viene. Una prostituta con uno scialle verde e occhi che hanno deciso qualcosa. Lui aveva scommesso dei soldi che non sarebbe venuta." } },
+    { s: U, t: { en: "I was certain she would not come. When the bell rang I stood behind the door like a debtor — or like a man who has already lost and does not know the words for it.", it: "Ero certo che non sarebbe venuta. Quando la campanella suonò restai dietro la porta come un debitore — o come un uomo che ha già perso e non conosce le parole per dirlo." } },
+    { s: "Liza", t: { en: "You gave me money. I brought it back. Not for the money — I want to know if what you said was spite, or the truth.", it: "Mi ha dato dei soldi. Li riporto indietro. Non per i soldi — voglio sapere se quello che ha detto era cattiveria, o la verità." } },
+    { s: U, t: { en: "It was both, which is the worst of combinations. I said you should leave that house, marry, live. I said it like a man throwing stones at his own window.", it: "Era tutte e due le cose, che è la peggiore delle combinazioni. Le ho detto di lasciare quella casa, di sposarsi, di vivere. L'ho detto come un uomo che lancia sassi contro la propria finestra." } },
+    { s: "Liza", t: { en: "Then say it once more, plainly. I will do it. I will leave the house. You could ask me anything tonight, and I would try to be a person again.", it: "Allora lo dica ancora una volta, semplicemente. Lo farò. Lascerò la casa. Potrebbe chiedermi qualsiasi cosa stasera, e proverei di nuovo a essere una persona." } },
+    { s: N, t: { en: "And here — the record is accurate, God help us — he tells her about the burying of the coffin in the rain, about his own humiliation, everything, and it is almost tenderness.", it: "E qui — la registrazione è accurata, ci mancherebbe — le racconta della sepoltura della bara sotto la pioggia, della propria umiliazione, di tutto, ed è quasi tenerezza." } },
+    { s: U, t: { en: "For one hour I was almost a man. Then I remembered I was the underground, and tenderness felt like debt, and debt like humiliation. I gave her money again. My last. And hated her.", it: "Per un'ora sono stato quasi un uomo. Poi mi sono ricordato di essere il sottosuolo, e la tenerezza è sembrata un debito, e il debito un'umiliazione. Le ho dato di nuovo dei soldi. I miei ultimi. E l'ho odiata." } },
+    { s: N, t: { en: "She understood everything — that is the horror. She pressed the banknote into the table and went out without a word, and the underground kept its tenant.", it: "Lei ha capito tutto — ed è questo l'orrore. Ha conficcato la banconota nel tavolo ed è uscita senza una parola, e il sottosuolo ha mantenuto il suo inquilino." } }
+  ],
+  choices: [
+    { text: { en: "Run after her — now, into the snow.", it: "Corri dietro di lei — adesso, nella neve." }, lines: [
+      { s: U, t: { en: "I run — four flights, half a street, slippers in the snow. Whether I find her or not, I have come up. The underground is behind me, shouting terms; the wind up here answers nothing, it only blows. Note: this footnote is true. Cross out 'note'.", it: "Corro — quattro rampe di scale, mezza strada, pantofole nella neve. Che io la trovi o no, sono salito. Il sottosuolo è alle mie spalle che grida condizioni; il vento, quassù, non risponde a niente, soffia soltanto. Nota: questa nota è vera. Cancelli la parola «nota»." } }
+    ] },
+    { text: { en: "Stay: write it all down instead.", it: "Resta: scrivi tutto, invece." }, lines: [
+      { s: N, t: { en: "He stays. He writes these notes. Somewhere a reader puts the page down, feeling seen by a man who has been dead for decades. That, too, is running after her — slower, and colder, and it is the only running he ever finished.", it: "Lui resta. Scrive questi appunti. Da qualche parte un lettore posa la pagina, sentendosi visto da un uomo morto da decenni. Anche questo è correre dietro di lei — più piano, e più freddo, ed è l'unica corsa che abbia mai finito." } }
+    ] }
+  ],
+  outro: { en: "The underground has one stair, and it goes up.", it: "Il sottosuolo ha una sola scala, e va su." }
+});
+</script>
+</body>
+</html>
