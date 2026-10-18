@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Mini Tower — costruisci la tua torre</title>
+<meta name="description" content="Gioco PWA ispirato a Tiny Tower: costruisci piani, apri negozi, fai salire gli abitanti in ascensore e fai crescere la tua torre. Funziona anche offline!">
+<meta name="theme-color" content="#1d2c4a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mini Tower">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <span class="pill">💰 <b id="c-coins">0</b></span>
+    <span class="pill">🔷 <b id="c-bux">0</b></span>
+    <span class="pill">👥 <b id="c-pop">0/0</b></span>
+    <span class="pill">🏢 <b id="c-flr">1/40</b></span>
+    <span class="pill" id="c-disc" style="display:none" title="Sconto sul prossimo piano">🎁</span>
+    <button id="sndbtn" title="Suono on/off">🔊</button>
+  </header>
+
+  <main id="viewport">
+    <div id="sky">
+      <div class="stars"></div>
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="cloud c3"></div>
+    </div>
+    <div id="content">
+      <div id="tower-wrap">
+        <div id="tower"></div>
+        <div id="shaft">
+          <div id="car">
+            <div class="door l"></div>
+            <div class="door r"></div>
+            <div class="pass"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="bottombar">
+    <button class="mbtn primary" id="btn-build">🏗️<span>Costruisci</span><span class="sub" id="bb-cost">40 💰</span></button>
+    <button class="mbtn" id="btn-bits">👥<span>Abitanti</span><span class="dot"></span></button>
+    <button class="mbtn" id="btn-missions">🎯<span>Missioni</span><span class="dot"></span></button>
+    <button class="mbtn" id="btn-menu">📋<span>Menu</span></button>
+  </footer>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script src="game.js"></script>
+<noscript><p style="color:#fff;text-align:center;padding:2rem">Abilita JavaScript per giocare.</p></noscript>
+</body>
+</html>
