@@ -3,6 +3,7 @@ tools/balance/out/
 tools/corpora/out/
 __pycache__/
 *.pyc
+.venv/
 
 # Generated screenshots (regenerate with <app>/shot.mjs or <app>/smoke.mjs)
 */shots/
