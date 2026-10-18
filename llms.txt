@@ -13,6 +13,16 @@ zero binary art assets (everything is drawn procedurally) and zero trackers.
 | `tools/balance/` | Monte-Carlo balance harness: Node drives `metro-pwa/sim.js` headless over 5000 seeded sessions; Python (stdlib only) writes an HTML report with inline SVG charts. |
 | `tools/corpora/` | Corpus statistics over the literary PWAs' own bilingual prose: sentence lengths, type/token ratio, hapax legomena, Zipf fits, EN/IT overlap. |
 
+## Notable games
+
+`pulse-pwa/` is a four-lane rhythm game with no audio files. One 32-bit seed decides
+tempo, key, chord progression, drum pattern and a melodic motif; the note chart is
+read back out of the same melody, so chart and audio cannot disagree. The track is
+rendered offline in twelve-second chunks and scheduled as each chunk finishes, so it
+is playable in about 450 ms with nothing downloaded. `src/song.js` and `src/chart.js`
+are DOM-free and deterministic, which is what lets the generator be tested over 500
+seeds in Node.
+
 ## Shared libraries
 
 `shared/arcade.js` — WebAudio blips, particles, localStorage helpers, seeded
@@ -31,8 +41,10 @@ node metro-pwa/sim.test.mjs    # LINEA ROSSA sim
 node census-pwa/sim.test.mjs    # CENSUS sim
 python3 tools/balance/test.py  # balance report
 python3 tools/corpora/test.py  # corpus statistics
+node pulse-pwa/sim.test.mjs    # PULSE generator + chart
 node stats-pwa/smoke.mjs       # in-browser (skips if no playwright)
 node census-pwa/smoke.mjs      # in-browser (skips if no playwright)
+node pulse-pwa/smoke.mjs       # in-browser (skips if no playwright)
 ```
 
 ## Layout

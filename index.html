@@ -1248,6 +1248,21 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="rhythm music arcade" data-playable="pulse-pwa/" style="--c1:#5ad1ff; --c2:#7bf1a8; --tile-glow:rgba(90,209,255,.5); --shimmer-delay:3.3s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#0b2b3a,#05070f)">&#9835;</div>
+            <h2>PULSE</h2>
+          </div>
+          <p class="tagline">A rhythm game where the song does not exist until you ask for it. One seed synthesises the drums, bass, pads and melody &#8212; and writes the note chart from the same melody, so you are always playing the tune. No audio files.</p>
+          <div class="chips"><span class="chip">RHYTHM</span><span class="chip">MUSIC</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="pulse-pwa/">&#9654;&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/pulse-pwa" aria-label="PULSE source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="tool" style="--c1:#64748b; --c2:#0ea5e9; --tile-glow:rgba(100,116,139,.55); --shimmer-delay:1.75s">          <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#64748b,#0ea5e9)">🛠️</div>
             <h2>EADS Studio</h2>
@@ -2146,6 +2161,7 @@
       "resort-pwa":      ["horizon", { period: 7 }],
       "nebbia-pwa":      ["chart",   { period: 9 }],
       "ironfall-pwa":    ["grid",    { period: 4.4 }],
+      "pulse-pwa":       ["pulse",   { period: 3.8 }],
       "sartoria-pwa":    ["runway",  { period: 6.5 }]
     };
 
@@ -2590,8 +2606,9 @@
       { slug: "acqua-pwa/",      name: "ACQUA",       emoji: "⛲", key: "acqua-pwa" },
       { slug: "sartoria-pwa/",   name: "SARTORIA",    emoji: "✂️", key: "sartoria-pwa" },
       { slug: "stats-pwa/",      name: "STATS",       emoji: "📊", key: "stats-pwa" },
-      { slug: "census-pwa/",     name: "CENSUS",      emoji: "📋", key: "census-pwa" }
+      { slug: "census-pwa/",     name: "CENSUS",      emoji: "📋", key: "census-pwa" },
       { slug: "ironfall-pwa/",   name: "IRONFALL",    emoji: "♖", key: "ironfall-pwa" },
+      { slug: "pulse-pwa/",      name: "PULSE",       emoji: "🎵", key: "pulse-pwa" },
     ];
     function readJSON(key) { return R2.loadJSON(key, null); }
     function timeAgo(ts) {

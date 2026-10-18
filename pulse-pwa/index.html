@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <title>PULSE — a procedurally generated rhythm game</title>
+    <meta name="description" content="PULSE is a free browser rhythm game where every track is generated from a single number. Press D F J K on the beat, work up the accuracy, and chase the S grade. Playable offline, no downloads.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="Luca Gandolfi">
+    <meta name="copyright" content="© 2026 Luca Gandolfi">
+
+    <link rel="canonical" href="https://lucagandolfi77.github.io/random2/pulse-pwa/">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <meta name="theme-color" content="#05070f">
+    <meta name="color-scheme" content="dark">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PULSE">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="PULSE">
+    <meta property="og:title" content="PULSE — a procedurally generated rhythm game">
+    <meta property="og:description" content="Every track comes from one number. Four lanes, three difficulties, no audio files.">
+    <meta property="og:url" content="https://lucagandolfi77.github.io/random2/pulse-pwa/">
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/pulse-pwa/og-cover.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <link rel="stylesheet" href="styles.css">
+
+    <script type="application/ld+json">{
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": "PULSE",
+      "url": "https://lucagandolfi77.github.io/random2/pulse-pwa/",
+      "image": "https://lucagandolfi77.github.io/random2/pulse-pwa/og-cover.png",
+      "description": "A procedurally generated rhythm game: one seed produces both the music and the note chart, so the notes always follow the melody.",
+      "genre": ["Music", "Rhythm", "Arcade"],
+      "gamePlatform": "Web browser",
+      "playMode": "SinglePlayer",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Any modern browser",
+      "inLanguage": "en",
+      "isAccessibleForFree": true,
+      "datePublished": "2026-10-18",
+      "author": {
+        "@type": "Person",
+        "name": "Luca Gandolfi",
+        "url": "https://github.com/lucagandolfi77"
+      },
+      "publisher": { "@type": "Person", "name": "Luca Gandolfi" },
+      "sameAs": ["https://github.com/lucagandolfi77/random2/tree/main/pulse-pwa"],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      }
+    }</script>
+</head>
+<body>
+
+<main id="app">
+
+    <section id="screen-menu" class="screen is-active">
+        <header class="brand">
+            <h1>PULSE</h1>
+            <p class="tagline">One number in. One whole song out.</p>
+        </header>
+
+        <div class="panel">
+            <div class="seed-row">
+                <label class="field">
+                    <span>Seed</span>
+                    <input id="seed-input" type="text" inputmode="numeric" autocomplete="off" spellcheck="false">
+                </label>
+                <button id="btn-daily" class="ghost" type="button">Daily</button>
+                <button id="btn-random" class="ghost" type="button">Random</button>
+            </div>
+
+            <div class="field">
+                <span>Difficulty</span>
+                <div id="difficulty" class="segmented" role="group" aria-label="Difficulty">
+                    <button type="button" data-difficulty="easy" aria-pressed="false">Easy</button>
+                    <button type="button" data-difficulty="normal" aria-pressed="true">Normal</button>
+                    <button type="button" data-difficulty="hard" aria-pressed="false">Hard</button>
+                </div>
+            </div>
+
+            <p id="track-summary" class="summary"></p>
+
+            <button id="btn-play" class="primary" type="button">Play</button>
+            <p class="hint">Lanes are <kbd>D</kbd> <kbd>F</kbd> <kbd>J</kbd> <kbd>K</kbd>. <kbd>Esc</kbd> pauses.</p>
+        </div>
+
+        <div class="panel">
+            <div class="panel-head">
+                <h2>Tracks you know</h2>
+                <span id="streak" class="streak"></span>
+            </div>
+            <ul id="tracks" class="tracks"></ul>
+        </div>
+    </section>
+
+    <section id="screen-load" class="screen">
+        <div class="loader">
+            <h2 id="load-title">Rendering the track</h2>
+            <p id="load-sub" class="summary"></p>
+            <div class="bar"><div id="load-bar" class="bar-fill"></div></div>
+            <p class="hint">Every sound is synthesised in the browser. Nothing is downloaded.</p>
+        </div>
+    </section>
+
+    <section id="screen-play" class="screen screen-play">
+        <canvas id="stage" width="900" height="600" role="img"
+                aria-label="Four-lane rhythm playfield. Press D, F, J and K when a note reaches the line at the bottom."></canvas>
+        <button id="btn-pause" class="ghost pause-btn" type="button">Pause</button>
+    </section>
+
+    <section id="screen-result" class="screen">
+        <div class="result">
+            <p id="result-track" class="summary"></p>
+            <div class="grade-row">
+                <div id="result-grade" class="grade">S</div>
+                <div class="grade-meta">
+                    <div class="score" id="result-score">0</div>
+                    <div class="accuracy" id="result-accuracy">100.0%</div>
+                </div>
+            </div>
+            <p id="result-badge" class="badge" hidden>New personal best</p>
+            <ul id="result-counts" class="counts"></ul>
+            <figure class="histogram">
+                <figcaption>Timing offset — left is early, right is late</figcaption>
+                <canvas id="histogram" width="640" height="180"></canvas>
+            </figure>
+            <div class="result-actions">
+                <button id="btn-retry" class="primary" type="button">Retry</button>
+                <button id="btn-share" class="ghost" type="button">Copy track link</button>
+                <button id="btn-menu" class="ghost" type="button">Menu</button>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<p id="live" class="sr-only" role="status" aria-live="polite"></p>
+
+<noscript>
+    <p style="padding:24px;color:#f2f5fa;font:16px system-ui,sans-serif">
+        PULSE needs JavaScript — the music is generated in your browser.
+    </p>
+</noscript>
+
+<script src="../shared/arcade.js"></script>
+<script src="src/song.js"></script>
+<script src="src/chart.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/game.js"></script>
+<script src="src/main.js"></script>
+
+</body>
+</html>

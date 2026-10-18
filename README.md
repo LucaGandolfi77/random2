@@ -38,6 +38,7 @@
   - [Territorio](#territorio)
   - [Snap Cam](#snap-cam)
   - [IRONFALL](#ironfall)
+  - [PULSE](#pulse)
 - [The tools](#the-tools)
   - [EADS Studio](#eads-studio)
 - [The hub page](#the-hub-page)
@@ -88,6 +89,7 @@
 | 28 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 | 30 | **CENSUS** | Sampling-theory tycoon | Canvas 2D | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/census-pwa/) |
 | 31 | **IRONFALL** | 3v3 lane MOBA, Warhammer 40k | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/ironfall-pwa/) |
+| 32 | **PULSE** | Procedural rhythm game | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pulse-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -843,6 +845,28 @@ Reliquary, kill the Core.
 [▶ Play](https://lucagandolfi77.github.io/random2/ironfall-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/ironfall-pwa) ·
 [README](ironfall-pwa/README.md)
+
+### PULSE
+
+*A rhythm game with no music files.* 🎵
+
+A four-lane game where the track does not exist until you ask for it. One 32-bit
+seed picks the tempo, key, progression, drum pattern and a melodic motif; the note
+chart is then read back out of the same melody, so the notes you press always land
+on the tune you hear. `#seed=` in the URL reproduces a track exactly.
+
+Audio is synthesised offline in twelve-second chunks and scheduled as each one
+finishes, so a 2:49 track is playable in about 450 ms with no files downloaded.
+`song.js` and `chart.js` are DOM-free and deterministic, which is what lets the
+generator be tested over 500 seeds in Node.
+
+**Files:** `index.html` · `styles.css` · `manifest.json` ·
+`service-worker.js` · `icons/` · `og-cover.png` · `src/` (5 files) ·
+`sim.test.mjs` · `smoke.mjs` · `tools/make-icons.py`
+
+[▶ Play](https://lucagandolfi77.github.io/random2/pulse-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/pulse-pwa) ·
+[README](pulse-pwa/README.md)
 
 ### CENSUS
 

@@ -100,6 +100,7 @@ jobs:
           node metro-pwa/sim.test.mjs
           node census-pwa/sim.test.mjs
           node new-star-soccer/sim.test.mjs
+          node pulse-pwa/sim.test.mjs
           node ironfall-pwa/tests/sim.test.js
           node ironfall-pwa/tests/roster.test.js
           node ironfall-pwa/tests/boot.test.js
@@ -155,6 +156,14 @@ jobs:
           out=$(node ironfall-pwa/smoke.mjs http://localhost:8099/ironfall-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  ironfall-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # PULSE plays itself: it seeks near the end of the track, presses the
+          # right lane for every note and checks the results screen appears.
+          out=$(node pulse-pwa/smoke.mjs http://localhost:8099/pulse-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  pulse-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3
