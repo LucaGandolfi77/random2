@@ -1,0 +1,920 @@
+/* IRONFALL - styles.
+ *
+ * Two rules hold everywhere:
+ *
+ * 1. Nothing scrolls, zooms or selects. The canvas handles every gesture and
+ *    anything that can interrupt a fight mid-push is a bug. So: touch-action
+ *    none, overscroll behaviour none, no tap highlight, no callout.
+ *
+ * 2. Every fixed element respects the safe-area insets. Without them the HUD
+ *    sits under the notch on every modern phone and the ability pads sit
+ *    under the home indicator, which is exactly where thumbs land.
+ */
+
+:root {
+    --void: #07090d;
+    --fog: #0b0f16;
+    --stone: #343a42;
+    --stone-dk: #22262c;
+    --line: #3a414c;
+    --ink: #e6e2d8;
+    --ink-dim: #9aa3ae;
+    --gold: #e0b23c;
+    --blue: #3f7fd6;
+    --blue-lit: #7fb4f0;
+    --red: #c8353f;
+    --red-lit: #f07780;
+    --warp: #7a2ecb;
+    --chitin: #8fb518;
+
+    --safe-t: env(safe-area-inset-top, 0px);
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-l: env(safe-area-inset-left, 0px);
+    --safe-r: env(safe-area-inset-right, 0px);
+
+    --font: "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    background: var(--void);
+    color: var(--ink);
+    font-family: var(--font);
+    touch-action: none;
+}
+
+body {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+#game-canvas {
+    position: fixed;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    z-index: 0;
+}
+
+/* ===== HUD ===== */
+
+#hud {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    display: none;
+    font-family: var(--mono);
+}
+
+#hud.is-on { display: block; }
+
+#hud .hud-tl,
+#hud .hud-tr,
+#hud .hud-bl,
+#hud .hud-br,
+#hud .hud-actions {
+    position: absolute;
+    pointer-events: none;
+}
+
+#hud button { pointer-events: auto; }
+
+/* Top-left: who you are and how much of you is left. */
+.hud-tl {
+    top: calc(8px + var(--safe-t));
+    left: calc(10px + var(--safe-l));
+    width: min(280px, 52vw);
+}
+
+.champ-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-shadow: 0 1px 3px #000;
+    margin-bottom: 4px;
+}
+
+.lvl-chip {
+    color: var(--ink-dim);
+    font-size: 11px;
+}
+.lvl-chip b { color: var(--ink); }
+
+/* Health sits above mana because they absorb in that order. */
+.bar {
+    position: relative;
+    height: 16px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--line);
+    margin-bottom: 3px;
+    overflow: hidden;
+}
+
+.bar .fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    transition: width 0.12s linear;
+}
+
+.bar.hp .fill { background: linear-gradient(180deg, #4fd18b, #1f7a48); }
+.bar.mp { height: 10px; }
+.bar.mp .fill { background: linear-gradient(180deg, #6fb8ff, #1d5ba8); }
+
+.bar-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: #fff;
+    text-shadow: 0 1px 2px #000;
+}
+
+/* Top-right: the clock, the tower pips and the minimap. */
+.hud-tr {
+    top: calc(8px + var(--safe-t));
+    right: calc(10px + var(--safe-r));
+    text-align: right;
+}
+
+.match-line {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink);
+    text-shadow: 0 1px 3px #000;
+    margin-bottom: 6px;
+}
+
+.tower-pips { display: inline-flex; align-items: center; gap: 3px; }
+.tower-pips i {
+    width: 7px; height: 12px;
+    background: var(--blue);
+    display: block;
+    border: 1px solid rgba(0,0,0,0.6);
+}
+.tower-pips i:nth-of-type(n+4) { background: var(--red); }
+.tower-pips i.is-down { background: #3a3a3a; opacity: 0.55; }
+.tower-pips b { color: var(--ink-dim); font-weight: 400; margin: 0 2px; }
+
+#minimap {
+    width: 168px;
+    height: 168px;
+    border: 1px solid var(--line);
+    background: var(--void);
+    /* The minimap is its own hit target and must never fall through to the
+       canvas and start a movement stick. */
+    pointer-events: auto;
+    touch-action: none;
+}
+
+/* Bottom-left: economy and record. */
+.hud-bl {
+    bottom: calc(10px + var(--safe-b));
+    left: calc(10px + var(--safe-l));
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    text-shadow: 0 1px 3px #000;
+}
+.hud-bl .k { display: inline-block; width: 52px; color: var(--ink-dim); }
+.hud-bl .v { color: var(--gold); }
+
+/* Bottom-right: the ability pads.
+ *
+ * Sits in the corner a thumb naturally rests in, not where a mouse cursor
+ * would be. The ultimate is offset above the other three because it is on a
+ * completely different cooldown and players need to be able to hit it
+ * without hitting E. */
+.hud-br {
+    bottom: calc(12px + var(--safe-b));
+    right: calc(12px + var(--safe-r));
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.pad-row { display: flex; gap: 8px; }
+
+.pad {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(12, 16, 22, 0.82);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 15px;
+    cursor: pointer;
+    overflow: hidden;
+    /* --cd is written by ui.js every frame as the remaining fraction. One
+       custom property is the whole cooldown sweep. */
+    --cd: 0%;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.pad-ult {
+    width: 74px;
+    height: 74px;
+    font-size: 18px;
+    border-color: var(--gold);
+    background: rgba(30, 22, 8, 0.86);
+}
+
+/* The sweep. A hard stop at --cd with the rest transparent reads instantly
+   at phone size, where a radial gradient does not. */
+.pad::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.66);
+    /* inset-block-end takes --cd from the bottom up, which is the direction
+       a cooldown drains. */
+    height: var(--cd);
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+}
+
+.pad.is-held { border-color: var(--gold); transform: translateY(1px); }
+.pad.is-locked { opacity: 0.3; }
+.pad.is-cooling .pad-key { opacity: 0.4; }
+
+.pad-key {
+    position: absolute;
+    top: 3px; left: 5px;
+    font-size: 11px;
+    color: var(--gold);
+    z-index: 2;
+}
+
+.pad-cd {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    z-index: 3;
+    color: #fff;
+    text-shadow: 0 1px 3px #000;
+}
+
+.pad-cost {
+    position: absolute;
+    bottom: 2px; right: 5px;
+    font-size: 10px;
+    color: var(--ink-dim);
+    z-index: 2;
+}
+.pad-cost.is-poor { color: #e06a6a; }
+
+.hud-actions {
+    bottom: calc(96px + var(--safe-b));
+    right: calc(12px + var(--safe-r));
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+}
+
+.mini-btn {
+    background: rgba(12, 16, 22, 0.82);
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.mini-btn:active { border-color: var(--gold); color: var(--ink); }
+
+/* ===== Feedback overlays ===== */
+
+#killfeed {
+    position: absolute;
+    top: calc(190px + var(--safe-t));
+    right: calc(10px + var(--safe-r));
+    text-align: right;
+    font-size: 11px;
+    line-height: 1.7;
+    text-shadow: 0 1px 3px #000;
+}
+.feed-row { opacity: 0.9; }
+.feed-row.is-mine { opacity: 1; font-weight: 700; }
+.feed-x { color: var(--ink-dim); margin: 0 6px; }
+
+#scoreboard {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(7, 9, 13, 0.94);
+    border: 1px solid var(--line);
+    padding: 12px;
+    display: none;
+    max-width: 94vw;
+    overflow-x: auto;
+    pointer-events: auto;
+}
+#scoreboard.is-on { display: block; }
+#scoreboard table { border-collapse: collapse; font-size: 11px; }
+#scoreboard th {
+    text-align: left;
+    color: var(--ink-dim);
+    font-weight: 400;
+    padding: 3px 10px;
+    border-bottom: 1px solid var(--line);
+}
+#scoreboard td { padding: 3px 10px; }
+#scoreboard tr.is-me td { background: rgba(224, 178, 60, 0.1); }
+.sb-items { display: flex; gap: 3px; }
+.sb-item {
+    width: 18px; height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--stone-dk);
+    border: 1px solid var(--line);
+    font-size: 9px;
+}
+
+#flash-message {
+    position: absolute;
+    bottom: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(7, 9, 13, 0.9);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    padding: 8px 16px;
+    opacity: 0;
+    transition: opacity 0.18s;
+    pointer-events: none;
+}
+#flash-message.is-on { opacity: 1; }
+
+#respawn {
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    color: var(--red-lit);
+    text-shadow: 0 2px 8px #000;
+    display: none;
+}
+#respawn.is-on { display: block; }
+
+/* ===== Shop ===== */
+
+#shop-panel {
+    position: absolute;
+    left: 50%;
+    bottom: calc(12px + var(--safe-b));
+    transform: translateX(-50%);
+    width: min(560px, 96vw);
+    max-height: 52vh;
+    background: rgba(7, 9, 13, 0.96);
+    border: 1px solid var(--gold);
+    display: none;
+    flex-direction: column;
+    pointer-events: auto;
+}
+#shop-panel.is-on { display: flex; }
+
+.shop-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+}
+.shop-head h3 { margin: 0; font-size: 12px; color: var(--gold); flex: 1; }
+.shop-gold-wrap b { color: var(--gold); margin-left: 6px; }
+
+#shop-list {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px;
+    touch-action: pan-y;
+}
+
+.shop-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 7px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.shop-item:active { border-color: var(--gold); background: rgba(224,178,60,0.08); }
+
+.shop-icon {
+    width: 30px; height: 30px;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--stone-dk);
+    border: 1px solid var(--line);
+    font-size: 14px;
+    color: var(--gold);
+    text-transform: uppercase;
+}
+
+.shop-body { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.shop-name { color: var(--ink); letter-spacing: 0.06em; }
+.shop-text { color: var(--ink-dim); }
+.shop-passive { color: var(--gold); }
+.shop-cost { color: var(--gold); flex: none; }
+
+/* ===== Floating joystick ===== */
+
+#stick {
+    position: fixed;
+    width: 104px;
+    height: 104px;
+    margin-left: -52px;
+    margin-top: -52px;
+    border-radius: 50%;
+    border: 1px solid rgba(224, 178, 60, 0.4);
+    background: rgba(224, 178, 60, 0.07);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+    transition: opacity 0.12s;
+}
+#stick.is-on { opacity: 1; }
+
+#stick-knob {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    margin-left: -22px;
+    margin-top: -22px;
+    border-radius: 50%;
+    background: rgba(224, 178, 60, 0.3);
+    border: 1px solid rgba(224, 178, 60, 0.6);
+}
+
+/* The aim marker. A dot that travels from the origin rather than a fixed
+   ring with a dot in it, because the two ends of the gesture have to be
+   unambiguous at a glance. */
+#aim-ring {
+    position: fixed;
+    width: 34px;
+    height: 34px;
+    margin-left: -17px;
+    margin-top: -17px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 210, 74, 0.8);
+    background: rgba(255, 210, 74, 0.12);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+    transition: opacity 0.1s;
+}
+#aim-ring.is-on { opacity: 1; }
+
+/* ===== Screens ===== */
+
+.screen {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: calc(14px + var(--safe-t)) 14px calc(14px + var(--safe-b));
+    background: rgba(7, 9, 13, 0.9);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+.screen.is-on { display: flex; }
+
+.panel {
+    width: min(520px, 100%);
+    background: rgba(11, 15, 22, 0.97);
+    border: 1px solid var(--line);
+    padding: 20px;
+    max-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+}
+.panel-wide { width: min(880px, 100%); }
+.panel-title { text-align: center; border-color: var(--gold); }
+
+.panel h1 {
+    margin: 0;
+    font-size: clamp(34px, 11vw, 62px);
+    letter-spacing: 0.24em;
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(224, 178, 60, 0.25);
+}
+.panel h2 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    letter-spacing: 0.16em;
+    color: var(--gold);
+}
+.panel h3 {
+    margin: 18px 0 8px;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+    font-weight: 500;
+}
+
+.tagline {
+    margin: 6px 0 12px;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: var(--ink-dim);
+}
+
+.blurb {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--ink-dim);
+    margin: 0 0 18px;
+    max-width: 44ch;
+    margin-inline: auto;
+}
+
+.sub {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin: 0 0 14px;
+    line-height: 1.6;
+}
+
+.row-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.btn {
+    background: rgba(20, 25, 33, 0.9);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    padding: 11px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn.primary { background: var(--gold); border-color: var(--gold); color: #16120a; font-weight: 700; }
+.btn.ghost { background: transparent; }
+.btn.small { padding: 8px 12px; font-size: 11px; }
+.btn:active { transform: translateY(1px); }
+
+/* Difficulty picker */
+.diff-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+}
+.diff-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--ink-dim);
+    width: 100%;
+    margin-bottom: 2px;
+}
+.diff {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 7px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.diff.is-on { border-color: var(--gold); color: var(--gold); background: rgba(224,178,60,0.08); }
+
+/* The two "how to play" disclosures. A <details> rather than a modal because
+   the answer to "how do turret plates work" should be one tap away from the
+   title screen, not a separate navigation. */
+.how { margin-top: 18px; text-align: left; }
+.how summary {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    cursor: pointer;
+    padding: 6px 0;
+    list-style: none;
+}
+.how summary::-webkit-details-marker { display: none; }
+.how summary::before { content: "▸ "; }
+.how[open] summary::before { content: "▾ "; }
+.how ul { margin: 6px 0 0; padding-left: 18px; }
+.how li {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    margin-bottom: 4px;
+}
+.how b { color: var(--ink); }
+
+/* ===== Champion select ===== */
+
+#champ-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+    gap: 10px;
+}
+
+.champ-card {
+    --fc: var(--gold);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+    background: rgba(16, 20, 27, 0.9);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--fc);
+    color: var(--ink);
+    font-family: var(--font);
+    padding: 11px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.champ-card.is-on { border-color: var(--fc); background: rgba(224, 178, 60, 0.07); }
+
+.champ-role {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: var(--fc);
+}
+.champ-name {
+    font-family: var(--mono);
+    font-size: 17px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+}
+.champ-title { font-size: 11px; color: var(--ink-dim); font-style: italic; }
+
+.champ-passive {
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+}
+.champ-passive b { color: var(--fc); }
+
+.champ-kit {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 6px;
+}
+.kit-chip {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: var(--ink-dim);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 5px;
+    border-radius: 3px;
+}
+
+.champ-record {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-dim);
+}
+.champ-record .is-none { opacity: 0.5; font-style: italic; }
+
+.champ-doctrine {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--ink-dim);
+    margin-top: 3px;
+}
+.champ-doctrine.is-on { color: var(--gold); }
+
+/* ===== Runes ===== */
+
+.rune-row { margin-bottom: 16px; }
+.rune-row h3 {
+    margin: 0 0 6px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--ink-dim);
+}
+.rune-opts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+.rune-card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+    background: rgba(16, 20, 27, 0.9);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.rune-card.is-on { border-color: var(--gold); background: rgba(224, 178, 60, 0.08); }
+.rune-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+}
+.rune-text { font-size: 11px; color: var(--ink-dim); line-height: 1.5; }
+
+.rune-sum {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-dim);
+    letter-spacing: 0.08em;
+}
+.rune-sum b { color: var(--gold); }
+
+/* ===== Records ===== */
+
+.rec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+}
+.rec-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 8px 10px;
+    border-radius: 5px;
+    font-family: var(--mono);
+}
+.rec-label { font-size: 9px; letter-spacing: 0.14em; color: var(--ink-dim); }
+.rec-value { font-size: 16px; color: var(--ink); }
+.rec-value em { font-size: 11px; color: var(--gold); margin-left: 6px; font-style: normal; }
+
+.rec-list { list-style: none; margin: 0; padding: 0; }
+.rec-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.rec-list li b { flex: none; width: 110px; letter-spacing: 0.08em; }
+.rec-list li span { flex: 1; color: var(--ink-dim); }
+.rec-list li span.is-none { font-style: italic; opacity: 0.6; }
+.rec-list li em { color: var(--ink-dim); font-size: 10px; font-style: normal; }
+.rec-list li em.is-on { color: var(--gold); }
+
+/* ===== Outcome ===== */
+
+.outcome-sub { font-size: 13px; color: var(--ink-dim); line-height: 1.6; margin: 4px 0 16px; }
+.is-win { color: var(--gold) !important; }
+.is-loss { color: var(--red-lit) !important; }
+
+/* ===== Settings ===== */
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-dim);
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.toggle input { width: 18px; height: 18px; accent-color: var(--gold); }
+
+.note {
+    font-size: 11px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    margin-top: 14px;
+}
+
+/* ===== Install prompt ===== */
+
+.install {
+    position: fixed;
+    left: 50%;
+    bottom: calc(14px + var(--safe-b));
+    transform: translateX(-50%);
+    z-index: 40;
+    background: rgba(11, 15, 22, 0.97);
+    border: 1px solid var(--gold);
+    padding: 14px 16px;
+    text-align: center;
+    max-width: 92vw;
+}
+.install.hidden { display: none; }
+.install p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ink-dim);
+    font-family: var(--mono);
+}
+.install .row-actions { margin-top: 10px; }
+
+/* ===== Landscape phones =====
+ *
+ * The ability pads and the minimap are the two things that collide first on
+ * a short screen. Both are shrunk, and the pad row drops its gap, rather
+ * than letting either of them grow. */
+@media (max-height: 460px) {
+    #minimap { width: 118px; height: 118px; }
+    .pad { width: 46px; height: 46px; font-size: 13px; }
+    .pad-ult { width: 58px; height: 58px; font-size: 15px; }
+    .pad-row { gap: 6px; }
+    .hud-br { gap: 7px; }
+    .hud-actions { bottom: calc(70px + var(--safe-b)); }
+    #killfeed { top: calc(140px + var(--safe-t)); font-size: 10px; }
+    .panel { padding: 14px; }
+}
+
+@media (max-width: 380px) {
+    .hud-tl { width: 46vw; }
+    #minimap { width: 130px; height: 130px; }
+    .pad { width: 52px; height: 52px; }
+    .pad-ult { width: 64px; height: 64px; }
+}
+
+/* Respect the system preference. It costs nothing to honour and it is the
+   difference between a game that is playable for someone and a game that is
+   playable for everyone else. */
+@media (prefers-reduced-motion: reduce) {
+    .pad .fill, .pad::after { transition: none; }
+    #stick, #aim-ring { transition: none; }
+    #flash-message { transition: none; }
+}

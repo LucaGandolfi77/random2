@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- ===== SEO =====
+         The description tracks what the game actually ships: three lanes,
+         eight champions, four warbands. A meta description that still
+         advertises an earlier build is worse than none, because a snippet is
+         a promise.
+
+         Every path here is relative except the canonical and the social
+         images. The game is served from a subfolder of a project page, and a
+         canonical URL only means anything if it names one specific place. -->
+    <title>IRONFALL — free 3-lane MOBA in the browser</title>
+    <meta name="description" content="IRONFALL is a free browser MOBA: hold three lanes across a shattered cathedral-world in Warhammer 40k. 8 champions, 4 warbands, turret plates, runes and last-hits. Fully offline.">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="author" content="Luca Gandolfi">
+    <meta name="copyright" content="© 2026 Luca Gandolfi">
+    <meta name="theme-color" content="#07090d">
+    <meta name="color-scheme" content="dark">
+
+    <link rel="canonical" href="https://lucagandolfi77.github.io/random2/ironfall-pwa/">
+    <link rel="license" href="https://github.com/LucaGandolfi77/random2/blob/main/LICENSE">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="IRONFALL">
+
+    <!-- 1200x630 is the one size every platform crops to, and
+         summary_large_image is the card type that actually shows the art. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="IRONFALL">
+    <meta property="og:title" content="IRONFALL — free 3-lane MOBA in the browser">
+    <meta property="og:description" content="Three lanes to the Reliquary. 8 champions, 4 warbands, turret plates, last-hits and runes. A free Warhammer 40k MOBA, fully offline.">
+    <meta property="og:url" content="https://lucagandolfi77.github.io/random2/ironfall-pwa/">
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/ironfall-pwa/og-cover.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="IRONFALL — isometric battlefield with three lanes, blue and red warbands and a gold Reliquary">
+    <meta property="og:locale" content="en">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="IRONFALL — free 3-lane MOBA in the browser">
+    <meta name="twitter:description" content="Three lanes to the Reliquary. 8 champions, 4 warbands, turret plates, last-hits and runes. Fully offline.">
+    <meta name="twitter:image" content="https://lucagandolfi77.github.io/random2/ironfall-pwa/og-cover.png">
+
+    <!-- VideoGame rather than WebApplication, because it is a game and the
+         rich-result rules differ. There is deliberately NO aggregateRating:
+         an invented rating is fabricated data, and Google has issued manual
+         actions for exactly that. isAccessibleForFree and a zero-price offer
+         say the true version of the same thing. -->
+    <script type="application/ld+json">{
+      "@context": "https://schema.org",
+      "@graph": [{
+        "@type": "VideoGame",
+        "@id": "https://lucagandolfi77.github.io/random2/ironfall-pwa/#game",
+        "name": "IRONFALL",
+        "alternateName": "IRONFALL: Three Lanes to the Reliquary",
+        "url": "https://lucagandolfi77.github.io/random2/ironfall-pwa/",
+        "image": "https://lucagandolfi77.github.io/random2/ironfall-pwa/og-cover.png",
+        "description": "A free browser MOBA set in the Warhammer 40k universe. You command one of eight champions against three enemy warbands across three lanes, breaking Bastion Towers to take the Reliquary and destroy the enemy Core.",
+        "genre": ["MOBA", "Strategy", "Action", "Arcade"],
+        "gamePlatform": "Web browser",
+        "playMode": "MultiPlayer",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any modern browser",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "datePublished": "2026-10-18",
+        "dateModified": "2026-10-18",
+        "author": {
+          "@type": "Person",
+          "name": "Luca Gandolfi",
+          "url": "https://github.com/LucaGandolfi77"
+        },
+        "publisher": { "@type": "Person", "name": "Luca Gandolfi" },
+        "sameAs": [
+          "https://github.com/LucaGandolfi77/random2/tree/main/ironfall-pwa"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        }
+      }, {
+        "@type": "WebSite",
+        "@id": "https://lucagandolfi77.github.io/random2/#website",
+        "name": "PWA Arcade",
+        "url": "https://lucagandolfi77.github.io/random2/"
+      }]
+    }</script>
+</head>
+<body class="in-menu">
+
+    <!-- One landmark for the whole app. The canvas and the seven screens are
+         all "the page" to anything reading it, and a single main landmark is
+         what lets a crawler tell content from chrome. Nothing here is layout:
+         the canvas and every .screen are position:fixed against the
+         viewport, so wrapping them changes no pixel and no selector. -->
+    <main id="app">
+
+    <canvas id="game-canvas" aria-label="IRONFALL battlefield"></canvas>
+
+    <!-- ===== HUD ===== -->
+    <div id="hud">
+
+        <div class="hud-tl">
+            <div class="champ-line">
+                <span id="hud-name">—</span>
+                <span class="lvl-chip">LV <b id="hud-level">1</b></span>
+            </div>
+            <div class="bar hp">
+                <div id="hp-fill" class="fill"></div>
+                <span id="hp-text" class="bar-text">0 / 0</span>
+            </div>
+            <div class="bar mp">
+                <div id="mp-fill" class="fill"></div>
+                <span id="mp-text" class="bar-text">0</span>
+            </div>
+        </div>
+
+        <div class="hud-tr">
+            <div class="match-line">
+                <span id="hud-timer">0:00</span>
+                <!-- Six pips, three a side. Cheaper than a scoreboard and it
+                     answers the question that actually gets asked mid-game:
+                     is this still winnable. -->
+                <span class="tower-pips">
+                    <i id="tower-0-top"></i><i id="tower-0-mid"></i><i id="tower-0-bot"></i>
+                    <b>/</b>
+                    <i id="tower-1-top"></i><i id="tower-1-mid"></i><i id="tower-1-bot"></i>
+                </span>
+            </div>
+            <canvas id="minimap" width="190" height="190" aria-label="Minimap"></canvas>
+        </div>
+
+        <div class="hud-bl">
+            <div class="stat"><span class="k">GOLD</span><span class="v" id="hud-gold">0</span></div>
+            <div class="stat"><span class="k">CS</span><span class="v" id="hud-cs">0</span></div>
+            <div class="stat"><span class="k">K/D/A</span><span class="v" id="hud-kda">0 / 0 / 0</span></div>
+        </div>
+
+        <!-- Four ability pads. data-slot is what input.js binds against, so
+             the markup declares the order and the code does not have to
+             know it. R is visually separated because it is on a different
+             cooldown to everything else and is the only ability a player
+             has to plan around. -->
+        <div class="hud-br">
+            <div class="pad-row">
+                <button class="pad" data-slot="0" type="button" aria-label="Ability Q">
+                    <span class="pad-key">Q</span>
+                    <span class="pad-cd"></span>
+                    <span class="pad-cost">0</span>
+                </button>
+                <button class="pad" data-slot="1" type="button" aria-label="Ability W">
+                    <span class="pad-key">W</span>
+                    <span class="pad-cd"></span>
+                    <span class="pad-cost">0</span>
+                </button>
+                <button class="pad" data-slot="2" type="button" aria-label="Ability E">
+                    <span class="pad-key">E</span>
+                    <span class="pad-cd"></span>
+                    <span class="pad-cost">0</span>
+                </button>
+            </div>
+            <button class="pad pad-ult" data-slot="3" type="button" aria-label="Ultimate R">
+                <span class="pad-key">R</span>
+                <span class="pad-cd"></span>
+                <span class="pad-cost">0</span>
+            </button>
+        </div>
+
+        <!-- Utility buttons. Recall and shop only work at your own base, and
+             they say so rather than silently ignoring you. -->
+        <div class="hud-actions">
+            <button class="mini-btn" id="btn-shop-toggle" type="button" aria-label="Open the forge">FORGE</button>
+            <button class="mini-btn" id="btn-recall" type="button" aria-label="Recall to base">RECALL</button>
+            <button class="mini-btn" id="btn-pause" type="button" aria-label="Pause">❚❚</button>
+        </div>
+
+        <div id="killfeed" aria-live="polite"></div>
+        <div id="scoreboard"></div>
+        <div id="flash-message"></div>
+        <div id="respawn"><span id="respawn-text">REDEPLOYING</span></div>
+
+        <!-- Shop -->
+        <div id="shop-panel">
+            <div class="shop-head">
+                <h3>THE RELIQUARY FORGE</h3>
+                <span class="shop-gold-wrap">REQUISITION <b id="shop-gold">0</b></span>
+                <button class="mini-btn" id="btn-shop-close" type="button">CLOSE</button>
+            </div>
+            <div id="shop-list"></div>
+        </div>
+    </div>
+
+    <!-- Floating joystick, positioned by input.js at the point of touch. -->
+    <div id="stick" aria-hidden="true"><div id="stick-knob"></div></div>
+    <div id="aim-ring" aria-hidden="true"></div>
+
+    <!-- ===== SCREENS ===== -->
+
+    <section class="screen" id="screen-menu">
+        <div class="panel panel-title">
+            <h1>IRONFALL</h1>
+            <p class="tagline">Three lanes to the Reliquary.</p>
+            <p class="blurb">
+                A 3v3 lane MOBA in the Warhammer 40k universe. Last-hit the wave,
+                break the Bastion Towers, take the Reliquary, kill the Core.
+                Eight champions, four warbands, one free browser game.
+            </p>
+            <div class="row-actions">
+                <button class="btn primary" id="btn-play" type="button">DEPLOY</button>
+                <button class="btn" id="btn-runes" type="button">RUNES</button>
+                <button class="btn" id="btn-records" type="button">RECORDS</button>
+                <button class="btn" id="btn-settings" type="button">SETTINGS</button>
+            </div>
+
+            <div class="diff-picker">
+                <span class="diff-label">ENEMY DOCTRINE</span>
+                <button class="diff" data-difficulty="recruit" type="button">RECRUIT</button>
+                <button class="diff is-on" data-difficulty="guardsman" type="button">GUARDSMAN</button>
+                <button class="diff" data-difficulty="necron" type="button">NECRON LORD</button>
+            </div>
+
+            <details class="how">
+                <summary>HOW A LANE IS WON</summary>
+                <ul>
+                    <li><b>Last-hit</b> for gold. Assisting pays a third of it, XP is shared by everyone standing there.</li>
+                    <li><b>Bastion Towers have three plates.</b> Each plate is 62 armour. Lose all three and the tower drops to 30 — that is your dive window.</li>
+                    <li>Plates <b>regrow</b>, faster before level 11 than after.</li>
+                    <li>Push with your wave. A wave that arrives alone gets eaten.</li>
+                    <li>Both <b>Cores</b> exposed means 25% more damage. That is the win clock.</li>
+                </ul>
+            </details>
+            <details class="how">
+                <summary>CONTROLS</summary>
+                <ul>
+                    <li><b>Left thumb</b> — move. The stick appears where you touch and follows your thumb if you drag past the ring.</li>
+                    <li><b>Right thumb</b> — drag to aim, release, then tap an ability. The aim marker stays put after you lift your finger.</li>
+                    <li><b>Ability pads</b> — hold, not tap. An ability on cooldown fires the instant it comes up if you are still holding it.</li>
+                    <li><b>Minimap tap</b> — ping. <b>FORGE</b> and <b>RECALL</b> only work at your own bastion, and only out of combat.</li>
+                    <li>Keyboard also works: <b>WASD</b> to move, <b>1–4</b> to cast, <b>B</b> to recall, <b>Esc</b> to pause.</li>
+                </ul>
+            </details>
+        </div>
+    </section>
+
+    <section class="screen" id="screen-champs">
+        <div class="panel panel-wide">
+            <h2>CHOOSE YOUR CHAMPION</h2>
+            <p class="sub">Eight champions. Four warbands. One pick each — your two allies and the enemy three are drafted around yours.</p>
+            <div id="champ-grid"></div>
+            <div class="row-actions">
+                <button class="btn" id="btn-champs-back" type="button">BACK</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="screen" id="screen-runes">
+        <div class="panel panel-wide">
+            <h2>RUNES</h2>
+            <p class="sub">One pick per row. Twenty-seven loadouts from nine runes. Applied at deployment, not during the match.</p>
+            <div id="rune-grid"></div>
+            <p class="rune-sum">LOADOUT: <b id="rune-summary"></b></p>
+            <div class="row-actions">
+                <button class="btn primary" id="btn-runes-back" type="button">CONFIRM</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="screen" id="screen-records">
+        <div class="panel panel-wide">
+            <h2>SERVICE RECORD</h2>
+            <div id="records-body" class="rec-grid"></div>
+            <h3>BY CHAMPION</h3>
+            <ul id="records-champs" class="rec-list"></ul>
+            <div class="row-actions">
+                <button class="btn primary" id="btn-records-back" type="button">BACK</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="screen" id="screen-settings">
+        <div class="panel">
+            <h2>SETTINGS</h2>
+            <label class="toggle"><input type="checkbox" id="set-sound" data-setting="sound"><span>Sound</span></label>
+            <label class="toggle"><input type="checkbox" id="set-haptics" data-setting="haptics"><span>Haptics</span></label>
+            <label class="toggle"><input type="checkbox" id="set-ranges" data-setting="showRanges"><span>Show ability ranges</span></label>
+            <label class="toggle"><input type="checkbox" id="set-pings" data-setting="lanePings"><span>Lane pings</span></label>
+            <p class="note">Quality is detected from your frame rate and set for you. If the game feels slow, close other tabs.</p>
+            <div class="row-actions">
+                <button class="btn primary" id="btn-settings-back" type="button">BACK</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="screen" id="screen-outcome">
+        <div class="panel">
+            <div id="outcome-body"></div>
+            <div class="row-actions">
+                <button class="btn primary" id="btn-again" type="button">DEPLOY AGAIN</button>
+                <button class="btn" id="btn-outcome-menu" type="button">MAIN MENU</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="screen" id="screen-pause">
+        <div class="panel">
+            <h2>HOLD</h2>
+            <div class="row-actions">
+                <button class="btn primary" id="btn-resume" type="button">RESUME</button>
+                <button class="btn" id="btn-quit" type="button">ABANDON</button>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <div id="install-prompt" class="install hidden">
+        <p>Install IRONFALL to play offline, fullscreen.</p>
+        <div class="row-actions">
+            <button class="btn primary small" id="btn-install" type="button">INSTALL</button>
+            <button class="btn ghost small" id="btn-install-later" type="button">LATER</button>
+        </div>
+    </div>
+
+    <script src="../shared/arcade.js"></script>
+    <script src="src/config.js"></script>
+    <script src="src/rng.js"></script>
+    <script src="src/mapdata.js"></script>
+    <script src="src/storage.js"></script>
+    <script src="src/champions.js"></script>
+    <script src="src/runes.js"></script>
+    <script src="src/items.js"></script>
+    <script src="src/combat.js"></script>
+    <script src="src/abilities.js"></script>
+    <script src="src/world.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/minimap.js"></script>
+    <script src="src/input.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

@@ -37,6 +37,7 @@
   - [BUCIO](#bucio)
   - [Territorio](#territorio)
   - [Snap Cam](#snap-cam)
+  - [IRONFALL](#ironfall)
 - [The tools](#the-tools)
   - [EADS Studio](#eads-studio)
 - [The hub page](#the-hub-page)
@@ -86,6 +87,7 @@
 | 29 | **STATS** | Play-data dashboard | Canvas 2D (charts) | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/stats-pwa/) |
 | 28 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
 | 30 | **CENSUS** | Sampling-theory tycoon | Canvas 2D | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/census-pwa/) |
+| 31 | **IRONFALL** | 3v3 lane MOBA, Warhammer 40k | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/ironfall-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -795,6 +797,52 @@ and a stack of image filters. Snaps live only on your device.
 `service-worker.js`. See [`snap-pwa/README.md`](snap-pwa/README.md).
 
 ---
+
+### IRONFALL
+
+**A 3v3 lane MOBA in the Warhammer 40k universe**, and the most mechanically
+ambitious thing in this arcade by a wide margin. You command one of eight
+champions against three enemy warbands across three lanes on a shattered
+cathedral-world: last-hit the wave, break the Bastion Towers, take the
+Reliquary, kill the Core.
+
+- **Three lanes, three Towers, two Cores** — a real Summoner's-Rift shape
+  compressed for a phone: lanes long enough to matter, a map small enough that
+  one screen's worth of camera is a meaningful decision
+- **Turret plates** — each Bastion Tower has three plates worth 62 armour
+  each. Lose them and the dive window opens. This is the single most important
+  number in the game and the reason tower timing is a decision rather than a
+  coin flip
+- **8 champions across 4 warbands** — Astartes, Warpbound, Tyranid Hive and
+  Guard & Grots, each with a passive that changes how you play, not just your
+  stat bar
+- **13 ability archetypes** — every one of the 32 abilities is *data* plus an
+  archetype name. Nothing in the roster has bespoke code, which is why eight
+  champions was a fortnight rather than a quarter
+- **9 runes, 27 loadouts** — a keystone row, a tempo row and a utility row,
+  applied at deployment
+- **Doctrine** — a champion unlocks a permanent bonus at 3, 6 and 10 wins with
+  it. Light on purpose: no grind
+- **12 items, no build paths** — a shop with forty items is a shop nobody
+  reads on a phone
+- **Three enemy doctrines** — Recruit, Guardsman, Necron Lord. Measured
+  last-hit *precision* of 0.777 / 0.809 / 0.831
+- **Warp haze instead of fog of war** — unseen enemies are drawn as
+  silhouettes. You know something is there; you can't aim at it
+- **Isometric faux-3D, no WebGL** — flat-shaded boxes on a linear axonometric
+  projection, painter-sorted on one dot-product key, DPR capped at 2, quality
+  tier chosen from sampled frame times
+- **Four node test suites, no framework** — including a Monte-Carlo balance
+  harness that runs AI-vs-AI matches and asserts on shape rather than on exact
+  numbers
+
+**Files:** `index.html` · `styles.css` · `manifest.json` ·
+`service-worker.js` · `icons/` · `og-cover.png` · `src/` (17 files) ·
+`tests/` (4 suites) · `scripts/gen-icons.mjs`
+
+[▶ Play](https://lucagandolfi77.github.io/random2/ironfall-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/ironfall-pwa) ·
+[README](ironfall-pwa/README.md)
 
 ### CENSUS
 

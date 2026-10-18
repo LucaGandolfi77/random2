@@ -77,7 +77,8 @@ jobs:
             fi
           done < <(find . \( -name 'manifest.json' -o -name '*.webmanifest' \) \
                      -not -path '*/node_modules/*' -not -path '*/.venv/*' \
-                     -not -path '*/dist/*' -not -path './EADS/*')
+                     -not -path '*/dist/*' -not -path '*/public/*' \
+                     -not -path './EADS/*')
           exit $fail
 
       - name: arcade.js exists only in shared/
@@ -99,6 +100,13 @@ jobs:
           node metro-pwa/sim.test.mjs
           node census-pwa/sim.test.mjs
           node new-star-soccer/sim.test.mjs
+          node ironfall-pwa/tests/sim.test.js
+          node ironfall-pwa/tests/roster.test.js
+          node ironfall-pwa/tests/boot.test.js
+          # Draw-call budget. The renderer is Canvas2D with one beginPath per
+          # polygon, so geometry is added face by face and nothing else in CI
+          # would notice the frame getting more expensive until a phone did.
+          node ironfall-pwa/tests/render.test.js
 
       - name: Analysis tooling tests
         run: |
@@ -141,6 +149,15 @@ jobs:
             }
             echo "$out" | tail -3
           done
+          # IRONFALL lives one folder deeper, so it takes its own path. It is
+          # the only smoke test that actually plays: it drives the stick, taps
+          # an ability and checks the match clock moved.
+          out=$(node ironfall-pwa/smoke.mjs http://localhost:8099/ironfall-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  ironfall-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
 
       - name: Balance report on PRs
         # A smaller session count than the full run: CI needs a verdict in

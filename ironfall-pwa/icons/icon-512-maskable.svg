@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Maskable: scaled to 76% and centred, so no element lands in the
+       outer 10% that Android's mask will crop. -->
+  <rect width="512" height="512" fill="#05070c"/>
+  <g transform="translate(256,256) scale(0.76) translate(-256,-256)">
+  <!-- IRONFALL icon.
+       Three lanes radiating from a gold Reliquary, with the blue warband at
+       one corner and the red at the opposite one. Bold and few on purpose:
+       this has to stay legible at 48px in a launcher, which is the size that
+       actually matters. An earlier version drew the full lane network and
+       read as a muddy X; a second drew strokes that spilled off the map
+       plate and read as scratches. Lanes are clipped to the plate and there
+       are only three of them. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#151b26"/>
+      <stop offset="1" stop-color="#05070c"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff2c4"/>
+      <stop offset="0.55" stop-color="#e8bb45"/>
+      <stop offset="1" stop-color="#9d6f10"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a9d0ff"/>
+      <stop offset="1" stop-color="#22507f"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffa3aa"/>
+      <stop offset="1" stop-color="#8d1f28"/>
+    </linearGradient>
+    <radialGradient id="halo">
+      <stop offset="0" stop-color="#e0b23c" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#e0b23c" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="plate">
+      <path d="M256 40 L472 256 L256 472 L40 256 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- the map plate -->
+  <g clip-path="url(#plate)">
+    <path d="M256 40 L472 256 L256 472 L40 256 Z" fill="#1b1e23"/>
+    <!-- river, across the middle -->
+    <path d="M40 256 L472 256" stroke="#242a32" stroke-width="60"/>
+    <!-- three lanes -->
+    <g stroke="#4d4436" stroke-width="40" stroke-linecap="round" fill="none">
+      <path d="M256 60 L256 256"/>
+      <path d="M256 256 L256 452"/>
+      <path d="M62 256 L450 256"/>
+    </g>
+    <g stroke="#6a5d47" stroke-width="18" stroke-linecap="round" fill="none" opacity="0.55">
+      <path d="M256 60 L256 452"/>
+      <path d="M62 256 L450 256"/>
+    </g>
+  </g>
+  <path d="M256 40 L472 256 L256 472 L40 256 Z" fill="none"
+        stroke="#3a414c" stroke-width="5"/>
+
+  <!-- the two warbands, at opposite corners of the main lane -->
+  <g>
+    <path d="M256 74 L306 124 L256 174 L206 124 Z" fill="url(#blue)"/>
+    <path d="M256 74 L306 124 L256 142 L206 124 Z" fill="#ffffff" opacity="0.24"/>
+    <path d="M256 338 L306 388 L256 438 L206 388 Z" fill="url(#red)"/>
+    <path d="M256 338 L306 388 L256 406 L206 388 Z" fill="#ffffff" opacity="0.2"/>
+  </g>
+
+  <!-- the Reliquary -->
+  <circle cx="256" cy="256" r="146" fill="url(#halo)"/>
+  <ellipse cx="256" cy="288" rx="80" ry="42" fill="none" stroke="#e0b23c"
+           stroke-width="6" opacity="0.5"/>
+  <path d="M256 176 L338 256 L256 336 L174 256 Z" fill="#5e4a0e"/>
+  <path d="M256 194 L314 256 L256 318 L198 256 Z" fill="url(#gold)"/>
+  <path d="M256 222 L288 256 L256 290 L224 256 Z" fill="#fff6d8" opacity="0.9"/>
+  </g>
+</svg>

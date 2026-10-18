@@ -1233,6 +1233,21 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="moba strategy arcade" data-playable="ironfall-pwa/" style="--c1:#e0b23c; --c2:#3f1f10; --tile-glow:rgba(224,178,60,.5); --shimmer-delay:2.9s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#3a2a08,#07090d)">&#9876;</div>
+            <h2>IRONFALL</h2>
+          </div>
+          <p class="tagline">A 3v3 lane MOBA in the Warhammer 40k universe. Last-hit the wave, break the Bastion Towers, take the Reliquary, kill the Core. 8 champions, 4 warbands, three enemy doctrines.</p>
+          <div class="chips"><span class="chip">MOBA</span><span class="chip">STRATEGY</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="ironfall-pwa/">&#9654;&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/ironfall-pwa" aria-label="IRONFALL source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="tool" style="--c1:#64748b; --c2:#0ea5e9; --tile-glow:rgba(100,116,139,.55); --shimmer-delay:1.75s">          <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#64748b,#0ea5e9)">🛠️</div>
             <h2>EADS Studio</h2>
@@ -2130,6 +2145,7 @@
       "snap-pwa":        ["shutter", { period: 3.4 }],
       "resort-pwa":      ["horizon", { period: 7 }],
       "nebbia-pwa":      ["chart",   { period: 9 }],
+      "ironfall-pwa":    ["grid",    { period: 4.4 }],
       "sartoria-pwa":    ["runway",  { period: 6.5 }]
     };
 
@@ -2575,6 +2591,7 @@
       { slug: "sartoria-pwa/",   name: "SARTORIA",    emoji: "✂️", key: "sartoria-pwa" },
       { slug: "stats-pwa/",      name: "STATS",       emoji: "📊", key: "stats-pwa" },
       { slug: "census-pwa/",     name: "CENSUS",      emoji: "📋", key: "census-pwa" }
+      { slug: "ironfall-pwa/",   name: "IRONFALL",    emoji: "♖", key: "ironfall-pwa" },
     ];
     function readJSON(key) { return R2.loadJSON(key, null); }
     function timeAgo(ts) {

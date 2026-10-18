@@ -39,7 +39,10 @@ node census-pwa/smoke.mjs      # in-browser (skips if no playwright)
 
 Each PWA is a plain static folder: `index.html`, `styles.css`, `game.js`,
 `manifest.json`, `service-worker.js`, `icons/`. No build step, no bundler.
-`bucio/` is the only exception (Vite + three.js).
+The bigger games use a `src/` of classic scripts under one `window.<NS>`
+namespace instead of a single `game.js` - `ironfall-pwa/` is the reference for
+that shape. `bucio/` (Vite + three.js) and `new-star-soccer/` (Vite +
+TypeScript) are the exceptions.
 
 ## Live
 
