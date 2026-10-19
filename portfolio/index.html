@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Luca Gandolfi — UI/UX &amp; Frontend Developer</title>
+<meta name="description" content="UI/UX and frontend developer. Interfaces that stay fast, accessible and usable offline — six case studies with the numbers behind them, from a 60-seed statistics engine to 1,800 objects in 30 draw calls.">
+<meta name="author" content="Luca Gandolfi">
+<link rel="canonical" href="https://lucagandolfi77.github.io/random2/portfolio/">
+
+<!-- SEO / sharing -->
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Luca Gandolfi — UI/UX &amp; Frontend Developer">
+<meta property="og:description" content="Interfaces that stay fast, accessible and usable offline. Six case studies, each with the numbers behind it.">
+<meta property="og:image" content="https://lucagandolfi77.github.io/random2/portfolio/shots/portfolio.png">
+<meta property="og:image:width" content="1920">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
+<meta name="theme-color" content="#0b0d16">
+<meta name="color-scheme" content="dark light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Luca Gandolfi">
+
+<style>
+  /* ===================================================================
+     Tokens. Copied from the arcade hub so this page is recognisably the
+     same hand as the rest of the work, rather than a separate design.
+     =================================================================== */
+  :root {
+    --bg: #0b0d16;
+    --surface: rgba(255, 255, 255, 0.045);
+    --surface-strong: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.09);
+    --text: #f4f5fb;
+    --muted: rgba(233, 236, 250, 0.66);
+    --faint: rgba(233, 236, 250, 0.44);
+    --accent: #8b5cf6;
+    --accent-2: #ec4899;
+    --ok: #34d399;
+    --warn: #fbbf24;
+    --radius: 24px;
+    --radius-sm: 14px;
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+  }
+
+  [data-theme="light"] {
+    --bg: #eef0f8;
+    --surface: rgba(18, 20, 40, 0.05);
+    --surface-strong: rgba(18, 20, 40, 0.09);
+    --border: rgba(18, 20, 40, 0.13);
+    --text: #171928;
+    --muted: rgba(28, 31, 55, 0.7);
+    --faint: rgba(28, 31, 55, 0.5);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    scroll-padding-top: 92px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Inter, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ---- Bilingual ----
+     Both languages live in the markup as sibling elements and CSS decides
+     which one shows. That means the page is readable and fully crawlable
+     with JavaScript off, the switch costs nothing, and translated sentences
+     can keep their own <strong> and <em> instead of being flattened to text. */
+  .it { display: none; }
+  [data-lang="it"] .en { display: none; }
+  [data-lang="it"] .it { display: revert; }
+
+  a { color: inherit; }
+  img { max-width: 100%; height: auto; display: block; }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  :focus-visible {
+    outline: 2px solid #a78bfa;
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* ---- Animated background ---- */
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    overflow: hidden;
+    background:
+      radial-gradient(1200px 800px at 85% -10%, rgba(139, 92, 246, 0.16), transparent 60%),
+      radial-gradient(1000px 700px at -10% 100%, rgba(236, 72, 153, 0.12), transparent 60%),
+      var(--bg);
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.35;
+    will-change: transform;
+  }
+  .blob-1 {
+    width: 46vmax; height: 46vmax;
+    left: -18vmax; top: -12vmax;
+    background: conic-gradient(from 120deg, #4f46e5, #7c3aed, #4f46e5);
+    animation: drift1 26s ease-in-out infinite alternate;
+  }
+  .blob-2 {
+    width: 40vmax; height: 40vmax;
+    right: -16vmax; bottom: -14vmax;
+    background: conic-gradient(from 300deg, #db2777, #9333ea, #db2777);
+    animation: drift2 32s ease-in-out infinite alternate;
+  }
+  @keyframes drift1 {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(9vmax, 6vmax, 0) scale(1.15); }
+  }
+  @keyframes drift2 {
+    from { transform: translate3d(0, 0, 0) scale(1.1); }
+    to   { transform: translate3d(-8vmax, -7vmax, 0) scale(0.95); }
+  }
+
+  /* ---- Layout ---- */
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding:
+      0 max(20px, var(--sar))
+      calc(48px + var(--sab))
+      max(20px, var(--sal));
+  }
+
+  /* ---- Top bar ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: calc(12px + var(--sat)) 0 12px;
+    margin-bottom: 8px;
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+  .topbar.stuck { border-bottom-color: var(--border); }
+  .brand {
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    margin-right: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .brand span {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.9);
+  }
+  .topnav { display: flex; gap: 4px; }
+  .topnav a {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 8px 11px;
+    border-radius: 10px;
+    transition: color 0.2s ease, background 0.2s ease;
+  }
+  .topnav a:hover { color: var(--text); background: var(--surface); }
+
+  .toggles { display: flex; gap: 8px; }
+  .toggle {
+    min-height: 38px;
+    min-width: 44px;
+    padding: 0 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .toggle:hover { color: var(--text); }
+  @media (hover: hover) { .toggle:hover { border-color: rgba(255,255,255,0.26); } }
+  [data-theme="light"] .toggle:hover { border-color: rgba(18,20,40,0.28); }
+
+  @media (max-width: 720px) {
+    .topnav { display: none; }
+  }
+
+  /* ---- Hero ---- */
+  .hero { padding: clamp(36px, 8vw, 86px) 0 clamp(30px, 5vw, 52px); }
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .kicker::before {
+    content: "";
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.9);
+  }
+  .hero h1 {
+    margin: 22px 0 0;
+    font-size: clamp(38px, 8.4vw, 76px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(120deg, #a78bfa, #e879f9, #fb7185);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero .role {
+    margin-top: 14px;
+    font-size: clamp(17px, 2.4vw, 22px);
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .hero .sub {
+    margin-top: 14px;
+    font-size: clamp(15.5px, 1.8vw, 18px);
+    color: var(--muted);
+    max-width: 62ch;
+  }
+
+  .hero-actions {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 50px;
+    padding: 0 22px;
+    border: 1px solid transparent;
+    border-radius: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    text-decoration: none;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary {
+    color: #fff;
+    background: linear-gradient(135deg, #6d5bf0, #b44df0);
+    box-shadow: 0 10px 26px -10px rgba(139, 92, 246, 0.8);
+  }
+  @media (hover: hover) { .btn-primary:hover { filter: brightness(1.12); } }
+  .btn-ghost {
+    color: var(--muted);
+    background: var(--surface);
+    border-color: var(--border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  @media (hover: hover) { .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.28); } }
+  [data-theme="light"] .btn-ghost:hover { border-color: rgba(18,20,40,0.28); }
+  [hidden] { display: none !important; }
+
+  /* ---- Stat strip ---- */
+  .stats {
+    margin-top: 34px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 10px;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 15px 16px;
+  }
+  .stat b {
+    display: block;
+    font-size: clamp(22px, 3.4vw, 27px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(120deg, #a78bfa, #e879f9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .stat .lbl {
+    display: block;
+    margin-top: 3px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  /* The labels carry a layout rule of their own, which outranks the plain
+     `.it { display: none }` above and would show both languages at once. So
+     they opt into the same language switch explicitly rather than relying on
+     specificity order. */
+  [data-lang] .stat .lbl { display: none; }
+  [data-lang="en"] .stat .lbl.en { display: block; }
+  [data-lang="it"] .stat .lbl.it { display: block; }
+
+  /* ---- Sections ---- */
+  section { padding-top: clamp(48px, 7vw, 86px); }
+  .sec-head { margin-bottom: 30px; max-width: 66ch; }
+  .sec-head h2 {
+    font-size: clamp(25px, 4vw, 34px);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+  }
+  .sec-head p { margin-top: 11px; color: var(--muted); font-size: 15.5px; }
+
+  /* ---- Case study ---- */
+  .case {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: clamp(24px, 4vw, 52px);
+    align-items: start;
+    padding: clamp(22px, 3vw, 30px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .case + .case { margin-top: 20px; }
+
+  /* Alternate which side the screenshot sits on, so a long scroll does not
+     read as one repeated template. */
+  .case.flip .case-media { order: -1; }
+  @media (max-width: 860px) {
+    .case, .case.flip { grid-template-columns: 1fr; }
+    .case.flip .case-media { order: 0; }
+  }
+
+  .case-num {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--accent-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .case h3 {
+    margin-top: 8px;
+    font-size: clamp(20px, 2.8vw, 25px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.18;
+  }
+  .case .tagline {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .steps { margin-top: 22px; display: grid; gap: 16px; }
+  .step h4 {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  .step p { font-size: 14.8px; color: var(--muted); }
+  .step.result p { color: var(--text); }
+  .step.result h4 { color: var(--ok); }
+
+  .case-meta {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+  .case-actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .case-actions .btn { min-height: 46px; padding: 0 18px; font-size: 14px; border-radius: 13px; }
+
+  .case-media figure {
+    margin: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    box-shadow: 0 26px 60px -34px rgba(0, 0, 0, 0.95);
+  }
+  .case-media img { width: 100%; }
+  .case-media figcaption {
+    margin-top: 11px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  /* ---- Client / craft / process cards ---- */
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+    gap: 16px;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .panel h3 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel h3 .ico { font-size: 19px; }
+  .panel p { margin-top: 10px; font-size: 14.6px; color: var(--muted); }
+
+  /* Unfilled client slots are visibly unfinished, so they cannot ship by
+     accident. Delete the block once the real project is written. */
+  .panel.placeholder {
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--warn) 42%, transparent);
+    background: color-mix(in srgb, var(--warn) 5%, var(--surface));
+  }
+  .panel.placeholder h3 { color: var(--warn); }
+  .todo {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--warn);
+    border: 1px dashed color-mix(in srgb, var(--warn) 50%, transparent);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+
+  /* ---- Process: decisions recovered from the source ---- */
+  .decisions { display: grid; gap: 14px; }
+  .decision {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: clamp(18px, 3vw, 40px);
+    padding: 22px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  @media (max-width: 760px) { .decision { grid-template-columns: 1fr; } }
+  .decision h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+  .decision p { font-size: 14.6px; color: var(--muted); }
+  .decision cite {
+    display: block;
+    margin-top: 9px;
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-style: normal;
+    color: var(--muted);
+  }
+  .decision blockquote {
+    font-size: 14.4px;
+    color: var(--text);
+    border-left: 2px solid var(--accent);
+    padding-left: 15px;
+  }
+
+  /* ---- The rest of the catalogue ---- */
+  .cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .cloud a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 9px 15px;
+    min-height: 42px;
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+  .cloud a:hover { color: var(--text); border-color: rgba(255,255,255,0.26); transform: translateY(-1px); }
+  [data-theme="light"] .cloud a:hover { border-color: rgba(18,20,40,0.28); }
+
+  /* ---- Contact ---- */
+  .contact-card {
+    text-align: center;
+    padding: clamp(34px, 6vw, 62px) clamp(22px, 4vw, 46px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .contact-card h2 {
+    font-size: clamp(26px, 4.6vw, 38px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+  .contact-card p { margin-top: 14px; color: var(--muted); max-width: 54ch; margin-inline: auto; }
+  .contact-card .hero-actions { justify-content: center; }
+
+  footer {
+    margin-top: clamp(48px, 7vw, 86px);
+    padding-top: 26px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .foot-badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 12px;
+  }
+  footer a { color: var(--muted); text-decoration: none; font-size: 13.5px; }
+  footer a:hover { color: var(--text); }
+  .foot-note { font-size: 13px; color: var(--muted); }
+
+  /* ---- Reduced motion: stop the animation, not just shorten it ---- */
+  @media (prefers-reduced-motion: reduce) {
+    .blob, .kicker::before { animation: none !important; }
+    html { scroll-behavior: auto; }
+    .btn:active, .cloud a:hover { transform: none; }
+    * { transition-duration: 0.01ms !important; }
+  }
+
+  [data-theme="light"] .blob { opacity: 0.16; }
+  [data-theme="light"] .status,
+  [data-theme="light"] .topbar { background: color-mix(in srgb, var(--bg) 82%, transparent); }
+  [data-theme="light"] .stat b {
+    background: linear-gradient(120deg, #6d4de0, #c2399b);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+</div>
+
+<!-- =====================================================================
+     EDIT ME — the four things that are blank on purpose:
+       1. the two hidden buttons in the hero  (email + LinkedIn)
+       2. the same two hidden buttons in #contact
+       3. the three .panel.placeholder blocks in #clients
+     Search for "FILL" to find all of them.
+     ===================================================================== -->
+
+<div class="wrap">
+
+  <header class="topbar" id="topbar">
+    <a class="brand" href="#top"><span></span>Luca Gandolfi</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#work" class="en">Work</a>
+      <a href="#work" class="it" lang="it">Lavori</a>
+      <a href="#craft" class="en">Craft</a>
+      <a href="#craft" class="it" lang="it">Metodo</a>
+      <a href="#process" class="en">Process</a>
+      <a href="#process" class="it" lang="it">Processo</a>
+      <a href="#contact" class="en">Contact</a>
+      <a href="#contact" class="it" lang="it">Contatti</a>
+    </nav>
+    <div class="toggles">
+      <button class="toggle" id="lang-btn" type="button" aria-label="Switch language">
+        <span class="en">IT</span><span class="it" lang="it">EN</span>
+      </button>
+      <button class="toggle" id="theme-btn" type="button" aria-label="Switch colour theme">
+        <span id="theme-label-en" class="en">Light</span><span id="theme-label-it" class="it" lang="it">Chiaro</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ================= HERO ================= -->
+    <section class="hero" aria-labelledby="hero-name">
+      <p class="kicker">
+        <span class="en">Interface &amp; product engineering</span>
+        <span class="it" lang="it">Interfacce e product engineering</span>
+      </p>
+
+      <h1 id="hero-name">Luca Gandolfi</h1>
+      <p class="role">
+        <span class="en">UI/UX &amp; frontend developer</span>
+        <span class="it" lang="it">Sviluppatore UI/UX e frontend</span>
+      </p>
+
+      <p class="sub">
+        <span class="en">
+          I design and build interfaces that stay fast, accessible and usable
+          with the network off. Forty-eight shipped projects, every one of them
+          without a runtime dependency — and six of them worth reading the
+          numbers on.
+        </span>
+        <span class="it" lang="it">
+          Progetto interfacce che restano veloci, accessibili e utilizzabili anche
+          senza rete. Quarantotto progetti pubblicati, nessuno con dipendenze a
+          runtime — e sei di loro meritano la pena di leggerne i numeri.
+        </span>
+      </p>
+
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#work">
+          <span class="en">See the work</span>
+          <span class="it" lang="it">Vedi i lavori</span>
+        </a>
+        <!-- FILL: set href to your mailto: and remove `hidden` -->
+        <a class="btn btn-ghost" href="#" hidden data-fill="email">
+          <span class="en">Email me</span>
+          <span class="it" lang="it">Scrivimi</span>
+        </a>
+        <!-- FILL: set href to your LinkedIn URL and remove `hidden` -->
+        <a class="btn btn-ghost" href="#" hidden data-fill="linkedin">
+          <span class="en">LinkedIn</span>
+          <span class="it" lang="it">LinkedIn</span>
+        </a>
+        <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77">
+          <span class="en">Source</span>
+          <span class="it" lang="it">Codice</span>
+        </a>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b>48</b>
+          <span class="lbl en">Projects shipped</span>
+          <span class="lbl it" lang="it">Progetti pubblicati</span>
+        </div>
+        <div class="stat"><b>0</b>
+          <span class="lbl en">Runtime dependencies</span>
+          <span class="lbl it" lang="it">Dipendenze runtime</span>
+        </div>
+        <div class="stat"><b>0</b>
+          <span class="lbl en">Binary art assets</span>
+          <span class="lbl it" lang="it">Asset grafici binari</span>
+        </div>
+        <div class="stat"><b>0</b>
+          <span class="lbl en">Trackers &amp; ads</span>
+          <span class="lbl it" lang="it">Tracker e pubblicità</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SELECTED WORK ================= -->
+    <section id="work" aria-labelledby="work-h">
+      <div class="sec-head">
+        <h2 id="work-h">
+          <span class="en">Six projects, and the numbers behind them</span>
+          <span class="it" lang="it">Sei progetti, e i numeri che ci stanno dietro</span>
+        </h2>
+        <p>
+          <span class="en">
+            Not a list of screenshots. Each one is a problem, the constraint
+            that made it interesting, what I actually did, and what it produced.
+          </span>
+          <span class="it" lang="it">
+            Non un elenco di screenshot. Ognuno è un problema, il vincolo che lo
+            ha reso interessante, cosa ho fatto davvero e cosa ne è uscito.
+          </span>
+        </p>
+      </div>
+
+      <!-- ---------- 01 CENSUS ---------- -->
+      <article class="case">
+        <div class="case-body">
+          <p class="case-num">01</p>
+          <h3>CENSUS</h3>
+          <p class="tagline">
+            <span class="en">A game about sampling, where every number on screen is real arithmetic — and the mistake it teaches is one spreadsheets hide.</span>
+            <span class="it" lang="it">Un gioco sul campionamento, dove ogni numero a schermo è aritmetica vera — e l'errore che insegna è uno che i fogli di calcolo nascondono.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">Sampling error is easy to claim and almost never demonstrated. A margin of error covers the luck of the draw; it cannot cover a biased sample. Most people learn that difference the expensive way.</span>
+                <span class="it" lang="it">L'errore di campionamento è facile da dichiarare e quasi mai dimostrato. Un margine di errore copre la sfortuna del sorteggio; non copre un campione distorto. Quasi tutti imparano la differenza nel modo più caro.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">The rules are the textbook ones, implemented for real: the margin of error is computed over the households that actually answered, a second variance term accounts for non-response, and a clamp floors the estimate so a unanimous sample of ten can never be reported as certain. The estimator is deliberately built without response-rate division, because the alternative hides the bias instead of measuring it.</span>
+                <span class="it" lang="it">Le regole sono quelle da manuale, implementate davvero: il margine di errore è calcolato sulle famiglie che hanno risposto, un secondo termine di varianza tiene conto della mancata risposta, e un limite inferiore impedisce che un campione unanime di dieci venga riportato come certo. L'estimatore è costruito di proposito senza divisione per il tasso di risposta, perché l'alternativa nasconde il bias invece di misurarlo.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">The simulation is DOM-free and canvas-free, so the arithmetic is unit-testable outside a browser. A 60-seed test proves a <em>claimed</em> 95% interval covers about 92% of the time when nothing is selective — and only about 75% under selective non-response. That gap is the entire game.</span>
+                <span class="it" lang="it">La simulazione è senza DOM e senza canvas, quindi l'aritmetica è testabile fuori dal browser. Un test su 60 semi dimostra che un intervallo <em>dichiarato</em> al 95% copre circa il 92% dei casi quando nulla è selettivo — e solo circa il 75% con non-risposta selettiva. Quello scarto è tutto il gioco.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="case-meta">
+            <span class="chip">~1,900 lines</span>
+            <span class="chip">Canvas 2D</span>
+            <span class="chip">0 dependencies</span>
+            <span class="chip">60-seed test</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="../census-pwa/">
+              <span class="en">Play it</span><span class="it" lang="it">Giocalo</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/census-pwa">
+              <span class="en">Source</span><span class="it" lang="it">Codice</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <img src="shots/census.png" width="1920" height="990" loading="lazy" decoding="async"
+                 alt="The CENSUS game showing a rejected population return: you published 20,626, the city holds 33,945, and your interval of plus or minus 2,444 did not contain the truth.">
+            <figcaption>
+              <span class="en">The screenshot is a real run. The player surveyed four wards of seven, and the game returns the verdict with a per-ward breakdown of where the estimate went wrong.</span>
+              <span class="it" lang="it">Lo screenshot è una partita reale. Il giocatore ha censito quattro quartieri su sette, e il gioco restituisce il verdetto con il dettaglio di dove la stima è andata storta.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ---------- 02 STATS ---------- -->
+      <article class="case flip">
+        <div class="case-body">
+          <p class="case-num">02</p>
+          <h3>STATS</h3>
+          <p class="tagline">
+            <span class="en">A dashboard whose first job is to admit what it cannot measure.</span>
+            <span class="it" lang="it">Una dashboard il cui primo compito è ammettere ciò che non riesce a misurare.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">"Nothing leaves your browser" is a claim clients rarely believe, and a dashboard that flatters its own numbers is worse than no dashboard at all.</span>
+                <span class="it" lang="it">"Nulla lascia il tuo browser" è un'affermazione che i clienti raramente credono, e una dashboard che lusinga i propri numeri è peggio di nessuna dashboard.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">Canvas 2D charts read straight out of the arcade's own local storage — run logs, score distributions, a weekday-by-hour heatmap, per-game records, and a JSON export. Plus an enumeration of every storage key with its byte size, so "nothing is sent anywhere" can be checked rather than believed.</span>
+                <span class="it" lang="it">Grafici Canvas 2D letti direttamente dal local storage dell'arcade — registro delle partite, distribuzioni dei punteggi, una mappa di calore per giorno e ora, record per gioco, ed export JSON. Più un elenco di ogni chiave di archiviazione con la sua dimensione in byte, così "non viene inviato nulla" si può verificare invece che credere.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">The heatmap is labelled an estimate, because playtime stores hourly and weekday marginals rather than a joint distribution — every cell is a product of two averages, and the caption says so. The score chart states outright that it mixes incompatible scoreboards. Where the data will not support a claim, the page says that instead of drawing a confident line.</span>
+                <span class="it" lang="it">La mappa di calore è etichettata come stima, perché il tempo giocato conserva marginali orarie e settimanali e non una distribuzione congiunta — ogni cella è il prodotto di due medie, e la didascalia lo dice. Il grafico dei punteggi dichiara apertamente che mescola classifiche incompatibili. Dove i dati non reggono un'affermazione, la pagina lo dice invece di tracciare una linea sicura.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="case-meta">
+            <span class="chip">~1,350 lines</span>
+            <span class="chip">26 save schemas</span>
+            <span class="chip">Shared chart lib</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="../stats-pwa/">
+              <span class="en">Open it</span><span class="it" lang="it">Aprilo</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/stats-pwa">
+              <span class="en">Source</span><span class="it" lang="it">Codice</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <img src="shots/stats.png" width="1920" height="1350" loading="lazy" decoding="async"
+                 alt="The STATS dashboard showing five summary tiles — 74 runs recorded, 13.1 hours played, 5 games touched, 27 days active, 6030 top score — above a score distribution histogram with the mean marked.">
+            <figcaption>
+              <span class="en">Seeded with a synthetic profile so the charts have something to draw. In real use it reads only your own device's storage.</span>
+              <span class="it" lang="it">Riempito con un profilo sintetico perché i grafici abbiano qualcosa da mostrare. Nell'uso reale legge solo l'archiviazione del tuo dispositivo.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ---------- 03 BUCIO ---------- -->
+      <article class="case">
+        <div class="case-body">
+          <p class="case-num">03</p>
+          <h3>BUCIO</h3>
+          <p class="tagline">
+            <span class="en">1,800 objects, about thirty draw calls, on a phone.</span>
+            <span class="it" lang="it">1.800 oggetti, circa trenta chiamate di disegno, su un telefono.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">A black hole is eating an Italian seaside town. Every gelato, wasp, parasol, boat, tourist and palazzo has to be interactive, destructible and replaceable. Done naively that is 1,800 draw calls per frame.</span>
+                <span class="it" lang="it">Un buco nero divora una cittadina di mare italiana. Ogni gelato, vespa, ombrellino, barca, turista e palazzo deve essere interattivo, distruttibile e sostituibile. Fatto alla cieca sono 1.800 chiamate di disegno per frame.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">three.js, with one merged geometry per object type rendered through a single instanced mesh. Devoured objects are never deleted — the instance is switched off and the town creates a replacement elsewhere, so the city stays alive without churning allocations. A 12-metre spatial grid answers "what is near the hole?" for the player and four AI rivals alike; buildings use a separate occupancy grid, because sharing one with chairs and lampposts leaves no room to build.</span>
+                <span class="it" lang="it">three.js, con una geometria fusa per tipo di oggetto renderizzata da un'unica instanced mesh. Gli oggetti divorati non vengono mai eliminati: l'istanza viene spenta e la città ne crea un'altra altrove, così la città resta viva senza allocare di continuo. Una griglia spaziale di 12 metri risponde a "cos'è vicino al buco?" per il giocatore e per i quattro rivali IA; gli edifici usano una griglia di occupazione separata, perché condividerne una con sedie e lampioni non lascia spazio per costruire.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">Roughly 1,800 objects in about 30 draw calls across two game modes, with three quality presets. Headless smoke tests in CI assert the properties that are easy to break: that the bigger map really is bigger, that an eliminated rival really disappears, that last-hole-standing really ends the match.</span>
+                <span class="it" lang="it">Circa 1.800 oggetti in una trentina di chiamate di disegno, su due modalità di gioco e con tre preset di qualità. I test headless in CI verificano le proprietà che si rompono più facilmente: che la mappa grande sia davvero più grande, che un rivale eliminato sparisca davvero, che l'ultimo buco finisca davvero la partita.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="case-meta">
+            <span class="chip">three.js + Vite</span>
+            <span class="chip">~6,900 lines</span>
+            <span class="chip">3 quality presets</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="../bucio/">
+              <span class="en">Play it</span><span class="it" lang="it">Giocalo</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/bucio">
+              <span class="en">Source</span><span class="it" lang="it">Codice</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <img src="shots/bucio.png" width="1280" height="720" loading="lazy" decoding="async"
+                 alt="BUCIO: a low-poly black hole suspended over a blue Mediterranean, swallowing buildings, cars and palm trees.">
+            <figcaption>
+              <span class="en">A real frame from a real run. Everything you can see here is drawn by code — there is not one image file in the project.</span>
+              <span class="it" lang="it">Un frame reale di una partita reale. Tutto ciò che vedi è disegnato dal codice: nel progetto non c'è un solo file immagine.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ---------- 04 SECTOR 7 ---------- -->
+      <article class="case flip">
+        <div class="case-body">
+          <p class="case-num">04</p>
+          <h3>SECTOR 7</h3>
+          <p class="tagline">
+            <span class="en">Sixteen thousand lines of offline space combat, where the greediest thing on screen is the thing most likely to kill you.</span>
+            <span class="it" lang="it">Sedicimila righe di combattimento spaziale offline, dove la cosa più avida a schermo è anche quella che ti uccide più spesso.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">In most twin-stick games, greed is a free multiplier. Here the energy you scoop up literally sits in an unbanked hold: it dies with you, and it only becomes score once you dock.</span>
+                <span class="it" lang="it">Nella maggior parte dei giochi twin-stick laavidità è un moltiplicatore gratuito. Qui l'energia che raccogli resta davvero in una stiva non depositata: muore con te e diventa punteggio solo quando attracchi.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">A two-pool damage model that makes weapon choice a decision rather than an upgrade path. Shields absorb and refill out of combat; armour never returns. Every shot carries a shield-damage and an armour-damage component, and the armour component is held off entirely while any shield remains. The consequence is that the free laser is always a real answer and the heavy round is always a tool for one specific problem. Five hulls each change what the ship <em>is</em>, across 135 possible fit-outs.</span>
+                <span class="it" lang="it">Un modello di danno a due pozze che rende la scelta dell'arma una decisione e non un percorso di potenziamento. Gli scudi assorbono e si ricaricano fuori dal combattimento; la corazza non torna mai. ogni colpo porta una componente di danno agli scudi e una alla corazza, e la componente corazza è trattenuta del tutto finché resta uno scudo. Ne segue che il laser gratuito è sempre una risposta valida e il round pesante è sempre lo strumento per un problema specifico. Cinque scafi cambiano ciascuno che cos'è <em>la nave</em>, su 135 configurazioni possibili.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">Twenty source modules, installable, fully playable with the network off, and still no build step — plain ES modules the browser runs directly. Node test suites cover the simulation, the renderer, boot and content.</span>
+                <span class="it" lang="it">Venti moduli sorgente, installabile, giocabile completamente offline e comunque senza build: moduli ES puri che il browser esegue direttamente. Le suite di test Node coprono simulazione, renderer, avvio e contenuti.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="case-meta">
+            <span class="chip">~16,100 lines</span>
+            <span class="chip">20 modules</span>
+            <span class="chip">135 fit-outs</span>
+            <span class="chip">No build step</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="../sector7-pwa/">
+              <span class="en">Play it</span><span class="it" lang="it">Giocalo</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/sector7-pwa">
+              <span class="en">Source</span><span class="it" lang="it">Codice</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <img src="shots/sector7.png" width="1920" height="1200" loading="lazy" decoding="async"
+                 alt="SECTOR 7 in flight: hull and shield bars top left, cargo hold and energy readouts, contract objectives, a radar top right, and the docking station with its touch controls bottom right.">
+            <figcaption>
+              <span class="en">In-sector flight. The hold reads 0/130 and energy 250 — the greed dial is a number on the screen, not a vibe.</span>
+              <span class="it" lang="it">In volo nel settore. La stiva segna 0/130 e l'energia 250: la bilancia dell'avidità è un numero sullo schermo, non un'impressione.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ---------- 05 IRONFALL ---------- -->
+      <article class="case">
+        <div class="case-body">
+          <p class="case-num">05</p>
+          <h3>IRONFALL</h3>
+          <p class="tagline">
+            <span class="en">A lane MOBA with one hard rule: the renderer can never touch the rules.</span>
+            <span class="it" lang="it">Un MOBA a corsie con una regola ferrea: il renderer non può mai toccare le regole.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">A multiplayer game is two systems pretending to be one: the simulation and the picture. Left alone they drift, and the game quietly becomes unfixable.</span>
+                <span class="it" lang="it">Un gioco multiplayer è due sistemi che fanno finta di essere uno: la simulazione e l'immagine. Lasciati andare divergono, e il gioco diventa silenziosamente irrimediabile.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">Two invariants, written into the code and stated at the top of the README. The simulation never reads a clock — time is advanced by the caller in exact steps, which is what makes a whole match reproducible from a seed and testable without a browser. The renderer never affects the simulation — transient particles and floaters expire in the world step, not in the draw call.</span>
+                <span class="it" lang="it">Due invarianti, scritte nel codice e dichiarate in cima al README. La simulazione non legge mai l'orologio — il tempo lo avanza il chiamante a passi esatti, ed è questo che rende una partita riproducibile da un seme e testabile senza browser. Il renderer non influenza mai la simulazione — particelle e numeri volatili scadono nel passo del mondo, non nella chiamata di disegno.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">About 15,700 lines with five Node test suites, one of which is a draw-call budget test. Nothing else in the pipeline would have noticed the frame getting more expensive until a phone did.</span>
+                <span class="it" lang="it">Circa 15.700 righe e cinque suite di test Node, una delle quali è un test sul budget delle chiamate di disegno. Nient'altro nella catena si sarebbe accorto che il frame stava diventando più costoso prima che lo notasse un telefono.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="case-meta">
+            <span class="chip">~15,700 lines</span>
+            <span class="chip">5 test suites</span>
+            <span class="chip">Draw-call budget</span>
+            <span class="chip">Seeded &amp; reproducible</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="../ironfall-pwa/">
+              <span class="en">Play it</span><span class="it" lang="it">Giocalo</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/ironfall-pwa">
+              <span class="en">Source</span><span class="it" lang="it">Codice</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <img src="shots/ironfall.png" width="1920" height="1200" loading="lazy" decoding="async"
+                 alt="IRONFALL: an isometric lane MOBA with three lanes, blue Bastion Towers, the gold Reliquary at centre, allied and enemy champions, a minimap and ability buttons.">
+            <figcaption>
+              <span class="en">Three lanes, eight champions, four warbands. The towers and the Reliquary are the map's hierarchy made visible at a glance.</span>
+              <span class="it" lang="it">Tre corsie, otto campioni, quattro guerre. Le torri e la Reliquia sono la gerarchia della mappa resa visibile a colpo d'occhio.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ---------- 06 PULSE ---------- -->
+      <article class="case flip">
+        <div class="case-body">
+          <p class="case-num">06</p>
+          <h3>PULSE</h3>
+          <p class="tagline">
+            <span class="en">A four-lane rhythm game with no music files — the track and the chart are the same data.</span>
+            <span class="it" lang="it">Un gioco ritmico a quattro corsie senza file musicali: il brano e la nota sono lo stesso dato.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">Rhythm games ship megabytes of audio plus a chart hand-synced to it. Every asset is something to host, license and keep in step with the notes forever.</span>
+                <span class="it" lang="it">I giochi ritmici distribuiscono megabyte di audio più una nota sincronizzata a mano. Ogni asset è qualcosa da ospitare, licenziare e tenere allineato alle note per sempre.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">One 32-bit seed decides the key, the tempo, the chord progression, the drum pattern and the melody — and the note chart is then read back out of that same melody, so a note can never disagree with the sound. Three difficulties are three filters over one melody: Easy takes every fourth note, Hard takes every note with kick and snare accents.</span>
+                <span class="it" lang="it">Un seme a 32 bit decide tonalità, tempo, progressione armonica, pattern di batteria e melodia — e la mappa delle note viene poi riletta da quella stessa melodia, così una nota non può mai contraddire il suono. Tre difficoltà sono tre filtri sulla stessa melodia: Facile prende una nota ogni quattro, Difficile prende ogni nota con accenti di cassa e rullante.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">The generator is deterministic and DOM-free, so it is tested across 500 seeds in Node. Playable time arrives in 12-second chunks, each rendered offline and scheduled as the previous one finishes — roughly 450ms of playable time before the first byte of audio is requested. <code>#seed=20261018</code> in the URL reproduces a track exactly.</span>
+                <span class="it" lang="it">Il generatore è deterministico e senza DOM, quindi è testato su 500 semi in Node. Il tempo giocabile arriva a blocchi di 12 secondi, ciascuno renderizzato offline e programmato quando il precedente finisce — circa 450ms di gioco prima del primo byte audio richiesto. <code>#seed=20261018</code> nell'URL riproduce un brano esattamente.</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="case-meta">
+            <span class="chip">~2,700 lines</span>
+            <span class="chip">0 audio assets</span>
+            <span class="chip">500 seeds tested</span>
+            <span class="chip">Seeded tracks</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="../pulse-pwa/">
+              <span class="en">Play it</span><span class="it" lang="it">Giocalo</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/pulse-pwa">
+              <span class="en">Source</span><span class="it" lang="it">Codice</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <img src="shots/pulse.png" width="1920" height="1200" loading="lazy" decoding="async"
+                 alt="PULSE: four lanes labelled D, F, J and K with a red hold note falling, score and accuracy readouts, and 125 BPM with the key A phrygian generated from the seed.">
+            <figcaption>
+              <span class="en">125 BPM in A phrygian — not chosen by a designer, derived from the seed. The four lanes are the only controls.</span>
+              <span class="it" lang="it">125 BPM in La frigio — non scelto da un designer, ma derivato dal seme. Le quattro corsie sono gli unici comandi.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ================= CLIENT WORK ================= -->
+    <section id="clients" aria-labelledby="clients-h">
+      <div class="sec-head">
+        <h2 id="clients-h">
+          <span class="en">Client work</span>
+          <span class="it" lang="it">Lavori per i clienti</span>
+        </h2>
+        <p>
+          <span class="en">Commissioned work, separate from the self-directed projects above.</span>
+          <span class="it" lang="it">Progetti commissionati, separati dai progetti personali qui sopra.</span>
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <!-- FILL: replace this whole block with the real project. Client, your
+             role, the problem, the outcome, and a link if there is one. -->
+        <div class="panel placeholder">
+          <h3><span class="en">Client name</span><span class="it" lang="it">Nome del cliente</span></h3>
+          <p>
+            <span class="en">What they asked for, what you actually built, and what changed as a result. Numbers where you have them — load time, conversion, hours saved, screens shipped.</span>
+            <span class="it" lang="it">Cosa ti hanno chiesto, cosa hai costruito davvero e cosa è cambiato di conseguenza. Numeri quando disponibili — tempi di caricamento, conversioni, ore risparmiate, schermate realizzate.</span>
+          </p>
+          <span class="todo">TODO — replace</span>
+        </div>
+
+        <div class="panel placeholder">
+          <h3><span class="en">Client name</span><span class="it" lang="it">Nome del cliente</span></h3>
+          <p>
+            <span class="en">Same shape as above. Keep it to the point — a hiring manager reads three of these, not thirty.</span>
+            <span class="it" lang="it">Stessa struttura di sopra. Tieni concise le cose — chi assume ne legge tre, non trenta.</span>
+          </p>
+          <span class="todo">TODO — replace</span>
+        </div>
+
+        <div class="panel placeholder">
+          <h3><span class="en">Client name</span><span class="it" lang="it">Nome del cliente</span></h3>
+          <p>
+            <span class="en">Third slot. If you only have two real projects, delete this block rather than filling it with something thin.</span>
+            <span class="it" lang="it">Terzo slot. Se hai solo due progetti reali, elimina questo blocco invece di riempirlo con qualcosa di fragile.</span>
+          </p>
+          <span class="todo">TODO — replace</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CRAFT ================= -->
+    <section id="craft" aria-labelledby="craft-h">
+      <div class="sec-head">
+        <h2 id="craft-h">
+          <span class="en">How the interface work is done</span>
+          <span class="it" lang="it">Come si fa il lavoro di interfaccia</span>
+        </h2>
+        <p>
+          <span class="en">The parts that apply to every project, rather than to one.</span>
+          <span class="it" lang="it">Le parti che valgono per ogni progetto, non per uno solo.</span>
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="panel">
+          <h3><span class="ico">🎨</span>
+            <span class="en">Design tokens, not hardcoded values</span>
+            <span class="it" lang="it">Token di design, non valori scritti a mano</span>
+          </h3>
+          <p>
+            <span class="en">Colour, radius and spacing are custom properties. A theme is a repaint, not a rewrite: the chart library reads its colours out of CSS at draw time, so switching between light and dark restyles data instead of re-authoring markup.</span>
+            <span class="it" lang="it">Colori, raggi e spazi sono custom property. Un tema è un ridisegno, non una riscrittura: la libreria di grafici legge i colori dal CSS al momento del disegno, così passare da chiaro a scuro ristilizza i dati invece di riscrivere il markup.</span>
+          </p>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ico">♿</span>
+            <span class="en">Accessible by construction</span>
+            <span class="it" lang="it">Accessibile per costruzione</span>
+          </h3>
+          <p>
+            <span class="en">Keyboard reachable throughout, a visible focus ring on every control, 48px minimum touch targets, aria-pressed on toggles, aria-live on status. Canvas games are driven by real keyboard and touch input rather than a private event path, so the browser's own accessibility behaviour still applies.</span>
+            <span class="it" lang="it">Navigabile da tastiera ovunque, anello di focus visibile su ogni controllo, area touch minima di 48px, aria-pressed sui toggle, aria-live sugli stati. I giochi su canvas ricevono input reale da tastiera e touch invece di un canale eventi privato, così resta valido il comportamento di accessibilità del browser stesso.</span>
+          </p>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ico">📱</span>
+            <span class="en">Phone-first, honestly</span>
+            <span class="it" lang="it">Mobile-first, davvero</span>
+          </h3>
+          <p>
+            <span class="en">Not a desktop layout that survives being squeezed. Safe-area insets are variables rather than hardcoded padding, so the same page respects a notch and a home indicator. These projects were designed on a phone and then made to scale up.</span>
+            <span class="it" lang="it">Non un layout da desktop che regge quando lo stringi. Le inset di safe-area sono variabili e non padding scritto a mano, così la stessa pagina rispetta notch e barra di navigazione. Questi progetti sono stati pensati sul telefono e poi fatti crescere.</span>
+          </p>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ico">🎬</span>
+            <span class="en">Motion that can be turned off</span>
+            <span class="it" lang="it">Movimento che si può spegnere</span>
+          </h3>
+          <p>
+            <span class="en">prefers-reduced-motion stops the animation rather than shortening it — every keyframe, the parallax background and the smooth scrolling all go still, because none of that movement carries information.</span>
+            <span class="it" lang="it">prefers-reduced-motion ferma l'animazione invece di accorciarla — spariscono ogni keyframe, lo sfondo parallattico e lo scorrimento fluido, perché quel movimento non porta informazione.</span>
+          </p>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ico">⚡</span>
+            <span class="en">Budgets, checked in CI</span>
+            <span class="it" lang="it">Budget, verificati in CI</span>
+          </h3>
+          <p>
+            <span class="en">Procedural art means there is not one sprite sheet to download — the entire arcade ships 44 PNGs and every one of them is an app icon. Draw-call counts are asserted by tests, because a frame that quietly got more expensive is the failure mode nobody notices until a phone is in someone's hand.</span>
+            <span class="it" lang="it">L'arte procedurale significa che non c'è nessuno sprite sheet da scaricare — l'intero arcade pubblica 44 PNG e sono tutti icone delle app. Il numero di chiamate di disegno è verificato dai test, perché un frame diventato più costoso è il fallimento che nessuno nota finché un telefono non è in mano a qualcuno.</span>
+          </p>
+        </div>
+
+        <div class="panel">
+          <h3><span class="ico">📴</span>
+            <span class="en">Works with the network off</span>
+            <span class="it" lang="it">Funziona senza rete</span>
+          </h3>
+          <p>
+            <span class="en">Every project is an installable PWA with its own service worker and its own cache, so installing one never interferes with another. State lives in localStorage and IndexedDB on the device; there is no server-side state anywhere in the whole repository.</span>
+            <span class="it" lang="it">Ogni progetto è una PWA installabile con il proprio service worker e la propria cache, così installarne uno non disturba gli altri. Lo stato vive in localStorage e IndexedDB sul dispositivo; in tutto il repository non esiste stato lato server.</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PROCESS ================= -->
+    <section id="process" aria-labelledby="process-h">
+      <div class="sec-head">
+        <h2 id="process-h">
+          <span class="en">Design decisions, recovered from the source</span>
+          <span class="it" lang="it">Decisioni di design, recuperate dal sorgente</span>
+        </h2>
+        <p>
+          <span class="en">
+            There are no Figma files behind these projects. The reasoning survives in the
+            code instead, as comments that explain <em>why</em> rather than what — which is
+            a more useful artefact than a mockup, because it still applies to the next
+            problem.
+          </span>
+          <span class="it" lang="it">
+            Dietro questi progetti non ci sono file Figma. Il ragionamento sopravvive
+            nel codice, in commenti che spiegano il <em>perché</em> e non il cosa — un
+            artefatto più utile di un mockup, perché vale ancora per il problema dopo.
+          </span>
+        </p>
+      </div>
+
+      <div class="decisions">
+        <div class="decision">
+          <div>
+            <h3>
+              <span class="en">Removing the hitbox made the game</span>
+              <span class="it" lang="it">Togliere la hitbox ha fatto il gioco</span>
+            </h3>
+            <p>
+              <span class="en">In a scrolling shooter the player expects a hitbox. This one has none: nothing in the code can collide with the plane. A life is lost only when a threat reaches the bottom edge, which turns a reflex test into a pure targeting puzzle — and it made the iPhone build possible.</span>
+              <span class="it" lang="it">In uno shooter a scorrimento il giocatore si aspetta una hitbox. Qui non ce n'è: nulla nel codice può collidere con l'aereo. Una vita si perde solo quando una minaccia arriva al bordo inferiore, il che trasforma un test di riflessi in un rompicapo di mira — e ha reso possibile la build per iPhone.</span>
+            </p>
+            <cite>plane-pwa/README.md:23</cite>
+          </div>
+          <blockquote>
+            <span class="en">"The plane has <strong>no hitbox at all</strong> — nothing in the code collides with it."</span>
+            <span class="it" lang="it">"L'aereo <strong>non ha hitbox</strong> — niente nel codice può collidere con lui."</span>
+          </blockquote>
+        </div>
+
+        <div class="decision">
+          <div>
+            <h3>
+              <span class="en">A variable timestep, handled once</span>
+              <span class="it" lang="it">Un timestep variabile, gestito una volta sola</span>
+            </h3>
+            <p>
+              <span class="en">Growth distance has to be accumulated in a per-tip value rather than measured from the last saved point each frame. At a variable timestep the obvious version reads back exactly speed × dt and never reaches the spacing threshold, so a tendril grows forever without ever committing a segment.</span>
+              <span class="it" lang="it">La distanza di crescita va accumulata in un valore per tendina invece di essere misurata ogni frame dall'ultimo punto salvato. Con un timestep variabile, la versione ovvia rilegge esattamente velocità × dt e non raggiunge mai la soglia di spaziatura: una tendina crescerebbe per sempre senza mai commettere un segmento.</span>
+            </p>
+            <cite>mycel-pwa/game.js:257</cite>
+          </div>
+          <blockquote>
+            <span class="en">"La distanza percorsa va accumulata" — and the comment above it explains exactly which measurement silently fails.</span>
+            <span class="it" lang="it">"La distanza percorsa va accumulata" — e il commento sopra spiega proprio quale misurazione fallisce in silenzio.</span>
+          </blockquote>
+        </div>
+
+        <div class="decision">
+          <div>
+            <h3>
+              <span class="en">The renderer is not allowed an opinion</span>
+              <span class="it" lang="it">Il renderer non ha diritto a opinioni</span>
+            </h3>
+            <p>
+              <span class="en">Two invariants keep the game testable: the simulation never reads a clock, and the renderer never affects the simulation. Particles expire in the world step rather than in draw — because a backgrounded tab stops drawing but keeps stepping, and cleanup that lives in the renderer is cleanup that stops happening.</span>
+              <span class="it" lang="it">Due invarianti tengono il gioco testabile: la simulazione non legge mai l'orologio e il renderer non influenza mai la simulazione. Le particelle scadono nel passo del mondo e non nel disegno — perché una scheda in secondo piano smette di disegnare ma continua a avanzare, e la pulizia che vive nel renderer è pulizia che smette di accadere.</span>
+            </p>
+            <cite>ironfall-pwa/README.md:163–164</cite>
+          </div>
+          <blockquote>
+            <span class="en">"Cleanup that lives in the renderer is cleanup that stops happening."</span>
+            <span class="it" lang="it">"La pulizia che vive nel renderer è pulizia che smette di accadere."</span>
+          </blockquote>
+        </div>
+
+        <div class="decision">
+          <div>
+            <h3>
+              <span class="en">Canvas cannot read a CSS variable</span>
+              <span class="it" lang="it">Il canvas non sa leggere una variabile CSS</span>
+            </h3>
+            <p>
+              <span class="en">Assigning <code>var(--accent)</code> to a canvas stroke is not an error — it silently keeps the previous colour, which on a light card means black lines that appear to have no styling at all. The fix is a small resolver that reads the computed value at draw time.</span>
+              <span class="it" lang="it">Assegnare <code>var(--accent)</code> al tratto di un canvas non è un errore — mantiene silenziosamente il colore precedente, che su una card chiara significa righe nere che sembrano non avere stile. La soluzione è un piccolo resolver che legge il valore calcolato al momento del disegno.</span>
+            </p>
+            <cite>shared/chart.js:44 · stats-pwa/README.md:84</cite>
+          </div>
+          <blockquote>
+            <span class="en">"Canvas does not understand <code>css var()</code>."</span>
+            <span class="it" lang="it">"Il canvas non capisce <code>css var()</code>."</span>
+          </blockquote>
+        </div>
+
+        <div class="decision">
+          <div>
+            <h3>
+              <span class="en">A chart nobody drew</span>
+              <span class="it" lang="it">Un grafico che nessuno ha disegnato</span>
+            </h3>
+            <p>
+              <span class="en">A canvas inside a hidden panel measures zero. Redraw on the first frame after a tab becomes visible, or every chart in that panel comes out blank — a bug that only ever shows up on the machine where you did not write it.</span>
+              <span class="it" lang="it">Un canvas dentro un pannello nascosto misura zero. Bisogna ridisegnare al primo frame dopo che una scheda diventa visibile, o ogni grafico di quel pannello esce vuoto — un bug che si vede solo sulla macchina dove non lo hai scritto.</span>
+            </p>
+            <cite>stats-pwa/app.js:657</cite>
+          </div>
+          <blockquote>
+            <span class="en">"Canvases in a hidden panel measure zero, so redraw after the panel is visible."</span>
+            <span class="it" lang="it">"I canvas in un pannello nascosto misurano zero, quindi ridisegna dopo che il pannello è visibile."</span>
+          </blockquote>
+        </div>
+
+        <div class="decision">
+          <div>
+            <h3>
+              <span class="en">Making the free option the right one</span>
+              <span class="it" lang="it">Far sì che l'opzione gratuita sia quella giusta</span>
+            </h3>
+            <p>
+              <span class="en">Every ship starts with a blaster that is never removed and never upgraded. Because it is permanently available, the expensive capacitor round can never be a straight upgrade — it is a tool for shields specifically. The economy is designed so the starting weapon stays worth using.</span>
+              <span class="it" lang="it">Ogni nave parte con un laser che non viene mai tolto né potenziato. Essendo sempre disponibile, il costoso round a condensatori non può mai essere un potenziamento ovvio — è uno strumento contro gli scudi in particolare. L'economia è progettata perché l'arma iniziale resti utile.</span>
+            </p>
+            <cite>sector7-pwa/README.md:104</cite>
+          </div>
+          <blockquote>
+            <span class="en">"Never a straight upgrade — it is a tool for one specific problem."</span>
+            <span class="it" lang="it">"Mai un potenziamento diretto — è uno strumento per un problema specifico."</span>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= EVERYTHING ELSE ================= -->
+    <section id="more" aria-labelledby="more-h">
+      <div class="sec-head">
+        <h2 id="more-h">
+          <span class="en">Also built</span>
+          <span class="it" lang="it">Costruito anche</span>
+        </h2>
+        <p>
+          <span class="en">
+            Everything else in the arcade. All of it runs in the browser, installs
+            to a phone, and works with the network off.
+          </span>
+          <span class="it" lang="it">
+            Tutto il resto dell'arcade. Funziona nel browser, si installa sul
+            telefono e regge senza rete.
+          </span>
+        </p>
+      </div>
+
+      <div class="cloud">
+        <a href="../sector7-pwa/">🛰️ <span class="en">Sector 7</span><span class="it" lang="it">Sector 7</span></a>
+        <a href="../lumen-pwa/">🌊 <span class="en">Lumen</span><span class="it" lang="it">Lumen</span></a>
+        <a href="../bucio/">🕳️ <span class="en">Bucio</span><span class="it" lang="it">Bucio</span></a>
+        <a href="../ironfall-pwa/">♖ <span class="en">Ironfall</span><span class="it" lang="it">Ironfall</span></a>
+        <a href="../pulse-pwa/">🎵 <span class="en">Pulse</span><span class="it" lang="it">Pulse</span></a>
+        <a href="../snap-pwa/">👻 <span class="en">Snap Cam</span><span class="it" lang="it">Snap Cam</span></a>
+        <a href="../new-star-soccer/">⚽ <span class="en">New Star Soccer</span><span class="it" lang="it">New Star Soccer</span></a>
+        <a href="https://github.com/LucaGandolfi77/random2/tree/main/EADS">🛠️ <span class="en">EADS Studio</span><span class="it" lang="it">EADS Studio</span></a>
+        <a href="https://github.com/LucaGandolfi77/random2/tree/main/pokesurvivor-bot">🤖 <span class="en">PokéSurvivor bot</span><span class="it" lang="it">Bot PokéSurvivor</span></a>
+        <a href="../metro-pwa/">🚇 <span class="en">Linea Rossa</span><span class="it" lang="it">Linea Rossa</span></a>
+        <a href="../census-pwa/">📋 <span class="en">Census</span><span class="it" lang="it">Census</span></a>
+        <a href="../acqua-pwa/">⛲ <span class="en">Acqua</span><span class="it" lang="it">Acqua</span></a>
+        <a href="../alveare-pwa/">🐝 <span class="en">Alveare</span><span class="it" lang="it">Alveare</span></a>
+        <a href="../nebbia-pwa/">🗺️ <span class="en">Nebbia</span><span class="it" lang="it">Nebbia</span></a>
+        <a href="../madre-pwa/">🫙 <span class="en">Madre</span><span class="it" lang="it">Madre</span></a>
+        <a href="../sartoria-pwa/">✂️ <span class="en">Sartoria</span><span class="it" lang="it">Sartoria</span></a>
+        <a href="../resort-pwa/">🏝️ <span class="en">Isola Resort</span><span class="it" lang="it">Isola Resort</span></a>
+        <a href="../territorio-pwa/">🚩 <span class="en">Territorio</span><span class="it" lang="it">Territorio</span></a>
+        <a href="../formica-pwa/">🐜 <span class="en">Formica</span><span class="it" lang="it">Formica</span></a>
+        <a href="../mycel-pwa/">🍄 <span class="en">Mycel</span><span class="it" lang="it">Mycel</span></a>
+        <a href="../static-pwa/">📺 <span class="en">Static</span><span class="it" lang="it">Static</span></a>
+        <a href="../sini-pwa/">🖌️ <span class="en">Sini</span><span class="it" lang="it">Sini</span></a>
+        <a href="../anthology-pwa/">📚 <span class="en">The Library</span><span class="it" lang="it">La Libreria</span></a>
+        <a href="../mustang-pwa/">✈️ <span class="en">Mustang 1942</span><span class="it" lang="it">Mustang 1942</span></a>
+        <a href="../king-shot-pwa/">👑 <span class="en">King Shot</span><span class="it" lang="it">King Shot</span></a>
+        <a href="../plane-pwa/">🛩️ <span class="en">Plane Shooter</span><span class="it" lang="it">Plane Shooter</span></a>
+        <a href="../snake-pwa/">🐍 <span class="en">Snake</span><span class="it" lang="it">Snake</span></a>
+        <a href="../slot-pwa/">🎰 <span class="en">Slot Machine</span><span class="it" lang="it">Slot Machine</span></a>
+        <a href="../tiny-tower-pwa/">🏗️ <span class="en">Mini Tower</span><span class="it" lang="it">Mini Tower</span></a>
+        <a href="../virtual-farm-pwa/">🌾 <span class="en">Farm Tycoon</span><span class="it" lang="it">Farm Tycoon</span></a>
+        <a href="../viti-pwa/">🪛 <span class="en">Viti &amp; Lastre</span><span class="it" lang="it">Viti &amp; Lastre</span></a>
+        <a href="../pokemon-go-pwa/">🔴 <span class="en">Pokéball GO</span><span class="it" lang="it">Pokéball GO</span></a>
+        <a href="../">🎮 <span class="en">The full arcade</span><span class="it" lang="it">L'intero arcade</span></a>
+      </div>
+    </section>
+
+    <!-- ================= CONTACT ================= -->
+    <section id="contact" aria-labelledby="contact-h">
+      <div class="contact-card">
+        <h2 id="contact-h">
+          <span class="en">Let's build something</span>
+          <span class="it" lang="it">Costruiamo qualcosa</span>
+        </h2>
+        <p>
+          <span class="en">
+            Product work, interface work, or the unglamorous parts in between —
+            performance, accessibility, offline behaviour. The fastest way to start
+            is a short message about what you are trying to ship.
+          </span>
+          <span class="it" lang="it">
+            Lavoro di prodotto, lavoro di interfaccia, o le parti meno appariscenti
+            nel mezzo — prestazioni, accessibilità, comportamento offline. Il modo
+            più rapido per iniziare è un breve messaggio su quello che vuoi
+            pubblicare.
+          </span>
+        </p>
+        <div class="hero-actions">
+          <!-- FILL: same two buttons as the hero -->
+          <a class="btn btn-primary" href="#" hidden data-fill="email">
+            <span class="en">Email me</span><span class="it" lang="it">Scrivimi</span>
+          </a>
+          <a class="btn btn-ghost" href="#" hidden data-fill="linkedin">
+            <span class="en">LinkedIn</span><span class="it" lang="it">LinkedIn</span>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77">
+            <span class="en">GitHub</span><span class="it" lang="it">GitHub</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="cloud">
+        <span class="foot-badge">HTML5 Canvas</span>
+        <span class="foot-badge">WebAudio</span>
+        <span class="foot-badge">Service Workers</span>
+        <span class="foot-badge">TypeScript</span>
+        <span class="foot-badge">Python</span>
+        <span class="foot-badge">Zero build*</span>
+      </div>
+      <p class="foot-note">
+        <span class="en">*plain ES modules, except two projects that build with Vite · MIT licensed</span>
+        <span class="it" lang="it">*moduli ES puri, tranne due progetti che compilano con Vite · licenza MIT</span>
+      </p>
+    </footer>
+
+  </main>
+</div>
+
+<script src="service-worker.js"></script>
+<script>
+/*
+ * Everything below is progressive enhancement. With JavaScript off the page
+ * is still complete and readable: the markup carries both languages and CSS
+ * shows the English one, so the only things lost are the remembered
+ * preferences.
+ */
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+  var LANG_KEY = "portfolio-lang";
+  var THEME_KEY = "portfolio-theme";
+
+  function store(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* private mode */ }
+  }
+  function read(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+
+  /* ---- Language ----
+     English is the default because it is what the markup contains; the
+     toggle only ever switches away from it and back. */
+  var lang = read(LANG_KEY);
+  if (!lang) {
+    var nav = (navigator.language || "en").toLowerCase();
+    lang = nav.indexOf("it") === 0 ? "it" : "en";
+  }
+
+  function setLang(next) {
+    lang = next;
+    root.setAttribute("data-lang", next);
+    /* Keep the document language honest so screen readers switch voice
+       rather than reading Italian with an English pronunciation. */
+    root.setAttribute("lang", next);
+    store(LANG_KEY, next);
+    var btn = document.getElementById("lang-btn");
+    btn.setAttribute("aria-label", next === "it" ? "Passa all'italiano" : "Switch to Italian");
+  }
+
+  document.getElementById("lang-btn").addEventListener("click", function () {
+    setLang(lang === "it" ? "en" : "it");
+  });
+  setLang(lang);
+
+  /* ---- Theme ---- */
+  var theme = read(THEME_KEY);
+  if (theme !== "light") theme = "dark";
+
+  function setTheme(next) {
+    theme = next;
+    root.setAttribute("data-theme", next);
+    store(THEME_KEY, next);
+    document.getElementById("theme-label-en").textContent = next === "dark" ? "Light" : "Dark";
+    document.getElementById("theme-label-it").textContent = next === "dark" ? "Chiaro" : "Scuro";
+    document.getElementById("theme-btn").setAttribute(
+      "aria-label", next === "dark" ? "Switch to light theme" : "Switch to dark theme");
+  }
+
+  document.getElementById("theme-btn").addEventListener("click", function () {
+    setTheme(theme === "dark" ? "light" : "dark");
+  });
+  setTheme(theme);
+
+  /* ---- Top bar hairline, only once the page has actually scrolled ---- */
+  var bar = document.getElementById("topbar");
+  var ticking = false;
+  window.addEventListener("scroll", function () {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(function () {
+      bar.classList.toggle("stuck", window.scrollY > 8);
+      ticking = false;
+    });
+  }, { passive: true });
+
+  /* ---- Contact links ----
+     The email and LinkedIn buttons ship hidden because the details are not
+     filled in yet. If one still has its placeholder href, keep it hidden
+     rather than shipping a link that goes nowhere. */
+  var EMPTY = "#";
+  Array.prototype.forEach.call(document.querySelectorAll("[data-fill]"), function (a) {
+    if (!a.getAttribute("href") || a.getAttribute("href") === EMPTY) {
+      a.hidden = true;
+    } else {
+      a.removeAttribute("data-fill");
+    }
+  });
+})();
+</script>
+</body>
+</html>

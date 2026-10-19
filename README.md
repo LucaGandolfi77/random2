@@ -41,6 +41,7 @@
   - [PULSE](#pulse)
 - [The tools](#the-tools)
   - [EADS Studio](#eads-studio)
+- [The portfolio page](#the-portfolio-page)
 - [The hub page](#the-hub-page)
 - [Architecture](#architecture)
 - [Deployment (GitHub Pages)](#deployment-github-pages)
@@ -90,6 +91,7 @@
 | 30 | **CENSUS** | Sampling-theory tycoon | Canvas 2D | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/census-pwa/) |
 | 31 | **IRONFALL** | 3v3 lane MOBA, Warhammer 40k | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/ironfall-pwa/) |
 | 32 | **PULSE** | Procedural rhythm game | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pulse-pwa/) |
+| 33 | **Portfolio** | EN/IT case-study site | HTML + CSS + JS | ✅ | [⌘ Open](https://lucagandolfi77.github.io/random2/portfolio/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -973,6 +975,36 @@ python app.py
 `tests/` (pytest suite).
 
 ---
+
+## The portfolio page
+
+`portfolio/` is the same work presented for a different reader. The arcade is
+a shelf of things to play; the portfolio is six case studies written as
+*problem → constraint → approach → result*, with the numbers attached:
+
+**CENSUS** (a claimed 95% interval that covers only ~75% under bias) ·
+**STATS** (a dashboard that labels its own heatmap an estimate) ·
+**BUCIO** (~1,800 objects in ~30 draw calls) · **SECTOR 7** (a two-pool
+damage model, 16k lines, no build) · **IRONFALL** (a draw-call budget test) ·
+**PULSE** (a rhythm game with no audio files).
+
+It is bilingual EN/IT with the language chosen by the browser on first visit.
+Both languages live in the markup as sibling elements and CSS picks one, so
+the page is complete and crawlable with JavaScript off — see
+[`portfolio/README.md`](portfolio/README.md) for why, and for the three
+placeholders that need filling before it goes in front of a client.
+
+Two details worth knowing if you touch it:
+
+- It is the **only page here that loads no shared library**. `shared/arcade.js`
+  would cost ~17 KB for one media query and would tie the folder to this
+  repository's layout, which is the only thing stopping the folder from being
+  copied to its own domain as-is.
+- Its screenshots in `portfolio/shots/` are **generated**, not drawn by hand:
+  `portfolio/scripts/shots.mjs` drives a Chromium over the DevTools Protocol
+  using only Node built-ins, and puts each app into a state worth
+  photographing — the published CENSUS return, a seeded STATS profile, a
+  sector in flight — because a title screen proves nothing.
 
 ## The hub page
 

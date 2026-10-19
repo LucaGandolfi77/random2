@@ -8,3 +8,8 @@ __pycache__/
 # Generated screenshots (regenerate with <app>/shot.mjs or <app>/smoke.mjs)
 */shots/
 */smoke-*.png
+
+# ...except the portfolio's. That page is static and references them from
+# index.html, so they are part of the site, not a review artefact. Regenerate
+# with portfolio/scripts/shots.mjs.
+!portfolio/shots/
