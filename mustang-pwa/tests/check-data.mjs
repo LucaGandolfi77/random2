@@ -246,6 +246,16 @@ const rankProbes = [[0, "ROOKIE"], [19999, "ROOKIE"], [20000, "FIGHTER"], [59999
 for (const [score, rank] of rankProbes) ok("rankFor(" + score + ") = " + rank, D.rankFor(score) === rank, D.rankFor(score));
 ok("reaching stage 1 still outranks a rookie", D.rankFor(1000000) === "TRIPLE ACE");
 
+/* ===== Threading ===== */
+section("threading");
+ok("a thread is worth points", D.config.threadPoints > 0, String(D.config.threadPoints));
+ok("the chain is capped", D.config.threadChainMax >= 2, String(D.config.threadChainMax));
+ok("the chain decays in about two seconds", D.config.threadDecay > 1 && D.config.threadDecay < 4, String(D.config.threadDecay));
+ok("one enemy cannot be threaded twice in a quarter of a second",
+    D.config.threadCooldown > 0.2, String(D.config.threadCooldown));
+ok("a thread pays more than one thread of the chain",
+    D.config.threadPoints * 2 > D.config.threadPoints);
+
 /* ===== Boss values ===== */
 section("boss values");
 ok("tier 1 boss pays 20000", D.archetypes.boss.pts + (1 - 1) * 10000 === 20000, String(D.archetypes.boss.pts));

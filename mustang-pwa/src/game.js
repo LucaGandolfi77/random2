@@ -42,6 +42,8 @@
         fireShots: 2,
         silent: 0,
         bomberCombo: 0,
+        thread: 0,
+        threadTimer: 0,
         shake: 0,
         hitStop: 0,
 
@@ -389,7 +391,7 @@
         releaseFormation(e);
         if (g.alive > 0 || g.awarded) return;
         g.awarded = true;
-        state.score += config.formationBonus;
+        addScore(config.formationBonus);
         floater(clamp(e.x, 30, W - 30), e.y, "500", "#ffe9a8");
         if (g.pow) spawnPow(g.pow, e.x, e.y);
     }
@@ -551,7 +553,7 @@
                 break;
             case "yellow":
                 state.loops++;
-                state.score += config.loopBonus;
+                addScore(config.loopBonus);
                 floater(p.x, p.y - 32, "LOOP BONUS " + config.loopBonus, "#ffd54f");
                 break;
             case "black":
@@ -560,7 +562,7 @@
                 floater(p.x, p.y - 32, "1 UP", "#ffffff");
                 break;
             case "red":
-                state.score += config.powBonus;
+                addScore(config.powBonus);
                 break;
         }
     }
@@ -677,6 +679,13 @@
     }
 
     /* ===== Combat ===== */
+    /* Every point of score comes through here. It is one function because
+       the score is the thing the game is about, and a mechanic that has to
+       watch the score (the extends) cannot watch nine separate additions. */
+    function addScore(n) {
+        state.score += n;
+    }
+
     function destroyEnemy(e, opts) {
         const idx = state.enemies.indexOf(e);
         if (idx < 0) return;
@@ -715,7 +724,7 @@
                 config.bomberComboMax
             );
         }
-        state.score += pts;
+        addScore(pts);
         floater(clamp(e.x, 26, W - 26), e.y - 8, String(pts), "#ffffff");
     }
 
@@ -735,7 +744,7 @@
             state.hitStop = Math.max(state.hitStop, config.hitStopBoss);
             spawnParticles(e.x, e.y, "#ffd54f", 60, 260, 4.5);
             spawnParticles(e.x, e.y, "#ff8c1a", 40, 180, 3.5);
-            state.score += e.pts;
+            addScore(e.pts);
             state.weightKilled += e.arch.weight;
             floater(clamp(e.x, 46, W - 46), e.y - 20, String(e.pts), "#ffd54f");
             endStage();
@@ -780,21 +789,24 @@
         collectPickups();
 
         const vulnerable = p.alive && p.invuln <= 0 && !p.looping;
-        if (!vulnerable) return;
 
-        for (const b of state.ebullets) {
-            if (b.dead) continue;
-            if (circleHit(b.x, b.y, b.r, p.x, p.y, p.r + 1)) {
-                b.dead = true;
-                killPlayer();
-                return;
-            }
-            for (let s = 0; s < state.sideFighters.length; s++) {
-                const f = state.sideFighters[s];
-                if (f && circleHit(b.x, b.y, b.r, f.x, f.y, 5)) {
+        /* The enemy bullets only kill while you are not rolling: the loop is
+           the one thing in the game that buys you invulnerability. */
+        if (vulnerable) {
+            for (const b of state.ebullets) {
+                if (b.dead) continue;
+                if (circleHit(b.x, b.y, b.r, p.x, p.y, p.r + 1)) {
                     b.dead = true;
-                    loseSideFighter(s);
-                    break;
+                    killPlayer();
+                    return;
+                }
+                for (let s = 0; s < state.sideFighters.length; s++) {
+                    const f = state.sideFighters[s];
+                    if (f && circleHit(b.x, b.y, b.r, f.x, f.y, 5)) {
+                        b.dead = true;
+                        loseSideFighter(s);
+                        break;
+                    }
                 }
             }
         }
@@ -804,11 +816,20 @@
             if (e.delay > 0) continue;
             const bodyR = e.kind === "ground" || e.kind === "sea" ? e.r * 0.72 : e.r;
             if (circleHit(p.x, p.y, p.r, e.x, e.y, bodyR)) {
+                /* Threading: you cut through it while rolling. You cannot
+                   shoot while you roll, so this is the trade: no gun, one
+                   hit, and the chain that makes it pay. */
+                if (p.looping && e.kind !== "boss") {
+                    tagliaInE(e, state.tick / 60);
+                    continue;
+                }
+                if (!vulnerable) continue;   // the spawn invulnerability
                 if (e.kind === "boss") { killPlayer(); return; }
                 destroyEnemy(e);
                 killPlayer();
                 return;
             }
+            if (!vulnerable) continue;
             for (let s = 0; s < state.sideFighters.length; s++) {
                 const f = state.sideFighters[s];
                 if (f && circleHit(f.x, f.y, 5, e.x, e.y, bodyR)) {
@@ -819,13 +840,28 @@
         }
     }
 
+    /* One thread: one hit, one more link in the chain, and the chain pays
+       for itself. A single enemy can only be threaded once per cooldown,
+       or a long roll through a formation would count every frame. */
+    function tagliaInE(e, now) {
+        if (e.kind === "boss") return;
+        if (e.threadAt !== undefined && now - e.threadAt < config.threadCooldown) return;
+        e.threadAt = now;
+        state.thread = Math.min(config.threadChainMax, state.thread + 1);
+        state.threadTimer = config.threadDecay;
+        damageEnemy(e);
+        addScore(config.threadPoints * state.thread);
+        floater(clamp(e.x, 30, W - 30), e.y - 12, "THREADED ×" + state.thread, "#9be7ff");
+        Sound.thread(state.thread);
+    }
+
     function collectPickups() {
         const p = state.player;
         for (let i = state.pows.length - 1; i >= 0; i--) {
             const pw = state.pows[i];
             if (circleHit(p.x, p.y, p.r + 10, pw.x, pw.y, 11)) {
                 state.pows.splice(i, 1);
-                state.score += config.powBonus;
+                addScore(config.powBonus);
                 collectPow(pw);
             }
         }
@@ -833,7 +869,7 @@
             const m = state.medals[i];
             if (circleHit(p.x, p.y, p.r + 12, m.x, m.y, 10)) {
                 state.medals.splice(i, 1);
-                state.score += config.yashichiBonus;
+                addScore(config.yashichiBonus);
                 Sound.yashichi();
                 floater(m.x, m.y - 16, "5000", "#ffd54f");
             }
@@ -1102,6 +1138,8 @@
         state.fireShots = 2;
         state.bomberCombo = 0;
         state.silent = 0;
+        state.thread = 0;
+        state.threadTimer = 0;
         state.player = newPlayer();
         state.paused = false;
         state.acc = 0;
@@ -1189,7 +1227,7 @@
     function advanceStage() {
         const stages = currentStages();
         if (state.stageIndex + 1 >= stages.length) {
-            state.score += 1000000;
+            addScore(1000000);
             save();
             state.phase = "victory";
             Music.stop();
@@ -1299,6 +1337,12 @@
         }
 
         if (state.phase !== "playing") return;
+
+        /* the thread chain runs out if you stop rolling through things */
+        if (state.threadTimer > 0) {
+            state.threadTimer -= dt;
+            if (state.threadTimer <= 0) state.thread = 0;
+        }
 
         updatePlayer(dt);
         updateScroll(dt);
@@ -1801,6 +1845,14 @@
                 ctx.fillStyle = "#ffd54f";
                 ctx.font = "bold 13px Arial, sans-serif";
                 ctx.fillText("BOMBER x" + state.bomberCombo, W / 2, 34);
+            }
+
+            /* The thread chain, and how long it has left. */
+            if (state.thread > 1) {
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#9be7ff";
+                ctx.font = "bold 13px Arial, sans-serif";
+                ctx.fillText("THREADED x" + state.thread, W / 2, state.bomberCombo > 1 ? 50 : 34);
             }
 
             if (state.silent > 0) {

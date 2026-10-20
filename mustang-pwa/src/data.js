@@ -45,6 +45,14 @@
         maxEnemies: 22,
         maxParticles: 340,
 
+        /* Threading: cutting through an enemy while rolling. One hit, the
+           chain goes up, and the chain is what makes it worth the risk:
+           you cannot shoot while you roll. */
+        threadPoints: 300,
+        threadChainMax: 9,
+        threadDecay: 2.4,
+        threadCooldown: 0.35,
+
         silentDuration: 9,
         bomberBaseScore: 2000,
         bomberComboStep: 500,

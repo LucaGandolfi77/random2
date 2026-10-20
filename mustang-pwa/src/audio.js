@@ -178,6 +178,13 @@
         yashichi() { this.tone(880, 0.1, "sine", 0.12, 1760); setTimeout(() => this.tone(1760, 0.2, "sine", 0.1), 110); },
         loop() { this.tone(300, 0.32, "sine", 0.11, 900); this.burst(0.3, 0.07, 900); },
         sideLost() { this.tone(420, 0.3, "sawtooth", 0.1, 110); },
+        /* The sound of the propeller cutting through another aircraft: a
+           metallic scrape that rises with the chain. */
+        thread() {
+            const n = Math.min(6, 1 + (arguments[0] || 1));
+            this.tone(900 + n * 180, 0.09, "sawtooth", 0.06, 2600 + n * 400);
+            this.burst(0.12, 0.05, 4200);
+        },
         smartBomb() { this.burst(1.1, 0.42, 3200); this.tone(70, 0.9, "sine", 0.24, 28); },
         death() { this.burst(0.6, 0.34, 1800); this.tone(200, 0.7, "sine", 0.2, 50); },
         briefing() { this.tone(392, 0.12, "square", 0.1); setTimeout(() => this.tone(587, 0.16, "square", 0.1), 110); },

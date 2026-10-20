@@ -472,6 +472,65 @@ ok("despawning formations are never marked as awarded", watched.every((g) => !g.
 ok("leaving the screen awards no formation bonus", S.score === 0, "score " + S.score);
 ok("leaving the screen drops no POW crate", S.pows.length === 0, S.pows.length + " crates");
 
+// ---- Threading: rolling through an enemy cuts it, and the chain pays ----
+console.log("\nthreading");
+armPlayer();
+M.game.startStage(0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.enemies.length = 0;
+S.ebullets.length = 0;
+S.thread = 0;
+S.threadTimer = 0;
+S.score = 0;
+
+// A heavy fighter: three hit points, so it survives one thread and the
+// damage is visible.
+const target = enemyStub("heavy", S.player.x, S.player.y);
+S.enemies.push(target);
+S.player.looping = true;
+S.player.loopTimer = 5;
+S.player.invuln = 0;
+step(1);
+ok("rolling through an enemy cuts it", target.hp < target.maxHp, "hp " + target.hp);
+ok("the thread chain starts at one", S.thread === 1, String(S.thread));
+ok("a thread is worth points", S.score > 0, "score " + S.score);
+
+// The chain must not tick every frame while you stay inside the same
+// enemy: one enemy is one thread.
+const hpAfterFirst = target.hp;
+guard = 0;
+while (target.hp === hpAfterFirst && guard++ < 30) { S.player.looping = true; S.player.loopTimer = 5; step(1); }
+ok("one enemy is only threaded once", target.hp === hpAfterFirst || S.thread === 1, "hp " + target.hp);
+
+// A second enemy raises the chain.
+const second = enemyStub("heavy", S.player.x, S.player.y);
+S.enemies.push(second);
+S.player.looping = true;
+S.player.loopTimer = 5;
+S.player.invuln = 0;
+step(1);
+ok("a second thread raises the chain", S.thread >= 2, String(S.thread));
+
+// The chain runs out.
+S.threadTimer = 0.05;
+S.player.looping = false;
+guard = 0;
+while (S.thread > 0 && guard++ < 30) step(1);
+ok("the thread chain runs out", S.thread === 0, String(S.thread));
+
+// Rolling is still the shield it was: a bullet passes through.
+armPlayer();
+S.enemies.length = 0;
+S.ebullets.length = 0;
+S.player.looping = true;
+S.player.loopTimer = 5;
+S.player.invuln = 0;
+S.ebullets.push({ x: S.player.x, y: S.player.y, vx: 0, vy: 0, r: 3, dead: false });
+step(1);
+ok("a bullet passes through while rolling", S.player.alive, "player alive");
+S.player.looping = false;
+
 // Side fighter hits must not inflate the shoot-down rate, but player hits must.
 armPlayer();
 S.enemies.length = 0;
