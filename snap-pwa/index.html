@@ -39,12 +39,15 @@
   <main id="camera" class="screen">
     <video id="video" playsinline muted autoplay></video>
     <canvas id="overlay"></canvas>
+    <svg id="griglia" aria-hidden="true" hidden></svg>
     <div id="flash" aria-hidden="true"></div>
 
     <header class="topbar">
       <button id="flip-btn" class="iconbtn" aria-label="Switch camera">🔄</button>
       <span class="spacer"></span>
       <button id="flash-btn" class="iconbtn" aria-label="Screen flash">⚡</button>
+      <button id="catalogo-btn" class="iconbtn" aria-label="All filters and looks">⋯</button>
+      <button id="settings-btn" class="iconbtn" aria-label="Settings">⚙</button>
       <button id="memories-btn" class="iconbtn" aria-label="Memories">📚</button>
     </header>
 
@@ -54,6 +57,12 @@
     <div id="status" class="status" role="status" aria-live="polite" hidden></div>
 
     <button id="shutter" aria-label="Take a photo"><span class="ring"></span></button>
+
+    <!-- Hold to see the frame without any filter on it. -->
+    <button id="confronta" aria-label="Hold to see the unfiltered frame" aria-pressed="false">◐</button>
+
+    <!-- The last shot, so it is one tap away from the viewer. -->
+    <button id="ultima" class="ultima" aria-label="Open the last snap" hidden><img alt=""></button>
 
     <!-- A look is a lens, a frame and a grade in one tap. -->
     <nav id="looks" class="looks" aria-label="Looks"></nav>
@@ -67,6 +76,7 @@
     <input id="caption" type="text" aria-label="Caption" maxlength="80" placeholder="Add a caption…" autocomplete="off">
     <div class="preview-actions">
       <button id="discard-btn" class="iconbtn" aria-label="Discard">✖</button>
+      <button id="share-btn" class="iconbtn" aria-label="Share">↗</button>
       <button id="download-btn" class="iconbtn" aria-label="Download">⬇️</button>
       <button id="save-btn" class="btn-gallo">💾 Save to Memories</button>
     </div>
@@ -95,6 +105,22 @@
   </div>
 
   <div id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ============ THE BOTTOM SHEET ============
+       One sheet, three uses: the whole filter catalogue, the settings and
+       the viewer. It is a dialog: it takes the focus, Escape closes it and
+       the focus goes back where it came from. -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-scrim"></div>
+    <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <header class="sheet-head">
+        <h2 id="sheet-title"></h2>
+        <button id="sheet-close" class="iconbtn" aria-label="Close">✖</button>
+      </header>
+      <div class="sheet-body" id="sheet-body"></div>
+    </div>
+  </div>
 
   <script type="module" src="app.js"></script>
 </body>

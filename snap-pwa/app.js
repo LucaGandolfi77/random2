@@ -6,6 +6,10 @@
 import {
   FILTRI, LOOKS, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
 } from './filters.js';
+import {
+  impostazioni, salvaImpostazioni, preferiti, togglePreferito, ePreferito,
+  apriFoglio, chiudiFoglio, collegaFoglio, alChiudi,
+} from './ui.js';
 
 /* ---------- DOM references ---------- */
 const $ = (sel) => document.querySelector(sel);
@@ -31,6 +35,9 @@ const stato = {
   ogniNFrame: 1,
   frame: 0,
   attivo: false,         // the render loop is running
+  comparando: false,     // the compare button is held: the raw frame
+  countdown: 0,          // the seconds left before the shot
+  ultimaUrl: null,       // the object URL of the last saved snap
   ultimaSnap: null,      // { blob, url, type, poster?, filter } in the preview
   registrazione: null,   // { rec, canvas, start } during a video
   pressione: 0,          // the long-press timer
@@ -59,7 +66,7 @@ async function avviaFotocamera() {
   stato.stream = await navigator.mediaDevices.getUserMedia(vincoli);
   video.srcObject = stato.stream;
   await video.play();
-  video.classList.toggle('mirror', stato.frontale);
+  video.classList.toggle('mirror', stato.frontale && impostazioni.specchio);
 }
 
 async function giraFotocamera() {
@@ -89,7 +96,10 @@ function loop() {
   const filtro = filtroPerId(stato.filtroId);
 
   /* the CSS filter on the video (a preview that costs nothing) */
-  if (filtro.animato) {
+  if (stato.comparando) {
+    /* the compare button is held: the raw frame, nothing on top of it */
+    video.style.filter = '';
+  } else if (filtro.animato) {
     video.style.filter = `saturate(1.3) hue-rotate(${(t * 60) % 360}deg)`;
   } else {
     video.style.filter = filtro.css ?? '';
@@ -97,7 +107,7 @@ function loop() {
 
   /* the frames on the overlay */
   octx.clearRect(0, 0, overlay.width, overlay.height);
-  if (filtro.cornice) {
+  if (filtro.cornice && !stato.comparando) {
     disegnaCornice(octx, filtro, overlay.width, overlay.height, t);
   }
 
@@ -106,7 +116,7 @@ function loop() {
   window.__dbg.filtroId = filtro.id;
   window.__dbg.volto = !!filtro.volto;
   window.__dbg.chiamate = (window.__dbg.chiamate || 0) + 1;
-  if (filtro.volto) {
+  if (filtro.volto && !stato.comparando) {
     gestisciFiltroVolto(filtro, t);
   } else {
     stato.landmarks = null;
@@ -220,6 +230,14 @@ function disegnaFotogramma(ctx, W, H, t, modalita) {
 
 async function scatta() {
   if (!video.videoWidth) return;
+
+  /* The countdown, when there is one. The ring on the shutter counts it
+     down, so the number is not the only thing that says how long is left. */
+  if (impostazioni.timer > 0) {
+    await contaAllIndietro(impostazioni.timer);
+    if (!video.videoWidth) return;
+  }
+
   suonoOturatore();
   flashEl.classList.add('on');
   setTimeout(() => flashEl.classList.remove('on'), 60);
@@ -231,12 +249,37 @@ async function scatta() {
   foto.width = W; foto.height = H;
   disegnaFotogramma(foto.getContext('2d'), W, H, performance.now() / 1000, 'foto');
 
-  const blob = await new Promise((res) => foto.toBlob(res, 'image/jpeg', 0.92));
+  const blob = await new Promise((res) => foto.toBlob(res, 'image/jpeg', impostazioni.qualita));
   mostraAnteprima({
     tipo: 'foto',
     blob,
     url: URL.createObjectURL(blob),
     filtro: stato.filtroId,
+  });
+}
+
+/* The countdown before the shot. It returns when the time is up, or early
+   if the camera goes away underneath it. */
+function contaAllIndietro(secondi) {
+  return new Promise((risolvi) => {
+    let rimasti = secondi;
+    stato.countdown = rimasti;
+    const anello = $('#shutter');
+    const passo = () => {
+      if (rimasti <= 0) {
+        stato.countdown = 0;
+        anello.style.removeProperty('--p');
+        anello.classList.remove('conta');
+        risolvi();
+        return;
+      }
+      anello.classList.add('conta');
+      anello.style.setProperty('--p', (1 - rimasti / secondi).toFixed(3));
+      if (impostazioni.vibrazione && navigator.vibrate) navigator.vibrate(12);
+      rimasti--;
+      setTimeout(passo, 1000);
+    };
+    passo();
   });
 }
 
@@ -285,6 +328,30 @@ async function scarica() {
   toast('Snap downloaded ⬇️');
 }
 
+/* Sharing, when the browser can do it. A file is what the share sheet
+   wants; when it is not there, the download is the fallback and the
+   button says so rather than failing. */
+async function condividi() {
+  const snap = stato.ultimaSnap;
+  if (!snap) return;
+  const nome = nomeFile(snap);
+  try {
+    const file = new File([snap.blob], nome, { type: snap.blob.type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Snap' });
+      return;
+    }
+    if (navigator.share) {
+      await navigator.share({ title: 'Snap', text: 'A snap from Snap PWA' });
+      return;
+    }
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+  }
+  await scarica();
+  toast('Shared as a download ⬇️');
+}
+
 function nomeFile(snap) {
   const base = `snap-${new Date(snap.ts ?? Date.now()).toISOString().replace(/[:.]/g, '-')}`;
   if (snap.tipo === 'video') return base + (snap.blob.type.includes('mp4') ? '.mp4' : '.webm');
@@ -326,12 +393,26 @@ async function salvaNeiRicordi() {
   try {
     await dbPut(record);
     toast('Saved to Memories 💾');
+    /* the last shot stays on screen as a thumbnail, so it is one tap from
+       the viewer instead of a trip through the memories grid */
+    mostraUltima(record);
     snap.url && URL.revokeObjectURL(snap.url);
     stato.ultimaSnap = null;
     tornaAllaCamera();
   } catch {
     toast('Could not save (private mode?)');
   }
+}
+
+/* The floating thumbnail of the last saved snap. */
+function mostraUltima(record) {
+  const bottone = $('#ultima');
+  const img = bottone.querySelector('img');
+  if (stato.ultimaUrl) URL.revokeObjectURL(stato.ultimaUrl);
+  stato.ultimaUrl = URL.createObjectURL(record.miniatura ?? record.blob);
+  img.src = stato.ultimaUrl;
+  img.alt = record.caption || 'The last snap';
+  bottone.hidden = false;
 }
 
 function tornaAllaCamera() {
@@ -447,6 +528,210 @@ function chiudiViewer() {
 }
 
 /* ============================================================
+ * THE CATALOGUE: every filter, every look, the favourites
+ * ============================================================ */
+
+/* Which shelf a filter belongs on. It is derived, not declared, so a new
+   filter lands on the right shelf without anyone having to remember. */
+function gruppoDi(f) {
+  if (f.quiz) return 'quizzes';
+  if (f.volto) return 'lenses';
+  if (f.cornice) return 'frames';
+  return 'colours';
+}
+
+const GRUPPI = [
+  ['Lenses', 'lenses'],
+  ['Frames', 'frames'],
+  ['Colours', 'colours'],
+  ['Quizzes', 'quizzes'],
+];
+
+function apriCatalogo() {
+  apriFoglio('Filters & looks', (corpo) => {
+    const disegnaCella = (f) => {
+      const cella = document.createElement('button');
+      cella.className = 'cella-filtro' + (f.id === stato.filtroId ? ' attiva' : '');
+      cella.dataset.id = f.id;
+      cella.innerHTML = `<span class="emoji">${f.emoji}</span><span class="nome">${f.nome}</span>`;
+      cella.addEventListener('click', () => {
+        selezionaFiltro(f.id, 'filtro');
+        chiudiFoglio();
+      });
+
+      /* the star is a separate target: tapping it must not also pick the
+         filter, and a 28px target is a compromise the house rules
+         forgive only because it is not the only way in. */
+      const stella = document.createElement('button');
+      stella.className = 'stella' + (ePreferito(f.id) ? ' attiva' : '');
+      stella.type = 'button';
+      stella.setAttribute('aria-label', (ePreferito(f.id) ? 'Remove ' : 'Add ') + f.nome + (ePreferito(f.id) ? ' from' : ' to') + ' the favourites');
+      stella.textContent = ePreferito(f.id) ? '★' : '☆';
+      stella.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dentro = togglePreferito(f.id);
+        stella.classList.toggle('attiva', dentro);
+        stella.textContent = dentro ? '★' : '☆';
+        stella.setAttribute('aria-label', (dentro ? 'Remove ' : 'Add ') + f.nome + (dentro ? ' from' : ' to') + ' the favourites');
+      });
+      cella.appendChild(stella);
+      return cella;
+    };
+
+    const gruppo = (titolo, voci) => {
+      if (!voci.length) return;
+      const sezione = document.createElement('section');
+      sezione.className = 'gruppo';
+      const h = document.createElement('h3');
+      h.textContent = titolo;
+      sezione.appendChild(h);
+      const griglia = document.createElement('div');
+      griglia.className = 'griglia-filtri';
+      for (const f of voci) griglia.appendChild(disegnaCella(f));
+      sezione.appendChild(griglia);
+      corpo.appendChild(sezione);
+    };
+
+    const fav = preferiti();
+    if (fav.length) {
+      gruppo('Favourites', fav.map((id) => filtroPerId(id)).filter((f) => f.nome));
+    }
+    gruppo('Looks', LOOKS.map((l) => filtroPerId(l.id)));
+    for (const [titolo, chiave] of GRUPPI) {
+      gruppo(titolo, FILTRI.filter((f) => gruppoDi(f) === chiave));
+    }
+  });
+}
+
+/* ============================================================
+ * THE SETTINGS
+ * ============================================================ */
+
+function apriImpostazioni() {
+  apriFoglio('Settings', (corpo) => {
+    const riga = (etichetta, descrizione, controllo) => {
+      const r = document.createElement('div');
+      r.className = 'impostazione';
+      const sinistra = document.createElement('div');
+      const titolo = document.createElement('span');
+      titolo.textContent = etichetta;
+      sinistra.appendChild(titolo);
+      if (descrizione) {
+        const piccolo = document.createElement('small');
+        piccolo.textContent = descrizione;
+        sinistra.appendChild(piccolo);
+      }
+      r.appendChild(sinistra);
+      r.appendChild(controllo);
+      corpo.appendChild(r);
+    };
+
+    const gruppoOpzioni = (opzioni, attivo, alClick) => {
+      const g = document.createElement('div');
+      g.className = 'gruppo-opzioni';
+      for (const [valore, etichetta] of opzioni) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = etichetta;
+        if (valore === attivo) b.classList.add('attivo');
+        b.addEventListener('click', () => {
+          alClick(valore);
+          chiudiFoglio();
+        });
+        g.appendChild(b);
+      }
+      return g;
+    };
+
+    riga('Countdown', 'Wait before the shot', gruppoOpzioni(
+      [[0, 'Off'], [3, '3s'], [10, '10s']],
+      impostazioni.timer,
+      (v) => { impostazioni.timer = Number(v); salvaImpostazioni(); }
+    ));
+
+    riga('Composition guide', 'Thirds or a nine-box grid', gruppoOpzioni(
+      [['off', 'Off'], ['terzi', 'Thirds'], ['nove', 'Nine']],
+      impostazioni.griglia,
+      (v) => { impostazioni.griglia = v; salvaImpostazioni(); disegnaGriglia(); }
+    ));
+
+    riga('Haptics', 'A short buzz on every selection', gruppoOpzioni(
+      [[true, 'On'], [false, 'Off']],
+      impostazioni.vibrazione,
+      (v) => { impostazioni.vibrazione = !!v; salvaImpostazioni(); }
+    ));
+
+    riga('Mirror the front camera', 'The preview flips, the photo does not', gruppoOpzioni(
+      [[true, 'On'], [false, 'Off']],
+      impostazioni.specchio,
+      (v) => { impostazioni.specchio = !!v; salvaImpostazioni(); video.classList.toggle('mirror', stato.frontale && impostazioni.specchio); }
+    ));
+
+    riga('Photo quality', 'The JPEG quality of the saved photo', gruppoOpzioni(
+      [[0.7, 'Small'], [0.85, 'Medium'], [0.92, 'Best']],
+      impostazioni.qualita,
+      (v) => { impostazioni.qualita = Number(v); salvaImpostazioni(); }
+    ));
+
+    /* what is on the device, and a way to clear it */
+    const spazio = document.createElement('div');
+    spazio.className = 'impostazione';
+    const info = document.createElement('div');
+    const titolo = document.createElement('span');
+    titolo.textContent = 'Memories';
+    info.appendChild(titolo);
+    const dettaglio = document.createElement('small');
+    dettaglio.textContent = snapsCache.length
+      ? `${snapsCache.length} snaps on this device`
+      : 'nothing saved yet';
+    info.appendChild(dettaglio);
+    spazio.appendChild(info);
+    const pulisci = document.createElement('button');
+    pulisci.className = 'pulsante';
+    pulisci.textContent = 'Clear';
+    pulisci.disabled = !snapsCache.length;
+    pulisci.addEventListener('click', async () => {
+      if (!confirm('Delete every snap on this device?')) return;
+      for (const s of snapsCache) await dbDel(s.id).catch(() => {});
+      snapsCache = [];
+      chiudiFoglio();
+      toast('Memories cleared 🗑️');
+    });
+    spazio.appendChild(pulisci);
+    corpo.appendChild(spazio);
+  });
+}
+
+/* ============================================================
+ * THE COMPOSITION GUIDE
+ * ============================================================ */
+function disegnaGriglia() {
+  const svg = $('#griglia');
+  if (!svg) return;
+  if (impostazioni.griglia === 'off') {
+    svg.hidden = true;
+    svg.innerHTML = '';
+    return;
+  }
+  const W = overlay.clientWidth || 1;
+  const H = overlay.clientHeight || 1;
+  const line = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`;
+  let corpo = '';
+  if (impostazioni.griglia === 'terzi') {
+    corpo += line(W / 3, 0, W / 3, H) + line((W * 2) / 3, 0, (W * 2) / 3, H);
+    corpo += line(0, H / 3, W, H / 3) + line(0, (H * 2) / 3, W, (H * 2) / 3);
+  } else {
+    for (let i = 1; i < 3; i++) {
+      corpo += line((W * i) / 3, 0, (W * i) / 3, H);
+      corpo += line(0, (H * i) / 3, W, (H * i) / 3);
+    }
+  }
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = corpo;
+  svg.hidden = false;
+}
+
+/* ============================================================
  * THE FILTER CAROUSEL
  * ============================================================ */
 function costruisciCarosello() {
@@ -480,7 +765,7 @@ function selezionaFiltro(id, origine) {
   attivo?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   const filtro = filtroPerId(id);
   if (!filtro.volto) nascondiStatus();
-  if (navigator.vibrate) navigator.vibrate(8);
+  if (impostazioni.vibrazione && navigator.vibrate) navigator.vibrate(8);
 }
 
 /* ============================================================
@@ -618,6 +903,7 @@ async function avviaApp() {
     mostra('camera');
     dimensionaOverlay();
     requestAnimationFrame(dimensionaOverlay);
+    disegnaGriglia();
     stato.attivo = true;
     requestAnimationFrame(loop);
   } catch (err) {
@@ -635,6 +921,36 @@ async function avviaApp() {
 /* ---------- events ---------- */
 $('#start-btn').addEventListener('click', avviaApp);
 $('#flip-btn').addEventListener('click', giraFotocamera);
+$('#catalogo-btn').addEventListener('click', apriCatalogo);
+$('#settings-btn').addEventListener('click', apriImpostazioni);
+$('#share-btn').addEventListener('click', condividi);
+collegaFoglio();
+
+/* Hold to compare: while the button is held the raw frame shows, with
+   nothing on top of it. It is the quickest way to see what a filter is
+   actually doing. */
+const confronta = $('#confronta');
+const confrontaPiu = () => { stato.comparando = true; confronta.classList.add('attivo'); confronta.setAttribute('aria-pressed', 'true'); };
+const confrontaMeno = () => { stato.comparando = false; confronta.classList.remove('attivo'); confronta.setAttribute('aria-pressed', 'false'); };
+confronta.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  try { confronta.setPointerCapture(e.pointerId); } catch { /* fine either way */ }
+  confrontaPiu();
+});
+confronta.addEventListener('pointerup', confrontaMeno);
+confronta.addEventListener('pointercancel', confrontaMeno);
+confronta.addEventListener('pointerleave', confrontaMeno);
+
+/* The last snap: one tap from the camera to the viewer. */
+$('#ultima').addEventListener('click', async () => {
+  stato.attivo = false;
+  const snap = snapsCache[0];
+  if (!snap) { toast('No snap saved yet'); return; }
+  const img = new Image();
+  img.src = URL.createObjectURL(snap.miniatura ?? snap.blob);
+  try { await img.decode(); } catch { /* the viewer copes */ }
+  apriViewer(snap, img.src);
+});
 
 /* the shutter: a tap takes a photo, a long press records video (max 10 s) */
 const otturatore = $('#shutter');
@@ -670,7 +986,7 @@ $('#discard-btn').addEventListener('click', scarta);
 $('#download-btn').addEventListener('click', scarica);
 $('#save-btn').addEventListener('click', salvaNeiRicordi);
 $('#viewer-close').addEventListener('click', chiudiViewer);
-window.addEventListener('resize', dimensionaOverlay);
+window.addEventListener('resize', () => { dimensionaOverlay(); disegnaGriglia(); });
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { stato.attivo = false; }
   else if ($('#camera').classList.contains('visible') && !stato.attivo) {
@@ -685,7 +1001,7 @@ window.__snapDebug = stato;
 /* the overlay has to be resized when the camera screen becomes visible
  * (from display:none its measurements are 0) and on every rotation */
 if (typeof ResizeObserver !== 'undefined') {
-  new ResizeObserver(dimensionaOverlay).observe($('#camera'));
+  new ResizeObserver(() => { dimensionaOverlay(); disegnaGriglia(); }).observe($('#camera'));
 }
 
 /* service worker (the shell + the MediaPipe models in vendor/, cached on first use) */

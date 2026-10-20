@@ -505,3 +505,209 @@ button {
 
 /* The shutter moves up to make room for the looks row. */
 #shutter { bottom: calc(152px + var(--sab)); }
+
+/* ---- the bottom sheet ----
+   One component, three uses: the filter catalogue, the settings and the
+   viewer. It slides up from the bottom over a scrim, and it is a dialog:
+   the focus goes in and comes back. */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 6, 10, 0.55);
+  opacity: 0;
+  transition: opacity var(--dur-mid) ease;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.sheet.aperto .sheet-scrim { opacity: 1; }
+.sheet-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 86dvh;
+  display: flex;
+  flex-direction: column;
+  background: #14141b;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 26px 26px 0 0;
+  box-shadow: 0 -20px 60px -20px rgba(0, 0, 0, 0.8);
+  transform: translateY(100%);
+  transition: transform var(--dur-slow) var(--ease);
+  padding-bottom: var(--sab);
+}
+.sheet.aperto .sheet-panel { transform: translateY(0); }
+.sheet-handle {
+  width: 42px;
+  height: 4px;
+  margin: 10px auto 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+}
+.sheet-head h2 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+.sheet-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--sp-4) var(--sp-4) calc(var(--sp-5) + var(--sab));
+  display: grid;
+  gap: var(--sp-5);
+}
+body.foglio-aperto { overflow: hidden; }
+
+/* the catalogue inside the sheet */
+.gruppo h3 {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: var(--sp-3);
+}
+.gruppo + .gruppo { border-top: 1px solid var(--border); padding-top: var(--sp-5); }
+.griglia-filtri {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--sp-2);
+}
+.cella-filtro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 74px;
+  padding: 10px 6px 8px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+}
+.cella-filtro .emoji { font-size: 24px; line-height: 1.1; }
+.cella-filtro .nome {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cella-filtro.attiva { border-color: var(--giallo); background: rgba(255, 252, 0, 0.14); }
+.cella-filtro.attiva .nome { color: var(--giallo); }
+.stella {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--faint);
+  border-radius: 50%;
+}
+.stella.attiva { color: var(--giallo); }
+
+/* the settings inside the sheet */
+.impostazione {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  min-height: var(--target);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+.impostazione:last-child { border-bottom: none; }
+.impostazione > div > span { display: block; font-size: 14.5px; }
+.impostazione > div > small { display: block; font-size: 12px; color: var(--faint); margin-top: 3px; }
+.gruppo-opzioni {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.gruppo-opzioni button {
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: var(--r-pill);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.gruppo-opzioni button.attivo { background: var(--giallo); color: #111; }
+.pulsante {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.pulsante:disabled { opacity: 0.4; }
+
+/* ---- the composition guide ---- */
+#griglia {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+#griglia line { stroke: rgba(255, 255, 255, 0.42); stroke-width: 1; }
+
+/* ---- the last shot ---- */
+.ultima {
+  position: absolute;
+  left: max(14px, var(--sal));
+  bottom: calc(152px + var(--sab));
+  width: 56px;
+  height: 72px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  background: var(--chip);
+  z-index: 6;
+  box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.8);
+}
+.ultima img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---- hold to compare ---- */
+#confronta {
+  position: absolute;
+  right: max(14px, var(--sar));
+  bottom: calc(152px + var(--sab));
+  width: var(--target);
+  height: var(--target);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border-radius: 50%;
+  background: var(--chip);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 6;
+}
+#confronta.attivo { background: var(--giallo); }
+
+/* The countdown before the shot uses the same ring as the recording
+   progress: the same circle, counting something else. */
+#shutter.conta::before { opacity: 1; }
