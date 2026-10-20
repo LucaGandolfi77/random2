@@ -349,6 +349,35 @@
   }
   .stat-note a { color: var(--text); text-decoration: underline; }
 
+  /* Each tile links to its row in the claims ledger, so a number on this page
+     can be checked rather than believed. The badge is small; the touch
+     target behind it is 48px, because a link that is hard to hit is not a
+     link. */
+  .stat { position: relative; }
+  .claim-link {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    color: var(--faint);
+    border-radius: 9px;
+    text-decoration: none;
+  }
+  .claim-link::after {
+    content: "";
+    position: absolute;
+    inset: -9px;
+  }
+  @media (hover: hover) {
+    .claim-link:hover { color: var(--text); background: var(--surface-strong); }
+  }
+
   /* ---- Sections ---- */
   section { padding-top: clamp(48px, 7vw, 86px); }
   .sec-head { margin-bottom: 30px; max-width: 66ch; }

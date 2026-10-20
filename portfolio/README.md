@@ -64,7 +64,77 @@ the bot is a terminal program.
 | Client work | Placeholders. Delete the ones you cannot fill. |
 | Craft | Design tokens, accessibility, responsive, motion, performance budgets, offline — the parts that apply to every project. |
 | Process | Six design decisions **quoted from the source**, with `file:line` references. There are no Figma files behind this work; the reasoning survives in the code instead. |
-| Also built | The remaining catalogue, linking into the arcade. |
+| Also built | The whole catalogue, linking into the arcade. |
+
+---
+
+## The claims ledger
+
+The page argues for itself with numbers, so the numbers had better be true.
+`tools/verify.mjs` recomputes every one of them from the repository and
+compares it with the number the page actually renders.
+
+```bash
+node tools/verify.mjs              # the table, on the terminal
+node tools/verify.mjs --json       # the same thing, machine-readable
+node tools/verify.mjs --check      # exit 1 if anything drifted
+node tools/verify.mjs --audit      # run every `how` command and compare
+node tools/verify.mjs --html portfolio/verify.html   # regenerate the page
+```
+
+The ledger is published at [`verify.html`](verify.html), next to the page it
+checks. Each row carries the claim, the value, whether it passes, where the
+number is used on the page, and **the command that reproduces it** — paste it
+into a terminal and you get the same answer.
+
+### Two kinds of check, because two kinds of claim
+
+- **Numbers in tiles.** The four stat tiles carry `data-claim="<id>"`. The
+  tool parses the `<b>` out of the tile and compares it with the value
+  computed from the repository. Edit the number on the page without changing
+  the repository and CI goes red.
+- **Numbers in prose.** Prose cannot be parsed reliably, so the registry
+  carries a `stale` list of literals that would prove a claim is out of date
+  — `"Forty-eight"`, `"44 PNG"`, `"every one of them"`. If one appears
+  anywhere in `index.html`, the check fails and names the claim it
+  contradicts. When a claim legitimately changes, remove its old literal in
+  the same commit that updates the page, or the lint becomes noise.
+
+### Adding a claim
+
+One entry in the `CLAIMS` array in `tools/verify.mjs`:
+
+```js
+{
+  id: "projects",
+  label: "Projects shipped",
+  labelIt: "Progetti pubblicati",
+  where: "the first stat tile",
+  whereIt: "la prima cifra",
+  expect: "44",                       // what the page has to show
+  how: "the command a reader can paste",
+  compute: () => projects().length,
+}
+```
+
+`expect` is what the page must show; leave it out for a supporting number
+that is not stated on the page. `how` is the command that produces the same
+number — write it, run it, check the two agree. `node tools/verify.mjs
+--audit` does exactly that for every claim in the registry.
+
+> **The house rule:** a claim is only true if the ledger says so. Do not type
+> a number onto the page without adding it to the registry in the same
+> change. A tile the ledger does not know about is a failure, not a detail.
+
+### The committed copy
+
+`portfolio/verify.html` is generated and committed, and CI fails if it is out
+of date. It carries **no timestamp**, on purpose: the file has to be
+byte-for-byte reproducible, so CI regenerates it and diffs it.
+
+One exception: the line counts move with every commit, so they sit in a
+marked-off section that the comparison skips. A committed copy that goes
+stale the moment anything else is touched is a copy nobody keeps up to date.
 
 ---
 
@@ -78,7 +148,10 @@ portfolio/
 ├── index.html          the shell: markup, both languages, the links
 ├── assets/
 │   ├── portfolio.css   the stylesheet, extracted from index.html verbatim
-│   └── portfolio.js    the progressive enhancement, extracted verbatim
+│   ├── portfolio.js    the progressive enhancement, extracted verbatim
+│   ├── ledger.css      the claims ledger's table
+│   └── ledger.js       the ledger's copy buttons
+├── verify.html         the claims ledger — GENERATED, never hand-edited
 ├── manifest.json       PWA manifest (CI requires manifest ↔ index.html link)
 ├── service-worker.js   cache-first shell, one cache per app
 ├── icons/              192 + 512, SVG like every other project here
@@ -184,10 +257,11 @@ because `bucio/public/` is not what gets published.
 
 ## Known limits
 
-- 🟡 **Three empty client slots.** Intentionally visible, and they should stay
-  that way until real projects exist.
 - 🟡 **Email and LinkedIn are not set**, so the two hero CTAs are hidden. The
   page is still usable — it links to GitHub and to every case study.
+- 🟡 **The claims ledger checks the numbers, not the prose.** A sentence that
+  states a number without a `data-claim` tile is only covered by the stale
+  literal lint, which catches the literals it knows about and nothing else.
 - 🟠 **The URL is `/random2/portfolio/`.** The page is self-contained and can
   be moved to its own repository or domain by copying the folder; nothing
   outside it would need to change.

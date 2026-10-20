@@ -38,17 +38,22 @@ const ONLY = process.argv.slice(3);
 function findChromium() {
     if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
 
-    const cache = join(
-        process.env.HOME || "",
-        "Library/Caches/ms-playwright"
-    );
-    if (existsSync(cache)) {
+    const home = process.env.HOME || "";
+    for (const cache of [
+        join(home, "Library/Caches/ms-playwright"),   // macOS
+        join(home, ".cache/ms-playwright"),            // Linux
+        join(home, "AppData/Local/ms-playwright"),    // Windows
+    ]) {
+        if (!existsSync(cache)) continue;
         for (const dir of readdirSync(cache).sort().reverse()) {
             if (!dir.startsWith("chromium")) continue;
             for (const rel of [
                 "chrome-headless-shell-mac-arm64/chrome-headless-shell",
                 "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
                 "chrome-mac/Chromium.app/Contents/MacOS/Chromium",
+                "chrome-headless-shell-linux64/chrome-headless-shell",
+                "chrome-linux64/chrome",
+                "chrome-win/chrome.exe",
             ]) {
                 const p = join(cache, dir, rel);
                 if (existsSync(p)) return p;
@@ -59,6 +64,8 @@ function findChromium() {
         "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
         "/Applications/Chromium.app/Contents/MacOS/Chromium",
         "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        "/usr/bin/google-chrome",
     ]) {
         if (existsSync(p)) return p;
     }

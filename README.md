@@ -1034,6 +1034,24 @@ Two details worth knowing if you touch it:
   photographing — the published CENSUS return, a seeded STATS profile, a
   sector in flight — because a title screen proves nothing.
 
+### The claims ledger
+
+Every number the portfolio states is recomputed from this repository by
+`tools/verify.mjs` and compared with the number the page actually renders.
+If one drifts, CI goes red. The ledger is published at
+`portfolio/verify.html`, and each row carries the command that reproduces its
+number.
+
+```bash
+node tools/verify.mjs --check   # exit 1 if any claim drifted
+```
+
+Numbers on the page carry a `data-claim` attribute, so the check is against
+the page itself rather than against a copy of the page. Numbers written in
+prose are covered by a stale-literal lint instead. See
+[`portfolio/README.md`](portfolio/README.md#the-claims-ledger) for how to add a
+claim.
+
 ## The hub page
 
 The repo root doubles as the arcade's home page

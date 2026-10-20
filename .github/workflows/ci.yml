@@ -122,6 +122,16 @@ jobs:
           python3 tools/balance/test.py
           python3 tools/corpora/test.py
 
+      - name: The portfolio's claims are true
+        # Three checks in one step: every number the portfolio states matches
+        # the repository, the prose lint finds no stale literal, and the
+        # committed ledger is not out of date. No browser, no network, no
+        # dependencies — it runs in about a second.
+        run: |
+          set -euo pipefail
+          node tools/verify.mjs --check
+          node tools/verify.mjs --compare portfolio/verify.html
+
       - name: Corpus extract stays in sync
         # The extractor reads the literary PWAs' source with regexes, so a
         # rewrite of a corpus file can silently empty it. This asserts the

@@ -24,7 +24,7 @@
 
   var state = {
     nets: [], spores: [], rocks: [], toxics: [], parasites: [],
-    time: 0, over: false, shake: 0,
+    time: 0, over: false, shake: 0, frame: 0,
   };
   var cam = { x: W / 2, y: H / 2, z: 0.7 };
   var view = { w: 0, h: 0, dpr: 1 };
@@ -63,8 +63,15 @@
   }
 
   /* ===== Networks ===== */
+  function safeSpot(pad) {
+    for (var tries = 0; tries < 40; tries++) {
+      var x = rand(160, W - 160), y = rand(160, H - 160);
+      if (!inRock(x, y, pad) && !inToxic(x, y)) return { x: x, y: y };
+    }
+    return { x: W / 2, y: H / 2 };
+  }
   function makeNet(name, bot, color) {
-    var s = { x: W / 2 + rand(-160, 160), y: H / 2 + rand(-160, 160) };
+    var s = safeSpot(60);
     return {
       name: name, bot: bot, color: color,
       B: START_B,
@@ -74,9 +81,12 @@
     };
   }
   function netLen(n) {
+    if (n._lf === state.frame) return n._len;
     var L = 0;
     n.tips.forEach(function (t) { if (t.alive) L += pathLen(t.path); });
-    return Math.floor(L);
+    n._len = Math.floor(L);
+    n._lf = state.frame;
+    return n._len;
   }
   function tipCount(n) {
     var c = 0;
@@ -106,7 +116,7 @@
     if (!t.alive) return;
     t.alive = false;
     t.path.forEach(function (pt) { Particles.spawn(pt.x, pt.y, n.color, 1); });
-    if (!silent) Sound.sever();
+    if (!silent) { Sound.sever(); state.shake = Math.min(12, state.shake + 5); }
     // tutti i rami nati da questo tendine muoiono (la rete si sfilaccia)
     n.tips.forEach(function (b, bi) {
       if (b.alive && b.parent === ti) killTip(n, bi, true);
@@ -147,7 +157,9 @@
       state.rocks.push({ x: rand(140, W - 140), y: rand(140, H - 140), r: rand(30, 58), rot: rand(0, 6.28), verts: verts });
     }
     for (var t = 0; t < 6; t++) {
-      state.toxics.push({ x: rand(200, W - 200), y: rand(200, H - 200), r: rand(110, 155), ph: rand(0, 6.28) });
+      var motes = [];
+      for (var m2 = 0; m2 < 9; m2++) motes.push({ a: rand(0, 6.28), rr: rand(0.15, 0.9), sp: rand(0.15, 0.5), sz: rand(1.2, 2.8) });
+      state.toxics.push({ x: rand(200, W - 200), y: rand(200, H - 200), r: rand(110, 155), ph: rand(0, 6.28), motes: motes, grad: null });
     }
     for (var s = 0; s < SPORES; s++) spawnSpore();
     state.parasites = [];
@@ -306,6 +318,12 @@
     state.nets.forEach(function (n) {
       if (!n.alive) { n.respawnT -= dt; return; }
       for (var ti = n.tips.length - 1; ti >= 0; ti--) updateTip(n, ti, dt);
+      // i bot ramificano ogni tanto: senza questo non reggono il confronto
+      if (n.bot && n.B > 110 && tipCount(n) < 3 && Math.random() < 0.008) {
+        var bt = -1, bl = 0;
+        n.tips.forEach(function (t, ti) { if (t.alive) { var L = pathLen(t.path); if (L > bl) { bl = L; bt = ti; } } });
+        if (bt >= 0) branch(n, bt, null);
+      }
       if (tipCount(n) === 0) {
         if (!n.bot) {
           if (n.B >= BRANCH_COST) {
@@ -324,9 +342,10 @@
         n.B = fresh.B; n.tips = fresh.tips; n.root = fresh.root; n.alive = true;
       }
     });
-    // tocchi su punte morte
+    // tocchi su punte morte (i pending, tip -1, vengono solo riassegnati)
     for (var i = touches.length - 1; i >= 0; i--) {
       var tc = touches[i];
+      if (tc.tip < 0) continue;
       var t = me.tips[tc.tip];
       if (!t || !t.alive) touches.splice(i, 1);
     }
@@ -397,13 +416,27 @@
 
     state.toxics.forEach(function (t) {
       var pulse = 0.5 + 0.5 * Math.sin(state.time * 1.6 + t.ph);
-      var g = ctx.createRadialGradient(t.x, t.y, t.r * 0.2, t.x, t.y, t.r);
-      g.addColorStop(0, "rgba(160,80,255," + (0.16 + pulse * 0.08).toFixed(3) + ")");
-      g.addColorStop(1, "rgba(160,80,255,0)");
-      ctx.fillStyle = g;
+      if (!t.grad) {
+        t.grad = ctx.createRadialGradient(t.x, t.y, t.r * 0.2, t.x, t.y, t.r);
+        t.grad.addColorStop(0, "rgba(160,80,255,0.26)");
+        t.grad.addColorStop(1, "rgba(160,80,255,0)");
+      }
+      ctx.globalAlpha = 0.55 + pulse * 0.45;
+      ctx.fillStyle = t.grad;
       ctx.beginPath();
       ctx.arc(t.x, t.y, t.r, 0, 6.2832);
       ctx.fill();
+      ctx.globalAlpha = 1;
+      // pulviscolo alla deriva dentro la zona: telegrafa il pericolo
+      ctx.fillStyle = "rgba(200,150,255,0.35)";
+      t.motes.forEach(function (m3) {
+        var ma = m3.a + state.time * m3.sp * 0.25;
+        var mx = t.x + Math.cos(ma) * m3.rr * t.r;
+        var my = t.y + Math.sin(ma) * m3.rr * t.r;
+        ctx.beginPath();
+        ctx.arc(mx, my, m3.sz, 0, 6.2832);
+        ctx.fill();
+      });
       ctx.strokeStyle = "rgba(190,120,255," + (0.14 + pulse * 0.1).toFixed(3) + ")";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -411,18 +444,39 @@
       ctx.stroke();
     });
     state.rocks.forEach(function (r) {
+      var poly = function () {
+        ctx.beginPath();
+        for (var k = 0; k < r.verts.length; k++) {
+          var a = r.rot + (k / r.verts.length) * 6.2832;
+          var rr = r.r * r.verts[k];
+          var x = r.x + Math.cos(a) * rr, y = r.y + Math.sin(a) * rr;
+          if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+      };
+      poly();
       ctx.fillStyle = "#241f1b";
-      ctx.beginPath();
-      for (var k = 0; k < r.verts.length; k++) {
-        var a = r.rot + (k / r.verts.length) * 6.2832;
-        var rr = r.r * r.verts[k];
-        var x = r.x + Math.cos(a) * rr, y = r.y + Math.sin(a) * rr;
-        if (k === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
       ctx.fill();
+      // ombra inferiore + riflesso superiore: danno volume
+      ctx.save();
+      ctx.translate(r.x, r.y + r.r * 0.14);
+      ctx.scale(0.9, 0.82);
+      ctx.translate(-r.x, -r.y);
+      poly();
+      ctx.fillStyle = "rgba(0,0,0,0.32)";
+      ctx.fill();
+      ctx.restore();
+      ctx.save();
+      ctx.translate(r.x, r.y - r.r * 0.14);
+      ctx.scale(0.82, 0.72);
+      ctx.translate(-r.x, -r.y);
+      poly();
+      ctx.fillStyle = "rgba(255,236,200,0.07)";
+      ctx.fill();
+      ctx.restore();
       ctx.strokeStyle = "rgba(120,100,80,0.25)";
       ctx.lineWidth = 2;
+      poly();
       ctx.stroke();
     });
     state.spores.forEach(function (s) {
@@ -442,17 +496,23 @@
     });
     state.nets.forEach(function (n) { if (n.alive) drawNet(n); });
     state.parasites.forEach(function (w) {
+      ctx.lineCap = "round";
       for (var i = 1; i < w.seg.length; i++) {
+        var a = w.seg[i - 1], b = w.seg[i];
+        var dx = b.x - a.x, dy = b.y - a.y;
+        var L = Math.sqrt(dx * dx + dy * dy) || 1;
+        var nx = -dy / L, ny = dx / L;
+        var w1 = Math.sin(i * 0.8 + state.time * 9) * 2.4;
         ctx.strokeStyle = "rgba(255,110,156," + (0.3 + 0.5 * i / w.seg.length).toFixed(3) + ")";
         ctx.lineWidth = 4;
         ctx.beginPath();
-        ctx.moveTo(w.seg[i - 1].x, w.seg[i - 1].y);
-        ctx.lineTo(w.seg[i].x, w.seg[i].y);
+        ctx.moveTo(a.x + nx * w1, a.y + ny * w1);
+        ctx.lineTo(b.x + nx * w1, b.y + ny * w1);
         ctx.stroke();
       }
       ctx.fillStyle = "#ff6e9c";
       ctx.beginPath();
-      ctx.arc(w.x, w.y, 6, 0, 6.2832);
+      ctx.arc(w.x, w.y, 6 + Math.sin(state.time * 8) * 0.8, 0, 6.2832);
       ctx.fill();
       ctx.fillStyle = "#2a0812";
       ctx.beginPath();
@@ -462,11 +522,67 @@
     Particles.draw(ctx);
     ctx.restore();
 
-    var vg = ctx.createRadialGradient(view.w / 2, view.h / 2, view.h * 0.35, view.w / 2, view.h / 2, view.h * 0.85);
-    vg.addColorStop(0, "rgba(0,0,0,0)");
-    vg.addColorStop(1, "rgba(0,0,0,0.55)");
-    ctx.fillStyle = vg;
+    var vgW = 0, vgH = 0;
+    if (view.vgW !== view.w || view.vgH !== view.h) {
+      view.vg = ctx.createRadialGradient(view.w / 2, view.h / 2, view.h * 0.35, view.w / 2, view.h / 2, view.h * 0.85);
+      view.vg.addColorStop(0, "rgba(0,0,0,0)");
+      view.vg.addColorStop(1, "rgba(0,0,0,0.55)");
+      view.vgW = view.w; view.vgH = view.h;
+    }
+    ctx.fillStyle = view.vg;
     ctx.fillRect(0, 0, view.w, view.h);
+    drawMinimap();
+  }
+
+  /* ===== Minimap: il mondo è 2400×2400 e la camera da sola non basta ===== */
+  function drawMinimap() {
+    var S = 116, pad = 14;
+    var x0 = pad, y0 = view.h - S - pad - 12;
+    var k = S / W;
+    ctx.save();
+    ctx.fillStyle = "rgba(6,10,8,0.55)";
+    ctx.fillRect(x0, y0, S, S);
+    ctx.strokeStyle = "rgba(125,240,200,0.3)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x0 + 0.5, y0 + 0.5, S, S);
+    ctx.beginPath();
+    ctx.rect(x0, y0, S, S);
+    ctx.clip();
+    state.toxics.forEach(function (t) {
+      ctx.fillStyle = "rgba(160,80,255,0.3)";
+      ctx.beginPath();
+      ctx.arc(x0 + t.x * k, y0 + t.y * k, t.r * k, 0, 6.2832);
+      ctx.fill();
+    });
+    state.rocks.forEach(function (r) {
+      ctx.fillStyle = "rgba(150,130,105,0.55)";
+      ctx.fillRect(x0 + r.x * k - 1.5, y0 + r.y * k - 1.5, 3, 3);
+    });
+    ctx.fillStyle = "rgba(143,247,224,0.85)";
+    state.spores.forEach(function (s) {
+      if (s.dead) return;
+      ctx.fillRect(x0 + s.x * k - 0.8, y0 + s.y * k - 0.8, 1.6, 1.6);
+    });
+    ctx.fillStyle = "rgba(255,110,156,0.95)";
+    state.parasites.forEach(function (w) {
+      ctx.fillRect(x0 + w.x * k - 1.2, y0 + w.y * k - 1.2, 2.4, 2.4);
+    });
+    state.nets.forEach(function (n) {
+      if (!n.alive) return;
+      ctx.fillStyle = n === me ? "#e8fff6" : n.color;
+      n.tips.forEach(function (t) {
+        if (!t.alive || !t.path.length) return;
+        var h2 = t.path[t.path.length - 1];
+        var r2 = n === me ? 2.6 : 2;
+        ctx.fillRect(x0 + h2.x * k - r2 / 2, y0 + h2.y * k - r2 / 2, r2, r2);
+      });
+    });
+    // riquadro della viewport
+    var vw = view.w / cam.z, vh = view.h / cam.z;
+    ctx.strokeStyle = "rgba(255,255,255,0.4)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x0 + (cam.x - vw / 2) * k, y0 + (cam.y - vh / 2) * k, vw * k, vh * k);
+    ctx.restore();
   }
 
   function drawNet(n) {
@@ -551,12 +667,17 @@
 
   function gameOver(n) {
     state.over = true;
+    state.shake = 16;
     Sound.die();
     R2.buzz([60, 40, 90]);
-    var best = Number(localStorage.getItem("mycel-best") || 0);
+    // un solo archivio per il record: il registro R2 che l'hub sa leggere
+    // (la chiave grezza 'mycel-best' resta solo come fallback di lettura)
+    var rec = R2.loadJSON("mycel-pwa", null) || {};
+    var best = typeof rec.highScore === "number" ? rec.highScore : (Number(localStorage.getItem("mycel-best") || 0) || 0);
     var L = netLen(n);
-    if (L > best) { localStorage.setItem("mycel-best", String(L)); best = L; }
+    if (L > best) best = L;
     R2.saveJSON("mycel-pwa", { highScore: best });
+    try { localStorage.removeItem("mycel-best"); } catch (e) {}
     var mins = Math.floor(state.time / 60), secs = Math.floor(state.time % 60);
     showModal(
       "La rete è morta",
@@ -634,6 +755,12 @@
         Sound.branch();
         R2.buzz([10, 20, 10]);
         toast("🌿 Nuovo tendine! Un dito per punta.");
+      } else if (tipCount(me) >= MAX_TIPS) {
+        toast("🧠 Massimo " + MAX_TIPS + " punte: una muore, allora puoi ramificare");
+      } else if (me.tips[li] && me.tips[li].path.length < 8) {
+        toast("Tendine troppo corto per ramificare");
+      } else {
+        toast("Biomassa insufficiente: servono " + BRANCH_COST);
       }
     });
     var sbtn = document.getElementById("sound-btn");
@@ -655,6 +782,8 @@
     var t = ts / 1000;
     var dt = lastT ? Math.min(t - lastT, 0.05) : 0.016;
     lastT = t;
+    if (state.frame === undefined) state.frame = 0;
+    state.frame++;
     if (!state.over) {
       updateNets(dt);
       updateParasites(dt);

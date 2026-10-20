@@ -3,6 +3,10 @@
  * is still complete and readable: the markup carries both languages and CSS
  * shows the English one, so the only things lost are the remembered
  * preferences.
+ *
+ * Every block here checks that the element it drives exists before it
+ * touches it. The same file is loaded by the ledger and by the CV, which
+ * share the language switch but not the top bar.
  */
 (function () {
   "use strict";
@@ -17,6 +21,7 @@
   function read(key) {
     try { return localStorage.getItem(key); } catch (e) { return null; }
   }
+  function el(id) { return document.getElementById(id); }
 
   /* ---- Language ----
      English is the default because it is what the markup contains; the
@@ -34,13 +39,18 @@
        rather than reading Italian with an English pronunciation. */
     root.setAttribute("lang", next);
     store(LANG_KEY, next);
-    var btn = document.getElementById("lang-btn");
-    btn.setAttribute("aria-label", next === "it" ? "Passa all'italiano" : "Switch to Italian");
+    var btn = el("lang-btn");
+    if (btn) {
+      btn.setAttribute("aria-label", next === "it" ? "Passa all'italiano" : "Switch to Italian");
+    }
   }
 
-  document.getElementById("lang-btn").addEventListener("click", function () {
-    setLang(lang === "it" ? "en" : "it");
-  });
+  var langBtn = el("lang-btn");
+  if (langBtn) {
+    langBtn.addEventListener("click", function () {
+      setLang(lang === "it" ? "en" : "it");
+    });
+  }
   setLang(lang);
 
   /* ---- Theme ---- */
@@ -51,28 +61,37 @@
     theme = next;
     root.setAttribute("data-theme", next);
     store(THEME_KEY, next);
-    document.getElementById("theme-label-en").textContent = next === "dark" ? "Light" : "Dark";
-    document.getElementById("theme-label-it").textContent = next === "dark" ? "Chiaro" : "Scuro";
-    document.getElementById("theme-btn").setAttribute(
-      "aria-label", next === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    var en = el("theme-label-en");
+    var it = el("theme-label-it");
+    if (en) en.textContent = next === "dark" ? "Light" : "Dark";
+    if (it) it.textContent = next === "dark" ? "Chiaro" : "Scuro";
+    var btn = el("theme-btn");
+    if (btn) {
+      btn.setAttribute("aria-label", next === "dark" ? "Switch to light theme" : "Switch to dark theme");
+    }
   }
 
-  document.getElementById("theme-btn").addEventListener("click", function () {
-    setTheme(theme === "dark" ? "light" : "dark");
-  });
+  var themeBtn = el("theme-btn");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", function () {
+      setTheme(theme === "dark" ? "light" : "dark");
+    });
+  }
   setTheme(theme);
 
   /* ---- Top bar hairline, only once the page has actually scrolled ---- */
-  var bar = document.getElementById("topbar");
-  var ticking = false;
-  window.addEventListener("scroll", function () {
-    if (ticking) return;
-    ticking = true;
-    window.requestAnimationFrame(function () {
-      bar.classList.toggle("stuck", window.scrollY > 8);
-      ticking = false;
-    });
-  }, { passive: true });
+  var bar = el("topbar");
+  if (bar) {
+    var ticking = false;
+    window.addEventListener("scroll", function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () {
+        bar.classList.toggle("stuck", window.scrollY > 8);
+        ticking = false;
+      });
+    }, { passive: true });
+  }
 
   /* ---- Contact links ----
      The email and LinkedIn buttons ship hidden because the details are not
