@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The audit that found its own bug — Luca Gandolfi</title>
+<meta name="description" content="A self-audit found a crash in the shared scene reader that had left nine pages empty. What that says about claims, and about tools.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://lucagandolfi77.github.io/random2/portfolio/notes/audit.html">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icons/icon-192.svg">
+<meta name="theme-color" content="#0b0d16">
+<meta name="color-scheme" content="dark light">
+<link rel="stylesheet" href="../assets/portfolio.css">
+<link rel="stylesheet" href="../assets/notes.css">
+</head>
+<body>
+
+<div class="wrap essay">
+
+  <header>
+    <p class="kicker">
+      <span class="en">Notes · 03</span>
+      <span class="it" lang="it">Note · 03</span>
+    </p>
+    <h1>
+      <span class="en">The audit that found its own bug</span>
+      <span class="it" lang="it">L'audit che ha trovato un suo bug</span>
+    </h1>
+    <p class="standfirst">
+      <span class="en">I wrote a tool to check this repository's accessibility. The first thing it found was a crash that had been there from the start.</span>
+      <span class="it" lang="it">Ho scritto uno strumento per verificare l'accessibilità di questo repository. La prima cosa che ha trovato è stato un errore che c'era fin dall'inizio.</span>
+    </p>
+    <p class="meta">
+      <span class="en">4 minutes · tools/audit</span>
+      <span class="it" lang="it">4 minuti · tools/audit</span>
+    </p>
+  </header>
+
+  <p>
+    <span class="en">The rule in this repository is that a claim is only true if a machine says so. The portfolio's numbers are recomputed from the repository by <code>tools/verify.mjs</code> and CI fails if one of them drifts. That is a lot of machinery for a page, and it is easy to think the machinery is the point.</span>
+    <span class="it" lang="it">La regola di questo repository è che un'affermazione è vera solo se una macchina lo dice. I numeri del portfolio sono ricalcolati dal repository da <code>tools/verify.mjs</code> e la CI fallisce se uno di loro scivola. È tantissima macchina per una pagina, ed è facile pensare che la macchina sia il punto.</span>
+  </p>
+
+  <p>
+    <span class="en">It is not. The point is what the machine catches. And the first thing the accessibility audit caught was this: the shared scene reader — the file that renders the nine standalone literary scenes — was <strong>throwing on load</strong>. Three of its elements carried a CSS class where the reader looked for an <code>id</code>, so <code>getElementById</code> returned null, the very next line crashed, and every one of those nine pages had been rendering an empty reader since the day it was written.</span>
+    <span class="it" lang="it">Non è. Il punto è ciò che la macchina intercetta. E la prima cosa che ha intercettato l'audit di accessibilità è stata questa: il lettore di scene condiviso — il file che disegna le nove scene letterarie autonome — <strong>lanciava un errore in caricamento</strong>. Tre dei suoi elementi avevano una classe CSS dove il lettore cercava un <code>id</code>, quindi <code>getElementById</code> restituiva null, la riga dopo crashava, e ognuna di quelle nove pagine mostrava un lettore vuoto dal giorno in cui era stata scritta.</span>
+  </p>
+
+  <blockquote>
+    <span class="en">"TypeError: Cannot read properties of null (setting 'textContent')" — at <code>shared/scene-reader.js</code>, in a file that had been loaded by nine pages and had never once thrown in a console anyone was watching.</span>
+    <span class="it" lang="it">«TypeError: Cannot read properties of null (setting 'textContent')» — in <code>shared/scene-reader.js</code>, in un file caricato da nove pagine che non aveva mai lanciato un errore in una console che qualcuno stesse guardando.</span>
+  </blockquote>
+
+  <h2>
+    <span class="en">Why reading the code did not find it</span>
+    <span class="it" lang="it">Perché leggere il codice non l'ha trovato</span>
+  </h2>
+
+  <p>
+    <span class="en">The bug was three characters long. It was also invisible to review, because the reader looked correct: it built the DOM, it styled it, it listened for the language toggle, and it looked like a working component in the source. The only way to see it was to run the page and look at what it actually rendered — and the pages that use it are literary scenes, where an empty stage looks like a deliberate design choice rather than a crash.</span>
+    <span class="it" lang="it">Il bug era lungo tre caratteri. Era anche invisibile alla revisione, perché il lettore sembrava corretto: costruiva il DOM, lo stilava, ascoltava l'interruttore della lingua, e nel sorgente sembrava un componente funzionante. L'unico modo per vederlo era eseguire la pagina e guardare cosa avesse disegnato davvero — e le pagine che lo usano sono scene letterarie, dove una scena vuota sembra una scelta di design e non un crash.</span>
+  </p>
+
+  <p>
+    <span class="en">This is the part worth generalising. <strong>The tool did not find a bug in the accessibility of the pages. It found a bug in the pages.</strong> The accessibility check was the excuse: the audit navigates to every app in the repository, and navigating is what made the crash visible. Any tool that touches every page finds the things that only appear when a page is actually loaded — and the checks you write first are almost never the ones that find them.</span>
+    <span class="it" lang="it">Questa è la parte che vale la pena generalizzare. <strong>Lo strumento non ha trovato un bug di accessibilità nelle pagine. Ha trovato un bug nelle pagine.</strong> Il controllo di accessibilità era la scusa: l'audit naviga in ogni app del repository, e navigare è ciò che ha reso visibile il crash. Qualsiasi strumento che tocca ogni pagina trova le cose che compaiono solo quando una pagina viene davvero caricata — e i controlli che scrivi per primi sono quasi mai quelli che le trovano.</span>
+  </p>
+
+  <h2>
+    <span class="en">What the report looks like now</span>
+    <span class="it" lang="it">Com'è fatto il rapporto adesso</span>
+  </h2>
+
+  <p>
+    <span class="en">It has 346 findings in it, and they are still there: 127 contrast problems in the games' muted text, 193 tap targets under 48px, and 26 canvas games that have no live region to announce their state. None of those are fixed yet. They are published, with the rule and the file and the line, because a report that shows nothing is a decoration and a report that shows only what has been fixed is marketing.</span>
+    <span class="it" lang="it">Oggi contiene 346 rilievi, e ci sono ancora: 127 problemi di contrasto nel testo attenuato dei giochi, 193 aree touch sotto 48px e 26 giochi su canvas senza un'area live per annunciare il loro stato. Nessuno di questi è ancora sistemato. Sono pubblicati, con la regola, il file e la riga, perché un rapporto che non mostra niente è una decorazione e un rapporto che mostra solo ciò che è stato sistemato è marketing.</span>
+  </p>
+
+  <p class="essay-foot">
+    <span class="en">Read the report: <a href="../audit/report.html">the self-audit</a>. Run the tool: <code>node tools/audit/run.mjs</code>. It skips cleanly when there is no browser, because a missing Chromium must never be the reason a build goes red.</span>
+    <span class="it" lang="it">Leggi il rapporto: <a href="../audit/report.html">l'auto-audit</a>. Fai girare lo strumento: <code>node tools/audit/run.mjs</code>. Salta in modo pulito quando non c'è un browser, perché un Chromium mancante non deve mai essere il motivo per cui una build diventa rossa.</span>
+  </p>
+
+</div>
+
+<script src="../assets/portfolio.js"></script>
+</body>
+</html>

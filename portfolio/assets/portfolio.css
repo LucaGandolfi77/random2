@@ -169,11 +169,16 @@
     text-decoration: none;
     padding: 8px 11px;
     min-height: 48px;
-    display: inline-flex;
     align-items: center;
     border-radius: 10px;
     transition: color 0.2s ease, background 0.2s ease;
   }
+  /* The nav links carry the bilingual pair themselves. A rule that sets
+     `display` on a .en/.it element outranks the language switch and shows
+     both languages at once, so the switch is declared explicitly here. */
+  [data-lang] .topnav a { display: none; }
+  [data-lang="en"] .topnav a.en { display: inline-flex; }
+  [data-lang="it"] .topnav a.it { display: inline-flex; }
   .topnav a:hover { color: var(--text); background: var(--surface); }
 
   .toggles { display: flex; gap: 8px; }
@@ -203,7 +208,23 @@
   }
 
   /* ---- Hero ---- */
-  .hero { padding: clamp(36px, 8vw, 86px) 0 clamp(30px, 5vw, 52px); }
+  .hero {
+    position: relative;
+    padding: clamp(36px, 8vw, 86px) 0 clamp(30px, 5vw, 52px);
+  }
+  /* The live canvas: one point per project, drawn by code. It sits behind
+     the text, it never takes a pointer, and it stops when the page does. */
+  .hero-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: min(460px, 62vh);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .hero > *:not(.hero-canvas) { position: relative; z-index: 1; }
   .kicker {
     display: inline-flex;
     align-items: center;
@@ -831,3 +852,25 @@
     .case-media { break-inside: avoid; }
     a { text-decoration: none; }
   }
+
+  /* ---- Footer navigation ---- */
+  .foot-nav {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+  .foot-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  .foot-nav a:hover { color: var(--text); }

@@ -1023,7 +1023,10 @@ projects) · **EADS STUDIO** (a gdb/MI debugger over a serial link).
 
 There is also a one-page CV at `portfolio/cv.html`: it prints to exactly one
 A4 sheet, and its figures carry the same machine-checked claims as the
-portfolio's.
+portfolio's. Around it: `portfolio/verify.html` (the ledger),
+`portfolio/audit/report.html` (the self-audit), `portfolio/now.html` (what is
+shipping), `portfolio/notes/` (three bilingual essays) and
+`portfolio/404.html`.
 
 It is bilingual EN/IT with the language chosen by the browser on first visit.
 Both languages live in the markup as sibling elements and CSS picks one, so

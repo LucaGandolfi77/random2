@@ -4,19 +4,30 @@
  * demand: a visitor who never scrolls to the third case study should not pay
  * for it.
  */
-const CACHE_NAME = "portfolio-v2";
+const CACHE_NAME = "portfolio-v3";
 const ASSETS = [
     "./",
     "./index.html",
     "./manifest.json",
     "./verify.html",
     "./cv.html",
+    "./now.html",
+    "./404.html",
+    "./notes/",
+    "./notes/index.html",
+    "./notes/corpus.html",
+    "./notes/copy.html",
+    "./notes/audit.html",
+    "./audit/report.html",
     "./assets/portfolio.css",
     "./assets/portfolio.js",
     "./assets/ledger.css",
     "./assets/ledger.js",
     "./assets/cv.css",
     "./assets/cv.js",
+    "./assets/notes.css",
+    "./assets/hero.js",
+    "./assets/install.js",
     "./icons/icon-192.svg",
     "./icons/icon-512.svg",
     "./shots/census.png",
@@ -24,7 +35,8 @@ const ASSETS = [
     "./shots/bucio.png",
     "./shots/sector7.png",
     "./shots/ironfall.png",
-    "./shots/pulse.png"
+    "./shots/pulse.png",
+    "./shots/balance.png"
 ];
 
 self.addEventListener("install", (e) => {

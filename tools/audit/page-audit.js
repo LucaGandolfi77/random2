@@ -125,8 +125,10 @@
     if (!el.getAttribute("lang")) push("inlineLang", el, "Italian text with no lang=\"it\"");
   }
 
-  /* ---- a canvas game should be able to announce its state ---- */
-  const canvas = document.querySelector("canvas");
+  /* ---- a canvas game should be able to announce its state ----
+     A canvas that is aria-hidden is decorative and has nothing to announce;
+     it is hidden from assistive technology on purpose. */
+  const canvas = document.querySelector("canvas:not([aria-hidden='true'])");
   if (canvas && !document.querySelector("[aria-live]")) {
     push("live", canvas, "a canvas game with no aria-live region to announce its state");
   }

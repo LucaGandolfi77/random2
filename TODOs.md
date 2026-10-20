@@ -414,3 +414,27 @@ game.js:98 Uncaught ReferenceError: seed is not defined
     at HTMLDocument.init (game.js:688:5)
 
 </details>
+
+---
+
+## The self-audit — what is left
+
+`tools/audit/run.mjs` loads every project in this repository in a real
+browser and checks it there. The report is committed at
+`portfolio/audit/report.html` **with the failures in it**. This is the list
+of what is still open, and it is the next piece of work.
+
+| Rule | Findings | Where |
+|---|---:|---|
+| Text below the WCAG contrast threshold | 127 | mostly the muted text of the games |
+| Tap targets under 48px | 193 | mostly small icon buttons in the games |
+| Canvas games with no aria-live region | 26 | the game surfaces cannot announce their state |
+
+Already fixed in the same pass: the shared scene reader was throwing on load
+and leaving nine literary pages empty; every control with no accessible name;
+every form control with no label; a heading that skipped a level; and every
+contrast and tap-target finding on the portfolio's own pages, which now
+audit clean.
+
+Run it with `node tools/audit/run.mjs`. It skips cleanly when there is no
+browser.

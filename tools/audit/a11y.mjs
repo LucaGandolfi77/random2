@@ -40,6 +40,11 @@ function projects() {
 const EXTRA_PAGES = [
   { name: "portfolio/cv.html", path: "/portfolio/cv.html" },
   { name: "portfolio/verify.html", path: "/portfolio/verify.html" },
+  { name: "portfolio/notes/", path: "/portfolio/notes/" },
+  { name: "portfolio/notes/corpus.html", path: "/portfolio/notes/corpus.html" },
+  { name: "portfolio/notes/copy.html", path: "/portfolio/notes/copy.html" },
+  { name: "portfolio/notes/audit.html", path: "/portfolio/notes/audit.html" },
+  { name: "portfolio/now.html", path: "/portfolio/now.html" },
 ];
 
 const PAGES = [

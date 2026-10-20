@@ -44,6 +44,25 @@ dashed and carries a `TODO` badge, so nobody can mistake it for a fact.
 
 ---
 
+## The hero canvas
+
+`assets/hero.js` draws one point per project in the arcade — forty-four of
+them — drifting slowly, with a line to each near neighbour. Every pixel is
+computed and there is not one image file in it, which is the point: the page
+claims "0 binary art assets" in words, and here it performs the claim.
+
+It follows the house rules: `prefers-reduced-motion` stops the animation
+rather than shortening it (one static frame is drawn and nothing moves), the
+canvas is `aria-hidden` and the text says the same thing in words, and the
+loop stops when the tab is hidden.
+
+## The install button
+
+`assets/install.js` listens for `beforeinstallprompt`. The button is hidden
+until the browser says the page can be installed, so a visitor never gets a
+button that leads nowhere — iOS has no such event, and a dead button is worse
+than no button.
+
 ## The CV
 
 [`cv.html`](cv.html) is a one-page CV that prints to exactly one A4 sheet.
@@ -97,7 +116,7 @@ camera, and the bot is a terminal program.
 
 | Section | What it is for |
 |---|---|
-| Hero | Positioning plus four numbers that are easy to verify. |
+| Hero | Positioning, four numbers that are easy to verify, and a live canvas: one point per project, drawn by code. |
 | Nine projects | The case studies above. |
 | Services | What you can hire him for: interface work, performance and accessibility audits, offline-first PWA builds — plus the availability facts only the author can fill in. |
 | Stack | Every skill linked to the project that proves it. No self-scored bars. |
@@ -186,14 +205,27 @@ dependencies — the same rule every other project in this repository follows.
 portfolio/
 ├── index.html          the shell: markup, both languages, the links
 ├── cv.html             one-page CV, prints to one A4 sheet
+├── now.html            what is shipping this month
+├── 404.html            this site's not-found page
+├── notes/
+│   ├── index.html      three short bilingual essays
+│   ├── corpus.html     what my own corpus says about my writing
+│   ├── copy.html       how I write the copy for a game
+│   └── audit.html      the audit that found its own bug
 ├── assets/
 │   ├── portfolio.css   the stylesheet, extracted from index.html verbatim
 │   ├── portfolio.js    the progressive enhancement, extracted verbatim
 │   ├── ledger.css      the claims ledger's table
 │   ├── ledger.js       the ledger's copy buttons
 │   ├── cv.css          the CV's layout and its print rules
-│   └── cv.js           the CV's print button
+│   ├── cv.js           the CV's print button
+│   ├── notes.css       the essays' measure
+│   ├── hero.js         the live canvas in the hero
+│   └── install.js      the install-to-phone button
 ├── verify.html         the claims ledger — GENERATED, never hand-edited
+├── audit/
+│   ├── report.html     the self-audit — GENERATED, failures included
+│   └── audit.css       the report's table
 ├── manifest.json       PWA manifest (CI requires manifest ↔ index.html link)
 ├── service-worker.js   cache-first shell, one cache per app
 ├── icons/              192 + 512, SVG like every other project here

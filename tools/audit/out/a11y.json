@@ -1499,11 +1499,111 @@
       }
     },
     {
+      "name": "portfolio/notes/",
+      "path": "/portfolio/notes/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 14,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "portfolio/notes/audit.html",
+      "path": "/portfolio/notes/audit.html",
+      "lang": "en",
+      "manual": 0,
+      "checked": 21,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "portfolio/notes/copy.html",
+      "path": "/portfolio/notes/copy.html",
+      "lang": "en",
+      "manual": 0,
+      "checked": 21,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "portfolio/notes/corpus.html",
+      "path": "/portfolio/notes/corpus.html",
+      "lang": "en",
+      "manual": 0,
+      "checked": 57,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "portfolio/now.html",
+      "path": "/portfolio/now.html",
+      "lang": "en",
+      "manual": 0,
+      "checked": 27,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
       "name": "portfolio/verify.html",
       "path": "/portfolio/verify.html",
       "lang": "en",
       "manual": 0,
-      "checked": 202,
+      "checked": 201,
       "error": null,
       "findings": {
         "alt": [],
@@ -1729,12 +1829,7 @@
           }
         ],
         "headings": [],
-        "live": [
-          {
-            "el": "canvas#stage",
-            "msg": "a canvas game with no aria-live region to announce its state"
-          }
-        ],
+        "live": [],
         "ids": [],
         "focus": [],
         "inlineLang": []

@@ -78,6 +78,13 @@
 
     <!-- ================= HERO ================= -->
     <section class="hero" aria-labelledby="hero-name">
+      <!-- The claim "0 binary art assets" is text until something runs.
+           This canvas is one point per project in the arcade, drifting, with
+           a line to each near neighbour. Every pixel is computed: there is
+           not one image file in it. It is aria-hidden, and the sentence
+           under it says the same thing in words. -->
+      <canvas class="hero-canvas" id="hero-canvas" aria-hidden="true"></canvas>
+
       <p class="kicker">
         <span class="en">Interface &amp; product engineering</span>
         <span class="it" lang="it">Interfacce e product engineering</span>
@@ -127,6 +134,12 @@
           <span class="en">CV</span>
           <span class="it" lang="it">CV</span>
         </a>
+        <!-- The browser decides whether this page can be installed, and says
+             so with an event. Until it does, the button stays hidden. -->
+        <button class="btn btn-ghost" id="install-btn" type="button" hidden>
+          <span class="en">Install to phone</span>
+          <span class="it" lang="it">Installa sul telefono</span>
+        </button>
       </div>
 
       <div class="stats">
@@ -1495,11 +1508,20 @@
         <span class="en">*plain ES modules, except two projects that build with Vite · MIT licensed</span>
         <span class="it" lang="it">*moduli ES puri, tranne due progetti che compilano con Vite · licenza MIT</span>
       </p>
+      <nav class="foot-nav" aria-label="More pages">
+        <a href="cv.html"><span class="en">CV</span><span class="it" lang="it">CV</span></a>
+        <a href="notes/"><span class="en">Notes</span><span class="it" lang="it">Note</span></a>
+        <a href="now.html"><span class="en">Now</span><span class="it" lang="it">Adesso</span></a>
+        <a href="verify.html"><span class="en">The ledger</span><span class="it" lang="it">Il registro</span></a>
+        <a href="audit/report.html"><span class="en">The self-audit</span><span class="it" lang="it">L'auto-audit</span></a>
+      </nav>
     </footer>
 
   </main>
 </div>
 
 <script src="assets/portfolio.js"></script>
+<script src="assets/hero.js"></script>
+<script src="assets/install.js"></script>
 </body>
 </html>

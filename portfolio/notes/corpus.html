@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>What my own corpus says about my writing — Luca Gandolfi</title>
+<meta name="description" content="Measuring the bilingual prose of the literary games in this repository: sentence length, type/token ratio, hapax legomena, Zipf fits and EN/IT overlap.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://lucagandolfi77.github.io/random2/portfolio/notes/corpus.html">
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icons/icon-192.svg">
+<meta name="theme-color" content="#0b0d16">
+<meta name="color-scheme" content="dark light">
+<link rel="stylesheet" href="../assets/portfolio.css">
+<link rel="stylesheet" href="../assets/notes.css">
+</head>
+<body>
+
+<div class="wrap essay">
+
+  <header>
+    <p class="kicker">
+      <span class="en">Notes · 01</span>
+      <span class="it" lang="it">Note · 01</span>
+    </p>
+    <h1>
+      <span class="en">What my own corpus says about my writing</span>
+      <span class="it" lang="it">Cosa dice il mio corpus sul mio modo di scrivere</span>
+    </h1>
+    <p class="standfirst">
+      <span class="en">The literary games are bilingual, so their prose is a corpus I already had. It turned out to be a worse one than I expected.</span>
+      <span class="it" lang="it">I giochi letterari sono bilingui, quindi la loro prosa è un corpus che avevo già. Si è rivelato peggiore di quanto mi aspettassi.</span>
+    </p>
+    <p class="meta">
+      <span class="en">6 minutes · measured with tools/corpora</span>
+      <span class="it" lang="it">6 minuti · misurato con tools/corpora</span>
+    </p>
+  </header>
+
+  <p>
+    <span class="en">There is a tool in this repository called <code>tools/corpora</code>. It pulls the prose out of the literary PWAs — which keep their text inside ES modules as object literals, convenient for the game and useless for statistics — and measures it. I wrote it to understand the translations. What it actually gave me was a description of how I write.</span>
+    <span class="it" lang="it">In questo repository c'è uno strumento chiamato <code>tools/corpora</code>. Estrae la prosa dai PWA letterari — che tengono il loro testo dentro moduli ES come letterali oggetto, comodo per il gioco e inutile per le statistiche — e la misura. L'ho scritto per capire le traduzioni. Quello che mi ha dato davvero è stata una descrizione di come scrivo.</span>
+  </p>
+
+  <p>
+    <span class="en">Here is the corpus: <strong>50 paired passages and 12 single-language strings</strong>, taken from the standalone scenes and the anthology. It is small. Published literary-corpus statistics run to hundreds of thousands of words, so every number below describes this repository's text and nothing else — not Tolstoy, not Proust, and certainly not the twenty or so other people who write in this repository.</span>
+    <span class="it" lang="it">Ecco il corpus: <strong>50 passaggi accoppiati e 12 stringhe monolingua</strong>, presi dalle scene autonome e dall'antologia. È piccolo. Le statistiche letterarie pubblicate arrivano a centinaia di migliaia di parole, quindi ogni numero qui descrive il testo di questo repository e nient'altro — non Tolstoj, non Proust, e certamente non le altre venti persone che scrivono in questo repository.</span>
+  </p>
+
+  <h2>
+    <span class="en">The numbers</span>
+    <span class="it" lang="it">I numeri</span>
+  </h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th><span class="en">Metric</span><span class="it" lang="it">Metrica</span></th>
+        <th><span class="en">EN</span><span class="it" lang="it">EN</span></th>
+        <th><span class="en">IT</span><span class="it" lang="it">IT</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="en">Tokens</span><span class="it" lang="it">Token</span></td><td>1,389</td><td>1,281</td></tr>
+      <tr><td><span class="en">Types</span><span class="it" lang="it">Tipi</span></td><td>516</td><td>576</td></tr>
+      <tr><td><span class="en">Type/token ratio</span><span class="it" lang="it">Rapporto tipo/token</span></td><td>0.371</td><td>0.450</td></tr>
+      <tr><td><span class="en">Hapax legomena</span><span class="it" lang="it"> Hapax legomena</span></td><td>331</td><td>395</td></tr>
+      <tr><td><span class="en">Lexical density</span><span class="it" lang="it">Densità lessicale</span></td><td>49.8%</td><td>59.5%</td></tr>
+      <tr><td><span class="en">Sentences</span><span class="it" lang="it">Frasi</span></td><td>128</td><td>128</td></tr>
+      <tr><td><span class="en">Mean sentence length</span><span class="it" lang="it">Lunghezza media della frase</span></td><td>10.9</td><td>10.0</td></tr>
+      <tr><td><span class="en">Sentence length CV</span><span class="it" lang="it">CV della lunghezza</span></td><td>0.54</td><td>0.56</td></tr>
+      <tr><td><span class="en">Zipf slope</span><span class="it" lang="it">Pendenza di Zipf</span></td><td>−0.816</td><td>−0.788</td></tr>
+      <tr><td><span class="en">Zipf R²</span><span class="it" lang="it">R² di Zipf</span></td><td>0.987</td><td>0.968</td></tr>
+    </tbody>
+  </table>
+
+  <h2>
+    <span class="en">What they say</span>
+    <span class="it" lang="it">Cosa dicono</span>
+  </h2>
+
+  <p>
+    <span class="en">The sentences are short. A mean of 10.9 words in English and 10.0 in Italian, with a coefficient of variation around 0.55, means the rhythm is fairly even: this is prose built out of one length, repeated with variations, not out of a mix of short and long. It is what a visual novel wants — a line that fits on a screen, a line the reader can read in one go and then click away.</span>
+    <span class="it" lang="it">Le frasi sono corte. Una media di 10,9 parole in inglese e 10,0 in italiano, con un coefficiente di variazione intorno a 0,55, vuol dire che il ritmo è abbastanza regolare: è prosa costruita su una lunghezza, ripetuta con variazioni, e non su un miscuglio di corte e lunghe. È ciò che un visual novel vuole: una riga che sta sullo schermo, una riga che si legge in un colpo e poi si clicca via.</span>
+  </p>
+
+  <p>
+    <span class="en">The Zipf fit is almost suspiciously good. A slope of −0.816 with an R² of 0.987 means the word-frequency curve is very nearly a straight line on a log-log plot, which is what natural text does and what generated text does not. And here is the part I did not expect: <strong>the Italian is the denser one</strong>. 59.5% against 49.8%, and 395 hapax legomena against 331 — words that appear exactly once. Italian carries more of the meaning in the individual word, and it pays for it with more one-offs.</span>
+    <span class="it" lang="it">L'adattamento di Zipf è quasi sospettosamente buono. Una pendenza di −0,816 con R² di 0,987 vuol dire che la curva delle frequenze è quasi esattamente una retta in scala log-log, che è ciò che fa il testo naturale e non il testo generato. E c'è la parte che non mi aspettavo: <strong>l'italiano è più denso</strong>. 59,5% contro 49,8%, e 395 hapax legomena contro 331 — parole che compaiono esattamente una volta. L'italiano porta più significato nella parola singola, e paga con più unici.</span>
+  </p>
+
+  <p>
+    <span class="en">The two versions overlap by <strong>3.5%</strong> on token forms. That number is worth reading carefully, because it is the one most likely to be misread. It is not semantic similarity: there is no translation model here. It is proper nouns, cognates and loanwords — <em>Anna</em>, <em>Karina</em>, <em>metro</em> — and the punctuation the two languages share. Two sentences saying the same thing in different words overlap at almost exactly the rate you would expect from the handful of words that have to stay the same.</span>
+    <span class="it" lang="it">Le due versioni si sovrappongono per il <strong>3,5%</strong> sulle forme dei token. Il numero va letto con attenzione, perché è quello più facile da fraintendere. Non è similarità semantica: qui non c'è un modello di traduzione. Sono nomi propri, cognati e prestiti — <em>Anna</em>, <em>Karina</em>, <em>metro</em> — e la punteggiatura che le due lingue condividono. Due frasi che dicono la stessa cosa con parole diverse si sovrappongono all'incirca al tasso che ci si aspetta dalle poche parole che devono restare uguali.</span>
+  </p>
+
+  <h2>
+    <span class="en">The part I would change</span>
+    <span class="it" lang="it">La parte che cambierei</span>
+  </h2>
+
+  <p>
+    <span class="en">A type/token ratio of 0.371 sounds impressive and means very little: it falls with length by arithmetic, which is why the tool prints it next to a type/token-against-length curve instead of on its own. On 1,389 tokens, almost any number can be defended and none of them should be quoted. The tool says so in its own caveats, which is the right place for it.</span>
+    <span class="it" lang="it">Un rapporto tipo/token di 0,371 sembra impressionante e significa pochissimo: cala con la lunghezza per aritmetica, ed è per questo che lo strumento lo stampa accanto a una curva tipo/token-contro-lunghezza invece che da solo. Su 1.389 token quasi qualunque numero si può difendere e nessuno dovrebbe essere citato. Lo strumento lo dice nelle sue stesse avvertenze, che è il posto giusto per dirlo.</span>
+  </p>
+
+  <p>
+    <span class="en">What the corpus is actually good for is a much smaller claim: it is a check that the two languages say the same thing. I write the English first, translate it, and then run the overlap. If the number moves when I have not changed the English, the translation has drifted. It is the cheapest regression test I have ever written, and it is about prose.</span>
+    <span class="it" lang="it">Quello per cui il corpus serve davvero è un'affermazione molto più piccola: è un controllo che le due lingue dicano la stessa cosa. Scrivo prima l'inglese, lo traduco, e poi faccio girare la sovrapposizione. Se il numero si muove senza che io abbia cambiato l'inglese, la traduzione è andata fuori strada. È il test di regressione più economico che abbia mai scritto, ed è sulla prosa.</span>
+  </p>
+
+  <p class="essay-foot">
+    <span class="en">Run it yourself: <code>node tools/corpora/extract.mjs --out /tmp/corpus.json</code> then <code>python3 tools/corpora/analyze.py /tmp/corpus.json</code>. The caveats the tool prints are worth reading before the numbers are.</span>
+    <span class="it" lang="it">Provalo tu: <code>node tools/corpora/extract.mjs --out /tmp/corpus.json</code> e poi <code>python3 tools/corpora/analyze.py /tmp/corpus.json</code>. Le avvertenze che stampa lo strumento vanno lette prima dei numeri.</span>
+  </p>
+
+</div>
+
+<script src="../assets/portfolio.js"></script>
+</body>
+</html>

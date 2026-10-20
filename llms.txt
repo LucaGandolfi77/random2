@@ -19,6 +19,30 @@ Chromium over the DevTools Protocol using only Node built-ins.
 its numbers carry the same `data-claim` attributes the ledger checks, so a
 figure on the CV is verified as carefully as a figure on the portfolio.
 
+### Services and availability
+
+Three things, because three things is what the work above actually is:
+interface work (screens, components, a design system in CSS custom
+properties, bilingual markup), performance and accessibility audits (measured
+against the WCAG formula, with the failures left in the report), and
+offline-first PWA builds (manifest, service worker, precache, install).
+
+Where, time zone, day rate and engagement shape are the only facts the
+repository cannot answer: they live in `portfolio/index.html` under
+`#services` and in `portfolio/now.html`, marked `data-fill-text`, and they
+ship visibly unfinished until they are filled in.
+
+### Other pages
+
+| Page | What it is |
+|---|---|
+| `portfolio/cv.html` | One-page CV, prints to exactly one A4 sheet |
+| `portfolio/verify.html` | The claims ledger, generated |
+| `portfolio/audit/report.html` | The self-audit, generated, with the failures in it |
+| `portfolio/now.html` | What is shipping this month |
+| `portfolio/notes/` | Three short bilingual essays |
+| `portfolio/404.html` | The portfolio's own not-found page |
+
 ### The self-audit
 
 `tools/audit/` loads every project in this repository in a real browser over
