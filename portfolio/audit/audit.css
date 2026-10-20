@@ -1,0 +1,132 @@
+/* portfolio · the self-audit
+ *
+ * The tokens, the type and the colour come from assets/portfolio.css. Only
+ * what is specific to a report of findings lives here.
+ */
+
+.audit { padding-bottom: calc(48px + var(--sab)); }
+
+.audit-head { padding-top: clamp(32px, 6vw, 64px); }
+.audit-head h1 {
+  margin: 18px 0 0;
+  font-size: clamp(26px, 4.6vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+}
+.audit-intro {
+  margin-top: 16px;
+  max-width: 70ch;
+  color: var(--muted);
+  font-size: 15px;
+}
+.audit-intro code, .audit-note code, .audit-foot code {
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--text);
+}
+.audit-summary {
+  margin-top: 20px;
+  font-size: 15px;
+  color: var(--muted);
+}
+.audit-summary b {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  margin-right: 4px;
+}
+.audit-back { margin-top: 12px; }
+.audit-back a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+}
+.audit-back a:hover { color: var(--text); }
+
+.audit-section { margin-top: 34px; }
+.audit-section > h2 {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 12px;
+}
+.audit-note {
+  margin-bottom: 12px;
+  max-width: 70ch;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.audit-table th,
+.audit-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.audit-table thead th {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.audit-table tbody th { font-weight: 700; color: var(--text); }
+.audit-table td.num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--muted);
+}
+.audit-table th.app { min-width: 190px; }
+.audit-table th.app a { color: var(--accent-2); text-decoration: none; }
+.audit-table th.app a:hover { text-decoration: underline; }
+.audit-table .meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--faint);
+}
+.audit-table .bad { color: var(--accent-2); font-weight: 700; }
+
+.findings {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 12.8px;
+  color: var(--muted);
+}
+.findings code {
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.audit-foot {
+  margin-top: 26px;
+  max-width: 72ch;
+  font-size: 12.5px;
+  color: var(--faint);
+}
+
+@media (max-width: 720px) {
+  .audit-table thead { display: none; }
+  .audit-table tbody tr { display: block; padding: 10px 0; }
+  .audit-table th, .audit-table td { display: block; border: none; padding: 3px 0; }
+}

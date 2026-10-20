@@ -96,8 +96,8 @@
     mount.innerHTML =
       '<div class="ls-reader">' +
         '<div class="ls-head">' +
-          '<div><div class="ls-title"></div><div class="ls-place"></div></div>' +
-          '<button class="ls-lang" type="button"></button>' +
+          '<div><div class="ls-title" id="ls-title"></div><div class="ls-place" id="ls-place"></div></div>' +
+          '<button class="ls-lang" id="ls-lang" type="button"></button>' +
         '</div>' +
         '<div class="ls-stage" id="ls-stage">' +
           '<div class="ls-speaker" id="ls-speaker"></div>' +

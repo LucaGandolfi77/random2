@@ -1,0 +1,197 @@
+/*
+ * tools/audit/report.mjs — the published self-audit.
+ *
+ * The report shows the failures. A report that hides them is a decoration,
+ * and the whole point of running an audit is that somebody else can check
+ * what it found.
+ *
+ * No timestamp: the file has to be byte-for-byte reproducible, so it can be
+ * committed and diffed without every commit making it stale.
+ */
+import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+
+export const RULES = [
+  { id: "alt", label: "Images without alt", it: "Immagini senza alt" },
+  { id: "names", label: "Controls with no accessible name", it: "Controlli senza nome accessibile" },
+  { id: "labels", label: "Form controls with no label", it: "Campi di modulo senza etichetta" },
+  { id: "contrast", label: "Text below the WCAG contrast threshold", it: "Testo sotto la soglia di contrasto WCAG" },
+  { id: "targets", label: "Tap targets under 48px", it: "Aree touch sotto 48px" },
+  { id: "headings", label: "Headings that skip a level", it: "Titoli che saltano un livello" },
+  { id: "live", label: "Canvas games with no aria-live region", it: "Giochi su canvas senza area aria-live" },
+  { id: "ids", label: "Duplicate id attributes", it: "Attributi id duplicati" },
+  { id: "focus", label: "outline: none on a focusable element", it: "outline: none su un elemento focusabile" },
+  { id: "inlineLang", label: "Italian text with no lang attribute", it: "Testo italiano senza attributo lang" },
+];
+
+const esc = (s) => String(s)
+  .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+  .replace(/"/g, "&quot;");
+
+/* The findings are already sorted: the runner sorts them, so the output
+   does not depend on the order the browser happened to visit things. */
+export function buildReport({ a11y, perf }) {
+  const apps = a11y ? a11y.apps : [];
+  const totals = {};
+  let findings = 0;
+  for (const app of apps) {
+    for (const rule of RULES) {
+      const n = (app.findings[rule.id] || []).length;
+      totals[rule.id] = (totals[rule.id] || 0) + n;
+      findings += n;
+    }
+  }
+  const appsWithFindings = apps.filter((a) =>
+    RULES.some((r) => (a.findings[r.id] || []).length)).length;
+
+  const ruleRows = RULES.map((r) => `
+        <tr>
+          <th scope="row">
+            <span class="en">${esc(r.label)}</span>
+            <span class="it" lang="it">${esc(r.it)}</span>
+          </th>
+          <td class="num">${totals[r.id] || 0}</td>
+          <td class="num">${apps.filter((a) => (a.findings[r.id] || []).length).length}</td>
+        </tr>`).join("");
+
+  const appRows = apps.map((app) => {
+    const rows = RULES.filter((r) => (app.findings[r.id] || []).length).map((r) => {
+      const items = app.findings[r.id].map((f) =>
+        `<li><code>${esc(f.el)}</code> — ${esc(f.msg)}</li>`).join("");
+      return `
+            <tr>
+              <th scope="row">
+                <span class="en">${esc(r.label)}</span>
+                <span class="it" lang="it">${esc(r.it)}</span>
+              </th>
+              <td><ul class="findings">${items}</ul></td>
+            </tr>`;
+    }).join("");
+    if (!rows) return "";
+    const lang = app.lang === "MISSING"
+      ? `<span class="bad">no lang</span>`
+      : esc(app.lang);
+    return `
+        <tr>
+          <th scope="row" class="app">
+            <a href="${esc(app.path)}">${esc(app.name)}</a>
+            <span class="meta">lang ${lang} · ${app.manual} not measurable</span>
+          </th>
+          <td>${rows}</td>
+        </tr>`;
+  }).join("");
+
+  const perfRows = perf ? perf.apps.map((p) => `
+        <tr>
+          <th scope="row"><a href="${esc(p.path)}">${esc(p.name)}</a></th>
+          <td class="num">${p.requests}</td>
+          <td class="num">${(p.bytes / 1024).toFixed(0)} KB</td>
+          <td class="num">${p.dcl} ms</td>
+          <td class="num">${p.load} ms</td>
+        </tr>`).join("") : "";
+
+  return `<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The self-audit — Luca Gandolfi</title>
+<meta name="description" content="An accessibility and performance audit of every project in the repository, with the failures left in.">
+<meta name="robots" content="index, follow">
+<link rel="stylesheet" href="../assets/portfolio.css">
+<link rel="stylesheet" href="audit.css">
+</head>
+<body>
+<div class="wrap audit">
+  <header class="audit-head">
+    <p class="kicker">
+      <span class="en">The self-audit</span>
+      <span class="it" lang="it">L'auto-audit</span>
+    </p>
+    <h1>
+      <span class="en">Every project, checked — with the failures left in</span>
+      <span class="it" lang="it">Ogni progetto, verificato — con gli errori lasciati dentro</span>
+    </h1>
+    <p class="audit-intro">
+      <span class="en">Nobody publishes a self-audit that finds its own bugs. That is the whole idea. This page is generated by <code>tools/audit/a11y.mjs</code> and <code>tools/audit/perf.mjs</code>, which load every project in this repository over the DevTools Protocol and check it in the browser: missing alt attributes, controls with no accessible name, contrast ratios computed with the WCAG formula, tap targets under 48px, headings that skip a level, documents with no language, canvas games that cannot announce their state, duplicate ids and outlines removed from focusable elements. The findings below are the real ones.</span>
+      <span class="it" lang="it">Nessuno pubblica un auto-audit che trova i propri bug. È proprio questo il punto. Questa pagina è generata da <code>tools/audit/a11y.mjs</code> e <code>tools/audit/perf.mjs</code>, che caricano ogni progetto di questo repository via DevTools Protocol e lo verificano nel browser: attributi alt mancanti, controlli senza nome accessibile, rapporti di contrasto calcolati con la formula WCAG, aree touch sotto 48px, titoli che saltano un livello, documenti senza lingua, giochi su canvas che non possono annunciare il loro stato, id duplicati e outline tolti dagli elementi focusabili. I rilievi qui sotto sono quelli veri.</span>
+    </p>
+    <p class="audit-summary">
+      <b>${apps.length}</b>
+      <span class="en">apps audited · ${findings} findings in ${appsWithFindings} of them</span>
+      <span class="it" lang="it">app verificate · ${findings} rilievi in ${appsWithFindings} di esse</span>
+    </p>
+    <p class="audit-back">
+      <a href="../">&larr; <span class="en">Back to the portfolio</span><span class="it" lang="it">Torna al portfolio</span></a>
+    </p>
+  </header>
+
+  <section class="audit-section">
+    <h2>
+      <span class="en">By rule</span>
+      <span class="it" lang="it">Per regola</span>
+    </h2>
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th scope="col"><span class="en">Rule</span><span class="it" lang="it">Regola</span></th>
+          <th scope="col"><span class="en">Findings</span><span class="it" lang="it">Rilievi</span></th>
+          <th scope="col"><span class="en">Apps</span><span class="it" lang="it">App</span></th>
+        </tr>
+      </thead>
+      <tbody>${ruleRows}
+      </tbody>
+    </table>
+  </section>
+
+${perfRows ? `
+  <section class="audit-section">
+    <h2>
+      <span class="en">Performance, measured</span>
+      <span class="it" lang="it">Prestazioni, misurate</span>
+    </h2>
+    <p class="audit-note">
+      <span class="en">Transferred bytes, request count and the two navigation timings, from a cold cache on a fixed viewport. The measurement device is fixed so the numbers are comparable between runs and between projects.</span>
+      <span class="it" lang="it">Byte trasferiti, numero di richieste e i due tempi di navigazione, da cache vuota su un viewport fisso. Il dispositivo di misura è fisso, così i numeri sono confrontabili fra esecuzioni e fra progetti.</span>
+    </p>
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th scope="col"><span class="en">App</span><span class="it" lang="it">App</span></th>
+          <th scope="col"><span class="en">Requests</span><span class="it" lang="it">Richieste</span></th>
+          <th scope="col"><span class="en">Transferred</span><span class="it" lang="it">Trasferiti</span></th>
+          <th scope="col"><span class="en">DOMContentLoaded</span><span class="it" lang="it">DOMContentLoaded</span></th>
+          <th scope="col"><span class="en">Load</span><span class="it" lang="it">Load</span></th>
+        </tr>
+      </thead>
+      <tbody>${perfRows}
+      </tbody>
+    </table>
+  </section>` : ""}
+
+  <section class="audit-section">
+    <h2>
+      <span class="en">By app</span>
+      <span class="it" lang="it">Per app</span>
+    </h2>
+    <table class="audit-table">
+      <tbody>${appRows}
+      </tbody>
+    </table>
+  </section>
+
+  <p class="audit-foot">
+    <span class="en">Generated by <code>node tools/audit/run.mjs</code>. No timestamp, on purpose: the file is byte-for-byte reproducible, so it can be committed and diffed. A browser-dependent tool that finds no Chromium prints SKIP and exits 0 — it can never be the reason a build goes red.</span>
+    <span class="it" lang="it">Generato da <code>node tools/audit/run.mjs</code>. Nessun timestamp, di proposito: il file è riproducibile byte per byte, così può essere committato e confrontato. Uno strumento che dipende da un browser e non trova nessun Chromium stampa SKIP ed esce con 0 — non può mai essere il motivo per cui una build diventa rossa.</span>
+  </p>
+</div>
+<script src="../assets/portfolio.js"></script>
+</body>
+</html>
+`;
+}
+
+export function writeReport(data, path) {
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, buildReport(data));
+}

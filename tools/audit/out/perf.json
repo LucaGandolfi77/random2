@@ -1,0 +1,356 @@
+{
+  "apps": [
+    {
+      "name": "acqua-pwa",
+      "path": "/acqua-pwa/",
+      "requests": 5,
+      "bytes": 53966,
+      "dcl": 92,
+      "load": 92
+    },
+    {
+      "name": "alveare-pwa",
+      "path": "/alveare-pwa/",
+      "requests": 5,
+      "bytes": 61407,
+      "dcl": 55,
+      "load": 56
+    },
+    {
+      "name": "anna-karenina-pwa",
+      "path": "/anna-karenina-pwa/",
+      "requests": 2,
+      "bytes": 16587,
+      "dcl": 33,
+      "load": 34
+    },
+    {
+      "name": "anthology-pwa",
+      "path": "/anthology-pwa/",
+      "requests": 8,
+      "bytes": 155828,
+      "dcl": 91,
+      "load": 92
+    },
+    {
+      "name": "bible-pwa",
+      "path": "/bible-pwa/",
+      "requests": 7,
+      "bytes": 52426,
+      "dcl": 53,
+      "load": 53
+    },
+    {
+      "name": "brothers-karamazov-pwa",
+      "path": "/brothers-karamazov-pwa/",
+      "requests": 2,
+      "bytes": 16771,
+      "dcl": 27,
+      "load": 27
+    },
+    {
+      "name": "bucio",
+      "path": "/bucio/",
+      "requests": 2,
+      "bytes": 8718,
+      "dcl": 13,
+      "load": 18
+    },
+    {
+      "name": "census-pwa",
+      "path": "/census-pwa/",
+      "requests": 5,
+      "bytes": 89712,
+      "dcl": 57,
+      "load": 57
+    },
+    {
+      "name": "crime-and-punishment-pwa",
+      "path": "/crime-and-punishment-pwa/",
+      "requests": 7,
+      "bytes": 38687,
+      "dcl": 46,
+      "load": 46
+    },
+    {
+      "name": "divine-comedy-pwa",
+      "path": "/divine-comedy-pwa/",
+      "requests": 2,
+      "bytes": 16529,
+      "dcl": 18,
+      "load": 18
+    },
+    {
+      "name": "dorian-gray-pwa",
+      "path": "/dorian-gray-pwa/",
+      "requests": 2,
+      "bytes": 16876,
+      "dcl": 20,
+      "load": 21
+    },
+    {
+      "name": "example-pwa",
+      "path": "/example-pwa/",
+      "requests": 9,
+      "bytes": 62663,
+      "dcl": 39,
+      "load": 39
+    },
+    {
+      "name": "formica-pwa",
+      "path": "/formica-pwa/",
+      "requests": 13,
+      "bytes": 186711,
+      "dcl": 104,
+      "load": 104
+    },
+    {
+      "name": "invisible-cities-pwa",
+      "path": "/invisible-cities-pwa/",
+      "requests": 2,
+      "bytes": 16708,
+      "dcl": 23,
+      "load": 24
+    },
+    {
+      "name": "ironfall-pwa",
+      "path": "/ironfall-pwa/",
+      "requests": 20,
+      "bytes": 556952,
+      "dcl": 74,
+      "load": 75
+    },
+    {
+      "name": "ivan-ilyich-pwa",
+      "path": "/ivan-ilyich-pwa/",
+      "requests": 2,
+      "bytes": 16783,
+      "dcl": 19,
+      "load": 19
+    },
+    {
+      "name": "king-shot-pwa",
+      "path": "/king-shot-pwa/",
+      "requests": 5,
+      "bytes": 49417,
+      "dcl": 36,
+      "load": 36
+    },
+    {
+      "name": "les-miserables-pwa",
+      "path": "/les-miserables-pwa/",
+      "requests": 2,
+      "bytes": 17307,
+      "dcl": 29,
+      "load": 30
+    },
+    {
+      "name": "lumen-pwa",
+      "path": "/lumen-pwa/",
+      "requests": 13,
+      "bytes": 168652,
+      "dcl": 68,
+      "load": 69
+    },
+    {
+      "name": "madre-pwa",
+      "path": "/madre-pwa/",
+      "requests": 5,
+      "bytes": 57954,
+      "dcl": 61,
+      "load": 63
+    },
+    {
+      "name": "metro-pwa",
+      "path": "/metro-pwa/",
+      "requests": 5,
+      "bytes": 76224,
+      "dcl": 31,
+      "load": 33
+    },
+    {
+      "name": "mustang-pwa",
+      "path": "/mustang-pwa/",
+      "requests": 7,
+      "bytes": 145644,
+      "dcl": 46,
+      "load": 47
+    },
+    {
+      "name": "mycel-pwa",
+      "path": "/mycel-pwa/",
+      "requests": 4,
+      "bytes": 55376,
+      "dcl": 37,
+      "load": 37
+    },
+    {
+      "name": "nebbia-pwa",
+      "path": "/nebbia-pwa/",
+      "requests": 5,
+      "bytes": 58422,
+      "dcl": 105,
+      "load": 106
+    },
+    {
+      "name": "new-star-soccer",
+      "path": "/new-star-soccer/",
+      "requests": 2,
+      "bytes": 33700,
+      "dcl": 17,
+      "load": 17
+    },
+    {
+      "name": "plane-pwa",
+      "path": "/plane-pwa/",
+      "requests": 5,
+      "bytes": 46855,
+      "dcl": 22,
+      "load": 22
+    },
+    {
+      "name": "pokemon-go-pwa",
+      "path": "/pokemon-go-pwa/",
+      "requests": 9,
+      "bytes": 337777,
+      "dcl": 90,
+      "load": 246
+    },
+    {
+      "name": "pulse-pwa",
+      "path": "/pulse-pwa/",
+      "requests": 8,
+      "bytes": 98033,
+      "dcl": 55,
+      "load": 56
+    },
+    {
+      "name": "recherche-pwa",
+      "path": "/recherche-pwa/",
+      "requests": 7,
+      "bytes": 42108,
+      "dcl": 59,
+      "load": 59
+    },
+    {
+      "name": "resort-pwa",
+      "path": "/resort-pwa/",
+      "requests": 5,
+      "bytes": 95229,
+      "dcl": 45,
+      "load": 45
+    },
+    {
+      "name": "sartoria-pwa",
+      "path": "/sartoria-pwa/",
+      "requests": 3,
+      "bytes": 158408,
+      "dcl": 69,
+      "load": 70
+    },
+    {
+      "name": "sector7-pwa",
+      "path": "/sector7-pwa/",
+      "requests": 18,
+      "bytes": 574634,
+      "dcl": 107,
+      "load": 107
+    },
+    {
+      "name": "sini-pwa",
+      "path": "/sini-pwa/",
+      "requests": 5,
+      "bytes": 60978,
+      "dcl": 84,
+      "load": 85
+    },
+    {
+      "name": "slot-pwa",
+      "path": "/slot-pwa/",
+      "requests": 5,
+      "bytes": 44486,
+      "dcl": 43,
+      "load": 43
+    },
+    {
+      "name": "snake-pwa",
+      "path": "/snake-pwa/",
+      "requests": 5,
+      "bytes": 52030,
+      "dcl": 24,
+      "load": 24
+    },
+    {
+      "name": "snap-pwa",
+      "path": "/snap-pwa/",
+      "requests": 4,
+      "bytes": 73850,
+      "dcl": 49,
+      "load": 50
+    },
+    {
+      "name": "static-pwa",
+      "path": "/static-pwa/",
+      "requests": 5,
+      "bytes": 52531,
+      "dcl": 42,
+      "load": 42
+    },
+    {
+      "name": "stats-pwa",
+      "path": "/stats-pwa/",
+      "requests": 5,
+      "bytes": 93870,
+      "dcl": 71,
+      "load": 72
+    },
+    {
+      "name": "territorio-pwa",
+      "path": "/territorio-pwa/",
+      "requests": 5,
+      "bytes": 41624,
+      "dcl": 43,
+      "load": 43
+    },
+    {
+      "name": "the-trial-pwa",
+      "path": "/the-trial-pwa/",
+      "requests": 2,
+      "bytes": 16918,
+      "dcl": 62,
+      "load": 73
+    },
+    {
+      "name": "tiny-tower-pwa",
+      "path": "/tiny-tower-pwa/",
+      "requests": 3,
+      "bytes": 88877,
+      "dcl": 48,
+      "load": 49
+    },
+    {
+      "name": "underground-pwa",
+      "path": "/underground-pwa/",
+      "requests": 2,
+      "bytes": 17242,
+      "dcl": 34,
+      "load": 35
+    },
+    {
+      "name": "virtual-farm-pwa",
+      "path": "/virtual-farm-pwa/",
+      "requests": 4,
+      "bytes": 37568,
+      "dcl": 50,
+      "load": 52
+    },
+    {
+      "name": "viti-pwa",
+      "path": "/viti-pwa/",
+      "requests": 5,
+      "bytes": 65681,
+      "dcl": 48,
+      "load": 49
+    }
+  ]
+}

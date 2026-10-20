@@ -18,11 +18,11 @@
  * the app into a state that shows the product *doing* something, rather than
  * a title screen. census-pwa/shot.mjs does the same thing with Playwright.
  */
-import { spawn, execSync } from "node:child_process";
-import { mkdirSync, writeFileSync, rmSync, existsSync, readdirSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { execSync } from "node:child_process";
+import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { launch, findChromium, sleep } from "../../tools/cdp.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, "..", "shots");
@@ -33,92 +33,8 @@ const ONLY = process.argv.slice(3);
 
 /* ---------------------------------------------------------------- browser */
 
-/* Playwright's cache is the usual place a Chromium already exists on a
- * developer machine. Chrome is the fallback so the script works without it. */
-function findChromium() {
-    if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
-
-    const home = process.env.HOME || "";
-    for (const cache of [
-        join(home, "Library/Caches/ms-playwright"),   // macOS
-        join(home, ".cache/ms-playwright"),            // Linux
-        join(home, "AppData/Local/ms-playwright"),    // Windows
-    ]) {
-        if (!existsSync(cache)) continue;
-        for (const dir of readdirSync(cache).sort().reverse()) {
-            if (!dir.startsWith("chromium")) continue;
-            for (const rel of [
-                "chrome-headless-shell-mac-arm64/chrome-headless-shell",
-                "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
-                "chrome-mac/Chromium.app/Contents/MacOS/Chromium",
-                "chrome-headless-shell-linux64/chrome-headless-shell",
-                "chrome-linux64/chrome",
-                "chrome-win/chrome.exe",
-            ]) {
-                const p = join(cache, dir, rel);
-                if (existsSync(p)) return p;
-            }
-        }
-    }
-    for (const p of [
-        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-        "/Applications/Chromium.app/Contents/MacOS/Chromium",
-        "/usr/bin/chromium",
-        "/usr/bin/chromium-browser",
-        "/usr/bin/google-chrome",
-    ]) {
-        if (existsSync(p)) return p;
-    }
-    return null;
-}
-
-/* ------------------------------------------------------------- CDP client */
-
-/* A promise-per-id client. Flat sessions are used, so every message from a
- * page carries the same sessionId and the routing stays trivial. */
-function connect(url) {
-    const ws = new WebSocket(url);
-    const pending = new Map();
-    const waiters = new Map();
-    let id = 0;
-
-    const ready = new Promise((res, rej) => {
-        ws.addEventListener("open", () => res());
-        ws.addEventListener("error", (e) => rej(new Error("devtools socket failed: " + e.message)));
-    });
-
-    ws.addEventListener("message", (ev) => {
-        const msg = JSON.parse(ev.data);
-        if (msg.id !== undefined) {
-            const slot = pending.get(msg.id);
-            if (!slot) return;
-            pending.delete(msg.id);
-            if (msg.error) slot.reject(new Error(msg.error.message));
-            else slot.resolve(msg.result);
-            return;
-        }
-        const list = waiters.get(msg.method);
-        if (list) for (const fn of list.splice(0)) fn(msg.params);
-    });
-
-    const send = (method, params = {}, sessionId) => {
-        const mid = ++id;
-        return new Promise((resolve, reject) => {
-            pending.set(mid, { resolve, reject });
-            ws.send(JSON.stringify({ id: mid, method, params, sessionId }));
-        });
-    };
-
-    const once = (method) => new Promise((resolve) => {
-        const list = waiters.get(method) || [];
-        list.push(resolve);
-        waiters.set(method, list);
-    });
-
-    return { ready, send, once, close: () => ws.close() };
-}
-
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/* The DevTools Protocol client lives in tools/cdp.mjs, because the audit
+ * tools need it too and there is no reason to have two of them. */
 
 /* -------------------------------------------------------------- the shots */
 
@@ -261,52 +177,13 @@ if (!bin) {
 }
 
 mkdirSync(out, { recursive: true });
-const profile = join(tmpdir(), "r2-portfolio-shots-" + process.pid);
 
-const child = spawn(
-    bin,
-    [
-        "--headless",
-        "--disable-gpu",
-        "--hide-scrollbars",
-        "--no-first-run",
-        "--no-default-browser-check",
-        "--disable-extensions",
-        /* PULSE schedules its note chart against audioCtx.currentTime. A
-         * headless AudioContext stays suspended without a user gesture, so
-         * currentTime never advances and the lanes stay empty forever. */
-        "--autoplay-policy=no-user-gesture-required",
-        "--mute-audio",
-        "--remote-debugging-port=0",
-        "--user-data-dir=" + profile,
-        "about:blank",
-    ],
-    { stdio: ["ignore", "ignore", "pipe"] }
-);
-
-/* Chromium prints the DevTools endpoint on stderr once it is listening. */
-const wsURL = await new Promise((resolve, reject) => {
-    let buf = "";
-    const timer = setTimeout(() => reject(new Error("no devtools endpoint")), 20000);
-    child.stderr.on("data", (d) => {
-        buf += d.toString();
-        const m = buf.match(/DevTools listening on (ws:\/\/\S+)/);
-        if (m) {
-            clearTimeout(timer);
-            resolve(m[1].trim());
-        }
-    });
-    child.on("exit", (code) => {
-        clearTimeout(timer);
-        reject(new Error("browser exited early (" + code + ")\n" + buf.slice(-400)));
-    });
-});
-
-const cdp = connect(wsURL);
-await cdp.ready;
-
-const { targetId } = await cdp.send("Target.createTarget", { url: "about:blank" });
-const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
+/* The browser comes with the flags the games need: PULSE schedules its note
+ * chart against audioCtx.currentTime, and a headless AudioContext stays
+ * suspended without a user gesture, so currentTime never advances and the
+ * lanes stay empty forever. */
+const browser = await launch({ bin });
+const { cdp, sessionId } = browser;
 
 await cdp.send("Page.enable", {}, sessionId);
 await cdp.send("Runtime.enable", {}, sessionId);
@@ -399,9 +276,7 @@ for (const shot of queue) {
     }
 }
 
-cdp.close();
-child.kill();
-rmSync(profile, { recursive: true, force: true });
+browser.close();
 
 console.log(`\n${ok} written, ${failed} failed → portfolio/shots/`);
 process.exit(failed ? 1 : 0);

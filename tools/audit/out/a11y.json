@@ -1,0 +1,2594 @@
+{
+  "apps": [
+    {
+      "name": "acqua-pwa",
+      "path": "/acqua-pwa/",
+      "lang": "it",
+      "manual": 0,
+      "checked": 33,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "b#money “400”",
+            "msg": "3.48:1 on rgb(251,251,244) — needs 4.5:1"
+          },
+          {
+            "el": "span.lbl “/”",
+            "msg": "4.01:1 on rgb(251,251,244) — needs 4.5:1"
+          },
+          {
+            "el": "div.dockinfo “La sorgente è sul monte a sinistra. Traccia …”",
+            "msg": "4.02:1 on rgb(253,252,244) — needs 4.5:1"
+          },
+          {
+            "el": "div#m-body.body “Roma ha sete. La sorgente è sul monte: la ci…”",
+            "msg": "3.89:1 on rgb(246,241,227) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#help-btn.iconbtn “❓”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button.mbtn.primary “💧 Prendi il cantiere”",
+            "msg": "416×40px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "alveare-pwa",
+      "path": "/alveare-pwa/",
+      "lang": "it",
+      "manual": 10,
+      "checked": 25,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "span.chip.honey “🍯 39”",
+            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+          },
+          {
+            "el": "b#honey “39”",
+            "msg": "1.11:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+          },
+          {
+            "el": "span.chip “🐝 10/10”",
+            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+          },
+          {
+            "el": "b#pop “10”",
+            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+          },
+          {
+            "el": "span#slots “10”",
+            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+          },
+          {
+            "el": "span#season.chip “🌸 Primavera · Anno 1”",
+            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#levels-btn.iconbtn “❓”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button.btn.primary “🐝 Prendi il comando”",
+            "msg": "378×43px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "anna-karenina-pwa",
+      "path": "/anna-karenina-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "anthology-pwa",
+      "path": "/anthology-pwa/",
+      "lang": "en",
+      "manual": 2,
+      "checked": 192,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button#reader-back.r-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#reader-again.r-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#reader-continue.r-btn.hidden",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.language-switch “Lingua: Italiano / English”",
+            "msg": "175×27px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          },
+          {
+            "el": "a.play-link “Read — Leggi”",
+            "msg": "117×37px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#bg-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "bible-pwa",
+      "path": "/bible-pwa/",
+      "lang": "en",
+      "manual": 2,
+      "checked": 10,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#bg-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "brothers-karamazov-pwa",
+      "path": "/brothers-karamazov-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "bucio",
+      "path": "/bucio/",
+      "lang": "it",
+      "manual": 0,
+      "checked": 18,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "h1.logo-text “BUCIO”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 3:1"
+          },
+          {
+            "el": "p.logo-sub “divora tutto”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "p.pitch “Sei un buco nero caduto dal cielo su Portoma…”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "em#menu-place “Portomarina”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span#menu-pitch-time “120 secondi”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "p#menu-mode.pitch.mode-note “La cittadina come l'hai sempre vista.”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "div.best-line “Record personale: 0 · Buco più grande: 1.0 m”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "b#menu-best “0”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.dot “·”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "b#menu-bestsize “1.0”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "label “Modalità”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "label “Ambientazione”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "label “Grafica”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "label “Audio”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "label “Scossa schermo”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "p.loader-text “Costruis Portomarina…”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#btn-play.btn.btn-primary “GIOCA”",
+            "msg": "59×21px tap target"
+          },
+          {
+            "el": "button#btn-howto.btn.btn-ghost “Come si gioca”",
+            "msg": "100×21px tap target"
+          },
+          {
+            "el": "input#chk-shake",
+            "msg": "13×13px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#scene",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "census-pwa",
+      "path": "/census-pwa/",
+      "lang": "en",
+      "manual": 6,
+      "checked": 6,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#help-btn.btn “? How it works”",
+            "msg": "114×42px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#city",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "crime-and-punishment-pwa",
+      "path": "/crime-and-punishment-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 11,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button “Reflect on the extraordinary man's right”",
+            "msg": "248×21px tap target"
+          },
+          {
+            "el": "button “Consider the weight of conscience”",
+            "msg": "219×21px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "divine-comedy-pwa",
+      "path": "/divine-comedy-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "dorian-gray-pwa",
+      "path": "/dorian-gray-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "example-pwa",
+      "path": "/example-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 29,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [
+          {
+            "el": "input#name-input",
+            "msg": "form control with no label"
+          }
+        ],
+        "contrast": [
+          {
+            "el": "span.stat-label “CRYSTALS”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span#stat-crystals.stat-value “0”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.stat-label “LIVES”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span#stat-lives.stat-value “3”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "h1.logo “STAR EXPLORER”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 3:1"
+          },
+          {
+            "el": "p.tagline “Pilot through the cosmos, collect crystals, …”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "p#menu-best.fine “No flights yet.”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.key “Left thumb”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span “fly — anywhere you press is the stick”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.key “FIRE”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span “shoot asteroids”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.key “T”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span “target lock”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "p.fine.dim “Asteroids, crystals, and survival across 50+…”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "h2#death-title “Mission Failed”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 3:1"
+          },
+          {
+            "el": "p#death-sub.tagline “The void claimed you.”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span#os-crystals.result-value “0”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.result-label “crystals banked”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span#os-best.result-value “0”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.result-label “best score”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span#os-deaths.result-value “0”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.result-label “deaths”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "p “Install Star Explorer to play offline, fulls…”",
+            "msg": "1.00:1 on rgb(255,255,255) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#btn-play.btn.primary “LAUNCH”",
+            "msg": "71×21px tap target"
+          },
+          {
+            "el": "button#btn-sound.btn.ghost “🔊 Sound”",
+            "msg": "75×21px tap target"
+          },
+          {
+            "el": "button#btn-again.btn.primary “RELAUNCH”",
+            "msg": "89×21px tap target"
+          },
+          {
+            "el": "button#btn-menu.btn.ghost “Back to menu”",
+            "msg": "98×21px tap target"
+          },
+          {
+            "el": "button#btn-install.btn.primary “Install”",
+            "msg": "51×21px tap target"
+          },
+          {
+            "el": "button#btn-install-later.btn.ghost “Later”",
+            "msg": "46×21px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "formica-pwa",
+      "path": "/formica-pwa/",
+      "lang": "it",
+      "manual": 10,
+      "checked": 15,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [
+          {
+            "el": "input#name-input",
+            "msg": "form control with no label"
+          }
+        ],
+        "contrast": [
+          {
+            "el": "button#btn-play.btn.primary “FONDA LA COLONIA”",
+            "msg": "2.74:1 at worst on a gradient (rgb(255,112,67)) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#btn-play.btn.primary “FONDA LA COLONIA”",
+            "msg": "370×42px tap target"
+          },
+          {
+            "el": "button#btn-sound.btn.ghost “🔊 Suono”",
+            "msg": "123×42px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "invisible-cities-pwa",
+      "path": "/invisible-cities-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "ironfall-pwa",
+      "path": "/ironfall-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 37,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#btn-play.btn.primary “DEPLOY”",
+            "msg": "91×38px tap target"
+          },
+          {
+            "el": "button#btn-runes.btn “RUNES”",
+            "msg": "82×38px tap target"
+          },
+          {
+            "el": "button#btn-records.btn “RECORDS”",
+            "msg": "100×38px tap target"
+          },
+          {
+            "el": "button#btn-settings.btn “SETTINGS”",
+            "msg": "109×38px tap target"
+          },
+          {
+            "el": "button.diff “RECRUIT”",
+            "msg": "71×27px tap target"
+          },
+          {
+            "el": "button.diff.is-on “GUARDSMAN”",
+            "msg": "85×27px tap target"
+          },
+          {
+            "el": "button.diff “NECRON LORD”",
+            "msg": "99×27px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "ivan-ilyich-pwa",
+      "path": "/ivan-ilyich-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "king-shot-pwa",
+      "path": "/king-shot-pwa/",
+      "lang": "en",
+      "manual": 5,
+      "checked": 11,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#start-btn.btn.primary “▶ Start”",
+            "msg": "120×43px tap target"
+          },
+          {
+            "el": "button#pause-btn.btn “⏸ Pause”",
+            "msg": "117×42px tap target"
+          },
+          {
+            "el": "button#overlay-play.btn.primary “▶ Play Again”",
+            "msg": "169×43px tap target"
+          },
+          {
+            "el": "button#overlay-theme.btn “🎨 Change Theme”",
+            "msg": "211×43px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "les-miserables-pwa",
+      "path": "/les-miserables-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "lumen-pwa",
+      "path": "/lumen-pwa/",
+      "lang": "en",
+      "manual": 8,
+      "checked": 13,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [
+          {
+            "el": "input#name-input",
+            "msg": "form control with no label"
+          }
+        ],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#btn-play.btn.primary “DIVE IN”",
+            "msg": "370×45px tap target"
+          },
+          {
+            "el": "button#btn-sound.btn.ghost “🔊 Sound”",
+            "msg": "370×46px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "madre-pwa",
+      "path": "/madre-pwa/",
+      "lang": "it",
+      "manual": 0,
+      "checked": 31,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "b#money “60”",
+            "msg": "3.48:1 on rgb(255,250,240) — needs 4.5:1"
+          },
+          {
+            "el": "button.tab “📜 Contratti 3”",
+            "msg": "4.20:1 on rgb(255,250,240) — needs 4.5:1"
+          },
+          {
+            "el": "button.tab “📈 Mercato”",
+            "msg": "4.20:1 on rgb(255,250,240) — needs 4.5:1"
+          },
+          {
+            "el": "button.roomchip.locked “🔒 Cantina fresca · € 200”",
+            "msg": "4.20:1 on rgb(255,250,240) — needs 4.5:1"
+          },
+          {
+            "el": "button.roomchip.locked “🔒 Locale caldo · € 350”",
+            "msg": "4.20:1 on rgb(255,250,240) — needs 4.5:1"
+          },
+          {
+            "el": "div.roomnote “Dispensa · matura in tempo reale · 📦 Aggiun…”",
+            "msg": "4.04:1 on rgb(246,238,221) — needs 4.5:1"
+          },
+          {
+            "el": "button.roomchip “📦 Aggiungi scaffale (+3 posti · € 70)”",
+            "msg": "4.20:1 on rgb(255,250,240) — needs 4.5:1"
+          },
+          {
+            "el": "button.empty “+ Nuovo lotto”",
+            "msg": "4.04:1 on rgb(246,238,221) — needs 4.5:1"
+          },
+          {
+            "el": "button.empty “+ Nuovo lotto”",
+            "msg": "4.04:1 on rgb(246,238,221) — needs 4.5:1"
+          },
+          {
+            "el": "button.empty “+ Nuovo lotto”",
+            "msg": "4.04:1 on rgb(246,238,221) — needs 4.5:1"
+          },
+          {
+            "el": "button.empty “+ Nuovo lotto”",
+            "msg": "4.04:1 on rgb(246,238,221) — needs 4.5:1"
+          },
+          {
+            "el": "button.empty “+ Nuovo lotto”",
+            "msg": "4.04:1 on rgb(246,238,221) — needs 4.5:1"
+          },
+          {
+            "el": "div#m-body.body “La madre — il fermento — ti è stata passata …”",
+            "msg": "4.04:1 on rgb(246,238,221) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#notify-btn.iconbtn “🔔”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button#help-btn.iconbtn “❓”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button.tab.sel “🍾 Cantina”",
+            "msg": "416×35px tap target"
+          },
+          {
+            "el": "button.tab “📜 Contratti 3”",
+            "msg": "416×35px tap target"
+          },
+          {
+            "el": "button.tab “📈 Mercato”",
+            "msg": "416×35px tap target"
+          },
+          {
+            "el": "button.roomchip.sel “Dispensa ×1”",
+            "msg": "96×28px tap target"
+          },
+          {
+            "el": "button.roomchip.locked “🔒 Cantina fresca · € 200”",
+            "msg": "168×28px tap target"
+          },
+          {
+            "el": "button.roomchip.locked “🔒 Locale caldo · € 350”",
+            "msg": "158×28px tap target"
+          },
+          {
+            "el": "button.roomchip “📦 Aggiungi scaffale (+3 posti · € 70)”",
+            "msg": "235×28px tap target"
+          },
+          {
+            "el": "button.btn.primary “🫙 Apri la cantina”",
+            "msg": "384×40px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "metro-pwa",
+      "path": "/metro-pwa/",
+      "lang": "it",
+      "manual": 0,
+      "checked": 24,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "span.lbl “/g”",
+            "msg": "3.81:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "div#waveline “🌅 Mattina — casa → lavoro”",
+            "msg": "3.66:1 on rgb(238,240,233) — needs 4.5:1"
+          },
+          {
+            "el": "div.dockinfo “Tocca una linea per gestirla · la città cres…”",
+            "msg": "3.81:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "div#m-body.body “Sei l'ingegnere della prima metropolitana de…”",
+            "msg": "3.81:1 on rgb(255,255,255) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#fin-btn.iconbtn “💰”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button#help-btn.iconbtn “❓”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button.btn.primary “➕ Nuova linea”",
+            "msg": "120×37px tap target"
+          },
+          {
+            "el": "button.btn “💰 Finanza”",
+            "msg": "96×37px tap target"
+          },
+          {
+            "el": "button.mbtn.primary “🚇 Apri il cantiere”",
+            "msg": "396×40px tap target"
+          },
+          {
+            "el": "button.mbtn “☰ Scegli la mappa”",
+            "msg": "396×40px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "mustang-pwa",
+      "path": "/mustang-pwa/",
+      "lang": "en",
+      "manual": 11,
+      "checked": 33,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "a.skip “Skip to controls”",
+            "msg": "153×38px tap target"
+          },
+          {
+            "el": "button#start-btn.btn.primary “▶ Start”",
+            "msg": "101×36px tap target"
+          },
+          {
+            "el": "button#loop-btn.btn.loop “↻ Loop”",
+            "msg": "95×36px tap target"
+          },
+          {
+            "el": "button#pause-btn.btn “⏸ Pause”",
+            "msg": "98×37px tap target"
+          },
+          {
+            "el": "button#sound-btn.btn “🔊 Sound”",
+            "msg": "113×37px tap target"
+          },
+          {
+            "el": "button#diff-recruit.btn.chip “RECRUIT”",
+            "msg": "119×32px tap target"
+          },
+          {
+            "el": "button#diff-arcade.btn.chip “ARCADE”",
+            "msg": "119×32px tap target"
+          },
+          {
+            "el": "button#diff-ace.btn.chip “ACE”",
+            "msg": "119×32px tap target"
+          },
+          {
+            "el": "button#overlay-play.btn.primary “▶ Play”",
+            "msg": "368×36px tap target"
+          },
+          {
+            "el": "button#overlay-theme.btn “🎨 Change Theme”",
+            "msg": "368×37px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "mycel-pwa",
+      "path": "/mycel-pwa/",
+      "lang": "it",
+      "manual": 12,
+      "checked": 30,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#branch-btn.bigbtn “🌿 Ramo-45”",
+            "msg": "84×46px tap target"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button.btn.primary “🌱 Germina”",
+            "msg": "374×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "nebbia-pwa",
+      "path": "/nebbia-pwa/",
+      "lang": "it",
+      "manual": 0,
+      "checked": 31,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "div.dockinfo “Copertura: 0% · navi in mare: 0 · relitti: 0…”",
+            "msg": "3.38:1 on rgb(254,249,236) — needs 4.5:1"
+          },
+          {
+            "el": "div#m-body.body “Seicento. Il continente è nella nebbia e la …”",
+            "msg": "3.13:1 on rgb(237,227,204) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#help-btn.iconbtn “❓”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button.btn.primary “⛵ Spedizione · € 80+”",
+            "msg": "146×38px tap target"
+          },
+          {
+            "el": "button.btn “🔍 Verifica · € 40”",
+            "msg": "123×38px tap target"
+          },
+          {
+            "el": "button.btn “🧑‍🎨 Cartografi (1)”",
+            "msg": "124×38px tap target"
+          },
+          {
+            "el": "button.btn “🗺️ Vendite”",
+            "msg": "89×38px tap target"
+          },
+          {
+            "el": "button.mbtn.primary “📜 Apri la gilda”",
+            "msg": "396×41px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "new-star-soccer",
+      "path": "/new-star-soccer/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 0,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "plane-pwa",
+      "path": "/plane-pwa/",
+      "lang": "en",
+      "manual": 7,
+      "checked": 13,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#start-btn.btn.primary “▶ Start”",
+            "msg": "120×43px tap target"
+          },
+          {
+            "el": "button#pause-btn.btn “⏸ Pause”",
+            "msg": "117×42px tap target"
+          },
+          {
+            "el": "button#overlay-play.btn.primary “▶ Play Again”",
+            "msg": "169×43px tap target"
+          },
+          {
+            "el": "button#overlay-theme.btn “🎨 Change Theme”",
+            "msg": "211×43px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "pokemon-go-pwa",
+      "path": "/pokemon-go-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 28,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button#tog-sound.toggle.on",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#tog-haptics.toggle.on",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "button#btn-pokedex.tab-btn “Pokédex”",
+            "msg": "3.23:1 on rgb(18,18,31) — needs 4.5:1"
+          },
+          {
+            "el": "button#btn-inventory.tab-btn “Items”",
+            "msg": "3.23:1 on rgb(18,18,31) — needs 4.5:1"
+          },
+          {
+            "el": "button#btn-trainer.tab-btn “Trainer”",
+            "msg": "3.23:1 on rgb(18,18,31) — needs 4.5:1"
+          },
+          {
+            "el": "div “Poké Ball”",
+            "msg": "3.34:1 on rgb(14,14,24) — needs 4.5:1"
+          },
+          {
+            "el": "p.swipe-hint “Swipe up from the bottom of the stage to thr…”",
+            "msg": "2.64:1 on rgb(10,10,20) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button.tb-btn “⚙”",
+            "msg": "29×27px tap target"
+          },
+          {
+            "el": "button.biome-btn.active “Tall Grass”",
+            "msg": "71×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Deep Forest”",
+            "msg": "80×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Mystic Cave”",
+            "msg": "83×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Sandy Beach”",
+            "msg": "85×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Urban City”",
+            "msg": "76×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Rocky Mountain”",
+            "msg": "102×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Volcano”",
+            "msg": "62×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Psychic Ruins”",
+            "msg": "90×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Lakeside”",
+            "msg": "66×25px tap target"
+          },
+          {
+            "el": "button.biome-btn “Open Sky”",
+            "msg": "70×25px tap target"
+          },
+          {
+            "el": "button.menu-button “🔄 New Encounter”",
+            "msg": "139×34px tap target"
+          },
+          {
+            "el": "button.menu-button “Lingua: English / Italiano”",
+            "msg": "184×34px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#stage-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "pulse-pwa",
+      "path": "/pulse-pwa/",
+      "lang": "en",
+      "manual": 1,
+      "checked": 20,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "h1 “PULSE”",
+            "msg": "1.00:1 at worst on a gradient (rgb(255,90,122)) — needs 3:1"
+          },
+          {
+            "el": "button#btn-daily.ghost “Daily”",
+            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "button#btn-random.ghost “Random”",
+            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "button “Easy”",
+            "msg": "1.65:1 on rgb(179,179,179) — needs 4.5:1"
+          },
+          {
+            "el": "button “Hard”",
+            "msg": "1.65:1 on rgb(179,179,179) — needs 4.5:1"
+          },
+          {
+            "el": "kbd “D”",
+            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "kbd “F”",
+            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "kbd “J”",
+            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "kbd “K”",
+            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "kbd “Esc”",
+            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
+          },
+          {
+            "el": "span.empty “No tracks yet — every seed is a new song.”",
+            "msg": "3.48:1 on rgb(255,255,255) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#btn-daily.ghost “Daily”",
+            "msg": "68×43px tap target"
+          },
+          {
+            "el": "button#btn-random.ghost “Random”",
+            "msg": "88×43px tap target"
+          },
+          {
+            "el": "button “Easy”",
+            "msg": "291×35px tap target"
+          },
+          {
+            "el": "button “Normal”",
+            "msg": "291×35px tap target"
+          },
+          {
+            "el": "button “Hard”",
+            "msg": "291×35px tap target"
+          },
+          {
+            "el": "button#btn-play.primary “Play”",
+            "msg": "898×41px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "recherche-pwa",
+      "path": "/recherche-pwa/",
+      "lang": "en",
+      "manual": 4,
+      "checked": 17,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "button “Contemplate the memory”",
+            "msg": "1.00:1 at worst on a gradient (rgb(201,184,168)) — needs 4.5:1"
+          },
+          {
+            "el": "button “Proceed to the next recollection”",
+            "msg": "1.00:1 at worst on a gradient (rgb(201,184,168)) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button “Contemplate the memory”",
+            "msg": "580×44px tap target"
+          },
+          {
+            "el": "button “Proceed to the next recollection”",
+            "msg": "580×44px tap target"
+          },
+          {
+            "el": "button.menu-button “Begin — Enter Memory”",
+            "msg": "416×46px tap target"
+          },
+          {
+            "el": "button.menu-button.sm “Lingua: Italiano”",
+            "msg": "416×34px tap target"
+          },
+          {
+            "el": "button.menu-button.sm “Continue — Load Memory”",
+            "msg": "416×34px tap target"
+          },
+          {
+            "el": "button.menu-button.sm “About — The Work”",
+            "msg": "416×34px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "resort-pwa",
+      "path": "/resort-pwa/",
+      "lang": "it",
+      "manual": 16,
+      "checked": 43,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [
+          {
+            "el": "input#import-file",
+            "msg": "form control with no label"
+          }
+        ],
+        "contrast": [
+          {
+            "el": "button#modal-btn.btn.primary “Al lavoro!”",
+            "msg": "3.41:1 at worst on a gradient (rgb(8,145,178)) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#photo-btn.iconbtn “📸”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button#rot-btn.iconbtn “🔄”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button#save-btn.iconbtn “💾”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button#music-btn.iconbtn “🎵”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button#help-btn.iconbtn “❓”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button#cancel-build.btn.ghost “✕ Annulla”",
+            "msg": "95×38px tap target"
+          },
+          {
+            "el": "button#modal-btn.btn.primary “Al lavoro!”",
+            "msg": "92×37px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "sartoria-pwa",
+      "path": "/sartoria-pwa/",
+      "lang": "it",
+      "manual": 2,
+      "checked": 23,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "h1.logo “SARTORIA”",
+            "msg": "1.00:1 at worst on a gradient (rgb(244,223,174)) — needs 3:1"
+          },
+          {
+            "el": "span “sfilate”",
+            "msg": "3.33:1 on rgb(28,21,30) — needs 4.5:1"
+          },
+          {
+            "el": "span “look”",
+            "msg": "3.33:1 on rgb(28,21,30) — needs 4.5:1"
+          },
+          {
+            "el": "span “record”",
+            "msg": "3.33:1 on rgb(28,21,30) — needs 4.5:1"
+          },
+          {
+            "el": "span “fama”",
+            "msg": "3.33:1 on rgb(28,21,30) — needs 4.5:1"
+          },
+          {
+            "el": "p.fine “© 2026 Luca Gandolfi · MIT”",
+            "msg": "3.28:1 on rgb(18,10,20) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#btn-play.btn.primary “APRI L'ATELIER”",
+            "msg": "136×38px tap target"
+          },
+          {
+            "el": "button#btn-wipe.btn.ghost “Azzera il salvataggio”",
+            "msg": "155×31px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#stage",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "sector7-pwa",
+      "path": "/sector7-pwa/",
+      "lang": "en",
+      "manual": 37,
+      "checked": 39,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [
+          {
+            "el": "input#name-input",
+            "msg": "form control with no label"
+          }
+        ],
+        "contrast": [
+          {
+            "el": "button#btn-play.btn.primary “LAUNCH”",
+            "msg": "2.67:1 at worst on a gradient (rgb(14,165,233)) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#btn-play.btn.primary “LAUNCH”",
+            "msg": "370×44px tap target"
+          },
+          {
+            "el": "button#btn-hangar.btn.ghost “Hangar”",
+            "msg": "110×44px tap target"
+          },
+          {
+            "el": "button#btn-sound.btn.ghost “🔊 Sound”",
+            "msg": "125×44px tap target"
+          },
+          {
+            "el": "a “Luca Gandolfi”",
+            "msg": "68×11px tap target"
+          },
+          {
+            "el": "a “MIT”",
+            "msg": "18×11px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "sini-pwa",
+      "path": "/sini-pwa/",
+      "lang": "it",
+      "manual": 5,
+      "checked": 21,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#minimap",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "slot-pwa",
+      "path": "/slot-pwa/",
+      "lang": "en",
+      "manual": 8,
+      "checked": 10,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#theme-btn.btn “🎨 Theme”",
+            "msg": "131×43px tap target"
+          },
+          {
+            "el": "button#bet-btn.btn “BET”",
+            "msg": "78×42px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "snake-pwa",
+      "path": "/snake-pwa/",
+      "lang": "en",
+      "manual": 5,
+      "checked": 13,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#theme-btn.btn “🎨 Theme”",
+            "msg": "129×44px tap target"
+          },
+          {
+            "el": "button#mode-btn.btn “🎮 Mode”",
+            "msg": "118×44px tap target"
+          },
+          {
+            "el": "button#start-btn.btn.primary “▶ Start”",
+            "msg": "121×44px tap target"
+          },
+          {
+            "el": "button#pause-btn.btn “⏸ Pause”",
+            "msg": "117×43px tap target"
+          },
+          {
+            "el": "button#overlay-play.btn.primary “▶ Play Again”",
+            "msg": "174×44px tap target"
+          },
+          {
+            "el": "button#overlay-theme.btn “🎨 Change Theme”",
+            "msg": "203×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game-canvas",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "snap-pwa",
+      "path": "/snap-pwa/",
+      "lang": "it",
+      "manual": 0,
+      "checked": 6,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [
+          {
+            "el": "input#caption",
+            "msg": "form control with no label"
+          }
+        ],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "static-pwa",
+      "path": "/static-pwa/",
+      "lang": "it",
+      "manual": 7,
+      "checked": 23,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "36×36px tap target"
+          },
+          {
+            "el": "button.btn “📡 Attiva ON AIR”",
+            "msg": "384×43px tap target"
+          },
+          {
+            "el": "button.btn.primary “▶ Trasmetti in anonimo”",
+            "msg": "384×43px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "stats-pwa",
+      "path": "/stats-pwa/",
+      "lang": "en",
+      "manual": 3,
+      "checked": 38,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [
+          {
+            "el": "input#d-file",
+            "msg": "form control with no label"
+          }
+        ],
+        "contrast": [
+          {
+            "el": "p.kicker “random2 · local only”",
+            "msg": "4.06:1 at worst on a gradient (rgb(0,0,0)) — needs 4.5:1"
+          },
+          {
+            "el": "h1 “Stats”",
+            "msg": "1.21:1 at worst on a gradient (rgb(0,0,0)) — needs 3:1"
+          },
+          {
+            "el": "p.sub “Every game already writes your records, play…”",
+            "msg": "4.36:1 at worst on a gradient (rgb(0,0,0)) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#theme-btn.btn “🌓Dark”",
+            "msg": "81×40px tap target"
+          },
+          {
+            "el": "button#export-btn.btn “↗Export”",
+            "msg": "88×40px tap target"
+          },
+          {
+            "el": "button.tab.on “Overview”",
+            "msg": "86×43px tap target"
+          },
+          {
+            "el": "button.tab “Runs”",
+            "msg": "61×43px tap target"
+          },
+          {
+            "el": "button.tab “Time”",
+            "msg": "58×43px tap target"
+          },
+          {
+            "el": "button.tab “Library”",
+            "msg": "72×43px tap target"
+          },
+          {
+            "el": "button.tab “Records”",
+            "msg": "80×43px tap target"
+          },
+          {
+            "el": "button.tab “Data”",
+            "msg": "56×43px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#c-runsday",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "territorio-pwa",
+      "path": "/territorio-pwa/",
+      "lang": "it",
+      "manual": 2,
+      "checked": 14,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "em “RITO”",
+            "msg": "1.00:1 at worst on a gradient (rgb(34,211,238)) — needs 3:1"
+          }
+        ],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "the-trial-pwa",
+      "path": "/the-trial-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "tiny-tower-pwa",
+      "path": "/tiny-tower-pwa/",
+      "lang": "it",
+      "manual": 19,
+      "checked": 22,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button#sndbtn “🔊”",
+            "msg": "34×30px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "underground-pwa",
+      "path": "/underground-pwa/",
+      "lang": "en",
+      "manual": 0,
+      "checked": 4,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [
+          {
+            "el": "button.ls-lang",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "a#ls-back.ls-btn",
+            "msg": "control with no accessible name"
+          },
+          {
+            "el": "button#ls-again.ls-btn",
+            "msg": "control with no accessible name"
+          }
+        ],
+        "labels": [],
+        "contrast": [],
+        "targets": [
+          {
+            "el": "button.ls-lang",
+            "msg": "21×12px tap target"
+          },
+          {
+            "el": "a “← The Library — La Biblioteca”",
+            "msg": "246×44px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "virtual-farm-pwa",
+      "path": "/virtual-farm-pwa/",
+      "lang": "en",
+      "manual": 29,
+      "checked": 50,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "h1 “🌾 Virtual Farm Tycoon”",
+            "msg": "1.00:1 at worst on a gradient (rgb(46,125,50)) — needs 3:1"
+          },
+          {
+            "el": "div.stat-item “💰 Coins: 250”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "span#coins “250”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "div.stat-item “📅 Day: 1”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "span#day “1”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "div.stat-item “☀️ Weather: ☀️”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "span#weather “☀️”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "div.stat-item “🏠 Land: 1x1”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "span#land-size “1x1”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "div.stat-item “👥 Staff: 1”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "span#staff-count “1”",
+            "msg": "3.81:1 at worst on a gradient (rgb(200,230,201)) — needs 4.5:1"
+          },
+          {
+            "el": "div.staff-row “👥 1 · 🧑‍🌾 growth +0%”",
+            "msg": "2.46:1 at worst on a gradient (rgb(46,125,50)) — needs 4.5:1"
+          },
+          {
+            "el": "strong “1”",
+            "msg": "2.46:1 at worst on a gradient (rgb(46,125,50)) — needs 4.5:1"
+          },
+          {
+            "el": "span.worker-chip “🧑‍🌾”",
+            "msg": "2.46:1 at worst on a gradient (rgb(46,125,50)) — needs 4.5:1"
+          },
+          {
+            "el": "small “growth +0%”",
+            "msg": "2.46:1 at worst on a gradient (rgb(46,125,50)) — needs 4.5:1"
+          },
+          {
+            "el": "button.btn.sm “👩‍🌾 Hire Aiutante · 40”",
+            "msg": "2.78:1 at worst on a gradient (rgb(76,175,80)) — needs 4.5:1"
+          },
+          {
+            "el": "button.btn.sm “🧑‍🔬 Hire Mastro · 120”",
+            "msg": "2.78:1 at worst on a gradient (rgb(76,175,80)) — needs 4.5:1"
+          },
+          {
+            "el": "h3 “🌱 Crops”",
+            "msg": "2.43:1 at worst on a gradient (rgb(255,224,178)) — needs 3:1"
+          },
+          {
+            "el": "h3 “🐄 Animals”",
+            "msg": "2.43:1 at worst on a gradient (rgb(255,224,178)) — needs 3:1"
+          },
+          {
+            "el": "h3 “🛠️ Tools”",
+            "msg": "2.43:1 at worst on a gradient (rgb(255,224,178)) — needs 3:1"
+          },
+          {
+            "el": "button#sell-all-btn.btn.danger “Sell All Crops”",
+            "msg": "3.68:1 at worst on a gradient (rgb(244,67,54)) — needs 4.5:1"
+          },
+          {
+            "el": "button#plant-all-btn.btn.primary “Plant All”",
+            "msg": "3.12:1 at worst on a gradient (rgb(33,150,243)) — needs 4.5:1"
+          },
+          {
+            "el": "button#next-day-btn.btn “Next Day 🌅”",
+            "msg": "2.78:1 at worst on a gradient (rgb(76,175,80)) — needs 4.5:1"
+          },
+          {
+            "el": "button#overlay-play.btn.primary “▶ Start Farming”",
+            "msg": "3.12:1 at worst on a gradient (rgb(33,150,243)) — needs 4.5:1"
+          },
+          {
+            "el": "p “📱 Install Virtual Farm Tycoon for the best …”",
+            "msg": "2.16:1 at worst on a gradient (rgb(255,152,0)) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button.btn.sm “👩‍🌾 Hire Aiutante · 40”",
+            "msg": "137×26px tap target"
+          },
+          {
+            "el": "button.btn.sm “🧑‍🔬 Hire Mastro · 120”",
+            "msg": "135×26px tap target"
+          },
+          {
+            "el": "button#sell-all-btn.btn.danger “Sell All Crops”",
+            "msg": "226×35px tap target"
+          },
+          {
+            "el": "button#plant-all-btn.btn.primary “Plant All”",
+            "msg": "226×35px tap target"
+          },
+          {
+            "el": "button#next-day-btn.btn “Next Day 🌅”",
+            "msg": "226×35px tap target"
+          },
+          {
+            "el": "button#overlay-play.btn.primary “▶ Start Farming”",
+            "msg": "140×35px tap target"
+          },
+          {
+            "el": "button#install-btn.btn.primary “Install”",
+            "msg": "79×35px tap target"
+          },
+          {
+            "el": "button#install-later.btn “Later”",
+            "msg": "73×35px tap target"
+          }
+        ],
+        "headings": [
+          {
+            "el": "h3 “🌱 Crops”",
+            "msg": "heading jumps from h1 to h3"
+          }
+        ],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "viti-pwa",
+      "path": "/viti-pwa/",
+      "lang": "it",
+      "manual": 6,
+      "checked": 21,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [
+          {
+            "el": "span#lvl-name.chip “Livello 1 · Primo strappo”",
+            "msg": "1.29:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+          },
+          {
+            "el": "span#ops.chip “🪛 0/4”",
+            "msg": "1.29:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+          },
+          {
+            "el": "button#levels-btn.iconbtn “☰”",
+            "msg": "1.59:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+          },
+          {
+            "el": "button#retry-btn.iconbtn “↺”",
+            "msg": "1.59:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "1.59:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn “1☆☆☆”",
+            "msg": "2.84:1 on rgb(201,141,78) — needs 4.5:1"
+          },
+          {
+            "el": "small “☆☆☆”",
+            "msg": "2.84:1 on rgb(201,141,78) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "2.32:1 on rgb(191,167,127) — needs 4.5:1"
+          },
+          {
+            "el": "div.body “Svita le viti, spostale nei fori giusti e bu…”",
+            "msg": "4.20:1 on rgb(243,231,211) — needs 4.5:1"
+          }
+        ],
+        "targets": [
+          {
+            "el": "button#levels-btn.iconbtn “☰”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button#retry-btn.iconbtn “↺”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button#sound-btn.iconbtn “🔊”",
+            "msg": "38×38px tap target"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "68×38px tap target"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "68×38px tap target"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "68×38px tap target"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "68×38px tap target"
+          },
+          {
+            "el": "button.lvbtn.locked “🔒”",
+            "msg": "68×38px tap target"
+          },
+          {
+            "el": "button.btn.ghost “Chiudi”",
+            "msg": "370×46px tap target"
+          }
+        ],
+        "headings": [],
+        "live": [
+          {
+            "el": "canvas#game",
+            "msg": "a canvas game with no aria-live region to announce its state"
+          }
+        ],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    }
+  ]
+}

@@ -70,7 +70,7 @@
       <button id="export-btn" class="btn">💾 Esporta salvataggio</button>
       <button id="import-btn" class="btn">📥 Importa salvataggio</button>
     </div>
-    <input type="file" id="import-file" accept=".json,application/json" hidden>
+    <input type="file" id="import-file" aria-label="Import save file" accept=".json,application/json" hidden>
 
     <div id="modal" class="overlay hidden">
       <div class="sheet">
@@ -83,6 +83,5 @@
 
   <script src="../shared/arcade.js"></script>
   <script src="game.js"></script>
-  <script src="service-worker.js"></script>
 </body>
 </html>
