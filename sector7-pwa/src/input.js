@@ -17,6 +17,9 @@
         mag: 0,
         firing: false,
         docking: false,
+        /* The mining beam is a HOLD, not an edge: it is a tool you keep
+         * on a rock, not a shot you spend. */
+        beaming: false,
         /* Edge-triggered weapons: one press, one salvo. A held missile button
          * would empty the magazine into the same hull every cooldown. */
         missileHeld: false,
@@ -25,12 +28,30 @@
         mineEdge: false,
         ammoHeld: false,
         ammoEdge: false,
+        /* The plasma round: one press, one heavy round. */
+        plasmaHeld: false,
+        plasmaEdge: false,
         cpuHeld: false,
         cpuEdge: false,
         /* Targeting: one press locks or unlocks, one press cycles. Both are
          * edge-triggered so holding the screen never thrashes the lock. */
         targetEdge: false,
         cycleEdge: false,
+        /* A click on the map, in canvas pixels. The input layer records where
+         * the pointer went; the player controller decides whether that was
+         * "select that ship" or "fly there". */
+        clickEdge: false,
+        clickX: 0,
+        clickY: 0,
+        /* A click on the minimap, in the minimap's own pixels. It is the
+         * same map at a wider scale, so it means the same thing. */
+        mapEdge: false,
+        mapX: 0,
+        mapY: 0,
+        /* The lock-on shot. Edge-triggered: one press, one shot, and it
+         * carries its own cooldown in the world so it never queues behind
+         * the blaster. */
+        attackEdge: false,
         keys: {},
         touchActive: false,
         stickId: null,
@@ -66,6 +87,10 @@
 
     function onStickDown(e) {
         if (input.stickId !== null) return;
+        /* A mouse never grabs the thumb stick. On a desktop the pointer is
+         * a cursor, not a thumb, and a click on the left half of the map
+         * is an order to fly somewhere - not the start of a drag. */
+        if (e.pointerType === "mouse") return;
         /* The right half belongs to the action buttons. */
         if (e.clientX > window.innerWidth * 0.52) return;
 
@@ -132,9 +157,12 @@
         input.missileEdge = false;
         input.mineEdge = false;
         input.ammoEdge = false;
+        input.plasmaEdge = false;
         input.cpuEdge = false;
         input.targetEdge = false;
         input.cycleEdge = false;
+        input.clickEdge = false;
+        input.attackEdge = false;
     }
 
     /* A tap on the right half that misses every button is a target press. The
@@ -142,11 +170,54 @@
      * and gives a mouse player the same lock a keyboard player gets. */
     function onCanvasTap(e) {
         if (input.stickId !== null) return;
+        /* The mouse gets the whole canvas and a real pick instead: it can
+         * tell which ship it was pointing at, this cannot. */
+        if (e.pointerType === "mouse") return;
         if (e.clientX <= window.innerWidth * 0.52) return;
         /* Anything sitting under a pad belongs to that pad. */
         var t = e.target;
         if (t && t.closest && t.closest(".pad-right")) return;
         pressWeapon("target");
+    }
+
+    /* A mouse click anywhere on the map.
+     *
+     * The click is recorded in canvas pixels and handed to the player
+     * controller, which is the only thing that knows how to turn a point on
+     * the screen into either a ship to lock or a place to fly to. Doing it
+     * here would mean the input layer reaching into the world, and the two
+     * decisions are genuinely different: a click on a hull and a click on
+     * empty space mean opposite things. */
+    function onWorldClick(e) {
+        if (e.pointerType !== "mouse") return;
+        /* Anything sitting under a pad belongs to that pad. */
+        var t = e.target;
+        if (t && t.closest && t.closest(".pad-right")) return;
+
+        var rect = canvas.getBoundingClientRect();
+        input.clickX = e.clientX - (rect ? rect.left : 0);
+        input.clickY = e.clientY - (rect ? rect.top : 0);
+        input.clickEdge = true;
+        e.preventDefault();
+    }
+
+    /* A click on the minimap.
+     *
+     * The minimap is the same sector from further away, so a click on it
+     * is a click on the map. The pixels are recorded in the minimap's own
+     * coordinates rather than the screen's, because the two are not the
+     * same size on a narrow phone. */
+    function onMinimapClick(e) {
+        if (e.pointerType !== "mouse") return;
+        var el = els.minimap;
+        if (!el || !el.width) return;
+        var rect = el.getBoundingClientRect();
+        if (!rect || !rect.width) return;
+        var scale = el.width / rect.width;
+        input.mapX = (e.clientX - rect.left) * scale;
+        input.mapY = (e.clientY - rect.top) * scale;
+        input.mapEdge = true;
+        e.preventDefault();
     }
 
     /* ===== Buttons ===== */
@@ -182,6 +253,22 @@
 
     function onKeyDown(e) {
         if (e.repeat) return;
+
+        /* The lock-on shot. Ctrl (or Cmd on a Mac, where Ctrl is a system
+         * gesture) fires at whatever the player has selected.
+         *
+         * Only the modifier key ITSELF is the trigger. Every other chord
+         * that happens to carry a modifier - Ctrl+R, Ctrl+W, Cmd+Q - is a
+         * browser shortcut and has to keep working, or the player cannot
+         * reload the page in the middle of a fight. */
+        if (e.ctrlKey || e.metaKey) {
+            if (e.key === "Control" || e.key === "Meta") {
+                input.attackEdge = true;
+                e.preventDefault();
+            }
+            return;
+        }
+
         input.keys[e.key] = true;
         if (e.key === " " || e.key === "Enter") {
             input.firing = true;
@@ -191,6 +278,8 @@
         if (e.key === "m" || e.key === "M") pressWeapon("missile");
         if (e.key === "b" || e.key === "B") pressWeapon("mine");
         if (e.key === "x" || e.key === "X") pressWeapon("ammo");
+        if (e.key === "v" || e.key === "V") pressWeapon("plasma");
+        if (e.key === "c" || e.key === "C") input.beaming = true;
         if (e.key === "f" || e.key === "F") pressWeapon("cpu");
         if (e.key === "t" || e.key === "T") pressWeapon("cycle");
         if (KEY_VECTORS[e.key]) e.preventDefault();
@@ -203,6 +292,8 @@
         if (e.key === "m" || e.key === "M") input.missileHeld = false;
         if (e.key === "b" || e.key === "B") input.mineHeld = false;
         if (e.key === "x" || e.key === "X") input.ammoHeld = false;
+        if (e.key === "v" || e.key === "V") input.plasmaHeld = false;
+        if (e.key === "c" || e.key === "C") input.beaming = false;
         if (e.key === "f" || e.key === "F") input.cpuHeld = false;
     }
 
@@ -246,15 +337,22 @@
         els.missile = document.getElementById("btn-missile");
         els.mine = document.getElementById("btn-mine");
         els.ammo = document.getElementById("btn-ammo");
+        els.plasma = document.getElementById("btn-plasma");
+        els.beam = document.getElementById("btn-beam");
         els.cpu = document.getElementById("btn-cpu");
         els.dock = document.getElementById("btn-dock");
+        els.minimap = document.getElementById("minimap");
 
         var d = defaultBase();
         placeBase(d.x, d.y);
 
         canvas.addEventListener("pointerdown", onStickDown, { passive: false });
         canvas.addEventListener("pointerdown", onCanvasTap, { passive: false });
+        canvas.addEventListener("pointerdown", onWorldClick, { passive: false });
         canvas.addEventListener("pointermove", onStickMove, { passive: false });
+        if (els.minimap) {
+            els.minimap.addEventListener("pointerdown", onMinimapClick, { passive: false });
+        }
         window.addEventListener("pointerup", onStickUp);
         window.addEventListener("pointercancel", onStickUp);
 
@@ -275,6 +373,13 @@
         holdButton(els.ammo, function (v) {
             if (v) pressWeapon("ammo");
             input.ammoHeld = v;
+        });
+        holdButton(els.plasma, function (v) {
+            if (v) pressWeapon("plasma");
+            input.plasmaHeld = v;
+        });
+        holdButton(els.beam, function (v) {
+            input.beaming = v;
         });
         holdButton(els.cpu, function (v) {
             if (v) pressWeapon("cpu");
@@ -301,12 +406,21 @@
         input.mag = 0;
         input.firing = false;
         input.docking = false;
+        input.beaming = false;
         input.missileHeld = input.missileEdge = false;
         input.mineHeld = input.mineEdge = false;
         input.ammoHeld = input.ammoEdge = false;
+        input.plasmaHeld = input.plasmaEdge = false;
         input.cpuHeld = input.cpuEdge = false;
         input.targetEdge = false;
         input.cycleEdge = false;
+        input.clickEdge = false;
+        input.clickX = 0;
+        input.clickY = 0;
+        input.mapEdge = false;
+        input.mapX = 0;
+        input.mapY = 0;
+        input.attackEdge = false;
         input.stickId = null;
         input.keys = {};
         showStick(false);

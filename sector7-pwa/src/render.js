@@ -29,6 +29,7 @@
 
     var canvas = null;
     var ctx = null;
+    var miniCanvas = null;
     var dpr = 1;
     var W = 0, H = 0;
 
@@ -229,7 +230,7 @@
     }
 
     /* ----- Player hulls: one silhouette per hangar ship -----
-     * Five hulls, each assembled from the same two primitives. They are
+     * Eight hulls, each assembled from the same two primitives. They are
      * built from the same vocabulary deliberately: the difference between a
      * Wasp and a Hauler should be a silhouette you can name at a glance,
      * not a different art style.
@@ -494,6 +495,23 @@
         return [
             (x - cam.x) * cam.zoom + cam.ox + z * P.yaw * cam.zoom + W * 0.5,
             (y - cam.y) * cam.zoom * P.ySquash - z * cam.zoom * P.zTilt + cam.oy + H * 0.5,
+        ];
+    }
+
+    /* Screen -> world, the exact inverse of project() for a chosen plane
+     * height. Without it a click on the map cannot mean anything: the
+     * player points at a spot on the screen and the game has to know which
+     * patch of space that is.
+     *
+     * The shake offsets are part of the forward transform, so they have to
+     * come back out here too - a click taken while the screen is shaking
+     * would otherwise land a whole screen-width away from where the player
+     * clicked. */
+    function toWorld(sx, sy, z) {
+        var pz = z || 0;
+        return [
+            (sx - cam.ox - pz * P.yaw * cam.zoom - W * 0.5) / cam.zoom + cam.x,
+            (sy - cam.oy + pz * cam.zoom * P.zTilt - H * 0.5) / (cam.zoom * P.ySquash) + cam.y,
         ];
     }
 
@@ -774,6 +792,14 @@
         /* Spawn and undock invulnerability reads as a flicker. */
         if (ship.invuln > 0 && ((ship.invuln * 9) | 0) % 2 === 0) return;
 
+        /* A cloaked ship is green and half transparent, and the shield
+         * ring and health bars go with it: a hull you cannot see should
+         * not be advertising its health over it either. */
+        var cloaked = S.World.isCloaked(ship);
+        if (cloaked) rgb = mixTo(rgb, [74, 222, 128], 0.75);
+
+        ctx.save();
+        if (cloaked) ctx.globalAlpha = 0.42;
         drawMesh(ship.mesh, ship.x, ship.y, ship.z, ship.heading, rgb, ship.scale);
 
         /* Engine flare, sized by throttle: the main read for "am I moving". */
@@ -786,12 +812,12 @@
             var flicker = 0.75 + 0.25 * Math.sin(world.time * 34 + ship.id);
             var r = (5 + ship.throttle * 7) * cam.zoom * flicker;
 
-            ctx.save();
             ctx.globalCompositeOperation = "lighter";
             glow(p[0], p[1], r * 2.4, mixTo(rgb, [255, 240, 200], 0.6),
                 0.45 * (0.3 + ship.throttle * 0.7));
-            ctx.restore();
+            ctx.globalCompositeOperation = "source-over";
         }
+        ctx.restore();
 
         var frac = ship.hull / ship.maxHull;
         var sFrac = ship.maxShield ? S.clamp(ship.shield / ship.maxShield, 0, 1) : 0;
@@ -819,6 +845,9 @@
         /* Two bars per hostile, because it has two pools. Shield sits on top
          * so "am I nearly through its shields" is a glance, not a sum. */
         if (!ship.isPlayer) {
+            /* A cloaked ship does not get a health bar over it either:
+             * the bar is a beacon. */
+            if (cloaked) return;
             var sp = project(ship.x, ship.y, ship.z - 15);
             var bw = Math.max(20, ship.radius * 2) * cam.zoom;
             ctx.fillStyle = "rgba(0,0,0,0.6)";
@@ -848,6 +877,50 @@
                 ctx.restore();
             }
         }
+    }
+
+    /* The mining beam.
+     *
+     * A held line from the ship's nose into the rock it is cutting, with a
+     * hot spot where it bites. It comes off the NOSE rather than the
+     * turret, because you point the ship at the rock - that is what makes
+     * it a different verb from firing, and it is why the beam cannot be
+     * used to snipe something behind you.
+     *
+     * The colour warms with the material, so a rich rock reads as a rich
+     * rock while you are working it. */
+    function drawBeam(world) {
+        var b = world.beam;
+        var ship = world.player;
+        if (!b || !ship || !ship.alive) return;
+
+        /* Start at the nose, not the centre, or the beam appears to come
+         * out of the pilot's seat. */
+        var nose = 15 * HULL_SCALE * (ship.scale || 1);
+        var nx = ship.x + Math.cos(ship.heading) * nose;
+        var ny = ship.y + Math.sin(ship.heading) * nose;
+        var a = project(nx, ny, ship.z);
+        var hit = project(b.x, b.y, b.z);
+
+        /* Richer material, hotter colour: the grade is the pitch of the
+         * sound and the colour of the light. */
+        var hot = b.grade >= 3;
+        var col = hot ? [255, 236, 180] : [255, 209, 102];
+
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        ctx.strokeStyle = hot ? "rgba(255,236,180,0.85)" : "rgba(255,209,102,0.7)";
+        ctx.lineWidth = Math.max(1.5, 3.4 * cam.zoom);
+        ctx.beginPath();
+        ctx.moveTo(a[0], a[1]);
+        ctx.lineTo(hit[0], hit[1]);
+        ctx.stroke();
+
+        /* The bite. It flickers, so it reads as a beam working rather than
+         * a line drawn on the screen. */
+        var flick = 0.72 + 0.28 * Math.sin(world.time * 41 + ship.id);
+        glow(hit[0], hit[1], (14 + b.grade * 3) * cam.zoom * flick, col, 0.5);
+        ctx.restore();
     }
 
     function drawRock(world, rock) {
@@ -1105,6 +1178,62 @@
                 ctx.lineDashOffset = world.time * 14;
                 ctx.stroke();
                 ctx.setLineDash([]);
+            } else if (h.kind === "drift") {
+                /* A current: streaks flowing one way. The direction is the
+                 * whole point of it, so the arrows have to point it. */
+                ctx.strokeStyle = "rgba(125,211,252," + (0.14 + h.strength * 0.16).toFixed(3) + ")";
+                ctx.lineWidth = 1.5;
+                for (var d = 0; d < 7; d++) {
+                    /* Offsets along the direction, so the whole field reads
+                     * as travelling rather than as seven random marks. */
+                    var along = ((d / 7) + (world.time * 0.22 + h.phase) % 1) % 1;
+                    var rr2 = r * (0.18 + along * 0.72);
+                    var cx2 = c[0] + Math.cos(h.dir) * rr2;
+                    var cy2 = c[1] + Math.sin(h.dir) * rr2 * P.ySquash;
+                    ctx.beginPath();
+                    ctx.moveTo(cx2, cy2);
+                    ctx.lineTo(cx2 + Math.cos(h.dir) * r * 0.22,
+                        cy2 + Math.sin(h.dir) * r * 0.22 * P.ySquash);
+                    ctx.stroke();
+                    /* The head of the streak, so the direction is legible
+                     * even at a glance. */
+                    ctx.beginPath();
+                    ctx.moveTo(cx2 + Math.cos(h.dir) * r * 0.22,
+                        cy2 + Math.sin(h.dir) * r * 0.22 * P.ySquash);
+                    ctx.lineTo(cx2 + Math.cos(h.dir + 2.5) * r * 0.08,
+                        cy2 + Math.sin(h.dir + 2.5) * r * 0.08 * P.ySquash);
+                    ctx.lineTo(cx2 + Math.cos(h.dir - 2.5) * r * 0.08,
+                        cy2 + Math.sin(h.dir - 2.5) * r * 0.08 * P.ySquash);
+                    ctx.closePath();
+                    ctx.fillStyle = "rgba(125,211,252," + (0.12 + h.strength * 0.16).toFixed(3) + ")";
+                    ctx.fill();
+                }
+                ctx.strokeStyle = "rgba(125,211,252,0.16)";
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.ellipse(c[0], c[1], r, r * P.ySquash, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (h.kind === "cinder") {
+                /* Charged rock. Always on, always crackling: the warning
+                 * has to be there before the player pulls the trigger, not
+                 * after. */
+                var pulse = 0.5 + 0.5 * Math.sin(world.time * 3.2 + h.phase);
+                ctx.strokeStyle = "rgba(240,171,252," + (0.22 + pulse * 0.3).toFixed(3) + ")";
+                ctx.lineWidth = 2 + pulse * 1.5;
+                ctx.beginPath();
+                ctx.ellipse(c[0], c[1], r, r * P.ySquash, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.strokeStyle = "rgba(255,220,255," + (pulse * 0.35).toFixed(3) + ")";
+                ctx.lineWidth = 1.2;
+                for (var ck = 0; ck < 11; ck++) {
+                    var ca = (ck / 11) * Math.PI * 2 + world.time * 2.4 + h.phase;
+                    var crad = r * (0.5 + 0.44 * Math.abs(Math.sin(ca * 1.7 + world.time * 5)));
+                    ctx.beginPath();
+                    ctx.moveTo(c[0] + Math.cos(ca) * crad, c[1] + Math.sin(ca) * crad * P.ySquash);
+                    ctx.lineTo(c[0] + Math.cos(ca + 0.6) * crad * 0.62,
+                        c[1] + Math.sin(ca + 0.6) * crad * 0.62 * P.ySquash);
+                    ctx.stroke();
+                }
             } else {
                 /* Well: a spiral so it reads as pulling rather than as a
                  * flat danger circle. */
@@ -1127,6 +1256,38 @@
             ctx.restore();
         }
         void accent;
+    }
+
+    /* The auto-turret's tracer.
+     *
+     * A turret shot has to be visible as a turret shot and not as the
+     * player's own gun: the player needs to see that the thing they
+     * fitted is eating their rounds. So it is a different colour and it
+     * fades fast.
+     *
+     * The tracers are drawn from the world state rather than from a list,
+     * because a turret shot is an ordinary bullet and the bullets already
+     * know where they are. */
+    function drawTurretTracers(world) {
+        var list = world.bullets;
+        if (!list) return;
+        ctx.save();
+        ctx.globalCompositeOperation = "lighter";
+        for (var i = 0; i < list.length; i++) {
+            var b = list[i];
+            if (!b.on || !b.turret) continue;
+            var p = project(b.x, b.y, b.z);
+            var back = 16 * cam.zoom;
+            var dir = Math.atan2(b.vy, b.vx);
+            var tail = project(b.x - Math.cos(dir) * back, b.y - Math.sin(dir) * back, b.z);
+            ctx.strokeStyle = "rgba(251,146,60,0.45)";
+            ctx.lineWidth = Math.max(1, 2 * cam.zoom);
+            ctx.beginPath();
+            ctx.moveTo(tail[0], tail[1]);
+            ctx.lineTo(p[0], p[1]);
+            ctx.stroke();
+        }
+        ctx.restore();
     }
 
     function drawMissiles(world) {
@@ -1601,8 +1762,11 @@
         drawAmmo(world);
         drawMissiles(world);
         drawMines(world);
+        drawTurretTracers(world);
+        drawBeam(world);
         drawBountyMarker(world);
         drawTargetMarker(world);
+        drawMoveMarker(world);
         drawRadarSweep(world);
         drawBase(world, dt);
         drawPortal(world);
@@ -1669,6 +1833,48 @@
         ctx.restore();
     }
 
+    /* The click-to-move waypoint.
+     *
+     * A destination the player cannot see is a destination they will
+     * overshoot, so the point is drawn where it actually is in the world -
+     * on the plane the ship flies on, not on the screen where the click
+     * happened. The ring pulses so it reads as a live order rather than a
+     * decal. */
+    function drawMoveMarker(world) {
+        var wp = world.moveTarget;
+        if (!wp) return;
+        var ship = world.player;
+        var z = ship ? ship.z : 0;
+
+        var p = project(wp.x, wp.y, z);
+        var r = (22 + Math.sin(world.time * 4.2) * 5) * cam.zoom;
+        if (r < 5) r = 5;
+
+        ctx.save();
+        ctx.strokeStyle = "rgba(103,232,249,0.8)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
+        ctx.stroke();
+
+        /* Four ticks pointing in at the centre. A plain circle could be a
+         * rock; the ticks make it read as a mark the game put there. */
+        ctx.beginPath();
+        for (var q = 0; q < 4; q++) {
+            var a = q * Math.PI * 0.5;
+            var cx = Math.cos(a), cy = Math.sin(a);
+            ctx.moveTo(p[0] + cx * (r + 4), p[1] + cy * (r + 4));
+            ctx.lineTo(p[0] + cx * (r + 11), p[1] + cy * (r + 11));
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(103,232,249,0.9)";
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
     /* The Radar CPU: while it runs, the player gets a live sweep ring. It is
      * purely feedback - what it actually reveals is drawn on the minimap,
      * which is where the player is already looking. */
@@ -1699,7 +1905,11 @@
         var player = world.player;
         var ox = player ? player.x : world.station.x;
         var oy = player ? player.y : world.station.y;
-        var sx = (size / 900);
+        /* The minimap covers the same span the camera is fitted to, so a
+         * click on it can be read back as a place in the sector. The two
+         * numbers have to be the same number, so they come from the same
+         * place. */
+        var sx = (size / C.camera.viewSpan);
 
         function mx(x) { return size / 2 + (x - ox) * sx; }
         function my(y) { return size / 2 + (y - oy) * sx; }
@@ -1805,7 +2015,12 @@
             mctx.save();
             mctx.translate(mx(player.x), my(player.y));
             mctx.rotate(player.heading);
-            mctx.fillStyle = S.COLORS.player;
+            /* The player's own arrow turns green while cloaked. It is the
+             * one mark on the radar that cannot be hidden - the radar is
+             * the player's own screen - but the colour still has to say
+             * "you are invisible", because that changes what every other
+             * mark on it means. */
+            mctx.fillStyle = S.World.isCloaked(player) ? "#4ade80" : S.COLORS.player;
             mctx.beginPath();
             mctx.moveTo(6, 0);
             mctx.lineTo(-4, 4);
@@ -1860,6 +2075,31 @@
         }
     }
 
+    /* Bind the minimap.
+     *
+     * It is a second canvas showing the same sector from further away, and
+     * the game has to be able to tell which of the two a click landed on.
+     */
+    function bindMinimap(canvasEl) {
+        miniCanvas = canvasEl;
+    }
+
+    /* Minimap pixel -> world.
+     *
+     * The minimap is a plain top-down square centred on the player, so the
+     * inverse is the scale read backwards. A click on the small map is a
+     * click on the big one - it is just a wider view of the same place -
+     * and it should mean the same thing. */
+    function minimapToWorld(world, px, py) {
+        if (!miniCanvas || !miniCanvas.width) return null;
+        var size = miniCanvas.width;
+        var player = world.player;
+        var ox = player ? player.x : world.station.x;
+        var oy = player ? player.y : world.station.y;
+        var s = C.camera.viewSpan / size;
+        return [ox + (px - size / 2) * s, oy + (py - size / 2) * s];
+    }
+
     function resize() {
         /* Cap DPR at 2: a 3x phone panel triples fill cost and buys nothing
          * you can see on a moving ship. */
@@ -1895,6 +2135,8 @@
         draw: draw,
         drawMinimap: drawMinimap,
         bindWorld: bindWorld,
+        bindMinimap: bindMinimap,
+        minimapToWorld: minimapToWorld,
         prepareShip: prepareShip,
         follow: follow,
         lookAt: lookAt,
@@ -1909,6 +2151,9 @@
         /* World -> screen, for tests and for anything that needs to anchor a
          * DOM element to a world position. */
         toScreen: project,
+        /* Screen -> world, the inverse. A click on the map is only a place
+         * in the sector once this turns the pixel into coordinates. */
+        toWorld: toWorld,
         fitZoom: fitZoom,
         _mesh: {
             /* drawMesh is exposed so the render test can put one known mesh

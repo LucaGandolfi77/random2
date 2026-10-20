@@ -60,6 +60,7 @@ S.Audio = {
     shoot() {}, hit() {}, kill() {}, rockBreak() {}, pickup() {},
     death() {}, respawn() {}, dock() {}, undock() {}, upgrade() {},
     error() {}, ui() {}, init() {}, resume() {}, setEnabled() {},
+    lockShot() {},
 };
 
 let failures = 0;
@@ -78,6 +79,18 @@ function useSeed(seed) {
     store.set(SEED_KEY, JSON.stringify(seed));
     store.delete(SHIP_KEY);
     store.delete(STATS_KEY);
+}
+
+/* Give a ship a full magazine.
+ *
+ * Every gun in the game draws from one now, so a test about a WEAPON has
+ * to give the ship the rounds to fire it. The tests about the economy
+ * itself are the ones that deliberately do not. */
+function giveMagazine(ship, n) {
+    ship.magazine = {
+        laser: n, ammo: n, plasma: n, missiles: n, mines: n,
+    };
+    return ship;
 }
 
 function finite(n) { return typeof n === "number" && Number.isFinite(n); }
@@ -120,6 +133,17 @@ function makePlayer(seed) {
     ship.heading = lp.heading;
     ship.aim = lp.heading;
     W.player = ship;
+    /* A full magazine.
+     *
+     * Every gun now draws from one, so a pilot who runs dry stops fighting
+     * - which is the point of the economy, and not the point of THIS
+     * measurement. The difficulty curve is about how dangerous the sector
+     * is, so the stand-in pilot is given enough rounds to keep shooting
+     * for the whole run. The logistics are measured on their own, in the
+     * munitions section below. */
+    ship.magazine = {
+        laser: 1e6, ammo: 1e6, plasma: 1e6, missiles: 1e6, mines: 1e6,
+    };
     return ship;
 }
 
@@ -222,6 +246,26 @@ section("modules and economy");
         hi.energyBonus > lo.energyBonus && hi.fireInterval < lo.fireInterval);
     check("tier scales with levels", S.tierForShip({ blaster: 10, shield: 10, armor: 10, processor: 10, thruster: 10 }) >
         S.tierForShip({ blaster: 1, shield: 1, armor: 1, processor: 1, thruster: 1 }));
+    check("a ship's tier is its investment, not the size of the track table", (() => {
+        /* Every track starts at level 1 for free, so the level sum grows by
+         * one whenever a track is added. The tier has to be measured from
+         * the investment ABOVE that baseline, or a tenth track hands every
+         * ship in the game a free tier - which is stronger pilots and a
+         * bigger repair bill, for every pilot who ever launches.
+         *
+         * These are the tiers the nine-track table produced, asserted as
+         * numbers rather than recomputed, so a future track cannot quietly
+         * move them. */
+        const a = {
+            blaster: 10, ammo: 5, shield: 6, armor: 4, processor: 4,
+            thruster: 3, cargo: 1, missiles: 1, mines: 1, plasma: 1,
+        };
+        const b = {
+            blaster: 10, ammo: 10, shield: 10, armor: 10, processor: 5,
+            thruster: 3, cargo: 1, missiles: 1, mines: 1, plasma: 1,
+        };
+        return S.tierForShip(a) === 2 && S.tierForShip(b) === 3;
+    })());
     check("sector threat caps at maxTier",
         S.tierForCrystals(1e9) === C.npc.maxTier);
 }
@@ -371,6 +415,32 @@ const byProfile = {
 let npcSamples = 0;
 let npcSum = 0;
 
+/* A seeded stand-in for Math.random.
+ *
+ * The world's own RNG is seeded, but the loot scatter and the particle
+ * scatter reach for Math.random directly - so two runs of the same seed
+ * were not the same run, and the survival assertion below flaked on the
+ * sample size rather than on the game. Making the measurement
+ * deterministic turns it from a coin flip into a regression test.
+ *
+ * xorshift32: small, fast, and good enough for a scatter.
+ */
+function withSeededRandom(seed, fn) {
+    const real = Math.random;
+    let s = (seed >>> 0) || 0x9e3779b9;
+    Math.random = function () {
+        s ^= s << 13; s >>>= 0;
+        s ^= s >>> 17;
+        s ^= s << 5; s >>>= 0;
+        return s / 4294967296;
+    };
+    try {
+        return fn();
+    } finally {
+        Math.random = real;
+    }
+}
+
 function runProfile(label, crystals, guns) {
     /* Three trials per seed. Sixteen seeds at one trial each was not enough:
      * the rookie profile genuinely wrecks about a fifth of the time, and at
@@ -379,6 +449,9 @@ function runProfile(label, crystals, guns) {
      * trials makes it forty-eight runs, which settles the question. */
     for (let trial = 0; trial < PROFILE_TRIALS; trial++) {
         for (const seed of SEEDS) {
+        /* Every trial gets its own generator, seeded from the run, so the
+         * whole profile is reproducible from the seed list alone. */
+        withSeededRandom((seed ^ (trial * 0x9e3779b9)) >>> 0, () => {
         newRun(seed);
         const player = makePlayer(seed);
         /* Crystals decide which NPC tiers the sector rolls, so setting them
@@ -462,6 +535,7 @@ function runProfile(label, crystals, guns) {
             stats.npcExtinct < npcSamples * 0.1, stats.npcExtinct);
         check(label + " seed " + seed + ": NPC population respects maxAlive",
             stats.maxNpc <= C.npc.maxAlive, stats.maxNpc);
+        });
         }
     }
 }
@@ -972,7 +1046,674 @@ section("damage model");
     W.ships.splice(W.ships.indexOf(regenShip), 1);
 }
 
-/* ---------- summary ---------- */
+/* =========================================================================
+ * The plasma round
+ * ====================================================================== */
+section("plasma");
+{
+    /* The third answer to the two-pool problem. The laser chews armour
+     * and bounces off shields, the capacitor round chews shields and is
+     * wasted on armour, and the plasma chews armour THROUGH a shield. */
+    const mk = (over) => Object.assign({
+        hull: 100, maxHull: 100,
+        shield: 0, maxShield: 0,
+        armor: 0, alive: true, invuln: 0,
+        hitFlash: 0, idleFor: 0, sinceHit: 99,
+    }, over);
+
+    /* --- the piercing rule --- */
+    const shielded = mk({ shield: 60, maxShield: 60, hull: 100 });
+    const plasmaPacket = S.packet("plasma", 20);
+    check("the plasma packet is marked as piercing", plasmaPacket.pierce === true);
+    const pierced = S.World.damageShip(shielded, plasmaPacket);
+    check("a plasma round puts armour damage through a shield",
+        pierced.hull > 0, JSON.stringify(pierced));
+    check("a plasma round still has its shield component eaten",
+        pierced.absorbed > 0 && shielded.shield < 60, JSON.stringify(pierced));
+
+    /* The same shot without the pierce flag does nothing to the hull. */
+    const plain = mk({ shield: 60, maxShield: 60, hull: 100 });
+    const laserPacket = S.packet("blaster", 20);
+    const bounced = S.World.damageShip(plain, laserPacket);
+    check("a laser round is still held off by a shield", bounced.hull === 0,
+        JSON.stringify(bounced));
+    check("the laser packet is not marked as piercing", laserPacket.pierce === false);
+
+    /* And a pierced hit still counts as being hit, so the shield cannot
+     * regenerate through it. */
+    const regenerating = mk({ shield: 60, maxShield: 60, hull: 100 });
+    regenerating.sinceHit = 30;
+    S.World.damageShip(regenerating, S.packet("plasma", 20));
+    check("a piercing hit still resets the shield regen delay",
+        regenerating.sinceHit === 0);
+
+    /* --- the weapon --- */
+    const stats = S.statsFor({ blaster: 1, plasma: 1, shield: 1, armor: 1, processor: 1, thruster: 1 });
+    const shooter = giveMagazine(S.World.spawnShip({
+        isPlayer: true, name: "TESTER", color: "#67e8f9", faction: "you",
+        maxHull: stats.maxHull, maxShield: stats.maxShield,
+        stats: stats, reduction: stats.reduction, radius: 16, z: 12,
+    }), 99);
+    W.player = shooter;
+    shooter.x = 1200; shooter.y = 1200;
+
+    check("a plasma round fires", S.World.firePlasma(shooter, 0) === true);
+    const round = W.bullets.filter((b) => b.on);
+    check("it puts exactly one round in the world", round.length === 1, round.length);
+    check("the round is marked as piercing", round[0] && round[0].pierce === true);
+    check("it runs on its own cooldown",
+        shooter.cooldownPlasma === stats.plasmaCooldown,
+        "cooldown " + shooter.cooldownPlasma);
+    check("it will not fire again straight away",
+        S.World.firePlasma(shooter, 0) === false);
+
+    /* --- the pool does not leak between guns ---
+     * The bullet pool is shared by the blaster, the lock-on shot and the
+     * plasma round. A slot keeps whatever the last shot through it left
+     * behind, so a blaster round that inherited `pierce` would go through
+     * shields and a blaster round that inherited `homing` would fly at a
+     * target nobody aimed at.
+     */
+    S.World.firePlasma(shooter, 0);
+    W.bullets.forEach((b) => { b.on = false; });
+    S.World.fire(shooter, 0);
+    const blaster = W.bullets.find((b) => b.on);
+    check("a blaster round does not inherit the pierce flag",
+        blaster && blaster.pierce === false);
+    check("a blaster round does not inherit homing",
+        blaster && blaster.homing === false);
+    check("a blaster round does not inherit a target",
+        blaster && blaster.targetId === 0);
+
+    S.World.firePlasma(shooter, 0);
+    W.bullets.forEach((b) => { b.on = false; });
+    S.World.fireLockOn(shooter, W.ships.find((s) => s !== shooter));
+    const lockOn = W.bullets.find((b) => b.on);
+    check("a lock-on round does not inherit the pierce flag",
+        lockOn && lockOn.pierce === false);
+
+    S.World.removeShip(shooter);
+    W.player = null;
+    W.bullets.forEach((b) => { b.on = false; });
+
+    /* --- the balance promise ---
+     * The plasma is an ANSWER to a problem, not a better gun. It must
+     * never kill an unshielded hull faster than the laser, and it must
+     * beat the laser against a shield - where the laser's armour
+     * component is held off entirely and it can do almost nothing.
+     *
+     * This is modelled as the fight actually goes, not as a damage-per-
+     * second division: the shield absorbs the shot's shield component
+     * first, and the armour component is held off until the shield is
+     * gone.
+     */
+    const timeToKill = (packet, interval, target) => {
+        let shield = target.shield, hull = target.hull, t = 0;
+        while (hull > 0 && t < 900) {
+            t += interval;
+            const absorbed = Math.min(shield, packet.shield);
+            shield -= absorbed;
+            const spill = packet.shield - absorbed;
+            const raw = (shield > 0 && !packet.pierce) ? spill : spill + packet.armor;
+            hull -= Math.max(0, Math.round(raw - (target.armor || 0)));
+        }
+        return t;
+    };
+
+    const tier8 = S.NPC_TIERS[8].hull;
+    const alien = S.faction("alien").shieldFrac;
+    const bare = { hull: tier8, shield: 0, armor: 0 };
+    const walled = { hull: tier8, shield: Math.round(tier8 * alien), armor: 0 };
+
+    for (const level of [1, 5, 10]) {
+        const st = S.statsFor({
+            blaster: level, plasma: level, shield: 1, armor: 1, processor: 1, thruster: 1,
+        });
+        const laser = timeToKill(st.blasterPacket, st.fireInterval, bare);
+        const plasma = timeToKill(st.plasmaPacket, st.plasmaCooldown, bare);
+        check("at level " + level + " the laser still kills an unshielded hull first",
+            laser < plasma,
+            "laser " + laser.toFixed(1) + "s, plasma " + plasma.toFixed(1) + "s");
+    }
+
+    /* And against a shielded hull, where the laser cannot land at all,
+     * the plasma has to be the better gun by a wide margin. */
+    const st = S.statsFor({
+        blaster: 10, plasma: 10, shield: 1, armor: 1, processor: 1, thruster: 1,
+    });
+    const laserOnShield = timeToKill(st.blasterPacket, st.fireInterval, walled);
+    const plasmaOnShield = timeToKill(st.plasmaPacket, st.plasmaCooldown, walled);
+    check("the plasma is the better gun against a shield",
+        plasmaOnShield < laserOnShield,
+        "laser " + laserOnShield.toFixed(1) + "s, plasma " + plasmaOnShield.toFixed(1) + "s");
+}
+
+/* =========================================================================
+ * The lock-on shot
+ * ====================================================================== */
+section("lock-on shot");
+{
+    /* The weapon the Ctrl key fires. It exists to make "I picked that ship"
+     * into "that ship is taking damage", and every rule around it is a
+     * promise to the player: it needs a lock, it needs a range, and it
+     * will not fire twice in the same breath. */
+    const stats = S.statsFor({ blaster: 3, shield: 0, armor: 0, processor: 0, thruster: 0 });
+
+    /* A clean world. This test is about the weapon, not about whatever
+     * happened to be drifting through the shot's path: a rock in the way
+     * or a passing NPC would make the result depend on the map seed. */
+    W.ships.length = 0;
+    W.bullets.forEach((b) => { b.on = false; });
+    W.rocks.forEach((r) => { r.alive = false; });
+
+    const shooter = giveMagazine(S.World.spawnShip({
+        isPlayer: true, name: "TESTER", color: "#67e8f9", faction: "you",
+        maxHull: stats.maxHull, maxShield: stats.maxShield,
+        stats: stats, reduction: stats.reduction, radius: 16, z: 12,
+    }), 99);
+    const target = S.World.spawnShip({
+        name: "DUMMY", color: "#ff5470", faction: "raid", tier: 3,
+        maxHull: 200, maxShield: 0, stats: stats, radius: 16, z: 12,
+    });
+    W.player = shooter;
+
+    /* --- the refusals --- */
+    check("the lock-on shot refuses without a target",
+        S.World.fireLockOn(shooter, null) === false);
+    check("the lock-on shot refuses a dead target", (() => {
+        target.alive = false;
+        const r = S.World.fireLockOn(shooter, target);
+        target.alive = true;
+        return r === false;
+    })());
+    check("the lock-on shot refuses a target out of range", (() => {
+        shooter.x = 1200; shooter.y = 1200;
+        target.x = 1200 + C.combat.attackRange + 60; target.y = 1200;
+        const r = S.World.fireLockOn(shooter, target);
+        shooter.x = 1200; shooter.y = 1200; target.x = 1200; target.y = 1400;
+        return r === false;
+    })());
+    check("a refused shot costs no cooldown", shooter.cooldownAttack === 0,
+        "cooldown " + shooter.cooldownAttack);
+
+    /* --- the shot itself --- */
+    /* Well inside the map, not on its edge: a round that spawns at x = 0
+     * dies on the out-of-bounds check before it can fly. */
+    shooter.x = 1200; shooter.y = 1200;
+    target.x = 1200; target.y = 1400;
+    target.hull = 200;
+    target.shield = 0;
+    target.maxShield = 0;
+    target.alive = true;
+    target.invuln = 0;
+
+    const fired = S.World.fireLockOn(shooter, target);
+    check("the lock-on shot fires at a locked target in range", fired === true);
+    check("it puts the shot on its own cooldown",
+        shooter.cooldownAttack === C.combat.attackCooldown,
+        "cooldown " + shooter.cooldownAttack);
+    check("it will not fire again straight away",
+        S.World.fireLockOn(shooter, target) === false);
+
+    /* The shot is a real projectile: it has to travel and connect, not
+     * apply damage on the spot. */
+    const shot = W.bullets.filter((b) => b.on && b.homing);
+    check("it puts a homing round in the world", shot.length === 1, shot.length + " in flight");
+    check("the round is aimed at the target", (() => {
+        if (!shot.length) return false;
+        const b = shot[0];
+        return Math.abs(Math.atan2(b.vy, b.vx) - Math.atan2(target.y - b.y, target.x - b.x)) < 0.01;
+    })());
+
+    /* Let it fly. The target is 200 units away and the round is fast, so
+     * this is a fraction of a second of flight. */
+    let hitHull = target.hull;
+    for (let f = 0; f < 30 && target.hull === hitHull; f++) {
+        S.World.step(1 / 60);
+    }
+    check("the round reaches the target and hurts it", target.hull < hitHull,
+        "hull " + hitHull + " -> " + target.hull);
+    check("the round does not hurt the shooter", shooter.hull === shooter.maxHull,
+        shooter.hull + " / " + shooter.maxHull);
+
+    /* It must not be a blaster in disguise: a second press inside the
+     * cooldown does nothing at all. */
+    const before = target.hull;
+    S.World.fireLockOn(shooter, target);
+    for (let f = 0; f < 10; f++) S.World.step(1 / 60);
+    check("a shot on cooldown does nothing", target.hull === before,
+        before + " -> " + target.hull);
+
+    /* And once the cooldown is up it works again. */
+    shooter.cooldownAttack = 0;
+    check("it fires again once the cooldown is over",
+        S.World.fireLockOn(shooter, target) === true);
+
+    /* A dead target must not keep eating shots: the round simply flies on
+     * without a target rather than seeking a ghost. */
+    target.alive = false;
+    check("a dead target is not a valid target",
+        S.World.fireLockOn(shooter, target) === false);
+
+    S.World.removeShip(shooter);
+    S.World.removeShip(target);
+    W.player = null;
+    W.bullets.forEach((b) => { b.on = false; });
+}
+
+/* =========================================================================
+ * The cloak
+ * ====================================================================== */
+section("cloak");
+{
+    /* The cloak is a perception effect, not a shield: anything that has to
+     * ACQUIRE a target cannot see a cloaked ship, but a round already in
+     * the air still lands. Those are two different promises and they have
+     * to be tested separately. */
+    newRun(13579);
+    const player = makePlayer(13579);
+    player.invuln = 0;
+
+    const npc = S.NPCs.spawnOne(player, "pirate");
+    /* Inside the aggro range, so the only reason not to fight is the
+     * cloak. */
+    npc.x = player.x + 120;
+    npc.y = player.y;
+    npc.state = "patrol";
+
+    /* Think long enough for the NPC to have picked the player up. */
+    for (let i = 0; i < 8; i++) S.NPCs.think(0.2);
+    check("an NPC acquires a visible player", npc.target === player,
+        "target " + (npc.target ? npc.target.name : "none"));
+
+    /* Cloak. */
+    player.cpu = "cloak";
+    player.cpuKey = "cloak";
+    player.cpuTimer = S.CONFIG.cpu.cloakTime;
+    check("a cloaked player reads as cloaked", S.World.isCloaked(player));
+
+    for (let i = 0; i < 8; i++) S.NPCs.think(0.2);
+    check("a cloaked player cannot be acquired", npc.target !== player,
+        "target " + (npc.target ? npc.target.name : "none"));
+    check("a cloaked player is not the NPC's state", npc.state !== "attack",
+        npc.state);
+
+    /* The cloak wears off, and the NPC finds the player again. */
+    player.cpuTimer = 0;
+    check("a player whose cloak has run out is visible again",
+        !S.World.isCloaked(player));
+    for (let i = 0; i < 8; i++) S.NPCs.think(0.2);
+    check("the NPC picks the player up again once the cloak is over",
+        npc.target === player, "target " + (npc.target ? npc.target.name : "none"));
+
+    /* The other half of the promise: being unseen is not being untouchable.
+     * A round already in the air still lands on a cloaked ship. */
+    const cloakShip = S.World.spawnShip({
+        name: "CLOAKED", color: "#4ade80", faction: "you", tier: 1,
+        maxHull: 200, maxShield: 0, stats: S.statsFor({}), radius: 16, z: 12,
+    });
+    cloakShip.cpuKey = "cloak";
+    cloakShip.cpuTimer = 5;
+    cloakShip.invuln = 0;
+    cloakShip.shield = 0;
+    const before = cloakShip.hull;
+    S.World.damageShip(cloakShip, { shield: 0, armor: 20 });
+    check("a cloaked ship still takes damage from a shot already in the air",
+        cloakShip.hull < before, before + " -> " + cloakShip.hull);
+
+    S.World.removeShip(cloakShip);
+    S.World.removeShip(npc);
+    S.World.removeShip(player);
+    W.player = null;
+}
+
+/* =========================================================================
+ * The mining beam
+ * ====================================================================== */
+section("mining beam");
+{
+    /* The beam is the free tool that makes everything else safe to change:
+     * a player can always mine, so a player can always be solvent. Its
+     * whole value rests on two promises, and both are asserted here.
+     *
+     *   1. It is a TOOL. It cuts rock and nothing else.
+     *   2. It is FREE, and it never runs out.
+     */
+    newRun(24680);
+    const player = makePlayer(24680);
+    player.invuln = 0;
+
+    /* A clean field, so the test is about the beam and not about whatever
+     * was already lying in the map. */
+    W.rocks.length = 0;
+    W.ships.length = 0;
+    W.pickups.forEach((p) => { p.on = false; });
+
+    const mkRock = (x, y, grade, energy, hull) => {
+        const rock = {
+            x: x, y: y, z: 0,
+            r: 40, hull: hull, maxHull: hull,
+            cache: grade, grade: grade,
+            energy: energy, energyLeft: energy,
+            seed: 1, alive: true, respawn: 0, hitFlash: 0,
+        };
+        W.rocks.push(rock);
+        return rock;
+    };
+
+    player.x = 1000; player.y = 1000; player.heading = 0;
+    player.hold = 0;
+    player.holdMax = 500;
+
+    /* Park the player in front of a rock and point the nose at it. The
+     * beam comes off the nose, not the turret, so this is the only way it
+     * ever finds anything. */
+    const faceRock = (rock) => {
+        player.x = rock.x;
+        player.y = rock.y - 120;
+        player.heading = Math.PI / 2;   /* +y is down the screen */
+        player.hold = 0;
+        player.holdMax = 500;
+    };
+
+    /* --- 1. it cuts rock --- */
+    const rock = mkRock(1100, 1000, 1, 20, 100);
+    const took = S.World.mineBeam(player, 1 / 60, true);
+    check("the beam cuts the rock it is pointed at", rock.hull < rock.maxHull,
+        "hull " + rock.hull);
+    check("the beam puts the energy straight in the hold", player.hold > 0,
+        "hold " + player.hold);
+    check("the beam reports what it took", took > 0, "took " + took);
+
+    /* --- 1b. and NOTHING else --- */
+    const victim = S.World.spawnShip({
+        name: "TARGET", color: "#ff5470", faction: "raid", tier: 3,
+        maxHull: 200, maxShield: 0, stats: S.statsFor({}), radius: 16, z: 12,
+    });
+    victim.x = 1100; victim.y = 1000;
+    victim.hull = 200; victim.shield = 0; victim.invuln = 0;
+    const hullBefore = victim.hull;
+    for (let i = 0; i < 60; i++) S.World.mineBeam(player, 1 / 60, true);
+    check("the beam does not touch a ship", victim.hull === hullBefore,
+        hullBefore + " -> " + victim.hull);
+    check("a ship in the beam's path is not even the beam's target",
+        W.beam && W.beam.x === rock.x);
+
+    /* --- 2. it is free --- */
+    const energyBefore = player.energy;
+    const crystalsBefore = player.crystals;
+    for (let i = 0; i < 60; i++) S.World.mineBeam(player, 1 / 60, true);
+    check("the beam costs no energy", player.energy === energyBefore,
+        energyBefore + " -> " + player.energy);
+    check("the beam costs no crystals", player.crystals === crystalsBefore);
+
+    /* --- the totals are preserved ---
+     * A rock's energy ends up in the hold or on the ground. It is never
+     * created and it is never destroyed. */
+    const grade1 = mkRock(1100, 1000, 1, 20, 100);
+    faceRock(grade1);
+    for (let i = 0; i < 600 && grade1.alive; i++) S.World.mineBeam(player, 1 / 60, true);
+    check("a whole rock is worth its whole energy", player.hold >= 20,
+        "hold " + player.hold.toFixed(2) + " of 20");
+    check("nothing is left in a mined-out rock", grade1.energyLeft <= 0.01,
+        "left " + grade1.energyLeft);
+    check("the rock is broken once it is cut away", !grade1.alive);
+
+    /* --- a full hold refuses rather than destroys --- */
+    const full = mkRock(1100, 1000, 4, 20, 100);
+    faceRock(full);
+    player.hold = player.holdMax;
+    const leftBefore = full.energyLeft;
+    for (let i = 0; i < 30; i++) S.World.mineBeam(player, 1 / 60, true);
+    check("a full hold does not take energy", player.hold <= player.holdMax,
+        "hold " + player.hold + " of " + player.holdMax);
+    check("a full hold does not consume the rock's energy",
+        full.energyLeft === leftBefore, leftBefore + " -> " + full.energyLeft);
+    check("a full hold is still never over capacity",
+        player.hold <= player.holdMax);
+
+    /* --- per material ---
+     * A rock's grade is how much crystal it hides, and the beam extracts
+     * faster from a richer one. Same cut, more energy, and the totals are
+     * the same. */
+    const cutFor = (grade) => {
+        const r = mkRock(1100, 1000, grade, 20, 100);
+        faceRock(r);
+        /* One second of cutting, whatever the material. */
+        for (let i = 0; i < 60; i++) S.World.mineBeam(player, 1 / 60, true);
+        return player.hold;
+    };
+    const plain = cutFor(1);
+    const rich = cutFor(4);
+    check("a richer rock yields more from the same cut", rich > plain * 2,
+        "plain " + plain.toFixed(2) + ", rich " + rich.toFixed(2));
+
+    /* --- the beam is off when it is not held --- */
+    player.hold = 0;
+    S.World.mineBeam(player, 1 / 60, false);
+    check("the beam switches off when the button is released", W.beam === null);
+
+    /* --- and it does not make the blaster pointless ---
+     * The beam mines at a fixed rate, so a pilot who has spent every level
+     * on cargo and shields still gets a working miner. What it must NOT do
+     * is out-cut a maxed blaster, or the laser track would be a wasted
+     * level for anyone who cares about the hold. */
+    check("the beam never out-cuts a maxed blaster", (() => {
+        const st = S.statsFor({
+            blaster: 10, shield: 1, armor: 1, processor: 1, thruster: 1,
+        });
+        /* A blaster round does its whole packet to a rock, hull included. */
+        const blasterRate =
+            (st.blasterPacket.shield + st.blasterPacket.armor) / st.fireInterval;
+        return C.combat.beamRate < blasterRate;
+    })(), "beam " + C.combat.beamRate + " vs blaster " +
+        ((S.statsFor({ blaster: 10 }).blasterPacket.shield +
+            S.statsFor({ blaster: 10 }).blasterPacket.armor) /
+            S.statsFor({ blaster: 10 }).fireInterval).toFixed(1));
+
+    S.World.removeShip(victim);
+    S.World.removeShip(player);
+    W.player = null;
+    W.rocks.length = 0;
+}
+
+/* =========================================================================
+ * The munitions magazine
+ * ====================================================================== */
+section("munitions");
+{
+    /* Every gun in the game draws on a magazine, and the magazine is lost
+     * with the ship. That is the whole economy of the endgame: rounds are
+     * a thing you own in the hangar and a thing you spend in a fight.
+     */
+    newRun(97531);
+    const player = makePlayer(97531);
+    player.invuln = 0;
+    player.magazine = { laser: 10, ammo: 3, plasma: 2, missiles: 4, mines: 2 };
+
+    /* --- every gun draws on it --- */
+    check("the blaster spends a laser round", (() => {
+        const before = player.magazine.laser;
+        S.World.fire(player, 0);
+        return player.magazine.laser === before - 1;
+    })());
+    check("the capacitor round spends a round", (() => {
+        const before = player.magazine.ammo;
+        S.World.fireAmmo(player, 0);
+        return player.magazine.ammo === before - 1;
+    })());
+    check("the plasma round spends a round", (() => {
+        const before = player.magazine.plasma;
+        S.World.firePlasma(player, 0);
+        return player.magazine.plasma === before - 1;
+    })());
+    check("a mine spends a round", (() => {
+        const before = player.magazine.mines;
+        S.World.dropMine(player);
+        return player.magazine.mines === before - 1;
+    })());
+
+    /* --- an empty magazine is an empty gun --- */
+    player.magazine.laser = 0;
+    const bulletsBefore = W.bullets.filter((b) => b.on).length;
+    check("an empty gun does not fire", S.World.fire(player, 0) === false);
+    check("an empty gun puts nothing in the world",
+        W.bullets.filter((b) => b.on).length === bulletsBefore);
+
+    /* A salvo costs a round per missile, and a pilot with three missiles
+     * left fires three, not nine. */
+    player.modules.missiles = 10;
+    player.stats = S.statsFor(player.modules, player.refits);
+    player.magazine.missiles = 3;
+    const fired = S.World.fireMissiles(player, [], 0);
+    check("a salvo is limited by the magazine", fired === 3,
+        "fired " + fired + " of " + player.stats.missiles);
+    check("the salvo took its rounds", player.magazine.missiles === 0);
+
+    /* --- the reserve is the hangar's, and the magazine is the ship's --- */
+    player.hangar = S.Storage.getHangar();
+    const hangar = player.hangar;
+    hangar.munitions = { laser: 500, ammo: 20, plasma: 5, missiles: 6, mines: 4 };
+    player.magazine = { laser: 0, ammo: 0, plasma: 0, missiles: 0, mines: 0 };
+    S.Stations.loadMunitions(player);
+    check("the ship loads what it can carry", player.magazine.laser === 300,
+        "loaded " + player.magazine.laser);
+    check("the reserve keeps the rest", hangar.munitions.laser === 200,
+        "reserve " + hangar.munitions.laser);
+    check("a type the ship cannot carry much of is capped too",
+        player.magazine.plasma === 5 && hangar.munitions.plasma === 0,
+        "plasma " + player.magazine.plasma + " / " + hangar.munitions.plasma);
+
+    /* A reload never loses a round and never doubles one. */
+    const carriedBefore = player.magazine.laser;
+    const reserveBefore = hangar.munitions.laser;
+    S.Stations.loadMunitions(player);
+    check("a reload neither loses nor invents rounds",
+        player.magazine.laser + hangar.munitions.laser === carriedBefore + reserveBefore,
+        player.magazine.laser + " + " + hangar.munitions.laser);
+    check("a reload tops the magazine back up", player.magazine.laser === 300,
+        "loaded " + player.magazine.laser);
+
+    /* --- the magazine is lost with the ship --- */
+    player.magazine.laser = 12;
+    const reserveAfter = hangar.munitions.laser;
+    /* The ship is wrecked: the magazine goes with it. The reserve in the
+     * hangar does not, because it was never on the ship. */
+    const wreck = S.World.spawnShip({
+        isPlayer: true, name: "WRECK", color: "#67e8f9", faction: "you",
+        maxHull: 100, maxShield: 0, stats: S.statsFor({}), radius: 16, z: 12,
+    });
+    wreck.magazine = { laser: 12, ammo: 0, plasma: 0, missiles: 0, mines: 0 };
+    S.World.killPlayer(wreck, null);
+    check("the magazine is lost with the ship", wreck.magazine.laser === 12,
+        "magazine " + wreck.magazine.laser);
+    check("the hangar's reserve is not lost with the ship",
+        hangar.munitions.laser === reserveAfter,
+        reserveAfter + " -> " + hangar.munitions.laser);
+
+    /* --- the soft-lock guard ---
+     * A pilot with no rounds and no energy can still mine. That is the
+     * whole reason the mining beam exists, and it is the difference
+     * between a consumable economy and a broken one. */
+    const broke = makePlayer(97531);
+    broke.energy = 0;
+    broke.magazine = { laser: 0, ammo: 0, plasma: 0, missiles: 0, mines: 0 };
+    const mineRock = {
+        x: 1400, y: 1400, z: 0, r: 40,
+        hull: 100, maxHull: 100, cache: 2, grade: 2,
+        energy: 20, energyLeft: 20,
+        seed: 1, alive: true, respawn: 0, hitFlash: 0,
+    };
+    W.rocks.length = 0;
+    W.rocks.push(mineRock);
+    broke.x = 1400; broke.y = 1280; broke.heading = Math.PI / 2;
+    broke.hold = 0; broke.holdMax = 500;
+    for (let i = 0; i < 30; i++) S.World.mineBeam(broke, 1 / 60, true);
+    check("a pilot with no rounds and no energy can still mine",
+        broke.hold > 0, "hold " + broke.hold.toFixed(1));
+
+    W.rocks.length = 0;
+    S.World.removeShip(player);
+    W.player = null;
+}
+
+
+/* =========================================================================
+ * The auto-turret
+ * ====================================================================== */
+section("auto-turret");
+{
+    /* A thing bolted to the ship that shoots on its own. It earns its place
+     * because it covers the player's back - and it costs them rounds,
+     * because a free turret would be a free gun.
+     */
+    newRun(246810);
+    const player = makePlayer(246810);
+    player.turret = 1;
+    player.cooldownTurret = 0;
+    player.magazine.laser = 50;
+
+    /* A hostile inside the turret's reach. */
+    const prey = S.World.spawnShip({
+        name: "PREY", color: "#ff5470", faction: "raid", tier: 2,
+        x: player.x + 120, y: player.y, z: 12,
+        maxHull: 300, maxShield: 0, stats: S.statsFor({}), radius: 16,
+    });
+    prey.hull = 300; prey.shield = 0; prey.invuln = 0;
+
+    const before = W.bullets.filter((b) => b.on).length;
+    const fired = S.World.fireTurret(player, 1 / 60);
+    check("the turret fires at a hostile in range", fired === true);
+    check("the turret puts a round in the world",
+        W.bullets.filter((b) => b.on).length === before + 1);
+    check("the turret spends a laser round", player.magazine.laser === 49,
+        "magazine " + player.magazine.laser);
+    const shot = W.bullets.find((b) => b.on && b.turret);
+    check("the turret's round is marked as a turret round", !!shot);
+
+    /* It does not fire at nothing. */
+    const quiet = W.bullets.filter((b) => b.on).length;
+    player.cooldownTurret = 0;
+    player.x = 5000; player.y = 5000;
+    const nowhere = S.World.fireTurret(player, 1 / 60);
+    check("the turret does not fire at empty space", nowhere === false);
+    check("the turret puts nothing in the world at empty space",
+        W.bullets.filter((b) => b.on).length === quiet);
+
+    /* A ship with no turret does not have one. */
+    player.turret = 0;
+    player.cooldownTurret = 0;
+    player.x = prey.x - 120; player.y = prey.y;
+    check("a ship with no turret does not shoot by itself",
+        S.World.fireTurret(player, 1 / 60) === false);
+
+    /* An empty magazine means a quiet turret, and no announcement: a
+     * machine has nothing to say about running dry. */
+    player.turret = 1;
+    player.cooldownTurret = 0;
+    player.magazine.laser = 0;
+    W.events.length = 0;
+    const dry = S.World.fireTurret(player, 1 / 60);
+    check("an empty turret does not fire", dry === false);
+    check("an empty turret does not announce itself",
+        !W.events.some((e) => e.type === "dry"));
+
+    /* The turret is a support weapon, not a second blaster: it does less
+     * damage than the gun it is bolted to. */
+    player.magazine.laser = 50;
+    player.cooldownTurret = 0;
+    S.World.fireTurret(player, 1 / 60);
+    const tShot = W.bullets.find((b) => b.on && b.turret);
+    check("the turret does less damage than the blaster",
+        tShot && tShot.da < player.stats.blasterPacket.armor,
+        tShot ? "turret " + tShot.da.toFixed(1) + " vs blaster " +
+            player.stats.blasterPacket.armor.toFixed(1) : "no shot");
+
+    S.World.removeShip(prey);
+    S.World.removeShip(player);
+    W.player = null;
+}
+
 console.log("\n" + "-".repeat(56));
 console.log(`checks: ${checks}   failures: ${failures}`);
 console.log(`sector averages: ${avgNpc.toFixed(1)} NPCs alive`);

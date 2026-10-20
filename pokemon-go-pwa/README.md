@@ -1,11 +1,18 @@
 # Pokéball GO
 
 > A low-poly Pokémon GO experience, bilingual (EN/IT). Swipe to throw, use
-> berries, collect them all — 31 procedurally drawn creatures across 8 biomes,
-> a full 40-level trainer ladder, and a 1-in-4096 shiny.
+> berries, collect them all — the **complete original 151 Pokédex**, 10 biomes,
+> a full 40-level trainer ladder, working evolutions, and a 1-in-4096 shiny.
 
-No build step, no dependencies, no image assets. Every creature is a triangle
-fan built from `drawPolyEllipse` primitives at runtime.
+Pokémon are rendered with the **real game sprites from the community wiki
+source** ([PokeAPI/sprites](https://github.com/PokeAPI/sprites) on GitHub —
+the same mirror the fan wikis use), loaded lazily and cached offline by the
+service worker. No binary assets are committed to this repository: if a sprite
+can't load (first visit offline), the game falls back to the original
+procedural low-poly drawing, so it always works.
+
+*Pokémon and Pokémon character names are © Nintendo / Creatures Inc. / GAME
+FREAK inc. — fan-made, non-commercial project.*
 
 **Play it:** <https://lucagandolfi77.github.io/random2/pokemon-go-pwa/>
 
@@ -35,23 +42,25 @@ Master Ball on a bad throw is worth less than a Poké Ball on a great one.
 | **Berries** | Razz ×1.5, Nanab ×1.1 (flat — the "steady" effect is a number, not behaviour), Pinap ×2.5, Golden: none |
 | **Rewards** | XP 100/120/150/200 by quality, ×2 if shiny, +50 on catch. Candy +3 (+6 with Pinap), stardust `100 + difficulty·20` |
 | **Shiny** | `Math.random() < 1/4096`, drawn with a gold shadowBlur and sparkle |
-| **Biomes** | 8 pools, picked as pills, weighted spawn by `p.weight` |
+| **Biomes** | 10 pools, picked as pills, weighted spawn (`p.weight` or `id:weight` refs) |
 | **Achievements** | 6, computed on the fly in `renderTrainer` |
 | **Ladder** | 30 XP thresholds (0…1,000,000), `getLevel` capped at 40 |
 
 ## The numbers
 
-31 Pokédex entries · 18 types · 7 low-poly archetypes · 4 balls · 4 berries ·
-8 biomes · 40 stars in the starfield · starting stock 30/10/5/0 balls,
-10/5/5/0 berries, 1000 stardust.
+**151 Pokédex entries** (the complete original roster) · 18 types · 7 low-poly
+fallback archetypes · 4 balls · 4 berries · 10 biomes · 79 wild-spawnable
+species (72 more via evolution) · starting stock 30/10/5/0 balls, 10/5/5/0
+berries, 1000 stardust.
 
 ## How it's built
 
 ```
 pokemon-go-pwa/
 ├── src/main.js       state, logic, DOM
-├── src/renderer.js   ARCHETYPES → triangle fans, canvas draw
-├── src/config.js     31 dex entries, biomes, thresholds
+├── src/renderer.js   ARCHETYPES → triangle fans, canvas draw (fallback)
+├── src/config.js     151 dex entries, biomes, thresholds
+├── src/sprites.js    PokeAPI sprite URLs + lazy loader
 ├── src/storage.js    three save keys
 ├── index.html
 ├── manifest.json
@@ -59,9 +68,10 @@ pokemon-go-pwa/
 └── icons/
 ```
 
-Archetypes are parametric families rather than 31 bespoke meshes: a creature
-points to a family with its numbers, so the dex is data. Pokédex sprites are
-re-drawn into 80×80 canvases inside each card on every `renderPokedex()`.
+The Pokédex number (`dex`) drives everything visual: encounter, dex cards and
+result modal use the real artwork; the procedural `archetype` + type palette
+remains as the offline fallback. Evolution lines, spawn tables and weights are
+pure data in `config.js`.
 
 ## Controls
 
@@ -83,9 +93,11 @@ candy map, stardust) and `pokemon-settings`. `resetGame()` clears the first two.
 - 🟠 **"Excellent" throws are unreachable.** `resolveCatch` only ever produces
   great / nice / normal. The "Expert Thrower" achievement and the ×2.0
   multiplier are dead code.
-- 🟠 **Evolution is display-only.** `candyToEvolve` / `evolvesTo` render as
-  "⚡ Evolves (n/cost)" but no evolve action exists — and none of the 30
-  `evolvesTo` ids point at a real dex entry.
+- 🟢 **Evolution works.** Tap "⚡ Evolves" on a ready card: candy is spent,
+  the caught instance becomes the evolved species and a candy of the new
+  species is granted. Eevee picks randomly among Vaporeon / Jolteon / Flareon.
+  All 72 evolution targets exist in the dex (72 species are evolution-only
+  and never spawn wild).
 - 🟡 Nanab's described effect ("reduce movement") is a flat ×1.1 and nothing
   else.
 - 🟡 `settings.haptics` is toggleable but `navigator.vibrate` is never called;

@@ -212,6 +212,57 @@
                 accent: "#fda4af",
             },
         },
+        /* ===== T5 and T6 =====
+         *
+         * Two more rungs on the ladder, and the last two. The ladder is
+         * the point of the frontier: each rung is harder than the one
+         * before it and pays better, so the question at every station is
+         * "is the next map worth the trip".
+         *
+         * HALD is a CURRENT. The fields push everything in them in one
+         * fixed direction, so the map fights your steering rather than
+         * your speed, and a ship that wants to leave has to fly harder
+         * than it wants to arrive.
+         *
+         * NULL is the top of the game. Its rocks are UNSTABLE: breaking
+         * one detonates it, and anything close enough to the blast feels
+         * it. Mining becomes a decision about where you are standing,
+         * which is the only thing that makes the last map feel like the
+         * last map and not more of the same. */
+        {
+            id: "hald", kind: "sector",
+            name: "HALD", subtitle: "The current",
+            blurb: "The whole sector drifts one way. Everything you shoot is carried with it, including you.",
+            gate: 1150,
+            size: 5800, rocks: 30, crates: 16,
+            npcMax: 16, tierCap: 8, npcSpeed: 1.16,
+            payout: 2.7,
+            hazard: { kind: "drift", count: 3, radius: 640, pull: 130 },
+            palette: {
+                nebula: ["30,90,110", "24,44,92"],
+                rock: "#4f5f68", rockRich: "#6d7a86",
+                grid: "rgba(90,190,210,0.10)",
+                wall: "rgba(120,210,230,0.45)",
+                accent: "#7dd3fc",
+            },
+        },
+        {
+            id: "null", kind: "sector",
+            name: "NULL", subtitle: "The unstable belt",
+            blurb: "The rocks here are charged. Break one and it takes the space around it with it.",
+            gate: 1500,
+            size: 6200, rocks: 26, crates: 14,
+            npcMax: 17, tierCap: 8, npcSpeed: 1.2,
+            payout: 3.1,
+            hazard: { kind: "cinder", count: 3, radius: 520 },
+            palette: {
+                nebula: ["80,20,70", "30,10,60"],
+                rock: "#4a4450", rockRich: "#6d5570",
+                grid: "rgba(200,90,190,0.10)",
+                wall: "rgba(230,130,220,0.45)",
+                accent: "#f0abfc",
+            },
+        },
     ];
 
     var byId = {};

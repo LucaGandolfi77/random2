@@ -121,6 +121,11 @@
                 return a.mineDamage >= b.mineDamage
                     ? null
                     : b.mineCapacity + " mines · " + b.mineDamage.toFixed(0) + " dmg";
+            case "plasma":
+                return a.plasmaDamage >= b.plasmaDamage
+                    ? null
+                    : b.plasmaDamage.toFixed(0) + " plasma dmg · " +
+                      b.plasmaCooldown.toFixed(1) + "s";
             default:
                 return null;
         }
@@ -332,7 +337,132 @@
          * applyHangar only ever runs on a player ship. */
         if (ship.hullDef && ship.hullDef.color) ship.color = ship.hullDef.color;
         ship.parts = S.Storage.resolveFit(hangar, hangar.active);
+        /* The turret travels with the fit: if the pilot owns one it is
+         * fitted, and removing it is a decision they make in the hangar
+         * rather than something the game does for them. */
+        ship.turret = hangar.turret > 0 ? 1 : 0;
         return ship;
+    }
+
+    /* ===== The auto-turret =====
+     *
+     * Bought once, owned for good, fitted to one ship at a time - the same
+     * rule as the parts and the CPUs, and for the same reason: a choice
+     * you cannot take back is not a choice.
+     *
+     * The turret is not a part. It has no slot, because it is not a
+     * passive that makes the ship better at being a ship; it is a thing
+     * that shoots, and it is fitted or it is not. */
+    function turretQuote(ship) {
+        var hangar = ship.hangar || S.Storage.getHangar();
+        var owned = hangar.turret || 0;
+        return {
+            key: S.TURRET.key,
+            name: S.TURRET.name,
+            glyph: S.TURRET.glyph,
+            cost: S.TURRET.cost,
+            blurb: "Shoots at whatever is nearest. It uses your laser rounds, " +
+                "so it covers your back by spending your ammunition.",
+            detail: "range " + S.TURRET.range + " · " + S.TURRET.interval + "s between shots",
+            owned: owned > 0,
+            fitted: ship.turret > 0,
+            affordable: owned > 0 || ship.energy >= S.TURRET.cost,
+        };
+    }
+
+    function buyTurret(ship) {
+        var hangar = ship.hangar || S.Storage.getHangar();
+        ship.hangar = hangar;
+        if (hangar.turret > 0) return { ok: false, reason: "already installed" };
+        if (ship.energy < S.TURRET.cost) return { ok: false, reason: "not enough energy" };
+        ship.energy -= S.TURRET.cost;
+        hangar.turret = 1;
+        /* Buying installs it, so the purchase is never inert. */
+        ship.turret = 1;
+        return { ok: true, spent: S.TURRET.cost };
+    }
+
+    /* ===== Munitions =====
+     *
+     * The hangar holds the reserve; the ship carries what it can. Loading
+     * moves rounds out of the reserve and into the magazine; unloading
+     * moves them back. A dock does both, so a dock is a resupply trip and
+     * not just a bank.
+     *
+     * The magazine is NOT persisted, exactly like the hold: rounds are
+     * ammunition, not cargo, and a crash should not be able to eat a
+     * magazine the pilot paid for. What IS persisted is the reserve in the
+     * hangar, which is the expensive part.
+     */
+    function loadMunitions(ship) {
+        var hangar = ship.hangar || S.Storage.getHangar();
+        ship.hangar = hangar;
+        if (!hangar.munitions) hangar.munitions = {};
+
+        var caps = C.munitions.capacity;
+        for (var i = 0; i < S.MUNITIONS.length; i++) {
+            var key = S.MUNITIONS[i].key;
+            /* What is in the magazine goes back to the bag first, so a
+             * reload never loses a round and never doubles one. */
+            var inMag = ship.magazine && ship.magazine[key] ? ship.magazine[key] : 0;
+            var stock = hangar.munitions[key] || 0;
+            stock += inMag;
+
+            var cap = caps[key] || 0;
+            var take = Math.min(stock, cap);
+            stock -= take;
+
+            hangar.munitions[key] = stock;
+            if (!ship.magazine) ship.magazine = {};
+            ship.magazine[key] = take;
+            if (!ship.magazineMax) ship.magazineMax = {};
+            ship.magazineMax[key] = cap;
+        }
+        return ship;
+    }
+
+    /* What the pilot owns, what the ship is carrying, and what a press of
+     * the button would cost. */
+    function munitionsQuote(ship) {
+        var hangar = ship.hangar || S.Storage.getHangar();
+        var stock = hangar.munitions || {};
+        var rows = [];
+        for (var i = 0; i < S.MUNITIONS.length; i++) {
+            var def = S.MUNITIONS[i];
+            var bundle = C.munitions.bundle[def.key] || 1;
+            var cost = bundle * (C.munitions.cost[def.key] || 0);
+            rows.push({
+                key: def.key,
+                name: def.name,
+                glyph: def.glyph,
+                blurb: def.blurb,
+                stock: stock[def.key] || 0,
+                carried: ship.magazine ? (ship.magazine[def.key] || 0) : 0,
+                capacity: C.munitions.capacity[def.key] || 0,
+                bundle: bundle,
+                cost: cost,
+                affordable: ship.energy >= cost,
+            });
+        }
+        return rows;
+    }
+
+    /* Buy a bundle of rounds into the reserve. A transaction like every
+     * other: it returns {ok, spent} and mutates nothing on failure. */
+    function buyMunitions(ship, key) {
+        var def = S.munition(key);
+        if (!def) return { ok: false, reason: "unknown ammunition" };
+        var hangar = ship.hangar || S.Storage.getHangar();
+        ship.hangar = hangar;
+        if (!hangar.munitions) hangar.munitions = {};
+
+        var bundle = C.munitions.bundle[key] || 1;
+        var cost = bundle * (C.munitions.cost[key] || 0);
+        if (ship.energy < cost) return { ok: false, reason: "not enough energy" };
+
+        ship.energy -= cost;
+        hangar.munitions[key] = (hangar.munitions[key] || 0) + bundle;
+        return { ok: true, spent: cost, bundle: bundle, stock: hangar.munitions[key] };
     }
 
     /* Kept separate so a refit or a purchase that changes max hull has one
@@ -566,6 +696,11 @@
         fitPart: fitPart,
         setActiveHull: setActiveHull,
         applyHangar: applyHangar,
+        loadMunitions: loadMunitions,
+        munitionsQuote: munitionsQuote,
+        buyMunitions: buyMunitions,
+        turretQuote: turretQuote,
+        buyTurret: buyTurret,
         undockFee: undockFee,
         nextCost: nextCost,
         quote: quote,

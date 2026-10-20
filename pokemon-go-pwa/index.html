@@ -54,6 +54,11 @@ html,body{background:#0a0a14;color:#d4c5b0;height:100%;font-family:'Cormorant Ga
 .pd-card:not(.caught):not(.seen){filter:grayscale(1);}
 .pd-sprite{height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:0.3rem;}
 .pd-sprite canvas{max-width:100%;max-height:100%;}
+.pd-sprite img{max-width:100%;max-height:100%;}
+.pd-count{text-align:center;color:#8a7b65;font-size:0.85rem;margin-bottom:0.9rem;}
+.pd-gen{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:0.8rem;}
+.pd-gen button{font-family:inherit;font-size:0.72rem;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#bfa07a;cursor:pointer;}
+.pd-gen button.active{background:#bfa07a;color:#12100c;border-color:#bfa07a;}
 .pd-name{font-family:'Cinzel Decorative',serif;font-size:0.82rem;color:#c9b8a0;margin-bottom:0.2rem;}
 .pd-types{display:flex;gap:0.3rem;justify-content:center;flex-wrap:wrap;margin-bottom:0.3rem;}
 .type-tag{font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;}
@@ -167,6 +172,8 @@ html,body{background:#0a0a14;color:#d4c5b0;height:100%;font-family:'Cormorant Ga
 
   <!-- POKEDEX TAB -->
   <div class="tab-panel hidden" id="tab-pokedex">
+    <div id="pokedex-gen" class="pd-gen"></div>
+    <p id="pokedex-count" class="pd-count"></p>
     <div id="pokedex-grid"></div>
   </div>
 

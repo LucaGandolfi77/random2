@@ -42,6 +42,7 @@
         D.crystals = el("stat-crystals");
         D.tier = el("stat-tier");
         D.kills = el("stat-kills");
+        D.mag = el("stat-mag");
         D.minimap = el("minimap");
         D.minimapCtx = D.minimap.getContext("2d");
         D.killfeed = el("killfeed");
@@ -143,6 +144,9 @@
         D.hgCrystals = el("hg-crystals");
         D.hgHulls = el("hg-hulls");
         D.hgParts = el("hg-parts");
+        D.hgMunitions = el("hg-munitions");
+        D.hgMunitionsHint = el("hg-munitions-hint");
+        D.hgTurret = el("hg-turret");
         D.hgFitHint = el("hg-fit-hint");
         D.hgSandboxToggle = el("hg-sandbox-toggle");
         D.hgSandboxNote = el("hg-sandbox-note");
@@ -244,6 +248,29 @@
             setText(D.crystals, S.fmt(p.crystals));
             setText(D.kills, p.kills);
 
+            /* The magazine.
+             *
+             * Every gun draws on one, so the count is a number the player
+             * has to watch. The laser is the one that matters most - it is
+             * what they hold down - so the strip leads with it, and any
+             * empty magazine goes red.
+             *
+             * The readouts are the counts and nothing else: a pilot who
+             * wants to know how many plasma rounds are left has to look at
+             * the number, and the number is here. */
+            var mag = p.magazine || {};
+            var magText = "";
+            var empty = false;
+            for (var mi = 0; mi < S.MUNITIONS.length; mi++) {
+                var key = S.MUNITIONS[mi].key;
+                var n = mag[key] || 0;
+                if (n <= 0) empty = true;
+                if (mi > 0) magText += " · ";
+                magText += S.MUNITIONS[mi].glyph + " " + n;
+            }
+            setText(D.mag, magText);
+            D.mag.classList.toggle("is-empty", empty);
+
             /* A hold that silently refuses every pickup is the single
              * most confusing thing this game can do, so it gets said out
              * loud and it flashes. */
@@ -260,7 +287,16 @@
                 setText(D.cpuName, def.glyph + " " + def.name.toUpperCase());
                 var busy = p.cooldownCpu > 0;
                 D.cpuChip.classList.toggle("is-cooling", busy);
-                setText(D.cpuTimer, busy ? Math.ceil(p.cooldownCpu) + "s" : "READY");
+                /* While the cloak is running the chip counts down the cloak
+                 * instead of the recharge: the player needs to know how
+                 * long they have left being invisible, not how long until
+                 * they can be invisible again. */
+                if (S.World.isCloaked(p)) {
+                    D.cpuChip.classList.remove("is-cooling");
+                    setText(D.cpuTimer, "CLOAKED " + Math.ceil(p.cpuTimer) + "s");
+                } else {
+                    setText(D.cpuTimer, busy ? Math.ceil(p.cooldownCpu) + "s" : "READY");
+                }
             } else {
                 D.cpuChip.classList.add("hidden");
             }
@@ -341,6 +377,12 @@
         var d = Math.sqrt(S.dist2(p.x, p.y, t.x, t.y));
         setText(D.tgtDist, Math.round(d) + "");
 
+        /* The lock-on shot has a reach, and the player has to be able to
+         * see that reach before they press the button rather than after.
+         * The distance goes red and the note says so. */
+        var inReach = d <= S.CONFIG.combat.attackRange;
+        D.tgtDist.style.color = inReach ? "" : "#ff5470";
+
         var sFrac = t.maxShield ? S.clamp(t.shield / t.maxShield, 0, 1) : 0;
         var hFrac = t.maxHull ? S.clamp(t.hull / t.maxHull, 0, 1) : 0;
         D.tgtShield.style.width = (sFrac * 100).toFixed(1) + "%";
@@ -352,11 +394,15 @@
          * the advice stays true for the whole fight instead of flipping
          * halfway through when the shields come down. */
         var frac = fac.shieldFrac;
-        setText(D.tgtNote, frac <= 0.001
-            ? "No shields. Lasers."
-            : frac < 0.6
-                ? "Part-shielded. Either gun works."
-                : "Shield wall. Ammo, not lasers.");
+        if (!inReach) {
+            setText(D.tgtNote, "Out of reach. Close the distance.");
+        } else {
+            setText(D.tgtNote, frac <= 0.001
+                ? "No shields. Lasers."
+                : frac < 0.6
+                    ? "Part-shielded. Either gun works."
+                    : "Shield wall. Ammo, not lasers.");
+        }
     }
 
     /* ===== Mode banner =====
@@ -536,6 +582,41 @@
             }
         }
 
+        /* --- the auto-turret ---
+         *
+         * It sits above the slots rather than in one: it is not a passive
+         * component, it is a thing that shoots, and putting it in a slot
+         * would imply it stacks with the engine.
+         *
+         * Owned means fitted. There is no fitting and removing it: a
+         * player who does not want a turret eating their rounds does not
+         * buy one, and a purchase that can be quietly undone is not a
+         * purchase. */
+        var tq = S.Stations.turretQuote(stationShip);
+        var turretRow = '<div class="st-row' + (tq.fitted ? " is-fitted" : "") + '">' +
+            '<div class="st-row-head">' +
+                '<span class="st-glyph">' + tq.glyph + "</span>" +
+                '<span class="st-name">' + escapeHtml(tq.name) + "</span>" +
+                '<span class="st-level">' + (tq.fitted ? "FITTED" : "") + "</span>" +
+            "</div>" +
+            '<div class="st-row-foot">' +
+                '<span class="st-delta">' + escapeHtml(tq.detail) + "</span>" +
+                (tq.owned ? "" :
+                    '<button class="st-buy" data-turret="buy"' +
+                    (tq.affordable ? "" : " disabled") + ">" +
+                    S.fmt(tq.cost) + " ⚡</button>") +
+            "</div>" +
+        "</div>";
+        if (D.hgTurret._html !== turretRow) {
+            D.hgTurret.innerHTML = turretRow;
+            var tBtns = D.hgTurret.querySelectorAll("[data-turret]");
+            for (var tb = 0; tb < tBtns.length; tb++) {
+                tBtns[tb].addEventListener("click", (function (what) {
+                    return function () { emit("turret", what); };
+                })(tBtns[tb].getAttribute("data-turret")));
+            }
+        }
+
         /* --- parts --- */
         var parts = "";
         for (var s = 0; s < q.slots.length; s++) {
@@ -572,6 +653,45 @@
         }
         setText(D.hgFitHint,
             "Fitting " + hull.name + ". Three slots; buying a component installs it, and swapping is free.");
+
+        /* --- munitions ---
+         *
+         * The reserve you own, and what the ship is carrying. Both are on
+         * the same row because the question the pilot is actually asking
+         * is "will I have enough when I get there", and that is the
+         * difference between the two numbers. */
+        var mrows = "";
+        var mq = S.Stations.munitionsQuote(stationShip);
+        for (var mi = 0; mi < mq.length; mi++) {
+            var m = mq[mi];
+            var carried = m.carried > 0 ? m.carried + " aboard" : "not loaded";
+            mrows +=
+                '<div class="st-row">' +
+                    '<div class="st-row-head">' +
+                        '<span class="st-glyph">' + m.glyph + "</span>" +
+                        '<span class="st-name">' + escapeHtml(m.name) + "</span>" +
+                        '<span class="st-level">' + m.stock + " in store</span>" +
+                    "</div>" +
+                    '<div class="st-row-foot">' +
+                        '<span class="st-delta">' + carried + " · holds " + m.capacity + "</span>" +
+                        '<button class="st-buy" data-mun="' + escapeHtml(m.key) + '"' +
+                            (m.affordable ? "" : " disabled") + ">" +
+                            "+" + m.bundle + " · " + S.fmt(m.cost) + " ⚡</button>" +
+                    "</div>" +
+                "</div>";
+        }
+        if (D.hgMunitions._html !== mrows) {
+            D.hgMunitions.innerHTML = mrows;
+            var munBtns = D.hgMunitions.querySelectorAll("[data-mun]");
+            for (var mb = 0; mb < munBtns.length; mb++) {
+                munBtns[mb].addEventListener("click", (function (key) {
+                    return function () { emit("munitions", key); };
+                })(munBtns[mb].getAttribute("data-mun")));
+            }
+        }
+        setText(D.hgMunitionsHint,
+            "Every gun draws from a magazine, and the magazine is lost with the ship. " +
+            "What you own stays here; the ship takes " + "what it can carry when it launches.");
 
         /* --- sandbox --- */
         var on = !!(stationShip.hangar && stationShip.hangar.sandbox);

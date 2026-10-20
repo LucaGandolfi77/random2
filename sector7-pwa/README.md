@@ -49,21 +49,36 @@ repo into `_site/` and publishes it to Pages; the only `npm` that runs is
 BUCIO's, and it runs on GitHub's machine, not yours. This folder is copied
 as-is.
 
-| Control | Touch | Keyboard |
-|---|---|---|
-| Fly | left thumb, anywhere — the stick appears where you press | `WASD` / arrows |
-| Blaster | `FIRE` (hold to keep firing) | `Space` |
-| Ammo | `AMMO` — one press, one capacitor round | `X` |
-| Missiles | `MSL` — one press, one salvo | `M` |
-| Mines | `MINE` — drops behind you | `B` |
-| CPU | `CPU` — fires whatever is fitted | `F` |
-| Target | tap the right of the screen to lock or clear | `T` to cycle |
-| Dock | hold `DOCK` inside the station ring | hold `E` |
-| Aim assist | toggle under the pads | same |
+| Control | Touch | Keyboard | Mouse |
+|---|---|---|---|
+| Fly | left thumb, anywhere — the stick appears where you press | `WASD` / arrows | click the map to fly there |
+| Blaster | `FIRE` (hold to keep firing) | `Space` | `Space` |
+| Ammo | `AMMO` — one press, one capacitor round | `X` | `X` |
+| Plasma | `PLS` — one press, one piercing round | `V` | `V` |
+| Mining beam | `BEAM` — hold it on a rock | hold `C` | hold `C` |
+| Missiles | `MSL` — one press, one salvo | `M` | `M` |
+| Mines | `MINE` — drops behind you | `B` | `B` |
+| CPU | `CPU` — fires whatever is fitted | `F` | `F` |
+| Target | tap the right of the screen to lock or clear | `T` to cycle | click a ship to lock it, click it again to let it go |
+| Lock-on shot | — | `Ctrl` — fires at the locked ship | `Ctrl` |
+| Dock | hold `DOCK` inside the station ring | hold `E` | hold `E` |
+| Aim assist | toggle under the pads | same | same |
 
-Missiles, ammo and the CPU are **edge-triggered**: one press, one shot.
-Holding the button would empty the whole magazine into a single hull every
-cooldown, which is not what a salvo is for.
+Missiles, ammo, plasma and the CPU are **edge-triggered**: one press, one
+shot. Holding the button would empty the whole magazine into a single hull
+every cooldown, which is not what a salvo is for. The mining beam is a
+**hold**, because it is a tool you keep on a rock rather than a shot you
+spend.
+
+**The mouse and the touch screen are two different games of the same
+ship.** A mouse click is never a thumb press: the stick ignores the mouse
+entirely, and a click on the map means one of two things depending on
+where it landed — on a hull it locks that ship, on empty space it is an
+order to fly there. The minimap is the same map at a wider scale, so a
+click on it is the same order read through a different projection. The
+lock-on shot is the one weapon that ignores the turret arc, so it can
+reach a target behind you; it needs the target inside `attackRange`, and
+it runs on its own cooldown so it never queues behind the blaster.
 
 ---
 
@@ -82,6 +97,33 @@ sectors and buys permanent refits.
 That is the whole tension. Greed is a number on a bar: a fuller hold means a
 bigger trip and a bigger wreck, and the sector answers both.
 
+### The mining beam
+
+**The beam is a tool, not a weapon.** It cuts rock and nothing else — it
+cannot hurt a ship, not even by accident. That is the whole point of it: a
+free beam that also hurt ships would be a free gun, and the laser and
+capacitor round tracks would be dead on arrival. The Ammo track in
+particular only exists because a shield is a real problem.
+
+Hold it and point the **ship** at a rock. The energy comes out of the rock
+and into your hold directly, so the Cargo track is legible from the
+cockpit: you watch the hold fill, and you watch it refuse to fill any
+further. The crystal cache still drops as a pickup, because crystals are
+banked the moment they are touched and must never be carried where they
+can be lost.
+
+**Per material.** A rock's grade is how much crystal it hides, and the beam
+extracts faster from a richer one — the cutter's pitch and the colour of
+its light both rise with the grade, so the material is readable without a
+number on the screen. A grade-1 rock yields its whole energy across the
+whole cut; a grade-4 rock yields it in the first quarter, and the rest of
+that cut is a rich rock's cache waiting to be worth a detour.
+
+**Why it is free.** The beam costs no energy, has no magazine and never
+runs out. That is what makes it safe to turn the guns into consumables
+later: a player can always mine, so a player can always be solvent. The
+whole economy of the endgame rests on this one button.
+
 ### Shields and armour are two different problems
 
 Every ship has **two** pools. Shields absorb, and refill once you have been
@@ -97,6 +139,7 @@ answered with shield damage.
 |---|---|---|---|
 | **Blaster** (laser) | ×0.25 | ×1.00 | Free, on every ship. Fast. Chews armour. |
 | **Ammo** (capacitor round) | ×3.00 | ×0.65 | The answer to a shield. Slow between shots. |
+| **Plasma** | ×0.60 | ×1.50 | **Pierces.** Its armour lands through a shield. Slow, and worse than the laser against a bare hull. |
 | **Missiles** | ×0.60 | ×1.10 | Lock-on burst, splash. |
 | **Mines** | ×2.00 | ×0.50 | Drains shields. The defence that works while fleeing. |
 
@@ -105,12 +148,19 @@ never a straight upgrade — it is a tool for one specific problem. Against
 something with no shields at all it is dead weight, and it has a cooldown
 floor it can never beat.
 
+**The plasma round is the third answer, and it is the one exception to the
+rule above.** A piercing shot's armour component is not held off by a shield,
+so it is the only gun that answers a shielded hull *and* hurts it. It is
+bounded by being slow — its damage per second against a bare hull is below
+the laser's at every level, and a test asserts that, because a weapon that
+beat the laser at everything would kill two tracks at once.
+
 ### The hangar
 
-Five hulls, each with one passive that changes what the ship **is** rather
+Eight hulls, each with one passive that changes what the ship **is** rather
 than adding to a number. Upgrades, refits, crystals and CPUs are shared
-across the whole garage — only the hull and its fit-out are per-ship, so a
-five-ship garage is not five times the energy bill.
+across the whole garage — only the hull and its fit-out are per-ship, so an
+eight-ship garage is not eight times the energy bill.
 
 | Hull | Passive | What it changes |
 |---|---|---|
@@ -118,9 +168,12 @@ five-ship garage is not five times the energy bill.
 | **HAULER** — 700 ⚡ | *Deep Hold* | Hold +65%, shield −22%, speed −10% |
 | **WARDEN** — 900 ⚡ | *Recovery* | Shield regen ×2.1, hull −8% |
 | **BULWARK** — 1300 ⚡ | *Plated* | Hull +28%, +6 armour, speed −14% |
-| **VANDAL** — 1500 ⚡ | *Overbore* | Both guns +6, shield −20%, hull +6% |
+| **VANDAL** — 1500 ⚡ | *Overbore* | Every gun +6, shield −20%, hull +6% |
+| **LANCE** — 2000 ⚡ | *Close Cover* | Shield +15%, regen +20%, speed +6% |
+| **HOUND** — 2400 ⚡ | *Brawler* | Hull +15%, turn +20%, hold −15% |
+| **ORACLE** — 2800 ⚡ | *Prospector* | Energy +35%, hold +20%, shield −10% |
 
-Three slots, three components each — 135 fit-outs:
+Three slots, three components each — 216 fit-outs:
 
 | Slot | Options |
 |---|---|
@@ -137,15 +190,16 @@ Warden.
 #### The one rule the hangar is built around
 
 **A weapon part may change rate and damage freely, but it must apply the
-same factors to the blaster and the capacitor round.** Because both builds
-then scale identically, the laser-versus-round comparison cannot move.
+same factors to every gun on the mount** — the blaster, the capacitor round
+and the plasma round. Because every build then scales identically, the
+laser-versus-round comparison cannot move.
 
 It is also what these parts physically mean — the laser slot is the weapon
 *mount*, and it upgrades everything bolted to it. An earlier draft made Pulse
 and Rail speed up the blaster alone, and the matrix test caught it in one
 run: **90 of 135 fit-outs** had the round stop being worth buying, purely
 because of which gun a cosmetic part happened to buff. `content.test.js`
-walks all 135 and requires the winner to flip between raiders and aliens in
+walks all 216 and requires the winner to flip between raiders and aliens in
 every single one.
 
 ### Factions
@@ -175,7 +229,7 @@ or the main menu.
 
 | Tab | What it is for |
 |---|---|
-| **Modules** | The energy economy. Nine tracks, ten levels each. |
+| **Modules** | The energy economy. Ten tracks, ten levels each. |
 | **Contracts** | Three rotating objectives that pay in crystals. |
 | **CPUs** | Active abilities. Buy once, fit one. |
 | **Refits** | Permanent perks bought with crystals, never refunded. |
@@ -194,6 +248,7 @@ or the main menu.
 | **Cargo** | How much energy one trip can carry |
 | **Missiles** | Lock-on burst, splash damage |
 | **Mines** | Proximity mines |
+| **Plasma** | A heavier piercing round — armour that goes through shields |
 
 A level-1 ship is always what you respawn with, so there is never a dead end
 and never a soft-lock.
@@ -221,6 +276,7 @@ carrying when you undock is a choice, so it has to be reversible.
 |---|---|
 | **Insta-Shield** | Three seconds of total invulnerability |
 | **Radar** | Every hostile on the minimap, including ones you cannot see |
+| **Cloak** | Nine seconds in which nothing can see you |
 | **Warp** | 300-unit jump along your nose, brief immunity in transit |
 | **Energy Leech** | A quarter of everything you damage comes back as shield |
 | **Repair Patch** | Patches the hull while you keep flying |
@@ -228,6 +284,13 @@ carrying when you undock is a choice, so it has to be reversible.
 Radar is the one worth noticing: with it off, the minimap only shows hostiles
 you could plausibly see on screen, using the same `viewSpan` the camera is
 fitted to. It can never promise contact the view will not deliver.
+
+**Cloak is a perception effect, not a shield.** Anything that has to
+*acquire* a target cannot see a cloaked ship, and an NPC already fighting you
+forgets you on its next think tick — so it does not have to be fired at the
+moment the fight starts to be worth having. But a round already in the air
+still lands. The distinction is the whole point of it: a player who reads it
+as "I am invulnerable" will fly straight into a turret they were never hit by.
 
 #### Refits — permanent, bought with crystals
 
@@ -383,11 +446,21 @@ into a storage change rather than a rewrite.
   asserts `spilled + banked === tank + hold`.
 - **A full hold refuses rather than destroys.** Crates and loose energy are
   left on the ground when there is no room, so the player can see the loot
-  they could not carry and go and dock.
+  they could not carry and go and dock. The mining beam is bound by the same
+  rule: a full hold takes nothing out of the rock, and the rock keeps it.
+- **A rock's energy is never created and never destroyed.** It is in the hold,
+  on the ground, or still in the rock — and the three always add up. The beam
+  moves energy out of the rock and into the hold; a rock broken by gunfire
+  drops all of it, because gunfire never touched the pool.
+- **The mining beam cannot hurt a ship.** It is a tool. A free beam that also
+  fought would be a free gun, and the laser and capacitor round tracks would
+  be dead on arrival — the Ammo track in particular only exists because a
+  shield is a real problem. Asserted directly.
 - **No hull or part can change what a gun is for.** Damage packets are rebuilt
   from raw damage after every multiplier, and every weapon part applies the
-  same factor to the blaster and the capacitor round. One hundred and
-  thirty-five fit-outs are walked in the test suite to keep it that way.
+  same factor to the blaster, the capacitor round and the plasma round. Two
+  hundred and sixteen fit-outs are walked in the test suite to keep it that
+  way.
 - **A save never grants what was not bought.** Hulls are owned by presence in
   the save, fitted parts must exist *and* be owned, and a fitted CPU the pilot
   does not own is dropped on load.
@@ -414,35 +487,41 @@ loot the player never docked.
 ## Tests
 
 ```bash
-node sector7-pwa/tests/sim.test.js       # 208 checks
-node sector7-pwa/tests/render.test.js    # 104 checks
-node sector7-pwa/tests/boot.test.js      #  76 checks
-node sector7-pwa/tests/content.test.js   # 262 checks
+node sector7-pwa/tests/sim.test.js       # 886 checks
+node sector7-pwa/tests/render.test.js    # 121 checks
+node sector7-pwa/tests/boot.test.js      # 108 checks
+node sector7-pwa/tests/content.test.js   # 292 checks
 ```
 
 `sim.test.js` runs the real world/AI/station modules with no browser: sector
 determinism, purchase invariants as a property test across every module and
 price band, save/load round-trips including deliberately corrupt saves, pool
 integrity under sustained fire, the docking round-trip, the death-and-loot
-loop, and the damage model.
+loop, the damage model, the lock-on shot, the cloak, the plasma round and the
+mining beam.
 
-It also runs a **difficulty-curve test**: one minute of play across eight
+It also runs a **difficulty-curve test**: one minute of play across sixteen
 seeds, three times — as a rookie (no crystals, so the sector is all tier-1
 raiders), as a banked pilot (700 crystals, so the sector rolls heavy tiers),
-and as a banked pilot carrying the Ammo track. The current numbers, stable over
-a dozen consecutive runs:
+and as a banked pilot carrying the Ammo track. The current numbers, and
+**identical on every run**:
 
 ```
-rookie:  15 kills/min,  0/8 runs ended in a wreck
-veteran:  7 kills/min,  8/8 runs ended in a wreck
-gunner:   8 kills/min,  7/8 runs ended in a wreck   (ammo build)
+rookie:  10 kills/min, 14/48 runs ended in a wreck
+veteran:  6 kills/min, 46/48 runs ended in a wreck
+gunner:   9 kills/min, 44/48 runs ended in a wreck   (ammo build)
 ```
 
-The assertion is on the **contrast** between the rookie and veteran profiles,
-not on absolute counts — spawn points and loot scatter use `Math.random`, so a
-bare count threshold on a handful of runs is a coin flip. The intro has to be
-survivable, the late game has to bite, and the second must be strictly worse
-than the first.
+The measurement is **deterministic**. The world's own RNG is seeded, but the
+loot scatter and the particle scatter reach for `Math.random` directly, so two
+runs of the same seed used to be two different runs — and the survival
+assertion flaked on the sample size rather than on the game, roughly one run
+in ten. A seeded stand-in for `Math.random` during the measurement turned it
+from a coin flip into a regression test.
+
+The assertion is on the **contrast** between the rookie and veteran profiles
+as well as on the counts: the intro has to be survivable, the late game has
+to bite, and the second must be strictly worse than the first.
 
 Notice what that table does *not* claim. It would be easy to read the gunner
 row as "ammo is better" and add an assertion that it wrecks strictly less
@@ -544,16 +623,27 @@ Built: bounty NPCs · mines · missiles · a spendable crystal sink (refits) ·
 four sectors · ion storms, dead nebulae and gravity wells · damage-direction
 indicators and hit flash · off-screen station markers · marked rich rocks ·
 **a cargo hold** · **a shield/armour split with a weapon that counters it** ·
-**factions, faction colour and faction wars** · **five CPUs, one slot** ·
-**an explicit target lock and a target panel** · **a hangar of five hulls
-with passives and 135 fit-outs** · **a sandbox cheat**.
+**a third gun that pierces it** · **factions, faction colour and faction
+wars** · **six CPUs, one slot, one of them a cloak** · **an explicit target
+lock and a target panel** · **a hangar of eight hulls with passives and 216
+fit-outs** · **a sandbox cheat** · **click-to-move, click-to-select and a
+lock-on shot** · **a free mining beam that is a tool and never a weapon**.
 
 Everything below is a real TODO, in the order it would actually be built.
 Open a PR and tick one.
 
 ### Next up
 
-- [ ] **More hulls and parts.** Five of each is enough to make the choice
+- [ ] **A munitions hangar.** Everything stockable, bought at the station and
+      carried from a loadout step: laser rounds, plasma rounds, missiles,
+      mines. The stockpile lives in the hangar blob, and the carry limit
+      ties into the Cargo track so that track finally has a visible verb.
+      **The mining beam is the prerequisite and it now exists**: a player can
+      always mine, so a player can always be solvent, so no stockout can be
+      a soft-lock. The one thing to watch is the beam's own rate — it must
+      never out-mine a blaster build, or the laser track becomes a wasted
+      level for anyone who cares about the hold.
+- [ ] **More hulls and parts.** Eight of each is enough to make the choice
       legible; a tenth hull would be a colour swap. If the garage grows, the
       thing worth adding is a slot, not a row.
 - [ ] **Hull-gated hardware.** Right now every hull is available from the
@@ -564,9 +654,11 @@ Open a PR and tick one.
       dial, sector gate and refit budget — and a premium sink would give the
       rare drops a purpose that is not "a bigger number, which makes the sector
       harder".
-- [ ] **Mining beam.** Right now the blaster cracks rocks, which is one less
-      verb in a game about choosing verbs. A held beam with per-material yield
-      would make the Cargo track's value legible from the cockpit.
+- [ ] **A deeper mining beam.** The beam exists and it carries the whole
+      endgame on its shoulders, but it is one grade of richness and one
+      fixed rate. A material table — a dense seam that pays out over a
+      longer cut, a brittle rock that shatters instead of being ground
+      down — would give the rock field the kind of variety the ships have.
 - [ ] **Elite encounter.** A roaming `Pirate Lord` with a shield phase and a
       capture/minion mechanic, appearing above a crystal threshold. The bounty
       hunter is already a named special-case spawn; this is a bigger one.

@@ -147,9 +147,19 @@
     }
 
     /* One projection, two entry paths, so the no-save ship and a restored
-     * one can never end up with different hulls. */
+     * one can never end up with different hulls.
+     *
+     * The hangar KEY is the source of truth. The hangar also used to ride
+     * along inside the ship save, and that copy was preferred here - which
+     * meant a save written before the hangar had a munitions reserve kept
+     * handing back a hangar with no rounds in it, while the copy under the
+     * key had them. Two copies of the same thing is two answers, and the
+     * game eventually asks the wrong one.
+     *
+     * The inline copy is still written, for the sake of a save file a human
+     * can read, but it is never read back. */
     function withHangar(ship, inline) {
-        var hangar = (inline && typeof inline === "object") ? inline : getHangar();
+        var hangar = getHangar();
         ship.hangar = hangar;
         ship.hullId = hangar.active;
         ship.hullDef = S.hull(hangar.active);
@@ -173,6 +183,14 @@
             active: S.HULLS[0].id,
             hulls: {},
             parts: {},
+            /* The munitions reserve. Rounds you own, parked in the hangar.
+             * The ship takes what it can carry out of this at launch and
+             * gives the rest back at the dock. */
+            munitions: S.CONFIG.munitions.starter,
+            /* The auto-turret: 0 is not owned, 1 is. It is a thing that
+             * shoots rather than a passive fitting, so it does not live in
+             * the parts table. */
+            turret: 0,
             sandbox: false,
         };
     }
@@ -181,10 +199,22 @@
         var raw = read(HANGAR_KEY, null);
         var out = defaultHangar();
         if (!raw || typeof raw !== "object") {
-            /* A pilot with no hangar at all still owns the starter hull,
-             * otherwise a fresh save could not fly. */
-            out.hulls[S.HULLS[0].id] = { parts: defaultFit() };
-            return out;
+            /* No hangar key. An older save keeps its hangar inline in the
+             * ship save, so adopt that rather than throwing away a garage
+             * full of hulls the pilot paid for. One-time reconciliation,
+             * and from here on the key is the only copy that is read. */
+            var ship = read(SHIP_KEY, null);
+            var inline = ship && ship.hangar && typeof ship.hangar === "object"
+                ? ship.hangar : null;
+            if (inline) {
+                write(HANGAR_KEY, inline);
+                raw = inline;
+            } else {
+                /* A pilot with no hangar at all still owns the starter hull,
+                 * otherwise a fresh save could not fly. */
+                out.hulls[S.HULLS[0].id] = { parts: defaultFit() };
+                return out;
+            }
         }
 
         var owned = raw.hulls && typeof raw.hulls === "object" ? raw.hulls : {};
@@ -222,7 +252,25 @@
             var lv = raw.parts && raw.parts[pk];
             out.parts[pk] = Number.isFinite(lv) ? S.clamp(Math.floor(lv), 0, S.PART_MAX) : 0;
         }
+
+        /* The munitions reserve. A save from before the hangar had a
+         * magazine gets the starter stock, so an old pilot is not left
+         * unable to shoot; a save with a negative or nonsense count gets
+         * clamped to zero, because a save is never trusted to be true. */
+        var stock = raw.munitions && typeof raw.munitions === "object" ? raw.munitions : null;
+        out.munitions = {};
+        for (var m = 0; m < S.MUNITIONS.length; m++) {
+            var mk = S.MUNITIONS[m].key;
+            var mv = stock ? stock[mk] : undefined;
+            out.munitions[mk] = Number.isFinite(mv)
+                ? Math.max(0, Math.floor(mv))
+                : S.CONFIG.munitions.starter[mk];
+        }
+
         out.sandbox = !!raw.sandbox;
+        /* The turret is owned or it is not. A save that says otherwise is
+         * a save that never owned one. */
+        out.turret = raw.turret > 0 ? 1 : 0;
         return out;
     }
 

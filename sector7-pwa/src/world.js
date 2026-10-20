@@ -50,6 +50,12 @@
          * this is a choice the player made and it survives losing the target
          * to radar range. */
         target: null,
+        /* Where the player told the ship to go, in world coordinates. Null
+         * when the ship is flying under its own control. */
+        moveTarget: null,
+        /* The rock the mining beam is on, or null. The renderer draws the
+         * beam from it. */
+        beam: null,
 
         roster: [],
         /* Recent hits on the player, for the directional damage indicator.
@@ -75,7 +81,7 @@
 
     function initPools() {
         world.bullets = makePool(C.pools.bullets, function () {
-            return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, life: 0, ds: 0, da: 0, r: 4, friendly: true, ownerId: 0, color: "#fff", heavy: false };
+            return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, life: 0, ds: 0, da: 0, r: 4, friendly: true, ownerId: 0, color: "#fff", heavy: false, homing: false, targetId: 0, pierce: false, turret: false };
         });
         world.ammo = makePool(C.pools.ammo, function () {
             return { on: false, x: 0, y: 0, z: 0, vx: 0, vy: 0, life: 0, ds: 0, da: 0, r: 7, ownerId: 0, friendly: true };
@@ -138,6 +144,8 @@
             if (clash) continue;
 
             var hull = Math.round(26 + r * 2.6);
+            var cache = 1 + Math.floor(rng() * 4);
+            var energy = 8 + Math.floor(rng() * 14);
             placed.push({
                 x: x, y: y, z: 0,
                 r: r,
@@ -145,8 +153,17 @@
                 maxHull: hull,
                 /* Every rock hides a different crystal cache, so breaking the
                  * field is a real payout rather than a formality. */
-                cache: 1 + Math.floor(rng() * 4),
-                energy: 8 + Math.floor(rng() * 14),
+                cache: cache,
+                /* The grade is the material. It is how much crystal the
+                 * rock hides, and the beam cuts a richer rock faster - so
+                 * the marked rocks are worth flying to, and the mark means
+                 * something before you have broken anything. */
+                grade: cache,
+                energy: energy,
+                /* What the beam has not taken out of it yet. Gunfire never
+                 * touches this: it breaks the rock and the whole pool drops
+                 * as pickups, exactly as it always did. */
+                energyLeft: energy,
                 seed: Math.floor(rng() * 100000),
                 alive: true,
                 respawn: 0,
@@ -248,6 +265,10 @@
                 r: sec.hazard.radius,
                 kind: sec.hazard.kind,
                 pull: sec.hazard.pull || 0,
+                /* A current pushes everything one way, so it needs a
+                 * direction. The angle is drawn from the seed so two maps
+                 * do not drift the same way. */
+                dir: rng() * Math.PI * 2,
                 /* Storm phases are offset per hazard so they never all fire
                  * at once and leave a safe window. */
                 phase: rng() * (sec.hazard.period || 30),
@@ -418,6 +439,23 @@
             cooldownMissiles: 0,
             cooldownMine: 0,
             cooldownCpu: 0,
+            /* The lock-on shot runs on its own clock so it never has to
+             * queue behind the blaster. */
+            cooldownAttack: 0,
+            /* The plasma round runs on its own clock too: it is a heavy
+             * weapon with a long reload, and sharing the blaster's clock
+             * would make the laser unusable. */
+            cooldownPlasma: 0,
+            /* What the ship is actually carrying. Every gun draws on this,
+             * and the magazine is lost with the ship - which is what makes
+             * a dock a resupply trip rather than a formality. */
+            magazine: { laser: 0, ammo: 0, plasma: 0, missiles: 0, mines: 0 },
+            /* The magazine's ceiling. The hangar can hold a thousand rounds
+             * and the ship can still only take so many. */
+            magazineMax: { laser: 0, ammo: 0, plasma: 0, missiles: 0, mines: 0 },
+            /* The auto-turret: 0 is none, 1 is fitted. */
+            turret: 0,
+            cooldownTurret: 0,
             alive: true,
             docked: false,
             invuln: opts.invuln || 0,
@@ -473,9 +511,48 @@
      * every call site.
      */
 
+    /* Does the magazine hold enough of this?
+     *
+     * Asked before a projectile is claimed out of the pool, so a round is
+     * never spent on a shot that was never going to exist. */
+    function hasRound(ship, key, n) {
+        if (!ship || !ship.alive) return false;
+        var want = n === undefined ? 1 : n;
+        var have = ship.magazine ? (ship.magazine[key] || 0) : 0;
+        return have >= want;
+    }
+
+    /* Take a round out of the magazine.
+     *
+     * Every gun in the game goes through here, so no weapon can be fired
+     * for free by accident. The dry-fire event is what the HUD and the
+     * sound listen to: a weapon that silently does nothing is a bug the
+     * player cannot report, because they do not know it was supposed to
+     * do something. */
+    function takeRound(ship, key, n) {
+        if (!ship || !ship.alive) return false;
+        /* The sector is not a logistics simulation. The NPCs have their own
+         * supply, and only the PLAYER's magazine is something the player
+         * can run out of. */
+        if (!ship.isPlayer) return true;
+        var want = n === undefined ? 1 : n;
+        var have = ship.magazine ? (ship.magazine[key] || 0) : 0;
+        if (have < want) {
+            world.events.push({ type: "dry", ship: ship, key: key });
+            return false;
+        }
+        ship.magazine[key] = have - want;
+        return true;
+    }
+
     function fire(ship, dirAngle, opts) {
         if (!ship.alive || ship.cooldown > 0) return false;
         var st = ship.stats;
+
+        /* A mining round is fired at a rock, and a rock does not eat
+         * ammunition. The pilots mine with the gun for exactly that
+         * reason, and it is the one thing in the game that is free. */
+        if (!(opts && opts.mining) && !takeRound(ship, "laser")) return false;
 
         ship.cooldown = st.fireInterval;
         var a = dirAngle === undefined ? ship.aim : dirAngle;
@@ -504,17 +581,205 @@
         b.friendly = ship.isPlayer;
         b.ownerId = ship.id;
         b.color = ship.isPlayer ? S.COLORS.bullet : S.COLORS.npcBullet;
+        /* The bullet pool is shared, and a slot keeps whatever the last
+         * shot through it left behind. A blaster round that inherited
+         * `homing` from a lock-on shot would fly at a target the player
+         * never aimed at, and one that inherited `pierce` would go
+         * through shields. Every field a shot can be is set here. */
+        b.homing = false;
+        b.targetId = 0;
+        b.pierce = false;
+        b.turret = false;
 
         world.events.push({ type: "shoot", ship: ship });
         return true;
     }
 
+    /* The plasma round.
+     *
+     * A slow, heavy slug that goes THROUGH a shield. It is the third
+     * answer to the two-pool problem: the laser chews armour and bounces
+     * off shields, the capacitor round chews shields and is wasted on
+     * armour, and the plasma chews armour even through a shield.
+     *
+     * It is deliberately not a better gun. It is slower than the laser,
+     * it does not home, and its armour damage per second is below the
+     * laser's - so it is an answer to a specific problem rather than an
+     * upgrade to everything. */
+    function firePlasma(ship, dirAngle) {
+        if (!ship || !ship.alive) return false;
+        if (ship.cooldownPlasma > 0) return false;
+        var st = ship.stats;
+        if (!st || !st.plasmaDamage) return false;
+        if (!takeRound(ship, "plasma")) return false;
+
+        ship.cooldownPlasma = st.plasmaCooldown;
+        var a = dirAngle === undefined ? ship.aim : dirAngle;
+        var b = claim(world.bullets);
+        if (!b) return false;
+
+        var muzzle = ship.radius + 9;
+        b.x = ship.x + Math.cos(a) * muzzle;
+        b.y = ship.y + Math.sin(a) * muzzle;
+        b.z = ship.z;
+        b.vx = Math.cos(a) * C.combat.plasmaSpeed;
+        b.vy = Math.sin(a) * C.combat.plasmaSpeed;
+        b.life = C.combat.plasmaLife;
+        b.ds = st.plasmaPacket.shield;
+        b.da = st.plasmaPacket.armor;
+        b.pierce = !!st.plasmaPacket.pierce;
+        b.heavy = true;
+        b.mining = false;
+        b.homing = false;
+        b.targetId = 0;
+        b.turret = false;
+        b.r = C.combat.plasmaRadius;
+        b.friendly = ship.isPlayer;
+        b.ownerId = ship.id;
+        b.color = ship.isPlayer ? S.COLORS.plasma : S.COLORS.npcBullet;
+
+        world.events.push({ type: "plasma", ship: ship });
+        return true;
+    }
+
+    /* The lock-on shot.
+     *
+     * Fired at whatever the player has selected, which makes it the one
+     * weapon that can reach a target the turret arc forbids: the blaster is
+     * bolted to a turret and cannot swing the muzzle through the hull, this
+     * one is aimed by the lock and does not care which way the ship is
+     * pointing.
+     *
+     * The trade is range and rate. It needs the target inside attackRange
+     * and it fires on its own long cooldown, so holding Ctrl is not a
+     * thing - it is a shot, spent and earned. */
+    function fireLockOn(ship, target) {
+        if (!ship || !ship.alive) return false;
+        if (!target || !target.alive || target === ship) return false;
+        if (ship.cooldownAttack > 0) return false;
+
+        var range2 = C.combat.attackRange * C.combat.attackRange;
+        if (S.dist2(ship.x, ship.y, target.x, target.y) > range2) return false;
+
+        var st = ship.stats;
+        if (!takeRound(ship, "laser")) return false;
+        ship.cooldownAttack = C.combat.attackCooldown;
+
+        var b = claim(world.bullets);
+        if (!b) return false;
+
+        var a = Math.atan2(target.y - ship.y, target.x - ship.x);
+        /* The round leaves the muzzle, but never past the target: a lock
+         * held at knife range would otherwise spawn the shot on the far
+         * side of the enemy and watch it fly away. */
+        var gap = Math.sqrt(S.dist2(ship.x, ship.y, target.x, target.y));
+        var muzzle = Math.min(ship.radius + 8, gap * 0.5);
+        b.x = ship.x + Math.cos(a) * muzzle;
+        b.y = ship.y + Math.sin(a) * muzzle;
+        b.z = ship.z;
+        b.vx = Math.cos(a) * C.combat.attackSpeed;
+        b.vy = Math.sin(a) * C.combat.attackSpeed;
+        b.life = C.combat.attackLife;
+        /* The blaster's packet, so every module that makes the gun stronger
+         * makes this stronger too. It is a different gun, not a different
+         * damage type. */
+        b.ds = st.blasterPacket.shield;
+        b.da = st.blasterPacket.armor;
+        b.heavy = true;
+        b.mining = false;
+        b.r = C.combat.attackRadius;
+        b.friendly = ship.isPlayer;
+        b.ownerId = ship.id;
+        b.color = ship.isPlayer ? S.COLORS.bullet : S.COLORS.npcBullet;
+        /* Tracking is what makes the shot land. A straight line at a moving
+         * target is a guess, and a weapon the player paid for should not be
+         * a guess. The turn rate is slow enough that a fast target can
+         * still outrun it. */
+        b.homing = true;
+        b.targetId = target.id;
+        /* A lock-on shot is not a piercing shot. The pool slot it claimed
+         * may have been used by a plasma round, and the pierce flag has to
+         * go with it. */
+        b.pierce = false;
+        b.turret = false;
+
+        world.events.push({ type: "lockShot", ship: ship, target: target });
+        return true;
+    }
+
+    /* The auto-turret.
+     *
+     * It shoots at whatever is nearest, because that is all a mounted
+     * weapon can do. It draws on the player's magazine, so a turret that
+     * is firing is a turret eating rounds the player might have wanted -
+     * which is what makes fitting one a decision rather than a free
+     * upgrade.
+     *
+     * It never announces itself as dry. A turret with no rounds is simply
+     * quiet, and the toast that says "NO ROUNDS" belongs to a finger on
+     * a button, not to a machine. */
+    function fireTurret(ship, dt) {
+        if (!ship || !ship.alive || ship.docked) return false;
+        if (!ship.turret) return false;
+        ship.cooldownTurret -= dt;
+        if (ship.cooldownTurret > 0) return false;
+
+        var target = null, bestD = S.TURRET.range * S.TURRET.range;
+        for (var i = 0; i < world.ships.length; i++) {
+            var s = world.ships[i];
+            if (s === ship || !s.alive || s.docked) continue;
+            if (!isHostileTo(ship, s)) continue;
+            var d2 = S.dist2(ship.x, ship.y, s.x, s.y);
+            if (d2 > bestD) continue;
+            bestD = d2;
+            target = s;
+        }
+        if (!target) return false;
+
+        ship.cooldownTurret = S.TURRET.interval;
+        /* No round, no shot - and no announcement either. */
+        if (!hasRound(ship, "laser")) return false;
+
+        var st = ship.stats;
+        var b = claim(world.bullets);
+        if (!b) return false;
+
+        var a = Math.atan2(target.y - ship.y, target.x - ship.x);
+        var muzzle = ship.radius + 6;
+        b.x = ship.x + Math.cos(a) * muzzle;
+        b.y = ship.y + Math.sin(a) * muzzle;
+        b.z = ship.z;
+        b.vx = Math.cos(a) * C.combat.bulletSpeed;
+        b.vy = Math.sin(a) * C.combat.bulletSpeed;
+        b.life = C.combat.bulletLife;
+        b.ds = st.blasterPacket.shield * S.TURRET.damageScale;
+        b.da = st.blasterPacket.armor * S.TURRET.damageScale;
+        b.pierce = false;
+        b.heavy = false;
+        b.mining = false;
+        b.homing = false;
+        b.targetId = 0;
+        b.r = C.combat.bulletRadius;
+        b.friendly = ship.isPlayer;
+        b.ownerId = ship.id;
+        b.color = ship.isPlayer ? S.COLORS.turret : S.COLORS.npcBullet;
+        /* So the renderer can draw it as a turret shot and not as the
+         * player's own gun. */
+        b.turret = true;
+
+        takeRound(ship, "laser");
+        world.events.push({ type: "turret", ship: ship, target: target });
+        return true;
+    }
+
     /* The capacitor round: one heavy shot, shield-first, on a long cooldown.
+
      * It is deliberately not a second blaster - it trades rate of fire for
      * the ability to hurt a shielded hull at all. */
     function fireAmmo(ship, dirAngle) {
         if (!ship.alive || ship.cooldownAmmo > 0) return false;
         var st = ship.stats;
+        if (!takeRound(ship, "ammo")) return false;
 
         ship.cooldownAmmo = st.ammoCooldown;
         var a = dirAngle === undefined ? ship.aim : dirAngle;
@@ -596,6 +861,20 @@
         if (!st.missiles) return 0;
 
         var n = Math.min(st.missiles, count || st.missiles);
+
+        /* A salvo costs a round per missile, and a pilot with three
+         * missiles left fires three, not nine. The burst is what the
+         * magazine can pay for. */
+        var have = ship.magazine ? (ship.magazine.missiles || 0) : 0;
+        if (have < n) {
+            n = have;
+            if (n <= 0) {
+                world.events.push({ type: "dry", ship: ship, key: "missiles" });
+                return 0;
+            }
+        }
+        ship.magazine.missiles = have - n;
+
         ship.cooldownMissiles = st.missileCooldown;
 
         var pool = [];
@@ -641,9 +920,14 @@
             if (world.mines[i].on && world.mines[i].ownerId === ship.id) live++;
         }
         if (live >= st.mineCapacity) return false;
+        if (!hasRound(ship, "mines")) {
+            world.events.push({ type: "dry", ship: ship, key: "mines" });
+            return false;
+        }
 
         var m = claim(world.mines);
         if (!m) return false;
+        takeRound(ship, "mines");
 
         var back = ship.heading + Math.PI;
         m.x = ship.x + Math.cos(back) * (ship.radius + 6);
@@ -813,6 +1097,9 @@
             case "repair":
                 ship.cpuTimer = C.cpu.repairTime;
                 break;
+            case "cloak":
+                ship.cpuTimer = C.cpu.cloakTime;
+                break;
             case "warp": {
                 /* Jump along the nose, not through the world boundary: a
                  * warp into a wall is a death the player cannot read coming. */
@@ -842,6 +1129,20 @@
         return !!(ship && ship.cpuTimer > 0 && ship.cpuKey);
     }
 
+    /* Is this ship hidden?
+     *
+     * The cloak is a perception effect, not a shield: anything that has to
+     * ACQUIRE a target cannot see a cloaked ship, but a round already in the
+     * air still lands. That distinction is the whole point of the weapon -
+     * a player who reads it as "I am invulnerable" will fly straight into a
+     * turret they were never hit by.
+     *
+     * Only one CPU is fitted at a time, so `cpuKey` is unambiguous and no
+     * second timer is needed. */
+    function isCloaked(ship) {
+        return !!(ship && ship.cpuKey === "cloak" && ship.cpuTimer > 0);
+    }
+
     /* Energy Leech: a share of what you land on a hostile comes back as
      * shield. Applied by the hit paths, which know both ends of the trade -
      * damageShip deliberately does not, because it cannot see the shooter. */
@@ -867,7 +1168,8 @@
      *
      *   - A shot carries a SHIELD component and an ARMOUR component.
      *   - The shield component is eaten by whatever shield is left.
-     *   - The armour component is HELD OFF entirely while any shield remains.
+     *   - The armour component is HELD OFF entirely while any shield remains,
+     *     UNLESS the shot pierces.
      *
      * That last rule is the load-bearing one. Without it a fast armour weapon
      * simply kills through a shield wall - it strips nothing, it just outlasts
@@ -876,12 +1178,21 @@
      * be answered with shield damage, and which gun you carry stops being a
      * matter of taste.
      *
-     * Three invariants are asserted in the sim test:
+     * A PIERCING shot is the one exception, and it is a weapon rather than a
+     * rule: the plasma round goes through a shield. It still has its shield
+     * component eaten by the shield, and it still loses the armour component
+     * to the hull underneath, but the armour part is no longer held off. That
+     * is the whole point of it - the third answer to the two-pool problem -
+     * and it is bounded by being slow and by having less armour damage per
+     * second than the laser.
+     *
+     * Four invariants are asserted in the sim test:
      *
      *   1. A shield that absorbs everything takes ZERO hull damage.
      *   2. Armour damage does not land while a shield is still up.
      *   3. Anything that gets past the shield still lands at least one point,
      *      so stacked armour can never make a hull permanently unkillable.
+     *   4. A piercing shot DOES land its armour through a shield.
      */
     function damageShip(ship, packet) {
         var out = { shield: 0, hull: 0, absorbed: 0, raw: 0, blocked: 0 };
@@ -889,6 +1200,7 @@
 
         var sDmg = Math.max(0, packet && packet.shield || 0);
         var aDmg = Math.max(0, packet && packet.armor || 0);
+        var pierce = !!(packet && packet.pierce);
 
         var maxS = ship.maxShield || 0;
         var absorbed = maxS > 0 ? Math.min(ship.shield, sDmg) : 0;
@@ -907,12 +1219,13 @@
 
         var spill = sDmg - absorbed;
         var raw;
-        if (ship.shield > 0) {
+        if (ship.shield > 0 && !pierce) {
             /* Still shielded: the armour component has nowhere to land. */
             out.blocked = aDmg;
             raw = spill;
         } else {
-            /* Shield is down (or was never up): the shot lands in full. */
+            /* Shield is down (or was never up), or the shot goes through it:
+             * the shot lands in full. */
             raw = spill + aDmg;
         }
         out.raw = raw;
@@ -1063,11 +1376,27 @@
         ship.vy = S.lerp(ship.vy, Math.sin(ship.heading) * targetSpeed, k);
 
         /* A gravity well bends the trajectory rather than teleporting:
-         * steering into one still works, you just have to plan for it. */
+         * steering into one still works, you just have to plan for it.
+         *
+         * A CURRENT is the other shape: it pushes everything inside it in
+         * one fixed direction, so the map fights your steering rather than
+         * your speed. A ship that wants to leave has to fly harder than it
+         * wanted to arrive, and everything the current carries - including
+         * the rocks it moves you past - is carried with you. */
         var hz = world.hazards;
         if (hz && hz.length) {
             for (var hi = 0; hi < hz.length; hi++) {
                 var h = hz[hi];
+                if (h.kind === "drift") {
+                    var ddx = ship.x - h.x, ddy = ship.y - h.y;
+                    var dd2 = ddx * ddx + ddy * ddy;
+                    if (dd2 > h.r * h.r) continue;
+                    var dd = Math.sqrt(dd2);
+                    var k = 1 - dd / h.r;
+                    ship.vx += Math.cos(h.dir) * (h.pull || 120) * k * dt;
+                    ship.vy += Math.sin(h.dir) * (h.pull || 120) * k * dt;
+                    continue;
+                }
                 if (h.kind !== "well") continue;
                 var hdx = h.x - ship.x, hdy = h.y - ship.y;
                 var hd2 = hdx * hdx + hdy * hdy;
@@ -1096,6 +1425,9 @@
         if (ship.cooldownMissiles > 0) ship.cooldownMissiles -= dt;
         if (ship.cooldownMine > 0) ship.cooldownMine -= dt;
         if (ship.cooldownCpu > 0) ship.cooldownCpu -= dt;
+        if (ship.cooldownAttack > 0) ship.cooldownAttack -= dt;
+        if (ship.cooldownPlasma > 0) ship.cooldownPlasma -= dt;
+        if (ship.cooldownTurret > 0) ship.cooldownTurret -= dt;
         if (ship.invuln > 0) ship.invuln -= dt;
         if (ship.hitFlash > 0) ship.hitFlash -= dt;
         if (ship.cpuTimer > 0) ship.cpuTimer -= dt;
@@ -1200,6 +1532,26 @@
             b.life -= dt;
             if (b.life <= 0) { b.on = false; continue; }
 
+            /* A lock-on shot steers toward the ship it was fired at. The
+             * turn rate is capped: unlimited tracking would turn the
+             * weapon into a ray and there would be no reason to close the
+             * distance first. If the target dies or ducks out of the world
+             * the shot keeps its last heading rather than vanishing. */
+            if (b.homing && b.targetId) {
+                for (var hs = 0; hs < ships.length; hs++) {
+                    var ht = ships[hs];
+                    if (ht.id !== b.targetId || !ht.alive) continue;
+                    var want = Math.atan2(ht.y - b.y, ht.x - b.x);
+                    var cur = Math.atan2(b.vy, b.vx);
+                    var turn = S.clamp(S.angleDiff(cur, want),
+                        -C.combat.attackTurn * dt, C.combat.attackTurn * dt);
+                    var a2 = cur + turn;
+                    b.vx = Math.cos(a2) * C.combat.attackSpeed;
+                    b.vy = Math.sin(a2) * C.combat.attackSpeed;
+                    break;
+                }
+            }
+
             b.x += b.vx * dt;
             b.y += b.vy * dt;
 
@@ -1263,7 +1615,7 @@
                     if (world.hitMarks.length > 8) world.hitMarks.shift();
                 }
 
-                var res = damageShip(ship, { shield: b.ds, armor: b.da });
+                var res = damageShip(ship, { shield: b.ds, armor: b.da, pierce: b.pierce });
                 applyLeech(ownerOf(b, ships), ship, res.hull);
                 provoke(ship, ownerOf(b, ships));
                 explode(b.x, b.y, b.z, b.color, 3, "spark", 80);
@@ -1299,12 +1651,62 @@
         explode(rock.x, rock.y, rock.z, "#9aa4b2", 8, "spark", 90);
         world.events.push({ type: "rockBreak", rock: rock, byPlayer: !!byPlayer });
 
+        /* In the unstable belt the rock does not just break, it goes off.
+         * Mining becomes a question about where you are standing when the
+         * rock finally gives, which is the only thing that makes the last
+         * map feel like the last map. */
+        if (hazardAt(rock.x, rock.y, "cinder") > 0.2) detonateRock(rock);
+
+        /* The crystal cache always drops. Crystals are banked the moment
+         * they are touched and must never be left lying in a wreck where
+         * they can be lost - so the beam, which puts ENERGY in the hold,
+         * still has to come back for this. */
         dropPickup(rock.x, rock.y, rock.z, "crystal", rock.cache);
-        /* Split the rock's own energy across a few drops. */
-        var chunks = 3;
-        for (var i = 0; i < chunks; i++) {
-            dropPickup(rock.x, rock.y, rock.z, "energy", Math.round(rock.energy / chunks));
+
+        /* Whatever energy the beam did not already put in the hold drops as
+         * pickups. A rock broken by gunfire never had its pool touched, so
+         * it drops all of it, exactly as it always did. */
+        if (rock.energyLeft > 0.5) {
+            var chunks = 3;
+            for (var i = 0; i < chunks; i++) {
+                dropPickup(rock.x, rock.y, rock.z, "energy", Math.round(rock.energyLeft / chunks));
+            }
         }
+        rock.energyLeft = 0;
+    }
+
+    /* An unstable rock going off. The blast is a physical event, not a
+     * shot, so it goes through a shield: the armour it carries lands
+     * whatever the shield is doing. Armour is still the answer to it -
+     * the damage is cut by the plating - but a shield will not save you
+     * from standing next to a charged rock.
+     *
+     * That is what makes the field a decision rather than scenery: a
+     * pilot with shields can still clear it, but not for free. */
+    function detonateRock(rock) {
+        var reach = C.combat.cinderRadius;
+        var reach2 = reach * reach;
+        var dmg = C.combat.cinderDamage;
+        explode(rock.x, rock.y, rock.z, "#f0abfc", 24, "spark", 210);
+        explode(rock.x, rock.y, rock.z, "#ffffff", 10, "shard", 160);
+        world.shake = Math.max(world.shake, 10);
+
+        for (var i = 0; i < world.ships.length; i++) {
+            var ship = world.ships[i];
+            if (!ship.alive || ship.docked) continue;
+            var d2 = S.dist2(ship.x, ship.y, rock.x, rock.y);
+            if (d2 > reach2) continue;
+            var falloff = 1 - Math.sqrt(d2) / reach;
+            var res = damageShip(ship, { shield: 0, armor: dmg * falloff, pierce: true });
+            if (res.hull > 0 && ship.isPlayer) {
+                floater(ship.x, ship.y, ship.z + 14, "-" + res.hull, "#f0abfc");
+            }
+            if (ship.hull <= 0) {
+                if (ship.isPlayer) killPlayer(ship, null);
+                else killShip(ship, null);
+            }
+        }
+        world.events.push({ type: "cinder", rock: rock });
     }
 
     function stepRocks(dt) {
@@ -1316,6 +1718,8 @@
             if (rock.respawn <= 0) {
                 rock.alive = true;
                 rock.hull = rock.maxHull;
+                /* A rock that comes back is a whole rock again. */
+                rock.energyLeft = rock.energy;
             }
         }
     }
@@ -1516,6 +1920,89 @@
         return ship.hold >= ship.holdMax - 0.5;
     }
 
+    /* ===== The mining beam =====
+     *
+     * A tool, not a weapon: it cuts rock and NOTHING else. That is the
+     * whole point of it. A free beam that also hurt ships would be a free
+     * gun, and the laser and capacitor round tracks would be dead on
+     * arrival - the Ammo track in particular only exists because a shield
+     * is a real problem.
+     *
+     * The energy comes out of the rock and into the hold directly, so the
+     * CARGO track is legible from the cockpit: you watch the hold fill,
+     * and you watch it refuse to fill any further.
+     *
+     * Per material: a rock's grade is how much crystal it hides, and the
+     * beam extracts faster from a richer one. A grade-1 rock yields its
+     * whole energy across the whole cut; a grade-4 rock yields it in the
+     * first quarter, and the rest of that cut is a rich rock's cache
+     * waiting to be worth a detour.
+     */
+    function mineBeam(ship, dt, on) {
+        if (!on) {
+            world.beam = null;
+            return 0;
+        }
+        world.beam = null;
+        if (!ship || !ship.alive || ship.docked) return 0;
+
+        /* The rock the beam is on: the nearest one inside the cone in
+         * front of the ship. The beam comes off the nose rather than the
+         * turret, because you point the SHIP at the rock - that is what
+         * makes it a different verb from firing. */
+        var a = ship.heading;
+        var cosCone = Math.cos(C.combat.beamCone);
+        var reach2 = C.combat.beamRange * C.combat.beamRange;
+        var best = null, bestD = reach2;
+        for (var i = 0; i < world.rocks.length; i++) {
+            var rock = world.rocks[i];
+            if (!rock.alive) continue;
+            var dx = rock.x - ship.x, dy = rock.y - ship.y;
+            var d2 = dx * dx + dy * dy;
+            if (d2 > bestD) continue;
+            var d = Math.sqrt(d2);
+            if (d > 1e-3) {
+                var cosA = (dx * Math.cos(a) + dy * Math.sin(a)) / d;
+                if (cosA < cosCone) continue;
+            }
+            bestD = d2;
+            best = rock;
+        }
+        if (!best) return 0;
+
+        var cut = C.combat.beamRate * dt;
+        if (cut > best.hull) cut = best.hull;
+        best.hull -= cut;
+        best.hitFlash = 0.12;
+
+        /* The beam is on the rock, so it is drawn on the rock - even if the
+         * hold is too full to take anything out of it. */
+        world.beam = {
+            x: best.x, y: best.y, z: best.z,
+            grade: best.grade, r: best.r,
+        };
+
+        /* The energy comes out in proportion to the rock you have actually
+         * cut away, scaled by the material. */
+        var want = cut * best.grade * (best.energy / best.maxHull);
+        if (want > best.energyLeft) want = best.energyLeft;
+
+        /* A full hold does not consume the rock: it keeps what it has, and
+         * that energy drops as a pickup when the rock finally breaks. */
+        var got = loadEnergy(ship, want);
+        if (got > 0) {
+            best.energyLeft -= got;
+            /* The Processor track pays out on top of what was cut - the
+             * same bonus it gives on wrecks and crates. */
+            if (ship.isPlayer && ship.stats.energyBonus > 1) {
+                loadEnergy(ship, got * (ship.stats.energyBonus - 1));
+            }
+        }
+
+        if (best.hull <= 0) breakRock(best, ship.isPlayer);
+        return got;
+    }
+
     function collect(ship, p) {
         if (p.kind === "energy") {
             var mult = ship.isPlayer ? ship.stats.energyBonus : 1;
@@ -1675,6 +2162,37 @@
             if (filter && !filter(s)) continue;
             var d2 = S.dist2(x, y, s.x, s.y);
             if (d2 < bestD) { bestD = d2; best = s; }
+        }
+        return best;
+    }
+
+    /* Pick the ship under a screen point.
+     *
+     * The hit test is done in screen space, because that is the space the
+     * click happened in: a hull is a screen-sized shape, not a world-sized
+     * circle, and at low zoom a world radius would either be unclickable
+     * or would swallow the ships around it. The tolerance is therefore the
+     * hull's own radius on screen, with a floor so a distant ship is still
+     * clickable and a ceiling so a big one is not a target the size of the
+     * screen.
+     *
+     * Returns null when the click landed on empty space - which is how the
+     * caller tells "select this" from "go there". */
+    function pickShip(sx, sy) {
+        if (!S.Render || !S.Render.toScreen) return null;
+        var zoom = S.Render.camera ? S.Render.camera.zoom : 1;
+        var best = null, bestD = Infinity;
+        for (var i = 0; i < world.ships.length; i++) {
+            var s = world.ships[i];
+            if (s.isPlayer || !s.alive || s.docked) continue;
+            var p = S.Render.toScreen(s.x, s.y, s.z);
+            var dx = p[0] - sx, dy = p[1] - sy;
+            var d2 = dx * dx + dy * dy;
+            if (d2 >= bestD) continue;
+            var reach = Math.max(s.radius * zoom, 18) + 8;
+            if (d2 > reach * reach) continue;
+            bestD = d2;
+            best = s;
         }
         return best;
     }
@@ -1857,6 +2375,8 @@
         world.events.length = 0;
         world.player = null;
         world.target = null;
+        world.moveTarget = null;
+        world.beam = null;
         for (var i = 0; i < world.bullets.length; i++) world.bullets[i].on = false;
         for (var ai = 0; ai < world.ammo.length; ai++) world.ammo[ai].on = false;
         for (var mi = 0; mi < world.missiles.length; mi++) world.missiles[mi].on = false;
@@ -1875,12 +2395,18 @@
         moveShip: moveShip,
         fire: fire,
         fireAmmo: fireAmmo,
+        fireLockOn: fireLockOn,
+        firePlasma: firePlasma,
+        fireTurret: fireTurret,
         fireMissiles: fireMissiles,
         dropMine: dropMine,
         damageShip: damageShip,
         damageBase: damageBase,
+        breakRock: breakRock,
+        mineBeam: mineBeam,
         activateCpu: activateCpu,
         cpuActive: cpuActive,
+        isCloaked: isCloaked,
         applyLeech: applyLeech,
         killPlayer: killPlayer,
         killShip: killShip,
@@ -1888,6 +2414,7 @@
         explode: explode,
         floater: floater,
         nearestShip: nearestShip,
+        pickShip: pickShip,
         coneTarget: coneTarget,
         isHostileTo: isHostileTo,
         provoke: provoke,
