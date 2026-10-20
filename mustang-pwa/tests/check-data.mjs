@@ -221,11 +221,24 @@ ok("crate colours are unique", (() => {
 /* ===== Music ===== */
 section("music");
 ok("music table exists", !!D.music);
-ok("bass and lead lines are the same length",
-    D.music.bass.length === D.music.lead.length && D.music.bass.length > 0);
-ok("tempo is a sane march", D.music.tempo >= 100 && D.music.tempo <= 200, String(D.music.tempo));
-ok("all note values stay within an octave and a fifth",
-    D.music.bass.concat(D.music.lead).every((n) => n >= 0 && n <= 19));
+const tracks = ["flight", "peril", "boss"];
+ok("there are three tracks", tracks.every((n) => !!D.music[n]), tracks.join(","));
+for (const name of tracks) {
+    const t = D.music[name];
+    ok(name + " has a bass line and a lead line",
+        t.bass.length === t.lead.length && t.bass.length > 0, String(t.bass.length));
+    ok(name + " has a sane tempo", t.tempo >= 100 && t.tempo <= 200, String(t.tempo));
+    ok(name + " stays within an octave and a fifth",
+        t.bass.concat(t.lead).every((n) => n >= 0 && n <= 19));
+}
+ok("the three tracks do not sound the same",
+    new Set(tracks.map((n) => D.music[n].bass.join(","))).size === 3);
+ok("the boss track is faster than the march",
+    D.music.boss.tempo > D.music.flight.tempo, D.music.boss.tempo + " vs " + D.music.flight.tempo);
+ok("the peril track is slower than the march",
+    D.music.peril.tempo < D.music.flight.tempo, D.music.peril.tempo + " vs " + D.music.flight.tempo);
+ok("the peril track has a tritone in it",
+    D.music.peril.bass.some((n) => n === 6), D.music.peril.bass.join(","));
 
 /* ===== Shoot-down weights ===== */
 section("shoot-down weights");

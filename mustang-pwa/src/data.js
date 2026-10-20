@@ -88,11 +88,31 @@
         ace: { label: "ACE", speed: 1.12, hp: 1.6, fire: 1.35, bullet: 1.15, density: 1.2 },
     };
 
-    /* ===== Music ===== */
+    /* ===== Music =====
+       Three tracks on the same eight-step grid.
+
+       flight: the march you hear over the water, a blues walk that keeps
+               moving without ever resolving.
+       peril:  slower, and with a tritone in the bass, so you know before
+               you look at the HUD that you are one life from the end.
+       boss:   faster and hammering, four times on the same note and then
+               a fifth, which is what a boss fight sounds like. */
     const music = {
-        tempo: 152,
-        bass: [0, 0, 3, 0, 5, 3, 7, 5],
-        lead: [12, 15, 19, 17, 15, 12, 10, 12],
+        flight: {
+            tempo: 152,
+            bass: [0, 0, 3, 0, 5, 3, 7, 5],
+            lead: [12, 15, 19, 17, 15, 12, 10, 12],
+        },
+        peril: {
+            tempo: 126,
+            bass: [0, 0, 6, 0, 1, 6, 8, 6],
+            lead: [12, 11, 12, 13, 12, 11, 10, 11],
+        },
+        boss: {
+            tempo: 178,
+            bass: [0, 0, 0, 0, 7, 7, 6, 6],
+            lead: [12, 13, 12, 19, 12, 13, 12, 18],
+        },
     };
 
     /* ===== Themes ===== */

@@ -203,7 +203,19 @@
         timer: null,
         step: 0,
         nextTime: 0,
-        track: MUSTANG.data.music,
+        track: MUSTANG.data.music.flight,
+        name: "flight",
+
+        /* Swaps the track without stopping the music: the march, the one
+           that means you are on your last life, and the boss. The step
+           goes back to the top so the change lands on the downbeat. */
+        set(name) {
+            const traccia = MUSTANG.data.music[name];
+            if (!traccia || traccia === this.track) return;
+            this.track = traccia;
+            this.name = name;
+            this.step = 0;
+        },
 
         start() {
             if (this.on || !Sound.ready || !Sound.ctx) return;

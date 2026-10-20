@@ -1088,6 +1088,7 @@
         state.boss = e;
         floater(W / 2, 120, "WARNING  BOSS", "#ff3b2f");
         Sound.bigExplode();
+        syncMusic();
     }
 
     function updateBoss(e, dt) {
@@ -1182,6 +1183,19 @@
         state.boss = null;
     }
 
+    /* The music knows how much trouble you are in: the march over the
+       water, the boss, or the one that plays when you are one life from
+       the end. The player hears the difference before they read the HUD. */
+    function musicMood() {
+        if (state.boss) return "boss";
+        if (state.lives <= 1) return "peril";
+        return "flight";
+    }
+
+    function syncMusic() {
+        Music.set(musicMood());
+    }
+
     function startStage(index) {
         const stages = currentStages();
         state.stageIndex = clamp(index, 0, stages.length - 1);
@@ -1218,6 +1232,7 @@
         p.fireCool = 0;
 
         clearEntities();
+        syncMusic();
         Sound.briefing();
     }
 
@@ -1352,6 +1367,7 @@
                 p.invuln = 2.6;
                 p.fireCool = 0;
                 state.phase = "playing";
+                syncMusic();
                 Music.start();
             }
             return;
@@ -1461,6 +1477,7 @@
             if (out) {
                 state.enemies.splice(i, 1);
                 releaseFormation(e);
+                if (e.kind === "boss") { state.boss = null; syncMusic(); }
             }
         }
     }

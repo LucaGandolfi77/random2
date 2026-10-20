@@ -1233,6 +1233,47 @@ ok("and the allied one is untouched", (() => {
     return S.checkpoint === 5;
 })(), "overlord checkpoint " + S.checkpoint);
 
+/* ===== Music variants ===== */
+console.log("\nmusic variants");
+ok("the music starts on the march", M.Music.name === "flight", M.Music.name);
+M.Music.set("boss");
+ok("the track can be swapped", M.Music.name === "boss" && M.Music.track === M.data.music.boss);
+M.Music.set("flight");
+ok("the track can be swapped back", M.Music.name === "flight" && M.Music.track === M.data.music.flight);
+M.Music.set("nonsense");
+ok("an unknown track is refused", M.Music.name === "flight", M.Music.name);
+
+// A boss brings the boss track with it.
+armPlayer();
+M.game.startStage(6);            // stage 26, the first boss stage
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.offset = S.totalLen;
+S.waveIndex = S.wavePlan.length;
+step(1);
+ok("the boss shows up", !!S.boss);
+ok("the boss brings its own music", M.Music.name === "boss", M.Music.name);
+
+// One life left: the march turns into the other one. A stage with no
+// boss on it, so the boss cannot come back while the player is down.
+M.Music.set("flight");
+M.game.startStage(0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.lives = 1;
+S.phase = "dead";
+S.player.deathTimer = 0.01;
+step(3);
+ok("the player comes back", S.phase === "playing", S.phase);
+ok("one life left plays the peril track", M.Music.name === "peril", M.Music.name);
+
+// Two lives is not peril.
+S.lives = 2;
+S.phase = "dead";
+S.player.deathTimer = 0.01;
+step(3);
+ok("two lives is still the march", M.Music.name === "flight", M.Music.name);
+
 /* ===== Winning the war ===== */
 console.log("\nvictory");
 
