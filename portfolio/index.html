@@ -206,8 +206,22 @@
             </div>
           </div>
 
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">No server, no accounts, no real census — and a margin of error that has to be <em>computed</em>, not asserted.</span><span class="it" lang="it">Nessun server, nessun account, nessun censimento reale — e un margine di errore da <em>calcolare</em>, non da dichiarare.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">Plain ES modules · Canvas 2D · the simulation is DOM-free, so the arithmetic is testable in Node</span><span class="it" lang="it">Moduli ES puri · Canvas 2D · la simulazione è senza DOM, così l'aritmetica è testabile in Node</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">Installable PWA · works offline · a 60-seed test that checks the coverage claim</span><span class="it" lang="it">PWA installabile · funziona offline · un test su 60 semi che verifica la copertura dichiarata</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> The interval is right, but the player cannot see why it is the width it is — the variance terms are computed and then hidden. I would show them, because a margin of error you cannot interrogate is a number you have to trust.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> L'intervallo è corretto, ma il giocatore non può vedere perché è largo quanto è — i termini di varianza vengono calcolati e poi nascosti. Li mostrerei, perché un margine di errore che non puoi interrogare è un numero che devi per forza credere.</span>
+          </p>
+
           <div class="case-meta">
-            <span class="chip">~1,900 lines</span>
+            <span class="chip" data-claim="census_lines"><b>2,762</b> lines</span>
             <span class="chip">Canvas 2D</span>
             <span class="chip">0 dependencies</span>
             <span class="chip">60-seed test</span>
@@ -220,7 +234,14 @@
             <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/census-pwa">
               <span class="en">Source</span><span class="it" lang="it">Codice</span>
             </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/census-pwa/sim.test.mjs#L358">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
           </div>
+          <p class="case-proof">
+            <span class="en">60-seed coverage test — <code>census-pwa/sim.test.mjs:358</code></span>
+            <span class="it" lang="it">Test di copertura su 60 semi — <code>census-pwa/sim.test.mjs:358</code></span>
+          </p>
         </div>
 
         <div class="case-media">
@@ -269,8 +290,22 @@
             </div>
           </div>
 
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">“Nothing leaves your browser” is a claim clients rarely believe, so the dashboard has to be checkable rather than reassuring.</span><span class="it" lang="it">«Nulla lascia il tuo browser» è un'affermazione che i clienti raramente credono, quindi la dashboard deve essere verificabile, non rassicurante.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">Canvas 2D · the shared chart library · zero dependencies · reads the arcade's own local storage</span><span class="it" lang="it">Canvas 2D · la libreria di grafici condivisa · zero dipendenze · legge il local storage dell'arcade</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">Installable PWA · works offline · a headless smoke test, and 26 save schemas it refuses to pretend are uniform</span><span class="it" lang="it">PWA installabile · funziona offline · uno smoke test headless e 26 schemi di salvataggio che non finge siano uniformi</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> The dashboard reads the arcade's storage but not the browser's: no time spent in another tab, no uninstalls, no abandonment between the run log and the session. It is honest about what it cannot measure, and it is still measuring a shadow of the real play history.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> La dashboard legge l'archiviazione dell'arcade ma non quella del browser: niente tempo passato in un'altra scheda, niente disinstallazioni, niente abbandono fra il registro delle partite e la sessione. È onesta su ciò che non riesce a misurare, e misura comunque un'ombra della storia reale.</span>
+          </p>
+
           <div class="case-meta">
-            <span class="chip">~1,350 lines</span>
+            <span class="chip" data-claim="stats_lines"><b>1,750</b> lines</span>
             <span class="chip">26 save schemas</span>
             <span class="chip">Shared chart lib</span>
           </div>
@@ -282,7 +317,14 @@
             <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/stats-pwa">
               <span class="en">Source</span><span class="it" lang="it">Codice</span>
             </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/stats-pwa/smoke.mjs#L126">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
           </div>
+          <p class="case-proof">
+            <span class="en">headless smoke test, and the 26 save schemas — <code>stats-pwa/smoke.mjs:126</code> · <code>stats-pwa/README.md:53</code></span>
+            <span class="it" lang="it">smoke test headless e i 26 schemi di salvataggio — <code>stats-pwa/smoke.mjs:126</code> · <code>stats-pwa/README.md:53</code></span>
+          </p>
         </div>
 
         <div class="case-media">
@@ -331,9 +373,23 @@
             </div>
           </div>
 
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">1,800 objects that are each interactive, destructible and replaceable, on a phone, for about thirty draw calls.</span><span class="it" lang="it">1.800 oggetti, ciascuno interattivo, distruttibile e sostituibile, su un telefono, per una trentina di chiamate di disegno.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">three.js · Vite · one merged geometry per object type behind a single instanced mesh</span><span class="it" lang="it">three.js · Vite · una geometria fusa per tipo di oggetto dietro un'unica instanced mesh</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">Built by CI · the one project in the arcade with a runtime dependency · three quality presets</span><span class="it" lang="it">Compilato dalla CI · l'unico progetto dell'arcade con una dipendenza runtime · tre preset di qualità</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> One instanced mesh per object type is fast, and it makes every object look the same. A second material per type would cost another draw call each and would buy back most of the town's character; I did not spend the frame budget on it.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> Una instanced mesh per tipo di oggetto è veloce, e rende tutti gli oggetti uguali. Un secondo materiale per tipo costerebbe un'altra chiamata di disegno ciascuno e restituirebbe quasi tutto il carattere della città; non ho speso il budget del frame su quello.</span>
+          </p>
+
           <div class="case-meta">
             <span class="chip">three.js + Vite</span>
-            <span class="chip">~6,900 lines</span>
+            <span class="chip" data-claim="bucio_lines"><b>8,741</b> lines</span>
             <span class="chip">3 quality presets</span>
           </div>
 
@@ -344,7 +400,14 @@
             <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/bucio">
               <span class="en">Source</span><span class="it" lang="it">Codice</span>
             </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/bucio/scripts/smoke-modes.mjs#L22">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
           </div>
+          <p class="case-proof">
+            <span class="en">one headless smoke script, not a suite — <code>bucio/scripts/smoke-modes.mjs:22</code>. It covers the world, the props, the knockout rules and a whole simulated match; what it cannot cover is the renderer, because asserting on WebGL means asserting on a GPU.</span>
+            <span class="it" lang="it">uno smoke script headless, non una suite — <code>bucio/scripts/smoke-modes.mjs:22</code>. Copre il mondo, gli oggetti, le regole di knockout e una partita completa simulata; quello che non può coprire è il renderer, perché asserire sul WebGL significa asserire su una GPU.</span>
+          </p>
         </div>
 
         <div class="case-media">
@@ -365,7 +428,7 @@
           <p class="case-num">04</p>
           <h3>SECTOR 7</h3>
           <p class="tagline">
-            <span class="en">Sixteen thousand lines of offline space combat, where the greediest thing on screen is the thing most likely to kill you.</span>
+            <span class="en">Twenty thousand lines of offline space combat, where the greediest thing on screen is the thing most likely to kill you.</span>
             <span class="it" lang="it">Sedicimila righe di combattimento spaziale offline, dove la cosa più avida a schermo è anche quella che ti uccide più spesso.</span>
           </p>
 
@@ -380,22 +443,36 @@
             <div class="step">
               <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
               <p>
-                <span class="en">A two-pool damage model that makes weapon choice a decision rather than an upgrade path. Shields absorb and refill out of combat; armour never returns. Every shot carries a shield-damage and an armour-damage component, and the armour component is held off entirely while any shield remains. The consequence is that the free laser is always a real answer and the heavy round is always a tool for one specific problem. Five hulls each change what the ship <em>is</em>, across 135 possible fit-outs.</span>
+                <span class="en">A two-pool damage model that makes weapon choice a decision rather than an upgrade path. Shields absorb and refill out of combat; armour never returns. Every shot carries a shield-damage and an armour-damage component, and the armour component is held off entirely while any shield remains. The consequence is that the free laser is always a real answer and the heavy round is always a tool for one specific problem. Eight hulls each change what the ship <em>is</em>, across 216 possible fit-outs.</span>
                 <span class="it" lang="it">Un modello di danno a due pozze che rende la scelta dell'arma una decisione e non un percorso di potenziamento. Gli scudi assorbono e si ricaricano fuori dal combattimento; la corazza non torna mai. ogni colpo porta una componente di danno agli scudi e una alla corazza, e la componente corazza è trattenuta del tutto finché resta uno scudo. Ne segue che il laser gratuito è sempre una risposta valida e il round pesante è sempre lo strumento per un problema specifico. Cinque scafi cambiano ciascuno che cos'è <em>la nave</em>, su 135 configurazioni possibili.</span>
               </p>
             </div>
             <div class="step result">
               <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
               <p>
-                <span class="en">Twenty source modules, installable, fully playable with the network off, and still no build step — plain ES modules the browser runs directly. Node test suites cover the simulation, the renderer, boot and content.</span>
+                <span class="en">Fifteen source modules, installable, fully playable with the network off, and still no build step — plain ES modules the browser runs directly. Node test suites cover the simulation, the renderer, boot and content.</span>
                 <span class="it" lang="it">Venti moduli sorgente, installabile, giocabile completamente offline e comunque senza build: moduli ES puri che il browser esegue direttamente. Le suite di test Node coprono simulazione, renderer, avvio e contenuti.</span>
               </p>
             </div>
           </div>
 
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">Greed has to be a decision instead of a multiplier, which means the energy you scoop up really sits in an unbanked hold until you dock.</span><span class="it" lang="it">L'avidità deve essere una decisione e non un moltiplicatore, quindi l'energia che raccogli resta davvero in una stiva non depositata finché non attracchi.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">Plain ES modules the browser runs directly · Canvas 2D · no build step, no bundler, no dependencies</span><span class="it" lang="it">Moduli ES puri eseguiti direttamente dal browser · Canvas 2D · nessuna build, nessun bundler, nessuna dipendenza</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">Installable PWA · fully playable offline · four Node test suites covering the simulation, the renderer, boot and content</span><span class="it" lang="it">PWA installabile · giocabile completamente offline · quattro suite di test Node su simulazione, renderer, avvio e contenuti</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> The two-pool damage model is correct and it is also fiddly: every weapon has to fill in both pools, and nothing in the code stops a weapon that is excellent against shields and useless against armour. The balance tables would be a better home for that than a hand-written constant is.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> Il modello di danno a due pozze è corretto e anche scrupoloso: ogni arma deve riempire entrambe le pozze, e niente nel codice impedisce un'arma eccellente contro gli scudi e inutile contro la corazza. Le tabelle di bilanciamento sarebbero una casa migliore per quello di una costante scritta a mano.</span>
+          </p>
+
           <div class="case-meta">
-            <span class="chip">~16,100 lines</span>
-            <span class="chip">20 modules</span>
+            <span class="chip" data-claim="sector7_lines"><b>19,926</b> lines</span>
+            <span class="chip" data-claim="sector7_modules"><b>15</b> modules</span>
             <span class="chip">135 fit-outs</span>
             <span class="chip">No build step</span>
           </div>
@@ -407,7 +484,14 @@
             <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/sector7-pwa">
               <span class="en">Source</span><span class="it" lang="it">Codice</span>
             </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/sector7-pwa/tests/sim.test.js#L1">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
           </div>
+          <p class="case-proof">
+            <span class="en">four Node test suites — <code>sector7-pwa/tests/sim.test.js:1</code> · <code>sector7-pwa/tests/render.test.js</code> · <code>sector7-pwa/tests/boot.test.js</code> · <code>sector7-pwa/tests/content.test.js</code></span>
+            <span class="it" lang="it">quattro suite di test Node — <code>sector7-pwa/tests/sim.testjs:1</code> · <code>sector7-pwa/tests/render.test.js</code> · <code>sector7-pwa/tests/boot.test.js</code> · <code>sector7-pwa/tests/content.test.js</code></span>
+          </p>
         </div>
 
         <div class="case-media">
@@ -450,14 +534,28 @@
             <div class="step result">
               <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
               <p>
-                <span class="en">About 15,700 lines with five Node test suites, one of which is a draw-call budget test. Nothing else in the pipeline would have noticed the frame getting more expensive until a phone did.</span>
+                <span class="en">About 16,100 lines with five Node test suites, one of which is a draw-call budget test. Nothing else in the pipeline would have noticed the frame getting more expensive until a phone did.</span>
                 <span class="it" lang="it">Circa 15.700 righe e cinque suite di test Node, una delle quali è un test sul budget delle chiamate di disegno. Nient'altro nella catena si sarebbe accorto che il frame stava diventando più costoso prima che lo notasse un telefono.</span>
               </p>
             </div>
           </div>
 
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">A multiplayer game is two systems pretending to be one. The renderer must never be able to touch the rules.</span><span class="it" lang="it">Un gioco multiplayer è due sistemi che fanno finta di essere uno. Il renderer non deve mai poter toccare le regole.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">Plain ES modules · Canvas 2D · the simulation never reads a clock, so a match is reproducible from a seed</span><span class="it" lang="it">Moduli ES puri · Canvas 2D · la simulazione non legge mai l'orologio, così una partita è riproducibile da un seme</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">Installable PWA · works offline · five Node test suites, one of them a draw-call budget</span><span class="it" lang="it">PWA installabile · funziona offline · cinque suite di test Node, una delle quali è un budget di chiamate di disegno</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> The renderer is Canvas 2D with one path per polygon, which the budget test polices well, but it means the frame cost grows with the visible area rather than with the number of things on it. A tiled background would flatten the worst of that, and I did not do it.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> Il renderer è Canvas 2D con un path per poligono, e il budget di chiamate lo sorveglia bene, ma significa che il costo del frame cresce con l'area visibile e non con il numero di cose su di essa. Uno sfondo a tile appiattirebbe il peggio, e non l'ho fatto.</span>
+          </p>
+
           <div class="case-meta">
-            <span class="chip">~15,700 lines</span>
+            <span class="chip" data-claim="ironfall_lines"><b>16,134</b> lines</span>
             <span class="chip">5 test suites</span>
             <span class="chip">Draw-call budget</span>
             <span class="chip">Seeded &amp; reproducible</span>
@@ -470,7 +568,14 @@
             <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/ironfall-pwa">
               <span class="en">Source</span><span class="it" lang="it">Codice</span>
             </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/ironfall-pwa/tests/render.test.js#L28">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
           </div>
+          <p class="case-proof">
+            <span class="en">the draw-call budget — <code>ironfall-pwa/tests/render.test.js:28</code>. It measures a whole scene and the marginal cost of one champion, because a per-unit regression hides completely inside a scene dominated by terrain.</span>
+            <span class="it" lang="it">il budget di chiamate di disegno — <code>ironfall-pwa/tests/render.test.js:28</code>. Misura una scena intera e il costo marginale di un campione, perché una regressione per unità sparisce del tutto dentro una scena dominata dal terreno.</span>
+          </p>
         </div>
 
         <div class="case-media">
@@ -519,8 +624,22 @@
             </div>
           </div>
 
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">No audio files, and the chart still has to agree with the sound — which means the notes have to come out of the melody.</span><span class="it" lang="it">Nessun file audio, e la nota deve comunque concordare con il suono — quindi le note devono uscire dalla melodia.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">WebAudio synthesis · Canvas 2D · the generator is DOM-free and deterministic</span><span class="it" lang="it">Sintesi WebAudio · Canvas 2D · il generatore è senza DOM e deterministico</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">Installable PWA · works offline · the generator is tested over 500 seeds</span><span class="it" lang="it">PWA installabile · funziona offline · il generatore è testato su 500 semi</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> One seed decides the key, the tempo, the progression, the drums and the melody, which makes every track reproducible — and it also means two seeds can land on the same progression by accident, because nothing checks that a generated melody is worth hearing before the player hears it.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> Un seme decide tonalità, tempo, progressione, batteria e melodia, il che rende ogni brano riproducibile — e significa anche che due semi possono cadere sulla stessa progressione per caso, perché nulla verifica che una melodia generata valga la pena di essere ascoltata prima che il giocatore la senta.</span>
+          </p>
+
           <div class="case-meta">
-            <span class="chip">~2,700 lines</span>
+            <span class="chip" data-claim="pulse_lines"><b>3,099</b> lines</span>
             <span class="chip">0 audio assets</span>
             <span class="chip">500 seeds tested</span>
             <span class="chip">Seeded tracks</span>
@@ -533,7 +652,14 @@
             <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/pulse-pwa">
               <span class="en">Source</span><span class="it" lang="it">Codice</span>
             </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/pulse-pwa/sim.test.mjs#L54">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
           </div>
+          <p class="case-proof">
+            <span class="en">500 seeds — <code>pulse-pwa/sim.test.mjs:54</code>. The generator is DOM-free, so a Node test can generate, fingerprint and compare thousands of tracks without a browser.</span>
+            <span class="it" lang="it">500 semi — <code>pulse-pwa/sim.test.mjs:54</code>. Il generatore è senza DOM, così un test Node può generare, fingerprintare e confrontare migliaia di brani senza browser.</span>
+          </p>
         </div>
 
         <div class="case-media">

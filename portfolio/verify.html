@@ -41,9 +41,9 @@
       <span class="it" lang="it">Questa pagina è generata da <code>tools/verify.mjs</code>. Ogni numero che il portfolio afferma ricalcolato sul repository e confrontato con il numero che la pagina mostra davvero. Se uno scivola, la CI diventa rossa. La colonna dei comandi è il comando che produce il numero: incollatelo in un terminale e ottieni la stessa risposta.</span>
     </p>
     <p class="ledger-summary">
-      <b>18</b>
-      <span class="en">claims · 18 pass · 0 fail</span>
-      <span class="it" lang="it">affermazioni · 18 ok · 0 ko</span>
+      <b>25</b>
+      <span class="en">claims · 25 pass · 0 fail</span>
+      <span class="it" lang="it">affermazioni · 25 ok · 0 ko</span>
     </p>
     <p class="ledger-back">
       <a href="./">&larr; <span class="en">Back to the portfolio</span><span class="it" lang="it">Torna al portfolio</span></a>
@@ -128,7 +128,7 @@
             <span class="it" lang="it">la quarta cifra</span>
           </td>
           <td class="how">
-            <pre><code>grep -rniE 'googletagmanager|google-analytics|gtag\(|adsense|doubleclick|hotjar|plausible\.io|matomo|mixpanel|segment\.io|amplitude\.com|clarity\.ms|connect\.facebook\.net|adservice' --include='*.html' --include='*.css' --include='*.js' --include='*.mjs' --include='*.ts' . | grep -v node_modules | grep -v '/dist/' | grep -v 'tools/verify.mjs' | wc -l</code></pre>
+            <pre><code>grep -rniE 'googletagmanager|google-analytics|gtag\(|adsense|doubleclick|hotjar|plausible\.io|matomo|mixpanel|segment\.io|amplitude\.com|clarity\.ms|connect\.facebook\.net|adservice' --include='*.html' --include='*.css' --include='*.js' --include='*.mjs' --include='*.ts' . | grep -v node_modules | grep -v '/dist/' | grep -v 'tools/verify.mjs' | grep -v 'portfolio/verify.html' | wc -l</code></pre>
             <button class="copy" type="button" hidden data-copy>Copy</button>
           </td>
         </tr>
@@ -292,6 +292,118 @@
             <button class="copy" type="button" hidden data-copy>Copy</button>
           </td>
         </tr>
+        <tr class="ok" id="census_lines">
+          <th scope="row">
+            <span class="en">CENSUS — lines of source</span>
+            <span class="it" lang="it">CENSUS — righe di codice</span>
+          </th>
+          <td class="value">2,762</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 01, the line-count chip</span>
+            <span class="it" lang="it">case 01, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files census-pwa | grep -E '\.(js|mjs|html|css)$' | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="stats_lines">
+          <th scope="row">
+            <span class="en">STATS — lines of source</span>
+            <span class="it" lang="it">STATS — righe di codice</span>
+          </th>
+          <td class="value">1,750</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 02, the line-count chip</span>
+            <span class="it" lang="it">case 02, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files stats-pwa | grep -E '\.(js|mjs|html|css)$' | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="bucio_lines">
+          <th scope="row">
+            <span class="en">BUCIO — lines of source</span>
+            <span class="it" lang="it">BUCIO — righe di codice</span>
+          </th>
+          <td class="value">8,741</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 03, the line-count chip</span>
+            <span class="it" lang="it">case 03, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files bucio | grep -E '\.(js|mjs|html|css)$' | grep -v node_modules | grep -v '/dist/' | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="sector7_lines">
+          <th scope="row">
+            <span class="en">SECTOR 7 — lines of source</span>
+            <span class="it" lang="it">SECTOR 7 — righe di codice</span>
+          </th>
+          <td class="value">19,926</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 04, the line-count chip</span>
+            <span class="it" lang="it">case 04, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files sector7-pwa | grep -E '\.(js|mjs|html|css)$' | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="sector7_modules">
+          <th scope="row">
+            <span class="en">SECTOR 7 — source modules</span>
+            <span class="it" lang="it">SECTOR 7 — moduli sorgente</span>
+          </th>
+          <td class="value">15</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 04, the module chip</span>
+            <span class="it" lang="it">case 04, il chip dei moduli</span>
+          </td>
+          <td class="how">
+            <pre><code>ls sector7-pwa/src/*.js | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="ironfall_lines">
+          <th scope="row">
+            <span class="en">IRONFALL — lines of source</span>
+            <span class="it" lang="it">IRONFALL — righe di codice</span>
+          </th>
+          <td class="value">16,134</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 05, the line-count chip</span>
+            <span class="it" lang="it">case 05, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files ironfall-pwa | grep -E '\.(js|mjs|html|css)$' | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="pulse_lines">
+          <th scope="row">
+            <span class="en">PULSE — lines of source</span>
+            <span class="it" lang="it">PULSE — righe di codice</span>
+          </th>
+          <td class="value">3,099</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 06, the line-count chip</span>
+            <span class="it" lang="it">case 06, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files pulse-pwa | grep -E '\.(js|mjs|html|css)$' | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
         <tr class="ok" id="cloud_links">
           <th scope="row">
             <span class="en">Projects linked from the catalogue</span>
@@ -340,7 +452,7 @@
             <span class="en">Lines of source</span>
             <span class="it" lang="it">Righe di codice</span>
           </th>
-          <td class="value">132497</td>
+          <td class="value">134163</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the ledger</span>
@@ -356,7 +468,7 @@
             <span class="en">Lines of JavaScript</span>
             <span class="it" lang="it">Righe di JavaScript</span>
           </th>
-          <td class="value">103365</td>
+          <td class="value">104292</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the ledger</span>

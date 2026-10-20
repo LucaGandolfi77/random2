@@ -1,5 +1,5 @@
 /* ===== MYCEL service worker ===== */
-const CACHE_NAME = "mycel-pwa-v1";
+const CACHE_NAME = "mycel-pwa-v2";
 const ASSETS = [
     "./", "./index.html", "./styles.css", "./game.js",
     "../shared/arcade.js", "./manifest.json",
@@ -7,7 +7,10 @@ const ASSETS = [
 ];
 self.addEventListener("install", (e) => {
     self.skipWaiting();
-    e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
+    // per-asset catch: un 404 non deve uccidere l'intera installazione
+    e.waitUntil(caches.open(CACHE_NAME).then((c) =>
+        Promise.all(ASSETS.map((u) => c.add(new Request(u, { cache: "reload" }))
+            .catch((x) => console.warn("skip:", u, x))))));
 });
 self.addEventListener("activate", (e) => {
     self.clients.claim();

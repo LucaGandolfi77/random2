@@ -226,7 +226,7 @@ echo \"$((total-deps))/$total\"",
     expect: "0",
     how: "grep -rniE 'googletagmanager|google-analytics|gtag\\(|adsense|doubleclick|hotjar|plausible\\.io|matomo|mixpanel|segment\\.io|amplitude\\.com|clarity\\.ms|connect\\.facebook\\.net|adservice' \
 --include='*.html' --include='*.css' --include='*.js' --include='*.mjs' --include='*.ts' . \
-| grep -v node_modules | grep -v '/dist/' | grep -v 'tools/verify.mjs' | wc -l",
+| grep -v node_modules | grep -v '/dist/' | grep -v 'tools/verify.mjs' | grep -v 'portfolio/verify.html' | wc -l",
     compute: () => scanLines(TRACKER).length,
   },
   {
@@ -363,6 +363,76 @@ if [ -f \"$d/service-worker.js\" ] || [ -f \"$d/sw.js\" ] || [ -f \"$d/public/se
     compute: () => (pageHtml().match(/<article class="case/g) || []).length,
   },
   {
+    id: "census_lines",
+    label: "CENSUS — lines of source",
+    labelIt: "CENSUS — righe di codice",
+    where: "case 01, the line-count chip",
+    whereIt: "case 01, il chip delle righe",
+    expect: "2,762",
+    how: "git ls-files census-pwa | grep -E '\\.(js|mjs|html|css)$' | xargs cat | wc -l",
+    compute: () => grouped(sourceLines("census-pwa")),
+  },
+  {
+    id: "stats_lines",
+    label: "STATS — lines of source",
+    labelIt: "STATS — righe di codice",
+    where: "case 02, the line-count chip",
+    whereIt: "case 02, il chip delle righe",
+    expect: "1,750",
+    how: "git ls-files stats-pwa | grep -E '\\.(js|mjs|html|css)$' | xargs cat | wc -l",
+    compute: () => grouped(sourceLines("stats-pwa")),
+  },
+  {
+    id: "bucio_lines",
+    label: "BUCIO — lines of source",
+    labelIt: "BUCIO — righe di codice",
+    where: "case 03, the line-count chip",
+    whereIt: "case 03, il chip delle righe",
+    expect: "8,741",
+    how: "git ls-files bucio | grep -E '\\.(js|mjs|html|css)$' | grep -v node_modules | grep -v '/dist/' | xargs cat | wc -l",
+    compute: () => grouped(sourceLines("bucio")),
+  },
+  {
+    id: "sector7_lines",
+    label: "SECTOR 7 — lines of source",
+    labelIt: "SECTOR 7 — righe di codice",
+    where: "case 04, the line-count chip",
+    whereIt: "case 04, il chip delle righe",
+    expect: "19,926",
+    how: "git ls-files sector7-pwa | grep -E '\\.(js|mjs|html|css)$' | xargs cat | wc -l",
+    compute: () => grouped(sourceLines("sector7-pwa")),
+  },
+  {
+    id: "sector7_modules",
+    label: "SECTOR 7 — source modules",
+    labelIt: "SECTOR 7 — moduli sorgente",
+    where: "case 04, the module chip",
+    whereIt: "case 04, il chip dei moduli",
+    expect: "15",
+    how: "ls sector7-pwa/src/*.js | wc -l",
+    compute: () => files().filter((f) => /^sector7-pwa\/src\/[^/]+\.js$/.test(f)).length,
+  },
+  {
+    id: "ironfall_lines",
+    label: "IRONFALL — lines of source",
+    labelIt: "IRONFALL — righe di codice",
+    where: "case 05, the line-count chip",
+    whereIt: "case 05, il chip delle righe",
+    expect: "16,134",
+    how: "git ls-files ironfall-pwa | grep -E '\\.(js|mjs|html|css)$' | xargs cat | wc -l",
+    compute: () => grouped(sourceLines("ironfall-pwa")),
+  },
+  {
+    id: "pulse_lines",
+    label: "PULSE — lines of source",
+    labelIt: "PULSE — righe di codice",
+    where: "case 06, the line-count chip",
+    whereIt: "case 06, il chip delle righe",
+    expect: "3,099",
+    how: "git ls-files pulse-pwa | grep -E '\\.(js|mjs|html|css)$' | xargs cat | wc -l",
+    compute: () => grouped(sourceLines("pulse-pwa")),
+  },
+  {
     id: "cloud_links",
     label: "Projects linked from the catalogue",
     labelIt: "Progetti linkati dal catalogo",
@@ -402,8 +472,9 @@ const STALE = [
 ];
 
 /* The ledger scans the repository for trackers and for remote loads. It
-   cannot scan itself: its own pattern strings would match. */
-const SELF = "tools/verify.mjs";
+   cannot scan itself, and it cannot scan the page it generates: both quote
+   the very patterns they are looking for. */
+const PATTERN_FILES = new Set(["tools/verify.mjs", "portfolio/verify.html"]);
 
 /* Lines that actually fetch something from another origin. A link a reader
    can click is not a load; a canonical URL is metadata. */
@@ -426,12 +497,27 @@ const TRACKER = [
   "clarity.ms", "connect.facebook.net", "adservice",
 ];
 
+/* The lines of source in one project: every tracked .js, .mjs, .html and
+   .css file in the folder. The case-study chips quote this number. */
+function sourceLines(dir) {
+  let n = 0;
+  for (const f of files()) {
+    if (!f.startsWith(`${dir}/`)) continue;
+    if (!/\.(js|mjs|html|css)$/i.test(f)) continue;
+    n += read(f).split("\n").length - 1;
+  }
+  return n;
+}
+
+/* Thousands separators, the way the chips write them. */
+const grouped = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
 /* Scan the repository line by line, the way grep does, so the number the
    ledger reports and the number the command prints are the same number. */
 function scanLines(patterns) {
   const hits = [];
   for (const f of files()) {
-    if (f === SELF) continue;
+    if (PATTERN_FILES.has(f)) continue;
     if (!/\.(html|css|js|mjs|ts)$/i.test(f)) continue;
     const lines = read(f).split("\n");
     for (let i = 0; i < lines.length; i++) {
@@ -507,11 +593,13 @@ function auditHow() {
     const mine = String(claim.compute());
     const theirs = error ? null : shellValue;
     /* Some commands print a list rather than a count; a count is what the
-       ledger compares, so the last numeric token is the answer. */
-    const numeric = theirs !== null && theirs.split(/\s+/).filter(Boolean).pop();
+       ledger compares, so the last numeric token is the answer. Thousands
+       separators are a formatting choice, not a different number. */
+    const norm = (s) => String(s).replace(/[, ]/g, "");
+    const numeric = theirs !== null && norm(theirs.split(/\s+/).filter(Boolean).pop());
     out.push({
       id: claim.id,
-      ok: error === null && numeric === mine,
+      ok: error === null && numeric === norm(mine),
       shell: theirs,
       computed: mine,
       error,
