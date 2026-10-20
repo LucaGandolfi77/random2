@@ -1901,23 +1901,69 @@
         ctx.textAlign = "left";
     }
 
+    /* The sector card: where this is, when it is, and what the sortie is
+       for. A stage is four stages inside a named sector, so the card is
+       looked up by the sector the stage belongs to. */
+    function sectorCard() {
+        const carte = D.sectorCards[state.theatre];
+        if (!carte || !state.stage) return null;
+        return carte[state.stage.name] || null;
+    }
+
+    /* Wraps a line of prose into the width the card has. The card is
+       measured before it is drawn, so the panel is exactly as tall as the
+       text in it. */
+    function wrapWords(line, max) {
+        const parole = line.split(" ");
+        const righe = [];
+        let riga = "";
+        for (const parola of parole) {
+            if ((riga + " " + parola).length > max) {
+                righe.push(riga);
+                riga = parola;
+            } else {
+                riga = riga ? riga + " " + parola : parola;
+            }
+        }
+        if (riga) righe.push(riga);
+        return righe;
+    }
+
     function drawBriefing(ctx, th) {
         const t = D.theatres[state.theatre];
+        const card = sectorCard();
+        const righe = card ? wrapWords(card.line, 40) : [];
+        const alto = card ? 92 : 64;
+        /* the panel is as tall as the card needs, and no taller */
+        const basso = card ? 90 + (righe.length - 1) * 15 : 64;
         ctx.fillStyle = "rgba(0,0,0,0.65)";
-        ctx.fillRect(0, H / 2 - 64, W, 128);
+        ctx.fillRect(0, H / 2 - alto, W, alto + basso);
         ctx.textAlign = "center";
         ctx.fillStyle = th.accent;
         ctx.font = "bold 14px Arial, sans-serif";
-        ctx.fillText(t.name, W / 2, H / 2 - 28);
+        ctx.fillText(t.name, W / 2, H / 2 - alto + 24);
         ctx.fillStyle = th.text;
         ctx.font = "bold 26px Arial, sans-serif";
-        ctx.fillText("STAGE " + state.stage.n, W / 2, H / 2 + 2);
+        ctx.fillText("STAGE " + state.stage.n, W / 2, H / 2 - 4);
         ctx.font = "bold 17px Arial, sans-serif";
         ctx.fillStyle = th.plane;
-        ctx.fillText(state.stage.name, W / 2, H / 2 + 26);
+        ctx.fillText(state.stage.name, W / 2, H / 2 + 20);
         ctx.font = "11px Arial, sans-serif";
         ctx.fillStyle = "rgba(240,240,240,0.7)";
-        ctx.fillText(t.plane + "   " + t.year, W / 2, H / 2 + 46);
+        ctx.fillText(t.plane + "   " + t.year, W / 2, H / 2 + 38);
+
+        if (!card) return;
+        /* the place and the date, then the one line that says what this is */
+        ctx.font = "bold 13px Arial, sans-serif";
+        ctx.fillStyle = th.accent;
+        ctx.fillText(card.place.toUpperCase() + "   " + card.date, W / 2, H / 2 + 58);
+        ctx.font = "italic 12px Arial, sans-serif";
+        ctx.fillStyle = "rgba(240,240,240,0.78)";
+        let y = H / 2 + 78;
+        for (const riga of righe) {
+            ctx.fillText(riga, W / 2, y);
+            y += 15;
+        }
     }
 
     function drawLanding(ctx, th) {

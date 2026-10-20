@@ -275,6 +275,34 @@
 
     /* The arcade gave an extra life at every score threshold, and the
        word EXTEND went up the screen. Highest first, like the ranks. */
+    /* ===== The sector cards =====
+       Every stage belongs to a named sector, four stages each. The card is
+       what the briefing screen shows: where this is, when it is, and the
+       one line that says what the sortie is for. A run of thirty-two
+       stages stops being a list and starts being a campaign. */
+    const sectorCards = {
+        overlord: {
+            CHANNEL: { place: "The English Channel", date: "February 1944", line: "The convoy route is mined and the escort is thin. Something has to go in first." },
+            "NORTH SEA": { place: "Off the Dutch coast", date: "March 1944", line: "The coast batteries have the range of the whole lane. Find a way in." },
+            NORMANDY: { place: "Normandy", date: "6 June 1944", line: "The invasion fleet is offshore, the beach is defended, and the weather is against it." },
+            BERLIN: { place: "Berlin", date: "Autumn 1944", line: "The last defence of the city. Flak, and a garrison that does not surrender." },
+            ARDENNES: { place: "The Ardennes", date: "December 1944", line: "The worst of the winter, and not enough fuel to get home." },
+            RHINE: { place: "The Rhine", date: "March 1945", line: "The bridges are gone. You will have to find the crossing yourself." },
+            ALPS: { place: "The Alps", date: "Spring 1945", line: "Aircraft that cannot climb. You will not get above them." },
+            VIENNA: { place: "Vienna", date: "April 1945", line: "One more front, and then it is over." },
+        },
+        rising: {
+            MIDWAY: { place: "Midway Atoll", date: "June 1942", line: "Four carriers, a few hours of light, and everything that floats in the water." },
+            MARSHALL: { place: "The Marshall Islands", date: "November 1943", line: "Atolls and reefs. The lagoon is shallow and the coral does not care." },
+            ATTU: { place: "Attu Island", date: "June 1943", line: "The weather is foul, the island is solid, and the garrison knows the ground." },
+            RABAUL: { place: "Rabaul", date: "January 1944", line: "A harbour full of shipping, defended by everything the Empire has left." },
+            LEYTE: { place: "Leyte Gulf", date: "October 1944", line: "The biggest battle of the war so far, and the first time the fleet is the target." },
+            SAIPAN: { place: "Saipan", date: "June 1944", line: "Five hundred miles from Japan, and the bombers need somewhere to start from." },
+            "IWO JIMA": { place: "Iwo Jima", date: "February 1945", line: "One island, three hundred miles of Japan, and the cost of a way in." },
+            OKINAWA: { place: "Okinawa", date: "April 1945", line: "The last island before the home islands. It is not over." },
+        },
+    };
+
     const extendTable = [
         { min: 150000, label: "EXTEND" },
         { min: 60000, label: "EXTEND" },
@@ -448,6 +476,7 @@
         bonusFor: bonusFor,
         pilotRanks: pilotRanks,
         extendTable: extendTable,
+        sectorCards: sectorCards,
         rankFor: rankFor,
         powPlan: powPlan,
         bossStages: bossStages,

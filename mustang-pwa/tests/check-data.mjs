@@ -246,6 +246,20 @@ const rankProbes = [[0, "ROOKIE"], [19999, "ROOKIE"], [20000, "FIGHTER"], [59999
 for (const [score, rank] of rankProbes) ok("rankFor(" + score + ") = " + rank, D.rankFor(score) === rank, D.rankFor(score));
 ok("reaching stage 1 still outranks a rookie", D.rankFor(1000000) === "TRIPLE ACE");
 
+/* ===== Sector cards ===== */
+section("sector cards");
+for (const theatre of ["overlord", "rising"]) {
+    const carte = D.sectorCards[theatre];
+    ok(theatre + " has eight cards", Object.keys(carte).length === 8, String(Object.keys(carte).length));
+    const settori = [...new Set(D.allStages[theatre].map((s) => s.name))];
+    ok(theatre + " has a card for every sector", settori.every((n) => !!carte[n]),
+        settori.filter((n) => !carte[n]).join(","));
+    ok(theatre + " cards all have a place, a date and a line",
+        Object.values(carte).every((c) => c.place && c.date && c.line && c.line.length > 20));
+    ok(theatre + " card lines are short enough to read on a phone",
+        Object.values(carte).every((c) => c.line.length < 130));
+}
+
 /* ===== Extends ===== */
 section("extends");
 ok("three thresholds", D.extendTable.length === 3, String(D.extendTable.length));
