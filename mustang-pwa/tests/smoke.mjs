@@ -90,6 +90,7 @@ const ids = [
     "overlay-play", "continue-btn", "continue-stage", "overlay-theme", "final-score", "final-high", "final-lives", "final-rank",
     "theatre-choices", "install-prompt", "install-btn", "install-later",
     "theatre-overlord", "theatre-rising",
+    "hitbox-row", "hitbox-choices", "hitbox-on", "hitbox-off",
     "sector-row", "sector-choices",
     "sector-0", "sector-1", "sector-2", "sector-3",
     "sector-4", "sector-5", "sector-6", "sector-7",
@@ -98,6 +99,9 @@ for (const id of ids) els[id] = makeEl(id);
 els["theatre-overlord"].dataset.theatre = "overlord";
 els["theatre-rising"].dataset.theatre = "rising";
 els["theatre-choices"].querySelectorAll = () => [els["theatre-overlord"], els["theatre-rising"]];
+els["hitbox-choices"].querySelectorAll = () => [els["hitbox-on"], els["hitbox-off"]];
+els["hitbox-on"].dataset.hitbox = "on";
+els["hitbox-off"].dataset.hitbox = "off";
 els["game-canvas"].parentElement = makeEl("main");
 
 /* ===== Globals ===== */
@@ -1272,6 +1276,47 @@ ok("the sectors change with the front", els["sector-0"].textContent === "MIDWAY"
 ok("the other front starts with nothing open", els["sector-0"].disabled === true);
 M.game.setTheatre("overlord");
 ok("and the first front still has its sector open", els["sector-0"].disabled === false);
+
+/* ===== Hitbox ===== */
+console.log("\nhitbox");
+ok("the hitbox is on by default", S.hitbox === true);
+ok("the player really is five and a half pixels across", CFG.playerRadius === 5.5, String(CFG.playerRadius));
+
+// The dot is drawn on the aircraft, and it is drawn where the aircraft is.
+// Only the circles the size of the hitbox count: the terrain and the
+// sprites draw arcs of their own.
+const realArc = ctx2d.arc;
+let hitArcs = [];
+function watchArcs() {
+    hitArcs = [];
+    ctx2d.arc = function (x, y, r) {
+        if (Math.abs(r - CFG.playerRadius) < 0.2) hitArcs.push({ x: x, y: y, r: r });
+        return realArc.apply(this, arguments);
+    };
+}
+function stopWatching() { ctx2d.arc = realArc; }
+
+armPlayer();
+S.player.x = 200;
+S.player.y = 300;
+watchArcs();
+step(4);            // the aircraft blinks while it is invulnerable
+stopWatching();
+ok("the hitbox is drawn", hitArcs.length > 0, String(hitArcs.length));
+ok("the hitbox is drawn on the aircraft",
+    hitArcs.some((a) => Math.abs(a.x - 200) < 1 && Math.abs(a.y - 300) < 1),
+    JSON.stringify(hitArcs[0] || null));
+
+// It can be turned off.
+els["hitbox-off"]._h.click[0]();
+ok("the hitbox can be turned off", S.hitbox === false);
+watchArcs();
+step(4);
+stopWatching();
+ok("and then it is not drawn", hitArcs.length === 0, String(hitArcs.length));
+
+els["hitbox-on"]._h.click[0]();
+ok("and it can be turned back on", S.hitbox === true);
 
 /* ===== Attract mode ===== */
 console.log("\nattract mode");

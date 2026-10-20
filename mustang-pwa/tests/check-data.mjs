@@ -273,6 +273,11 @@ for (const theatre of ["overlord", "rising"]) {
         Object.values(carte).every((c) => c.line.length < 130));
 }
 
+/* ===== Hitbox ===== */
+section("hitbox");
+ok("the hitbox is a dot, not the aircraft", D.config.playerRadius < 8, String(D.config.playerRadius));
+ok("the hitbox is on by default", D.config.hitbox === true);
+
 /* ===== Sectors ===== */
 section("sectors");
 for (const theatre of ["overlord", "rising"]) {

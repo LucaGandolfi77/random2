@@ -33,6 +33,10 @@
         shotSpeed: 520,
         shotGap: 0.085,
         playerRadius: 5.5,
+        /* Show the true collision circle of the aircraft. It is five and a
+           half pixels across and the aircraft is thirty: the dot is where
+           you actually die. */
+        hitbox: true,
         playerTopMargin: 76,
         playerBottomMargin: 22,
 

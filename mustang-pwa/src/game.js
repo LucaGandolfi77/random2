@@ -28,6 +28,7 @@
         phaseTimer: 0,
         attract: false,
         menuIdle: 0,
+        hitbox: config.hitbox,
         theatre: "overlord",
         difficulty: "arcade",
         checkpoint: 0,
@@ -116,6 +117,8 @@
         DOME.finalLives = document.getElementById("final-lives");
         DOME.finalRank = document.getElementById("final-rank");
         DOME.theatreChoices = document.getElementById("theatre-choices");
+        DOME.hitboxChoices = document.getElementById("hitbox-choices");
+        DOME.hitboxRow = document.getElementById("hitbox-row");
         DOME.sectorRow = document.getElementById("sector-row");
         DOME.sectorChoices = document.getElementById("sector-choices");
         DOME.sectorBtns = [];
@@ -1469,6 +1472,7 @@
         markSectorButtons();
         if (DOME.theatreChoices) DOME.theatreChoices.classList.add("hidden");
         if (DOME.difficultyRow) DOME.difficultyRow.classList.add("hidden");
+        if (DOME.hitboxRow) DOME.hitboxRow.classList.add("hidden");
         if (DOME.continueBtn) {
             const resume = clamp(state.checkpoint, 0, currentStages().length - 1);
             DOME.continueStage.textContent = currentStages()[resume].n;
@@ -1811,6 +1815,11 @@
             b.addEventListener("click", () => { Sound.unlock(); startSector(i); });
         }
         DOME.overlayTheme.addEventListener("click", cycleTheme);
+        if (DOME.hitboxChoices) {
+            for (const b of DOME.hitboxChoices.querySelectorAll(".chip")) {
+                b.addEventListener("click", () => { Sound.unlock(); setHitbox(b.dataset.hitbox === "on"); });
+            }
+        }
 
         if (DOME.difficultyChoices) {
             for (const btn of DOME.difficultyChoices.querySelectorAll(".chip")) {
@@ -1859,6 +1868,19 @@
         for (const b of DOME.difficultyChoices.querySelectorAll(".chip")) {
             b.classList.toggle("active", b.dataset.difficulty === state.difficulty);
         }
+    }
+
+    function markHitboxButtons() {
+        if (!DOME.hitboxChoices) return;
+        for (const b of DOME.hitboxChoices.querySelectorAll(".chip")) {
+            b.classList.toggle("active", (b.dataset.hitbox === "on") === !!state.hitbox);
+        }
+    }
+
+    function setHitbox(on) {
+        state.hitbox = !!on;
+        markHitboxButtons();
+        save();
     }
 
     function markTheatreButtons() {
@@ -2037,6 +2059,26 @@
         }
         Art.warbird(ctx, theatre.planeArt, p.x, p.y, p.looping ? p.roll : p.tilt, 1,
             { body: th.plane, wing: th.planeGrad, trim: "#ffffff" }, state.stageTime, 1);
+
+        /* The hitbox: the circle that actually kills you, five and a half
+           pixels across, drawn on top of an aircraft thirty pixels wide.
+           Every modern shooter shows it, because the aircraft is not the
+           thing that gets hit. */
+        if (state.hitbox) {
+            ctx.save();
+            ctx.globalAlpha = 0.95;
+            ctx.fillStyle = "#ff3b2f";
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 0.55;
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
     }
 
     function drawHud(ctx, th) {
@@ -2301,6 +2343,7 @@
             markTheatreButtons();
         }
         markDifficultyButtons();
+        markHitboxButtons();
         if (DOME.difficultyRow) DOME.difficultyRow.classList.remove("hidden");
     }
 
@@ -2338,6 +2381,7 @@
                 overlord: (state.cleared.overlord || []).slice(),
                 rising: (state.cleared.rising || []).slice(),
             },
+            hitbox: state.hitbox,
             sound: state.sound,
         });
     }
@@ -2360,6 +2404,7 @@
                     state.cleared[id] = list.filter((n) => Number.isInteger(n) && n >= 0 && n < 8);
                 }
             }
+            state.hitbox = saved.hitbox !== false;
             state.sound = saved.sound !== false;
         }
         state.highScore = state.highScores[state.theatre] || 0;
@@ -2367,6 +2412,7 @@
         Sound.setEnabled(state.sound);
         DOME.soundBtn.textContent = state.sound ? "\u{1F50A} Sound" : "\u{1F507} Muted";
         markDifficultyButtons();
+        markHitboxButtons();
         if (store.get("mustang-install-dismissed", false)) DOME.installPrompt.classList.add("hidden");
         if (store.get("mustang-hint-seen", false) && DOME.controlsHint) DOME.controlsHint.classList.add("hidden");
     }
