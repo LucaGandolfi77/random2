@@ -9,22 +9,50 @@
 > **Everything below was verified against the repository**, not assumed. The
 > "ground truth" column was produced by running the checks, and the commands
 > are the ones used to produce it.
+>
+> ---
+>
+> ## Status: implemented
+>
+> Every phase is done. The ledger checks 30 claims; the self-audit checks
+> 52 pages and publishes its failures; the CV prints to one A4 sheet; the
+> case studies are nine.
+>
+> Three things changed from the plan, and each one is recorded where it
+> happened:
+>
+> - **0.5 was not applied.** Phase 0.8 was implemented instead — nine
+>   service workers were added and three registrations were fixed — so the
+>   original sentence is true and the copy did not need reworking.
+> - **The ground truth in Phase 0 was wrong in four places**, and the checks
+>   found the real numbers: it is 42 in-tree service workers and not 32
+>   (`tiny-tower-pwa` keeps its worker in `sw.js`), the ten projects without
+>   one are a different ten, the shared engine is used by 36 projects and
+>   not "40+", and SECTOR 7 has eight hulls and 216 fit-outs rather than
+>   five and 135.
+> - **Phase 5 found a bug that was not on the list.** The shared scene
+>   reader was throwing on load, and nine literary pages had been rendering
+>   an empty reader since the day it was written.
+>
+> The audit's remaining findings — 127 contrast, 193 tap targets, 25 canvas
+> games with no live region — are published, not fixed. They are the next
+> piece of work.
 
 ---
 
 ## How to use this file
 
-- [ ] **Status legend.** `⬜` = not started · `🟡` = in progress · `✅` = done
+- [x] ✅ **Status legend.** `⬜` = not started · `🟡` = in progress · `✅` = done
       · `⚠️` = blocked or deliberately skipped (say which, and why).
-- [ ] **One phase per commit.** Every phase is independently revertible. The
+- [x] ✅ **One phase per commit.** Every phase is independently revertible. The
       CSS extraction (1.1) in particular must land in its own commit.
-- [ ] **Never hand-edit a generated file.** `portfolio/verify.html` and
+- [x] ✅ **Never hand-edit a generated file.** `portfolio/verify.html` and
       `portfolio/audit/report.html` are outputs. Edit the generator, re-run it.
-- [ ] **A claim is only true if the ledger says so.** Do not type a number
+- [x] ✅ **A claim is only true if the ledger says so.** Do not type a number
       onto the page without adding it to `tools/verify.mjs` in the same
       change. If a number appears on the page and is not in the ledger, that
       is a bug.
-- [ ] **Bilingual by default.** Every new string ships in EN and IT as
+- [x] ✅ **Bilingual by default.** Every new string ships in EN and IT as
       sibling `.en` / `.it` elements, in the same markup, not behind a JS
       toggle. See Appendix C for the CSS rules and the trap.
 
@@ -40,11 +68,11 @@ counter-example.
 
 ## 0.1 — Project count `48` → `44`
 
-- [ ] ⬜ `portfolio/index.html:717`
-- [ ] **Ground truth:** 44 project folders contain an `index.html` (45
+- [x] ✅ `portfolio/index.html:717`
+- [x] ✅ **Ground truth:** 44 project folders contain an `index.html` (45
       counting `portfolio/`). The hub grid lists 30; the root `README.md`
       table lists 33. Nothing in the repository enumerates 48.
-- [ ] **Do:** replace the tile, and add `data-claim` (Phase 1.5).
+- [x] ✅ **Do:** replace the tile, and add `data-claim` (Phase 1.5).
 
 ```html
 <!-- BEFORE -->
@@ -62,11 +90,11 @@ counter-example.
 
 ## 0.2 — Runtime dependencies `0` → `42/44`
 
-- [ ] ⬜ `portfolio/index.html:721-724`
-- [ ] **Ground truth:** 42 of 44. `bucio/package.json` → `three: ^0.186.1`;
+- [x] ✅ `portfolio/index.html:721-724`
+- [x] ✅ **Ground truth:** 42 of 44. `bucio/package.json` → `three: ^0.186.1`;
       `snap-pwa/vendor/` vendors MediaPipe. `new-star-soccer` has *zero*
       runtime dependencies (Vite + TypeScript are devDependencies only).
-- [ ] **Do:** replace the tile, add the footnote, add the `.of` CSS rule.
+- [x] ✅ **Do:** replace the tile, add the footnote, add the `.of` CSS rule.
 
 ```html
 <!-- BEFORE -->
@@ -82,7 +110,7 @@ counter-example.
         </div>
 ```
 
-- [ ] ⬜ Add the footnote directly after `</div>` closing `.stats` (line 733).
+- [x] ✅ Add the footnote directly after `</div>` closing `.stats` (line 733).
       It is a plain `<p>`: **do not** give it a rule that sets `display` on a
       `.en` / `.it` child, or both languages show at once (Appendix C).
 
@@ -93,7 +121,7 @@ counter-example.
       </p>
 ```
 
-- [ ] ⬜ Add the CSS for both new elements, next to the existing `.stat`
+- [x] ✅ Add the CSS for both new elements, next to the existing `.stat`
       rules (`portfolio/index.html:328-366`):
 
 ```css
@@ -115,11 +143,11 @@ counter-example.
 
 ## 0.3 — The hero paragraph
 
-- [ ] ⬜ `portfolio/index.html:684` (EN) and `:690` (IT)
-- [ ] **Current:** *"Forty-eight shipped projects, **every one of them**
+- [x] ✅ `portfolio/index.html:684` (EN) and `:690` (IT)
+- [x] ✅ **Current:** *"Forty-eight shipped projects, **every one of them**
       without a runtime dependency — and six of them worth reading the numbers
       on."*
-- [ ] **Ground truth:** same as 0.1 and 0.2. "six" is the case-study count
+- [x] ✅ **Ground truth:** same as 0.1 and 0.2. "six" is the case-study count
       and must become 9 in Phase 4.
 
 ```html
@@ -149,8 +177,8 @@ counter-example.
 
 ## 0.4 — The PNG claim in the Craft panel
 
-- [ ] ⬜ `portfolio/index.html:1242`
-- [ ] **Ground truth:** 46 published PNGs are app icons; **+7** case-study
+- [x] ✅ `portfolio/index.html:1242`
+- [x] ✅ **Ground truth:** 46 published PNGs are app icons; **+7** case-study
       screenshots in `portfolio/shots/` = 53 images on the site; 68 PNGs in
       the repository (46 icons + 20 in `*/shots/` + 2 in
       `bucio/public/screens/`).
@@ -163,19 +191,28 @@ counter-example.
             <span class="en">Procedural art means there is not one sprite sheet to download — the arcade's 46 published PNGs are all app icons, and the only other images on this site are the seven case-study screenshots below. Draw-call counts are asserted by tests, because a frame that quietly got more expensive is the failure mode nobody notices until a phone is in someone's hand.</span>
 ```
 
-- [ ] ⬜ Mirror in IT: `44 PNG` → `46 PNG`, and add the clause about the seven
+- [x] ✅ Mirror in IT: `44 PNG` → `46 PNG`, and add the clause about the seven
       screenshots (*"le sette screenshot dei case study qui sotto"*).
 
 ## 0.5 — The offline claim in the Craft panel
 
-- [ ] ⬜ `portfolio/index.html:1253`
-- [ ] **Ground truth:** 34 of 44 have a service worker (32 hand-written
+- [x] ✅ `portfolio/index.html:1253`
+- [x] ✅ **Ground truth:** 34 of 44 have a service worker (32 hand-written
       in-tree + 2 generated by `vite-plugin-pwa` at build time). **10 have
       none:** `anna-karenina-pwa`, `bible-pwa`, `brothers-karamazov-pwa`,
       `crime-and-punishment-pwa`, `divine-comedy-pwa`, `dorian-gray-pwa`,
       `invisible-cities-pwa`, `ivan-ilyich-pwa`, `les-miserables-pwa`,
       `recherche-pwa`, `the-trial-pwa`, `underground-pwa` (9 literary) and
       `tiny-tower-pwa`.
+
+> **Not needed, and that is the point.** Phase 0.8 was implemented, so every
+> project now has a service worker and the original sentence is true: the
+> reword below was never applied. The three projects this list names that
+> already had a worker (`bible-pwa`, `crime-and-punishment-pwa`,
+> `recherche-pwa`) were shipping one that was **never registered** — a
+> worker is not a script, it has to be registered — so they were not
+> offline-capable either. The other nine literary scenes had no worker at
+> all. All twelve are fixed, and the copy below was not needed.
 
 ```html
 <!-- BEFORE (EN) -->
@@ -185,22 +222,22 @@ counter-example.
             <span class="en">Thirty-four of the forty-four are installable PWAs, each with its own service worker and its own cache, so installing one never interferes with another. The other ten are static documents with nothing to cache. State lives in localStorage and IndexedDB on the device; there is no server-side state anywhere in the whole repository.</span>
 ```
 
-- [ ] ⬜ Mirror in IT: *"Ogni progetto è una PWA installabile…"* → *"Trentaquattro
+- [x] ✅ Mirror in IT: *"Ogni progetto è una PWA installabile…"* → *"Trentaquattro
       dei quarantaquattro sono PWA installabili…"*.
 
 ## 0.6 — The "Also built" cloud is incomplete
 
-- [ ] ⬜ `portfolio/index.html:1412-1446`
-- [ ] **Ground truth:** the cloud links **30** of the 44 projects, but the
+- [x] ✅ `portfolio/index.html:1412-1446`
+- [x] ✅ **Ground truth:** the cloud links **30** of the 44 projects, but the
       section claims to be *"Everything else in the arcade"*. Missing 13:
       `anna-karenina-pwa`, `bible-pwa`, `brothers-karamazov-pwa`,
       `crime-and-punishment-pwa`, `divine-comedy-pwa`, `dorian-gray-pwa`,
       `example-pwa`, `invisible-cities-pwa`, `ivan-ilyich-pwa`,
       `les-miserables-pwa`, `recherche-pwa`, `the-trial-pwa`,
       `underground-pwa`.
-- [ ] **Do:** add one compact row grouping the 12 literary adaptations, plus
+- [x] ✅ **Do:** add one compact row grouping the 12 literary adaptations, plus
       `example-pwa` (Star Explorer).
-- [ ] ⬜ Also add `stats-pwa` — it is case study 02 but is absent from the
+- [x] ✅ Also add `stats-pwa` — it is case study 02 but is absent from the
       cloud, while `census-pwa` is in the cloud *and* a case study.
       Inconsistent; pick one rule. Recommendation: case studies live in the
       case list, so the cloud should list the rest — which means removing
@@ -210,21 +247,21 @@ counter-example.
 
 ## 0.7 — Root `README.md` table mistakes
 
-- [ ] ⬜ Duplicate `| 16 |` at rows 76–77 (New Star Soccer, ALVEARE).
-- [ ] ⬜ `28` and `29` swapped at rows 89–90 (STATS is 29, EADS is 28).
+- [x] ✅ Duplicate `| 16 |` at rows 76–77 (New Star Soccer, ALVEARE).
+- [x] ✅ `28` and `29` swapped at rows 89–90 (STATS is 29, EADS is 28).
 
 ## 0.8 — Optional: fix the work, not just the words
 
-- [ ] ⬜ *(optional, better than rewording)* Add a ~20-line service worker to
+- [x] ✅ *(optional, better than rewording)* Add a ~20-line service worker to
       the 10 projects that lack one, so the original "every project" claim
       becomes *true* instead of reworded. The pattern already exists in 32
       folders. The difference between "I corrected the copy" and "I fixed the
       work".
-- [ ] ⬜ If done, update `service_workers` in the ledger to 42 and revert 0.5.
+- [x] ✅ If done, update `service_workers` in the ledger to 42 and revert 0.5.
 
 ## 0.9 — Leave these two tiles unchanged
 
-- [ ] ✅ Verified true; do not touch.
+- [x] ✅ ✅ Verified true; do not touch.
   - `0 Binary art assets` — the only files under `bucio/public/` and
     `new-star-soccer/public/` are `favicon.svg`, `manifest.json`,
     `service-worker.js` and PNG icons. No binary art anywhere.
@@ -242,36 +279,41 @@ is what keeps them true.
 
 ## 1.1 — Extract the shared shell *(enabler for every later page)*
 
-- [ ] ⬜ Create `portfolio/assets/portfolio.css` from `portfolio/index.html`
+- [x] ✅ Create `portfolio/assets/portfolio.css` from `portfolio/index.html`
       lines **32–624** — the content of the `<style>` block at line 31,
       verbatim, no edits.
-- [ ] ⬜ Create `portfolio/assets/portfolio.js` from `portfolio/index.html`
+- [x] ✅ Create `portfolio/assets/portfolio.js` from `portfolio/index.html`
       lines **1504–1592** — the content of the inline `<script>` at line
       1503, verbatim, no edits.
-- [ ] ⬜ In `portfolio/index.html`: delete the `<style>…</style>` block
+- [x] ✅ In `portfolio/index.html`: delete the `<style>…</style>` block
       (31–625) and replace with a `<link>` in the `<head>`; delete the
       inline `<script>…</script>` (1503–1593) and replace with a `<script src>`.
-- [ ] ⬜ **Keep the classic-script position** (after the markup) so the DOM is
+- [x] ✅ **Keep the classic-script position** (after the markup) so the DOM is
       parsed before the script runs. Do not add `defer`/`async`.
-- [ ] ⬜ **Own commit, trivially revertible.** This touches the file that
+- [x] ✅ **Own commit, trivially revertible.** This touches the file that
       currently works.
-- [ ] ⬜ This preserves the README's *actual* stated reason for
+- [x] ✅ This preserves the README's *actual* stated reason for
       self-containment — "it would tie the folder to this repository's
       layout", which was about `shared/arcade.js`, not about sibling files.
       The folder stays liftable to its own domain unchanged.
-- [ ] ⬜ Update `portfolio/README.md` §"How it is built" — the file tree
+- [x] ✅ Update `portfolio/README.md` §"How it is built" — the file tree
       changes, and the claim "everything: shell, CSS, both languages" is now
       wrong.
-- [ ] ⚠️ **Watch the bilingual trap** (Appendix C): any new block that styles
+- [x] ✅ **Watch the bilingual trap** (Appendix C): any new block that styles
       a bilingual element must be checked in both languages.
+
+> **It was hit.** Giving the top-nav links `display: inline-flex` for the
+> 48px touch target outranked `.it { display: none }`, and both languages
+> appeared at once. The nav now carries its own explicit rule pair, the
+> same way the stat labels do.
 
 ## 1.2 — `tools/verify.mjs`, the claim registry
 
-- [ ] ⬜ New file `tools/verify.mjs`. One registry, no dependencies, Node
+- [x] ✅ New file `tools/verify.mjs`. One registry, no dependencies, Node
       built-ins only — the house rule.
-- [ ] ⬜ Each claim carries: `id`, EN/IT labels, `compute()`, `how` (the
+- [x] ✅ Each claim carries: `id`, EN/IT labels, `compute()`, `how` (the
       shell command a reader can paste), and where it is used on the page.
-- [ ] ⬜ CLI:
+- [x] ✅ CLI:
       ```
       node tools/verify.mjs            # human-readable table
       node tools/verify.mjs --json     # machine-readable ledger
@@ -299,29 +341,29 @@ is what keeps them true.
 
 ## 1.3 — Two kinds of check, because two kinds of claim
 
-- [ ] ⬜ **Numeric claims are scraped out of the rendered page**, so the ledger
+- [x] ✅ **Numeric claims are scraped out of the rendered page**, so the ledger
       verifies *the page*, not a parallel copy of it.
-- [ ] ⬜ `portfolio/index.html` gains `data-claim` attributes on the stat
+- [x] ✅ `portfolio/index.html` gains `data-claim` attributes on the stat
       tiles (Phase 0 already adds them):
       ```html
       <div class="stat" data-claim="projects"><b>44</b> …</div>
       ```
-- [ ] ⬜ `verify.mjs --check` parses `index.html`, pulls the `<b>` out of each
+- [x] ✅ `verify.mjs --check` parses `index.html`, pulls the `<b>` out of each
       `data-claim` element, and compares it to the computed value. If someone
       edits a number on the page without reality changing, **CI goes red**.
-- [ ] ⬜ **Prose claims cannot be parsed reliably** → use a **stale-literal
+- [x] ✅ **Prose claims cannot be parsed reliably** → use a **stale-literal
       lint**. The ledger carries a `stale` list:
       `"Forty-eight"`, `"Quarantotto"`, `"48"`, `"44 PNGs"`,
       `"every one of them"`, `"Every project is an installable PWA"`.
       If any appears anywhere in `index.html`, the check fails with a message
       naming the claim.
-- [ ] ⬜ Simple, robust, self-documenting — and it catches exactly the class
+- [x] ✅ Simple, robust, self-documenting — and it catches exactly the class
       of bug Phase 0 just found.
 
 ## 1.4 — `portfolio/verify.html`, the ledger rendered
 
-- [ ] ⬜ **Generated by the tool, never hand-edited**, so it cannot lie.
-- [ ] ⬜ Contents:
+- [x] ✅ **Generated by the tool, never hand-edited**, so it cannot lie.
+- [x] ✅ Contents:
   - EN/IT heading, same tokens and typography as the main page
   - A table: `claim → value → PASS/FAIL → where it is used on the page →
     the exact command to reproduce it`
@@ -329,24 +371,24 @@ is what keeps them true.
     without JS, so it works with JavaScript off
   - A summary line: *"N claims · M pass · K fail"*
   - A link back to the portfolio
-- [ ] ⬜ **No timestamps in the generated file.** Deliberate: it makes the
+- [x] ✅ **No timestamps in the generated file.** Deliberate: it makes the
       output byte-for-byte deterministic, so CI can regenerate and diff it and
       fail if the committed copy is stale. Same rule will apply to the Phase 5
       audit report.
-- [ ] ⬜ Add it to the portfolio service worker's precache list (Phase
+- [x] ✅ Add it to the portfolio service worker's precache list (Phase
       cross-cutting).
 
 ## 1.5 — Wiring the page to the ledger
 
-- [ ] ⬜ Each hero stat tile gets a small `⧉` affordance linking to
+- [x] ✅ Each hero stat tile gets a small `⧉` affordance linking to
       `verify.html#<claim-id>` — a `title` attribute plus a focusable link,
       obeying the same 48px-target and focus-ring rules as everything else.
-- [ ] ⬜ The Craft panel's corrected sentence gets a trailing *"→ see the
+- [x] ✅ The Craft panel's corrected sentence gets a trailing *"→ see the
       ledger"* link.
 
 ## 1.6 — CI
 
-- [ ] ⬜ Add to `.github/workflows/ci.yml`, after "Analysis tooling tests":
+- [x] ✅ Add to `.github/workflows/ci.yml`, after "Analysis tooling tests":
       ```yaml
             - name: The portfolio's claims are true
               run: |
@@ -355,18 +397,18 @@ is what keeps them true.
                 node tools/verify.mjs --html /tmp/verify.html --quiet
                 diff -u portfolio/verify.html /tmp/verify.html
       ```
-- [ ] ⬜ Three checks in one step: every value true, the prose lint clean, the
+- [x] ✅ Three checks in one step: every value true, the prose lint clean, the
       committed report not stale.
-- [ ] ⬜ Runs in about a second — no browser, no network, no dependencies.
+- [x] ✅ Runs in about a second — no browser, no network, no dependencies.
 
 ## 1.7 — Docs
 
-- [ ] ⬜ `portfolio/README.md` — add a "The claims ledger" section: how to run
+- [x] ✅ `portfolio/README.md` — add a "The claims ledger" section: how to run
       it, how to add a claim, what `stale` is for. Rewrite "Known limits" so it
       no longer leads with the empty client slots. Update the file tree.
-- [ ] ⬜ Root `README.md` — add a line about the ledger in the portfolio
+- [x] ✅ Root `README.md` — add a line about the ledger in the portfolio
       section.
-- [ ] ⬜ `llms.txt` — mention the ledger's existence, so an AI reading the
+- [x] ✅ `llms.txt` — mention the ledger's existence, so an AI reading the
       repo knows the numbers are machine-checked.
 
 ---
@@ -375,7 +417,7 @@ is what keeps them true.
 
 The six cases *describe* their evidence but never *link* it.
 
-- [ ] ⬜ Add a proof row to each case's `.case-actions`:
+- [x] ✅ Add a proof row to each case's `.case-actions`:
 
 | Case | Link to |
 |---|---|
@@ -386,19 +428,19 @@ The six cases *describe* their evidence but never *link* it.
 | 05 IRONFALL | `ironfall-pwa/tests/render.test.js` — the draw-call budget |
 | 06 PULSE | `pulse-pwa/sim.test.mjs` — 500 seeds |
 
-- [ ] ⬜ Add **"What I'd do differently"** — one honest self-critique line per
+- [x] ✅ Add **"What I'd do differently"** — one honest self-critique line per
       case, in both languages. The page is currently too flawless to be
       believable; one line per case reads as seniority.
-- [ ] ⬜ Add **"The constraint"**, **"Stack"** and **"Shipped"** lines to each
+- [x] ✅ Add **"The constraint"**, **"Stack"** and **"Shipped"** lines to each
       case, so all nine read the same way.
-- [ ] ⬜ Link the proof rows to `file:line` on GitHub, matching the existing
+- [x] ✅ Link the proof rows to `file:line` on GitHub, matching the existing
       `cite` style in the Process section.
 
 ---
 
 # Phase 3 — CV and hireability
 
-- [ ] ⬜ `portfolio/cv.html` — a real one-page CV with a `@media print`
+- [x] ✅ `portfolio/cv.html` — a real one-page CV with a `@media print`
       stylesheet and a "Save as PDF" button calling `window.print()`.
       - Dense, one page, A4, no build step, links `assets/portfolio.css`.
       - Print rules: hide the topbar, the toggles, the "Also built" cloud and
@@ -406,21 +448,21 @@ The six cases *describe* their evidence but never *link* it.
         `print-color-adjust: exact` so the accent gradient survives.
       - *Today a recruiter can get a vibe but not a CV — this is the biggest
         missing artefact in the repo.*
-- [ ] ⬜ `#services` section — replaces the three empty `#clients` slots with
+- [x] ✅ `#services` section — replaces the three empty `#clients` slots with
       *what you can be hired for*: interface work / performance & accessibility
       audits / PWA builds. Turns a visible weakness into a sales page; a real
       client swaps the copy later.
   - Note: `.panel.placeholder` + `.todo` badge + the `FILL` comments
     (lines 1147-1174) all go away with this section.
-- [ ] ⬜ `#stack` section — skills, each linking to the project that proves it.
+- [x] ✅ `#stack` section — skills, each linking to the project that proves it.
       No self-scored bars:
       *WebAudio → PULSE · three.js → BUCIO · TypeScript → New Star Soccer ·
       Python → tools/balance · Service Workers → all 44 · Monte-Carlo → the
       balance lab.*
-- [ ] ⬜ **Availability + working model** — where you are, time zone, engagement
+- [x] ✅ **Availability + working model** — where you are, time zone, engagement
       shape, and (daring) your rates. Publishing rates filters out bad fits
       and signals you're a professional, not a hobbyist.
-- [ ] ⬜ **Timeline section: DROPPED.** The case studies and the CV carry the
+- [x] ✅ **Timeline section: DROPPED.** The case studies and the CV carry the
       credibility. A timeline without a client history may read as padding.
 
 ---
@@ -430,7 +472,7 @@ The six cases *describe* their evidence but never *link* it.
 All six current cases are *products*. The most hire-relevant artefacts are
 *tools*.
 
-- [ ] ⬜ **07 · THE BALANCE LAB** (`tools/balance/`) — a Monte-Carlo harness:
+- [x] ✅ **07 · THE BALANCE LAB** (`tools/balance/`) — a Monte-Carlo harness:
       Node drives `metro-pwa/sim.js` headless over 5,000 seeded sessions;
       Python (stdlib only) writes an HTML report with inline SVG. Testing,
       simulation, reproducibility, tooling. A frontend hire cares more about
@@ -439,20 +481,20 @@ All six current cases are *products*. The most hire-relevant artefacts are
   - The report HTML is gitignored today (`tools/balance/out/`). For the case
     study you need it published: add a `!portfolio/shots/balance.png`
     exception, or copy the report into `portfolio/shots/`.
-- [ ] ⬜ **08 · THE SHARED ENGINE** (`shared/arcade.js` + `shared/chart.js`) —
+- [x] ✅ **08 · THE SHARED ENGINE** (`shared/arcade.js` + `shared/chart.js`) —
       one audio helper, one seeded RNG, one chart library, used by 40+ apps.
       The architectural story: how you avoid 40 copies of a beep. This is the
       case that says "I think in systems."
-- [ ] ⬜ **09 · EADS STUDIO** (`EADS/`, Flask + gdb/MI) — the root `README.md`
+- [x] ✅ **09 · EADS STUDIO** (`EADS/`, Flask + gdb/MI) — the root `README.md`
       already flags it as the top gap. No screenshot possible (needs a
       toolchain), so: **an architecture diagram in inline SVG instead**. A case
       study with a diagram instead of a photo reads as confident, not as a
       workaround.
-- [ ] ⬜ Each new case gets the same proof links (Phase 2) and the same
+- [x] ✅ Each new case gets the same proof links (Phase 2) and the same
       Problem → What I built → Result shape.
-- [ ] ⬜ Update `case_studies` in the ledger to 9, and the hero `sub` copy
+- [x] ✅ Update `case_studies` in the ledger to 9, and the hero `sub` copy
       ("six of them" → "nine") in both languages.
-- [ ] ⬜ The case-study numbering becomes 01–09; check the `.case-num` values
+- [x] ✅ The case-study numbering becomes 01–09; check the `.case-num` values
       and the `case` / `case flip` alternation still reads.
 
 ---
@@ -461,7 +503,7 @@ All six current cases are *products*. The most hire-relevant artefacts are
 
 Nobody publishes a self-audit that finds its own bugs. That is the whole idea.
 
-- [ ] ⬜ `tools/audit/a11y.mjs` — loads each of the 44 apps over the DevTools
+- [x] ✅ `tools/audit/a11y.mjs` — loads each of the 44 apps over the DevTools
       Protocol (the harness `portfolio/scripts/shots.mjs` already speaks), then
       checks in-page:
   - images without `alt`
@@ -476,26 +518,26 @@ Nobody publishes a self-audit that finds its own bugs. That is the whole idea.
   - duplicate `id` attributes
   - `outline: none` on focusables
   - `lang` attribute on inline non-English text
-- [ ] ⬜ `tools/audit/perf.mjs` — per-app transfer bytes, request count,
+- [x] ✅ `tools/audit/perf.mjs` — per-app transfer bytes, request count,
       DOMContentLoaded / load timings. CDP domains: `Network.enable`,
       `Page.enable`, `Performance.enable` (Appendix C).
-- [ ] ⬜ `portfolio/audit/report.html` — **generated and committed** (same
+- [x] ✅ `portfolio/audit/report.html` — **generated and committed** (same
       `.gitignore` exception pattern as `portfolio/shots/`), with **the
       failures shown, not hidden**.
-- [ ] ⬜ It will find real bugs. Fix them, and let the report show
+- [x] ✅ It will find real bugs. Fix them, and let the report show
       before/after. This lands perfectly on the STATS story: *"I will not
       flatter your data."*
-- [ ] ⬜ Both scripts **skip cleanly without a browser**, matching the repo's
+- [x] ✅ Both scripts **skip cleanly without a browser**, matching the repo's
       existing smoke-test philosophy. They must never turn the build red for a
       missing Chromium.
-- [ ] ⬜ Do not put a timestamp in the report — same determinism rule as
+- [x] ✅ Do not put a timestamp in the report — same determinism rule as
       `verify.html`.
 
 ---
 
 # Phase 6 — Bold and interactive
 
-- [ ] ⬜ **Live procedural canvas in the hero.** The claim "0 binary art assets"
+- [x] ✅ **Live procedural canvas in the hero.** The claim "0 binary art assets"
       is currently text. Put a running canvas on the page and the page
       *performs* the claim. Better: a 60-second playable micro-game — "the
       portfolio is a game too" is memorable.
@@ -503,30 +545,35 @@ Nobody publishes a self-audit that finds its own bugs. That is the whole idea.
     for it. The canvas must stop too.
   - Keep the canvas `aria-hidden="true"` and provide a text alternative, or
     the Phase 5 audit will (correctly) flag it.
-- [ ] ⬜ **Install-to-phone button.** The portfolio is *already* a PWA
+- [x] ✅ **Install-to-phone button.** The portfolio is *already* a PWA
       (manifest + service worker + SVG icons) with no install affordance.
       ~10 lines of `beforeinstallprompt`. Hide the button when the event does
       not fire (iOS has no install event) — a dead button is worse than none.
-- [ ] ⬜ `portfolio/notes/` — 3–4 short bilingual essays from material already
+- [x] ✅ `portfolio/notes/` — 3–4 short bilingual essays from material already
       written (Appendix H).
-- [ ] ⬜ `portfolio/now.html` — what's shipping this month, availability, last
+- [x] ✅ `portfolio/now.html` — what's shipping this month, availability, last
       updated. Fresh, human, cheap to maintain.
-- [ ] ⬜ *(Optional)* a hidden terminal easter egg — behind a link, never in
+- [ ] ⚠️ *(Optional)* a hidden terminal easter egg — behind a link, never in
       front of the case studies. A recruiter who has to play before they can
       read will not read.
+
+> **Skipped, deliberately.** The page already has three things to read that
+> are better than a gimmick: the notes, the ledger and the audit. A fourth
+> would be a maintenance cost for a joke, and the plan itself says it must
+> never be in front of the case studies.
 
 ---
 
 # Cross-cutting — once, at the end
 
-- [ ] ⬜ Bump the portfolio service worker to `portfolio-v2` and precache the new
+- [x] ✅ Bump the portfolio service worker to `portfolio-v2` and precache the new
       pages.
-- [ ] ⬜ Add the new URLs to `sitemap.xml` — whose `lastmod` values are already
+- [x] ✅ Add the new URLs to `sitemap.xml` — whose `lastmod` values are already
       stale (portfolio says 2026-10-18, the rest say 2026-10-14). Generate them
       from git.
-- [ ] ⬜ `portfolio/404.html` (the root one already exists).
-- [ ] ⬜ `llms.txt` — add the portfolio's services and availability.
-- [ ] ⬜ Update `portfolio/README.md`, root `README.md` and `TODOs.md`.
+- [x] ✅ `portfolio/404.html` (the root one already exists).
+- [x] ✅ `llms.txt` — add the portfolio's services and availability.
+- [x] ✅ Update `portfolio/README.md`, root `README.md` and `TODOs.md`.
 
 ---
 
@@ -611,10 +658,10 @@ const STALE = [
 ];
 ```
 
-- [ ] ⬜ `compute()` for each claim must be a pure function of the repository
+- [x] ✅ `compute()` for each claim must be a pure function of the repository
       state — no network, no clock, no randomness. The output has to be
       reproducible.
-- [ ] ⬜ `how` must be a command that a reader can paste and get the same
+- [x] ✅ `how` must be a command that a reader can paste and get the same
       number. Write it, then run it, and check the two agree.
 
 ## B.2 — The page scraper
@@ -632,9 +679,9 @@ function scrapeStat(html, id) {
 }
 ```
 
-- [ ] ⬜ Strip inner tags before comparing, so `42/44` written as two spans
+- [x] ✅ Strip inner tags before comparing, so `42/44` written as two spans
       still compares equal to the string `"42/44"`.
-- [ ] ⬜ A `data-claim` with no matching tile is a **failure**, not a skip. A
+- [x] ✅ A `data-claim` with no matching tile is a **failure**, not a skip. A
       claim that has left the page has not become true.
 
 ## B.3 — The stale-literal lint
@@ -648,9 +695,9 @@ function staleHits(html) {
 }
 ```
 
-- [ ] ⬜ Report the offending literal *and* the claim it contradicts, so the
+- [x] ✅ Report the offending literal *and* the claim it contradicts, so the
       fix is obvious.
-- [ ] ⬜ When a claim legitimately changes, remove its old literal from
+- [x] ✅ When a claim legitimately changes, remove its old literal from
       `STALE` in the same commit that updates the page. Otherwise the lint
       becomes noise and people start ignoring it.
 
@@ -685,11 +732,11 @@ const AUDIT = `(() => {
 })()`;
 ```
 
-- [ ] ⬜ Run the audit against the *served* pages, not `file://` — service
+- [x] ✅ Run the audit against the *served* pages, not `file://` — service
       workers and `fetch` behave differently.
-- [ ] ⬜ Skip cleanly when no Chromium is found (the `findChromium()` helper
+- [x] ✅ Skip cleanly when no Chromium is found (the `findChromium()` helper
       already exists in `shots.mjs`).
-- [ ] ⬜ Record which app each finding came from, so the report can group by
+- [x] ✅ Record which app each finding came from, so the report can group by
       project and by rule.
 
 # Appendix C — Reference
@@ -713,9 +760,9 @@ own explicit pair:
 [data-lang="it"] .stat .lbl.it { display: block; }
 ```
 
-- [ ] ⬜ Rule of thumb for new blocks: **do not set `display` on a `.en`/`.it`
+- [x] ✅ Rule of thumb for new blocks: **do not set `display` on a `.en`/`.it`
       element**. Put the layout on a wrapper instead.
-- [ ] ⬜ Check every new bilingual block in both languages before committing.
+- [x] ✅ Check every new bilingual block in both languages before committing.
 
 ## C.2 — WCAG contrast ratio
 
@@ -732,9 +779,9 @@ function ratio(fg, bg) {
 }
 ```
 
-- [ ] ⬜ AA thresholds: 4.5:1 for normal text, 3:1 for large text (≥18.66px
+- [x] ✅ AA thresholds: 4.5:1 for normal text, 3:1 for large text (≥18.66px
       bold or ≥24px) and for UI component boundaries.
-- [ ] ⬜ Finding the background means walking ancestors until a non-transparent
+- [x] ✅ Finding the background means walking ancestors until a non-transparent
       `background-color` is found. `rgba(0,0,0,0)` is transparent; a
       gradient is not measurable this way — flag it as "manual check" rather
       than guessing.
@@ -751,25 +798,25 @@ function ratio(fg, bg) {
 | Network bytes | `Network.enable`, `Network.loadingFinished` (`encodedDataLength`) |
 | Timing | `Performance.enable`, `Performance.getMetrics` |
 
-- [ ] ⬜ For the perf audit use `deviceScaleFactor: 1` and a fixed viewport,
+- [x] ✅ For the perf audit use `deviceScaleFactor: 1` and a fixed viewport,
       so the numbers are comparable between runs.
-- [ ] ⬜ Note the same caveat as `shots.mjs`: at 2× the screenshots were
+- [x] ✅ Note the same caveat as `shots.mjs`: at 2× the screenshots were
       1.9 MB, which would have undercut the performance claim the page is
       making. Payload numbers must not be inflated by the measurement.
 
 ## C.4 — House rules this plan obeys
 
-- [ ] Plain HTML, CSS and JS. No bundler, no package.json, no dependencies.
-- [ ] Zero binary art assets. Zero trackers. Works offline.
-- [ ] Bilingual EN/IT in the markup as sibling `.en` / `.it` elements, so the
+- [x] ✅ Plain HTML, CSS and JS. No bundler, no package.json, no dependencies.
+- [x] ✅ Zero binary art assets. Zero trackers. Works offline.
+- [x] ✅ Bilingual EN/IT in the markup as sibling `.en` / `.it` elements, so the
       page is complete and crawlable with JavaScript off.
-- [ ] One service worker cache per app.
-- [ ] Any new tool must skip cleanly when its prerequisite is missing
+- [x] ✅ One service worker cache per app.
+- [x] ✅ Any new tool must skip cleanly when its prerequisite is missing
       (browser, toolchain) rather than failing the build.
-- [ ] 48px minimum touch targets, visible focus rings, `aria-pressed` on
+- [x] ✅ 48px minimum touch targets, visible focus rings, `aria-pressed` on
       toggles, `aria-live` on status.
-- [ ] `prefers-reduced-motion` stops animations rather than shortening them.
-- [ ] Safe-area insets are CSS variables, so a notch does not break layout.
+- [x] ✅ `prefers-reduced-motion` stops animations rather than shortening them.
+- [x] ✅ Safe-area insets are CSS variables, so a notch does not break layout.
 
 # Appendix D — Definition of Done, per phase
 
@@ -807,7 +854,7 @@ function ratio(fg, bg) {
 | `tools/balance/run.mjs` | ✅ | ✅ (1,200 sessions) | no | `tools/balance/out/` (gitignored) |
 | `tools/corpora/extract.mjs` | ✅ | ✅ | no | `tools/corpora/out/` (gitignored) |
 
-- [ ] ⬜ Browser-dependent scripts must print `SKIP` and exit 0 when no
+- [x] ✅ Browser-dependent scripts must print `SKIP` and exit 0 when no
       Chromium is present. The repo's existing rule: *"a missing browser makes
       them skip rather than fail, so they can never be the reason CI goes
       red."*
@@ -829,17 +876,17 @@ function ratio(fg, bg) {
 
 Already written, already bilingual, already yours:
 
-- [ ] ⬜ `PWA_COPY_GUIDE.md` (13 KB) — the writing voice. The best starting
+- [x] ✅ `PWA_COPY_GUIDE.md` (13 KB) — the writing voice. The best starting
       point for "how I write copy for a game".
-- [ ] ⬜ `BEST_PWA_ANALYSIS.md` (7 KB) — the comparative analysis.
-- [ ] ⬜ `tools/corpora/` — the corpus lab that measures your *own* prose:
+- [x] ✅ `BEST_PWA_ANALYSIS.md` (7 KB) — the comparative analysis.
+- [x] ✅ `tools/corpora/` — the corpus lab that measures your *own* prose:
       sentence lengths, type/token ratio, hapax legomena, Zipf fits, EN/IT
       overlap. A piece called *"What my own corpus says about my writing"*,
       with the real numbers from the tool, would be the most distinctive
       essay on the site.
-- [ ] ⬜ The `cite` blockquotes in the Process section (6 of them) are already
+- [x] ✅ The `cite` blockquotes in the Process section (6 of them) are already
       essay-shaped — they are the seeds.
-- [ ] ⬜ `portfolio/README.md` "Known limits" and "What's next" — short,
+- [x] ✅ `portfolio/README.md` "Known limits" and "What's next" — short,
       honest, and exactly the register an essay wants.
 
 # Appendix I — Verification commands
@@ -907,10 +954,14 @@ current page can be called out.
 
 ## Two things to watch
 
-- [ ] The CSS extraction (1.1) — mechanical, but it touches the file that
-      currently works. Hence its own commit.
-- [ ] The "42/44" tile (0.2) — the fraction is less punchy than a lone `0`,
-      and the honesty is worth more. Revisit if it reads wrong.
+- [x] ✅ The CSS extraction (1.1) — mechanical, but it touches the file that
+      currently works. Hence its own commit. *(It has one: `9902ff9`, and
+      the extraction was verified byte-for-byte against the block it
+      replaced.)*
+- [x] ✅ The "42/44" tile (0.2) — the fraction is less punchy than a lone `0`,
+      and the honesty is worth more. Revisit if it reads wrong. *(It reads
+      fine: the footnote names both exceptions, and the ledger checks the
+      tile against the repository.)*
 
 ---
 
