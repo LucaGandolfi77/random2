@@ -58,6 +58,12 @@ export const FILTRI = [
   { id: 'angelo',   nome: 'Angel',    emoji: '😇', volto: true },
   { id: 'blush',    nome: 'Blush',     emoji: '🌸', volto: true },
   { id: 'arcoboca', nome: 'Rainbow', emoji: '🤮', volto: true },
+  { id: 'volpe',    nome: 'Fox',         emoji: '🦊', volto: true },
+  { id: 'panda',    nome: 'Panda',       emoji: '🐼', volto: true },
+  { id: 'vampiro',  nome: 'Vampire',     emoji: '🧛', volto: true },
+  { id: 'mago',     nome: 'Wizard',      emoji: '🧙', volto: true },
+  { id: 'ape',      nome: 'Bee',         emoji: '🐝', volto: true },
+  { id: 'cilindro', nome: 'Top Hat',     emoji: '🎩', volto: true },
   { id: 'quiz-animale', nome: 'Which animal?', emoji: '🐾', volto: true, quiz: 'animali' },
   { id: 'quiz-cibo',    nome: 'Which food?',    emoji: '🍽️', volto: true, quiz: 'cibo' },
   { id: 'quiz-mood',    nome: 'Which mood?',    emoji: '⚡', volto: true, quiz: 'mood' },
@@ -322,8 +328,6 @@ export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
   // With the front camera the projector mirrors the coordinates: landmark
   // 234 (cheekL) ends up on the right of the screen. Without this, ears
   // and other accessories drawn towards that side would land inside the face.
-  // 234 (cheekL) ends up on the right of the screen. Without this, ears
-  // and other accessories drawn towards that side would land inside the face.
   fc.latoSchermo = (lato) => lato * (specchio ? -1 : 1);
 
   if (filtro.quiz) return disegnaQuiz(ctx, fc, filtro, t);
@@ -341,6 +345,12 @@ export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
     case 'angelo':    return disegnaAngelo(ctx, fc, t);
     case 'blush':     return disegnaBlush(ctx, fc, t);
     case 'arcoboca':  return disegnaArcobalenoBocca(ctx, fc, t);
+    case 'volpe':    return disegnaVolpe(ctx, fc);
+    case 'panda':    return disegnaPanda(ctx, fc);
+    case 'vampiro':  return disegnaVampiro(ctx, fc);
+    case 'mago':     return disegnaMago(ctx, fc);
+    case 'ape':      return disegnaApe(ctx, fc);
+    case 'cilindro': return disegnaCilindro(ctx, fc);
   }
   return false;
 }
@@ -751,6 +761,284 @@ function disegnaArcobalenoBocca(ctx, fc, t) {
     ctx.bezierCurveTo(half * 0.9, len * 0.8, half, len * 0.45, lv * 0.05, 0);
     ctx.closePath();
     ctx.fillStyle = colori[i];
+    ctx.fill();
+  }
+  ctx.restore();
+  return true;
+}
+
+/* --- 🦊 fox: pointed ears + a pale muzzle + whiskers --- */
+function disegnaVolpe(ctx, fc) {
+  const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+
+  // ears: pointed triangles above the cheeks, tilted outwards
+  for (const lato of [-1, 1]) {
+    const g = P(lato < 0 ? LM.guanciaSx : LM.guanciaDx);
+    const s = fc.latoSchermo(lato);
+    const ex = g[0] + s * lv * 0.17;
+    const ey = g[1] - av * 0.46;
+    const alt = av * 0.30;
+    const larg = lv * 0.13;
+    ctx.save();
+    ctx.translate(ex, ey);
+    ctx.rotate(s * (0.30 + angolo));
+    ctx.beginPath();
+    ctx.moveTo(-larg, alt);
+    ctx.lineTo(0, -alt * 1.5);
+    ctx.lineTo(larg, alt);
+    ctx.closePath();
+    ctx.fillStyle = '#d9622b';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-larg * 0.45, alt * 0.55);
+    ctx.lineTo(0, -alt * 0.95);
+    ctx.lineTo(larg * 0.45, alt * 0.55);
+    ctx.closePath();
+    ctx.fillStyle = '#f7b8c6';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // the muzzle: a pale patch over the nose and the mouth
+  const n = P(LM.naso);
+  const bocca = mid(P, 'labbroSup', 'labbroInf');
+  ctx.save();
+  ctx.translate((n[0] + bocca[0]) / 2, (n[1] + bocca[1]) / 2);
+  ctx.rotate(angolo);
+  ellisse(ctx, 0, 0, lv * 0.20, av * 0.13, 'rgba(255, 249, 240, 0.92)');
+  ellisse(ctx, 0, -av * 0.05, lv * 0.05, av * 0.035, '#2a1a12');
+  ctx.restore();
+
+  // whiskers: three on each side
+  ctx.strokeStyle = 'rgba(40, 26, 18, 0.55)';
+  ctx.lineWidth = Math.max(1, lv * 0.008);
+  for (const lato of [-1, 1]) {
+    const s = fc.latoSchermo(lato);
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(n[0] + s * lv * 0.06, n[1] + av * 0.02);
+      ctx.lineTo(
+        n[0] + s * lv * (0.32 + i * 0.03),
+        n[1] + av * (0.04 + (i - 1) * 0.05)
+      );
+      ctx.stroke();
+    }
+  }
+  return true;
+}
+
+/* --- 🐼 panda: round ears + eye patches + a nose --- */
+function disegnaPanda(ctx, fc) {
+  const { P, occhioSx, occhioDx, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+
+  // ears: round black discs above the cheeks
+  for (const lato of [-1, 1]) {
+    const g = P(lato < 0 ? LM.guanciaSx : LM.guanciaDx);
+    const s = fc.latoSchermo(lato);
+    ellisse(ctx, g[0] + s * lv * 0.15, g[1] - av * 0.52, lv * 0.115, av * 0.11, '#15151a');
+  }
+
+  // eye patches: dark ovals that follow the tilt of the face
+  for (const occhio of [occhioSx, occhioDx]) {
+    ctx.save();
+    ctx.translate(occhio[0], occhio[1]);
+    ctx.rotate(angolo);
+    ellisse(ctx, 0, 0, lv * 0.115, av * 0.085, '#15151a');
+    ctx.restore();
+  }
+
+  // the nose, and a small smile under it
+  const n = P(LM.naso);
+  ellisse(ctx, n[0], n[1] + av * 0.01, lv * 0.07, av * 0.048, '#15151a');
+  ctx.beginPath();
+  ctx.arc(n[0], n[1] + av * 0.06, lv * 0.055, 0.15 * Math.PI, 0.85 * Math.PI);
+  ctx.strokeStyle = '#15151a';
+  ctx.lineWidth = Math.max(1.5, lv * 0.012);
+  ctx.stroke();
+  return true;
+}
+
+/* --- 🧛 vampire: a widow's peak + fangs + a high collar --- */
+function disegnaVampiro(ctx, fc) {
+  const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+
+  // the widow's peak: a dark point at the hairline
+  const f = P(LM.fronte);
+  ctx.save();
+  ctx.translate(f[0], f[1] + av * 0.04);
+  ctx.rotate(angolo);
+  ctx.beginPath();
+  ctx.moveTo(-lv * 0.17, -av * 0.10);
+  ctx.lineTo(0, av * 0.10);
+  ctx.lineTo(lv * 0.17, -av * 0.10);
+  ctx.closePath();
+  ctx.fillStyle = '#17141c';
+  ctx.fill();
+  ctx.restore();
+
+  // the fangs: two white triangles under the lower lip
+  const bocca = mid(P, 'labbroSup', 'labbroInf');
+  const larg = lv * 0.05;
+  const alt = av * 0.075;
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(bocca[0] + s * larg * 1.5, bocca[1] + av * 0.012);
+    ctx.lineTo(bocca[0] + s * larg * 0.4, bocca[1] + av * 0.012);
+    ctx.lineTo(bocca[0] + s * larg * 0.95, bocca[1] + alt);
+    ctx.closePath();
+    ctx.fillStyle = '#f7f5ef';
+    ctx.fill();
+  }
+
+  // the collar: two dark peaks rising at the sides of the neck
+  const mento = P(LM.mento);
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(mento[0] + s * lv * 0.05, mento[1] + av * 0.12);
+    ctx.lineTo(mento[0] + s * lv * 0.44, mento[1] + av * 0.10);
+    ctx.lineTo(mento[0] + s * lv * 0.19, mento[1] - av * 0.17);
+    ctx.closePath();
+    ctx.fillStyle = '#221a2c';
+    ctx.fill();
+  }
+  return true;
+}
+
+/* --- 🧙 wizard: a starred hat + a beard --- */
+function disegnaMago(ctx, fc) {
+  const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+
+  // the hat: a cone above the forehead, with a brim and a band
+  const f = P(LM.fronte);
+  const alt = av * 0.62;
+  const larg = lv * 0.30;
+  ctx.save();
+  ctx.translate(f[0], f[1] - av * 0.02);
+  ctx.rotate(angolo * 0.5 - 0.08);
+  ellisse(ctx, 0, 0, larg, alt * 0.16, '#2b2340');
+  ctx.beginPath();
+  ctx.moveTo(-larg * 0.82, 0);
+  ctx.lineTo(0, -alt);
+  ctx.lineTo(larg * 0.82, 0);
+  ctx.closePath();
+  ctx.fillStyle = '#3b2f57';
+  ctx.fill();
+  ctx.fillStyle = '#c9a227';
+  ctx.fillRect(-larg * 0.7, -alt * 0.24, larg * 1.4, alt * 0.10);
+  ctx.fillStyle = '#ffe9a8';
+  for (const [sx, sy, r] of [[-0.05, -0.56, 0.06], [0.30, -0.34, 0.045]]) {
+    scintilla(ctx, larg * sx, alt * sy, larg * r);
+  }
+  ctx.restore();
+
+  // the beard: a pale shape hanging from the mouth to the chin
+  const bocca = mid(P, 'labbroSup', 'labbroInf');
+  const mento = P(LM.mento);
+  ctx.beginPath();
+  ctx.moveTo(bocca[0] - lv * 0.16, bocca[1] - av * 0.01);
+  ctx.quadraticCurveTo(bocca[0], mento[1] + av * 0.17, bocca[0] + lv * 0.16, bocca[1] - av * 0.01);
+  ctx.quadraticCurveTo(bocca[0], bocca[1] + av * 0.09, bocca[0] - lv * 0.16, bocca[1] - av * 0.01);
+  ctx.closePath();
+  ctx.fillStyle = '#e8e4dc';
+  ctx.fill();
+  return true;
+}
+
+/* --- 🐝 bee: antennae + striped cheeks + a proboscis --- */
+function disegnaApe(ctx, fc) {
+  const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+
+  // the antennae: two curved lines with a ball at the tip
+  const f = P(LM.fronte);
+  for (const s of [-1, 1]) {
+    const bx = f[0] + s * lv * 0.07;
+    const by = f[1] + av * 0.02;
+    const tx = bx + s * lv * 0.15;
+    const ty = by - av * 0.17;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.quadraticCurveTo(bx + s * lv * 0.04, by - av * 0.13, tx, ty);
+    ctx.strokeStyle = '#2a2018';
+    ctx.lineWidth = Math.max(1.5, lv * 0.012);
+    ctx.stroke();
+    ellisse(ctx, tx, ty, lv * 0.026, av * 0.02, '#2a2018');
+  }
+
+  // the cheeks: yellow with two dark bands
+  for (const lato of [-1, 1]) {
+    const g = P(lato < 0 ? LM.guanciaSx : LM.guanciaDx);
+    const s = fc.latoSchermo(lato);
+    ctx.save();
+    ctx.translate(g[0] + s * lv * 0.07, g[1] + av * 0.02);
+    ctx.rotate(angolo);
+    ellisse(ctx, 0, 0, lv * 0.10, av * 0.075, '#f2c53d');
+    ctx.fillStyle = '#2a2018';
+    for (let i = 0; i < 2; i++) {
+      ctx.fillRect(-lv * 0.10, -av * 0.028 + i * av * 0.034, lv * 0.20, av * 0.015);
+    }
+    ctx.restore();
+  }
+
+  // the proboscis
+  const n = P(LM.naso);
+  ellisse(ctx, n[0], n[1] + av * 0.03, lv * 0.05, av * 0.035, '#2a2018');
+  return true;
+}
+
+/* --- 🎩 top hat and monocle --- */
+function disegnaCilindro(ctx, fc) {
+  const { P, occhioSx, occhioDx, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+
+  // the hat: a cylinder above the forehead, with a brim and a band
+  const f = P(LM.fronte);
+  const alt = av * 0.40;
+  const larg = lv * 0.20;
+  ctx.save();
+  ctx.translate(f[0], f[1] + av * 0.02);
+  ctx.rotate(angolo * 0.4);
+  ellisse(ctx, 0, 0, larg * 1.5, alt * 0.16, '#141419');
+  ctx.fillStyle = '#1d1d24';
+  ctx.fillRect(-larg, -alt, larg * 2, alt);
+  ctx.fillStyle = '#8a2233';
+  ctx.fillRect(-larg, -alt * 0.24, larg * 2, alt * 0.12);
+  ctx.restore();
+
+  // the monocle: a ring on one eye, with a chain
+  const occhio = fc.specchio ? occhioDx : occhioSx;
+  ctx.save();
+  ctx.translate(occhio[0], occhio[1]);
+  ctx.rotate(angolo);
+  ctx.beginPath();
+  ctx.arc(0, 0, lv * 0.115, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(210, 235, 255, 0.16)';
+  ctx.fill();
+  ctx.strokeStyle = '#d9b24a';
+  ctx.lineWidth = Math.max(2, lv * 0.016);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.moveTo(occhio[0] + lv * 0.11, occhio[1] + av * 0.03);
+  ctx.quadraticCurveTo(
+    occhio[0] + lv * 0.17, occhio[1] + av * 0.14,
+    occhio[0] + lv * 0.05, occhio[1] + av * 0.19
+  );
+  ctx.strokeStyle = 'rgba(217, 178, 74, 0.85)';
+  ctx.lineWidth = Math.max(1.2, lv * 0.009);
+  ctx.stroke();
+
+  // the moustache
+  const n = P(LM.naso);
+  ctx.save();
+  ctx.translate(n[0], n[1] + av * 0.055);
+  ctx.rotate(angolo);
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(s * lv * 0.10, -av * 0.035, s * lv * 0.16, av * 0.012);
+    ctx.quadraticCurveTo(s * lv * 0.08, av * 0.022, 0, 0);
+    ctx.closePath();
+    ctx.fillStyle = '#3a2a1e';
     ctx.fill();
   }
   ctx.restore();
