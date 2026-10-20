@@ -3,16 +3,68 @@
 A vertical-scrolling WWII air shooter for the browser. Mechanics follow Capcom's
 *1942* (1984): the aerial loop, POW crates dropped by destroyed formations, side
 fighters, Yashichi medals, bomber scoring chains, sector boss planes and the
-shoot-down bonus tally. Two fronts, 32 stages each.
+shoot-down bonus tally. Two fronts, 32 stages each. Six things here are not on
+the cabinet, and they are listed under **What this game adds on top of 1942**.
 
 No build step, no dependencies, no binary assets. Every aircraft, tank, warship
 and landscape is drawn procedurally on a 2D canvas; every sound is synthesised
 with WebAudio.
 
+## What this game adds on top of 1942
+
+The cabinet gave you a score, three lives, a loop and a road of green military
+bases. Six things here are not on the cabinet, and each one is there because the
+cabinet had something missing.
+
+**Threading.** On the arcade the loop was a defence: you rolled through an
+enemy and nothing happened. Here rolling through one cuts it, and cuts build a
+chain — `THREADED x2`, `x3`, up to nine, decaying in two and a half seconds if
+you stop rolling through things. You cannot shoot while you roll, so the trade
+is explicit: no gun, one hit, and a multiplier that only a pilot willing to fly
+into a formation can collect. The loop went from three free passes per stage to
+a decision.
+
+**Extend.** The cabinet gave a life at every score threshold and put `EXTEND` up
+the screen. Here there were none: the number went up and nothing came of it.
+Twenty thousand, sixty thousand, a hundred and fifty thousand, with the lives
+capped at six. A threshold that cannot be granted yet — because you are already
+at the cap — waits instead of being lost, so it is handed over the moment a
+life goes missing.
+
+**The sector card.** Every stage belongs to one of eight named sectors, and the
+briefing screen shows where you are, when it is, and the one line that says what
+the sortie is for. *"The invasion fleet is offshore, the beach is defended, and
+the weather is against it."* Thirty-two stage numbers are a list. Eight named
+sectors are a campaign.
+
+**Three tracks.** The cabinet had one piece of music and it played over
+everything: the briefing, the boss, the moment you had one life left. There are
+three now, on the same eight-step grid. The march over the water, a slower one
+with a tritone in the bass for when you are down to your last life, and a
+faster hammering one for the boss. The game picks the track itself, so nothing
+about the mood is on the HUD: you hear it. A track that never changes is
+wallpaper.
+
+**The sector select.** Eight buttons, one per sector, locked until you have
+flown that sector. The game used to keep a single bookmark per front, and a
+thirty-two stage campaign with one bookmark is not a campaign you can return to.
+The two fronts keep their own sectors, and the record survives a new run.
+
+**The attract mode.** After three seconds of nobody touching anything, the
+cabinet plays the game by itself behind the menu. A bot flies the aircraft: it
+lines up with the nearest enemy in front of it and gets out of the way of
+anything on its way down. It writes into the same input the keyboard writes
+into, so the tilt, the guns and the loops behave exactly as they do for a
+person. The demo never touches the campaign: the checkpoint does not move, no
+sector opens, and the points it scores stay out of the high score.
+
 ## Run it
 
-The game uses a service worker with root-absolute paths, so it must be served
-from the root of a host (opening `index.html` over `file://` will not work).
+Every path in this game is relative — the markup, the service worker
+registration, the precache list, the manifest — so it can be served from a
+sub-path as well as from the root of a host. It does need a real origin:
+opening `index.html` over `file://` will not work, because the service worker
+cannot register there.
 
 ```bash
 cd mustang-pwa
@@ -32,13 +84,34 @@ python3 -m http.server 8080
 
 The loop is the signature move: it makes you briefly invulnerable, but you
 cannot shoot while rolling, and each stage gives you only three. Whatever you
-do not spend is worth 1,000 points each at the end of the stage.
+do not spend is worth 1,000 points each at the end of the stage. Rolling
+*through* an enemy cuts it, and a chain of cuts pays a multiplier — see
+**Threading** below.
 
 ## Mechanics
 
+**Threading.** Rolling through an enemy deals one damage and adds one link to a
+chain, up to nine. The chain runs out two and a half seconds after the last
+cut. One enemy is one thread per 0.35 s, so a long roll through a formation
+does not count every frame, and a boss cannot be threaded at all. The trade is
+the point: you have no gun while you roll.
+
+**Extend.** Crossing 20,000, 60,000 or 150,000 points gives a life. The lives
+cap at six. A threshold that cannot be granted because you are already at the
+cap waits, and is granted as soon as a life goes missing.
+
 **Continue.** If you run out of aircraft the game offers to restart from the
 last sector you cleared, with three lives and the score back to zero. It is
-remembered per front and never moves backwards.
+remembered per front and never moves backwards. The **sector select** goes
+further: every sector you have finished is a button you can start from again.
+
+**Sector cards.** The eight sectors of a front are CHANNEL, NORTH SEA,
+NORMANDY, BERLIN, ARDENNES, RHINE, ALPS and VIENNA on the western front;
+MIDWAY, MARSHALL, ATTU, RABAUL, LEYTE, SAIPAN, IWO JIMA and OKINAWA on the
+Pacific one. Four stages to a sector. The briefing screen shows the card for
+the sector you are about to fly: the place, the date, and one line of
+situation. A sector opens for the sector select when the last of its four
+stages is behind you, not the first.
 
 **Difficulty.** Three presets, chosen on the title screen and remembered between
 runs. *Recruit* softens enemy speed, toughness, rate of fire, bullet speed and
@@ -66,9 +139,13 @@ colour is a different effect:
 **Yashichi.** A slow green plane drifts up from a bottom corner on stages 29,
 25, 21, 17, 13, 09, 05 and 01. Shoot it and it drops a medal worth 5,000.
 
-**Music.** A marching bassline with kick and hats plays while you fly and stops
-everywhere else: briefing, tally, pause, game over. Mute it with the speaker
-button.
+**Music.** Three tracks on the same eight-step grid, driven by a look-ahead
+scheduler that queues about four beats at a time so a throttled background tab
+cannot make it stutter. *Flight* is the march over the water. *Peril* is slower
+and has a tritone in the bass, and plays when you are down to your last life.
+*Boss* is faster and hammering, and plays while a boss is in the sky. The music
+plays only while you fly and stops everywhere else: briefing, tally, pause,
+game over. Mute it with the speaker button.
 
 **Bomber chains.** Big bombers climb up the screen from the bottom, shooting
 back with a tail gun. The first is worth 2,000, each successive one 500 more, up
@@ -83,6 +160,12 @@ loop. 100% pays a 50,000 SPECIAL bonus. The rate is weighted by what you shot
 down, not by how accurately you shoot: a Zero counts 1, a B-24 counts 6, a boss
 counts 20, and anything that escapes counts against you.
 
+**Attract mode.** Sit on the title screen for three seconds and the game starts
+playing itself behind the menu. The bot survives between thirteen seconds and
+nearly two minutes, and the demo starts again when it goes down. It never
+touches the campaign: no checkpoint moves, no sector opens, and its score does
+not reach the high score. Press Play and it stops.
+
 ## Tests
 
 No dependencies needed, plain `node`:
@@ -90,8 +173,8 @@ No dependencies needed, plain `node`:
 ```bash
 node --check src/data.js && node --check src/audio.js && node --check src/art.js && node --check src/game.js
 node tests/run-all.mjs         # everything below, with a summary
-node tests/check-data.mjs      # 1494 assertions over stage, enemy, music, difficulty, bonus tables
-node tests/smoke.mjs           # boots the game headless and plays it, 158 assertions
+node tests/check-data.mjs      # 1999 assertions over stage, enemy, music, difficulty, bonus, sector tables
+node tests/smoke.mjs           # boots the game headless and plays it, 211 assertions
 node tests/check-wiring.mjs    # DOM ids, asset paths, portability, precache list, manifest
 ```
 
@@ -102,7 +185,9 @@ regression shows up as a number changing rather than as a vague feeling.
 loop frame by frame: it starts a run, drags the plane with touch input, fires,
 uses a loop, collects every POW type, plays a stage to the shoot-down tally,
 fights and kills a boss, loses three lives to reach game over, and finally plays
-all 64 stages of both fronts to prove none of them can stall.
+all 64 stages of both fronts to prove none of them can stall. It also flies the
+attract demo, watches the bot stay in the air, and checks that the demo leaves
+the campaign alone.
 
 ## Layout
 
@@ -173,6 +258,9 @@ Fixed, and covered by the regression block in `tests/smoke.mjs`:
       look-ahead scheduler that queues about four beats at a time so a throttled
       background tab cannot make it stutter. It plays only while flying: silent
       on the briefing screen, the stage tally, the pause screen and game over.
+      There are three tracks now — the march, a peril one for when you are down
+      to your last life, and a boss one — and the game swaps between them
+      without stopping the music.
 - [x] Carrier landing at the end of a stage: the ship comes up from the bottom
       and the aircraft settles onto her deck with a touchdown line, before the
       tally fades in.
@@ -287,6 +375,8 @@ remaining cost is aircraft, armour and the HUD, which is the actual content.
       front, survives a reload, and never moves backwards. On game over a
       Continue button offers to restart from the last sector you cleared, with
       three lives and the score reset, so one bad stage is not a whole run.
+      Every finished sector is also a button you can start from again, which
+      is what turns the campaign into something you can return to.
 - [x] Screen shake on every kill, a harder shake and a hit-stop on boss hits and
       on your own death. Hit-stop is deliberately **not** applied to ordinary
       kills: in a game this dense it made the whole screen stutter every time a
@@ -326,3 +416,31 @@ remaining cost is aircraft, armour and the HUD, which is the actual content.
 - [ ] The repository root README still does not index any of its projects. Left
       alone deliberately: none of the other projects are listed either, so adding
       this one alone would be inconsistent. Worth doing for all six at once.
+
+## 🟡 The next layer
+
+The six additions described at the top of this file are in. These are the
+honest things they leave behind.
+
+- [ ] The bot is a demonstrator, not a rival. It dodges what is on its way
+      down and lines up with the nearest enemy, and it never spends a loop.
+      A rival that threads formations, rolls to survive a boss and picks up
+      crates would need a second brain, and a second brain is a second game
+      inside the game. **Cost:** the input layer is already the right shape
+      for it, but the collision model has no notion of what the bot wants.
+- [ ] The sector select keeps no memory of how you did. A best time and a best
+      score per sector would turn eight buttons from a re-play menu into a
+      scoreboard. **Cost:** a per-sector record, and a place to show it — the
+      buttons themselves are already eight slots wide.
+- [ ] Nobody will ever see the third extend. The thresholds are 20,000,
+      60,000 and 150,000, and a campaign that ends around 150,000 has one
+      extend in it, not three. Either the thresholds come down or the
+      campaign gets longer. **Cost:** a measured play-through of a real run,
+      which is also the only honest way to answer it.
+- [ ] The demo never says what it is playing. A caption naming the sector
+      would tell a watching player what they are looking at. **Cost:** one
+      line of text, and the demo would have to let the briefing card show.
+- [ ] Each track is eight steps long and loops, and the ear locks on. A second
+      phrase per track would stop it, the way a real arcade arrangement does.
+      **Cost:** sixteen more steps and a scheduler that can cross a bar
+      boundary without losing the beat.
