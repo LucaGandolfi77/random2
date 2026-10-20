@@ -509,6 +509,25 @@ S.lives = CFG.maxLives - 1;
 M.game.addScore(1);
 ok("the waiting threshold is granted when a life is lost", S.lives === CFG.maxLives, "lives " + S.lives);
 
+// The end-of-stage bonus goes through addScore, so it counts toward the
+// extends like every other point.
+console.log("\nstage bonus");
+armPlayer();
+M.game.startStage(0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.score = 19000;
+S.extendsGiven = 0;
+S.lives = 3;
+S.weightTotal = 100;
+S.weightKilled = 100;
+S.loops = 0;
+guard = 0;
+while (S.phase === "playing" && guard++ < 12000) { armPlayer(); step(1); }
+ok("the stage bonus is added to the score", S.score > 19000, "score " + S.score);
+ok("the stage bonus can grant an extend", S.lives > 3 || S.extendsGiven > 0,
+    "lives " + S.lives + ", granted " + S.extendsGiven);
+
 // ---- Threading: rolling through an enemy cuts it, and the chain pays ----
 console.log("\nthreading");
 armPlayer();

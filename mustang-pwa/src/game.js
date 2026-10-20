@@ -1231,7 +1231,7 @@
         const row = D.bonusFor(shootDownRate());
         state.accuracyBonus = row.pts;
         state.loopBonus = state.loops * config.loopBonus;
-        state.score += state.accuracyBonus + state.loopBonus;
+        addScore(state.accuracyBonus + state.loopBonus);
         state.phase = "clear";
         state.phaseTimer = 0;
         state.landing = 0;
