@@ -5,112 +5,112 @@
       "path": "/acqua-pwa/",
       "requests": 4,
       "bytes": 52988,
-      "dcl": 95,
-      "load": 96
+      "dcl": 63,
+      "load": 63
     },
     {
       "name": "alveare-pwa",
       "path": "/alveare-pwa/",
       "requests": 4,
       "bytes": 60425,
-      "dcl": 48,
-      "load": 49
+      "dcl": 59,
+      "load": 59
     },
     {
       "name": "anna-karenina-pwa",
       "path": "/anna-karenina-pwa/",
       "requests": 2,
       "bytes": 16628,
-      "dcl": 34,
-      "load": 34
+      "dcl": 40,
+      "load": 40
     },
     {
       "name": "anthology-pwa",
       "path": "/anthology-pwa/",
       "requests": 8,
       "bytes": 155828,
-      "dcl": 112,
-      "load": 112
+      "dcl": 134,
+      "load": 135
     },
     {
       "name": "bible-pwa",
       "path": "/bible-pwa/",
       "requests": 7,
       "bytes": 52426,
-      "dcl": 52,
-      "load": 52
+      "dcl": 35,
+      "load": 37
     },
     {
       "name": "brothers-karamazov-pwa",
       "path": "/brothers-karamazov-pwa/",
       "requests": 2,
       "bytes": 16812,
-      "dcl": 31,
-      "load": 31
+      "dcl": 22,
+      "load": 22
     },
     {
       "name": "bucio",
       "path": "/bucio/",
       "requests": 2,
       "bytes": 8718,
-      "dcl": 15,
-      "load": 18
+      "dcl": 17,
+      "load": 17
     },
     {
       "name": "census-pwa",
       "path": "/census-pwa/",
       "requests": 5,
       "bytes": 89712,
-      "dcl": 60,
-      "load": 60
+      "dcl": 59,
+      "load": 59
     },
     {
       "name": "crime-and-punishment-pwa",
       "path": "/crime-and-punishment-pwa/",
       "requests": 7,
       "bytes": 38687,
-      "dcl": 58,
-      "load": 59
+      "dcl": 135,
+      "load": 136
     },
     {
       "name": "divine-comedy-pwa",
       "path": "/divine-comedy-pwa/",
       "requests": 2,
       "bytes": 16570,
-      "dcl": 32,
-      "load": 32
+      "dcl": 42,
+      "load": 42
     },
     {
       "name": "dorian-gray-pwa",
       "path": "/dorian-gray-pwa/",
       "requests": 2,
       "bytes": 16917,
-      "dcl": 21,
-      "load": 21
+      "dcl": 37,
+      "load": 48
     },
     {
       "name": "example-pwa",
       "path": "/example-pwa/",
       "requests": 9,
       "bytes": 62691,
-      "dcl": 42,
-      "load": 42
+      "dcl": 62,
+      "load": 62
     },
     {
       "name": "formica-pwa",
       "path": "/formica-pwa/",
       "requests": 13,
       "bytes": 186736,
-      "dcl": 101,
-      "load": 101
+      "dcl": 111,
+      "load": 112
     },
     {
       "name": "invisible-cities-pwa",
       "path": "/invisible-cities-pwa/",
       "requests": 2,
       "bytes": 16749,
-      "dcl": 30,
-      "load": 31
+      "dcl": 46,
+      "load": 47
     },
     {
       "name": "ironfall-pwa",
@@ -118,63 +118,63 @@
       "requests": 20,
       "bytes": 556952,
       "dcl": 75,
-      "load": 77
+      "load": 75
     },
     {
       "name": "ivan-ilyich-pwa",
       "path": "/ivan-ilyich-pwa/",
       "requests": 2,
       "bytes": 16824,
-      "dcl": 28,
-      "load": 28
+      "dcl": 27,
+      "load": 29
     },
     {
       "name": "king-shot-pwa",
       "path": "/king-shot-pwa/",
       "requests": 4,
       "bytes": 48110,
-      "dcl": 20,
-      "load": 22
+      "dcl": 21,
+      "load": 23
     },
     {
       "name": "les-miserables-pwa",
       "path": "/les-miserables-pwa/",
       "requests": 2,
       "bytes": 17348,
-      "dcl": 19,
-      "load": 19
+      "dcl": 28,
+      "load": 28
     },
     {
       "name": "lumen-pwa",
       "path": "/lumen-pwa/",
       "requests": 13,
       "bytes": 168675,
-      "dcl": 75,
-      "load": 75
+      "dcl": 61,
+      "load": 61
     },
     {
       "name": "madre-pwa",
       "path": "/madre-pwa/",
       "requests": 4,
       "bytes": 56976,
-      "dcl": 92,
-      "load": 93
+      "dcl": 70,
+      "load": 72
     },
     {
       "name": "metro-pwa",
       "path": "/metro-pwa/",
       "requests": 4,
       "bytes": 75240,
-      "dcl": 41,
-      "load": 41
+      "dcl": 29,
+      "load": 30
     },
     {
       "name": "mustang-pwa",
       "path": "/mustang-pwa/",
       "requests": 6,
       "bytes": 144260,
-      "dcl": 48,
-      "load": 48
+      "dcl": 53,
+      "load": 54
     },
     {
       "name": "mycel-pwa",
@@ -189,56 +189,56 @@
       "path": "/nebbia-pwa/",
       "requests": 4,
       "bytes": 57442,
-      "dcl": 41,
-      "load": 44
+      "dcl": 63,
+      "load": 64
     },
     {
       "name": "new-star-soccer",
       "path": "/new-star-soccer/",
       "requests": 2,
       "bytes": 33700,
-      "dcl": 65,
-      "load": 65
+      "dcl": 21,
+      "load": 21
     },
     {
       "name": "plane-pwa",
       "path": "/plane-pwa/",
       "requests": 4,
       "bytes": 45669,
-      "dcl": 21,
-      "load": 21
+      "dcl": 26,
+      "load": 26
     },
     {
       "name": "pokemon-go-pwa",
       "path": "/pokemon-go-pwa/",
       "requests": 9,
-      "bytes": 293484,
-      "dcl": 96,
-      "load": 328
+      "bytes": 348665,
+      "dcl": 91,
+      "load": 248
     },
     {
       "name": "portfolio",
       "path": "/portfolio/",
       "requests": 8,
       "bytes": 758538,
-      "dcl": 177,
-      "load": 182
+      "dcl": 189,
+      "load": 189
     },
     {
       "name": "portfolio/cv.html",
       "path": "/portfolio/cv.html",
       "requests": 5,
       "bytes": 0,
-      "dcl": 38,
-      "load": 40
+      "dcl": 44,
+      "load": 46
     },
     {
       "name": "portfolio/notes/",
       "path": "/portfolio/notes/",
       "requests": 4,
       "bytes": 0,
-      "dcl": 42,
-      "load": 42
+      "dcl": 30,
+      "load": 31
     },
     {
       "name": "portfolio/notes/audit.html",
@@ -246,175 +246,175 @@
       "requests": 4,
       "bytes": 0,
       "dcl": 26,
-      "load": 26
+      "load": 27
     },
     {
       "name": "portfolio/notes/copy.html",
       "path": "/portfolio/notes/copy.html",
       "requests": 4,
       "bytes": 0,
-      "dcl": 30,
-      "load": 30
+      "dcl": 26,
+      "load": 26
     },
     {
       "name": "portfolio/notes/corpus.html",
       "path": "/portfolio/notes/corpus.html",
       "requests": 4,
       "bytes": 0,
-      "dcl": 20,
-      "load": 22
+      "dcl": 25,
+      "load": 25
     },
     {
       "name": "portfolio/now.html",
       "path": "/portfolio/now.html",
       "requests": 4,
       "bytes": 0,
-      "dcl": 29,
-      "load": 30
+      "dcl": 20,
+      "load": 22
     },
     {
       "name": "portfolio/verify.html",
       "path": "/portfolio/verify.html",
       "requests": 5,
       "bytes": 0,
-      "dcl": 36,
-      "load": 36
+      "dcl": 29,
+      "load": 32
     },
     {
       "name": "pulse-pwa",
       "path": "/pulse-pwa/",
       "requests": 8,
       "bytes": 98033,
-      "dcl": 77,
-      "load": 77
+      "dcl": 74,
+      "load": 76
     },
     {
       "name": "recherche-pwa",
       "path": "/recherche-pwa/",
       "requests": 7,
       "bytes": 42108,
-      "dcl": 70,
-      "load": 71
+      "dcl": 62,
+      "load": 62
     },
     {
       "name": "resort-pwa",
       "path": "/resort-pwa/",
       "requests": 4,
       "bytes": 94060,
-      "dcl": 57,
-      "load": 57
+      "dcl": 40,
+      "load": 41
     },
     {
       "name": "sartoria-pwa",
       "path": "/sartoria-pwa/",
       "requests": 3,
       "bytes": 158408,
-      "dcl": 74,
-      "load": 75
+      "dcl": 76,
+      "load": 76
     },
     {
       "name": "sector7-pwa",
       "path": "/sector7-pwa/",
       "requests": 18,
       "bytes": 574657,
-      "dcl": 94,
-      "load": 94
+      "dcl": 132,
+      "load": 136
     },
     {
       "name": "sini-pwa",
       "path": "/sini-pwa/",
       "requests": 4,
       "bytes": 59800,
-      "dcl": 44,
-      "load": 44
+      "dcl": 47,
+      "load": 47
     },
     {
       "name": "slot-pwa",
       "path": "/slot-pwa/",
       "requests": 4,
       "bytes": 43302,
-      "dcl": 34,
-      "load": 34
+      "dcl": 44,
+      "load": 45
     },
     {
       "name": "snake-pwa",
       "path": "/snake-pwa/",
       "requests": 4,
       "bytes": 50731,
-      "dcl": 30,
-      "load": 30
+      "dcl": 40,
+      "load": 40
     },
     {
       "name": "snap-pwa",
       "path": "/snap-pwa/",
       "requests": 4,
       "bytes": 73871,
-      "dcl": 46,
-      "load": 46
+      "dcl": 33,
+      "load": 33
     },
     {
       "name": "static-pwa",
       "path": "/static-pwa/",
       "requests": 4,
       "bytes": 51551,
-      "dcl": 41,
-      "load": 41
+      "dcl": 39,
+      "load": 39
     },
     {
       "name": "stats-pwa",
       "path": "/stats-pwa/",
       "requests": 5,
       "bytes": 93900,
-      "dcl": 82,
-      "load": 82
+      "dcl": 60,
+      "load": 60
     },
     {
       "name": "territorio-pwa",
       "path": "/territorio-pwa/",
       "requests": 5,
       "bytes": 41624,
-      "dcl": 53,
-      "load": 53
+      "dcl": 41,
+      "load": 41
     },
     {
       "name": "the-trial-pwa",
       "path": "/the-trial-pwa/",
       "requests": 2,
       "bytes": 16959,
-      "dcl": 39,
-      "load": 39
+      "dcl": 22,
+      "load": 26
     },
     {
       "name": "tiny-tower-pwa",
       "path": "/tiny-tower-pwa/",
       "requests": 3,
       "bytes": 88877,
-      "dcl": 40,
-      "load": 40
+      "dcl": 47,
+      "load": 48
     },
     {
       "name": "underground-pwa",
       "path": "/underground-pwa/",
       "requests": 2,
       "bytes": 17283,
-      "dcl": 18,
-      "load": 19
+      "dcl": 21,
+      "load": 21
     },
     {
       "name": "virtual-farm-pwa",
       "path": "/virtual-farm-pwa/",
       "requests": 3,
       "bytes": 35420,
-      "dcl": 32,
-      "load": 32
+      "dcl": 36,
+      "load": 36
     },
     {
       "name": "viti-pwa",
       "path": "/viti-pwa/",
       "requests": 4,
       "bytes": 64494,
-      "dcl": 37,
-      "load": 38
+      "dcl": 33,
+      "load": 35
     }
   ]
 }

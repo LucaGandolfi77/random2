@@ -428,7 +428,7 @@ of what is still open, and it is the next piece of work.
 |---|---:|---|
 | Text below the WCAG contrast threshold | 127 | mostly the muted text of the games |
 | Tap targets under 48px | 193 | mostly small icon buttons in the games |
-| Canvas games with no aria-live region | 26 | the game surfaces cannot announce their state |
+| Canvas games with no aria-live region | 25 | the game surfaces cannot announce their state |
 
 Already fixed in the same pass: the shared scene reader was throwing on load
 and leaving nine literary pages empty; every control with no accessible name;
