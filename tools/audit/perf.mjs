@@ -101,10 +101,14 @@ for (const page of PAGES) {
       expression: `(() => {
         const n = performance.getEntriesByType("navigation")[0];
         if (!n) return "{}";
+        /* Rounded to the nearest 50ms: a number that moves by a few
+           milliseconds on every run is noise, and the report has to be
+           reproducible enough to commit. */
+        const round = (ms) => Math.round(ms / 50) * 50;
         return JSON.stringify({
-          dcl: Math.round(n.domContentLoadedEventEnd),
-          load: Math.round(n.loadEventEnd),
-          dom: Math.round(n.domInteractive),
+          dcl: round(n.domContentLoadedEventEnd),
+          load: round(n.loadEventEnd),
+          dom: round(n.domInteractive),
         });
       })()`,
       returnByValue: true,

@@ -155,8 +155,8 @@ ${perfRows ? `
       <span class="it" lang="it">Prestazioni, misurate</span>
     </h2>
     <p class="audit-note">
-      <span class="en">Transferred bytes, request count and the two navigation timings, from a cold cache on a fixed viewport. The measurement device is fixed so the numbers are comparable between runs and between projects.</span>
-      <span class="it" lang="it">Byte trasferiti, numero di richieste e i due tempi di navigazione, da cache vuota su un viewport fisso. Il dispositivo di misura è fisso, così i numeri sono confrontabili fra esecuzioni e fra progetti.</span>
+      <span class="en">Transferred bytes, request count and the two navigation timings, from a cold cache on a fixed viewport. The measurement device is fixed so the numbers are comparable between runs and between projects, and the timings are rounded to the nearest 50&nbsp;ms — a number that moves by a few milliseconds on every run is noise, not a measurement.</span>
+      <span class="it" lang="it">Byte trasferiti, numero di richieste e i due tempi di navigazione, da cache vuota su un viewport fisso. Il dispositivo di misura è fisso, così i numeri sono confrontabili fra esecuzioni e fra progetti, e i tempi sono arrotondati ai 50&nbsp;ms più vicini — un numero che si muove di qualche millisecondo a ogni esecuzione è rumore, non una misura.</span>
     </p>
     <table class="audit-table">
       <thead>
