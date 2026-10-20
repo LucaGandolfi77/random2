@@ -15,7 +15,8 @@ distance and mirror correctly on the front camera.
 | 🐱 Cat | 🐰 Bunny | 🤖 Robot | 🤠 Cowboy |
 | 😈 Devil | 😇 Angel | 🌸 Blush | 🤮 Rainbow |
 | 🦊 Fox | 🐼 Panda | 🧛 Vampire | 🧙 Wizard |
-| 🐝 Bee | 🎩 Top Hat & Monocle | | |
+| 🐝 Bee | 🎩 Top Hat & Monocle | 🧔 Wig | 🥸 Moustache |
+| 🏴 Eyepatch | 🫧 Bubbles | | |
 
 **Forehead quizzes** — the card spins the answers and then locks onto one.
 The draw comes from the clock, so the preview and the photo always agree.
@@ -30,7 +31,8 @@ in the photo exactly as they looked in the preview.
 |---|---|---|---|
 | 🌑 Vignette | 🎞️ Grain | 📼 VHS | ☁️ Dream (bloom) |
 | 💫 Light Leak | 📆 Instant Film | 🎞️ Cinema | 🧊 Frost |
-| ⚡ Glitch | 🌈 Prism | | |
+| ⚡ Glitch | 🌈 Prism | 🎟️ Ticket | 🔲 Corners |
+| 🎞️ Film strip | ✨ Dust | 🌟 Rim light | |
 
 **Colour grades** — baked into the pixels of the photo, with a CSS
 equivalent for the live preview.
@@ -40,6 +42,7 @@ equivalent for the live preview.
 | ⚪ B/N | 🎩 Noir | 🟤 Sepia | 🌈 Vivid |
 | 🧊 Cold | 🔥 Warm | 🌓 Negative | 🟣 Duotone |
 | 🟪 Neon | 💙 Cyanotype | 🌡️ Thermal | 🌀 Psychedelic |
+| ☀️ Solarized | 🌿 Infrared | 📟 Amber | 🔀 Cross |
 | 🟪 Mosaic | | | |
 
 **Looks** — a lens, a frame and a grade in one tap. They sit in their own
@@ -49,6 +52,23 @@ row above the carousel, because they are combinations and not filters.
 |---|---|---|---|---|
 | 🪩 Disco | 🎩 Noir | 🎞️ Cinema | 🌊 Wave |
 | 👸 Ice Queen | | | | |
+
+## The games
+
+Two minigames that use the body instead of the fingers. They need the face
+landmarks the lenses already use, so nothing extra is downloaded.
+
+- 🥁 **Drums** — a kit at the bottom of the frame. Move your head over a
+  pad and open your mouth to hit it. Tilt your head for the crash, blink
+  for the hi-hat. The score counts the hits and the combo counts the
+  ones in a row.
+- 🦆 **Duck** — a rubber duck swims across the frame. Open your mouth when
+  it is in front of you to catch it. Three ducks get away and the game is
+  over.
+
+Their sounds are synthesised: a kick is a sine that falls, a snare is a
+burst of noise through a bandpass, a quack is a sawtooth with a fast
+vibrato. There is no asset to download and none to licence.
 
 ## Requirements
 
@@ -79,6 +99,7 @@ snap-pwa/
 ├── styles.css          the styles, with the token scale at the top
 ├── app.js              the camera, the shot, the memories
 ├── filters.js          the filter registry, the lenses, the frames
+├── minigames.js        the drum kit and the duck
 ├── ui.js               the bottom sheet, the settings, the favourites
 ├── manifest.json
 ├── service-worker.js   the shell, and the engine on first use
@@ -111,7 +132,14 @@ the order of how much it would be worth doing.
       face.
 - [ ] **An animated lens.** The hair and the rainbow do not move with the
       face; the landmarks are not tracked between frames, only within one.
-- [ ] **A lens for the hands.** The tracker only gives a face.
+- [ ] **A lens for the hands.** The tracker only gives a face. The
+      vendored bundle has the HandLandmarker and the PoseLandmarker in it,
+      but not the models: the hand model is ~7.5 MB and the pose one ~6 MB,
+      and the app promises never to reach the internet, so they would have
+      to be vendored too. That is a decision about the size of the
+      repository, not about the code.
+- [ ] **A minigame that uses the hands**, once there is a hand model: the
+      drums would be better with hands than with a mouth.
 
 ## Frames
 

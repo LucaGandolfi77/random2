@@ -58,12 +58,18 @@ export const FILTRI = [
   { id: 'angelo',   nome: 'Angel',    emoji: '😇', volto: true },
   { id: 'blush',    nome: 'Blush',     emoji: '🌸', volto: true },
   { id: 'arcoboca', nome: 'Rainbow', emoji: '🤮', volto: true },
+  { id: 'batteria', nome: 'Drums',   emoji: '🥁', volto: true, minigame: 'batteria' },
+  { id: 'anatra',   nome: 'Duck',    emoji: '🦆', volto: true, minigame: 'anatra' },
   { id: 'volpe',    nome: 'Fox',         emoji: '🦊', volto: true },
   { id: 'panda',    nome: 'Panda',       emoji: '🐼', volto: true },
   { id: 'vampiro',  nome: 'Vampire',     emoji: '🧛', volto: true },
   { id: 'mago',     nome: 'Wizard',      emoji: '🧙', volto: true },
   { id: 'ape',      nome: 'Bee',         emoji: '🐝', volto: true },
   { id: 'cilindro', nome: 'Top Hat',     emoji: '🎩', volto: true },
+  { id: 'parrucca', nome: 'Wig',         emoji: '🧔', volto: true },
+  { id: 'baffi',    nome: 'Moustache',   emoji: '🥸', volto: true },
+  { id: 'benda',    nome: 'Eyepatch',    emoji: '🏴', volto: true },
+  { id: 'bolle',    nome: 'Bubbles',    emoji: '🫧', volto: true },
   { id: 'quiz-animale', nome: 'Which animal?', emoji: '🐾', volto: true, quiz: 'animali' },
   { id: 'quiz-cibo',    nome: 'Which food?',    emoji: '🍽️', volto: true, quiz: 'cibo' },
   { id: 'quiz-mood',    nome: 'Which mood?',    emoji: '⚡', volto: true, quiz: 'mood' },
@@ -86,6 +92,10 @@ export const FILTRI = [
   { id: 'duotone',  nome: 'Duotone',   emoji: '🟣', css: 'grayscale(1) sepia(1) hue-rotate(225deg) saturate(2.6) contrast(1.05)', op: 'duotone' },
   { id: 'neon',     nome: 'Neon',      emoji: '🟪', css: 'saturate(2.4) contrast(1.28) hue-rotate(-12deg)', op: 'neon' },
   { id: 'cianotipo', nome: 'Cyanotype', emoji: '💙', css: 'grayscale(1) contrast(1.25) sepia(0.55) hue-rotate(178deg) saturate(2.4)', op: 'cianotipo' },
+  { id: 'solarizzato', nome: 'Solarized', emoji: '☀️', css: 'saturate(1.2) contrast(1.05) sepia(0.3) hue-rotate(322deg)', op: 'solarizzato' },
+  { id: 'infrarosso', nome: 'Infrared', emoji: '🌿', css: 'grayscale(1) sepia(1) hue-rotate(70deg) saturate(3.2) contrast(1.05)', op: 'infrarosso' },
+  { id: 'ambrato', nome: 'Amber', emoji: '📟', css: 'grayscale(1) sepia(1) saturate(3) hue-rotate(352deg) brightness(1.05)', op: 'ambrato' },
+  { id: 'crosprocess', nome: 'Cross', emoji: '🔀', css: 'saturate(1.35) contrast(1.06) hue-rotate(-16deg)', op: 'crosprocess' },
   // `live: true` = the preview uses the same ramp as the photo (at a low
   // resolution); without it the CSS showed a red heatmap with black.
   // resolution); without it the CSS showed a red heatmap with black.
@@ -97,6 +107,11 @@ export const FILTRI = [
   { id: 'gelo',     nome: 'Frost',     emoji: '🧊', cornice: 'gelo' },
   { id: 'glitch',   nome: 'Glitch',    emoji: '⚡', cornice: 'glitch' },
   { id: 'prisma',   nome: 'Prism',     emoji: '🌈', cornice: 'prisma' },
+  { id: 'biglietto', nome: 'Ticket',   emoji: '🎟️', cornice: 'biglietto' },
+  { id: 'angoli',   nome: 'Corners',   emoji: '🔲', cornice: 'angoli' },
+  { id: 'perforazioni', nome: 'Film strip', emoji: '🎞️', cornice: 'perforazioni' },
+  { id: 'polvere',  nome: 'Dust',      emoji: '✨', cornice: 'polvere' },
+  { id: 'alone',    nome: 'Rim light', emoji: '🌟', cornice: 'alone' },
   { id: 'psichedelico', nome: 'Psychedelic', emoji: '🌀', animato: true, op: 'psichedelico' },
 ];
 
@@ -384,26 +399,79 @@ const mid = (P, i, j) => {
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
 /* ============================================================
+ * READING THE FACE
+ * ============================================================ */
+
+/**
+ * What the face is doing, in the terms the minigames need: where it is,
+ * how open the mouth is, how far the head is tilted, and how far the
+ * eyelids have closed.
+ *
+ * The two "how much" numbers are ratios, not distances, so they mean the
+ * same thing for a face at ten centimetres and a face at two metres. And
+ * the callers measure them against a resting baseline rather than a fixed
+ * threshold, because a face that is already talking is not a face that is
+ * about to hit a drum.
+ */
+export function leggiVolto(fc) {
+  const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+  const occhiSx = mid(P, 'occhioSxEst', 'occhioSxInt');
+  const occhiDx = mid(P, 'occhioDxEst', 'occhioDxInt');
+  const bocca = mid(P, 'labbroSup', 'labbroInf');
+
+  /* the mouth: the distance between the lips, over the height of the face */
+  const apertura = dist(P(LM.labbroSup), P(LM.labbroInf)) / Math.max(av, 0.0001);
+
+  /* the blink: how far the eyelids have closed, over the width of the eye */
+  const palpebra = Math.abs(P(159)[1] - P(145)[1]);
+  const larghezzaOcchio = dist(P(33), P(133));
+  const battito = 1 - Math.min(1, palpebra / Math.max(larghezzaOcchio * 0.42, 0.0001));
+
+  return {
+    centro: [(occhiSx[0] + occhiDx[0]) / 2, (occhiSx[1] + occhiDx[1]) / 2],
+    occhiSx, occhiDx, bocca,
+    apertura, battito,
+    roll: angolo,
+    lv, av,
+  };
+}
+
+/* ============================================================
  * DRAWING THE FACE LENSES
  * ============================================================ */
 
-export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
-  if (!landmarks?.length) return false;
-  const { specchio } = geom;
+/**
+ * The face context: the landmarks, projected, and the handful of measures
+ * every lens needs. It is built once per frame and shared, so the lenses
+ * and the minigames are looking at exactly the same face.
+ */
+export function contestoVolto(landmarks, geom) {
   const P = creaProiettore(geom, landmarks);
   const occhioSx = mid(P, 'occhioSxEst', 'occhioSxInt');
   const occhioDx = mid(P, 'occhioDxEst', 'occhioDxInt');
+  const fc = {
+    P,
+    occhioSx,
+    occhioDx,
+    larghezzaVolto: dist(P(LM.guanciaSx), P(LM.guanciaDx)),
+    altezzaVolto: dist(P(LM.fronte), P(LM.mento)),
+    angolo: Math.atan2(occhioDx[1] - occhioSx[1], occhioDx[0] - occhioSx[0]),
+    specchio: geom.specchio,
+  };
+  fc.latoSchermo = (lato) => lato * (fc.specchio ? -1 : 1);
+  return fc;
+}
+
+export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
+  if (!landmarks?.length) return false;
+  const fc = contestoVolto(landmarks, geom);
   // malformed landmarks: better not to draw than to draw in the void
-  if (!Number.isFinite(occhioSx[0] + occhioSx[1] + occhioDx[0] + occhioDx[1])) return false;
-  const larghezzaVolto = dist(P(LM.guanciaSx), P(LM.guanciaDx));
-  const altezzaVolto = dist(P(LM.fronte), P(LM.mento));
-  const angolo = Math.atan2(occhioDx[1] - occhioSx[1], occhioDx[0] - occhioSx[0]);
-  const fc = { P, occhioSx, occhioDx, larghezzaVolto, altezzaVolto, angolo, specchio };
+  if (!Number.isFinite(fc.occhioSx[0] + fc.occhioSx[1] + fc.occhioDx[0] + fc.occhioDx[1])) return false;
+  const { larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+
   // With the front camera the projector mirrors the coordinates: landmark
   // 234 (cheekL) ends up on the right of the screen. Without this, ears
   // and other accessories drawn towards that side would land inside the face.
-  fc.latoSchermo = (lato) => lato * (specchio ? -1 : 1);
-
   if (filtro.quiz) return disegnaQuiz(ctx, fc, filtro, t);
 
   /* A look carries the lens it wants in `lente`; a plain filter is its own
@@ -427,6 +495,10 @@ export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
     case 'mago':     return disegnaMago(ctx, fc);
     case 'ape':      return disegnaApe(ctx, fc);
     case 'cilindro': return disegnaCilindro(ctx, fc);
+    case 'parrucca': return disegnaParrucca(ctx, fc);
+    case 'baffi':    return disegnaBaffi(ctx, fc);
+    case 'benda':    return disegnaBenda(ctx, fc);
+    case 'bolle':    return disegnaBolle(ctx, fc, t);
   }
   return false;
 }
@@ -1121,6 +1193,104 @@ function disegnaCilindro(ctx, fc) {
   return true;
 }
 
+/* --- 🧔 wig: a big hair shape above the forehead --- */
+function disegnaParrucca(ctx, fc) {
+  const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+  const f = P(LM.fronte);
+  ctx.save();
+  ctx.translate(f[0], f[1] + av * 0.04);
+  ctx.rotate(angolo * 0.4);
+  ctx.fillStyle = '#2a1d16';
+  ctx.beginPath();
+  ctx.ellipse(0, -av * 0.30, lv * 0.40, av * 0.26, 0, Math.PI, Math.PI * 2);
+  ctx.fill();
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.ellipse(s * lv * 0.33, -av * 0.06, lv * 0.10, av * 0.16, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // a few strands catching the light
+  ctx.strokeStyle = 'rgba(255, 220, 170, 0.32)';
+  ctx.lineWidth = Math.max(1.5, lv * 0.012);
+  for (let i = 0; i < 5; i++) {
+    const a0 = Math.PI + (i / 4) * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(0, -av * 0.18);
+    ctx.quadraticCurveTo(Math.cos(a0) * lv * 0.3, -av * 0.38, Math.cos(a0) * lv * 0.38, -av * 0.26);
+    ctx.stroke();
+  }
+  ctx.restore();
+  return true;
+}
+
+/* --- 🥸 moustache: a handlebar under the nose --- */
+function disegnaBaffi(ctx, fc) {
+  const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
+  const n = P(LM.naso);
+  ctx.save();
+  ctx.translate(n[0], n[1] + av * 0.075);
+  ctx.rotate(angolo);
+  for (const s of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.bezierCurveTo(s * lv * 0.10, -av * 0.055, s * lv * 0.22, -av * 0.035, s * lv * 0.24, av * 0.005);
+    ctx.bezierCurveTo(s * lv * 0.16, av * 0.020, s * lv * 0.06, av * 0.018, 0, 0);
+    ctx.closePath();
+    ctx.fillStyle = '#3a2418';
+    ctx.fill();
+  }
+  ctx.restore();
+  return true;
+}
+
+/* --- 🏴 eyepatch: a patch over one eye, and its strap --- */
+function disegnaBenda(ctx, fc) {
+  const { P, occhioSx, occhioDx, larghezzaVolto: lv, altezzaVolto: av, angolo, specchio } = fc;
+  const occhio = specchio ? occhioDx : occhioSx;
+  ctx.save();
+  ctx.translate(occhio[0], occhio[1]);
+  ctx.rotate(angolo);
+  ctx.strokeStyle = 'rgba(20, 16, 12, 0.85)';
+  ctx.lineWidth = Math.max(2, lv * 0.03);
+  ctx.beginPath();
+  ctx.moveTo(-lv * 0.42, -av * 0.04);
+  ctx.lineTo(lv * 0.42, -av * 0.10);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(0, 0, lv * 0.13, av * 0.10, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#14100c';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+  ctx.lineWidth = Math.max(1, lv * 0.008);
+  ctx.stroke();
+  ctx.restore();
+  return true;
+}
+
+/* --- 🫧 bubbles: they rise from the mouth --- */
+function disegnaBolle(ctx, fc, t) {
+  const { P, larghezzaVolto: lv, altezzaVolto: av } = fc;
+  const b = mid(P, 'labbroSup', 'labbroInf');
+  for (let i = 0; i < 7; i++) {
+    const fase = (t * 0.5 + i * 0.37) % 1;
+    const r = lv * (0.03 + fase * 0.05);
+    const x = b[0] + Math.sin(i * 2.1 + t * 1.3) * lv * 0.12;
+    const y = b[1] - fase * av * 0.75;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(210, 240, 255, 0.26)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = Math.max(1, r * 0.14);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x - r * 0.32, y - r * 0.32, r * 0.22, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fill();
+  }
+  return true;
+}
+
 /* ---------- shared drawing helpers ---------- */
 
 function rettangoloTondo(ctx, x, y, w, h, r) {
@@ -1337,6 +1507,97 @@ export function disegnaCornice(ctx, filtro, W, H, t, bloom = false) {
       ctx.fill();
     }
     ctx.restore();
+  } else if (filtro.cornice === 'biglietto') {
+    // a ticket stub across the bottom, with a barcode
+    const h = Math.max(46, H * 0.09);
+    const y = H - h;
+    ctx.fillStyle = 'rgba(250, 246, 236, 0.94)';
+    ctx.fillRect(0, y, W, h);
+    // the perforation
+    ctx.fillStyle = 'rgba(0,0,0,0.16)';
+    const passo = Math.max(7, h * 0.16);
+    for (let x = W * 0.52; x < W; x += passo) {
+      ctx.beginPath();
+      ctx.arc(x, y + h * 0.22, passo * 0.22, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // the barcode
+    ctx.fillStyle = '#20160a';
+    let x = W * 0.56;
+    while (x < W - 14) {
+      const w = 1 + ((x * 7919) % 3);
+      ctx.fillRect(x, y + h * 0.45, w, h * 0.42);
+      x += w + 2 + ((x * 104729) % 3);
+    }
+    // the text
+    ctx.fillStyle = '#20160a';
+    ctx.font = `700 ${Math.max(9, h * 0.22)}px "Courier New", ui-monospace, monospace`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText('SNAP PWA · 1 OF 1', 14, y + h * 0.5);
+  } else if (filtro.cornice === 'angoli') {
+    // the four corners that hold a print down
+    const c = Math.min(W, H) * 0.13;
+    const spessore = Math.max(8, c * 0.22);
+    ctx.fillStyle = 'rgba(248, 244, 234, 0.92)';
+    for (const [sx, sy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
+      const x = sx ? W - c : 0;
+      const y = sy ? H - c : 0;
+      ctx.beginPath();
+      ctx.moveTo(x + (sx ? -c : c), y);
+      ctx.lineTo(x + (sx ? 0 : c * 1.6), y);
+      ctx.lineTo(x, y + (sy ? -c : c * 1.6));
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.fillRect(0, 0, W, spessore * 0.25);
+  } else if (filtro.cornice === 'perforazioni') {
+    // the film strip: sprocket holes down both sides
+    const largh = Math.max(22, W * 0.045);
+    const passo = Math.max(26, H * 0.075);
+    ctx.fillStyle = 'rgba(12, 12, 16, 0.85)';
+    ctx.fillRect(0, 0, largh, H);
+    ctx.fillRect(W - largh, 0, largh, H);
+    ctx.fillStyle = 'rgba(245, 240, 225, 0.85)';
+    for (let y = passo * 0.25; y < H; y += passo) {
+      ctx.fillRect(largh * 0.24, y, largh * 0.52, passo * 0.34);
+      ctx.fillRect(W - largh * 0.76, y, largh * 0.52, passo * 0.34);
+    }
+  } else if (filtro.cornice === 'polvere') {
+    // dust and the scratches an old print carries
+    ctx.strokeStyle = 'rgba(255, 250, 235, 0.16)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 9; i++) {
+      const x = ((i * 137.5 + t * 3) % 100) / 100 * W;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + (i % 3 - 1) * 6, H);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(255, 250, 235, 0.35)';
+    for (let i = 0; i < 26; i++) {
+      const x = ((i * 61.8) % 100) / 100 * W;
+      const y = ((i * 43.1 + t * 5) % 100) / 100 * H;
+      ctx.fillRect(x, y, 2, 2);
+    }
+  } else if (filtro.cornice === 'alone') {
+    // a rim of light down the edges
+    const spessore = Math.max(14, Math.min(W, H) * 0.05);
+    const g1 = ctx.createLinearGradient(0, 0, spessore, 0);
+    g1.addColorStop(0, 'rgba(120, 220, 255, 0.34)');
+    g1.addColorStop(1, 'rgba(120, 220, 255, 0)');
+    ctx.fillStyle = g1;
+    ctx.fillRect(0, 0, spessore, H);
+    const g2 = ctx.createLinearGradient(W, 0, W - spessore, 0);
+    g2.addColorStop(0, 'rgba(255, 140, 220, 0.34)');
+    g2.addColorStop(1, 'rgba(255, 140, 220, 0)');
+    ctx.fillStyle = g2;
+    ctx.fillRect(W - spessore, 0, spessore, H);
+    const g3 = ctx.createLinearGradient(0, 0, 0, spessore);
+    g3.addColorStop(0, 'rgba(180, 150, 255, 0.28)');
+    g3.addColorStop(1, 'rgba(180, 150, 255, 0)');
+    ctx.fillStyle = g3;
+    ctx.fillRect(0, 0, W, spessore);
   }
 }
 
@@ -1396,6 +1657,37 @@ const OPS_PIXEL = {
       clamp255(v * 0.20 + 10),
       clamp255(v * 0.50 + 28),
       clamp255(v * 0.95 + 58),
+    ];
+  },
+  solarizzato(d) {
+    // blue shadows, warm highlights: the look of a cross-processed slide
+    const l = (0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255;
+    const ombra = Math.max(0, 1 - l * 2);
+    const luce = Math.max(0, l * 1.6 - 0.6);
+    return [
+      clamp255(d[0] * (1 - 0.35 * ombra) + 255 * luce * 0.30),
+      clamp255(d[1] * (1 - 0.10 * ombra) + 255 * luce * 0.20),
+      clamp255(d[2] * (1 + 0.45 * ombra) + 255 * luce * 0.02),
+    ];
+  },
+  infrarosso(d) {
+    // the green of an infrared film
+    const l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2];
+    return [clamp255(l * 0.25), clamp255(l * 0.95), clamp255(l * 0.35)];
+  },
+  ambrato(d) {
+    // an amber terminal
+    const l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2];
+    return [clamp255(l * 1.05 + 25), clamp255(l * 0.72 + 6), clamp255(l * 0.15)];
+  },
+  crosprocess(d) {
+    // teal shadows, magenta highlights
+    const l = (0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255;
+    const s = 1 - l;
+    return [
+      clamp255(d[0] * (0.85 + 0.40 * l) + 70 * s),
+      clamp255(d[1] * (0.90 + 0.15 * l) + 25 * s),
+      clamp255(d[2] * (0.75 + 0.65 * l) + 40 * s),
     ];
   },
   duotone(d) {

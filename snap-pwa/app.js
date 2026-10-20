@@ -4,12 +4,13 @@
  */
 
 import {
-  FILTRI, LOOKS, filtroPerId, ensureEngineVolto, ensureEngineStill, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
+  FILTRI, LOOKS, filtroPerId, ensureEngineVolto, ensureEngineStill, contestoVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
 } from './filters.js';
 import {
   impostazioni, salvaImpostazioni, preferiti, togglePreferito, ePreferito,
   apriFoglio, chiudiFoglio, collegaFoglio, alChiudi,
 } from './ui.js';
+import { disegnaMinigioco, azzeraMinigioco } from './minigames.js';
 
 /* ---------- DOM references ---------- */
 const $ = (sel) => document.querySelector(sel);
@@ -120,6 +121,15 @@ function loop() {
   window.__dbg.chiamate = (window.__dbg.chiamate || 0) + 1;
   if (filtro.volto && !stato.comparando) {
     gestisciFiltroVolto(filtro, t);
+    /* the minigames use the same face, so they are drawn right after the
+       lens and read the same landmarks */
+    if (filtro.minigame && stato.landmarks) {
+      disegnaMinigioco(octx, filtro.minigame, contestoVolto(stato.landmarks, {
+        W: overlay.width, H: overlay.height,
+        vw: video.videoWidth, vh: video.videoHeight,
+        specchio: stato.frontale,
+      }), t, overlay.width, overlay.height);
+    }
   } else {
     stato.landmarks = null;
     if (stato.filtroId !== 'nessuno') nascondiStatus();
@@ -672,6 +682,7 @@ function chiudiViewer() {
 /* Which shelf a filter belongs on. It is derived, not declared, so a new
    filter lands on the right shelf without anyone having to remember. */
 function gruppoDi(f) {
+  if (f.minigame) return 'games';
   if (f.quiz) return 'quizzes';
   if (f.volto) return 'lenses';
   if (f.cornice) return 'frames';
@@ -679,6 +690,7 @@ function gruppoDi(f) {
 }
 
 const GRUPPI = [
+  ['Games', 'games'],
   ['Lenses', 'lenses'],
   ['Frames', 'frames'],
   ['Colours', 'colours'],
@@ -926,6 +938,7 @@ function selezionaFiltro(id, origine) {
   stato.landmarks = null;
   stato.engineStato = stato.engineStato === 'errore' ? 'idle' : stato.engineStato;
   resetQuizStati(); // the quizzes restart with a new draw
+  if (filtroPerId(id).minigame) azzeraMinigioco(filtroPerId(id).minigame);
   /* Only one of the two rows can be the active one: a look is a
      combination, and a filter is one thing. */
   for (const c of carousel.children) c.classList.toggle('attiva', c.dataset.id === id);

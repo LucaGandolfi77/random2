@@ -817,13 +817,19 @@ and a stack of image filters. Snaps live only on your device.
 
 - Face lenses: 🐶 dog, 😎 shades, 👑 crown, 😍 heart eyes, 🐱 cat, 🐰 rabbit,
   🤖 robot, 🤠 cowboy, 😈 devil, 😇 angel, 🦊 fox, 🐼 panda, 🧛 vampire,
-  🧙 wizard, 🐝 bee, 🎩 top hat & monocle, plus animated "quiz" lenses that
-  draw a random animal/food/mood on your forehead
+  🧙 wizard, 🐝 bee, 🎩 top hat & monocle, 🧔 wig, 🥸 moustache, 🏴 eyepatch,
+  🫧 bubbles, plus animated "quiz" lenses that draw a random
+  animal/food/mood on your forehead
 - Film filters: B/W, noir, sepia, vivid, cold, warm, negative, psychedelic
   (animated), mosaic, vignette, grain, VHS (scanlines), duotone, thermal,
-  dream (bloom), neon, cyanotype
+  dream (bloom), neon, cyanotype, solarized, infrared, amber, cross-process
 - Frames: light leak, instant film with a date back, 2.39:1 cinema with a
-  frame counter, frost, glitch, prism
+  frame counter, frost, glitch, prism, ticket stub, photo corners, film
+  strip, dust, rim light
+- **Minigames that use the body**: 🥁 drums (move your head over a pad and
+  open your mouth to hit it, tilt for the crash, blink for the hi-hat) and
+  🦆 duck (a rubber duck swims across the frame; open your mouth to catch
+  it). The sounds are synthesised, so there is nothing to download.
 - **Looks**: a lens, a frame and a grade in one tap
 - Front/back switching with auto-mirror on the front camera, screen flash
 - Shot → caption → save to **Memories** (IndexedDB) / download / share;
