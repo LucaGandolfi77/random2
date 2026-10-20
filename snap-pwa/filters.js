@@ -1,37 +1,39 @@
 /**
- * ===== Snap PWA — motore dei filtri =====
+ * ===== Snap PWA — the filter engine =====
  *
- * Due famiglie di filtri:
- *  1. Lenti volto (face:true): tracciano il volto con MediaPipe FaceLandmarker
- *     (478 landmark) e disegnano accessori ancorati a occhi/naso/bocca.
- *     L'engine è caricato lazy al primo filtro volto (~3.7 MB, una volta sola).
- *  2. Filtri immagine: CSS sul <video> in anteprima + operazioni per-pixel
- *     sul canvas al momento dello scatto (così anteprima e foto coincidono
- *     anche dove CanvasRenderingContext2D.filter non esiste, es. iOS < 18).
+ * Two families of filters:
+ *  1. Face lenses (face:true): they track the face with MediaPipe's
+ *     FaceLandmarker (478 landmarks) and draw accessories anchored to the
+ *     eyes, nose and mouth. The engine loads lazily on the first face
+ *     filter (~3.7 MB, once).
+ *  2. Image filters: CSS on the <video> for the live preview, plus
+ *     per-pixel operations on the canvas at the moment of the shot (so the
+ *     preview and the photo agree even where CanvasRenderingContext2D.filter
+ *     does not exist, e.g. iOS < 18).
  */
 
-/* ---------- indici landmark del face mesh ---------- */
+/* ---------- face mesh landmark indices ---------- */
 const LM = {
   naso: 4,
   mento: 152,
   fronte: 10,
-  occhioSxEst: 33, occhioSxInt: 133,   // occhio sinistro del soggetto
+  occhioSxEst: 33, occhioSxInt: 133,   // the subject's left eye
   occhioDxEst: 263, occhioDxInt: 362,
-  guanciaSx: 234, guanciaDx: 454,      // lati del volto, all'altezza delle orecchie
-  guanciaSXint: 50, guanciaDXint: 280, // centro guance (per il blush)
+  guanciaSx: 234, guanciaDx: 454,      // sides of the face, at ear height
+  guanciaSXint: 50, guanciaDXint: 280, // cheek centres (for the blush)
   boccaSx: 61, boccaDx: 291,
   labbroSup: 13, labbroInf: 14,
 };
 
 /**
- * Sorgente dell'engine: i file locali in vendor/ (bundle + wasm + modello),
- * che il service worker mette in cache alla prima richiesta: dalla seconda
- * apertura i filtri volto funzionano anche offline.
+ * Where the engine comes from: the local files in vendor/ (bundle + wasm +
+ * model), which the service worker caches on the first request: from the
+ * second opening the face filters work offline too.
  *
- * Non c'è un fallback su CDN. Un tempo c'era, per un deploy parziale; ma
- * significa che l'app esce a internet quando non dovrebbe, e l'unica
- * versione che questa pagina promette — zero richieste esterne, tutto
- * offline — è quella in cui il motore è sempre in locale.
+ * There is no CDN fallback. There used to be one, for a partial deploy; but
+ * it means the app reaches the internet when it should not, and the only
+ * version this page promises — zero external requests, everything offline —
+ * is the one where the engine is always local.
  */
 const SORGENTI_ENGINE = [
   {
@@ -41,50 +43,53 @@ const SORGENTI_ENGINE = [
   },
 ];
 
-/* ---------- definizione filtri ---------- */
+/* ---------- the filter registry ---------- */
 export const FILTRI = [
-  { id: 'nessuno',  nome: 'Originale', emoji: '✨' },
-  { id: 'cagnolino', nome: 'Cagnolino', emoji: '🐶', volto: true },
-  { id: 'occhiali', nome: 'Occhiali',  emoji: '😎', volto: true },
-  { id: 'corona',   nome: 'Corona',    emoji: '👑', volto: true },
-  { id: 'cuori',    nome: 'Cuori',     emoji: '😍', volto: true },
-  { id: 'gatto',    nome: 'Gatto',     emoji: '🐱', volto: true },
-  { id: 'coniglio', nome: 'Coniglio',  emoji: '🐰', volto: true },
+  { id: 'nessuno',  nome: 'Original', emoji: '✨' },
+  { id: 'cagnolino', nome: 'Dog', emoji: '🐶', volto: true },
+  { id: 'occhiali', nome: 'Sunglasses',  emoji: '😎', volto: true },
+  { id: 'corona',   nome: 'Crown',    emoji: '👑', volto: true },
+  { id: 'cuori',    nome: 'Hearts',     emoji: '😍', volto: true },
+  { id: 'gatto',    nome: 'Cat',     emoji: '🐱', volto: true },
+  { id: 'coniglio', nome: 'Bunny',  emoji: '🐰', volto: true },
   { id: 'robot',    nome: 'Robot',     emoji: '🤖', volto: true },
   { id: 'cowboy',   nome: 'Cowboy',    emoji: '🤠', volto: true },
-  { id: 'diavolo',  nome: 'Diavolo',   emoji: '😈', volto: true },
-  { id: 'angelo',   nome: 'Angelo',    emoji: '😇', volto: true },
+  { id: 'diavolo',  nome: 'Devil',   emoji: '😈', volto: true },
+  { id: 'angelo',   nome: 'Angel',    emoji: '😇', volto: true },
   { id: 'blush',    nome: 'Blush',     emoji: '🌸', volto: true },
-  { id: 'arcoboca', nome: 'Arcobaleno', emoji: '🤮', volto: true },
-  { id: 'quiz-animale', nome: 'Che animale?', emoji: '🐾', volto: true, quiz: 'animali' },
-  { id: 'quiz-cibo',    nome: 'Che cibo?',    emoji: '🍽️', volto: true, quiz: 'cibo' },
-  { id: 'quiz-mood',    nome: 'Che mood?',    emoji: '⚡', volto: true, quiz: 'mood' },
-  { id: 'vignetta', nome: 'Vignetta',  emoji: '🌑', cornice: 'vignetta' },
-  { id: 'grana',    nome: 'Grana',     emoji: '🎞️', cornice: 'grana' },
-  { id: 'mosaico',  nome: 'Mosaico',   emoji: '🟪', pixel: true },
+  { id: 'arcoboca', nome: 'Rainbow', emoji: '🤮', volto: true },
+  { id: 'quiz-animale', nome: 'Which animal?', emoji: '🐾', volto: true, quiz: 'animali' },
+  { id: 'quiz-cibo',    nome: 'Which food?',    emoji: '🍽️', volto: true, quiz: 'cibo' },
+  { id: 'quiz-mood',    nome: 'Which mood?',    emoji: '⚡', volto: true, quiz: 'mood' },
+  { id: 'vignetta', nome: 'Vignette',  emoji: '🌑', cornice: 'vignetta' },
+  { id: 'grana',    nome: 'Grain',     emoji: '🎞️', cornice: 'grana' },
+  { id: 'mosaico',  nome: 'Mosaic',   emoji: '🟪', pixel: true },
   { id: 'vhs',      nome: 'VHS',       emoji: '📼', css: 'saturate(1.15) contrast(1.08)', cornice: 'vhs' },
   { id: 'bw',       nome: 'B/N',       emoji: '⚪', css: 'grayscale(1) contrast(1.08)', op: 'gray' },
   { id: 'noir',     nome: 'Noir',      emoji: '🎩', css: 'grayscale(1) contrast(1.4) brightness(0.88)', op: 'noir' },
-  { id: 'seppia',   nome: 'Seppia',    emoji: '🟤', css: 'sepia(0.85) contrast(1.05)', op: 'seppia' },
-  { id: 'vivido',   nome: 'Vivido',    emoji: '🌈', css: 'saturate(1.65) contrast(1.12)', op: 'vivido' },
-  // NB: una hue-rotate verso il blu renderebbe il cielo arancione e la
-  // pelle più rossa: Freddo si fa desaturando verso la luminanza e
-  // sollevando il blu (stessa idea della versione pixel, sotto).
-  { id: 'freddo',   nome: 'Freddo',    emoji: '🧊', css: 'saturate(0.45) brightness(1.06) sepia(0.25) hue-rotate(172deg) saturate(1.6)', op: 'freddo' },
-  { id: 'caldo',    nome: 'Caldo',     emoji: '🔥', css: 'sepia(0.35) saturate(1.35) hue-rotate(-12deg)', op: 'caldo' },
-  { id: 'negativo', nome: 'Negativo',  emoji: '🌓', css: 'invert(1)', op: 'negativo' },
+  { id: 'seppia',   nome: 'Sepia',    emoji: '🟤', css: 'sepia(0.85) contrast(1.05)', op: 'seppia' },
+  { id: 'vivido',   nome: 'Vivid',    emoji: '🌈', css: 'saturate(1.65) contrast(1.12)', op: 'vivido' },
+  // NB: a hue-rotate towards blue turns the sky orange and the skin
+  // redder: Cold desaturates towards luminance and lifts the blue
+  // instead (the same idea as the pixel version, below).
+  // redder: Cold desaturates towards luminance and lifts the blue
+  // instead (the same idea as the pixel version, below).
+  { id: 'freddo',   nome: 'Cold',    emoji: '🧊', css: 'saturate(0.45) brightness(1.06) sepia(0.25) hue-rotate(172deg) saturate(1.6)', op: 'freddo' },
+  { id: 'caldo',    nome: 'Warm',     emoji: '🔥', css: 'sepia(0.35) saturate(1.35) hue-rotate(-12deg)', op: 'caldo' },
+  { id: 'negativo', nome: 'Negative',  emoji: '🌓', css: 'invert(1)', op: 'negativo' },
   { id: 'duotone',  nome: 'Duotone',   emoji: '🟣', css: 'grayscale(1) sepia(1) hue-rotate(225deg) saturate(2.6) contrast(1.05)', op: 'duotone' },
-  // `live: true` = l'anteprima usa la stessa rampa della foto (in bassa
-  // risoluzione); senza, il CSS mostrava una mappa termica rossa col nero.
-  { id: 'termica',  nome: 'Termica',   emoji: '🌡️', css: 'none', live: true, op: 'termica' },
-  { id: 'sogno',    nome: 'Sogno',     emoji: '☁️', css: 'brightness(1.1) saturate(1.25) contrast(0.92)', cornice: 'bloom' },
-  { id: 'psichedelico', nome: 'Psichedelico', emoji: '🌀', animato: true, op: 'psichedelico' },
+  // `live: true` = the preview uses the same ramp as the photo (at a low
+  // resolution); without it the CSS showed a red heatmap with black.
+  // resolution); without it the CSS showed a red heatmap with black.
+  { id: 'termica',  nome: 'Thermal',   emoji: '🌡️', css: 'none', live: true, op: 'termica' },
+  { id: 'sogno',    nome: 'Dream',     emoji: '☁️', css: 'brightness(1.1) saturate(1.25) contrast(0.92)', cornice: 'bloom' },
+  { id: 'psichedelico', nome: 'Psychedelic', emoji: '🌀', animato: true, op: 'psichedelico' },
 ];
 
 export const filtroPerId = (id) => FILTRI.find((f) => f.id === id) ?? FILTRI[0];
 
 /* ============================================================
- * ENGINE VOLTO (MediaPipe, caricamento lazy)
+ * FACE ENGINE (MediaPipe, lazy loading)
  * ============================================================ */
 
 let enginePromise = null;
@@ -97,7 +102,7 @@ async function avviaLandmarker(vision, fileset, modello) {
       numFaces: 1,
     });
   } catch {
-    // GPU non disponibile (o WebGL spento): fallback CPU
+  // no GPU (or WebGL off): fall back to the CPU
     return await vision.FaceLandmarker.createFromOptions(fileset, {
       baseOptions: { modelAssetPath: modello, delegate: 'CPU' },
       runningMode: 'VIDEO',
@@ -106,7 +111,7 @@ async function avviaLandmarker(vision, fileset, modello) {
   }
 }
 
-/** Restituisce { detect(video, ts) → landmarks | null }. Carica al primo uso. */
+/** Returns { detect(video, ts) → landmarks | null }. Loads on first use. */
 export function ensureEngineVolto() {
   enginePromise ??= (async () => {
     let ultimoErrore;
@@ -125,7 +130,7 @@ export function ensureEngineVolto() {
           },
         };
       } catch (err) {
-        ultimoErrore = err; // prova la sorgente successiva
+        ultimoErrore = err; // try the next source
       }
     }
     throw ultimoErrore;
@@ -134,40 +139,40 @@ export function ensureEngineVolto() {
 }
 
 /* ============================================================
- * QUIZ SULLA FRONTE ("che animale sei?", …)
+ * THE FOREHEAD QUIZ ("which animal are you?", …)
  *
- * Un cartellino ancorato alla fronte: gira i risultati veloce, poi si
- * blocca su uno (con "pop"). L'estrazione è deterministica dal tempo,
- * così l'anteprima e la foto mostrano lo stesso risultato.
+ * A card anchored to the forehead: it spins the results quickly, then
+ * locks onto one (with a "pop"). The draw is deterministic from the clock,
+ * so the preview and the photo show the same result.
  * ============================================================ */
 
 const QUIZ = {
   animali: {
-    titolo: 'CHE ANIMALE SEI?',
+    titolo: 'WHICH ANIMAL ARE YOU?',
     voci: [
-      ['Leone', '🦁'], ['Gatto', '🐱'], ['Panda', '🐼'], ['Volpe', '🦊'],
-      ['Gufo', '🦉'], ['Delfino', '🐬'], ['Lupo', '🐺'], ['Koala', '🐨'],
-      ['Tigre', '🐯'], ['Unicorno', '🦄'],
+      ['Lion', '🦁'], ['Cat', '🐱'], ['Panda', '🐼'], ['Fox', '🦊'],
+      ['Owl', '🦉'], ['Dolphin', '🐬'], ['Wolf', '🐺'], ['Koala', '🐨'],
+      ['Tiger', '🐯'], ['Unicorn', '🦄'],
     ],
   },
   cibo: {
-    titolo: 'CHE CIBO SEI?',
+    titolo: 'WHICH FOOD ARE YOU?',
     voci: [
-      ['Pizza', '🍕'], ['Sushi', '🍣'], ['Gelato', '🍦'], ['Taco', '🌮'],
-      ['Ciambella', '🍩'], ['Anguria', '🍉'], ['Popcorn', '🍿'], ['Avocado', '🥑'],
+      ['Pizza', '🍕'], ['Sushi', '🍣'], ['Ice cream', '🍦'], ['Taco', '🌮'],
+      ['Donut', '🍩'], ['Watermelon', '🍉'], ['Popcorn', '🍿'], ['Avocado', '🥑'],
     ],
   },
   mood: {
-    titolo: 'CHE MOOD SEI?',
+    titolo: 'WHICH MOOD ARE YOU?',
     voci: [
-      ['Felice', '😄'], ['Zen', '🧘'], ['Turbo', '🚀'], ['Fuoco', '🔥'],
-      ['Romantico', '🥰'], ['Misterioso', '🕶️'], ['Party', '🥳'], ['Sonno', '😴'],
+      ['Happy', '😄'], ['Zen', '🧘'], ['Turbo', '🚀'], ['Fire', '🔥'],
+      ['Romantic', '🥰'], ['Mysterious', '🕶️'], ['Party', '🥳'], ['Sleepy', '😴'],
     ],
   },
 };
 
-const CICLO_S = 1.6; // durata della fase "gira"
-const LOCK_S = 5;    // quanto resta fermo sul risultato
+const CICLO_S = 1.6; // how long the spin lasts
+const LOCK_S = 5;    // how long it stays on the result
 const quizStati = {};
 
 function mescola(n) {
@@ -177,7 +182,7 @@ function mescola(n) {
   return (x ^ (x >>> 16)) >>> 0;
 }
 
-/** Indice corrente del quiz + se l'estrazione è già bloccata. */
+/** The current quiz index + whether the draw is already locked. */
 function statoQuiz(id, t) {
   let s = quizStati[id];
   if (!s) s = quizStati[id] = { inizio: t, seed: (Math.random() * 0x7fffffff) | 0 };
@@ -190,7 +195,7 @@ function statoQuiz(id, t) {
   return { indice: mescola(s.seed + fase * 7919) % voci, bloccato: true };
 }
 
-/** Reinizia l'estrazione (chiamato al cambio filtro). */
+/** Restarts the draw (called when the filter changes). */
 export function resetQuizStati() {
   for (const k of Object.keys(quizStati)) delete quizStati[k];
 }
@@ -204,21 +209,21 @@ function disegnaQuiz(ctx, fc, filtro, t) {
 
   const w = Math.max(lv * 1.05, 60);
   const h = w * 0.95;
-  const base = -av * 0.04; // bordo inferiore del cartellino, sulla fronte
+  const base = -av * 0.04; // the card's bottom edge, on the forehead
   const top = base - h;
 
   ctx.save();
   ctx.translate(f[0], f[1]);
   ctx.rotate(angolo);
 
-  // animazione: lampeggio veloce durante l'estrazione, "pop" al blocco
+  // animation: a fast blink while spinning, a "pop" when it locks
   const trascorsoLock = t - (quizStati[filtro.quiz].inizio + CICLO_S);
   const scala = bloccato
     ? (trascorsoLock >= 0 && trascorsoLock < 0.3 ? 1 + 0.28 * (1 - trascorsoLock / 0.3) : 1)
     : 1 + 0.05 * Math.sin(t * 22);
   ctx.scale(scala, scala);
 
-  // puntatore giallo verso la fronte
+  // the yellow pointer towards the forehead
   ctx.beginPath();
   ctx.moveTo(-w * 0.07, base);
   ctx.lineTo(w * 0.07, base);
@@ -227,7 +232,7 @@ function disegnaQuiz(ctx, fc, filtro, t) {
   ctx.fillStyle = '#fffc00';
   ctx.fill();
 
-  // cartellino bianco con ombra
+  // the white card with a shadow
   ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
   ctx.shadowBlur = w * 0.07;
   ctx.shadowOffsetY = w * 0.02;
@@ -238,7 +243,7 @@ function disegnaQuiz(ctx, fc, filtro, t) {
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
 
-  // fascia titolo gialla (clipata sui bordi arrotondati)
+  // the yellow title band (clipped to the rounded corners)
   ctx.save();
   rettangoloTondo(ctx, -w / 2, top, w, h, w * 0.13);
   ctx.clip();
@@ -252,13 +257,13 @@ function disegnaQuiz(ctx, fc, filtro, t) {
   ctx.font = `800 ${w * 0.075}px -apple-system, BlinkMacSystemFont, sans-serif`;
   ctx.fillText(quiz.titolo, 0, top + h * 0.125);
 
-  // bordo
+  // border
   rettangoloTondo(ctx, -w / 2, top, w, h, w * 0.13);
   ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
   ctx.lineWidth = Math.max(1.5, w * 0.012);
   ctx.stroke();
 
-  // emoji gigante + nome del risultato
+  // the big emoji and the result name
   ctx.font = `${w * 0.40}px "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
   ctx.fillText(emoji, 0, top + h * 0.24 + h * 0.37);
   ctx.fillStyle = '#141414';
@@ -270,16 +275,16 @@ function disegnaQuiz(ctx, fc, filtro, t) {
 }
 
 /* ============================================================
- * GEOMETRIA: proietta i landmark (0..1) sul canvas visibile
+ * GEOMETRY: projects the landmarks (0..1) onto the visible canvas
  * ============================================================ */
 
 /**
- * Il video usa object-fit: cover; le stesse coordinate vanno ricalcolate
- * per disegnare allineato sia in anteprima sia nella foto finale.
+ * The video uses object-fit: cover, so the same coordinates have to be
+ * recomputed to stay aligned in the preview and in the final photo.
  */
-/* Proietta un landmark dalla canvas di disegno: prende l'INDICE del punto
- * (LM.fronte, LM.naso, …) e restituisce [x, y] in pixel, con object-fit:cover
- * e specchiatura della fotocamera frontale. */
+/* Projects a landmark onto the drawing canvas: it takes the point's INDEX
+ * (LM.brow, LM.nose, …) and returns [x, y] in pixels, with object-fit:cover
+ * and the front camera's mirroring. */
 function creaProiettore(geom, landmarks) {
   const { W, H, vw, vh, specchio } = geom;
   const scala = Math.max(W / vw, H / vh);
@@ -299,7 +304,7 @@ const mid = (P, i, j) => {
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
 /* ============================================================
- * DISEGNO LENTI VOLTO
+ * DRAWING THE FACE LENSES
  * ============================================================ */
 
 export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
@@ -307,15 +312,17 @@ export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
   const P = creaProiettore(geom, landmarks);
   const occhioSx = mid(P, 'occhioSxEst', 'occhioSxInt');
   const occhioDx = mid(P, 'occhioDxEst', 'occhioDxInt');
-  // landmark malformati: meglio non disegnare che disegnare nel vuoto
+  // malformed landmarks: better not to draw than to draw in the void
   if (!Number.isFinite(occhioSx[0] + occhioSx[1] + occhioDx[0] + occhioDx[1])) return false;
   const larghezzaVolto = dist(P(LM.guanciaSx), P(LM.guanciaDx));
   const altezzaVolto = dist(P(LM.fronte), P(LM.mento));
   const angolo = Math.atan2(occhioDx[1] - occhioSx[1], occhioDx[0] - occhioSx[0]);
   const fc = { P, occhioSx, occhioDx, larghezzaVolto, altezzaVolto, angolo, specchio };
-  // Con la frontale il proiettore specchia le coordinate: il landmark 234
-  // (guanciaSx) finisce a destra sullo schermo. Senza questo, orecchie e
-  // altri accessori disegnati verso il lato finivano dentro il viso.
+  // With the front camera the projector mirrors the coordinates: landmark
+  // 234 (cheekL) ends up on the right of the screen. Without this, ears
+  // and other accessories drawn towards that side would land inside the face.
+  // 234 (cheekL) ends up on the right of the screen. Without this, ears
+  // and other accessories drawn towards that side would land inside the face.
   fc.latoSchermo = (lato) => lato * (specchio ? -1 : 1);
 
   if (filtro.quiz) return disegnaQuiz(ctx, fc, filtro, t);
@@ -337,14 +344,14 @@ export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
   return false;
 }
 
-/* --- 🐶 cagnolino: orecchie + naso + lingue --- */
+/* --- 🐶 dog: ears + nose + tongue --- */
 function disegnaCagnolino(ctx, fc) {
   const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
 
-  // orecchie: sopra le guance, inclinate verso l'esterno
+  // ears: above the cheeks, tilted outwards
   for (const lato of [-1, 1]) {
     const g = P(lato < 0 ? LM.guanciaSx : LM.guanciaDx);
-    const s = fc.latoSchermo(lato); // lato come appare a schermo
+    const s = fc.latoSchermo(lato); // the side as it appears on screen
     const ex = g[0] + s * lv * 0.10;
     const ey = g[1] - av * 0.52;
     ctx.save();
@@ -355,11 +362,11 @@ function disegnaCagnolino(ctx, fc) {
     ctx.restore();
   }
 
-  // naso
+  // nose
   const n = P(LM.naso);
   ellisse(ctx, n[0], n[1] + av * 0.015, lv * 0.075, av * 0.055, '#241a12');
 
-  // lingua: sotto la bocca, con solcatura centrale
+  // tongue: under the mouth, with a centre crease
   const bocca = mid(P, 'labbroSup', 'labbroInf');
   const lung = av * 0.30, larg = lv * 0.17;
   ctx.save();
@@ -382,7 +389,7 @@ function disegnaCagnolino(ctx, fc) {
   return true;
 }
 
-/* --- 😎 occhiali da sole --- */
+/* --- 😎 sunglasses --- */
 function disegnaOcchiali(ctx, fc) {
   const { P, occhioSx, occhioDx, larghezzaVolto: lv, angolo } = fc;
   const r = dist(occhioSx, occhioDx) * 0.30;
@@ -391,7 +398,7 @@ function disegnaOcchiali(ctx, fc) {
   ctx.rotate(angolo);
   ctx.translate(-(occhioSx[0] + occhioDx[0]) / 2, -(occhioSx[1] + occhioDx[1]) / 2);
 
-  // stangrette verso le orecchie
+  // the arms towards the ears
   ctx.strokeStyle = '#141414';
   ctx.lineWidth = r * 0.28;
   ctx.lineCap = 'round';
@@ -403,7 +410,7 @@ function disegnaOcchiali(ctx, fc) {
   ctx.lineTo(oD[0], oD[1] - lv * 0.02);
   ctx.stroke();
 
-  // ponte
+  // bridge
   ctx.beginPath();
   ctx.moveTo(occhioSx[0] + r * 0.8, occhioSx[1] - r * 0.15);
   ctx.quadraticCurveTo(
@@ -412,7 +419,7 @@ function disegnaOcchiali(ctx, fc) {
   );
   ctx.stroke();
 
-  // lenti: ovali scure con riflesso
+  // lenses: dark ovals with a highlight
   for (const c of [occhioSx, occhioDx]) {
     ctx.beginPath();
     ctx.ellipse(c[0], c[1], r, r * 0.78, 0, 0, Math.PI * 2);
@@ -427,7 +434,7 @@ function disegnaOcchiali(ctx, fc) {
   return true;
 }
 
-/* --- 👑 corona --- */
+/* --- 👑 crown --- */
 function disegnaCorona(ctx, fc) {
   const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
   const f = P(LM.fronte);
@@ -442,7 +449,7 @@ function disegnaCorona(ctx, fc) {
   grad.addColorStop(0, '#ffe066');
   grad.addColorStop(1, '#e0a10c');
 
-  // corpo a zig-zag (5 punte)
+  // the zig-zag body (5 points)
   ctx.beginPath();
   ctx.moveTo(-w / 2, 0);
   for (let i = 0; i < 5; i++) {
@@ -457,7 +464,7 @@ function disegnaCorona(ctx, fc) {
   ctx.lineWidth = Math.max(1.5, w * 0.02);
   ctx.stroke();
 
-  // gemme sulle punte dispari + fascia
+  // gems on the odd points + the band
   ctx.fillStyle = '#e0314b';
   for (let i = 0; i < 3; i++) {
     const x = -w / 2 + (w / 4) * (2 * i + 1);
@@ -473,7 +480,7 @@ function disegnaCorona(ctx, fc) {
   return true;
 }
 
-/* --- 😍 occhi a cuore --- */
+/* --- 😍 heart eyes --- */
 function disegnaCuori(ctx, fc) {
   const { occhioSx, occhioDx } = fc;
   const s = dist(occhioSx, occhioDx) * 0.42;
@@ -495,7 +502,7 @@ function disegnaCuore(ctx, x, y, s) {
   ctx.fill();
 }
 
-/* --- 🐱 gatto: orecchie triangolari + naso + baffi --- */
+/* --- 🐱 cat: triangular ears + nose + whiskers --- */
 function disegnaGatto(ctx, fc) {
   const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
 
@@ -534,7 +541,7 @@ function disegnaGatto(ctx, fc) {
   ctx.fill();
   ctx.restore();
 
-  // baffi
+  // whiskers
   ctx.strokeStyle = 'rgba(255,255,255,0.9)';
   ctx.lineWidth = Math.max(1.5, lv * 0.012);
   ctx.lineCap = 'round';
@@ -553,7 +560,7 @@ function disegnaGatto(ctx, fc) {
   return true;
 }
 
-/* --- 🐰 coniglietto: orecchie lunghe che oscillano --- */
+/* --- 🐰 bunny: long ears that swing --- */
 function disegnaConiglio(ctx, fc, t) {
   const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
   const f = P(LM.fronte);
@@ -568,7 +575,7 @@ function disegnaConiglio(ctx, fc, t) {
   return true;
 }
 
-/* --- 🤖 robot: visiera metallica, occhi LED, antenna --- */
+/* --- 🤖 robot: metal visor, LED eyes, antenna --- */
 function disegnaRobot(ctx, fc, t) {
   const { occhioSx, occhioDx, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
   const cx = (occhioSx[0] + occhioDx[0]) / 2;
@@ -578,7 +585,7 @@ function disegnaRobot(ctx, fc, t) {
   ctx.translate(cx, cy);
   ctx.rotate(angolo);
 
-  // antenna con lucina pulsante
+  // antenna with a blinking light
   ctx.strokeStyle = '#8f9bab';
   ctx.lineWidth = Math.max(2, lv * 0.02);
   ctx.beginPath();
@@ -590,7 +597,7 @@ function disegnaRobot(ctx, fc, t) {
   ctx.arc(0, -h / 2 - av * 0.19, lv * 0.028, 0, Math.PI * 2);
   ctx.fill();
 
-  // visiera
+  // visor
   rettangoloTondo(ctx, -w / 2, -h / 2, w, h, h * 0.35);
   const g = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
   g.addColorStop(0, '#d7dee8');
@@ -599,12 +606,12 @@ function disegnaRobot(ctx, fc, t) {
   ctx.fillStyle = g;
   ctx.fill();
 
-  // schermo scuro
+  // dark screen
   rettangoloTondo(ctx, -w / 2 + h * 0.18, -h / 2 + h * 0.22, w - h * 0.36, h * 0.56, h * 0.22);
   ctx.fillStyle = '#101820';
   ctx.fill();
 
-  // occhi LED con bagliore
+  // LED eyes with a glow
   const eo = dist(occhioSx, occhioDx) / 2;
   ctx.save();
   ctx.shadowColor = 'rgba(53, 224, 255, 0.9)';
@@ -617,7 +624,7 @@ function disegnaRobot(ctx, fc, t) {
   }
   ctx.restore();
 
-  // bulloni laterali
+  // side bolts
   ctx.fillStyle = '#39424d';
   for (const s of [-1, 1]) {
     ctx.beginPath();
@@ -628,22 +635,22 @@ function disegnaRobot(ctx, fc, t) {
   return true;
 }
 
-/* --- 🤠 cowboy: cappello con tesa, calotta e fascia --- */
+/* --- 🤠 cowboy: hat with brim, crown and band --- */
 function disegnaCowboy(ctx, fc) {
   const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
   const f = P(LM.fronte);
   ctx.save();
   ctx.translate(f[0], f[1] - av * 0.32);
   ctx.rotate(angolo);
-  // calotta
+  // crown
   ctx.beginPath();
   ctx.ellipse(0, -av * 0.16, lv * 0.28, av * 0.17, 0, 0, Math.PI * 2);
   ctx.fillStyle = '#8a5a2b';
   ctx.fill();
-  // fascia
+  // band
   ctx.fillStyle = '#3a2a18';
   ctx.fillRect(-lv * 0.28, -av * 0.085, lv * 0.56, av * 0.05);
-  // tesa (davanti a tutto)
+  // brim (in front of everything)
   ctx.beginPath();
   ctx.ellipse(0, 0, lv * 0.54, av * 0.085, 0, 0, Math.PI * 2);
   ctx.fillStyle = '#966333';
@@ -652,7 +659,7 @@ function disegnaCowboy(ctx, fc) {
   return true;
 }
 
-/* --- 😈 diavoletto: corna rosse --- */
+/* --- 😈 little devil: red horns --- */
 function disegnaDiavolo(ctx, fc) {
   const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
   const f = P(LM.fronte);
@@ -672,14 +679,15 @@ function disegnaDiavolo(ctx, fc) {
   return true;
 }
 
-/* --- 😇 angioletto: aureola dorata fluttuante --- */
+/* --- 😇 little angel: floating golden halo --- */
 function disegnaAngelo(ctx, fc, t) {
   const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
   const f = P(LM.fronte);
   ctx.save();
-  // dimensione e altezza ancorate alla larghezza della testa: con la sola
-  // altezza del volto l'aureola finisce fuori dall'inquadratura sui primi
-  // piani
+  // size and height anchored to the width of the head: with the face
+  // height alone the halo leaves the frame on the close-ups
+  // height alone the halo leaves the frame on the close-ups
+  // close-ups
   ctx.translate(f[0], f[1] - lv * 0.24 + Math.sin(t * 2.2) * lv * 0.02);
   ctx.rotate(angolo * 0.5);
   ctx.shadowColor = 'rgba(255, 214, 64, 0.9)';
@@ -693,7 +701,7 @@ function disegnaAngelo(ctx, fc, t) {
   return true;
 }
 
-/* --- 🌸 blush: guancerose + scintille pulsanti --- */
+/* --- 🌸 blush: rosy cheeks + pulsing sparkles --- */
 function disegnaBlush(ctx, fc, t) {
   const { P, larghezzaVolto: lv, altezzaVolto: av } = fc;
   ctx.save();
@@ -721,7 +729,7 @@ function disegnaBlush(ctx, fc, t) {
   return true;
 }
 
-/* --- 🤮 arcobaleno dalla bocca --- */
+/* --- 🤮 rainbow from the mouth --- */
 function disegnaArcobalenoBocca(ctx, fc, t) {
   const { P, larghezzaVolto: lv, altezzaVolto: av, angolo } = fc;
   const bocca = mid(P, 'labbroSup', 'labbroInf');
@@ -730,7 +738,7 @@ function disegnaArcobalenoBocca(ctx, fc, t) {
   ctx.translate(bocca[0], bocca[1] + av * 0.012);
   ctx.rotate(angolo);
   const L = av * 0.78, wob = Math.sin(t * 3) * lv * 0.012;
-  // dal più esterno (viola) al più interno (rosso, vicino alla bocca)
+  // from the outermost (violet) to the innermost (red, near the mouth)
   for (let i = colori.length - 1; i >= 0; i--) {
     const k = (i + 1) / colori.length;
     const half = lv * 0.30 * k + wob * k;
@@ -748,7 +756,7 @@ function disegnaArcobalenoBocca(ctx, fc, t) {
   return true;
 }
 
-/* ---------- helper di disegno condivisi ---------- */
+/* ---------- shared drawing helpers ---------- */
 
 function rettangoloTondo(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -779,7 +787,7 @@ function ellisse(ctx, x, y, rx, ry, colore) {
 }
 
 /* ============================================================
- * CORNICI (vignetta, grana) — sopra tutto, in anteprima e foto
+ * FRAMES (vignette, grain) — drawn on top, in the preview and in the photo
  * ============================================================ */
 
 let patternGrana = null;
@@ -806,25 +814,25 @@ export function disegnaCornice(ctx, filtro, W, H, t, bloom = false) {
       patternGrana = { pattern: ctx.createPattern(n, 'repeat'), scala: Math.min(W, H) };
     }
     ctx.save();
-    ctx.translate((t * 37) % 128, (t * 53) % 128); // grana "viva"
+    ctx.translate((t * 37) % 128, (t * 53) % 128); // "live" grain
     ctx.fillStyle = patternGrana.pattern;
     ctx.fillRect(-128, -128, W + 256, H + 256);
     ctx.restore();
   } else if (filtro.cornice === 'vhs') {
-    // scanline che scorrono
+  // scanlines that scroll
     const passo = Math.max(3, Math.round(H / 280));
     ctx.fillStyle = 'rgba(0, 0, 0, 0.14)';
     for (let y = (t * 30) % (passo * 2); y < H; y += passo * 2) {
       ctx.fillRect(0, y, W, Math.max(1, passo * 0.5));
     }
-    // strappi orizzontali casuali
+  // random horizontal tears
     for (let i = 0; i < 2; i++) {
       const y = Math.random() * H;
       const hh = 2 + Math.random() * H * 0.012;
       ctx.fillStyle = `rgba(255,255,255,${0.04 + Math.random() * 0.05})`;
       ctx.fillRect(0, y, W, hh);
     }
-    // frangia cromatica ai bordi
+  // chromatic fringe at the edges
     const fw = W * 0.06;
     let g = ctx.createLinearGradient(0, 0, fw, 0);
     g.addColorStop(0, 'rgba(255,0,80,0.16)');
@@ -837,7 +845,7 @@ export function disegnaCornice(ctx, filtro, W, H, t, bloom = false) {
     ctx.fillStyle = g;
     ctx.fillRect(W - fw, 0, fw, H);
   } else if (filtro.cornice === 'bloom') {
-    // alone morbido al centro
+  // a soft halo in the centre
     const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.6);
     g.addColorStop(0, 'rgba(255,245,225,0.16)');
     g.addColorStop(0.55, 'rgba(255,245,225,0.05)');
@@ -845,8 +853,9 @@ export function disegnaCornice(ctx, filtro, W, H, t, bloom = false) {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
     if (bloom) {
-      // vero bloom (solo allo scatto: il canvas contiene già la foto):
-      // copia ridotta e rimessa con blend 'lighter'
+  // a real bloom (at the shot only: the canvas already holds the photo):
+  // a downscaled copy put back with the 'lighter' blend
+      // a downscaled copy put back with the 'lighter' blend
       const tw = Math.max(2, Math.round(W / 10));
       const th = Math.max(2, Math.round(H / 10));
       const tmp = document.createElement('canvas');
@@ -863,10 +872,10 @@ export function disegnaCornice(ctx, filtro, W, H, t, bloom = false) {
 }
 
 /* ============================================================
- * FILTRI PIXEL (per lo scatto, indipendenti da ctx.filter)
+ * PIXEL FILTERS (for the shot, independent of ctx.filter)
  * ============================================================ */
 
-/** Matrice hue-rotate standard (come la CSS, in radianti). */
+/** The standard hue-rotate matrix (as in CSS, in radians). */
 function matriceHue(rad) {
   const c = Math.cos(rad), s = Math.sin(rad);
   return [
@@ -880,7 +889,7 @@ const OPS_PIXEL = {
   gray(d) { const l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]; return [l, l, l]; },
   noir(d) {
     let l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2];
-    l = (l - 128) * 1.4 + 110; // più contrasto, ombre dense
+    l = (l - 128) * 1.4 + 110; // more contrast, dense shadows
     return [l, l, l];
   },
   seppia(d) {
@@ -891,8 +900,9 @@ const OPS_PIXEL = {
     const l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2];
     return [l + (d[0] - l) * 1.7, l + (d[1] - l) * 1.7, l + (d[2] - l) * 1.7].map((v) => (v - 128) * 1.08 + 126);
   },
-  // Freddo: desatura verso la luminanza e alza il blu. Con hue-rotate(-18)
-  // la pelle (hue ~19°) finiva a ~354°, cioè PIÙ rossa: l'effetto era caldo.
+  // Cold: desaturates towards luminance and lifts the blue. With
+  // hue-rotate(-18) the skin (hue ~19°) ended up at ~354°, that is REDDER:
+  // the effect was warm.
   freddo(d) {
     const l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2];
     return [l * 0.86 - 6, l * 0.95 + 4, l * 1.02 + 26].map((v) => (v < 0 ? 0 : v > 255 ? 255 : Math.round(v)));
@@ -901,7 +911,7 @@ const OPS_PIXEL = {
   negativo(d) { return [255 - d[0], 255 - d[1], 255 - d[2]]; },
   duotone(d) {
     const t = clamp01((0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255);
-    // viola profondo → rosa brillante
+  // deep violet → bright pink
     return [18 + 218 * t, 7 + 99 * t, 58 + 158 * t];
   },
   termica(d) { return rampaTermica(luma01(d)); },
@@ -920,8 +930,8 @@ function applicaMatrice(d, m, offset) {
 }
 
 /**
- * Applica il filtro pixel su tutto il canvas (usato solo allo scatto:
- * un frame singolo, quindi la lentezza non importa).
+ * Applies the pixel filter to the whole canvas (used at the shot only: a
+ * single frame, so the slowness does not matter).
  */
 export function applicaFiltroPixel(ctx, filtro, W, H, t) {
   if (filtro.op === 'mosaico' || filtro.pixel) { mosaico(ctx, W, H); return; }
@@ -938,10 +948,13 @@ export function applicaFiltroPixel(ctx, filtro, W, H, t) {
 
 const luma01 = (d) => clamp01((0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255);
 
-// Rampa termica condivisa fra anteprima e foto: nero → viola → rosso →
-// arancio → quasi bianco. L'anteprima CSS precedente mappava invece tutto
-// su rosso caldo con ombre nere, cioè il contrario di quello che si vedeva
-// nella foto salvata.
+// The thermal ramp shared by the preview and the photo: black → violet →
+// red → orange → almost white. The previous CSS preview mapped everything
+// to hot red with black shadows, the opposite of what the saved photo
+// showed.
+// red → orange → almost white. The previous CSS preview mapped everything
+// to hot red with black shadows, the opposite of what the saved photo
+// showed.
 const RAMPA_TERMICA = [
   [0.00, [5, 0, 30]],
   [0.25, [80, 0, 160]],
@@ -962,10 +975,10 @@ function rampaTermica(t) {
 }
 
 /**
- * Termica per il video: la rampa dipende solo dalla luminanza ed è a bassa
- * frequenza, quindi si calcola su una copia ridotta (1/6) e si riscala.
- * ~36x più economico del per-pixel a piena risoluzione, e visivamente
- * identico perché la rampa non ha bordi netti.
+ * Thermal for the video: the ramp depends on luminance alone and is low
+ * frequency, so it is computed on a reduced copy (1/6) and scaled back up.
+ * ~36x cheaper than per-pixel at full resolution, and visually identical
+ * because the ramp has no hard edges.
  */
 export function applicaTermicaVivo(ctx, W, H) {
   const f = 6;

@@ -1,13 +1,13 @@
 /**
- * ===== Snap PWA — app =====
- * Fotocamera + filtri + scatto + Ricordi (IndexedDB, tutto locale).
+ * ===== Snap PWA — the app =====
+ * Camera + filters + the shot + Memories (IndexedDB, everything local).
  */
 
 import {
   FILTRI, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
 } from './filters.js';
 
-/* ---------- riferimenti DOM ---------- */
+/* ---------- DOM references ---------- */
 const $ = (sel) => document.querySelector(sel);
 const video = $('#video');
 const overlay = $('#overlay');
@@ -17,33 +17,33 @@ const statusEl = $('#status');
 const toastEl = $('#toast');
 const carousel = $('#carousel');
 
-/* ---------- stato ---------- */
+/* ---------- state ---------- */
 const stato = {
   stream: null,
   frontale: true,
   flash: false,
   filtroId: 'nessuno',
-  engine: null,          // engine MediaPipe quando caricato
-  engineStato: 'idle',   // idle | loading | pronto | errore
+  engine: null,          // the MediaPipe engine once it is loaded
+  engineStato: 'idle',   // idle | loading | ready | error
   landmarks: null,
   ultimaDetection: 0,
   ogniNFrame: 1,
   frame: 0,
-  attivo: false,         // loop di rendering in esecuzione
-  ultimaSnap: null,      // { blob, url, tipo, poster?, filtro } in anteprima
-  registrazione: null,   // { rec, canvas, inizio } durante un video
-  pressione: 0,          // timer della pressione prolungata
+  attivo: false,         // the render loop is running
+  ultimaSnap: null,      // { blob, url, type, poster?, filter } in the preview
+  registrazione: null,   // { rec, canvas, start } during a video
+  pressione: 0,          // the long-press timer
 };
 
 /* ============================================================
- * SCHERMATE
+ * SCREENS
  * ============================================================ */
 function mostra(id) {
   for (const s of document.querySelectorAll('.screen')) s.classList.toggle('visible', s.id === id);
 }
 
 /* ============================================================
- * FOTOCAMERA
+ * THE CAMERA
  * ============================================================ */
 async function avviaFotocamera() {
   const vincoli = {
@@ -67,13 +67,13 @@ async function giraFotocamera() {
   try {
     await avviaFotocamera();
   } catch {
-    toast('Fotocamera non disponibile');
+    toast('Camera not available');
     stato.frontale = !stato.frontale;
   }
 }
 
 /* ============================================================
- * LOOP DI RENDERING
+ * THE RENDER LOOP
  * ============================================================ */
 function dimensionaOverlay() {
   const dpr = Math.min(devicePixelRatio || 1, 2);
@@ -87,20 +87,20 @@ function loop() {
   const t = performance.now() / 1000;
   const filtro = filtroPerId(stato.filtroId);
 
-  /* filtro CSS sul video (anteprima a costo zero) */
+  /* the CSS filter on the video (a preview that costs nothing) */
   if (filtro.animato) {
     video.style.filter = `saturate(1.3) hue-rotate(${(t * 60) % 360}deg)`;
   } else {
     video.style.filter = filtro.css ?? '';
   }
 
-  /* cornici su overlay */
+  /* the frames on the overlay */
   octx.clearRect(0, 0, overlay.width, overlay.height);
   if (filtro.cornice) {
     disegnaCornice(octx, filtro, overlay.width, overlay.height, t);
   }
 
-  /* lenti volto */
+  /* the face lenses */
   window.__dbg = window.__dbg || {};
   window.__dbg.filtroId = filtro.id;
   window.__dbg.volto = !!filtro.volto;
@@ -112,7 +112,7 @@ function loop() {
     if (stato.filtroId !== 'nessuno') nascondiStatus();
   }
 
-  /* registrazione video: compilo il canvas che finisce nell'MP4 */
+  /* video recording: I fill the canvas that ends up in the MP4 */
   if (stato.registrazione) {
     const reg = stato.registrazione;
     disegnaFotogramma(reg.canvas.getContext('2d'), reg.canvas.width, reg.canvas.height, t, 'video');
@@ -125,16 +125,16 @@ function loop() {
 }
 
 async function gestisciFiltroVolto(filtro, t) {
-  // engine lazy: la prima volta carica il modello da vendor/ (una volta sola)
+  // lazy engine: the first time it loads the model from vendor/ (once)
   if (stato.engineStato === 'idle') {
     stato.engineStato = 'loading';
-    mostraStatus('Carico i filtri volto… (solo la prima volta)');
+    mostraStatus('Loading the face filters… (only the first time)');
     try {
       stato.engine = await ensureEngineVolto();
       stato.engineStato = 'pronto';
     } catch {
       stato.engineStato = 'errore';
-      mostraStatus('Filtri volto non disponibili su questo dispositivo');
+      mostraStatus('Face filters are not available on this device');
       setTimeout(() => stato.filtroId === filtro.id && nascondiStatus(), 3500);
       return;
     }
@@ -142,12 +142,12 @@ async function gestisciFiltroVolto(filtro, t) {
   }
   if (stato.engineStato !== 'pronto') return;
 
-  // detection throttled adattivamente (i dispositivi lenti fanno ogni 2 frame)
+  // the detection is throttled adaptively (slow devices run every 2 frames)
   if (stato.frame % stato.ogniNFrame === 0) {
     const t0 = performance.now();
     try {
       stato.landmarks = stato.engine.detect(video, t0);
-    } catch { /* frame perso: pazienza */ }
+    } catch { /* dropped frame: never mind */ }
     const dt = performance.now() - t0;
     stato.ogniNFrame = dt > 40 ? 2 : 1;
     stato.ultimaDetection = t0;
@@ -161,27 +161,27 @@ async function gestisciFiltroVolto(filtro, t) {
       specchio: stato.frontale,
     }, t);
   } else if (performance.now() - stato.ultimaDetection > 1200) {
-    mostraStatus('Guarda in camera 👀');
+    mostraStatus('Look at the camera 👀');
   }
 }
 
 /* ============================================================
- * SCATTO
+ * THE SHOT
  * ============================================================ */
 
 /**
- * Disegna il fotogramma composito (video + filtro + cornice + lenti) su una
- * canvas qualsiasi. È l'unico motore di rendering: lo usano la foto e il
- * video, così ciò che si salva è ciò che si vedeva in anteprima.
+ * Draws the composite frame (video + filter + frame + lenses) onto any
+ * canvas. It is the only rendering engine: the photo and the video both
+ * use it, so what gets saved is what was on screen in the preview.
  *
- * modalita 'foto'  → filtri colore cotto sui pixel (identici all'anteprima,
- *                    compresi quelli che ctx.filter non sa fare)
- * modalita 'video' → ctx.filter sulla GPU (i pixel costerebbero 30 fps)
+ * mode 'photo'  → the colour filters are baked into the pixels (identical
+ *                  to the preview, including the ones ctx.filter cannot do)
+ * mode 'video'  → ctx.filter on the GPU (the pixels would cost 30 fps)
  */
 function disegnaFotogramma(ctx, W, H, t, modalita) {
   const filtro = filtroPerId(stato.filtroId);
 
-  // 1. frame video con object-fit:cover (+ specchio se frontale)
+  // 1. the video frame with object-fit:cover (+ mirroring on the front camera)
   const scala = Math.max(W / video.videoWidth, H / video.videoHeight);
   const dw = video.videoWidth * scala, dh = video.videoHeight * scala;
   ctx.save();
@@ -193,7 +193,8 @@ function disegnaFotogramma(ctx, W, H, t, modalita) {
   ctx.filter = 'none';
   ctx.restore();
 
-  // 2. filtro colore: pixel per la foto; per il video solo i filtri con un
+  // 2. the colour filter: pixels for the photo; for the video only the
+  //    filters with a cheap path (mosaic, thermal at a reduced resolution)
   //    percorso economico (mosaico, termica a risoluzione ridotta)
   if (modalita === 'foto' || filtro.pixel) {
     applicaFiltroPixel(ctx, filtro, W, H, t);
@@ -201,7 +202,7 @@ function disegnaFotogramma(ctx, W, H, t, modalita) {
     applicaTermicaVivo(ctx, W, H);
   }
 
-  // 3. cornice + accessori volto, con le stesse coordinate dell'anteprima
+  // 3. the frame + the face accessories, at the preview's own coordinates
   const scalaFoto = W / overlay.width;
   if (filtro.cornice) disegnaCornice(ctx, filtro, W, H, t, modalita === 'foto');
   if (filtro.volto && stato.landmarks) {
@@ -239,7 +240,7 @@ async function scatta() {
 }
 
 /* ============================================================
- * ANTEPRIMA SNAP
+ * THE SNAP PREVIEW
  * ============================================================ */
 function mostraAnteprima(snap) {
   stato.ultimaSnap?.url && URL.revokeObjectURL(stato.ultimaSnap.url);
@@ -280,7 +281,7 @@ async function scarica() {
   document.body.appendChild(a);
   a.click();
   a.remove();
-  toast('Snap scaricata ⬇️');
+  toast('Snap downloaded ⬇️');
 }
 
 function nomeFile(snap) {
@@ -323,12 +324,12 @@ async function salvaNeiRicordi() {
   };
   try {
     await dbPut(record);
-    toast('Salvata nei Ricordi 💾');
+    toast('Saved to Memories 💾');
     snap.url && URL.revokeObjectURL(snap.url);
     stato.ultimaSnap = null;
     tornaAllaCamera();
   } catch {
-    toast('Impossibile salvare (modalità privata?)');
+    toast('Could not save (private mode?)');
   }
 }
 
@@ -342,7 +343,7 @@ function tornaAllaCamera() {
 }
 
 /* ============================================================
- * RICORDI (IndexedDB)
+ * MEMORIES (IndexedDB)
  * ============================================================ */
 function dbOpen() {
   return new Promise((res, rej) => {
@@ -370,7 +371,7 @@ const dbDel = (id) => dbOpen().then((db) => new Promise((res, rej) => {
 let snapsCache = [];
 
 async function apriRicordi() {
-  stato.attivo = false; // stop al loop: risparmia batteria
+  stato.attivo = false; // stop the loop: it saves battery
   try {
     snapsCache = (await dbAll()).sort((a, b) => b.ts - a.ts);
   } catch { snapsCache = []; }
@@ -421,7 +422,7 @@ function apriViewer(snap, url) {
   $('#viewer-delete').onclick = async () => {
     if (!confirm('Eliminare questa snap?')) return;
     await dbDel(snap.id).catch(() => {});
-    toast('Snap eliminata 🗑️');
+    toast('Snap deleted 🗑️');
     chiudiViewer();
     apriRicordi();
   };
@@ -445,7 +446,7 @@ function chiudiViewer() {
 }
 
 /* ============================================================
- * CAROSELLO FILTRI
+ * THE FILTER CAROUSEL
  * ============================================================ */
 function costruisciCarosello() {
   for (const f of FILTRI) {
@@ -462,7 +463,7 @@ function selezionaFiltro(id) {
   stato.filtroId = id;
   stato.landmarks = null;
   stato.engineStato = stato.engineStato === 'errore' ? 'idle' : stato.engineStato;
-  resetQuizStati(); // i quiz ripartono con una nuova estrazione
+  resetQuizStati(); // the quizzes restart with a new draw
   for (const c of carousel.children) c.classList.toggle('attiva', c.dataset.id === id);
   const attivo = carousel.querySelector(`[data-id="${id}"]`);
   attivo?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -471,9 +472,9 @@ function selezionaFiltro(id) {
 }
 
 /* ============================================================
- * REGISTRAZIONE VIDEO
+ * VIDEO RECORDING
  * ============================================================ */
-const DURATA_VIDEO = 10000; // millisecondi (10 s)
+const DURATA_VIDEO = 10000; // milliseconds (10 s)
 
 const MIME_VIDEO = [
   'video/mp4;codecs=avc1.42E01E',
@@ -491,14 +492,14 @@ function supportaVideo() {
 function mimeVideo() {
   if (typeof MediaRecorder === 'undefined') return null;
   for (const m of MIME_VIDEO) {
-    try { if (MediaRecorder.isTypeSupported(m)) return m; } catch { /* provo il prossimo */ }
+    try { if (MediaRecorder.isTypeSupported(m)) return m; } catch { /* try the next one */ }
   }
   return '';
 }
 
 function iniziaRegistrazione() {
   if (stato.registrazione || !video.videoWidth) return;
-  if (!supportaVideo()) { toast('Video non supportato su questo browser'); return; }
+  if (!supportaVideo()) { toast('Video is not supported in this browser'); return; }
   const mime = mimeVideo();
   if (mime === null) { toast('Video non supportato su questo browser'); return; }
 
@@ -520,7 +521,7 @@ function iniziaRegistrazione() {
   rec.onstop = () => {
     stream.getTracks().forEach((traccia) => traccia.stop());
     const blob = new Blob(pezzi, { type: rec.mimeType || mime || 'video/mp4' });
-    if (!blob.size) { toast('Registrazione vuota, riprova'); return; }
+    if (!blob.size) { toast('Empty recording, try again'); return; }
     mostraAnteprima({
       tipo: 'video',
       blob,
@@ -534,7 +535,7 @@ function iniziaRegistrazione() {
   rec.start(1000);
   stato.registrazione = { rec, canvas, inizio: performance.now() };
   $('#shutter').classList.add('registra');
-  toast('Registrazione…');
+  toast('Recording…');
 }
 
 function fermaRegistrazione() {
@@ -549,7 +550,7 @@ function fermaRegistrazione() {
 }
 
 /* ============================================================
- * UTILITÀ
+ * UTILITIES
  * ============================================================ */
 let toastTimer;
 function toast(msg) {
@@ -562,7 +563,7 @@ function toast(msg) {
 function mostraStatus(msg) { statusEl.textContent = msg; statusEl.hidden = false; }
 function nascondiStatus() { statusEl.hidden = true; }
 
-/* otturatore sintetizzato (nessun asset) */
+/* the shutter sound, synthesised (no asset) */
 let audioCtx = null;
 function suonoOturatore() {
   try {
@@ -581,11 +582,11 @@ function suonoOturatore() {
     gain.gain.exponentialRampToValueAtTime(0.001, t0 + durata);
     src.connect(gain).connect(audioCtx.destination);
     src.start(t0);
-  } catch { /* audio bloccato: pazienza */ }
+  } catch { /* the audio is blocked: never mind */ }
 }
 
 /* ============================================================
- * AVVIO
+ * START UP
  * ============================================================ */
 function mostraErrore(msg) {
   const el = $('#start-error');
@@ -596,11 +597,12 @@ function mostraErrore(msg) {
 async function avviaApp() {
   const btn = $('#start-btn');
   btn.disabled = true;
-  btn.textContent = 'Attivo…';
+  btn.textContent = 'Starting…';
   try {
     await avviaFotocamera();
-    // prima mostro la schermata, poi dimensiono: finché è display:none
-    // l'overlay misura 0x0 e i filtri non avrebbero dove disegnare
+  // show the screen first, then measure: while it is display:none
+  // the overlay measures 0x0 and the filters would have nowhere to draw
+    // the overlay measures 0x0 and the filters would have nowhere to draw
     mostra('camera');
     dimensionaOverlay();
     requestAnimationFrame(dimensionaOverlay);
@@ -608,25 +610,25 @@ async function avviaApp() {
     requestAnimationFrame(loop);
   } catch (err) {
     btn.disabled = false;
-    btn.textContent = 'Riprova';
+    btn.textContent = 'Try again';
     const nomi = {
-      NotAllowedError: 'Permesso negato: consenti la fotocamera dalle impostazioni di Safari (aA → Impostazioni sito → Fotocamera).',
-      NotFoundError: 'Nessuna fotocamera trovata su questo dispositivo.',
-      NotReadableError: 'La fotocamera è già usata da un\'altra app.',
+      NotAllowedError: 'Permission denied: allow the camera from Safari\'s settings (aA → Site settings → Camera).',
+      NotFoundError: 'No camera found on this device.',
+      NotReadableError: 'The camera is already in use by another app.',
     };
     mostraErrore(nomi[err?.name] ?? `Errore fotocamera: ${err?.message ?? err}`);
   }
 }
 
-/* ---------- eventi ---------- */
+/* ---------- events ---------- */
 $('#start-btn').addEventListener('click', avviaApp);
 $('#flip-btn').addEventListener('click', giraFotocamera);
 
-/* otturatore: tocco = foto, pressione prolungata = video (max 10 s) */
+/* the shutter: a tap takes a photo, a long press records video (max 10 s) */
 const otturatore = $('#shutter');
 otturatore.addEventListener('pointerdown', (e) => {
   e.preventDefault();
-  try { otturatore.setPointerCapture(e.pointerId); } catch { /* ok lo stesso */ }
+  try { otturatore.setPointerCapture(e.pointerId); } catch { /* fine either way */ }
   clearTimeout(stato.pressione);
   if (!supportaVideo()) return;
   stato.pressione = setTimeout(iniziaRegistrazione, 250);
@@ -648,7 +650,7 @@ otturatore.addEventListener('contextmenu', (e) => e.preventDefault());
 $('#flash-btn').addEventListener('click', (e) => {
   stato.flash = !stato.flash;
   e.currentTarget.classList.toggle('attiva', stato.flash);
-  toast(stato.flash ? 'Flash schermo attivo ⚡' : 'Flash spento');
+  toast(stato.flash ? 'Screen flash on ⚡' : 'Screen flash off');
 });
 $('#memories-btn').addEventListener('click', apriRicordi);
 $('#memories-close').addEventListener('click', tornaAllaCamera);
@@ -668,13 +670,13 @@ document.addEventListener('visibilitychange', () => {
 costruisciCarosello();
 window.__snapDebug = stato;
 
-/* l'overlay va ridimensionato quando la schermata camera diventa visibile
- * (da display:none le sue misure sono 0) e a ogni rotazione */
+/* the overlay has to be resized when the camera screen becomes visible
+ * (from display:none its measurements are 0) and on every rotation */
 if (typeof ResizeObserver !== 'undefined') {
   new ResizeObserver(dimensionaOverlay).observe($('#camera'));
 }
 
-/* service worker (shell + modelli MediaPipe in vendor/ cachati al primo uso) */
+/* service worker (the shell + the MediaPipe models in vendor/, cached on first use) */
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./service-worker.js').catch(() => {});
 }

@@ -1,4 +1,8 @@
-/* ===== Snap PWA — stili ===== */
+/* ===== Snap PWA — styles =====
+ * A small token scale first, then the screens. The tokens are here so the
+ * new pieces (the bottom sheet, the looks row, the settings) do not each
+ * invent their own spacing and durations.
+ */
 :root {
   --bg: #101014;
   --giallo: #fffc00;
@@ -6,6 +10,31 @@
   --muted: rgba(245, 245, 247, 0.6);
   --chip: rgba(20, 20, 26, 0.72);
   --border: rgba(255, 255, 255, 0.12);
+
+  /* spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+
+  /* radii */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+
+  /* motion */
+  --dur-fast: 0.12s;
+  --dur-mid: 0.22s;
+  --dur-slow: 0.35s;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* the smallest comfortable touch target, and the glass it sits on */
+  --target: 48px;
+  --glass: var(--chip);
+
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
@@ -35,6 +64,15 @@ button {
   background: none;
   cursor: pointer;
   touch-action: manipulation;
+}
+
+/* A visible focus ring on everything that can take the keyboard. The
+   caption field used to set `outline: none` and never gave it back, which
+   made it invisible to a keyboard user. */
+:focus-visible {
+  outline: 2px solid var(--giallo);
+  outline-offset: 3px;
+  border-radius: var(--r-sm);
 }
 
 /* ---- schermate ---- */
@@ -124,18 +162,18 @@ button {
 .topbar .spacer { flex: 1; }
 
 .iconbtn {
-  width: 46px;
-  height: 46px;
+  width: var(--target);
+  height: var(--target);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 21px;
   border-radius: 50%;
-  background: var(--chip);
+  background: var(--glass);
   border: 1px solid var(--border);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  transition: transform 0.12s ease, background 0.2s ease;
+  transition: transform var(--dur-fast) ease, background var(--dur-mid) ease;
 }
 .iconbtn:active { transform: scale(0.9); }
 .iconbtn.attiva { background: var(--giallo); border-color: var(--giallo); }
@@ -269,17 +307,17 @@ button {
 #caption {
   margin: 12px max(16px, var(--sar)) 10px max(16px, var(--sal));
   padding: 13px 16px;
-  border-radius: 14px;
+  border-radius: var(--r-md);
   border: 1px solid var(--border);
-  background: var(--chip);
+  background: var(--glass);
   color: var(--text);
   font-size: 16px;
   font-family: inherit;
-  outline: none;
   user-select: text;
   -webkit-user-select: text;
 }
 #caption:focus { border-color: var(--giallo); }
+#caption:focus-visible { outline: 2px solid var(--giallo); outline-offset: 2px; }
 .preview-actions {
   display: flex;
   gap: 10px;
@@ -398,4 +436,24 @@ button {
 
 @media (min-width: 700px) {
   .mem-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ---- Reduced motion ----
+   The house rule of this repository: prefers-reduced-motion stops the
+   animation rather than shortening it. Nothing here carries information,
+   so all of it can simply stop. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .btn-gallo:active,
+  .iconbtn:active,
+  .chip-filtro:active,
+  #shutter:active .ring { transform: none; }
+  #flash { transition: none; }
 }

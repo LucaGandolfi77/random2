@@ -10,137 +10,7 @@
 <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<style>
-/* The Google Fonts @import lived here. It was the only outbound request
-   in the whole repository, and it broke the promise this app makes: a
-   visual novel that opens with the network off. The stacks below fall
-   back to fonts the device already has. */
-
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{background:#0a0a14;color:#d4c5b0;height:100%;font-family:'Cormorant Garamond',Georgia,serif;overflow:hidden;letter-spacing:0.02em;}
-
-/* Layout */
-.app{height:100vh;display:flex;flex-direction:column;}
-.top-bar{height:44px;background:#12121f;border-bottom:1px solid #222;display:flex;align-items:center;justify-content:space-between;padding:0 0.8rem;font-size:0.82rem;gap:0.6rem;flex-shrink:0;z-index:30;}
-.tb-stat{color:#8a7b65;white-space:nowrap;}
-.tb-btn{background:none;border:none;color:#bfa07a;font-size:1.1rem;cursor:pointer;padding:0.2rem 0.4rem;border-radius:4px;}
-.tb-btn:active{background:#ffffff11;}
-
-/* Tabs */
-.tab-bar{height:52px;background:#12121f;border-bottom:1px solid #222;display:flex;flex-shrink:0;z-index:30;}
-.tab-btn{flex:1;background:none;border:none;color:#666;font-family:'Cinzel Decorative',serif;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent;}
-.tab-btn.active{color:#bfa07a;border-bottom-color:#bfa07a;}
-.tab-btn:active{background:#ffffff08;}
-
-/* Panels */
-.tab-panel{flex:1;overflow-y:auto;padding:1rem;display:none;}
-.tab-panel:not(.hidden){display:block;}
-
-/* Catch Stage */
-.stage-wrap{position:relative;width:100%;max-width:520px;margin:0 auto;height:420px;border-radius:16px;overflow:hidden;border:1px solid #222;background:#0e0e18;box-shadow:0 8px 32px rgba(0,0,0,0.5);}
-#stage-canvas{display:block;width:100%;height:100%;touch-action:none;}
-.stage-overlay{position:absolute;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:0.8rem;}
-.stage-info{text-align:center;pointer-events:none;}
-.stage-controls{pointer-events:auto;display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;}
-.biome-bar{display:flex;gap:0.4rem;overflow-x:auto;padding:0.5rem 0;scrollbar-width:none;justify-content:center;}
-.biome-bar::-webkit-scrollbar{display:none;}
-.biome-btn{background:#1a1a2e;border:1px solid #333;color:#8a7b65;font-family:inherit;font-size:0.72rem;padding:0.35rem 0.7rem;border-radius:999px;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
-.biome-btn.active{border-color:#bfa07a;color:#bfa07a;box-shadow:0 0 10px rgba(191,160,122,0.15);}
-
-.swipe-hint{text-align:center;color:#555;font-size:0.75rem;margin-top:0.4rem;font-style:italic;}
-
-/* Pokedex Grid */
-#pokedex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.7rem;max-width:900px;margin:0 auto;}
-.pd-card{background:#12121f;border:1px solid #222;border-radius:12px;padding:0.7rem;text-align:center;transition:all 0.2s;}
-.pd-card:hover{border-color:#333;transform:translateY(-2px);}
-.pd-card.seen{opacity:0.6;}
-.pd-card:not(.caught):not(.seen){filter:grayscale(1);}
-.pd-sprite{height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:0.3rem;}
-.pd-sprite canvas{max-width:100%;max-height:100%;}
-.pd-sprite img{max-width:100%;max-height:100%;}
-.pd-count{text-align:center;color:#8a7b65;font-size:0.85rem;margin-bottom:0.9rem;}
-.pd-gen{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:0.8rem;}
-.pd-gen button{font-family:inherit;font-size:0.72rem;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#bfa07a;cursor:pointer;}
-.pd-gen button.active{background:#bfa07a;color:#12100c;border-color:#bfa07a;}
-.pd-name{font-family:'Cinzel Decorative',serif;font-size:0.82rem;color:#c9b8a0;margin-bottom:0.2rem;}
-.pd-types{display:flex;gap:0.3rem;justify-content:center;flex-wrap:wrap;margin-bottom:0.3rem;}
-.type-tag{font-size:0.6rem;padding:0.15rem 0.4rem;border-radius:4px;text-transform:uppercase;letter-spacing:0.04em;}
-.pd-meta{font-size:0.65rem;color:#666;display:flex;justify-content:space-between;padding:0 0.3rem;}
-.pd-evolve{font-size:0.65rem;color:#666;margin-top:0.2rem;}
-.pd-evolve.ready{color:#81c784;}
-
-/* Inventory */
-#inventory-grid{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:1.2rem;}
-.inv-section h4{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:0.85rem;margin-bottom:0.5rem;letter-spacing:0.05em;}
-.inv-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:0.6rem;}
-.inv-item{background:#12121f;border:1px solid #222;border-radius:10px;padding:0.6rem;text-align:center;cursor:pointer;transition:all 0.2s;}
-.inv-item:hover{border-color:#333;}
-.inv-item.active{border-color:#bfa07a;box-shadow:0 0 12px rgba(191,160,122,0.1);}
-.inv-icon{font-size:1.6rem;}
-.inv-count{font-size:0.8rem;color:#c9b8a0;margin-top:0.15rem;}
-.inv-label{font-size:0.62rem;color:#666;}
-.inv-summary{text-align:center;color:#8a7b65;font-size:0.9rem;margin-top:0.5rem;}
-
-/* Trainer */
-#trainer-panel{max-width:600px;margin:0 auto;}
-.trainer-card{display:flex;gap:1rem;background:#12121f;border:1px solid #222;border-radius:12px;padding:1rem;margin-bottom:1rem;align-items:center;}
-.trainer-avatar{width:80px;height:80px;flex-shrink:0;}
-.trainer-info{flex:1;}
-.trainer-level{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:1.1rem;margin-bottom:0.3rem;}
-.trainer-xp-bar{height:6px;background:#222;border-radius:3px;overflow:hidden;margin-bottom:0.3rem;}
-.trainer-xp-fill{height:100%;background:linear-gradient(90deg,#bfa07a,#d4c5b0);border-radius:3px;transition:width 0.5s ease;}
-.trainer-xp-text{font-size:0.7rem;color:#666;}
-.trainer-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem;}
-.stat-box{background:#12121f;border:1px solid #222;border-radius:10px;padding:0.6rem;text-align:center;}
-.stat-num{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:1.2rem;}
-.stat-label{font-size:0.65rem;color:#666;text-transform:uppercase;letter-spacing:0.05em;}
-.trainer-achievements h4{font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:0.85rem;margin-bottom:0.5rem;}
-.ach-row{display:flex;gap:0.6rem;align-items:center;background:#12121f;border:1px solid #222;border-radius:8px;padding:0.5rem 0.7rem;margin-bottom:0.4rem;}
-.ach-row.unlocked{border-color:#bfa07a44;}
-.ach-icon{font-size:1.1rem;color:#444;}
-.ach-row.unlocked .ach-icon{color:#ffd700;}
-.ach-title{font-size:0.8rem;color:#999;}
-.ach-row.unlocked .ach-title{color:#c9b8a0;}
-.ach-desc{font-size:0.65rem;color:#555;}
-
-/* Result Modal */
-.result-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(6px);}
-.result-modal.hidden{display:none;}
-.rm-panel{background:#12121f;border:1px solid #333;border-radius:16px;padding:1.5rem;text-align:center;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
-.rm-title{font-family:'Cinzel Decorative',serif;font-size:1.4rem;margin-bottom:0.8rem;}
-.rm-body{margin-bottom:1.2rem;line-height:1.4;}
-.rm-btn{background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;padding:0.6rem 1.8rem;border-radius:6px;font-family:inherit;font-size:0.95rem;cursor:pointer;transition:all 0.2s;}
-.rm-btn:hover{background:#bfa07a35;border-color:#bfa07a;}
-
-/* Start Menu */
-.menu-screen{position:fixed;inset:0;background:#0a0a14;z-index:200;display:flex;align-items:center;justify-content:center;padding:2rem;}
-.menu-screen.hidden{display:none;}
-.menu-panel{text-align:center;padding:2rem 1rem;max-width:460px;width:100%;}
-.menu-panel h1{font-family:'Cinzel Decorative',serif;font-size:2.6rem;color:#c9b0a0;margin-bottom:0.5rem;letter-spacing:0.06em;}
-.menu-panel .sub{font-style:italic;color:#9a8876;font-size:1rem;margin-bottom:2rem;line-height:1.5;}
-.menu-button{background:#bfa07a22;border:1px solid #bfa07a55;color:#c9b8a8;border-radius:6px;padding:0.8rem 1.5rem;font-family:inherit;font-size:1rem;cursor:pointer;letter-spacing:0.03em;margin:0.3rem;transition:all 0.2s;}
-.menu-button:hover{background:#bfa07a35;border-color:#bfa07a;}
-.menu-cta{display:block;width:100%;max-width:320px;margin:0 auto 0.6rem;font-size:1.1rem;padding:1rem 1.5rem;}
-
-/* Settings */
-.settings-list{max-width:400px;margin:0 auto;display:flex;flex-direction:column;gap:0.8rem;}
-.setting-row{display:flex;justify-content:space-between;align-items:center;background:#12121f;border:1px solid #222;border-radius:10px;padding:0.8rem 1rem;}
-.setting-label{font-size:0.9rem;color:#c9b8a0;}
-.toggle{background:#333;border:none;width:44px;height:24px;border-radius:12px;position:relative;cursor:pointer;transition:background 0.2s;}
-.toggle.on{background:#bfa07a;}
-.toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left 0.2s;}
-.toggle.on::after{left:22px;}
-.danger-btn{background:#5c121222;border:1px solid #5c121255;color:#e57373;padding:0.6rem 1rem;border-radius:6px;font-family:inherit;cursor:pointer;width:100%;margin-top:1rem;}
-
-.hidden{display:none !important;}
-
-@media(max-width:420px){
-  .stage-wrap{height:340px;}
-  .menu-panel h1{font-size:2rem;}
-  #pokedex-grid{grid-template-columns:repeat(2,1fr);}
-  .trainer-stats{grid-template-columns:repeat(2,1fr);}
-}
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app">
@@ -154,16 +24,19 @@ html,body{background:#0a0a14;color:#d4c5b0;height:100%;font-family:'Cormorant Ga
     <button class="tab-btn" id="btn-pokedex" onclick="switchTab('pokedex')">Pokédex</button>
     <button class="tab-btn" id="btn-inventory" onclick="switchTab('inventory')">Items</button>
     <button class="tab-btn" id="btn-trainer" onclick="switchTab('trainer')">Trainer</button>
+    <button class="tab-btn" id="btn-research" onclick="switchTab('research')">Research</button>
   </div>
 
   <!-- CATCH TAB -->
   <div class="tab-panel" id="tab-catch">
     <div class="biome-bar" id="biome-selector"></div>
+    <div class="nearby-radar" id="nearby-radar"></div>
     <div class="stage-wrap">
       <canvas id="stage-canvas"></canvas>
+      <div id="combo-overlay" class="combo-overlay hidden"><span id="combo-text"></span></div>
       <div class="stage-overlay">
         <div class="stage-info" id="stage-info">
-          <div style="font-family:'Cinzel Decorative',serif;color:#bfa07a;font-size:1.1rem;">Choose a biome</div>
+          <div style="font-family:var(--font-display);color:var(--accent-light);font-size:1.1rem;">Choose a biome</div>
         </div>
         <div class="stage-controls">
           <button class="menu-button" style="font-size:0.8rem;padding:0.5rem 1rem;" onclick="spawnWildPokemon()">🔄 New Encounter</button>
@@ -190,7 +63,12 @@ html,body{background:#0a0a14;color:#d4c5b0;height:100%;font-family:'Cormorant Ga
     <div id="trainer-panel"></div>
   </div>
 
-  <!-- SETTINGS (rendered inside trainer or accessible) -->
+  <!-- RESEARCH TAB -->
+  <div class="tab-panel hidden" id="tab-research">
+    <div id="research-grid"></div>
+  </div>
+
+  <!-- SETTINGS -->
   <div class="tab-panel hidden" id="tab-settings">
     <div class="settings-list">
       <div class="setting-row">

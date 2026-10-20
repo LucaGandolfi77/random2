@@ -22,6 +22,9 @@ export function getDefaultState() {
     lastPlayed: Date.now(),
     currentBiome: 'grass',
     achievements: {},
+    quests: [],
+    lastQuestDate: null,
+    streak: 0,
   };
 }
 
@@ -44,7 +47,6 @@ export function loadState() {
   const s = loadJSON(SK, null);
   if (!s) return getDefaultState();
   const def = getDefaultState();
-  // merge
   const out = {};
   for (const k in def) out[k] = s[k] !== undefined ? s[k] : def[k];
   return out;

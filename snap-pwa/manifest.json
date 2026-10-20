@@ -1,7 +1,7 @@
 {
   "name": "Snap PWA",
   "short_name": "Snap",
-  "description": "Fotocamera in tempo reale con lenti volto (cagnolino, occhiali, corona, cuori) e filtri retrò. Le snap restano sul tuo dispositivo.",
+  "description": "A real-time camera with face lenses (dog, sunglasses, crown, hearts) and retro filters. The snaps stay on your device.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
