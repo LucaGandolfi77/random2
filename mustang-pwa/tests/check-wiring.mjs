@@ -28,10 +28,14 @@ for (const id of ["theatre-overlord", "theatre-rising"]) {
 console.log("\nasset wiring");
 const refs = [...new Set([...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]))]
     .filter((r) => !/^(https?:|data:|#|mailto:)/.test(r)).sort();
-ok("index.html references " + refs.length + " local assets", refs.length >= 9);
+ok("index.html references " + refs.length + " local assets", refs.length >= 8, String(refs.length));
 for (const r of refs) {
     ok("asset " + r + " exists on disk", existsSync(resolve(root, r)));
 }
+/* The service worker registers itself from game.js. Loading it a second time
+   as a page script was redundant, and the old count of nine local assets was
+   the number that still included it. */
+ok("the service worker is not loaded as a page script", !/src="service-worker\.js"/.test(html));
 
 console.log("\nportability");
 ok("no asset path is root absolute", !/(?:src|href)="\//.test(html), (html.match(/(?:src|href)="\/[^"]*"/) || [""])[0]);
