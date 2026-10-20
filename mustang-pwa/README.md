@@ -3,7 +3,7 @@
 A vertical-scrolling WWII air shooter for the browser. Mechanics follow Capcom's
 *1942* (1984): the aerial loop, POW crates dropped by destroyed formations, side
 fighters, Yashichi medals, bomber scoring chains, sector boss planes and the
-shoot-down bonus tally. Two fronts, 32 stages each. Six things here are not on
+shoot-down bonus tally. Two fronts, 32 stages each. Ten things here are not on
 the cabinet, and they are listed under **What this game adds on top of 1942**.
 
 No build step, no dependencies, no binary assets. Every aircraft, tank, warship
@@ -13,8 +13,8 @@ with WebAudio.
 ## What this game adds on top of 1942
 
 The cabinet gave you a score, three lives, a loop and a road of green military
-bases. Six things here are not on the cabinet, and each one is there because the
-cabinet had something missing.
+bases. Ten things here are not on the cabinet, and each one is there because
+the cabinet had something missing.
 
 **Threading.** On the arcade the loop was a defence: you rolled through an
 enemy and nothing happened. Here rolling through one cuts it, and cuts build a
@@ -57,6 +57,30 @@ anything on its way down. It writes into the same input the keyboard writes
 into, so the tilt, the guns and the loops behave exactly as they do for a
 person. The demo never touches the campaign: the checkpoint does not move, no
 sector opens, and the points it scores stay out of the high score.
+
+**The hitbox.** The aircraft you draw is thirty pixels wide. The thing that
+kills you is five and a half. There is a red dot on the machine now, at the
+position the collision test uses, because threading a formation means putting
+that dot next to another aircraft on purpose and you should not have to guess
+where it is. It can be turned off from the title screen.
+
+**The second phase of the boss.** A boss that only ever does one thing is a
+target, not a fight. At half health all four of them wake up: `ENRAGED` goes
+up the screen, they turn from the colour they were painted to a hot red, they
+move faster and wider, they fire more often, and they throw out rings of
+twelve shot that turn as they travel, so two of them together make a spiral.
+
+**Sector records and medals.** Every sector keeps the best shoot-down rate you
+have managed over its four stages — the same judgement the game already makes
+about a stage, where a Zero counts one and a warship counts six. Gold is 95 per
+cent, silver 85, bronze 70, and the button carries the medal in its border and
+its number.
+
+**The weather of the sector.** Each sector brings its own sky, and it is the
+weather that was actually there: the Channel in February is rain, the Ardennes
+in December is snow, Attu is fog, Berlin is smoke. It does not touch the
+gameplay — the rain does not make the enemies harder to hit — it is there so
+that a sector looks like a place.
 
 ## Run it
 
@@ -109,9 +133,20 @@ further: every sector you have finished is a button you can start from again.
 NORMANDY, BERLIN, ARDENNES, RHINE, ALPS and VIENNA on the western front;
 MIDWAY, MARSHALL, ATTU, RABAUL, LEYTE, SAIPAN, IWO JIMA and OKINAWA on the
 Pacific one. Four stages to a sector. The briefing screen shows the card for
-the sector you are about to fly: the place, the date, and one line of
-situation. A sector opens for the sector select when the last of its four
+the sector you are about to fly: the place, the date, the weather and one line
+of situation. A sector opens for the sector select when the last of its four
 stages is behind you, not the first.
+
+**Sector records.** Every sector keeps the best shoot-down rate you have
+managed over its four stages, and a medal for it: gold at 95 per cent, silver
+at 85, bronze at 70. Each stage keeps its own figure, so flying a stage again
+replaces it rather than counting it twice.
+
+**The boss.** Boss planes appear at the end of stages 26, 18, 10 and 02, worth
+20,000, 30,000, 40,000 and 50,000. Higher tiers add spread shots, rotating
+barrage and escort fighters. At half health every boss wakes up: it turns hot
+red, moves faster and wider, fires more often, and throws out rings of twelve
+shot that turn as they travel.
 
 **Difficulty.** Three presets, chosen on the title screen and remembered between
 runs. *Recruit* softens enemy speed, toughness, rate of fire, bullet speed and
@@ -151,10 +186,6 @@ game over. Mute it with the speaker button.
 back with a tail gun. The first is worth 2,000, each successive one 500 more, up
 to a 9,000 cap. Dying resets the chain.
 
-**Boss planes** appear at the end of stages 26, 18, 10 and 02, worth 20,000,
-30,000, 40,000 and 50,000. Higher tiers add spread shots, rotating barrage and
-escort fighters.
-
 **End of stage bonus** is based on your shoot-down rate, plus 1,000 per unused
 loop. 100% pays a 50,000 SPECIAL bonus. The rate is weighted by what you shot
 down, not by how accurately you shoot: a Zero counts 1, a B-24 counts 6, a boss
@@ -173,8 +204,8 @@ No dependencies needed, plain `node`:
 ```bash
 node --check src/data.js && node --check src/audio.js && node --check src/art.js && node --check src/game.js
 node tests/run-all.mjs         # everything below, with a summary
-node tests/check-data.mjs      # 1999 assertions over stage, enemy, music, difficulty, bonus, sector tables
-node tests/smoke.mjs           # boots the game headless and plays it, 211 assertions
+node tests/check-data.mjs      # 2005 assertions over stage, enemy, music, difficulty, bonus, sector tables
+node tests/smoke.mjs           # boots the game headless and plays it, 237 assertions
 node tests/check-wiring.mjs    # DOM ids, asset paths, portability, precache list, manifest
 ```
 
@@ -419,7 +450,7 @@ remaining cost is aircraft, armour and the HUD, which is the actual content.
 
 ## 🟡 The next layer
 
-The six additions described at the top of this file are in. These are the
+The ten additions described at the top of this file are in. These are the
 honest things they leave behind.
 
 - [ ] The bot is a demonstrator, not a rival. It dodges what is on its way
@@ -428,19 +459,38 @@ honest things they leave behind.
       crates would need a second brain, and a second brain is a second game
       inside the game. **Cost:** the input layer is already the right shape
       for it, but the collision model has no notion of what the bot wants.
-- [ ] The sector select keeps no memory of how you did. A best time and a best
-      score per sector would turn eight buttons from a re-play menu into a
-      scoreboard. **Cost:** a per-sector record, and a place to show it — the
-      buttons themselves are already eight slots wide.
 - [ ] Nobody will ever see the third extend. The thresholds are 20,000,
       60,000 and 150,000, and a campaign that ends around 150,000 has one
       extend in it, not three. Either the thresholds come down or the
       campaign gets longer. **Cost:** a measured play-through of a real run,
       which is also the only honest way to answer it.
-- [ ] The demo never says what it is playing. A caption naming the sector
-      would tell a watching player what they are looking at. **Cost:** one
-      line of text, and the demo would have to let the briefing card show.
 - [ ] Each track is eight steps long and loops, and the ear locks on. A second
       phrase per track would stop it, the way a real arcade arrangement does.
       **Cost:** sixteen more steps and a scheduler that can cross a bar
       boundary without losing the beat.
+- [ ] The hitbox is shown but it is still the size of the aircraft the arcade
+      drew. A real hitbox is a dot, and a dot that small would make the game
+      about something other than threading. **Cost:** the collision radius is
+      one number in `config` and about forty places that would have to be
+      re-tuned — the enemy formations, the ground units, the bosses.
+- [ ] The fog does not hide anything. It should: a sector with fog you can
+      see through is decoration, and a sector with fog you cannot is a
+      difficulty setting hiding behind a picture. **Cost:** the enemies would
+      have to fade with the haze, which means the draw order changes and the
+      frame budget has to take it.
+- [ ] The medal is the shoot-down rate, and the rate is weighted: a player can
+      ignore every Zero and still get a gold medal if they kill the bombers.
+      That is the arcade's own metric, so it is defensible, but it is not the
+      only reading of "how well did you fly that sector". **Cost:** a second
+      metric, and a way to show two numbers on a button that is forty pixels
+      wide.
+- [x] The sector select keeps a record now: the best shoot-down rate over the
+      four stages of the sector, with a medal for it.
+- [x] The demo says where it is. The HUD names the sector the demo is
+      flying, so a watching player knows which part of the campaign they are
+      looking at.
+- [ ] The demo shows the sector card, not just the HUD line. The card is
+      behind the menu panel while the demo runs, and the panel is exactly
+      what the demo is playing behind. **Cost:** the panel would have to
+      step aside for the two seconds of the briefing, or the card would
+      have to be drawn in a corner of the playfield.
