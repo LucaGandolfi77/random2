@@ -711,3 +711,13 @@ body.foglio-aperto { overflow: hidden; }
 /* The countdown before the shot uses the same ring as the recording
    progress: the same circle, counting something else. */
 #shutter.conta::before { opacity: 1; }
+
+/* A control that only a screen reader needs to find. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

@@ -20,6 +20,7 @@ export const impostazioni = {
   vibrazione: true,  // the 8ms buzz on every selection
   specchio: true,    // mirror the front camera
   qualita: 0.92,     // the JPEG quality of the saved photo
+  striscia: false,    // the photo booth: four shots in a row, one strip
   ...leggi(SETTINGS_KEY),
 };
 

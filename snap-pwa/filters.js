@@ -141,19 +141,20 @@ export const filtroPerId = (id) => {
  * ============================================================ */
 
 let enginePromise = null;
+let engineStillPromise = null;
 
-async function avviaLandmarker(vision, fileset, modello) {
+async function avviaLandmarker(vision, fileset, modello, runningMode) {
   try {
     return await vision.FaceLandmarker.createFromOptions(fileset, {
       baseOptions: { modelAssetPath: modello, delegate: 'GPU' },
-      runningMode: 'VIDEO',
+      runningMode,
       numFaces: 1,
     });
   } catch {
   // no GPU (or WebGL off): fall back to the CPU
     return await vision.FaceLandmarker.createFromOptions(fileset, {
       baseOptions: { modelAssetPath: modello, delegate: 'CPU' },
-      runningMode: 'VIDEO',
+      runningMode,
       numFaces: 1,
     });
   }
@@ -167,7 +168,7 @@ export function ensureEngineVolto() {
       try {
         const vision = await import(/* @vite-ignore */ sorgente.bundle);
         const fileset = await vision.FilesetResolver.forVisionTasks(sorgente.wasm);
-        const landmarker = await avviaLandmarker(vision, fileset, sorgente.modello);
+        const landmarker = await avviaLandmarker(vision, fileset, sorgente.modello, 'VIDEO');
         let lastTs = -1;
         return {
           detect(video, ts) {
@@ -184,6 +185,37 @@ export function ensureEngineVolto() {
     throw ultimoErrore;
   })();
   return enginePromise;
+}
+
+/**
+ * The same engine in IMAGE mode, for a photo imported from the device.
+ *
+ * MediaPipe runs a landmarker in one mode or the other: VIDEO takes a video
+ * element and a timestamp, IMAGE takes a still and returns the landmarks
+ * straight away. A photo from the gallery is a still, so it needs its own
+ * landmarker — the bundle supports both, it is the same model.
+ */
+export function ensureEngineStill() {
+  engineStillPromise ??= (async () => {
+    let ultimoErrore;
+    for (const sorgente of SORGENTI_ENGINE) {
+      try {
+        const vision = await import(/* @vite-ignore */ sorgente.bundle);
+        const fileset = await vision.FilesetResolver.forVisionTasks(sorgente.wasm);
+        const landmarker = await avviaLandmarker(vision, fileset, sorgente.modello, 'IMAGE');
+        return {
+          detect(immagine) {
+            const res = landmarker.detect(immagine);
+            return res.faceLandmarks?.[0] ?? null;
+          },
+        };
+      } catch (err) {
+        ultimoErrore = err; // try the next source
+      }
+    }
+    throw ultimoErrore;
+  })();
+  return engineStillPromise;
 }
 
 /* ============================================================

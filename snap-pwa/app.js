@@ -4,7 +4,7 @@
  */
 
 import {
-  FILTRI, LOOKS, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
+  FILTRI, LOOKS, filtroPerId, ensureEngineVolto, ensureEngineStill, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
 } from './filters.js';
 import {
   impostazioni, salvaImpostazioni, preferiti, togglePreferito, ePreferito,
@@ -37,6 +37,8 @@ const stato = {
   attivo: false,         // the render loop is running
   comparando: false,     // the compare button is held: the raw frame
   countdown: 0,          // the seconds left before the shot
+  immagine: null,        // a photo imported from the device, when there is one
+  striscia: [],          // the shots of the photo booth strip
   ultimaUrl: null,       // the object URL of the last saved snap
   ultimaSnap: null,      // { blob, url, type, poster?, filter } in the preview
   registrazione: null,   // { rec, canvas, start } during a video
@@ -177,13 +179,15 @@ async function gestisciFiltroVolto(filtro, t) {
 }
 
 /* ============================================================
- * THE SHOT
+ * THE COMPOSITE FRAME
  * ============================================================ */
 
 /**
- * Draws the composite frame (video + filter + frame + lenses) onto any
+ * Draws the composite frame (source + filter + frame + lenses) onto any
  * canvas. It is the only rendering engine: the photo and the video both
  * use it, so what gets saved is what was on screen in the preview.
+ *
+ * The source is the live video, or a photo imported from the device.
  *
  * mode 'photo'  → the colour filters are baked into the pixels (identical
  *                  to the preview, including the ones ctx.filter cannot do)
@@ -191,16 +195,17 @@ async function gestisciFiltroVolto(filtro, t) {
  */
 function disegnaFotogramma(ctx, W, H, t, modalita) {
   const filtro = filtroPerId(stato.filtroId);
+  const src = sorgenteFrame();
 
-  // 1. the video frame with object-fit:cover (+ mirroring on the front camera)
-  const scala = Math.max(W / video.videoWidth, H / video.videoHeight);
-  const dw = video.videoWidth * scala, dh = video.videoHeight * scala;
+  // 1. the frame with object-fit:cover (+ mirroring on the front camera)
+  const scala = Math.max(W / src.w, H / src.h);
+  const dw = src.w * scala, dh = src.h * scala;
   ctx.save();
-  if (stato.frontale) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+  if (!stato.immagine && stato.frontale) { ctx.translate(W, 0); ctx.scale(-1, 1); }
   if (modalita === 'video') {
     ctx.filter = filtro.animato ? `saturate(1.3) hue-rotate(${(t * 60) % 360}deg)` : (filtro.css ?? 'none');
   }
-  ctx.drawImage(video, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  ctx.drawImage(src.img, (W - dw) / 2, (H - dh) / 2, dw, dh);
   ctx.filter = 'none';
   ctx.restore();
 
@@ -228,6 +233,119 @@ function disegnaFotogramma(ctx, W, H, t, modalita) {
   }
 }
 
+/* Where the frame comes from: the live video, or a photo imported from
+   the device. Everything downstream reads this and nothing else. */
+function sorgenteFrame() {
+  if (stato.immagine) {
+    return { img: stato.immagine, w: stato.immagine.naturalWidth, h: stato.immagine.naturalHeight };
+  }
+  return { img: video, w: video.videoWidth, h: video.videoHeight };
+}
+
+/* ============================================================
+ * IMPORTING A PHOTO FROM THE DEVICE
+ * ============================================================ */
+
+/**
+ * Takes a photo that is already on the device and runs it through the same
+ * stack: the lens needs landmarks, and MediaPipe in IMAGE mode gives them
+ * for a still.
+ */
+async function importaFoto(file) {
+  if (!file) return;
+  let url = null;
+  try {
+    url = URL.createObjectURL(file);
+    const img = await caricaImmagine(url);
+
+    /* the landmarks, in IMAGE mode */
+    stato.landmarks = null;
+    try {
+      mostraStatus('Looking for a face…');
+      const engine = await ensureEngineStill();
+      stato.landmarks = engine.detect(img);
+    } catch {
+      stato.landmarks = null;
+    }
+    nascondiStatus();
+
+    stato.immagine = img;
+    const W = 1080;
+    const H = Math.round((W * img.naturalHeight) / img.naturalWidth);
+    const foto = document.createElement('canvas');
+    foto.width = W; foto.height = H;
+    disegnaFotogramma(foto.getContext('2d'), W, H, performance.now() / 1000, 'foto');
+    const blob = await new Promise((res) => foto.toBlob(res, 'image/jpeg', impostazioni.qualita));
+    mostraAnteprima({
+      tipo: 'foto',
+      blob,
+      url: URL.createObjectURL(blob),
+      filtro: stato.filtroId,
+      importata: true,
+    });
+  } catch {
+    toast('Could not read that file');
+  } finally {
+    if (url) URL.revokeObjectURL(url);
+  }
+}
+
+/* ============================================================
+ * THE PHOTO BOOTH STRIP
+ * ============================================================ */
+
+/**
+ * Four shots in a row, composed into one strip: the photo-booth of a
+ * festival, on a device that has no printer.
+ */
+function aggiungiAllaStriscia(blob) {
+  stato.striscia.push(blob);
+  if (stato.striscia.length < 4) {
+    toast(`${stato.striscia.length} of 4 📸`);
+    return null;
+  }
+  const pezzi = stato.striscia.slice();
+  stato.striscia = [];
+  return composiStriscia(pezzi);
+}
+
+function composiStriscia(pezzi) {
+  const LATO = 480;
+  const BORDO = 26;
+  const canvas = document.createElement('canvas');
+  canvas.width = LATO * 4 + BORDO * 5;
+  canvas.height = LATO + BORDO * 2;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#f4f1e8';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  return new Promise((risolvi) => {
+    /* the four frames, drawn as they decode */
+    let pronti = 0;
+    const finito = () => {
+      const d = new Date();
+      const testo = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+      ctx.fillStyle = '#ff7a1a';
+      ctx.font = `700 34px "Courier New", ui-monospace, monospace`;
+      ctx.textAlign = 'right';
+      ctx.fillText(testo, canvas.width - BORDO, canvas.height - BORDO / 2);
+      canvas.toBlob((blob) => risolvi(blob), 'image/jpeg', impostazioni.qualita);
+    };
+
+    for (let i = 0; i < 4; i++) {
+      const img = new Image();
+      img.onload = () => {
+        const scala = Math.max(LATO / img.width, LATO / img.height);
+        const dw = img.width * scala;
+        const dh = img.height * scala;
+        ctx.drawImage(img, BORDO + i * (LATO + BORDO) + (LATO - dw) / 2, BORDO + (LATO - dh) / 2, dw, dh);
+        if (++pronti === 4) finito();
+      };
+      img.src = URL.createObjectURL(pezzi[i]);
+    }
+  });
+}
+
 async function scatta() {
   if (!video.videoWidth) return;
 
@@ -250,6 +368,24 @@ async function scatta() {
   disegnaFotogramma(foto.getContext('2d'), W, H, performance.now() / 1000, 'foto');
 
   const blob = await new Promise((res) => foto.toBlob(res, 'image/jpeg', impostazioni.qualita));
+
+  /* in strip mode the shot goes into the strip instead of the preview */
+  if (impostazioni.striscia) {
+    const strip = await aggiungiAllaStriscia(blob);
+    if (!strip) {
+      stato.ultimaSnap = { tipo: 'foto', blob, url: URL.createObjectURL(blob), filtro: stato.filtroId };
+      return;
+    }
+    mostraAnteprima({
+      tipo: 'foto',
+      blob: strip,
+      url: URL.createObjectURL(strip),
+      filtro: stato.filtroId,
+      striscia: true,
+    });
+    return;
+  }
+
   mostraAnteprima({
     tipo: 'foto',
     blob,
@@ -416,6 +552,8 @@ function mostraUltima(record) {
 }
 
 function tornaAllaCamera() {
+  stato.immagine = null;
+  stato.landmarks = null;
   $('#preview-img').src = '';
   $('#preview-img').hidden = false;
   $('#preview-video').hidden = true;
@@ -592,6 +730,26 @@ function apriCatalogo() {
       corpo.appendChild(sezione);
     };
 
+    /* the import comes first: it is the thing you came for when you open
+       the catalogue with a photo in mind */
+    const sezione = document.createElement('section');
+    sezione.className = 'gruppo';
+    const h = document.createElement('h3');
+    h.textContent = 'From this device';
+    sezione.appendChild(h);
+    const griglia = document.createElement('div');
+    griglia.className = 'griglia-filtri';
+    const importa = document.createElement('button');
+    importa.className = 'cella-filtro';
+    importa.innerHTML = '<span class="emoji">🖼️</span><span class="nome">Import a photo</span>';
+    importa.addEventListener('click', () => {
+      chiudiFoglio();
+      $('#import-input').click();
+    });
+    griglia.appendChild(importa);
+    sezione.appendChild(griglia);
+    corpo.appendChild(sezione);
+
     const fav = preferiti();
     if (fav.length) {
       gruppo('Favourites', fav.map((id) => filtroPerId(id)).filter((f) => f.nome));
@@ -642,6 +800,17 @@ function apriImpostazioni() {
       }
       return g;
     };
+
+    riga('Photo booth', 'Four shots in a row, composed into one strip', gruppoOpzioni(
+      [[false, 'Off'], [true, 'On']],
+      impostazioni.striscia,
+      (v) => {
+        impostazioni.striscia = !!v;
+        salvaImpostazioni();
+        stato.striscia = [];
+        if (impostazioni.striscia) toast('Photo booth on 📸');
+      }
+    ));
 
     riga('Countdown', 'Wait before the shot', gruppoOpzioni(
       [[0, 'Off'], [3, '3s'], [10, '10s']],
@@ -922,6 +1091,11 @@ async function avviaApp() {
 $('#start-btn').addEventListener('click', avviaApp);
 $('#flip-btn').addEventListener('click', giraFotocamera);
 $('#catalogo-btn').addEventListener('click', apriCatalogo);
+$('#import-input').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (file) importaFoto(file);
+});
 $('#settings-btn').addEventListener('click', apriImpostazioni);
 $('#share-btn').addEventListener('click', condividi);
 collegaFoglio();
