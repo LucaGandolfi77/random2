@@ -11,8 +11,8 @@ function saveJSON(k, v) {
 export function getDefaultState() {
   return {
     language: 'en',
-    caught: [], // array of {id, cp, iv, shiny, date, candy}
-    seen: [],   // array of ids
+    caught: [],
+    seen: [],
     flown: 0,
     totalThrows: 0,
     greatThrows: 0,
@@ -25,6 +25,12 @@ export function getDefaultState() {
     quests: [],
     lastQuestDate: null,
     streak: 0,
+    eggs: [],
+    eggsToday: 0,
+    eggDate: null,
+    buddy: null,
+    spinLast: 0,
+    transferred: 0,
   };
 }
 
@@ -38,7 +44,7 @@ export function getDefaultInventory() {
     nanab: 5,
     pinap: 5,
     golden: 0,
-    candy: {}, // {pokemonId: count}
+    candy: {},
     stardust: 1000,
   };
 }

@@ -1,4 +1,4 @@
-const CACHE="pokemon-v4";const ASSETS=["./","./index.html","./manifest.json","../shared/arcade.js","src/config.js","src/dex-data.js","src/storage.js","src/renderer.js","src/sprites.js","src/main.js","icons/icon-192.svg"];
+const CACHE="pokemon-v8";const ASSETS=["./","./index.html","./styles.css","./manifest.json","../shared/arcade.js","src/config.js","src/dex-data.js","src/storage.js","src/renderer.js","src/sprites.js","src/main.js","icons/icon-192.svg"];
 self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>Promise.all(ASSETS.map(u=>c.add(new Request(u,{cache:"reload"})).catch(x=>console.warn("skip:",u,x))))));});
 self.addEventListener("activate",e=>{self.clients.claim();e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));});
 

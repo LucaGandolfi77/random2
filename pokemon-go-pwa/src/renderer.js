@@ -20,6 +20,10 @@ function drawPolyEllipse(ctx, cx, cy, rx, ry, segs, color, time, bobAmount) {
     ctx.lineTo(cx + Math.cos(a2) * rx, cy + Math.sin(a2) * ry);
     ctx.closePath();
     ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+    ctx.stroke();
   }
 }
 
@@ -32,6 +36,10 @@ function drawPolyTri(ctx, x1, y1, x2, y2, x3, y3, color) {
   ctx.lineTo(x3, y3);
   ctx.closePath();
   ctx.fill();
+  ctx.lineWidth = 1.5;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+  ctx.stroke();
 }
 
 /* Archetype builders — each returns a function that draws the pokemon */

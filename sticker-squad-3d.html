@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sticker Squad — 5 Worlds</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #1a1a2e; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+    canvas { display: block; }
+    #ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+    #hud-top { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 18px; }
+    .panel {
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(10px); border-radius: 12px;
+      padding: 10px 14px; color: #fff; pointer-events: auto;
+      border: 1px solid rgba(255,255,255,0.1); min-width: 170px; font-size: 13px;
+    }
+    .panel h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: #ffd700; margin-bottom: 5px; }
+    .panel p, .panel li { font-size: 12px; color: #ddd; line-height: 1.5; }
+    .panel ul { list-style: none; padding: 0; }
+    .panel li kbd {
+      display: inline-block; background: rgba(255,255,255,0.12); padding: 1px 5px;
+      border-radius: 4px; font-size: 11px; color: #ffd700; font-family: monospace; margin: 0 1px;
+    }
+    #command-line {
+      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(10px);
+      background: rgba(0,0,0,0.65); backdrop-filter: blur(10px);
+      border-radius: 14px; padding: 10px 24px; color: #ffd700;
+      font-size: 15px; border: 1px solid rgba(255,215,0,0.25);
+      transition: all 0.35s ease; opacity: 0; pointer-events: none;
+    }
+    #command-line.active { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #command-line span { color: #fff; }
+    #reticle {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 18px; height: 18px; pointer-events: none; z-index: 20;
+    }
+    #reticle::before, #reticle::after { content: ''; position: absolute; background: rgba(255,255,255,0.55); }
+    #reticle::before { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
+    #reticle::after { width: 100%; height: 2px; top: 50%; transform: translateY(-50%); }
+    #mode-badge {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.35);
+      color: #ffd700; padding: 5px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 600; letter-spacing: 1px;
+    }
+    #portal-hint {
+      position: fixed; top: 52px; left: 50%; transform: translateX(-50%);
+      color: #66ffcc; font-size: 13px; opacity: 0; transition: opacity 0.4s;
+      text-shadow: 0 0 8px rgba(102,255,204,0.4);
+    }
+    #portal-hint.visible { opacity: 1; }
+    #level-title {
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 42px; font-weight: 800; color: #ffd700; letter-spacing: 3px;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.6); opacity: 0; pointer-events: none;
+      transition: opacity 0.6s; z-index: 50;
+    }
+    #level-title.show { opacity: 1; }
+    #level-sub {
+      position: fixed; top: calc(50% + 36px); left: 50%; transform: translateX(-50%);
+      font-size: 16px; color: #fff; opacity: 0; transition: opacity 0.6s 0.2s;
+      pointer-events: none; z-index: 50; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+    #level-sub.show { opacity: 1; }
+    .sticker-btn {
+      position: fixed; bottom: 18px; right: 18px;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.12); color: #fff;
+      padding: 9px 14px; border-radius: 10px; cursor: pointer;
+      font-size: 12px; transition: all 0.2s; pointer-events: auto;
+    }
+    .sticker-btn:hover { border-color: #ffd700; color: #ffd700; }
+    .sticker-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #squad-bar {
+      position: fixed; bottom: 18px; left: 18px; display: flex; gap: 6px; pointer-events: auto;
+    }
+    .squad-slot {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .squad-slot.filled { border-color: #ffd700; background: rgba(255,215,0,0.15); }
+
+    #progress-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 100;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.5s;
+    }
+    #progress-overlay.visible { opacity: 1; pointer-events: auto; }
+    #progress-overlay h1 { color: #ffd700; font-size: 28px; margin-bottom: 8px; }
+    #progress-overlay p { color: #ccc; font-size: 14px; margin-bottom: 20px; }
+    #progress-overlay button {
+      padding: 10px 28px; border-radius: 10px; border: 1px solid #ffd700;
+      background: rgba(255,215,0,0.15); color: #ffd700; font-size: 15px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    #progress-overlay button:hover { background: rgba(255,215,0,0.3); }
+
+    #dark-overlay {
+      position: fixed; inset: 0; background: #000;
+      opacity: 0; pointer-events: none; z-index: 40;
+      transition: opacity 1.2s ease;
+    }
+    #dark-overlay.on { opacity: 0.65; }
+
+    /* Tooltip for interactables */
+    .tooltip {
+      position: fixed; background: rgba(0,0,0,0.7); color: #ffd700;
+      padding: 4px 10px; border-radius: 6px; font-size: 12px;
+      pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 25;
+    }
+    .tooltip.visible { opacity: 1; }
+
+    /* Lives / health dots */
+    #health-bar {
+      position: fixed; top: 18px; right: 18px; display: flex; gap: 4px;
+    }
+    .heart { color: #ff4466; font-size: 18px; text-shadow: 0 0 6px rgba(255,68,102,0.5); }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <div id="ui">
+    <div id="hud-top">
+      <div class="panel">
+        <h2>Controls</h2>
+        <ul>
+          <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</li>
+          <li><kbd>Space</kbd> Jump / Peel</li>
+          <li><kbd>Shift</kbd> Sprint</li>
+          <li><kbd>Click</kbd> Sticker / Interact</li>
+          <li><kbd>E</kbd> Stick to Wall</li>
+          <li><kbd>Q</kbd> Command Squad</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Status</h2>
+        <p>Sticks: <strong id="stick-count" style="color:#ffd700">0</strong></p>
+        <p>Score: <strong id="score" style="color:#66ccff">0</strong></p>
+        <p style="margin-top:4px; font-size:11px; color:#aaa">Zone: <strong id="zone-name" style="color:#ffd700">The Desk</strong></p>
+      </div>
+    </div>
+  </div>
+  <div id="mode-badge">MODE: GROUNDED</div>
+  <div id="portal-hint">PORTAL NEARBY — WALK INTO IT</div>
+  <div id="level-title"></div>
+  <div id="level-sub"></div>
+  <div id="command-line"><span id="cmd-text"></span></div>
+  <div id="reticle"></div>
+  <div id="health-bar"></div>
+  <button class="sticker-btn" id="stick-toggle">🦶 Toggle Stick</button>
+
+  <div id="squad-bar"></div>
+  <div class="tooltip" id="tooltip"></div>
+
+  <div id="progress-overlay">
+    <h1 id="progress-title">World Complete!</h1>
+    <p id="progress-desc">You conquered The Desk.</p>
+    <button id="progress-btn">Enter Next World</button>
+  </div>
+
+  <div id="dark-overlay"></div>
+
+  <script>
+    // ============================================================
+    // STICKER SQUAD — 5 WORLD ADVENTURE
+    // ============================================================
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function beep(freq=440, duration=0.1, type='sine', vol=0.05) {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+    function sfxRiser() {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(880, audioCtx.currentTime + 0.4);
+      gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+    }
+    function sfxPortalLoop() {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(340, audioCtx.currentTime + 0.6);
+      gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+    }
+
+    // ============================================================
+    // THREE.JS SETUP
+    // ============================================================
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB);
+    scene.fog = new THREE.Fog(0x87CEEB, 25, 100);
+
+    const camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, 0.1, 200);
+    camera.position.set(0, 6, 10);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    dirLight.position.set(25, 45, 20);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.set(2048, 2048);
+    dirLight.shadow.camera.near = 0.5; dirLight.shadow.camera.far = 120;
+    const sc = 50;
+    dirLight.shadow.camera.left = -sc; dirLight.shadow.camera.right = sc;
+    dirLight.shadow.camera.top = sc; dirLight.shadow.camera.bottom = -sc;
+    scene.add(dirLight);
+
+    const worldGroup = new THREE.Group();
+    scene.add(worldGroup);
+
+    // Reusable geometries and materials cache
+    const GEO = {
+      box: new THREE.BoxGeometry(1,1,1),
+      cyl: new THREE.CylinderGeometry(1,1,1,6),
+      cone: new THREE.ConeGeometry(1,1,5),
+      sphere: new THREE.DodecahedronGeometry(1),
+      circle: new THREE.CircleGeometry(1,8),
+    };
+
+    function mat(color, opts={}) {
+      if (opts.emissive) return new THREE.MeshPhongMaterial({ color, emissive: opts.emissive });
+      if (opts.transparent) return new THREE.MeshPhongMaterial({ color, transparent:true, opacity: opts.opacity||0.7, shininess: 80 });
+      if (opts.double) return new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide });
+      return new THREE.MeshLambertMaterial({ color });
+    }
+
+    // ============================================================
+    // PLAYER STICKER CHARACTER
+    // ============================================================
+    const playerGroup = new THREE.Group();
+    scene.add(playerGroup);
+
+    const stickerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.07, 10), mat(0xffd700));
+    stickerBody.castShadow = true;
+    playerGroup.add(stickerBody);
+
+    const stickerEdge = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.07, 10, 1, true), mat(0xcc9900));
+    stickerEdge.scale.set(1.02,1,1.02);
+    playerGroup.add(stickerEdge);
+
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+    const eyeGeo = new THREE.CircleGeometry(0.065, 8);
+    function addEye(x,z) {
+      const e = new THREE.Mesh(eyeGeo, eyeMat);
+      e.position.set(x, 0.036, z); e.rotation.x = -Math.PI/2;
+      playerGroup.add(e); return e;
+    }
+    const eyeL = addEye(-0.13, 0.26), eyeR = addEye(0.13, 0.26);
+    // blink with scale animation handled in loop
+
+    const mouthGeo = new THREE.RingGeometry(0.035, 0.075, 8, 1, 0, Math.PI);
+    const mouthMat = new THREE.MeshBasicMaterial({ color: 0x882222 });
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, 0.036, 0.29); mouth.rotation.x = -Math.PI/2;
+    playerGroup.add(mouth);
+
+    const legGeo = new THREE.CylinderGeometry(0.055, 0.055, 0.22, 4);
+    const legMat = mat(0xcc9900);
+    const legL = new THREE.Mesh(legGeo, legMat);
+    const legR = new THREE.Mesh(legGeo, legMat);
+    legL.position.set(-0.16, -0.1, 0.1); legL.visible = false;
+    legR.position.set(0.16, -0.1, 0.1); legR.visible = false;
+    playerGroup.add(legL); playerGroup.add(legR);
+
+    // Shadow blob
+    const playerShadow = new THREE.Mesh(
+      new THREE.CircleGeometry(0.35, 12),
+      new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22 })
+    );
+    playerShadow.rotation.x = -Math.PI/2;
+    scene.add(playerShadow);
+
+    // ============================================================
+    // GAME STATE
+    // ============================================================
+    const state = {
+      pos: new THREE.Vector3(0, 0.5, 0),
+      vel: new THREE.Vector3(0, 0, 0),
+      yaw: 0,
+      mode: 'grounded',
+      stickPlane: null,
+      onGround: true,
+      speed: 4.2,
+      sprintMult: 1.8,
+      peelTimer: 0,
+      sticks: 0,
+      score: 0,
+      animTime: 0,
+      selectedSticker: 0,
+      height: 0.5,
+      health: 3,
+      maxHealth: 3,
+      invincible: 0,
+      levelIndex: 0,
+      inPortal: false,
+    };
+
+    const squad = [];
+    function updateSquadUI() {
+      const bar = document.getElementById('squad-bar');
+      bar.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'squad-slot' + (i < squad.length ? ' filled' : '');
+        slot.textContent = i < squad.length ? '⭐' : '';
+        bar.appendChild(slot);
+      }
+    }
+    function updateHealthUI() {
+      const bar = document.getElementById('health-bar');
+      bar.innerHTML = '';
+      for (let i = 0; i < state.maxHealth; i++) {
+        const h = document.createElement('span');
+        h.className = 'heart'; h.textContent = i < state.health ? '❤' : '🖤';
+        bar.appendChild(h);
+      }
+    }
+    updateSquadUI(); updateHealthUI();
+
+    const raycaster = new THREE.Raycaster();
+    const mouseNDC = new THREE.Vector2();
+
+    const keys = {};
+    window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; handleKey(e.key.toLowerCase()); });
+    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+    window.addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+    window.addEventListener('mousemove', e => { mouseNDC.x = (e.clientX / innerWidth) * 2 - 1; mouseNDC.y = -(e.clientY / innerHeight) * 2 + 1; });
+    window.addEventListener('mousedown', onClick);
+    window.addEventListener('touchstart', onTouch, {passive:false});
+
+    function handleKey(key) {
+      if (key === ' ') {
+        if (state.mode === 'grounded') jump();
+        else if (state.mode === 'sticking') peelOff();
+      }
+      if (key === 'e') toggleStickMode();
+      if (key === 'q') { showCommand('SQUAD: Follow me!'); squad.forEach(s => { s.following = true; s.followTimer = 6; }); beep(550, 0.12, 'square'); }
+      if (key === '1' || key === '2' || key === '3') state.selectedSticker = parseInt(key) - 1;
+    }
+
+    function showCommand(text) {
+      const el = document.getElementById('command-line');
+      document.getElementById('cmd-text').textContent = text;
+      el.classList.add('active');
+      setTimeout(() => el.classList.remove('active'), 1800);
+    }
+
+    // ============================================================
+    // LEVEL SYSTEM
+    // ============================================================
+    let currentLevel = null;
+    let collectibles = [];
+    let targets = [];
+    let hazards = [];
+    let placedStickers = [];
+    let portals = [];
+    let water = null;
+    let worldLights = [];
+    let levelObjects = [];
+    let levelParticles = [];
+
+    function clearLevel() {
+      // Remove all dynamic objects
+      collectibles.forEach(c => worldGroup.remove(c));
+      targets.forEach(t => { worldGroup.remove(t.body); worldGroup.remove(t.head); });
+      placedStickers.forEach(p => worldGroup.remove(p.mesh));
+      hazards.forEach(h => worldGroup.remove(h));
+      portals.forEach(p => worldGroup.remove(p));
+      levelObjects.forEach(o => worldGroup.remove(o));
+      levelParticles.forEach(p => scene.remove(p));
+      if (water) { scene.remove(water); water = null; }
+      worldLights.forEach(l => worldGroup.remove(l));
+
+      collectibles = []; targets = []; hazards = []; placedStickers = [];
+      portals = []; worldLights = []; levelObjects = []; levelParticles = [];
+      worldGroup.rotation.set(0,0,0);
+    }
+
+    function spawnTitle(title, sub) {
+      const tEl = document.getElementById('level-title');
+      const sEl = document.getElementById('level-sub');
+      tEl.textContent = title; sEl.textContent = sub;
+      tEl.classList.add('show'); sEl.classList.add('show');
+      setTimeout(() => { tEl.classList.remove('show'); sEl.classList.remove('show'); }, 3000);
+    }
+
+    // Helper mesh builder
+    function m(kind, sx, sy, sz, color, x, y, z, opts={}) {
+      let geo;
+      if (kind === 'box') geo = GEO.box;
+      else if (kind === 'cyl') geo = GEO.cyl;
+      else if (kind === 'cone') geo = GEO.cone;
+      else if (kind === 'sphere') geo = GEO.sphere;
+      else geo = GEO.box;
+      const m2 = mat(color, opts);
+      const mesh = new THREE.Mesh(geo, m2);
+      mesh.scale.set(sx, sy, sz);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = opts.cast !== false;
+      mesh.receiveShadow = opts.receive !== false;
+      if (opts.rot) mesh.rotation.set(opts.rot[0], opts.rot[1], opts.rot[2]);
+      if (opts.name) mesh.name = opts.name;
+      worldGroup.add(mesh);
+      levelObjects.push(mesh);
+      return mesh;
+    }
+
+    function addCollectible(x, y, z) {
+      const geo = new THREE.OctahedronGeometry(0.32, 0);
+      const mesh = new THREE.Mesh(geo, mat(0xff66cc, { emissive: 0x662244 }));
+      mesh.castShadow = true;
+      mesh.position.set(x, y, z);
+      worldGroup.add(mesh);
+      collectibles.push(mesh);
+      return mesh;
+    }
+
+    function addTarget(x, y, z, color=0x33ccff) {
+      const body = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.28, 0.28, 0.9, 6),
+        mat(color)
+      );
+      const head = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.32),
+        mat(0xffcc66)
+      );
+      body.position.set(x, y+0.45, z); head.position.set(x, y+1.0, z);
+      body.castShadow = true; head.castShadow = true;
+      worldGroup.add(body); worldGroup.add(head);
+      const obj = { body, head, baseY: y, phase: Math.random()*6.28, speed: 0.5+Math.random(), following: false, followTimer: 0 };
+      targets.push(obj);
+      return obj;
+    }
+
+    function addPortal(x, y, z) {
+      const group = new THREE.Group();
+      group.position.set(x, y, z);
+      // Ring
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.12, 6, 16), mat(0x66ffcc, { emissive: 0x22aa88 }));
+      ring.rotation.x = Math.PI/2;
+      group.add(ring);
+      // Inner glow disc
+      const disc = new THREE.Mesh(new THREE.CircleGeometry(0.7, 16), new THREE.MeshBasicMaterial({ color: 0x66ffcc, transparent: true, opacity: 0.35, side: THREE.DoubleSide }));
+      disc.rotation.x = -Math.PI/2;
+      disc.position.y = 0.02;
+      group.add(disc);
+      worldGroup.add(group);
+      portals.push(group);
+      return group;
+    }
+
+    // ============================================================
+    // LEVEL 0 — THE DESK (Tutorial)
+    // ============================================================
+    function loadLevel0() {
+      clearLevel();
+      state.pos.set(0, 0.5, 0); state.vel.set(0,0,0); state.yaw = 0;
+      worldGroup.rotation.set(0,0,0); state.mode = 'grounded'; updateModeBadge();
+      state.levelIndex = 0;
+
+      scene.background = new THREE.Color(0xaaccff);
+      scene.fog.color.set(0xaaccff);
+      dirLight.intensity = 0.85; dirLight.color.setHex(0xffffff); hemiLight.intensity = 0.6;
+      document.getElementById('dark-overlay').classList.remove('on');
+
+      // Desk surface (wood)
+      m('box', 40, 1, 40, 0x8b5a2b, 0, -0.5, 0);
+
+      // Water ring outside desk
+      water = new THREE.Mesh(new THREE.CylinderGeometry(55, 55, 1, 16), mat(0x55aadd, { transparent: true, opacity: 0.5 }));
+      water.position.y = -3; scene.add(water);
+
+      // Scattered rocks (paperclips / eraser bits)
+      for (let i = 0; i < 12; i++) {
+        const s = 0.4 + Math.random()*1.2;
+        m('box', s, s*0.3, s*0.5, 0x8899aa, (Math.random()-0.5)*34, s*0.15, (Math.random()-0.5)*34, { rot: [0, Math.random()*0.5, Math.random()*0.2] });
+      }
+
+      // Pencil bridge
+      m('cyl', 0.25, 6, 0.25, 0xffcc44, 6, 3, 0, { rot: [0,0, Math.PI/2] });
+      m('cone', 0.25, 1.2, 0.25, 0xffee88, 9.3, 3, 0, { rot: [0,0, -Math.PI/2] });
+      // Pencil tip (sharp)
+      m('cone', 0.1, 0.4, 0.1, 0x333333, 10.1, 3, 0, { rot: [0,0, -Math.PI/2] });
+
+      // Pencil 2 (crossing)
+      m('cyl', 0.22, 5, 0.22, 0x66ccff, -4, 3.2, 4, { rot: [0.2,0, Math.PI/2.2] });
+
+      // Eraser block (pink)
+      m('box', 2, 1.2, 3, 0xffaabb, -10, 0.6, -8);
+
+      // Tape dispenser (arch)
+      m('cyl', 1.5, 2.2, 1.5, 0xdddddd, 10, 1.1, -8);
+      m('box', 3.5, 0.8, 2, 0xcc3333, 10, 0.4, -8);
+
+      // Trees (small succulents / pens in cups)
+      [[-6,-8],[8,-10],[-12,6],[12,10],[-3,13],[5,-14]].forEach(([x,z]) => {
+        m('cyl', 0.15, 2, 0.15, 0x4a3020, x, 1, z);
+        m('cone', 0.8, 1.5, 0.8, 0x2d8a3e, x, 2.2, z);
+        m('cone', 0.5, 1.2, 0.5, 0x3db84f, x, 3.0, z);
+      });
+
+      // Small houses (stacked books)
+      m('box', 3, 1.8, 4, 0xcc8866, -6, 0.9, -6);
+      m('box', 2.8, 0.4, 3.8, 0xdd9977, -6, 2.0, -6); // pages showing
+      m('cone', 2.5, 1.5, 2.5, 0x8b5a2b, -6, 2.9, -6, { rot: [0,0.1,0] });
+
+      m('box', 3.5, 2.2, 3, 0x2255aa, 8, 1.1, 5);
+      m('box', 3.3, 0.4, 2.8, 0x3366cc, 8, 2.4, 5);
+
+      // Collectibles
+      addCollectible(0, 1.0, 0);
+      addCollectible(6, 3.8, 0); // on pencil
+      addCollectible(-10, 2.0, -8); // on eraser
+      addCollectible(10, 2, -8);
+      addCollectible(-6, 2.6, -6);
+      addCollectible(8, 2.8, 5);
+      addCollectible(12, 1, 10);
+      addCollectible(-12, 1, 4);
+      addCollectible(0, 1, 12);
+      addCollectible(-4, 4, 4); // on pencil 2
+
+      // Targets (sticker characters you can recruit)
+      addTarget(-4, 0, 4, 0xff66cc);
+      addTarget(8, 0, -6, 0x33ff66);
+      addTarget(0, 0, -10, 0x6633ff);
+
+      // Portal
+      addPortal(0, 0.2, 16);
+
+      spawnTitle('WORLD 1: THE DESK', 'Collect stickers. Find the portal.');
+      document.getElementById('zone-name').textContent = 'The Desk';
+    }
+
+    // ============================================================
+    // LEVEL 1 — THE BOOKSHELF (Vertical Climbing)
+    // ============================================================
+    function loadLevel1() {
+      clearLevel();
+      state.pos.set(0, 0.5, 0); state.vel.set(0,0,0); state.yaw = 0;
+      worldGroup.rotation.set(0,0,0); state.mode = 'grounded'; updateModeBadge();
+      state.levelIndex = 1;
+
+      scene.background = new THREE.Color(0xcca87a);
+      scene.fog.color.set(0xcca87a);
+      dirLight.intensity = 0.7; hemiLight.intensity = 0.5;
+      document.getElementById('dark-overlay').classList.remove('on');
+
+      // Floor (shelf board)
+      m('box', 50, 1, 50, 0x8b5a2b, 0, -0.5, 0);
+
+      water = new THREE.Mesh(new THREE.CylinderGeometry(55, 55, 1, 16), mat(0x998866, { transparent: true, opacity: 0.4 }));
+      water.position.y = -4; scene.add(water);
+
+      // Book spines (tall vertical blocks you can stick to)
+      const bookColors = [0xcc3333, 0x2255aa, 0x228833, 0x6622aa, 0xaa6622, 0xcc4488];
+      bookColors.forEach((c, i) => {
+        const h = 4 + Math.random()*4;
+        const x = -18 + i * 6.5;
+        m('box', 1.8, h, 5, c, i%2===0 ? x : x+1, h/2, i%2===0 ? -12 : -16);
+      });
+
+      // Floating books (platforms)
+      const floating = [
+        [ -8, 3, -8, 0xdd4444 ], [ 0, 5, -10, 0x33aa55 ], [ 8, 4, -9, 0x4466cc ],
+        [ -6, 7, -14, 0xaa33aa ], [ 5, 8, -14, 0xcc8833 ], [ -2, 10, -12, 0x44ccaa ],
+        [ 10, 7, -5, 0xcc3355 ], [ -12, 6, -4, 0x55cc44 ], [ 3, 12, -15, 0xffd700 ]
+      ];
+      floating.forEach(([x,y,z,c]) => m('box', 2.2, 0.5, 3.5, c, x, y, z));
+
+      // Bookmark tassels (hazards that swing)
+      for (let i = 0; i < 5; i++) {
+        const tassel = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.5, 0.02), mat(0xff3366));
+        const pivot = new THREE.Group();
+        pivot.position.set(-14 + i*7, 5 + Math.random()*3, -8);
+        tassel.position.set(0, -1.25, 0);
+        pivot.add(tassel);
+        worldGroup.add(pivot);
+        hazards.push({ type: 'swing', obj: pivot, offset: Math.random()*10, speed: 1.5 + Math.random() });
+        levelObjects.push(pivot);
+      }
+
+      // Bookmark string (thin line collision)
+      for (let i = 0; i < 5; i++) {
+        const string = new THREE.Mesh(new THREE.BoxGeometry(0.04, 3, 0.04), mat(0xffffff));
+        const pivot2 = new THREE.Group();
+        pivot2.position.set(-14 + i*7, 7 + Math.random()*2, -8.2);
+        string.position.set(0, -1.5, 0);
+        pivot2.add(string);
+        worldGroup.add(pivot2);
+        hazards.push({ type: 'swing', obj: pivot2, offset: Math.random()*10, speed: 1.2 + Math.random()*0.5 });
+        levelObjects.push(pivot2);
+      }
+
+      // Collectibles on high platforms
+      addCollectible(-8, 3.8, -8);
+      addCollectible(0, 5.8, -10);
+      addCollectible(8, 4.8, -9);
+      addCollectible(-6, 7.8, -14);
+      addCollectible(5, 8.8, -14);
+      addCollectible(-2, 10.8, -12);
+      addCollectible(10, 7.8, -5);
+      addCollectible(-12, 6.8, -4);
+      addCollectible(3, 12.8, -15);
+      addCollectible(0, 1, 12); // ground easy one
+
+      // Targets
+      addTarget(-5, 0, 5, 0x33ffcc);
+      addTarget(8, 0, 6, 0xffaa33);
+
+      // Portal at top
+      addPortal(3, 13.4, -15);
+
+      spawnTitle('WORLD 2: THE BOOKSHELF', 'Climb the books. Avoid bookmarks.');
+      document.getElementById('zone-name').textContent = 'The Bookshelf';
+    }
+
+    // ============================================================
+    // LEVEL 2 — THE FLOOR (Carpet Stealth)
+    // ============================================================
+    function loadLevel2() {
+      clearLevel();
+      state.pos.set(0, 0.5, 0); state.vel.set(0,0,0); state.yaw = 0;
+      worldGroup.rotation.set(0,0,0); state.mode = 'grounded'; updateModeBadge();
+      state.levelIndex = 2;
+
+      scene.background = new THREE.Color(0xddbba0);
+      scene.fog.color.set(0xddbba0);
+      dirLight.intensity = 0.65; hemiLight.intensity = 0.55;
+      document.getElementById('dark-overlay').classList.remove('on');
+
+      // Carpet (bumpy texture analog = scattered micro-boxes on a base)
+      m('box', 50, 0.8, 50, 0xbb8866, 0, -0.4, 0);
+      // "Grass" tufts
+      for (let i = 0; i < 60; i++) {
+        const x = (Math.random()-0.5)*48;
+        const z = (Math.random()-0.5)*48;
+        const h = 0.3 + Math.random()*0.6;
+        m('cone', 0.15, h, 0.15, Math.random()>0.5 ? 0xcc9977 : 0xbb8866, x, h/2, z);
+      }
+
+      water = new THREE.Mesh(new THREE.CylinderGeometry(55, 55, 1, 16), mat(0xaa8866, { transparent: true, opacity: 0.35 }));
+      water.position.y = -3; scene.add(water);
+
+      // Lego blocks (different physics properties)
+      const legoColors = [0xff3333, 0x33aa33, 0x3366ff, 0xffcc00, 0xffffff];
+      const legoPositions = [
+        [5,0,5], [6,0,5], [5,0,6], [6,0,6], // block cluster
+        [-8,0,-6], [-8,1,-6], // stacked
+        [10,0,-10], [11,0,-10], [10,0,-9],
+        [-5,0,10], [-4,0,10], [-5,0,11], [-4,0,11], [-4.5,1,10.5], // pyramid
+        [0,0,-14], [1,0,-14], [0,1,-14], // tower start
+      ];
+      legoPositions.forEach(([x,y,z]) => {
+        const c = legoColors[Math.floor(Math.random()*legoColors.length)];
+        m('box', 0.95, 0.45 + Math.random()*0.3, 0.95, c, x, y*0.5 + 0.25, z);
+      });
+
+      // Dust bunnies (round enemies that patrol)
+      for (let i = 0; i < 4; i++) {
+        const bunny = new THREE.Mesh(new THREE.DodecahedronGeometry(0.6), mat(0x887766));
+        bunny.position.set((Math.random()-0.5)*30, 0.6, (Math.random()-0.5)*30);
+        bunny.castShadow = true;
+        worldGroup.add(bunny);
+        hazards.push({ type: 'patrol', obj: bunny, center: bunny.position.clone(), radius: 4 + Math.random()*4, speed: 1 + Math.random(), angle: Math.random()*6.28 });
+        levelObjects.push(bunny);
+      }
+
+      // Collectibles scattered
+      addCollectible(5.5, 1.5, 5.5);
+      addCollectible(-8, 2, -6);
+      addCollectible(10.5, 1, -9.5);
+      addCollectible(-4.5, 2, 10.5); // on lego pyramid
+      addCollectible(0, 1.5, -14);
+      addCollectible(-12, 1, 12);
+      addCollectible(14, 1, 2);
+      addCollectible(0, 1, 0);
+      addCollectible(-6, 1, -14);
+      addCollectible(8, 1, 8);
+
+      addTarget(4, 0, -4, 0xff66cc);
+      addTarget(-10, 0, 8, 0x66ff33);
+
+      // Portal
+      addPortal(15, 0.2, 0);
+
+      spawnTitle('WORLD 3: THE FLOOR', 'Navigate carpet & lego. Avoid dust bunnies.');
+      document.getElementById('zone-name').textContent = 'The Floor';
+    }
+
+    // ============================================================
+    // LEVEL 3 — THE WINDOW (Light Beams / Raindrop Race)
+    // ============================================================
+    function loadLevel3() {
+      clearLevel();
+      state.pos.set(0, 0.5, 0); state.vel.set(0,0,0); state.yaw = 0;
+      worldGroup.rotation.set(0,0,0); state.mode = 'grounded'; updateModeBadge();
+      state.levelIndex = 3;
+
+      scene.background = new THREE.Color(0xbbddff);
+      scene.fog.color.set(0xbbddff);
+      dirLight.intensity = 1.0; dirLight.color.setHex(0xffffee); hemiLight.intensity = 0.7;
+      document.getElementById('dark-overlay').classList.remove('on');
+
+      // Window sill (glass surface)
+      m('box', 50, 0.4, 50, 0xcceeff, 0, -0.2, 0);
+
+      // Outside water (sky visible through glass)
+      water = new THREE.Mesh(new THREE.CylinderGeometry(60, 60, 1, 16), mat(0x88bbdd, { transparent: true, opacity: 0.45 }));
+      water.position.y = -3; scene.add(water);
+
+      // Light beams (safe zones - cylinders of warm glow)
+      const beamPositions = [
+        [-8,0,-8], [0,0,-12], [8,0,-6], [-4,0,4], [6,0,8], [-10,0,10], [12,0,-10]
+      ];
+      beamPositions.forEach(([x,y,z]) => {
+        const beam = new THREE.Mesh(
+          new THREE.CylinderGeometry(1.2, 1.4, 0.05, 10),
+          mat(0xffeeaa, { emissive: 0xaa8844, transparent: true, opacity: 0.6 })
+        );
+        beam.position.set(x, 0.05, z);
+        worldGroup.add(beam);
+        levelObjects.push(beam);
+        // Point light inside beam
+        const pl = new THREE.PointLight(0xffeeaa, 0.4, 8);
+        pl.position.set(x, 1, z);
+        worldGroup.add(pl);
+        worldLights.push(pl);
+      });
+
+      // Frame bars
+      m('box', 0.6, 3, 50, 0xeeeeee, -15, 1.5, 0);
+      m('box', 0.6, 3, 50, 0xeeeeee, 15, 1.5, 0);
+      m('box', 50, 3, 0.6, 0xeeeeee, 0, 1.5, -18);
+      m('box', 50, 3, 0.6, 0xeeeeee, 0, 1.5, 18);
+
+      // Raindrops (small spheres that slide)
+      for (let i = 0; i < 8; i++) {
+        const drop = new THREE.Mesh(new THREE.SphereGeometry(0.25, 6, 6), mat(0xaaddff, { transparent: true, opacity: 0.65 }));
+        drop.position.set((Math.random()-0.5)*28, 0.25, (Math.random()-0.5)*34);
+        worldGroup.add(drop);
+        hazards.push({ type: 'raindrop', obj: drop, zDir: Math.random()>0.5?1:-1, speed: 2 + Math.random()*3 });
+        levelObjects.push(drop);
+      }
+
+      // Cloud formations (low poly clusters above)
+      for (let i = 0; i < 5; i++) {
+        const cx = (Math.random()-0.5)*40;
+        const cz = -20 - Math.random()*15;
+        m('sphere', 2+Math.random(), 1+Math.random()*0.5, 2+Math.random(), 0xffffff, cx, 8+Math.random()*3, cz);
+        m('sphere', 1.5+Math.random(), 1, 1.5+Math.random(), 0xffffff, cx+2, 8, cz+1);
+      }
+
+      // Collectibles
+      addCollectible(-8, 0.8, -8);
+      addCollectible(0, 0.8, -12);
+      addCollectible(8, 0.8, -6);
+      addCollectible(-4, 0.8, 4);
+      addCollectible(6, 0.8, 8);
+      addCollectible(-10, 0.8, 10);
+      addCollectible(12, 0.8, -10);
+      addCollectible(0, 0.8, 0);
+      addCollectible(-6, 0.8, -14);
+      addCollectible(10, 0.8, 4);
+
+      addTarget(-3, 0, 8, 0xffcc33);
+      addTarget(10, 0, -4, 0x33ccff);
+
+      // Portal at far edge
+      addPortal(0, 0.2, -16);
+
+      spawnTitle('WORLD 4: THE WINDOW', 'Stay in light beams. Dodge sliding raindrops.');
+      document.getElementById('zone-name').textContent = 'The Window';
+    }
+
+    // ============================================================
+    // LEVEL 4 — THE BACKPACK (Dark Maze / Boss)
+    // ============================================================
+    function loadLevel4() {
+      clearLevel();
+      state.pos.set(0, 0.5, 0); state.vel.set(0,0,0); state.yaw = 0;
+      worldGroup.rotation.set(0,0,0); state.mode = 'grounded'; updateModeBadge();
+      state.levelIndex = 4;
+
+      scene.background = new THREE.Color(0x222233);
+      scene.fog.color.set(0x222233);
+      dirLight.intensity = 0.3; dirLight.color.setHex(0xaaaaff); hemiLight.intensity = 0.25;
+      document.getElementById('dark-overlay').classList.add('on');
+
+      // Floor (dark fabric)
+      m('box', 60, 0.6, 60, 0x332244, 0, -0.3, 0);
+
+      // No water in backpack
+      water = null;
+
+      // Crumpled paper tunnels (maze walls) - positioned to form corridors
+      const mazeWalls = [
+        // Outer border
+        [-20,2,-20],[-20,2,-10],[-20,2,0],[-20,2,10],[-20,2,20],
+        [20,2,-20],[20,2,-10],[20,2,0],[20,2,10],[20,2,20],
+        [-10,2,-20],[0,2,-20],[10,2,-20],
+        [-10,2,20],[0,2,20],[10,2,20],
+        // Inner maze
+        [-8,2,-8],[0,2,-8],[8,2,-8],
+        [-8,2,8],[0,2,8],[8,2,8],
+        [-12,2,-4],[-4,2,-4],[4,2,-4],[12,2,-4],
+        [-12,2,4],[-4,2,4],[4,2,4],[12,2,4],
+        [-8,2,0],[8,2,0],
+      ];
+      mazeWalls.forEach(([x,y,z]) => {
+        const rot = [Math.random()*0.2, Math.random()*0.5, Math.random()*0.2];
+        m('box', 0.8 + Math.random()*0.6, 2.5 + Math.random()*1.5, 0.8 + Math.random()*0.6, 0xeeeeee, x, y, z, { rot });
+      });
+
+      // Flashlight battery stations (safe light zones)
+      const lights = [
+        [-10,0,-10], [10,0,10], [0,0,0], [-12,0,8], [12,0,-8]
+      ];
+      lights.forEach(([x,y,z]) => {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2, 5), mat(0xaaaaaa));
+        post.position.set(x, 1, z); worldGroup.add(post); levelObjects.push(post);
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), mat(0xffffaa, { emissive: 0xaaaa44 }));
+        bulb.position.set(x, 2, z); worldGroup.add(bulb); levelObjects.push(bulb);
+        const pl = new THREE.PointLight(0xffffaa, 0.6, 10);
+        pl.position.set(x, 2, z); worldGroup.add(pl); worldLights.push(pl);
+      });
+
+      // Dryer Sheet Ghost Boss (floats and chases)
+      const bossGroup = new THREE.Group();
+      bossGroup.position.set(15, 3, -15);
+      // Sheet body
+      const sheet = new THREE.Mesh(new THREE.PlaneGeometry(2, 3), mat(0xffffff, { double: true, transparent: true, opacity: 0.85 }));
+      sheet.position.y = 0;
+      // Eyes (cutouts)
+      const bEyeL = new THREE.Mesh(new THREE.CircleGeometry(0.15, 8), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+      bEyeL.position.set(-0.3, 0.3, 0.02); sheet.add(bEyeL);
+      const bEyeR = new THREE.Mesh(new THREE.CircleGeometry(0.15, 8), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+      bEyeR.position.set(0.3, 0.3, 0.02); sheet.add(bEyeR);
+      // Mouth
+      const bMouth = new THREE.Mesh(new THREE.RingGeometry(0.1, 0.18, 8, 1, 0, Math.PI), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+      bMouth.position.set(0, -0.2, 0.02); sheet.add(bMouth);
+      bossGroup.add(sheet);
+      worldGroup.add(bossGroup);
+      hazards.push({ type: 'boss', obj: bossGroup, sheet, phase: 0, hp: 3, dead: false });
+      levelObjects.push(bossGroup);
+
+      // Collectibles scattered through maze
+      addCollectible(-10, 0.8, -10);
+      addCollectible(10, 0.8, 10);
+      addCollectible(0, 0.8, 0);
+      addCollectible(-12, 0.8, 8);
+      addCollectible(12, 0.8, -8);
+      addCollectible(-6, 0.8, -14);
+      addCollectible(6, 0.8, 14);
+      addCollectible(-16, 0.8, 0);
+      addCollectible(16, 0.8, 4);
+      addCollectible(0, 0.8, -16);
+
+      // Targets (lost stickers hiding)
+      addTarget(-5, 0, 5, 0xffaa66);
+      addTarget(8, 0, -5, 0x66aaff);
+
+      // Victory portal (appears when boss defeated)
+      addPortal(0, 0.2, -18);
+      // Hide portal initially? We just place it. If boss alive, we'll block entry.
+
+      spawnTitle('WORLD 5: THE BACKPACK', 'Navigate the dark maze. Defeat the Dryer Ghost!');
+      document.getElementById('zone-name').textContent = 'The Backpack';
+    }
+
+    // ============================================================
+    // PROGRESSION
+    // ============================================================
+    const levelNames = ['The Desk', 'The Bookshelf', 'The Floor', 'The Window', 'The Backpack'];
+    const levelSubs = [
+      'Collect stickers. Find the portal.',
+      'Climb the books. Avoid bookmark tassels.',
+      'Navigate carpet & lego. Avoid dust bunnies.',
+      'Stay in light beams. Dodge sliding raindrops.',
+      'Navigate the dark maze. Defeat the Dryer Ghost!'
+    ];
+
+    function showProgress(title, desc, callback) {
+      const ov = document.getElementById('progress-overlay');
+      document.getElementById('progress-title').textContent = title;
+      document.getElementById('progress-desc').textContent = desc;
+      ov.classList.add('visible');
+      const btn = document.getElementById('progress-btn');
+      const handler = () => {
+        ov.classList.remove('visible');
+        btn.removeEventListener('click', handler);
+        callback();
+      };
+      btn.addEventListener('click', handler);
+    }
+
+    function nextLevel() {
+      if (state.levelIndex >= 4) {
+        showProgress('STICKER SQUAD COMPLETE!', 'You conquered all 5 worlds!', () => {
+          state.levelIndex = -1; nextLevel();
+        });
+        return;
+      }
+      loadLevelByIndex(state.levelIndex + 1);
+    }
+
+    function loadLevelByIndex(idx) {
+      if (idx === 0) loadLevel0();
+      else if (idx === 1) loadLevel1();
+      else if (idx === 2) loadLevel2();
+      else if (idx === 3) loadLevel3();
+      else if (idx === 4) loadLevel4();
+    }
+
+    // ============================================================
+    // MOVEMENT & PHYSICS (Already detailed, expanded for all modes)
+    // ============================================================
+    function getInputDir() {
+      const dir = new THREE.Vector3(0,0,0);
+      if (keys['w'] || keys['arrowup']) dir.z -= 1;
+      if (keys['s'] || keys['arrowdown']) dir.z += 1;
+      if (keys['a'] || keys['arrowleft']) dir.x -= 1;
+      if (keys['d'] || keys['arrowright']) dir.x += 1;
+      return dir.normalize();
+    }
+
+    function jump() {
+      if (!state.onGround) return;
+      state.vel.y = 8.5;
+      state.onGround = false; state.mode = 'air';
+      updateModeBadge();
+      beep(290, 0.12, 'square');
+      state.peelTimer = 0.35;
+      legL.visible = true; legR.visible = true;
+    }
+
+    function peelOff() {
+      if (state.mode !== 'sticking') return;
+      state.mode = 'peeling';
+      state.peelTimer = 0.45;
+      state.vel.set(0, 2, 1.5);
+      beep(180, 0.35, 'sawtooth', 0.04);
+      showCommand('PEELING OFF!');
+      worldGroup.rotation.set(0,0,0);
+      updateModeBadge();
+    }
+
+    document.getElementById('stick-toggle').addEventListener('click', toggleStickMode);
+
+    function toggleStickMode() {
+      if (state.mode === 'grounded' || state.mode === 'air') {
+        if (tryStickToWall()) beep(520, 0.1);
+      } else if (state.mode === 'sticking') {
+        peelOff();
+      }
+    }
+
+    function tryStickToWall() {
+      const forward = new THREE.Vector3(0,0,-1).applyAxisAngle(new THREE.Vector3(0,1,0), state.yaw);
+      const origin = state.pos.clone().add(new THREE.Vector3(0,0.3,0));
+      raycaster.set(origin, forward);
+      const hits = raycaster.intersectObjects(worldGroup.children, true);
+      if (hits.length > 0 && hits[0].distance < 2.5) {
+        const wallNormal = hits[0].face.normal.clone().transformDirection(hits[0].object.matrixWorld).normalize();
+        if (Math.abs(wallNormal.y) < 0.75) {
+          state.mode = 'sticking';
+          state.stickPlane = wallNormal;
+          worldGroup.rotation.set(0,0,0);
+          if (Math.abs(wallNormal.x) > Math.abs(wallNormal.z)) {
+            worldGroup.rotation.z = wallNormal.x > 0 ? -Math.PI/2 : Math.PI/2;
+          } else {
+            worldGroup.rotation.x = wallNormal.z > 0 ? Math.PI/2 : -Math.PI/2;
+          }
+          showCommand('STUCK TO WALL!');
+          updateModeBadge();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function updateModeBadge() {
+      const el = document.getElementById('mode-badge');
+      const map = { grounded: ['MODE: GROUNDED', '#ffd700'], air: ['MODE: AIR', '#66ccff'], sticking: ['MODE: STICKING', '#ff66cc'], peeling: ['MODE: PEELING...', '#ff9966'] };
+      const [t, c] = map[state.mode] || map.grounded;
+      el.textContent = t; el.style.color = c;
+    }
+
+    // ============================================================
+    // INTERACTION
+    // ============================================================
+    function onClick(e) {
+      mouseNDC.x = (e.clientX / innerWidth) * 2 - 1;
+      mouseNDC.y = -(e.clientY / innerHeight) * 2 + 1;
+      handleInteraction();
+    }
+    function onTouch(e) {
+      e.preventDefault();
+      const t = e.touches[0];
+      mouseNDC.x = (t.clientX / innerWidth) * 2 - 1;
+      mouseNDC.y = -(t.clientY / innerHeight) * 2 + 1;
+      handleInteraction();
+    }
+
+    function handleInteraction() {
+      raycaster.setFromCamera(mouseNDC, camera);
+
+      // Collectibles
+      const cHits = raycaster.intersectObjects(collectibles);
+      if (cHits.length) {
+        const c = cHits[0].object;
+        worldGroup.remove(c); collectibles.splice(collectibles.indexOf(c), 1);
+        state.score += 100; state.sticks += 1;
+        updateHUD();
+        beep(920, 0.07, 'sine');
+        showCommand('+ GLITTER STICKER!');
+        createParticles(state.pos.x, state.pos.y+0.5, state.pos.z, 0xff66cc, 14);
+        return;
+      }
+
+      // Targets
+      const tHits = raycaster.intersectObjects(targets.map(t => t.body));
+      if (tHits.length) {
+        const t = tHits[0].object.userData.targetId || targets.find(tt => tt.body === tHits[0].object);
+        if (t) {
+          beep(680, 0.1, 'square');
+          showCommand('RECRUITED: Target follows!');
+          t.following = true; t.followTimer = 6;
+          if (squad.length < 3) { squad.push(t); updateSquadUI(); }
+        }
+        return;
+      }
+
+      // Boss (Backpack level — click to damage)
+      if (state.levelIndex === 4) {
+        const bossHazard = hazards.find(h => h.type === 'boss');
+        if (bossHazard && !bossHazard.dead) {
+          const bHits = raycaster.intersectObjects(bossHazard.obj.children, true);
+          if (bHits.length && bHits[0].distance < 10) {
+            bossHazard.hp--;
+            createParticles(bossHazard.obj.position.x, bossHazard.obj.position.y, bossHazard.obj.position.z, 0xffffff, 12);
+            beep(200 + bossHazard.hp*150, 0.15, 'square');
+            if (bossHazard.hp <= 0) {
+              bossHazard.dead = true;
+              showCommand('BOSS DEFEATED!');
+              beep(440, 0.3, 'sine');
+              // Flash victory
+              document.getElementById('progress-overlay').style.background = 'rgba(255,255,255,0.3)';
+            } else {
+              showCommand(`BOSS HP: ${bossHazard.hp}`);
+            }
+            return;
+          }
+        }
+      }
+
+      // Surface sticker placement
+      const wHits = raycaster.intersectObjects(worldGroup.children, true);
+      if (wHits.length) {
+        const pt = wHits[0].point;
+        placeSticker(pt, wHits[0].face.normal);
+        beep(460, 0.05, 'triangle');
+        showCommand('PLACED DECAL STICKER');
+        state.sticks += 1; updateHUD();
+      }
+    }
+
+    function placeSticker(pos, normal) {
+      const geo = new THREE.CircleGeometry(0.28, 6);
+      const mats = [
+        new THREE.MeshBasicMaterial({ color: 0xff3366, side: THREE.DoubleSide }),
+        new THREE.MeshBasicMaterial({ color: 0x33ff66, side: THREE.DoubleSide }),
+        new THREE.MeshBasicMaterial({ color: 0x6633ff, side: THREE.DoubleSide }),
+      ];
+      const mesh = new THREE.Mesh(geo, mats[state.selectedSticker % mats.length]);
+      mesh.position.copy(pos).add(normal.clone().multiplyScalar(0.025));
+      mesh.lookAt(pos.clone().add(normal));
+      mesh.scale.setScalar(0.01);
+      worldGroup.add(mesh);
+      placedStickers.push({ mesh, age: 0 });
+    }
+
+    const particles = [];
+    function createParticles(x, y, z, color, count=10) {
+      const geo = new THREE.PlaneGeometry(0.08, 0.08);
+      const mat = new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+      for (let i = 0; i < count; i++) {
+        const m = new THREE.Mesh(geo, mat.clone());
+        m.position.set(x, y, z);
+        m.userData.vel = new THREE.Vector3((Math.random()-0.5)*4, Math.random()*4, (Math.random()-0.5)*4);
+        m.userData.life = 1.0;
+        scene.add(m); particles.push(m);
+      }
+    }
+
+    function updateHUD() {
+      document.getElementById('stick-count').textContent = state.sticks;
+      document.getElementById('score').textContent = state.score;
+    }
+
+    // ============================================================
+    // DAMAGE / HEALTH
+    // ============================================================
+    function takeDamage() {
+      if (state.invincible > 0) return;
+      state.health--;
+      state.invincible = 1.5;
+      updateHealthUI();
+      beep(120, 0.25, 'sawtooth');
+      showCommand('OUCH!');
+      createParticles(state.pos.x, state.pos.y, state.pos.z, 0xff2222, 10);
+      if (state.health <= 0) {
+        // Respawn
+        state.health = state.maxHealth;
+        state.pos.set(0, 0.5, 0);
+        state.vel.set(0,0,0);
+        updateHealthUI();
+        showCommand('RESPAWNED!');
+      }
+    }
+
+    // ============================================================
+    // UPDATE LOOP
+    // ============================================================
+    const clock = new THREE.Clock();
+
+    function update(dt) {
+      state.animTime += dt;
+      const input = getInputDir();
+      const speed = state.speed * (keys['shift'] ? state.sprintMult : 1);
+
+      // Invincibility decay
+      if (state.invincible > 0) state.invincible -= dt;
+
+      // === MOVEMENT ===
+      if (state.mode === 'grounded' || state.mode === 'air' || state.mode === 'peeling') {
+        const camYaw = cameraYaw;
+        const moveDir = input.clone().applyAxisAngle(new THREE.Vector3(0,1,0), camYaw);
+        if (input.length() > 0.1) {
+          state.vel.x = moveDir.x * speed;
+          state.vel.z = moveDir.z * speed;
+          state.yaw = Math.atan2(moveDir.x, moveDir.z);
+        } else {
+          state.vel.x *= 0.82; state.vel.z *= 0.82;
+        }
+        state.vel.y -= 20 * dt;
+        state.pos.addScaledVector(state.vel, dt);
+
+        if (state.pos.y < state.height) {
+          state.pos.y = state.height;
+          state.vel.y = 0;
+          if (!state.onGround) { beep(160, 0.08, 'square'); legL.visible = false; legR.visible = false; }
+          state.onGround = true;
+          if (state.mode === 'air' || state.mode === 'peeling') { state.mode = 'grounded'; updateModeBadge(); }
+        } else { state.onGround = false; state.mode = 'air'; updateModeBadge(); }
+
+        const limit = 24;
+        if (state.pos.x > limit) state.pos.x = limit;
+        if (state.pos.x < -limit) state.pos.x = -limit;
+        if (state.pos.z > limit) state.pos.z = limit;
+        if (state.pos.z < -limit) state.pos.z = -limit;
+      }
+
+      if (state.mode === 'sticking') {
+        const yaw = state.yaw;
+        const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw));
+        const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
+        const mv = new THREE.Vector3(0,0,0);
+        if (keys['w']) mv.add(forward); if (keys['s']) mv.sub(forward);
+        if (keys['a']) mv.sub(right); if (keys['d']) mv.add(right);
+        mv.normalize().multiplyScalar(speed * dt);
+        state.pos.add(mv);
+        if (state.pos.y < 0.03) state.pos.y = 0.03;
+        if (state.pos.y > 15) state.pos.y = 15;
+        const lim = 26;
+        state.pos.x = Math.max(-lim, Math.min(lim, state.pos.x));
+        state.pos.z = Math.max(-lim, Math.min(lim, state.pos.z));
+      }
+
+      // === PORTAL PROXIMITY ===
+      let nearPortal = false;
+      portals.forEach(p => {
+        const d = new THREE.Vector2(state.pos.x - p.position.x, state.pos.z - p.position.z).length();
+        if (d < 1.8) nearPortal = true;
+        // Portal spin
+        p.children.forEach((c, i) => {
+          if (i === 0) c.rotation.z += dt * (state.levelIndex === 4 ? 1 : 2);
+        });
+      });
+      const hint = document.getElementById('portal-hint');
+      if (nearPortal && !state.inPortal) { hint.classList.add('visible'); } else { hint.classList.remove('visible'); }
+
+      if (nearPortal && !state.inPortal) {
+        state.inPortal = true;
+        sfxPortalLoop();
+        setTimeout(() => {
+          if (state.levelIndex === 4) {
+            // Check boss
+            const boss = hazards.find(h => h.type === 'boss');
+            if (boss && !boss.dead) {
+              showCommand('DEFEAT THE GHOST FIRST!');
+              state.inPortal = false;
+              return;
+            }
+          }
+          showProgress(`${levelNames[state.levelIndex]} Complete!`, levelSubs[state.levelIndex], () => {
+            state.inPortal = false;
+            nextLevel();
+          });
+        }, 400);
+      }
+      if (!nearPortal) state.inPortal = false;
+
+      // === HAZARDS UPDATE ===
+      hazards.forEach(h => {
+        if (h.type === 'swing') {
+          h.obj.rotation.z = Math.sin(state.animTime * h.speed + h.offset) * 0.6;
+          // Collision with player
+          const hp = h.obj.position.clone();
+          hp.y -= 1.2; // approximate hit zone
+          if (state.pos.distanceTo(hp) < 1.2) takeDamage();
+        }
+        if (h.type === 'patrol') {
+          h.angle += h.speed * dt;
+          h.obj.position.x = h.center.x + Math.cos(h.angle) * h.radius;
+          h.obj.position.z = h.center.z + Math.sin(h.angle) * h.radius;
+          h.obj.position.y = 0.6 + Math.sin(state.animTime * 3 + h.angle) * 0.2;
+          if (state.pos.distanceTo(h.obj.position) < 0.9) takeDamage();
+        }
+        if (h.type === 'raindrop') {
+          h.obj.position.z += h.zDir * h.speed * dt;
+          if (Math.abs(h.obj.position.z) > 20) {
+            h.zDir *= -1;
+            h.obj.position.x = (Math.random()-0.5)*28;
+          }
+          if (state.pos.distanceTo(h.obj.position) < 0.7) takeDamage();
+        }
+        if (h.type === 'boss' && !h.dead) {
+          h.phase += dt;
+          // Float toward player slowly
+          const toPlayer = state.pos.clone().sub(h.obj.position);
+          toPlayer.y = 0;
+          const dist = toPlayer.length();
+          if (dist > 3) {
+            toPlayer.normalize().multiplyScalar(1.8 * dt);
+            h.obj.position.add(toPlayer);
+          }
+          h.obj.position.y = 3 + Math.sin(h.phase) * 0.8;
+          h.sheet.rotation.y = Math.sin(h.phase * 0.5) * 0.3;
+          // Boss damage zone
+          if (dist < 2 && state.invincible <= 0) {
+            takeDamage();
+            // Knockback
+            state.vel.add(toPlayer.normalize().multiplyScalar(-6));
+          }
+        }
+      });
+
+      // === PLAYER ANIMATION ===
+      playerGroup.position.copy(state.pos);
+      if (state.invincible > 0 && Math.floor(state.animTime * 10) % 2 === 0) {
+        playerGroup.visible = false;
+      } else { playerGroup.visible = true; }
+
+      if (state.mode === 'grounded') {
+        playerGroup.rotation.y = THREE.MathUtils.lerp(playerGroup.rotation.y, state.yaw + Math.PI, 0.25);
+        if (input.length() > 0.1) {
+          playerGroup.rotation.z = Math.sin(state.animTime * 10) * 0.1;
+          playerGroup.position.y += Math.abs(Math.sin(state.animTime * 20)) * 0.03;
+          legL.visible = true; legR.visible = true;
+          legL.position.y = -0.1 + Math.sin(state.animTime * 14) * 0.04;
+          legR.position.y = -0.1 + Math.sin(state.animTime * 14 + Math.PI) * 0.04;
+        } else {
+          playerGroup.rotation.z = THREE.MathUtils.lerp(playerGroup.rotation.z, 0, 0.2);
+          legL.visible = false; legR.visible = false;
+        }
+        if (state.peelTimer > 0) {
+          state.peelTimer -= dt;
+          playerGroup.rotation.x = -state.peelTimer * 2.2;
+        } else {
+          playerGroup.rotation.x = THREE.MathUtils.lerp(playerGroup.rotation.x, 0, 0.2);
+        }
+      } else if (state.mode === 'air' || state.mode === 'peeling') {
+        playerGroup.rotation.x = -state.vel.z * 0.035;
+        playerGroup.rotation.z = state.vel.x * 0.035;
+        legL.visible = true; legR.visible = true;
+        legL.position.y = -0.08; legR.position.y = -0.12;
+      } else if (state.mode === 'sticking') {
+        playerGroup.rotation.set(0,0,0);
+        const sp = state.stickPlane || new THREE.Vector3(0,0,1);
+        playerGroup.lookAt(state.pos.clone().add(sp));
+      }
+
+      // Eyes blink
+      const blink = Math.sin(state.animTime * 1.3) > 0.97;
+      eyeL.scale.y = blink ? 0.1 : 1;
+      eyeR.scale.y = blink ? 0.1 : 1;
+
+      // Shadow
+      playerShadow.position.set(state.pos.x, 0.02, state.pos.z);
+      const dist = state.pos.y - 0.5;
+      playerShadow.scale.setScalar(Math.max(0.08, 0.4 - dist*0.018));
+      playerShadow.material.opacity = Math.max(0, 0.28 - dist*0.009);
+
+      // === COLLECTIBLES ===
+      collectibles.forEach((c, i) => { c.rotation.y += dt * 2.2; c.position.y += Math.sin(state.animTime*2.5 + i)*0.015; });
+
+      // === TARGETS ===
+      targets.forEach(tgt => {
+        tgt.head.position.y = tgt.baseY + 1.1 + Math.sin(state.animTime * 2 + tgt.phase)*0.08;
+        tgt.head.rotation.y += dt;
+        if (tgt.following) {
+          tgt.followTimer -= dt;
+          if (tgt.followTimer <= 0) tgt.following = false;
+          const toP = state.pos.clone().sub(tgt.body.position);
+          toP.y = 0; const d = toP.length();
+          if (d > 2) { toP.normalize().multiplyScalar(2.2 * dt); tgt.body.position.add(toP); tgt.head.position.add(toP); tgt.baseY = tgt.body.position.y; }
+        }
+      });
+
+      // === SQUAD FOLLOW ===
+      squad.forEach((s, i) => {
+        if (!s.following) return;
+        const targetPos = state.pos.clone().add(new THREE.Vector3(Math.sin(i*2.1)*1.5, 0, Math.cos(i*2.1)*1.5));
+        const toP = targetPos.sub(s.body.position); toP.y = 0;
+        const d = toP.length();
+        if (d > 0.5) { toP.normalize().multiplyScalar(2.5 * dt); s.body.position.add(toP); s.head.position.add(toP); s.baseY = s.body.position.y; }
+        s.head.position.y = s.baseY + 1.1 + Math.sin(state.animTime * 3 + i)*0.05;
+        // Squad attacks boss if nearby
+        if (state.levelIndex === 4) {
+          const boss = hazards.find(h => h.type === 'boss');
+          if (boss && !boss.dead && s.body.position.distanceTo(boss.obj.position) < 3) {
+            boss.hp -= dt * 0.5;
+            if (boss.hp <= 0) { boss.dead = true; showCommand('SQUAD DEFEATED BOSS!'); beep(440, 0.3, 'sine'); }
+          }
+        }
+      });
+
+      // === CAMERA ===
+      updateCamera(dt);
+
+      // === PARTICLES ===
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.position.addScaledVector(p.userData.vel, dt);
+        p.userData.vel.y -= 5 * dt;
+        p.userData.life -= dt;
+        p.rotation.z += dt * 5;
+        p.scale.setScalar(p.userData.life * 0.1);
+        if (p.userData.life <= 0) { scene.remove(p); particles.splice(i, 1); }
+      }
+
+      // === PLACED STICKERS ===
+      placedStickers.forEach(ps => { ps.age += dt; ps.mesh.scale.setScalar(Math.min(1, ps.age * 6)); });
+
+      // === WATER ===
+      if (water) water.position.y = -2.5 + Math.sin(state.animTime * 0.6) * 0.15;
+
+      // === TOOLTIP ===
+      updateTooltip();
+    }
+
+    let cameraYaw = 0;
+    const cameraOffset = new THREE.Vector3(0, 4.5, 7.5);
+    function updateCamera(dt) {
+      const targetPos = state.pos.clone().add(new THREE.Vector3(0, 2.8, 0));
+      const offset = cameraOffset.clone().applyAxisAngle(new THREE.Vector3(0,1,0), state.yaw);
+      const desired = targetPos.clone().add(offset);
+      camera.position.lerp(desired, 2.5 * dt);
+      camera.lookAt(targetPos);
+      cameraYaw = state.yaw;
+    }
+
+    // Tooltip raycast
+    function updateTooltip() {
+      raycaster.setFromCamera(mouseNDC, camera);
+      const tip = document.getElementById('tooltip');
+      // Check targets
+      const tHits = raycaster.intersectObjects(targets.map(t => t.body));
+      if (tHits.length && tHits[0].distance < 12) {
+        tip.textContent = 'CLICK to RECRUIT';
+        tip.classList.add('visible');
+        tip.style.left = (mouseNDC.x * 0.5 + 0.5) * innerWidth + 12 + 'px';
+        tip.style.top = (-mouseNDC.y * 0.5 + 0.5) * innerHeight + 'px';
+        return;
+      }
+      // Check boss
+      if (state.levelIndex === 4) {
+        const boss = hazards.find(h => h.type === 'boss');
+        if (boss && !boss.dead) {
+          const bHits = raycaster.intersectObjects(boss.obj.children, true);
+          if (bHits.length) { tip.textContent = `GHOST HP: ${Math.ceil(boss.hp)} — CLICK TO ATTACK`; tip.classList.add('visible'); tip.style.left = (mouseNDC.x * 0.5 + 0.5) * innerWidth + 12 + 'px'; tip.style.top = (-mouseNDC.y * 0.5 + 0.5) * innerHeight + 'px'; return; }
+        }
+      }
+      // Check collectibles
+      const cHits = raycaster.intersectObjects(collectibles);
+      if (cHits.length && cHits[0].distance < 12) { tip.textContent = 'GLITTER STICKER'; tip.classList.add('visible'); tip.style.left = (mouseNDC.x * 0.5 + 0.5) * innerWidth + 12 + 'px'; tip.style.top = (-mouseNDC.y * 0.5 + 0.5) * innerHeight + 'px'; return; }
+      tip.classList.remove('visible');
+    }
+
+    // ============================================================
+    // RENDER
+    // ============================================================
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+      update(dt);
+      renderer.render(scene, camera);
+    }
+
+    // Start
+    loadLevel0();
+    animate();
+  </script>
+</body>
+</html>

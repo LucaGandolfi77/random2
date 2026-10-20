@@ -13,18 +13,20 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="app">
+<div class="app" id="app-root">
   <div class="top-bar" id="top-bar">
-    <span class="tb-stat">Pokémon GO — Low Poly</span>
+    <span class="tb-stat">Pokémon GO</span>
     <span style="flex:1"></span>
   </div>
 
   <div class="tab-bar">
-    <button class="tab-btn active" id="btn-catch" onclick="switchTab('catch')">Catch</button>
-    <button class="tab-btn" id="btn-pokedex" onclick="switchTab('pokedex')">Pokédex</button>
-    <button class="tab-btn" id="btn-inventory" onclick="switchTab('inventory')">Items</button>
-    <button class="tab-btn" id="btn-trainer" onclick="switchTab('trainer')">Trainer</button>
-    <button class="tab-btn" id="btn-research" onclick="switchTab('research')">Research</button>
+    <button class="tab-btn active" id="btn-catch" onclick="switchTab('catch')">🎯 Catch</button>
+    <button class="tab-btn" id="btn-pokedex" onclick="switchTab('pokedex')">📖 Pokédex</button>
+    <button class="tab-btn" id="btn-inventory" onclick="switchTab('inventory')">🎒 Items</button>
+    <button class="tab-btn" id="btn-shop" onclick="switchTab('shop')">🏪 Shop</button>
+    <button class="tab-btn" id="btn-collection" onclick="switchTab('collection')">📦 Collection</button>
+    <button class="tab-btn" id="btn-trainer" onclick="switchTab('trainer')">👤 Trainer</button>
+    <button class="tab-btn" id="btn-research" onclick="switchTab('research')">🔬 Research</button>
   </div>
 
   <!-- CATCH TAB -->
@@ -33,21 +35,25 @@
     <div class="nearby-radar" id="nearby-radar"></div>
     <div class="stage-wrap">
       <canvas id="stage-canvas"></canvas>
+      <div id="ambient-overlay" class="ambient-overlay"></div>
       <div id="combo-overlay" class="combo-overlay hidden"><span id="combo-text"></span></div>
+      <div id="time-badge" class="time-badge"></div>
       <div class="stage-overlay">
         <div class="stage-info" id="stage-info">
           <div style="font-family:var(--font-display);color:var(--accent-light);font-size:1.1rem;">Choose a biome</div>
         </div>
         <div class="stage-controls">
-          <button class="menu-button" style="font-size:0.8rem;padding:0.5rem 1rem;" onclick="spawnWildPokemon()">🔄 New Encounter</button>
+          <button class="menu-button spin-btn" style="font-size:0.8rem;padding:0.5rem 1rem;" onclick="window.doSpin()">🌀 Spin</button>
+          <button class="menu-button" style="font-size:0.8rem;padding:0.5rem 1rem;" onclick="spawnWildPokemon()">🔄 New</button>
         </div>
       </div>
     </div>
-    <p class="swipe-hint">Swipe up from the bottom of the stage to throw a Poké Ball</p>
+    <p class="swipe-hint">Swipe up to throw a Poké Ball</p>
   </div>
 
   <!-- POKEDEX TAB -->
   <div class="tab-panel hidden" id="tab-pokedex">
+    <div id="pokedex-filters" class="pd-filters"></div>
     <div id="pokedex-gen" class="pd-gen"></div>
     <p id="pokedex-count" class="pd-count"></p>
     <div id="pokedex-grid"></div>
@@ -56,6 +62,18 @@
   <!-- INVENTORY TAB -->
   <div class="tab-panel hidden" id="tab-inventory">
     <div id="inventory-grid"></div>
+  </div>
+
+  <!-- SHOP TAB -->
+  <div class="tab-panel hidden" id="tab-shop">
+    <div id="shop-grid"></div>
+  </div>
+
+  <!-- COLLECTION TAB -->
+  <div class="tab-panel hidden" id="tab-collection">
+    <div id="collection-filters" class="collection-filters"></div>
+    <p id="collection-count" class="pd-count"></p>
+    <div id="collection-grid"></div>
   </div>
 
   <!-- TRAINER TAB -->
@@ -97,6 +115,19 @@
   </div>
 </div>
 
+<!-- Pokémon Detail Modal -->
+<div id="detail-modal" class="detail-modal hidden">
+  <div class="dm-panel">
+    <div class="dm-close" onclick="window.closeDetail()">✕</div>
+    <div class="dm-sprite" id="dm-sprite"></div>
+    <div class="dm-name" id="dm-name"></div>
+    <div class="dm-types" id="dm-types"></div>
+    <div class="dm-stats" id="dm-stats"></div>
+    <div class="dm-desc" id="dm-desc"></div>
+    <div class="dm-actions" id="dm-actions"></div>
+  </div>
+</div>
+
 <!-- Start Menu -->
 <div id="start-menu" class="menu-screen">
   <div class="menu-panel">
@@ -106,6 +137,9 @@
     <button class="menu-button" style="font-size:0.85rem;padding:0.5rem 1rem;" onclick="switchLang()">Lingua: English / Italiano</button>
   </div>
 </div>
+
+<!-- Toast container -->
+<div id="toast-box" class="toast-box"></div>
 
 <script type="module" src="src/config.js"></script>
 <script type="module" src="src/storage.js"></script>

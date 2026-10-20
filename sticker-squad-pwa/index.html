@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd700">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Sticker Squad — 3D Low-Poly Command Game</title>
+  <link rel="icon" href="assets/icon-192.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <div id="ui">
+    <div id="hud-top">
+      <div class="panel" id="controls-panel">
+        <h2>Controls</h2>
+        <ul>
+          <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Move</li>
+          <li><kbd>Space</kbd> Jump / Peel</li>
+          <li><kbd>Shift</kbd> Sprint</li>
+          <li><kbd>Click</kbd> Sticker / Interact</li>
+          <li><kbd>E</kbd> Stick to Wall</li>
+          <li><kbd>Q</kbd> Command Squad</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Status</h2>
+        <p>Sticks: <strong id="stick-count" style="color:#ffd700">0</strong></p>
+        <p>Score: <strong id="score" style="color:#66ccff">0</strong></p>
+        <p style="margin-top:4px; font-size:11px; color:#aaa">Zone: <strong id="zone-name" style="color:#ffd700">The Desk</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="mode-badge">MODE: GROUNDED</div>
+  <div id="portal-hint">PORTAL NEARBY — WALK INTO IT</div>
+  <div id="level-title"></div>
+  <div id="level-sub"></div>
+  <div id="command-line"><span id="cmd-text"></span></div>
+  <div id="health-bar"></div>
+  <button class="sticker-btn" id="stick-toggle">🦶 Toggle Stick</button>
+
+  <div id="squad-bar"></div>
+
+  <!-- Touch UI (visible on coarse-pointer devices only) -->
+  <div id="touch-ui">
+    <div id="joystick-base"><div id="joystick-stick"></div></div>
+    <div id="decal-swatches">
+      <div class="swatch active" data-i="0" style="background:#ff3366"></div>
+      <div class="swatch" data-i="1" style="background:#33ff66"></div>
+      <div class="swatch" data-i="2" style="background:#6633ff"></div>
+    </div>
+    <div id="action-buttons">
+      <button class="action-btn" id="btn-act">✋</button>
+      <button class="action-btn" id="btn-stick">🧲</button>
+      <button class="action-btn" id="btn-jump">⬆️</button>
+    </div>
+  </div>
+
+  <div id="saver-badge">🔋 Saver</div>
+
+  <div id="progress-overlay">
+    <h1 id="progress-title">World Complete!</h1>
+    <p id="progress-desc">You conquered The Desk.</p>
+    <button id="progress-btn">Enter Next World</button>
+  </div>
+
+  <div id="dark-overlay"></div>
+
+  <!-- Portrait rotation hint (phones only) -->
+  <div id="portrait-hint">
+    <div style="font-size:44px">🔄</div>
+    <b>Rotate your phone</b>
+    <span>Sticker Squad plays in landscape</span>
+  </div>
+
+  <!-- Load order matters: engine → audio → haptics → player → squad → particles → ui → touch → enemies → levels → game → main -->
+  <script src="js/engine.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/haptics.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/squad.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/touch.js"></script>
+  <script src="js/enemies.js"></script>
+  <script src="js/levels.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
