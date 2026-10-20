@@ -758,10 +758,29 @@
         floater(clamp(e.x, 26, W - 26), e.y - 8, String(pts), "#ffffff");
     }
 
+    /* The second phase of a boss. At half health it stops sitting at the
+       top of the screen waiting to be shot and starts fighting: it moves
+       faster, it fires more often, and it throws out rings of shot that
+       the first phase never did. A boss that only ever does one thing is
+       a target, not a fight. */
+    function checkBossRage(e) {
+        if (e.enraged || e.hp > e.maxHp * 0.5) return;
+        e.enraged = true;
+        floater(e.x, e.y - 34, "ENRAGED", "#ff3b2f");
+        Sound.bigExplode();
+        shake(2.6);
+        state.hitStop = Math.max(state.hitStop, config.hitStopKill);
+        spawnParticles(e.x, e.y, "#ff3b2f", 26, 190, 3);
+    }
+
     function damageEnemy(e) {
         e.hp--;
         e.flash = 0.12;
-        if (e.kind === "boss") { shake(2.2); state.hitStop = Math.max(state.hitStop, config.hitStopKill); }
+        if (e.kind === "boss") {
+            shake(2.2);
+            state.hitStop = Math.max(state.hitStop, config.hitStopKill);
+            checkBossRage(e);
+        }
         else Sound.hit();
         if (e.hp > 0) return;
 
@@ -1092,6 +1111,7 @@
             leaving: false,
             boss: true,
             bossPhase: "enter",
+            enraged: false,
             patternTimer: 1.6,
         };
         state.enemies.push(e);
@@ -1114,13 +1134,14 @@
             return;
         }
 
-        e.x = W / 2 + Math.sin(e.t * 0.55) * 96;
-        e.y = 190 + Math.sin(e.t * 0.9) * 14;
-        e.angle = Math.sin(e.t * 0.55) * 0.07;
+        const rage = e.enraged;
+        e.x = W / 2 + Math.sin(e.t * (rage ? 0.92 : 0.55)) * (rage ? 118 : 96);
+        e.y = 190 + Math.sin(e.t * (rage ? 1.3 : 0.9)) * (rage ? 26 : 14);
+        e.angle = Math.sin(e.t * (rage ? 0.92 : 0.55)) * 0.07;
 
         e.patternTimer -= dt;
         if (e.patternTimer <= 0) {
-            e.patternTimer = 1.7;
+            e.patternTimer = rage ? 1.15 : 1.7;
             const tier = e.tier;
             if (state.silent <= 0) {
                 if (tier >= 2) fireAt(e, px, py, config.enemyBulletSpeed * D.difficulty[state.difficulty].bullet, 3);
@@ -1135,9 +1156,20 @@
                     fireAt(e, px - 70, H, config.enemyBulletSpeed * D.difficulty[state.difficulty].bullet);
                     fireAt(e, px + 70, H, config.enemyBulletSpeed * D.difficulty[state.difficulty].bullet);
                 }
+                /* The second phase throws out rings of shot that turn as
+                   they go, so two of them together make a spiral. */
+                if (rage) {
+                    const n = 12;
+                    const spin = e.t * 2.2;
+                    for (let i = 0; i < n; i++) {
+                        const a = (i / n) * Math.PI * 2 + spin;
+                        pushEnemyShot(e.x, e.y + 10, Math.cos(a) * 118, Math.sin(a) * 118 + 30);
+                    }
+                    Sound.enemyShot();
+                }
             }
         }
-        if (e.tier >= 3 && Math.random() < dt * 0.35) {
+        if (e.tier >= 3 && Math.random() < dt * (rage ? 0.6 : 0.35)) {
             spawnEnemy("fighter", W / 2 + (Math.random() - 0.5) * 120, e.y + 30, 0, null);
         }
     }
@@ -2022,14 +2054,17 @@
     }
 
     function drawBoss(ctx, e, th) {
+        const scheme = e.enraged
+            ? { body: "#6b120c", wing: "#ff5533", trim: "#ffd54f" }
+            : Art.schemeFor(state.theatre, "bomber");
         Art.warbird(ctx, "boss", e.x, e.y, e.angle, 1,
-            e.flash > 0 ? BOSS_FLASH : Art.schemeFor(state.theatre, "bomber"), state.stageTime, 1);
+            e.flash > 0 ? BOSS_FLASH : scheme, state.stageTime, 1);
         const bw = 88;
         const bx = e.x - bw / 2;
         const by = e.y + 66;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
         ctx.fillRect(bx, by, bw, 5);
-        ctx.fillStyle = e.hp < e.maxHp * 0.3 ? "#ff3b2f" : th.accent;
+        ctx.fillStyle = e.enraged ? "#ff8c1a" : (e.hp < e.maxHp * 0.3 ? "#ff3b2f" : th.accent);
         ctx.fillRect(bx, by, bw * clamp(e.hp / e.maxHp, 0, 1), 5);
     }
 

@@ -393,6 +393,69 @@ if (S.boss) {
     ok("boss points were awarded", S.score > 0, String(S.score));
 }
 
+/* ===== Boss, second phase ===== */
+console.log("\nboss: the second phase");
+M.game.startGame();
+M.game.startStage(6);            // stage 26, the first boss stage
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.offset = S.totalLen;
+S.waveIndex = S.wavePlan.length;
+step(1);
+ok("the boss shows up", !!S.boss);
+ok("the boss starts calm", S.boss && S.boss.enraged === false);
+
+// Take the boss to half health. It should wake up.
+if (S.boss) {
+    S.boss.bossPhase = "fight";
+    S.boss.hp = Math.floor(S.boss.maxHp / 2) + 1;
+    S.player.alive = true;
+    S.player.invuln = 9999;
+    for (let i = 0; i < 40 && S.boss && !S.boss.enraged; i++) {
+        S.player.x = S.boss.x;
+        S.player.y = S.boss.y + 24;
+        S.player.alive = true;
+        step(1);
+    }
+    ok("the boss wakes up at half health", S.boss && S.boss.enraged === true);
+}
+ok("the wake-up is announced", S.floaters.some((f) => f.text === "ENRAGED"),
+    JSON.stringify(S.floaters.map((f) => f.text)));
+
+// The enraged boss throws out rings of shot.
+if (S.boss) {
+    S.boss.hp = Math.floor(S.boss.maxHp / 2);
+    S.ebullets.length = 0;
+    S.boss.patternTimer = 0;
+    S.boss.t = 0;
+    S.hitStop = 0;          // the hit stop of the last hit would swallow it
+    step(1);
+    ok("the enraged boss throws rings of shot", S.ebullets.length >= 12, String(S.ebullets.length));
+    const directions = new Set(S.ebullets.map((b) => Math.round(Math.atan2(b.vy, b.vx) * 8)));
+    ok("the ring of shot goes in every direction", directions.size >= 8, String(directions.size));
+}
+
+// And it moves faster than it did.
+if (S.boss) {
+    const travel = (enraged) => {
+        /* Move the player off the boss first: a hit would put the game in
+           hit stop and the boss would not move on those frames. */
+        S.player.x = 20;
+        S.player.y = 560;
+        S.boss.enraged = enraged;
+        S.boss.t = 0;
+        S.hitStop = 0;
+        step(1);
+        const x0 = S.boss.x;
+        for (let i = 0; i < 30; i++) step(1);
+        return Math.abs(S.boss.x - x0);
+    };
+    const furious = travel(true);
+    const calm = travel(false);
+    ok("the enraged boss moves faster", furious > calm * 1.3, furious + " vs " + calm);
+    S.boss.enraged = true;
+}
+
 /* ===== Death and game over ===== */
 console.log("\ndeath and game over");
 M.game.startStage(0);
