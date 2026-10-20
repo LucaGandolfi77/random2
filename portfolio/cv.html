@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Luca Gandolfi — Curriculum Vitae</title>
+<meta name="description" content="UI/UX and frontend developer. Interfaces that stay fast, accessible and usable offline.">
+<meta name="author" content="Luca Gandolfi">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://lucagandolfi77.github.io/random2/portfolio/cv.html">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.svg">
+<meta name="theme-color" content="#0b0d16">
+<meta name="color-scheme" content="dark light">
+<link rel="stylesheet" href="assets/portfolio.css">
+<link rel="stylesheet" href="assets/cv.css">
+</head>
+<body>
+
+<div class="wrap cv">
+
+  <header class="cv-head">
+    <h1>Luca Gandolfi</h1>
+    <p class="cv-role">
+      <span class="en">UI/UX &amp; frontend developer</span>
+      <span class="it" lang="it">Sviluppatore UI/UX e frontend</span>
+    </p>
+    <ul class="cv-contact">
+      <!-- FILL: set href to your mailto: and to your LinkedIn URL; the
+           script hides any of these that still points at "#". -->
+      <li><a href="#" hidden data-fill="cv-email">
+        <span class="en">Email</span><span class="it" lang="it">Email</span></a></li>
+      <li><a href="#" hidden data-fill="cv-linkedin">
+        <span class="en">LinkedIn</span><span class="it" lang="it">LinkedIn</span></a></li>
+      <li><a href="https://github.com/LucaGandolfi77">
+        <span class="en">GitHub</span><span class="it" lang="it">GitHub</span></a></li>
+      <li><a href="./">
+        <span class="en">Portfolio</span><span class="it" lang="it">Portfolio</span></a></li>
+    </ul>
+  </header>
+
+  <section class="cv-section">
+    <p>
+      <span class="en">I build interfaces that stay fast, accessible and usable with the network off, and I publish the numbers that say so. Forty-four shipped projects, every one installable and offline-capable, none loading a single byte from another origin. The portfolio is bilingual, has no build step and no dependencies, and every figure on it is recomputed from the repository by CI.</span>
+      <span class="it" lang="it">Costruisco interfacce che restano veloci, accessibili e utilizzabili anche senza rete, e pubblico i numeri che lo dimostrano. Quarantaquattro progetti pubblicati, tutti installabili e utilizzabili offline, e nessuno che carichi un solo byte da un'altra origine. Il portfolio è bilingue, senza build step e senza dipendenze, e ogni cifra che contiene è ricalcolata dal repository dalla CI.</span>
+    </p>
+  </section>
+
+  <section class="cv-section">
+    <h2>
+      <span class="en">What I do</span>
+      <span class="it" lang="it">Cosa faccio</span>
+    </h2>
+    <div class="cv-columns">
+      <ul class="cv-list">
+        <li><span class="en"><b>Interface work.</b> Screens, components and the design system under them: tokens, bilingual markup, and a page that still reads with JavaScript off.</span><span class="it" lang="it"><b>Lavoro di interfaccia.</b> Schermate, componenti e il design system sotto: token, markup bilingue, e una pagina che si legge anche senza JavaScript.</span></li>
+        <li><span class="en"><b>Performance and accessibility audits.</b> Measured against the WCAG formula, with the failures left in the report.</span><span class="it" lang="it"><b>Audit di prestazioni e accessibilità.</b> Misurati con la formula WCAG, con gli errori lasciati nel rapporto.</span></li>
+        <li><span class="en"><b>Offline-first PWA builds.</b> Manifest, service worker, precache, install — one cache per app.</span><span class="it" lang="it"><b>PWA offline-first.</b> Manifest, service worker, precache, installazione — una cache per app.</span></li>
+      </ul>
+      <ul class="cv-list">
+        <li><span class="en"><b>Canvas 2D and WebAudio.</b> Games and charts drawn by code, with the draw-call budget asserted by tests.</span><span class="it" lang="it"><b>Canvas 2D e WebAudio.</b> Giochi e grafici disegnati dal codice, con il budget di chiamate verificato dai test.</span></li>
+        <li><span class="en"><b>Tooling and measurement.</b> Simulation harnesses, corpus analysis, and a claims ledger that fails CI when a number drifts.</span><span class="it" lang="it"><b>Strumenti e misura.</b> Harness di simulazione, analisi di corpus, e un registro delle affermazioni che fa fallire la CI quando un numero scivola.</span></li>
+        <li><span class="en"><b>Delivery without a build step.</b> Plain HTML, CSS and ES modules: what you receive is what you can read.</span><span class="it" lang="it"><b>Consegna senza build step.</b> HTML, CSS e moduli ES puri: quello che ricevi è quello che puoi leggere.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="cv-section">
+    <h2>
+      <span class="en">Selected work</span>
+      <span class="it" lang="it">Progetti selezionati</span>
+    </h2>
+    <dl class="cv-work">
+      <dt>CENSUS</dt>
+      <dd><span class="en">A sampling-theory game where the stated confidence interval has to survive an audit.</span><span class="it" lang="it">Un gioco sul campionamento in cui l'intervallo dichiarato deve reggere un audit.</span></dd>
+      <dd class="n">92% → 75% under bias</dd>
+
+      <dt>STATS</dt>
+      <dd><span class="en">A play-data dashboard that labels its own heatmap an estimate and refuses to mix scoreboards.</span><span class="it" lang="it">Una dashboard che etichetta la propria mappa di calore come stima e non mescola classifiche.</span></dd>
+      <dd class="n">26 save schemas</dd>
+
+      <dt>BUCIO</dt>
+      <dd><span class="en">1,800 interactive, destructible objects rendered through one instanced mesh per type.</span><span class="it" lang="it">1.800 oggetti interattivi e distruttibili, resi da un'unica instanced mesh per tipo.</span></dd>
+      <dd class="n">~30 draw calls</dd>
+
+      <dt>SECTOR 7</dt>
+      <dd><span class="en">A two-pool damage model where greed is a decision rather than a multiplier.</span><span class="it" lang="it">Un modello di danno a due pozze in cui l'avidità è una decisione, non un moltiplicatore.</span></dd>
+      <dd class="n">8 hulls · 216 fit-outs</dd>
+
+      <dt>IRONFALL</dt>
+      <dd><span class="en">A lane MOBA with two invariants: the simulation never reads a clock, the renderer never touches the rules.</span><span class="it" lang="it">Un MOBA a corsie con due invarianti: la simulazione non legge l'orologio, il renderer non tocca le regole.</span></dd>
+      <dd class="n">5 test suites</dd>
+
+      <dt>PULSE</dt>
+      <dd><span class="en">A rhythm game with no audio files: one seed writes the track, and the chart is read back out of it.</span><span class="it" lang="it">Un gioco ritmico senza file audio: un seme scrive il brano, e la nota viene riletta da lì.</span></dd>
+      <dd class="n">500 seeds tested</dd>
+
+      <dt>THE BALANCE LAB</dt>
+      <dd><span class="en">A Monte-Carlo harness that drives a game's headless simulation over thousands of seeded sessions.</span><span class="it" lang="it">Un harness Monte-Carlo che porta la simulazione headless di un gioco su migliaia di sessioni con semi.</span></dd>
+      <dd class="n">5,000 sessions</dd>
+
+      <dt>THE SHARED ENGINE</dt>
+      <dd><span class="en">One audio helper, one seeded RNG and one chart library, used by forty apps instead of forty copies.</span><span class="it" lang="it">Un helper audio, un RNG con semi e una libreria di grafici, usati da quaranta app invece di quaranta copie.</span></dd>
+      <dd class="n">40+ apps</dd>
+
+      <dt>EADS STUDIO</dt>
+      <dd><span class="en">An embedded development environment: a Flask app driving gdb/MI over a serial link.</span><span class="it" lang="it">Un ambiente di sviluppo embedded: un'app Flask che guida gdb/MI su un collegamento seriale.</span></dd>
+      <dd class="n">Python · gdb/MI</dd>
+    </dl>
+  </section>
+
+  <section class="cv-section">
+    <h2>
+      <span class="en">Stack</span>
+      <span class="it" lang="it">Stack</span>
+    </h2>
+    <div class="cv-columns">
+      <ul class="cv-list">
+        <li><span class="en">Plain ES modules, Canvas 2D, WebAudio — no build step, no bundler, no dependencies</span><span class="it" lang="it">Moduli ES puri, Canvas 2D, WebAudio — nessuna build, nessun bundler, nessuna dipendenza</span></li>
+        <li><span class="en">Service workers, web manifests, IndexedDB and local storage — offline as the default, not a feature</span><span class="it" lang="it">Service worker, web manifest, IndexedDB e local storage — offline come default, non come funzione</span></li>
+        <li><span class="en">Accessibility: keyboard throughout, visible focus, 48px targets, ARIA where it is needed</span><span class="it" lang="it">Accessibilità: tastiera ovunque, focus visibile, aree da 48px, ARIA dove serve</span></li>
+      </ul>
+      <ul class="cv-list">
+        <li><span class="en">three.js and Vite — one project, and the only runtime dependency in the repository</span><span class="it" lang="it">three.js e Vite — un progetto, e l'unica dipendenza runtime del repository</span></li>
+        <li><span class="en">TypeScript — one project, the only one with a typed domain</span><span class="it" lang="it">TypeScript — un progetto, l'unico con un dominio tipizzato</span></li>
+        <li><span class="en">Python (standard library only) — Monte-Carlo harnesses, corpus analysis, HTML reports</span><span class="it" lang="it">Python (solo libreria standard) — harness Monte-Carlo, analisi di corpus, rapporti HTML</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="cv-section">
+    <h2>
+      <span class="en">Numbers, and how to check them</span>
+      <span class="it" lang="it">Numeri, e come verificarli</span>
+    </h2>
+    <ul class="cv-numbers">
+      <li><b>44</b> <span class="en">projects shipped</span><span class="it" lang="it">progetti pubblicati</span></li>
+      <li><b>42/44</b> <span class="en">with zero runtime dependencies</span><span class="it" lang="it">senza dipendenze runtime</span></li>
+      <li><b>44/44</b> <span class="en">installable and offline-capable</span><span class="it" lang="it">installabili e utilizzabili offline</span></li>
+      <li><b>0</b> <span class="en">remote resources loaded</span><span class="it" lang="it">risorse remote caricate</span></li>
+      <li><b>0</b> <span class="en">trackers or ads</span><span class="it" lang="it">tracker o pubblicità</span></li>
+      <li><b>25</b> <span class="en">claims checked in CI</span><span class="it" lang="it">affermazioni verificate in CI</span></li>
+    </ul>
+  </section>
+
+  <footer class="cv-foot">
+    <p>
+      <span class="en">Every number above is recomputed from the repository by <code>tools/verify.mjs</code> and checked in CI; the ledger is published at <a href="verify.html">portfolio/verify.html</a>.</span>
+      <span class="it" lang="it">Ogni numero sopra è ricalcolato dal repository da <code>tools/verify.mjs</code> e verificato in CI; il registro è pubblicato su <a href="verify.html">portfolio/verify.html</a>.</span>
+    </p>
+    <p>
+      <span class="en">Italian and English · MIT licence</span>
+      <span class="it" lang="it">Italiano e inglese · licenza MIT</span>
+    </p>
+  </footer>
+
+</div>
+
+<button class="print-btn" id="print-btn" type="button" hidden>
+  <span class="en">Save as PDF</span><span class="it" lang="it">Salva come PDF</span>
+</button>
+
+<script src="assets/portfolio.js"></script>
+<script src="assets/cv.js"></script>
+</body>
+</html>

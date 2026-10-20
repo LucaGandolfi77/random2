@@ -38,10 +38,11 @@
 </div>
 
 <!-- =====================================================================
-     EDIT ME — the four things that are blank on purpose:
+     EDIT ME — the things that are blank on purpose:
        1. the two hidden buttons in the hero  (email + LinkedIn)
        2. the same two hidden buttons in #contact
-       3. the three .panel.placeholder blocks in #clients
+       3. the three facts in #services that only you know (where, time
+          zone, day rate) — marked data-fill-text
      Search for "FILL" to find all of them.
      ===================================================================== -->
 
@@ -54,8 +55,12 @@
       <a href="#work" class="it" lang="it">Lavori</a>
       <a href="#craft" class="en">Craft</a>
       <a href="#craft" class="it" lang="it">Metodo</a>
+      <a href="#stack" class="en">Stack</a>
+      <a href="#stack" class="it" lang="it">Stack</a>
       <a href="#process" class="en">Process</a>
       <a href="#process" class="it" lang="it">Processo</a>
+      <a href="#services" class="en">Services</a>
+      <a href="#services" class="it" lang="it">Servizi</a>
       <a href="#contact" class="en">Contact</a>
       <a href="#contact" class="it" lang="it">Contatti</a>
     </nav>
@@ -117,6 +122,10 @@
         <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77">
           <span class="en">Source</span>
           <span class="it" lang="it">Codice</span>
+        </a>
+        <a class="btn btn-ghost" href="cv.html">
+          <span class="en">CV</span>
+          <span class="it" lang="it">CV</span>
         </a>
       </div>
 
@@ -676,49 +685,117 @@
 
     </section>
 
-    <!-- ================= CLIENT WORK ================= -->
-    <section id="clients" aria-labelledby="clients-h">
+    <!-- ================= SERVICES ================= -->
+    <section id="services" aria-labelledby="services-h">
       <div class="sec-head">
-        <h2 id="clients-h">
-          <span class="en">Client work</span>
-          <span class="it" lang="it">Lavori per i clienti</span>
+        <h2 id="services-h">
+          <span class="en">What you can hire me for</span>
+          <span class="it" lang="it">Per cosa puoi assumermi</span>
         </h2>
         <p>
-          <span class="en">Commissioned work, separate from the self-directed projects above.</span>
-          <span class="it" lang="it">Progetti commissionati, separati dai progetti personali qui sopra.</span>
+          <span class="en">Three things, because three things is what the work above actually is. Each one ships with the evidence attached.</span>
+          <span class="it" lang="it">Tre cose, perché tre cose è quello che il lavoro qui sopra è davvero. Ognuna arriva con le prove allegate.</span>
         </p>
       </div>
 
       <div class="grid-3">
-        <!-- FILL: replace this whole block with the real project. Client, your
-             role, the problem, the outcome, and a link if there is one. -->
-        <div class="panel placeholder">
-          <h3><span class="en">Client name</span><span class="it" lang="it">Nome del cliente</span></h3>
+        <div class="panel">
+          <h3><span class="ico">◐</span>
+            <span class="en">Interface work</span>
+            <span class="it" lang="it">Lavoro di interfaccia</span>
+          </h3>
           <p>
-            <span class="en">What they asked for, what you actually built, and what changed as a result. Numbers where you have them — load time, conversion, hours saved, screens shipped.</span>
-            <span class="it" lang="it">Cosa ti hanno chiesto, cosa hai costruito davvero e cosa è cambiato di conseguenza. Numeri quando disponibili — tempi di caricamento, conversioni, ore risparmiate, schermate realizzate.</span>
+            <span class="en">Screens, components and the system underneath them. Design tokens rather than hardcoded values, bilingual markup, and a page that still reads with JavaScript off. Delivered as plain HTML and CSS with no build step, so the thing you get is the thing you can read.</span>
+            <span class="it" lang="it">Schermate, componenti e il sistema sotto. Token di design invece di valori scritti a mano, markup bilingue, e una pagina che si legge anche senza JavaScript. Consegnata come HTML e CSS puri, senza build step: quello che ricevi è quello che puoi leggere.</span>
           </p>
-          <span class="todo">TODO — replace</span>
+          <ul class="panel-list">
+            <li><span class="en">A screen set, or one screen that has to be right</span><span class="it" lang="it">Un set di schermate, o una schermata che deve essere giusta</span></li>
+            <li><span class="en">A design system in CSS custom properties</span><span class="it" lang="it">Un design system in custom property CSS</span></li>
+            <li><span class="en">Bilingual EN/IT without a second codebase</span><span class="it" lang="it">Bilingue EN/IT senza un secondo codebase</span></li>
+          </ul>
         </div>
 
-        <div class="panel placeholder">
-          <h3><span class="en">Client name</span><span class="it" lang="it">Nome del cliente</span></h3>
+        <div class="panel">
+          <h3><span class="ico">⚖</span>
+            <span class="en">Performance &amp; accessibility audits</span>
+            <span class="it" lang="it">Audit di prestazioni e accessibilità</span>
+          </h3>
           <p>
-            <span class="en">Same shape as above. Keep it to the point — a hiring manager reads three of these, not thirty.</span>
-            <span class="it" lang="it">Stessa struttura di sopra. Tieni concise le cose — chi assume ne legge tre, non trenta.</span>
+            <span class="en">An audit that measures and then shows its work: contrast ratios computed with the WCAG formula, tap targets counted, heading order checked, and every finding left in the report even after the cheap ones are fixed. A published failure count is more useful than a promise of none.</span>
+            <span class="it" lang="it">Un audit che misura e poi mostra il lavoro: contrasti calcolati con la formula WCAG, aree touch contate, ordine dei titoli verificato, e ogni rilievo lasciato nel rapporto anche dopo che quelli economici sono stati corretti. Un numero di errori pubblicato vale più di una promessa di zero.</span>
           </p>
-          <span class="todo">TODO — replace</span>
+          <ul class="panel-list">
+            <li><span class="en">A machine-checked claims ledger</span><span class="it" lang="it">Un registro delle affermazioni verificato a macchina</span></li>
+            <li><span class="en">Real numbers, in the report, with the commands</span><span class="it" lang="it">Numeri reali, nel rapporto, con i comandi</span></li>
+            <li><span class="en">A prioritised list, not a wall of red</span><span class="it" lang="it">Una lista prioritaria, non un muro di rosso</span></li>
+          </ul>
         </div>
 
-        <div class="panel placeholder">
-          <h3><span class="en">Client name</span><span class="it" lang="it">Nome del cliente</span></h3>
+        <div class="panel">
+          <h3><span class="ico">⤓</span>
+            <span class="en">Offline-first PWA builds</span>
+            <span class="it" lang="it">PWA offline-first</span>
+          </h3>
           <p>
-            <span class="en">Third slot. If you only have two real projects, delete this block rather than filling it with something thin.</span>
-            <span class="it" lang="it">Terzo slot. Se hai solo due progetti reali, elimina questo blocco invece di riempirlo con qualcosa di fragile.</span>
+            <span class="en">An installable app with its own service worker and its own cache, so installing one never disturbs another, and state that lives on the device. This is the part of the arcade that was built forty-four times, which is why it is the part I am fastest at.</span>
+            <span class="it" lang="it">Un'app installabile con il proprio service worker e la propria cache, così installarne una non disturba le altre, e uno stato che vive sul dispositivo. È la parte dell'arcade costruita quarantaquattro volte, ed è per questo che è la parte in cui sono più veloce.</span>
           </p>
-          <span class="todo">TODO — replace</span>
+          <ul class="panel-list">
+            <li><span class="en">Manifest, service worker, precache, install</span><span class="it" lang="it">Manifest, service worker, precache, installazione</span></li>
+            <li><span class="en">Nothing sent anywhere, and a way to check that</span><span class="it" lang="it">Nulla inviato da nessuna parte, e un modo per verificarlo</span></li>
+            <li><span class="en">Budgets enforced by tests, not by intention</span><span class="it" lang="it">Budget imposti dai test, non dalle intenzioni</span></li>
+          </ul>
         </div>
       </div>
+
+      <!-- Availability: the three facts below are the only ones on this page
+           that the repository cannot answer. They ship visibly unfinished so
+           that they cannot go live by accident. Search for "FILL" in this
+           file to find every one of them. -->
+      <div class="panel availability">
+        <h3>
+          <span class="en">Availability &amp; working model</span>
+          <span class="it" lang="it">Disponibilità e modalità di lavoro</span>
+        </h3>
+        <dl class="availability-facts">
+          <dt><span class="en">Where</span><span class="it" lang="it">Dove</span></dt>
+          <dd><span class="en" data-fill-text>FILL: your city and country</span><span class="it" lang="it" data-fill-text>FILL: la tua città e il tuo paese</span></dd>
+          <dt><span class="en">Time zone</span><span class="it" lang="it">Fuso orario</span></dt>
+          <dd><span class="en" data-fill-text>FILL: your UTC offset and working hours</span><span class="it" lang="it" data-fill-text>FILL: il tuo scarto UTC e il tuo orario</span></dd>
+          <dt><span class="en">Day rate</span><span class="it" lang="it">Tariffa giornaliera</span></dt>
+          <dd><span class="en" data-fill-text>FILL: your rate, or the range you work in</span><span class="it" lang="it" data-fill-text>FILL: la tua tariffa, o l'intervallo in cui lavori</span></dd>
+          <dt><span class="en">Engagement</span><span class="it" lang="it">Impegno</span></dt>
+          <dd><span class="en" data-fill-text>FILL: project or retainer, and how you like to work</span><span class="it" lang="it" data-fill-text>FILL: progetto o retainer, e come preferisci lavorare</span></dd>
+        </dl>
+        <span class="todo">TODO — fill in</span>
+      </div>
+    </section>
+
+    <!-- ================= STACK ================= -->
+    <section id="stack" aria-labelledby="stack-h">
+      <div class="sec-head">
+        <h2 id="stack-h">
+          <span class="en">The stack, and the project that proves it</span>
+          <span class="it" lang="it">Lo stack, e il progetto che lo dimostra</span>
+        </h2>
+        <p>
+          <span class="en">No self-assessed bars. Every skill below links to the work that uses it, so the claim and the evidence are one click apart.</span>
+          <span class="it" lang="it">Nessuna barra di autovalutazione. Ogni competenza qui sotto porta al lavoro che la usa, così l'affermazione e la prova sono a un clic di distanza.</span>
+        </p>
+      </div>
+
+      <ul class="stack-grid">
+        <li><span class="skill">Canvas 2D</span><a href="../ironfall-pwa/">IRONFALL</a><span class="why">every polygon is its own draw call, and a test says how many that is allowed to be</span></li>
+        <li><span class="skill">WebAudio</span><a href="../pulse-pwa/">PULSE</a><span class="why">no audio files: one seed synthesises the track and the chart together</span></li>
+        <li><span class="skill">three.js</span><a href="../bucio/">BUCIO</a><span class="why">1,800 objects through one instanced mesh per type</span></li>
+        <li><span class="skill">TypeScript</span><a href="../new-star-soccer/">New Star Soccer</a><span class="why">the one project built with a bundler, and the only one with a typed domain</span></li>
+        <li><span class="skill">Python</span><a href="https://github.com/LucaGandolfi77/random2/tree/main/tools/balance">the balance lab</a><span class="why">stdlib only: it reads the sessions and writes the report</span></li>
+        <li><span class="skill">Monte-Carlo</span><a href="https://github.com/LucaGandolfi77/random2/tree/main/tools/balance">the balance lab</a><span class="why">5,000 seeded sessions, so a balance change is a number and not an opinion</span></li>
+        <li><span class="skill">Service workers</span><a href="../">all 44 projects</a><span class="why">one cache per app, so installing one never interferes with another</span></li>
+        <li><span class="skill">Performance budgets</span><a href="../ironfall-pwa/tests/render.test.js">the draw-call budget</a><span class="why">a test fails CI when the frame quietly gets more expensive</span></li>
+        <li><span class="skill">Accessibility</span><a href="#craft">the method</a><span class="why">keyboard throughout, visible focus, 48px targets, and a published audit that counts the failures</span></li>
+        <li><span class="skill">Tooling</span><a href="https://github.com/LucaGandolfi77/random2/tree/main/tools">the tools directory</a><span class="why">a corpus lab, a balance harness, and a claims ledger — no dependencies</span></li>
+      </ul>
     </section>
 
     <!-- ================= CRAFT ================= -->
@@ -1046,6 +1123,9 @@
           </a>
           <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77">
             <span class="en">GitHub</span><span class="it" lang="it">GitHub</span>
+          </a>
+          <a class="btn btn-ghost" href="cv.html">
+            <span class="en">CV (one page)</span><span class="it" lang="it">CV (una pagina)</span>
           </a>
         </div>
       </div>

@@ -1,0 +1,202 @@
+/* portfolio · the CV
+ *
+ * One A4 page. Dense, because a CV is not a portfolio: it is the part
+ * somebody reads in ninety seconds before they decide to read the rest.
+ * The design comes from assets/portfolio.css — this file only holds what
+ * is specific to a printed page.
+ */
+
+.cv {
+  max-width: 860px;
+  padding-top: 26px;
+  padding-bottom: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cv-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 22px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--accent);
+}
+.cv-head h1 {
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.cv-role {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.cv-contact {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  list-style: none;
+  padding: 0;
+  font-size: 12.5px;
+}
+.cv-contact a { color: var(--accent-2); text-decoration: none; }
+.cv-contact li { color: var(--muted); }
+
+.cv-section { margin-top: 18px; }
+.cv-section > h2 {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+.cv-section p { color: var(--muted); font-size: 13px; }
+.cv-section p + p { margin-top: 6px; }
+
+.cv-list {
+  display: grid;
+  gap: 5px;
+  list-style: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.cv-list li { position: relative; padding-left: 16px; }
+.cv-list li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Selected work: project, what it is, and the number that matters. */
+.cv-work {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+  gap: 4px 14px;
+  align-items: baseline;
+  font-size: 13px;
+}
+.cv-work dt {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.cv-work dd { color: var(--muted); margin: 0; }
+.cv-work .n {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-2);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.cv-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px 32px;
+}
+
+.cv-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  list-style: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.cv-numbers b {
+  color: var(--text);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-foot {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 11.5px;
+  color: var(--faint);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  justify-content: space-between;
+}
+.cv-foot a { color: var(--muted); }
+
+/* The print button is an enhancement: it starts hidden and is revealed by
+   the script, so a visitor without JavaScript never sees a button that
+   does nothing. */
+.print-btn {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 50;
+  min-height: 48px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #6d5bf0, #b44df0);
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 26px -10px rgba(139, 92, 246, 0.8);
+  cursor: pointer;
+}
+@media print {
+  .print-btn { display: none !important; }
+}
+
+/* ---- Print: one A4 page ----
+   The screen version breathes; the paper version does not. Every size here
+   is in points, because that is what the page is measured in once it is
+   on paper, and the whole thing is sized to land on a single sheet. */
+@media print {
+  .cv {
+    max-width: none;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 9.3pt;
+    line-height: 1.38;
+  }
+  .cv-head { padding-bottom: 6pt; gap: 3pt 16pt; }
+  .cv-head h1 { font-size: 19pt; }
+  .cv-role { font-size: 10pt; }
+  .cv-contact { font-size: 8.6pt; gap: 2pt 12pt; }
+
+  .cv-section { margin-top: 6.5pt; }
+  .cv-section > h2 { font-size: 7.6pt; letter-spacing: 0.13em; margin-bottom: 3.5pt; }
+  .cv-section p { font-size: 9.3pt; }
+
+  .cv-columns { gap: 3pt 26pt; }
+  .cv-list { gap: 2pt; font-size: 9.3pt; }
+  .cv-list li { padding-left: 13pt; }
+
+  .cv-work {
+    grid-template-columns: 7.6rem minmax(0, 1fr) auto;
+    gap: 2pt 12pt;
+    font-size: 9.3pt;
+  }
+
+  .cv-numbers { font-size: 9.3pt; gap: 3pt 14pt; }
+
+  .cv-foot {
+    margin-top: 7pt;
+    padding-top: 5pt;
+    font-size: 8.2pt;
+    gap: 2pt 14pt;
+  }
+}

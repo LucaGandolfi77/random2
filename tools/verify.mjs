@@ -572,10 +572,12 @@ function check() {
   const known = new Set(CLAIMS.map((c) => c.id));
   const unknown = pageClaimIds(html).filter((id) => !known.has(id));
 
-  /* The prose lint. */
+  /* The prose lint. Comments are stripped first: a literal inside an HTML
+     comment is not a claim anybody reads. */
+  const prose = html.replace(/<!--[\s\S]*?-->/g, " ");
   const stale = [];
   for (const { literal, claim } of STALE) {
-    if (html.includes(literal)) stale.push({ literal, claim });
+    if (prose.includes(literal)) stale.push({ literal, claim });
   }
 
   return { results, unknown, stale };

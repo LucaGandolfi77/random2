@@ -57,7 +57,9 @@ let rafCb = null;
 const sandbox = {
   console,
   setTimeout: () => 0,
+  setInterval: () => 0,
   clearTimeout: () => {},
+  clearInterval: () => {},
   Math, Number, String, JSON, Object, Array, Infinity, isFinite,
   localStorage: (() => {
     const s = {};

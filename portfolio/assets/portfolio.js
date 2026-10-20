@@ -106,6 +106,15 @@
     }
   });
 
+  /* ---- Filled-in text fields ----
+     A fact the repository cannot answer carries data-fill-text. While its
+     text still starts with FILL it stays visibly unfinished; once the real
+     value is in, the attribute comes off and the field reads like any
+     other. */
+  Array.prototype.forEach.call(document.querySelectorAll("[data-fill-text]"), function (el) {
+    if (!/^\s*FILL/.test(el.textContent || "")) el.removeAttribute("data-fill-text");
+  });
+
   /* ---- Offline ----
      The page is a PWA: it has a manifest and it should have a service
      worker behind it. The worker used to be pulled in with a plain

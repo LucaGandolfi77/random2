@@ -554,12 +554,6 @@
 
   /* Unfilled client slots are visibly unfinished, so they cannot ship by
      accident. Delete the block once the real project is written. */
-  .panel.placeholder {
-    border-style: dashed;
-    border-color: color-mix(in srgb, var(--warn) 42%, transparent);
-    background: color-mix(in srgb, var(--warn) 5%, var(--surface));
-  }
-  .panel.placeholder h3 { color: var(--warn); }
   .todo {
     display: inline-block;
     margin-top: 12px;
@@ -571,6 +565,105 @@
     border: 1px dashed color-mix(in srgb, var(--warn) 50%, transparent);
     border-radius: 999px;
     padding: 4px 10px;
+  }
+
+  /* ---- Services ---- */
+  .panel-list {
+    margin-top: 14px;
+    display: grid;
+    gap: 7px;
+    list-style: none;
+    padding: 0;
+  }
+  .panel-list li {
+    position: relative;
+    padding-left: 18px;
+    font-size: 13.6px;
+    color: var(--muted);
+  }
+  .panel-list li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 0.62em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+
+  /* ---- Availability ----
+     The three facts the repository cannot answer. They ship visibly
+     unfinished, because a rate that was never agreed is worse than one
+     that is missing. */
+  .availability {
+    margin-top: 18px;
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--warn) 42%, transparent);
+    background: color-mix(in srgb, var(--warn) 5%, var(--surface));
+  }
+  .availability-facts {
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+    gap: 9px 18px;
+    font-size: 14px;
+  }
+  .availability-facts dt {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--faint);
+    padding-top: 3px;
+  }
+  .availability-facts dd { color: var(--muted); }
+  .availability-facts dd [data-fill-text] {
+    color: var(--warn);
+    font-style: italic;
+  }
+  @media (max-width: 560px) {
+    .availability-facts { grid-template-columns: 1fr; gap: 2px; }
+    .availability-facts dd { margin-bottom: 10px; }
+  }
+
+  /* ---- Stack ---- */
+  .stack-grid {
+    margin-top: 4px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+  }
+  .stack-grid li {
+    padding: 15px 17px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .stack-grid .skill {
+    display: block;
+    font-size: 14.5px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .stack-grid a {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--accent-2);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--accent-2) 35%, transparent);
+  }
+  .stack-grid a:hover { border-bottom-color: var(--accent-2); }
+  .stack-grid .why {
+    display: block;
+    margin-top: 7px;
+    font-size: 13.2px;
+    color: var(--muted);
   }
 
   /* ---- Process: decisions recovered from the source ---- */
@@ -684,4 +777,44 @@
     background: linear-gradient(120deg, #6d4de0, #c2399b);
     -webkit-background-clip: text;
     background-clip: text;
+  }
+
+  /* ---- Print ----
+     Printing this page should give a document, not a screenshot of a
+     website: the chrome goes, the type gets a paper palette, and the
+     colours survive because they carry meaning. */
+  @media print {
+    @page { margin: 14mm; }
+
+    :root {
+      --bg: #ffffff;
+      --surface: #f4f4f8;
+      --surface-strong: #e9e9f0;
+      --border: #d8d8e2;
+      --text: #12121a;
+      --muted: #3a3a4a;
+      --faint: #5a5a6c;
+    }
+
+    /* Keep the accent gradient: it is the only thing that says "this is a
+       designed page" once the background is white. */
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    html { scroll-behavior: auto; }
+    body { background: #fff; }
+
+    .no-print,
+    .topbar,
+    .bg,
+    .hero-actions,
+    .claim-link,
+    footer .cloud { display: none !important; }
+
+    section { padding-top: 18px; }
+    .case { break-inside: avoid; }
+    .case-media { break-inside: avoid; }
+    a { text-decoration: none; }
   }

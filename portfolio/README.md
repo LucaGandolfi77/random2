@@ -16,7 +16,7 @@ python3 -m http.server 8080
 
 ---
 
-## Before you publish: three things to fill in
+## Before you publish: four things to fill in
 
 The page ships with these blank on purpose, so that a half-written section
 cannot go live by accident. Search the file for `FILL`:
@@ -25,12 +25,45 @@ cannot go live by accident. Search the file for `FILL`:
 |---|---|---|
 | Hero + Contact | **Email** | `href="mailto:you@example.com"` and delete `hidden` |
 | Hero + Contact | **LinkedIn** | `href="https://www.linkedin.com/in/you"` and delete `hidden` |
-| `#clients` | **Three client slots** | Replace the `.panel.placeholder` blocks and delete the `.todo` badge |
+| `#services` | **Where** | replace the `FILL:` text inside the `data-fill-text` span |
+| `#services` | **Time zone** | as above |
+| `#services` | **Day rate** | as above |
+| `#services` | **Engagement** | as above |
 
 The contact buttons also have a safety net: any `[data-fill]` link still
 pointing at `#` is hidden by the script at the bottom of the page, so filling
 in only the href and forgetting to remove `hidden` still ships a dead button.
 The GitHub link works today and needs no editing.
+
+The four facts in `#services` are the ones the repository cannot answer —
+only you know where you are and what you charge. They carry `data-fill-text`
+instead of `data-fill`, because they are not links: the script leaves them
+styled as unfinished while their text still starts with `FILL`, and the
+attribute comes off the moment you replace it. Until then the panel is
+dashed and carries a `TODO` badge, so nobody can mistake it for a fact.
+
+---
+
+## The CV
+
+[`cv.html`](cv.html) is a one-page CV that prints to exactly one A4 sheet.
+It links `assets/portfolio.css` for the design and `assets/cv.css` for the
+page itself, and it has a **Save as PDF** button that calls `window.print()`
+— the browser's own print dialog, with "Save as PDF" as one of its targets.
+
+```bash
+python3 -m http.server 8099 &          # from the repository root
+# open http://localhost:8099/portfolio/cv.html
+```
+
+The print rules live in `assets/portfolio.css`, not in the CV, because they
+are the same rules for the whole site: the chrome goes, the type gets a
+paper palette, `@page { margin: 14mm }` and `print-color-adjust: exact` keep
+the accent gradient alive on white paper.
+
+The CV is bilingual like everything else here. The language switch is CSS,
+so only one of the two languages is ever on the page — which is what makes
+it fit on one sheet.
 
 ---
 
@@ -61,7 +94,8 @@ the bot is a terminal program.
 |---|---|
 | Hero | Positioning plus four numbers that are easy to verify. |
 | Six projects | The case studies above. |
-| Client work | Placeholders. Delete the ones you cannot fill. |
+| Services | What you can hire him for: interface work, performance and accessibility audits, offline-first PWA builds — plus the availability facts only the author can fill in. |
+| Stack | Every skill linked to the project that proves it. No self-scored bars. |
 | Craft | Design tokens, accessibility, responsive, motion, performance budgets, offline — the parts that apply to every project. |
 | Process | Six design decisions **quoted from the source**, with `file:line` references. There are no Figma files behind this work; the reasoning survives in the code instead. |
 | Also built | The whole catalogue, linking into the arcade. |
@@ -146,11 +180,14 @@ dependencies — the same rule every other project in this repository follows.
 ```
 portfolio/
 ├── index.html          the shell: markup, both languages, the links
+├── cv.html             one-page CV, prints to one A4 sheet
 ├── assets/
 │   ├── portfolio.css   the stylesheet, extracted from index.html verbatim
 │   ├── portfolio.js    the progressive enhancement, extracted verbatim
 │   ├── ledger.css      the claims ledger's table
-│   └── ledger.js       the ledger's copy buttons
+│   ├── ledger.js       the ledger's copy buttons
+│   ├── cv.css          the CV's layout and its print rules
+│   └── cv.js           the CV's print button
 ├── verify.html         the claims ledger — GENERATED, never hand-edited
 ├── manifest.json       PWA manifest (CI requires manifest ↔ index.html link)
 ├── service-worker.js   cache-first shell, one cache per app
