@@ -58,5 +58,11 @@ LibraryScene.open({
   outro: { en: "A promise made to the dying is the only contract the law cannot draft.", it: "Una promessa fatta a un morente è l'unico contratto che la legge non sa scrivere." }
 });
 </script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

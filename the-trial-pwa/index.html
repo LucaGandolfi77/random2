@@ -56,5 +56,11 @@ LibraryScene.open({
   outro: { en: "In the attic, even the windows face other attics.", it: "Nel sottotetto, perfino le finestre danno su altri sottotetti." }
 });
 </script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

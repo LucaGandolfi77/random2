@@ -365,6 +365,21 @@
   [data-lang="en"] .stat .lbl.en { display: block; }
   [data-lang="it"] .stat .lbl.it { display: block; }
 
+  /* The fraction in "42/44" is secondary: the big number is the story. */
+  .stat b .of {
+    font-size: 0.52em;
+    font-weight: 700;
+    letter-spacing: 0;
+    opacity: 0.62;
+  }
+  .stat-note {
+    margin-top: 12px;
+    max-width: 62ch;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .stat-note a { color: var(--text); text-decoration: underline; }
+
   /* ---- Sections ---- */
   section { padding-top: clamp(48px, 7vw, 86px); }
   .sec-head { margin-bottom: 30px; max-width: 66ch; }
@@ -681,14 +696,15 @@
       <p class="sub">
         <span class="en">
           I design and build interfaces that stay fast, accessible and usable
-          with the network off. Forty-eight shipped projects, every one of them
-          without a runtime dependency — and six of them worth reading the
-          numbers on.
+          with the network off. Forty-four shipped projects. Two of them use a
+          third-party library; the other forty-two need nothing but a browser —
+          and six of them are worth reading the numbers on.
         </span>
         <span class="it" lang="it">
           Progetto interfacce che restano veloci, accessibili e utilizzabili anche
-          senza rete. Quarantotto progetti pubblicati, nessuno con dipendenze a
-          runtime — e sei di loro meritano la pena di leggerne i numeri.
+          senza rete. Quarantaquattro progetti pubblicati. Due usano una libreria
+          di terze parti; gli altri quarantadue si affidano solo al browser —
+          e sei di loro meritano la pena di leggerne i numeri.
         </span>
       </p>
 
@@ -714,23 +730,28 @@
       </div>
 
       <div class="stats">
-        <div class="stat"><b>48</b>
+        <div class="stat" data-claim="projects"><b>44</b>
           <span class="lbl en">Projects shipped</span>
           <span class="lbl it" lang="it">Progetti pubblicati</span>
         </div>
-        <div class="stat"><b>0</b>
-          <span class="lbl en">Runtime dependencies</span>
-          <span class="lbl it" lang="it">Dipendenze runtime</span>
+        <div class="stat" data-claim="zero_dep"><b>42<span class="of">/44</span></b>
+          <span class="lbl en">Zero runtime dependencies</span>
+          <span class="lbl it" lang="it">Zero dipendenze runtime</span>
         </div>
-        <div class="stat"><b>0</b>
+        <div class="stat" data-claim="binary_art"><b>0</b>
           <span class="lbl en">Binary art assets</span>
           <span class="lbl it" lang="it">Asset grafici binari</span>
         </div>
-        <div class="stat"><b>0</b>
+        <div class="stat" data-claim="trackers"><b>0</b>
           <span class="lbl en">Trackers &amp; ads</span>
           <span class="lbl it" lang="it">Tracker e pubblicità</span>
         </div>
       </div>
+
+      <p class="stat-note">
+        <span class="en">The two exceptions: <a href="https://github.com/LucaGandolfi77/random2/tree/main/bucio">bucio</a> ships three.js and <a href="https://github.com/LucaGandolfi77/random2/tree/main/snap-pwa">snap-pwa</a> vendors MediaPipe. The other forty-two need nothing but a browser.</span>
+        <span class="it" lang="it">Le due eccezioni: <a href="https://github.com/LucaGandolfi77/random2/tree/main/bucio">bucio</a> distribuisce three.js e <a href="https://github.com/LucaGandolfi77/random2/tree/main/snap-pwa">snap-pwa</a> include MediaPipe. Gli altri quarantadue si affidano solo al browser.</span>
+      </p>
     </section>
 
     <!-- ================= SELECTED WORK ================= -->
@@ -1239,8 +1260,8 @@
             <span class="it" lang="it">Budget, verificati in CI</span>
           </h3>
           <p>
-            <span class="en">Procedural art means there is not one sprite sheet to download — the entire arcade ships 44 PNGs and every one of them is an app icon. Draw-call counts are asserted by tests, because a frame that quietly got more expensive is the failure mode nobody notices until a phone is in someone's hand.</span>
-            <span class="it" lang="it">L'arte procedurale significa che non c'è nessuno sprite sheet da scaricare — l'intero arcade pubblica 44 PNG e sono tutti icone delle app. Il numero di chiamate di disegno è verificato dai test, perché un frame diventato più costoso è il fallimento che nessuno nota finché un telefono non è in mano a qualcuno.</span>
+            <span class="en">Procedural art means there is not one sprite sheet to download — the arcade's 46 published PNGs are all app icons, and the only other images on this site are the seven case-study screenshots below. Draw-call counts are asserted by tests, because a frame that quietly got more expensive is the failure mode nobody notices until a phone is in someone's hand.</span>
+            <span class="it" lang="it">L'arte procedurale significa che non c'è nessuno sprite sheet da scaricare — i 46 PNG pubblicati dell'arcade sono tutte icone delle app, e le uniche altre immagini di questo sito sono le sette screenshot dei case study qui sotto. Il numero di chiamate di disegno è verificato dai test, perché un frame diventato più costoso è il fallimento che nessuno nota finché un telefono non è in mano a qualcuno.</span>
           </p>
         </div>
 
@@ -1399,28 +1420,33 @@
         </h2>
         <p>
           <span class="en">
-            Everything else in the arcade. All of it runs in the browser, installs
-            to a phone, and works with the network off.
+            Every project in the arcade, in one place — including the six written
+            up above. All of it runs in the browser, installs to a phone, and
+            works with the network off.
           </span>
           <span class="it" lang="it">
-            Tutto il resto dell'arcade. Funziona nel browser, si installa sul
-            telefono e regge senza rete.
+            Tutti i progetti dell'arcade, in un unico posto — compresi i sei
+            descritti sopra. Funziona tutto nel browser, si installa sul telefono
+            e regge senza rete.
           </span>
         </p>
       </div>
 
       <div class="cloud">
-        <a href="../sector7-pwa/">🛰️ <span class="en">Sector 7</span><span class="it" lang="it">Sector 7</span></a>
-        <a href="../lumen-pwa/">🌊 <span class="en">Lumen</span><span class="it" lang="it">Lumen</span></a>
+        <!-- The case studies above are in here too: this is the complete
+             catalogue, not the leftovers. `cloud_links` in tools/verify.mjs
+             checks that every project folder is reachable from this list. -->
+        <a href="../census-pwa/">📋 <span class="en">Census</span><span class="it" lang="it">Census</span></a>
+        <a href="../stats-pwa/">📈 <span class="en">Stats</span><span class="it" lang="it">Stats</span></a>
         <a href="../bucio/">🕳️ <span class="en">Bucio</span><span class="it" lang="it">Bucio</span></a>
+        <a href="../sector7-pwa/">🛰️ <span class="en">Sector 7</span><span class="it" lang="it">Sector 7</span></a>
         <a href="../ironfall-pwa/">♖ <span class="en">Ironfall</span><span class="it" lang="it">Ironfall</span></a>
         <a href="../pulse-pwa/">🎵 <span class="en">Pulse</span><span class="it" lang="it">Pulse</span></a>
+
+        <a href="../lumen-pwa/">🌊 <span class="en">Lumen</span><span class="it" lang="it">Lumen</span></a>
         <a href="../snap-pwa/">👻 <span class="en">Snap Cam</span><span class="it" lang="it">Snap Cam</span></a>
         <a href="../new-star-soccer/">⚽ <span class="en">New Star Soccer</span><span class="it" lang="it">New Star Soccer</span></a>
-        <a href="https://github.com/LucaGandolfi77/random2/tree/main/EADS">🛠️ <span class="en">EADS Studio</span><span class="it" lang="it">EADS Studio</span></a>
-        <a href="https://github.com/LucaGandolfi77/random2/tree/main/pokesurvivor-bot">🤖 <span class="en">PokéSurvivor bot</span><span class="it" lang="it">Bot PokéSurvivor</span></a>
         <a href="../metro-pwa/">🚇 <span class="en">Linea Rossa</span><span class="it" lang="it">Linea Rossa</span></a>
-        <a href="../census-pwa/">📋 <span class="en">Census</span><span class="it" lang="it">Census</span></a>
         <a href="../acqua-pwa/">⛲ <span class="en">Acqua</span><span class="it" lang="it">Acqua</span></a>
         <a href="../alveare-pwa/">🐝 <span class="en">Alveare</span><span class="it" lang="it">Alveare</span></a>
         <a href="../nebbia-pwa/">🗺️ <span class="en">Nebbia</span><span class="it" lang="it">Nebbia</span></a>
@@ -1432,7 +1458,6 @@
         <a href="../mycel-pwa/">🍄 <span class="en">Mycel</span><span class="it" lang="it">Mycel</span></a>
         <a href="../static-pwa/">📺 <span class="en">Static</span><span class="it" lang="it">Static</span></a>
         <a href="../sini-pwa/">🖌️ <span class="en">Sini</span><span class="it" lang="it">Sini</span></a>
-        <a href="../anthology-pwa/">📚 <span class="en">The Library</span><span class="it" lang="it">La Libreria</span></a>
         <a href="../mustang-pwa/">✈️ <span class="en">Mustang 1942</span><span class="it" lang="it">Mustang 1942</span></a>
         <a href="../king-shot-pwa/">👑 <span class="en">King Shot</span><span class="it" lang="it">King Shot</span></a>
         <a href="../plane-pwa/">🛩️ <span class="en">Plane Shooter</span><span class="it" lang="it">Plane Shooter</span></a>
@@ -1442,6 +1467,26 @@
         <a href="../virtual-farm-pwa/">🌾 <span class="en">Farm Tycoon</span><span class="it" lang="it">Farm Tycoon</span></a>
         <a href="../viti-pwa/">🪛 <span class="en">Viti &amp; Lastre</span><span class="it" lang="it">Viti &amp; Lastre</span></a>
         <a href="../pokemon-go-pwa/">🔴 <span class="en">Pokéball GO</span><span class="it" lang="it">Pokéball GO</span></a>
+        <a href="../example-pwa/">✨ <span class="en">Star Explorer</span><span class="it" lang="it">Star Explorer</span></a>
+
+        <!-- The Library: one anthology and the twelve scenes it grew into. -->
+        <a href="../anthology-pwa/">📚 <span class="en">The Library</span><span class="it" lang="it">La Libreria</span></a>
+        <a href="../anna-karenina-pwa/">📕 <span class="en">Anna Karenina</span><span class="it" lang="it">Anna Karenina</span></a>
+        <a href="../les-miserables-pwa/">🪶 <span class="en">Les Misérables</span><span class="it" lang="it">I miserabili</span></a>
+        <a href="../crime-and-punishment-pwa/">⚖️ <span class="en">Crime &amp; Punishment</span><span class="it" lang="it">Delitto e castigo</span></a>
+        <a href="../divine-comedy-pwa/">🌋 <span class="en">Divine Comedy</span><span class="it" lang="it">Divina Commedia</span></a>
+        <a href="../recherche-pwa/">🕰️ <span class="en">À la recherche</span><span class="it" lang="it">Alla ricerca</span></a>
+        <a href="../the-trial-pwa/">🧾 <span class="en">The Trial</span><span class="it" lang="it">Il processo</span></a>
+        <a href="../underground-pwa/">🕳️ <span class="en">Underground</span><span class="it" lang="it">Sottosuolo</span></a>
+        <a href="../dorian-gray-pwa/">🖤 <span class="en">Dorian Gray</span><span class="it" lang="it">Il ritratto di Dorian Gray</span></a>
+        <a href="../invisible-cities-pwa/">🏙️ <span class="en">Invisible Cities</span><span class="it" lang="it">Città invisibili</span></a>
+        <a href="../ivan-ilyich-pwa/">🪦 <span class="en">Ivan Ilyich</span><span class="it" lang="it">Ivan Il'jič</span></a>
+        <a href="../brothers-karamazov-pwa/">🕯️ <span class="en">The Karamazovs</span><span class="it" lang="it">I Karamazov</span></a>
+        <a href="../bible-pwa/">📖 <span class="en">The Bible</span><span class="it" lang="it">La Bibbia</span></a>
+
+        <!-- Two projects that are not web pages at all. -->
+        <a href="https://github.com/LucaGandolfi77/random2/tree/main/EADS">🛠️ <span class="en">EADS Studio</span><span class="it" lang="it">EADS Studio</span></a>
+        <a href="https://github.com/LucaGandolfi77/random2/tree/main/pokesurvivor-bot">🤖 <span class="en">PokéSurvivor bot</span><span class="it" lang="it">Bot PokéSurvivor</span></a>
         <a href="../">🎮 <span class="en">The full arcade</span><span class="it" lang="it">L'intero arcade</span></a>
       </div>
     </section>

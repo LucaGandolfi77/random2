@@ -27,5 +27,11 @@
     <div id="save-indicator" class="save-indicator hidden">💾 Saved</div>
 
     <script type="module" src="src/main.js"></script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

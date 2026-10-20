@@ -56,5 +56,11 @@ LibraryScene.open({
   outro: { en: "Every portrait is an unfinished argument with its sitter.", it: "Ogni ritratto è una lite incompiuta col proprio modello." }
 });
 </script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

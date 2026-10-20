@@ -74,24 +74,24 @@
 | 14 | **Star Explorer** | Space adventure: asteroids and crystals | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/example-pwa/) |
 | 15 | **STATIC** | Pirate broadcast .io (CRT/VHS) | Canvas 2D + WebAudio + BroadcastChannel | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/static-pwa/) |
 | 16 | **New Star Soccer** | Football career RPG: matches, transfers, life | TypeScript + Canvas 2D + WebAudio (Vite) | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/new-star-soccer/) |
-| 16 | **ALVEARE** | Bee-tycoon con waggle dance disegnabile | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/alveare-pwa/) |
-| 17 | **MADRE** | Fermentation tycoon on real time | DOM UI + Canvas curves + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/madre-pwa/) |
-| 18 | **LINEA ROSSA** | Metro planner tycoon | Canvas 2D + gravity model + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/metro-pwa/) |
-| 19 | **NEBBIA** | Cartographer guild, misinformation economy | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/nebbia-pwa/) |
-| 20 | **ACQUA** | Roman aqueduct engineer (hydraulics) | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/acqua-pwa/) |
-| 21 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
-| 22 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
-| 23 | **Farm Tycoon** | Idle farming sim, staff da assumere | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
-| 24 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
-| 25 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
-| 26 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
-| 27 | **Territorio** | Paper.io vs bots, modalità arena senza respawn | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
+| 17 | **ALVEARE** | Bee-tycoon con waggle dance disegnabile | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/alveare-pwa/) |
+| 18 | **MADRE** | Fermentation tycoon on real time | DOM UI + Canvas curves + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/madre-pwa/) |
+| 19 | **LINEA ROSSA** | Metro planner tycoon | Canvas 2D + gravity model + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/metro-pwa/) |
+| 20 | **NEBBIA** | Cartographer guild, misinformation economy | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/nebbia-pwa/) |
+| 21 | **ACQUA** | Roman aqueduct engineer (hydraulics) | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/acqua-pwa/) |
+| 22 | **FORMICA** | Ant-colony territory .io | Canvas 2D + WebAudio | ✅ | [▶ Gioca](https://lucagandolfi77.github.io/random2/formica-pwa/) |
+| 23 | **Mustang 1942** | WWII vertical shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/mustang-pwa/) |
+| 24 | **Farm Tycoon** | Idle farming sim, staff da assumere | Canvas/DOM + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/virtual-farm-pwa/) |
+| 25 | **Isola Resort** | Low-poly island resort tycoon | Canvas 2D (isometrico) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/resort-pwa/) |
+| 26 | **BUCIO** | 3D black-hole eat-'em-up | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/bucio/) |
+| 27 | **Snap Cam** | Camera + face lenses | MediaPipe + getUserMedia | ✅* | [▶ Open](https://lucagandolfi77.github.io/random2/snap-pwa/) |
+| 28 | **Territorio** | Paper.io vs bots, modalità arena senza respawn | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/territorio-pwa/) |
 | 29 | **STATS** | Play-data dashboard | Canvas 2D (charts) | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/stats-pwa/) |
-| 28 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
-| 30 | **CENSUS** | Sampling-theory tycoon | Canvas 2D | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/census-pwa/) |
-| 31 | **IRONFALL** | 3v3 lane MOBA, Warhammer 40k | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/ironfall-pwa/) |
-| 32 | **PULSE** | Procedural rhythm game | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pulse-pwa/) |
-| 33 | **Portfolio** | EN/IT case-study site | HTML + CSS + JS | ✅ | [⌘ Open](https://lucagandolfi77.github.io/random2/portfolio/) |
+| 30 | **EADS Studio** | Embedded dev tool | Python / Flask | n/a | [⌘ GitHub](https://github.com/LucaGandolfi77/random2/tree/main/EADS) |
+| 31 | **CENSUS** | Sampling-theory tycoon | Canvas 2D | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/census-pwa/) |
+| 32 | **IRONFALL** | 3v3 lane MOBA, Warhammer 40k | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/ironfall-pwa/) |
+| 33 | **PULSE** | Procedural rhythm game | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pulse-pwa/) |
+| 34 | **Portfolio** | EN/IT case-study site | HTML + CSS + JS | ✅ | [⌘ Open](https://lucagandolfi77.github.io/random2/portfolio/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.

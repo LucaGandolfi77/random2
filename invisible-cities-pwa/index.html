@@ -56,5 +56,11 @@ LibraryScene.open({
   outro: { en: "Trade is the oldest way of remembering out loud.", it: "Il commercio è il modo più antico di ricordare ad alta voce." }
 });
 </script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

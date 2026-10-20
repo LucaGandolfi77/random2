@@ -56,5 +56,11 @@ LibraryScene.open({
   outro: { en: "The sack was never Death. It was everything he called living.", it: "Il sacco non è mai stata la Morte. Era tutto ciò che lui chiamava vivere." }
 });
 </script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

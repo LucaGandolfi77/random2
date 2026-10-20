@@ -44,9 +44,9 @@ self.addEventListener('fetch', (event) => {
 
   const url = new URL(req.url);
 
-  // Modelli locali (vendor/) e CDN (fallback): cache-first con aggiornamento
-  // in background — una volta scaricati, i filtri volto funzionano offline.
-  if (isVendor(url) || url.hostname === 'cdn.jsdelivr.net' || url.hostname === 'storage.googleapis.com') {
+  // Modelli locali (vendor/): cache-first con aggiornamento in background —
+  // una volta scaricati, i filtri volto funzionano offline.
+  if (isVendor(url)) {
     event.respondWith(
       caches.match(req).then((hit) => {
         const rete = fetch(req)

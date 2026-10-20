@@ -1,7 +1,10 @@
 /* Star Explorer Game Styles */
 /* Game UI and visual styling */
 
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap');
+/* The Google Fonts @import lived here. It was an outbound request on every
+   page load, and it broke the promise this app makes: a game that opens
+   with the network off. The stacks below fall back to fonts the device
+   already has. */
 
 :root {
     --primary-color: #06b6d4;

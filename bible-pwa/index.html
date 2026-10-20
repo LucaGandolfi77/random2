@@ -12,7 +12,10 @@
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 <script src="../shared/arcade.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+/* The Google Fonts @import lived here. It was the only outbound request
+   in the whole repository, and it broke the promise this app makes: a
+   visual novel that opens with the network off. The stacks below fall
+   back to fonts the device already has. */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Cormorant Garamond',Georgia,serif;}
 body{background:#0e0a12;color:#c8b6a0;overflow:hidden;height:100vh;width:100vw;font-size:17px;line-height:1.7;letter-spacing:0.02em;}
 #bg-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0.12;pointer-events:none;z-index:0;}
@@ -83,5 +86,11 @@ body{background:#0e0a12;color:#c8b6a0;overflow:hidden;height:100vh;width:100vw;f
 </div>
 
   <script type="module" src="src/main.js"></script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

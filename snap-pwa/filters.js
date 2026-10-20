@@ -23,27 +23,21 @@ const LM = {
   labbroSup: 13, labbroInf: 14,
 };
 
-const VERSIONE_MEDIAPIPE = '0.10.14';
-const CDN_MEDIAPIPE = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${VERSIONE_MEDIAPIPE}`;
-const URL_MODELLO_CDN =
-  'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
-
 /**
- * Sorgenti dell'engine in ordine di preferenza: prima i file locali in
- * vendor/ (bundle + wasm + modello già nel sito, cachati dal service worker:
- * offline dalla seconda apertura), in fallback il CDN se vendor/ non è
- * disponibile (es. deploy parziale).
+ * Sorgente dell'engine: i file locali in vendor/ (bundle + wasm + modello),
+ * che il service worker mette in cache alla prima richiesta: dalla seconda
+ * apertura i filtri volto funzionano anche offline.
+ *
+ * Non c'è un fallback su CDN. Un tempo c'era, per un deploy parziale; ma
+ * significa che l'app esce a internet quando non dovrebbe, e l'unica
+ * versione che questa pagina promette — zero richieste esterne, tutto
+ * offline — è quella in cui il motore è sempre in locale.
  */
 const SORGENTI_ENGINE = [
   {
     bundle: './vendor/vision_bundle.mjs',
     wasm: './vendor/wasm',
     modello: './vendor/models/face_landmarker.task',
-  },
-  {
-    bundle: CDN_MEDIAPIPE,
-    wasm: `${CDN_MEDIAPIPE}/wasm`,
-    modello: URL_MODELLO_CDN,
   },
 ];
 

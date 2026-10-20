@@ -11,7 +11,10 @@
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Cinzel+Decorative:wght@400;700&display=swap');
+/* The Google Fonts @import lived here. It was the only outbound request
+   in the whole repository, and it broke the promise this app makes: a
+   visual novel that opens with the network off. The stacks below fall
+   back to fonts the device already has. */
 
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{background:#0a0a14;color:#d4c5b0;height:100%;font-family:'Cormorant Garamond',Georgia,serif;overflow:hidden;letter-spacing:0.02em;}

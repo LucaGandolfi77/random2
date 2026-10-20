@@ -56,5 +56,11 @@ LibraryScene.open({
   outro: { en: "A society watches the race and pretends not to see the woman.", it: "La società guarda la corsa e finge di non vedere la donna." }
 });
 </script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

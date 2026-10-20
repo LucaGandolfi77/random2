@@ -57,5 +57,11 @@ LibraryScene.open({
   outro: { en: "Do not fear life. That is the whole gospel, read at a funeral.", it: "Non temere la vita. È tutto il vangelo, letto a un funerale." }
 });
 </script>
+<!-- Offline: one service worker, one cache, for this app alone. -->
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>
