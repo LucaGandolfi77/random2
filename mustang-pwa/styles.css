@@ -299,6 +299,9 @@ nav.controls {
 
 .btn.chip {
     flex: 1;
+    /* 48px is the tap target the accessibility audit asks for, and a chip
+       you can miss with a thumb is a chip you will miss. */
+    min-height: 48px;
     padding: 8px 6px;
     font-size: 0.7rem;
     letter-spacing: 1px;
@@ -321,9 +324,11 @@ nav.controls {
 .btn.chip.sector {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 1px;
     flex: 1 1 22%;
     min-width: 0;
+    min-height: 48px;
     padding: 6px 3px;
     font-size: 0.58rem;
     letter-spacing: 0.4px;
@@ -403,6 +408,13 @@ nav.controls {
 
 .btn.theatre.active small {
     color: rgba(0, 0, 0, 0.65);
+}
+
+/* The two big buttons in the overlay are 48px tall like every other
+   control the audit looks at. They sit in a panel that has room. */
+#overlay-play,
+#overlay-theme {
+    min-height: 48px;
 }
 
 #overlay-stats p {
