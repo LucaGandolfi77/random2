@@ -246,6 +246,13 @@ const rankProbes = [[0, "ROOKIE"], [19999, "ROOKIE"], [20000, "FIGHTER"], [59999
 for (const [score, rank] of rankProbes) ok("rankFor(" + score + ") = " + rank, D.rankFor(score) === rank, D.rankFor(score));
 ok("reaching stage 1 still outranks a rookie", D.rankFor(1000000) === "TRIPLE ACE");
 
+/* ===== Extends ===== */
+section("extends");
+ok("three thresholds", D.extendTable.length === 3, String(D.extendTable.length));
+ok("the thresholds are ordered highest first", D.extendTable.every((r, i) => i === 0 || r.min < D.extendTable[i - 1].min));
+ok("the first threshold is 20000", D.extendTable[D.extendTable.length - 1].min === 20000, String(D.extendTable[D.extendTable.length - 1].min));
+ok("the lives are capped", D.config.maxLives > D.config.startLives, String(D.config.maxLives));
+
 /* ===== Threading ===== */
 section("threading");
 ok("a thread is worth points", D.config.threadPoints > 0, String(D.config.threadPoints));

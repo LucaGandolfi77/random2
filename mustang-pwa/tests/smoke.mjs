@@ -472,6 +472,43 @@ ok("despawning formations are never marked as awarded", watched.every((g) => !g.
 ok("leaving the screen awards no formation bonus", S.score === 0, "score " + S.score);
 ok("leaving the screen drops no POW crate", S.pows.length === 0, S.pows.length + " crates");
 
+// ---- Extends: the arcade gave a life at every threshold ----
+console.log("\nextends");
+armPlayer();
+M.game.startStage(0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.score = 19990;
+S.extendsGiven = 0;
+S.lives = 3;
+S.player.alive = true;
+S.player.x = 200;
+S.player.y = 300;
+M.game.addScore(5);
+ok("no life before the first threshold", S.lives === 3, "lives " + S.lives);
+M.game.addScore(10);
+ok("crossing 20000 gives a life", S.lives === 4, "lives " + S.lives);
+ok("the threshold is granted once", S.extendsGiven === 1, String(S.extendsGiven));
+M.game.addScore(10);
+ok("the same threshold is not granted twice", S.lives === 4, "lives " + S.lives);
+
+M.game.addScore(40000);
+ok("crossing 60000 gives a second life", S.lives === 5, "lives " + S.lives);
+M.game.addScore(90000);
+ok("crossing 150000 gives a third life", S.lives === 6, "lives " + S.lives);
+ok("the life cap is six", CFG.maxLives === 6, String(CFG.maxLives));
+
+// At the cap a threshold waits instead of being lost.
+S.lives = CFG.maxLives;
+S.extendsGiven = 0;
+S.score = 0;
+M.game.addScore(25000);
+ok("no life above the cap", S.lives === CFG.maxLives, "lives " + S.lives);
+ok("a threshold above the cap waits", S.extendsGiven === 0, String(S.extendsGiven));
+S.lives = CFG.maxLives - 1;
+M.game.addScore(1);
+ok("the waiting threshold is granted when a life is lost", S.lives === CFG.maxLives, "lives " + S.lives);
+
 // ---- Threading: rolling through an enemy cuts it, and the chain pays ----
 console.log("\nthreading");
 armPlayer();

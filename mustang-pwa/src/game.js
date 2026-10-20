@@ -35,6 +35,7 @@
         stageIndex: 0,
 
         score: 0,
+        extendsGiven: 0,
         highScore: 0,
         highScores: { overlord: 0, rising: 0 },
         lives: config.startLives,
@@ -684,6 +685,25 @@
        watch the score (the extends) cannot watch nine separate additions. */
     function addScore(n) {
         state.score += n;
+        controllaExtends();
+    }
+
+    /* The arcade gave an extra life at every threshold, and EXTEND went up
+       the screen. A threshold that cannot be granted yet — because the
+       player is already at the life cap — waits instead of being lost. */
+    function controllaExtends() {
+        /* The table is written highest first, like the ranks, but the
+           thresholds are crossed from the bottom up. */
+        const tabella = D.extendTable.slice().reverse();
+        for (let i = state.extendsGiven; i < tabella.length; i++) {
+            if (state.score < tabella[i].min) break;
+            if (state.lives >= config.maxLives) break;   // pending, not lost
+            state.extendsGiven = i + 1;
+            state.lives++;
+            Sound.extend();
+            const p = state.player;
+            floater(p ? p.x : W / 2, (p ? p.y : H / 2) - 34, tabella[i].label, "#7ef07e");
+        }
     }
 
     function destroyEnemy(e, opts) {
@@ -1134,6 +1154,7 @@
         state.stageNumber = stages[0].n;
         state.checkpoint = 0;
         state.score = 0;
+        state.extendsGiven = 0;
         state.lives = config.startLives;
         state.fireShots = 2;
         state.bomberCombo = 0;
@@ -2180,5 +2201,8 @@
         advanceStage: advanceStage,
         doLoop: doLoop,
         setTheatre: setTheatre,
+        /* Exported so the tests can add points the way the game does, rather
+           than setting the score behind the extends' back. */
+        addScore: addScore,
     };
 })(typeof window !== "undefined" ? window : globalThis);

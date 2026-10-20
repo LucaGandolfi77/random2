@@ -42,6 +42,7 @@
         loopsPerStage: 3,
 
         startLives: 3,
+        maxLives: 6,
         maxEnemies: 22,
         maxParticles: 340,
 
@@ -272,6 +273,14 @@
         { min: 0, label: "", pts: 0 },
     ];
 
+    /* The arcade gave an extra life at every score threshold, and the
+       word EXTEND went up the screen. Highest first, like the ranks. */
+    const extendTable = [
+        { min: 150000, label: "EXTEND" },
+        { min: 60000, label: "EXTEND" },
+        { min: 20000, label: "EXTEND" },
+    ];
+
     const pilotRanks = [
         { min: 300000, rank: "TRIPLE ACE" },
         { min: 150000, rank: "ACE" },
@@ -438,6 +447,7 @@
         bonusTable: bonusTable,
         bonusFor: bonusFor,
         pilotRanks: pilotRanks,
+        extendTable: extendTable,
         rankFor: rankFor,
         powPlan: powPlan,
         bossStages: bossStages,
