@@ -816,18 +816,27 @@ A Snapchat-style PWA: real-time front/back camera with **face lenses**
 and a stack of image filters. Snaps live only on your device.
 
 - Face lenses: 🐶 dog, 😎 shades, 👑 crown, 😍 heart eyes, 🐱 cat, 🐰 rabbit,
-  🤖 robot, 🤠 cowboy, 😈 devil, 😇 angel, plus animated "quiz" lenses that
+  🤖 robot, 🤠 cowboy, 😈 devil, 😇 angel, 🦊 fox, 🐼 panda, 🧛 vampire,
+  🧙 wizard, 🐝 bee, 🎩 top hat & monocle, plus animated "quiz" lenses that
   draw a random animal/food/mood on your forehead
 - Film filters: B/W, noir, sepia, vivid, cold, warm, negative, psychedelic
   (animated), mosaic, vignette, grain, VHS (scanlines), duotone, thermal,
-  dream (bloom)
+  dream (bloom), neon, cyanotype
+- Frames: light leak, instant film with a date back, 2.39:1 cinema with a
+  frame counter, frost, glitch, prism
+- **Looks**: a lens, a frame and a grade in one tap
 - Front/back switching with auto-mirror on the front camera, screen flash
-- Shot → caption → save to **Ricordi** (IndexedDB) / download / discard;
+- Shot → caption → save to **Memories** (IndexedDB) / download / share;
   grid viewer with delete and export
+- **Import a photo** from the device and run it through the same lens,
+  frame and grade; **photo booth**: four shots composed into one strip
+- A bottom sheet with the whole catalogue and the favourites, a settings
+  panel (countdown, composition guide, haptics, mirror, quality), a
+  hold-to-compare button and a thumbnail of the last snap
 - Requires HTTPS (GitHub Pages qualifies); first face-lens use fetches the
   ~15 MB engine, then it is cached by the service worker for offline use
 
-**Files:** `index.html`, `app.js`, `filters.js`, `styles.css`,
+**Files:** `index.html`, `app.js`, `filters.js`, `ui.js`, `styles.css`,
 `vendor/` (MediaPipe tasks-vision bundle, wasm, models), `manifest.json`,
 `service-worker.js`. See [`snap-pwa/README.md`](snap-pwa/README.md).
 
