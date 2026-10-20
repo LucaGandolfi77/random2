@@ -1,6 +1,7 @@
 import CONFIG from './config.js';
 import { loadState, saveState, loadInventory, saveInventory, loadSettings, saveSettings } from './storage.js';
 import { drawLowPolyPokemon, drawPokeball, drawTerrain, drawParticles, drawCatchEffect, drawStarfield } from './renderer.js';
+import { artworkUrl, loadSprite } from './sprites.js';
 
 /* ================== STATE ================== */
 let state = loadState();
@@ -24,6 +25,8 @@ let screenW = 0, screenH = 0;
 let wildPokemon = null;
 let wildIsShiny = false;
 let wildCP = 0;
+let wildSpriteImg = null;   // artwork reale (PokeAPI) quando caricato
+let wildSpriteReady = false;
 
 const GROUND_Y_RATIO = 0.72;
 
@@ -74,10 +77,21 @@ function resize() {
 /* ================== WILD SPAWN ================== */
 function spawnWildPokemon() {
   const biome = CONFIG.biomes[currentBiome];
-  const ids = biome ? biome.pokemon : CONFIG.pokedex.map(p => p.id);
-  const pool = CONFIG.pokedex.filter(p => ids.includes(p.id));
-  if (pool.length === 0) pool.push(CONFIG.pokedex[0]);
-  const weights = pool.map(p => p.weight || 10);
+  // i riferimenti bioma possono avere peso dedicato: 'pikachu:0.7'
+  const refs = biome ? biome.pokemon : CONFIG.pokedex.map(p => p.id);
+  const pool = refs.map(ref => {
+    const [id, w] = ref.split(':');
+    const p = CONFIG.byId(id);
+    if (!p) return null;
+    return { p, w: w != null ? parseFloat(w) : (p.weight || 0) };
+  }).filter(x => x && x.w > 0);
+  // + specie delle generazioni successive assegnate al bioma per tipo
+  for (const a of (CONFIG.autoSpecies?.[currentBiome] || [])) {
+    const p = CONFIG.byId(a.id);
+    if (p && p.weight > 0) pool.push({ p, w: a.w });
+  }
+  if (pool.length === 0) pool.push({ p: CONFIG.pokedex[0], w: 1 });
+  const weights = pool.map(x => x.w);
   const total = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * total;
   let idx = 0;
@@ -85,8 +99,20 @@ function spawnWildPokemon() {
     roll -= weights[i];
     if (roll <= 0) { idx = i; break; }
   }
-  wildPokemon = pool[idx];
+  wildPokemon = pool[idx].p;
   wildIsShiny = Math.random() < CONFIG.shinyChance;
+
+  // carica lo sprite reale; se fallisce (offline alla prima visita) si
+  // ricade sul disegno low-poly procedurale
+  wildSpriteReady = false;
+  const url = artworkUrl(wildPokemon, wildIsShiny);
+  loadSprite(url).then(img => {
+    if (wildPokemon && artworkUrl(wildPokemon, wildIsShiny) === url) {
+      wildSpriteImg = img;
+      wildSpriteReady = !!img;
+    }
+  });
+
   // CP based on difficulty + some randomness
   const base = 10 + (wildPokemon.difficulty * 25);
   wildCP = Math.floor(base + Math.random() * base * 0.5);
@@ -119,7 +145,7 @@ function gameLoop(ts) {
   const groundY = screenH * GROUND_Y_RATIO;
   const centerX = screenW / 2;
 
-  // Render wild Pokémon
+  // Render wild Pokémon — sprite reale con fallback low-poly
   if (wildPokemon) {
     const pokeSize = Math.min(screenW * 0.35, 160);
     const jitter = gamePhase === 'shaking' ? (Math.random() - 0.5) * 8 : 0;
@@ -127,7 +153,30 @@ function gameLoop(ts) {
     const fleeAlpha = gamePhase === 'result' && catchResult === false ? Math.max(0, 1 - phaseTime * 1.5) : 1;
     ctx.save();
     ctx.globalAlpha = fleeAlpha;
-    drawLowPolyPokemon(ctx, wildPokemon, centerX + jitter + fleeOffset, groundY - pokeSize * 0.25, pokeSize, time, wildIsShiny);
+    const drawX = centerX + jitter + fleeOffset;
+    if (wildSpriteReady && wildSpriteImg) {
+      const s = pokeSize * 1.9;
+      if (wildIsShiny) {
+        ctx.shadowColor = 'rgba(255, 215, 0, 0.65)';
+        ctx.shadowBlur = 26;
+      }
+      ctx.drawImage(wildSpriteImg, drawX - s / 2, groundY - s * 0.66, s, s);
+      ctx.shadowBlur = 0;
+      if (wildIsShiny) {
+        // scintilla shiny anche sugli sprite
+        const sp = Math.abs(Math.sin(time * 3));
+        if (sp > 0.7) {
+          ctx.globalAlpha = ((sp - 0.7) / 0.3) * fleeAlpha;
+          ctx.fillStyle = '#ffd700';
+          ctx.beginPath();
+          ctx.arc(drawX + s * 0.3, groundY - s * 0.9, s * 0.05, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = fleeAlpha;
+        }
+      }
+    } else {
+      drawLowPolyPokemon(ctx, wildPokemon, drawX, groundY - pokeSize * 0.25, pokeSize, time, wildIsShiny);
+    }
     ctx.restore();
   }
 
@@ -333,7 +382,10 @@ function showResult(caught) {
     title.textContent = t('Gotcha!') + (data.shiny ? ' ✨' : '');
     title.style.color = '#81c784';
     body.innerHTML = `
-      <div style="font-size:3rem;margin:0.5rem 0;">${data.shiny ? '✨ ' : ''}${data.pokemon.name[tLang()]}</div>
+      <img src="${artworkUrl(data.pokemon, data.shiny) || ''}" alt=""
+           onerror="this.style.display='none'"
+           style="width:130px;height:130px;object-fit:contain;display:block;margin:0.3rem auto 0;">
+      <div style="font-size:2rem;margin:0.3rem 0;">${data.shiny ? '✨ ' : ''}${data.pokemon.name[tLang()]}</div>
       <div style="color:#bfa07a;font-size:1.1rem;">${t('CP')} ${data.cp}</div>
       <div style="color:#8a7b65;font-size:0.85rem;margin-top:0.3rem;">${t(data.throwQuality + ' throw')} · +${data.xpGain} XP</div>
       ${data.shiny ? '<div style="color:#ffd700;margin-top:0.3rem;font-size:0.9rem;">✨ SHINY ✨</div>' : ''}
@@ -343,7 +395,10 @@ function showResult(caught) {
     title.textContent = t('Oh no! The Pokémon broke free!');
     title.style.color = '#e57373';
     body.innerHTML = `
-      <div style="font-size:2rem;margin:0.5rem 0;">${data.pokemon.name[tLang()]}</div>
+      <img src="${artworkUrl(data.pokemon) || ''}" alt=""
+           onerror="this.style.display='none'"
+           style="width:100px;height:100px;object-fit:contain;display:block;margin:0.3rem auto 0;opacity:0.85;">
+      <div style="font-size:2rem;margin:0.3rem 0;">${data.pokemon.name[tLang()]}</div>
       <div style="color:#8a7b65;font-size:0.9rem;">${t('It was too strong... Try a better ball or berry!')}</div>
     `;
     btn.textContent = t('Try Again');
@@ -394,15 +449,40 @@ function playCatchSound(success) {
 }
 
 /* ================== UI RENDERING ================== */
+const dexGenOf = (p) => p.gen || 1;
+let dexGenFilter = localStorage.getItem('pokemon-dexgen') || '1';
+
 function renderPokedex() {
   const container = document.getElementById('pokedex-grid');
   if (!container) return;
   container.innerHTML = '';
 
+  // filtro per generazione (Gen 1…9 + tutte)
+  const genWrap = document.getElementById('pokedex-gen');
+  if (genWrap) {
+    genWrap.innerHTML = '';
+    const options = [['1','Gen 1'],['2','Gen 2'],['3','Gen 3'],['4','Gen 4'],['5','Gen 5'],['6','Gen 6'],['7','Gen 7'],['8','Gen 8'],['9','Gen 9'],['all', t('All')]];
+    for (const [val, label] of options) {
+      const btn = document.createElement('button');
+      btn.className = 'gen-btn' + (dexGenFilter === val ? ' active' : '');
+      btn.textContent = label;
+      btn.onclick = () => {
+        dexGenFilter = val;
+        localStorage.setItem('pokemon-dexgen', val);
+        renderPokedex();
+      };
+      genWrap.appendChild(btn);
+    }
+  }
+
+  const lista = dexGenFilter === 'all'
+    ? CONFIG.pokedex
+    : CONFIG.pokedex.filter(p => dexGenOf(p) === +dexGenFilter);
+
   const caughtIds = state.caught.map(c => c.id);
   const seenIds = state.seen || [];
 
-  CONFIG.pokedex.forEach(p => {
+  lista.forEach(p => {
     const isCaught = caughtIds.includes(p.id);
     const isSeen = seenIds.includes(p.id);
     const caughtCount = caughtIds.filter(id => id === p.id).length;
@@ -422,22 +502,39 @@ function renderPokedex() {
       <div class="pd-meta">
         <span>${t('Caught')}: ${caughtCount}</span>
         <span>🍬 ${candyCount}</span>
+        ${caughtIds.some(id => id === p.id) && state.caught.find(c => c.id === p.id)?.shiny ? '<span style="color:#ffd700;">✨</span>' : ''}
       </div>
-      ${p.candyToEvolve && isCaught ? `<div class="pd-evolve${candyCount >= p.candyToEvolve ? ' ready' : ''}">⚡ ${t('Evolves')} (${candyCount}/${p.candyToEvolve})</div>` : ''}
+      ${p.candyToEvolve && isCaught ? `<div class="pd-evolve${candyCount >= p.candyToEvolve ? ' ready' : ''}"${candyCount >= p.candyToEvolve ? ` onclick="window.evolvePokemon('${p.id}');event.stopPropagation();" style="cursor:pointer;"` : ''}>⚡ ${t('Evolves')} (${Math.min(candyCount, p.candyToEvolve)}/${p.candyToEvolve})</div>` : ''}
     `;
     container.appendChild(card);
 
-    // Draw mini sprite on canvas inside card
-    requestAnimationFrame(() => {
-      const wrap = document.getElementById(`sprite-${p.id}`);
-      if (!wrap) return;
-      const cvs = document.createElement('canvas');
-      cvs.width = 80; cvs.height = 80;
-      wrap.appendChild(cvs);
-      const c = cvs.getContext('2d');
+    // sprite: artwork reale da PokeAPI; silhouette per i visti non catturati;
+    // fallback low-poly procedurale se lo sprite non è raggiungibile
+    const wrap = document.getElementById(`sprite-${p.id}`);
+    if (wrap) {
       if (isCaught || isSeen) {
-        drawLowPolyPokemon(c, p, 40, 45, 50, 0, false);
+        const img = document.createElement('img');
+        img.alt = p.name[tLang()];
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.style.width = '76px';
+        img.style.height = '76px';
+        img.style.objectFit = 'contain';
+        img.style.filter = isCaught ? 'none' : 'brightness(0) opacity(0.5)';
+        img.onerror = () => {
+          img.remove();
+          const cvs = document.createElement('canvas');
+          cvs.width = 80; cvs.height = 80;
+          wrap.appendChild(cvs);
+          drawLowPolyPokemon(cvs.getContext('2d'), p, 40, 45, 50, 0, false);
+        };
+        img.src = artworkUrl(p) || '';
+        wrap.appendChild(img);
       } else {
+        const cvs = document.createElement('canvas');
+        cvs.width = 80; cvs.height = 80;
+        wrap.appendChild(cvs);
+        const c = cvs.getContext('2d');
         c.fillStyle = '#333';
         c.beginPath(); c.arc(40, 40, 20, 0, Math.PI * 2); c.fill();
         c.fillStyle = '#555';
@@ -445,8 +542,16 @@ function renderPokedex() {
         c.textAlign = 'center';
         c.fillText('???', 40, 44);
       }
-    });
+    }
   });
+
+  // contatore Pokédex
+  const count = document.getElementById('pokedex-count');
+  if (count) {
+    const unici = new Set(caughtIds).size;
+    count.textContent = t('Caught') + ': ' + unici + ' / ' + CONFIG.pokedex.length +
+      ' · ' + t('Seen') + ': ' + seenIds.length;
+  }
 }
 
 function renderInventory() {
@@ -664,6 +769,32 @@ window.resetGame = function () {
   updateStageUI();
 };
 
+/* ================== EVOLUZIONE ================== */
+window.evolvePokemon = function (id) {
+  const sp = CONFIG.byId(id);
+  if (!sp || !sp.evolvesTo) return;
+  const have = inventory.candy[id] || 0;
+  if (have < sp.candyToEvolve) { alert(t('Not enough candy!')); return; }
+  const choices = Array.isArray(sp.evolvesTo) ? sp.evolvesTo : [sp.evolvesTo];
+  const evoId = choices[Math.floor(Math.random() * choices.length)];
+  const evo = CONFIG.byId(evoId);
+  if (!evo) return;
+
+  inventory.candy[id] -= sp.candyToEvolve;
+  const inst = state.caught.find(c => c.id === id);
+  if (inst) inst.id = evoId; // evolve l'istanza più recente
+  if (!state.seen.includes(evoId)) state.seen.push(evoId);
+  inventory.candy[evoId] = (inventory.candy[evoId] || 0) + 1;
+  saveInventory(inventory);
+  saveState(state);
+  renderPokedex();
+  renderInventory();
+  renderTrainer();
+  updateTopBar();
+  playCatchSound(true);
+  alert(`⚡ ${t('Evolved!')} ${evo.name[tLang()]}`);
+};
+
 /* ================== UTILITIES ================== */
 function t(key) {
   const dict = {
@@ -702,6 +833,9 @@ function t(key) {
       'Master Catcher': 'Master Catcher',
       'Catch with a Master Ball': 'Catch with a Master Ball',
       'Evolves': 'Evolves',
+      'Not enough candy!': 'Not enough candy!',
+      'Evolved!': 'Evolved into',
+      'All': 'All',
       'Difficulty': 'Difficulty',
       'Reset all progress? This cannot be undone.': 'Reset all progress? This cannot be undone.',
       'menu-desc': 'A low-poly Pokémon GO experience. Swipe to throw Poké Balls. Use berries. Collect them all. Bilingual.',
@@ -741,6 +875,9 @@ function t(key) {
       'Master Catcher': 'Cattura Master',
       'Catch with a Master Ball': 'Cattura con Master Ball',
       'Evolves': 'Si evolve',
+      'Not enough candy!': 'Caramelle insufficienti!',
+      'Evolved!': 'Si è evoluto in',
+      'All': 'Tutte',
       'Difficulty': 'Difficoltà',
       'Reset all progress? This cannot be undone.': 'Resettare tutti i progressi? Non si può annullare.',
       'menu-desc': 'Un\'esperienza Pokémon GO low-poly. Scorri per lanciare Poké Ball. Usa bacche. Collezionali tutti. Bilingue.',

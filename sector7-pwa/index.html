@@ -150,6 +150,13 @@
                 <span class="stat-label">KILLS</span>
                 <span class="stat-value is-small" id="stat-kills">0</span>
             </div>
+            <!-- The magazine. Every gun draws on one, so the count is a
+                 thing the player has to watch, not a thing they can
+                 assume. An empty one goes red. -->
+            <div class="stat">
+                <span class="stat-label">MAG</span>
+                <span class="stat-value is-mag" id="stat-mag">0</span>
+            </div>
         </div>
 
         <!-- Explicit target panel. The aim assist tells you what the turret
@@ -234,7 +241,9 @@
         <div class="pad-right">
             <button id="btn-dock" class="pad-btn pad-dock" type="button">DOCK</button>
             <div class="pad-stack">
+                <button id="btn-beam" class="pad-btn pad-sm" type="button">BEAM</button>
                 <button id="btn-ammo" class="pad-btn pad-sm" type="button">AMMO</button>
+                <button id="btn-plasma" class="pad-btn pad-sm" type="button">PLS</button>
                 <button id="btn-missile" class="pad-btn pad-sm" type="button">MSL</button>
                 <button id="btn-mine" class="pad-btn pad-sm" type="button">MINE</button>
             </div>
@@ -267,8 +276,13 @@
                 <div class="how-row"><span class="key">Left thumb</span><span>fly — anywhere you press is the stick</span></div>
                 <div class="how-row"><span class="key">FIRE</span><span>laser — fast, chews armour, bounces off shields</span></div>
                 <div class="how-row"><span class="key">AMMO</span><span>capacitor round — slow, brutal against shields</span></div>
+                <div class="how-row"><span class="key">PLS</span><span>plasma round — slow, and goes through shields</span></div>
+                <div class="how-row"><span class="key">BEAM</span><span>mining beam — hold it on a rock, it fills your hold</span></div>
                 <div class="how-row"><span class="key">DOCK</span><span>hold it inside the station ring — your hold banks here</span></div>
                 <div class="how-row"><span class="key">Tap right</span><span>lock a target; <b>T</b> cycles</span></div>
+                <div class="how-row"><span class="key">Mouse</span><span>click the map to fly there, click a ship to lock it</span></div>
+                <div class="how-row"><span class="key">Ctrl</span><span>lock-on shot — fires at the locked ship, needs to be in reach</span></div>
+                <div class="how-row"><span class="key">Cloak</span><span>a CPU — nothing can see you while it runs</span></div>
                 <div class="how-row"><span class="key">Mode</span><span>patrol, or a wave to survive, or a haul against the clock</span></div>
             </div>
 
@@ -315,7 +329,7 @@
             </div>
             <p class="st-repair-note" id="st-repair">Hull is intact.</p>
 
-            <p class="st-tier-line">SHIP TIER <b id="st-tier">1</b><span id="st-tier-note">· nine tracks, ten levels each</span></p>
+            <p class="st-tier-line">SHIP TIER <b id="st-tier">1</b><span id="st-tier-note">· ten tracks, ten levels each</span></p>
 
             <nav class="st-tabs mode-tabs" id="st-modes"></nav>
 
@@ -381,6 +395,7 @@
             <nav class="st-tabs hg-tabs">
                 <button id="hg-tab-hulls" class="hg-tab is-on" data-hgtab="hulls" type="button">HULLS</button>
                 <button id="hg-tab-parts" class="hg-tab" data-hgtab="parts" type="button">FIT OUT</button>
+                <button id="hg-tab-munitions" class="hg-tab" data-hgtab="munitions" type="button">MUNITIONS</button>
                 <button id="hg-tab-sandbox" class="hg-tab" data-hgtab="sandbox" type="button">SANDBOX</button>
             </nav>
 
@@ -391,7 +406,15 @@
 
             <div id="hg-panel-parts" class="st-tabpanel is-hidden">
                 <p class="st-hint" id="hg-fit-hint">Three slots. Buying a component installs it; swapping is free and you can swap as often as you like.</p>
+                <div id="hg-turret" class="st-rows"></div>
                 <div id="hg-parts" class="st-rows"></div>
+            </div>
+
+            <!-- The munitions reserve. Rounds you own, parked here; the ship
+                 takes what it can carry when it launches. -->
+            <div id="hg-panel-munitions" class="st-tabpanel is-hidden">
+                <p class="st-hint" id="hg-munitions-hint">Every gun draws from a magazine. Buy rounds here and the ship loads what it can carry.</p>
+                <div id="hg-munitions" class="st-rows"></div>
             </div>
 
             <!-- The cheat. Off by default and it says so, because a panel

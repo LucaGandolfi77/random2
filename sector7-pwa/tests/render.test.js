@@ -469,6 +469,66 @@ section("camera framing");
 }
 
 /* =========================================================================
+ * 4a. Screen -> world
+ * ====================================================================== */
+section("clicking the map");
+{
+    /* Click-to-move only means something if a pixel can be turned back into
+     * a place in the sector. The inverse has to be exact, because every
+     * click the player makes is a world coordinate they will fly to. */
+    const cam = S.Render.camera;
+    const toScreen = S.Render.toScreen;
+    const toWorld = S.Render.toWorld;
+    check("the renderer exposes a screen -> world inverse", typeof toWorld === "function");
+
+    const samples = [
+        [0, 0, 0], [1000, 2000, 0], [4800, 4800, 0],
+        [1200, 800, 12], [2400, 2400, 30], [500, 4000, -5],
+    ];
+    let worst = 0;
+    for (const [x, y, z] of samples) {
+        const s = toScreen(x, y, z);
+        const w = toWorld(s[0], s[1], z);
+        worst = Math.max(worst, Math.hypot(w[0] - x, w[1] - y));
+    }
+    check("every world point round-trips through screen space", worst < 0.01,
+        "worst error " + worst.toExponential(2) + " world units");
+
+    /* The camera-centre invariant has to survive the inverse: a click on
+     * the middle of the screen is a click on the ship. */
+    const centre = toScreen(cam.x, cam.y, 0);
+    const back = toWorld(centre[0], centre[1], 0);
+    check("the middle of the screen is where the camera is",
+        Math.hypot(back[0] - cam.x, back[1] - cam.y) < 0.01,
+        back.map((v) => v.toFixed(3)).join(", "));
+
+    /* The shake offsets are part of the forward transform, so a click taken
+     * while the screen is shaking has to come back out of them - otherwise
+     * every shot during a fight lands a whole screen away from where the
+     * player aimed. */
+    const shakeX = cam.ox, shakeY = cam.oy;
+    cam.ox = 7.5;
+    cam.oy = -4.25;
+    const shakenPoint = toScreen(1500, 900, 12);
+    const shakenBack = toWorld(shakenPoint[0], shakenPoint[1], 12);
+    check("a click taken during screen shake still means the same place",
+        Math.hypot(shakenBack[0] - 1500, shakenBack[1] - 900) < 0.01,
+        shakenBack.map((v) => v.toFixed(3)).join(", "));
+    cam.ox = shakeX;
+    cam.oy = shakeY;
+
+    /* The height matters: the projection shears by z, so a click read on
+     * the wrong plane lands somewhere else entirely. The player controller
+     * uses the ship's own height, and the difference has to be visible
+     * enough that the choice is not arbitrary. */
+    const onDeck = toWorld(toScreen(1000, 2000, 0)[0], toScreen(1000, 2000, 0)[1], 0);
+    const upHigh = toWorld(toScreen(1000, 2000, 0)[0], toScreen(1000, 2000, 0)[1], 40);
+    check("the plane a click is read on changes the answer",
+        Math.hypot(onDeck[0] - upHigh[0], onDeck[1] - upHigh[1]) > 1,
+        Math.hypot(onDeck[0] - upHigh[0], onDeck[1] - upHigh[1]).toFixed(2) + " units");
+}
+
+/* =========================================================================
  * 4b. The renderer must agree with the projection
  * ====================================================================== */
 section("drawMesh matches the projection");

@@ -245,7 +245,7 @@ creatures' glow halos long before their bodies, which is most of the tension.
 
 ### SECTOR 7
 
-*Low-poly space combat, one thumb.* 🛰️
+*Low-poly space combat, one thumb or one mouse.* 🛰️
 
 A *Darkorbit*-flavoured single-player game: one ship, four sectors, no clock.
 Harvest **energy** and **crystals**, shoot pirates across eight tiers, dock at
@@ -269,10 +269,11 @@ touch them**, so a bad run can never cost you progress.
 - **Bounty hunters**: a named rival arrives on a timer, knows where you are
   from the moment it spawns, and its price climbs the longer it lives. The one
   that killed you last time comes back
-- Seven module tracks (Blaster, Shield, Armor, Processor, Thruster, Missiles,
-  Mines) at ten levels each, every one of them showing the concrete numbers it
-  buys. Missiles are a lock-on burst that cuts through armour; mines are the
-  only defence that works while you are running away from something faster
+- Ten module tracks (Blaster, Ammo, Plasma, Shield, Armor, Processor, Thruster,
+  Cargo, Missiles, Mines) at ten levels each, every one of them showing the
+  concrete numbers it buys. Missiles are a lock-on burst that cuts through
+  armour; mines are the only defence that works while you are running away from
+  something faster
 - **Destructible rock fields** — rocks holding a big crystal cache are visibly
   marked, because an undifferentiated field tells you nothing about what is
   worth shooting — plus loose energy crates, and eight NPC tiers with patrol /
@@ -284,25 +285,52 @@ touch them**, so a bad run can never cost you progress.
 - Thumb-anchored virtual stick, `FIRE`/`MSL`/`MINE`/`DOCK` pads, soft turret
   auto-aim, directional damage indicators, an off-screen station marker, full
   keyboard parity, haptics
+- **Two control schemes that never fight each other.** A mouse click is never a
+  thumb press: the stick ignores the mouse, and a click on the map means
+  "fly there" on empty space or "lock that ship" on a hull — the minimap is the
+  same map at a wider scale, so a click on it means the same thing. `Ctrl` fires
+  a dedicated **lock-on shot** at the selected ship: it ignores the turret arc
+  and can hit something behind you, it needs the target in reach, and it runs on
+  its own cooldown so the blaster is still the better answer to a target you are
+  already pointing at
+- **Three guns, three problems.** The laser chews armour and bounces off
+  shields, the capacitor round chews shields and is wasted on armour, and the
+  **plasma round pierces** — its armour damage lands through a shield. It is
+  the only answer to a shielded hull, and it is bounded by being slow: a test
+  asserts it never out-damages the laser against a bare hull, because a weapon
+  that won at everything would kill two upgrade tracks at once
+- **Six CPUs, one slot.** Insta-Shield, Radar, **Cloak**, Warp, Energy Leech and
+  Repair Patch. The cloak is a perception effect and not a shield: anything that
+  has to *acquire* a target cannot see you, and an NPC already fighting you
+  forgets you — but a round already in the air still lands
+- **A mining beam that is a tool and never a weapon.** Hold it, point the ship at
+  a rock, and the energy comes out of the rock and into your hold directly — no
+  pickups to chase, and the Cargo track is legible from the cockpit. It cannot
+  hurt a ship, it costs nothing, and it never runs out, which is exactly what
+  makes it safe to turn the guns into consumables later: a player can always
+  mine, so a player can always be solvent
 - Fully synthesised WebAudio — no audio assets. Zero art assets of any kind
 - Everything that churns is a fixed pool: no allocation in the draw or sim path
 - Hand-rolled facet-mesh renderer on Canvas 2D (no WebGL): two primitives,
   flat-shaded through a sheared oblique projection, per-face lighting in one dot
   product, back-face culling driven by the projection's own view vector
-- Headless tests: **284 checks across three suites** — simulation/economy,
-  render, and a full app boot against a fake DOM that drives menu → launch →
-  touch steering → dock → upgrade → repair → undock → die → relaunch without a
-  browser. The render suite compares every drawn polygon against an
-  independent projection, which is the only check that catches geometry that is
-  subtly wrong rather than broken; the boot suite asserts every button in the
-  markup is actually wired
+- Headless tests: **over 1,400 checks across four suites** — simulation/economy,
+  render, content tables, and a full app boot against a fake DOM that drives
+  menu → launch → touch steering → dock → upgrade → repair → undock → die →
+  relaunch without a browser. The render suite compares every drawn polygon
+  against an independent projection, which is the only check that catches
+  geometry that is subtly wrong rather than broken; the boot suite asserts
+  every button in the markup is actually wired, and that the mouse and touch
+  schemes stay apart
 - Includes a difficulty-curve test that runs the sector twice, as a rookie and
   as a banked pilot, asserting the intro is survivable and the late game is not
 
-**Files:** `index.html`, `styles.css`, `src/` (`config`, `storage`, `world`,
-`render`, `stations`, `input`, `player`, `npcs`, `audio`, `ui`, `main`),
-`manifest.json`, `service-worker.js`, `icons/`, `scripts/gen-icons.mjs`,
-`tests/sim.test.js`, `tests/render.test.js`. See
+**Files:** `index.html`, `styles.css`, `src/` (`config`, `storage`, `sectors`,
+`modes`, `world`, `render`, `stations`, `contracts`, `bounty`, `input`,
+`player`, `npcs`, `audio`, `ui`, `main`), `manifest.json`,
+`service-worker.js`, `icons/`, `scripts/gen-icons.mjs`,
+`tests/sim.test.js`, `tests/render.test.js`, `tests/boot.test.js`,
+`tests/content.test.js`. See
 [`sector7-pwa/README.md`](sector7-pwa/README.md).
 
 ### SINI

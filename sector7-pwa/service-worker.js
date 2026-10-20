@@ -1,7 +1,12 @@
 /* ===== SECTOR 7 PWA Service Worker =====
  * Cache-first so the game is fully playable offline once installed.
+ *
+ * The cache name carries a version. It is not decoration: the fetch handler
+ * is cache-first, so a returning player with the old service worker
+ * installed would be served the old game forever, and a change to the
+ * source would never reach anyone. Bump this whenever the game changes.
  */
-const CACHE_NAME = "sector7-pwa-v1";
+const CACHE_NAME = "sector7-pwa-v3";
 const ASSETS = [
     "./",
     "./index.html",
@@ -10,9 +15,13 @@ const ASSETS = [
     "../shared/arcade.js",
     "./src/config.js",
     "./src/storage.js",
+    "./src/sectors.js",
+    "./src/modes.js",
     "./src/world.js",
     "./src/render.js",
     "./src/stations.js",
+    "./src/contracts.js",
+    "./src/bounty.js",
     "./src/input.js",
     "./src/player.js",
     "./src/npcs.js",

@@ -12,6 +12,7 @@
         master: null,
         noiseBuf: null,
         engine: null,
+        beam: null,
         enabled: true,
         started: false,
         /* Rate-limit the blaster: at 0.1s intervals across a dozen sources
@@ -51,6 +52,7 @@
 
         audio.noiseBuf = makeNoise(ctx);
         buildEngine();
+        buildBeam();
     }
 
     /* A continuous filtered-noise engine bed whose volume tracks the
@@ -82,6 +84,46 @@
         var k = S.clamp(t, 0, 1);
         audio.engine.gain.gain.setTargetAtTime(0.012 + k * 0.055, now(), 0.12);
         audio.engine.filter.frequency.setTargetAtTime(240 + k * 520, now(), 0.2);
+    }
+
+    /* A continuous cutter bed, the same trick as the engine: a bandpassed
+     * sawtooth that comes up while the beam is on and drops the moment it
+     * is not. Cheaper and more convincing than retriggering a tick every
+     * frame.
+     *
+     * The pitch is the material. A richer rock cuts faster, so it sounds
+     * faster - which makes the grade readable without a number on the
+     * screen. */
+    function buildBeam() {
+        var ctx = audio.ctx;
+        var osc = ctx.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.value = 92;
+
+        var filter = ctx.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.value = 1400;
+        filter.Q.value = 3.2;
+
+        var gain = ctx.createGain();
+        gain.gain.value = 0.0001;
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audio.master);
+        osc.start();
+
+        audio.beam = { osc: osc, filter: filter, gain: gain };
+    }
+
+    /* `rock` is the rock the beam is on, or null. */
+    function setMining(on, rock) {
+        if (!audio.beam) return;
+        var t = now();
+        var grade = rock && rock.grade ? rock.grade : 1;
+        audio.beam.gain.gain.setTargetAtTime(on ? 0.05 : 0.0001, t, on ? 0.04 : 0.12);
+        audio.beam.osc.frequency.setTargetAtTime(on ? 76 + grade * 15 : 92, t, 0.15);
+        audio.beam.filter.frequency.setTargetAtTime(on ? 900 + grade * 260 : 1400, t, 0.15);
     }
 
     function resume() {
@@ -242,6 +284,42 @@
         noise(0.08, 0.04, "highpass", 3000, 1400);
     }
 
+    /* The lock-on shot.
+     *
+     * Higher and tighter than the blaster on purpose: the player has to be
+     * able to hear that a different weapon went off, because it is a
+     * different weapon on a different cooldown and a press that did nothing
+     * looks exactly like a press that was refused. */
+    function lockShot() {
+        if (!audio.ctx || !audio.enabled) return;
+        blip(1320, 0.12, "sine", 0.07, 480);
+        noise(0.1, 0.045, "highpass", 3400, 1600);
+    }
+
+    /* The cloak. A downward sweep and a hiss: the ship stops being a thing
+     * that can be seen, and the sound should say so. */
+    function cloak() {
+        if (!audio.ctx || !audio.enabled) return;
+        blip(520, 0.42, "sine", 0.06, 120);
+        noise(0.4, 0.05, "lowpass", 2600, 300);
+    }
+
+    /* The plasma round. A low, heavy thump under a hiss: the heaviest
+     * thing the ship fires, and it should sound like it. */
+    function plasma() {
+        if (!audio.ctx || !audio.enabled) return;
+        blip(180, 0.26, "sawtooth", 0.08, 70);
+        noise(0.22, 0.06, "bandpass", 900, 2400);
+    }
+
+    /* The auto-turret. A flat mechanical report, deliberately duller than
+     * the player's own gun: it is a machine doing a job, and the player
+     * should be able to tell at a glance whose shot that was. */
+    function turret() {
+        if (!audio.ctx || !audio.enabled) return;
+        blip(620, 0.05, "square", 0.035, 380);
+    }
+
     function explosion() {
         noise(0.36, 0.16, "lowpass", 1400, 90);
         blip(260, 0.26, "sawtooth", 0.1, 60);
@@ -295,6 +373,14 @@
         }
     }
 
+    /* A dry fire. The click of a gun with an empty magazine, which is a
+     * different sound from the error buzz: this one is mechanical, and it
+     * says "you are out" rather than "that was refused". */
+    function dry() {
+        if (!audio.ctx || !audio.enabled) return;
+        blip(140, 0.05, "square", 0.05, 90);
+    }
+
     function error() {
         blip(180, 0.16, "square", 0.07, 120);
     }
@@ -308,12 +394,16 @@
         resume: resume,
         setEnabled: setEnabled,
         setThrottle: setThrottle,
+        setMining: setMining,
         shoot: shoot,
         hit: hit,
         kill: kill,
         rockBreak: rockBreak,
         salvo: salvo,
         mineDrop: mineDrop,
+        lockShot: lockShot,
+        plasma: plasma,
+        cloak: cloak,
         ammo: ammo,
         cpu: cpu,
         explosion: explosion,
@@ -326,6 +416,8 @@
         undock: undock,
         upgrade: upgrade,
         error: error,
+        dry: dry,
+        turret: turret,
         ui: ui,
     };
 

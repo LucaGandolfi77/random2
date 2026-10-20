@@ -265,6 +265,7 @@ check("the middle of a void is fully inside it",
 check("a void falls off toward the rim",
     S.World.hazardAt(voidHole.x + voidHole.r * 0.9, voidHole.y, "void") <
     S.World.hazardAt(voidHole.x, voidHole.y, "void"));
+
 check("a void suppresses regeneration", (() => {
     const p = W.player;
     if (!p) return false;
@@ -279,6 +280,96 @@ check("a void suppresses regeneration", (() => {
     return inside <= before + 0.01 && p.hull > inside;
 })());
 
+/* ---- T5: the current ---------------------------------------------- */
+
+newRun(4242, "hald");
+const current = W.hazards.find((h) => h.kind === "drift");
+check("HALD has currents", !!current);
+
+check("a current pushes a ship the way it is running", (() => {
+    /* Put a ship in the middle of a current, not moving, and see which way
+     * it ends up going. The current is the only force on it. */
+    const raft = S.World.spawnShip({
+        x: current.x, y: current.y, z: 10,
+        heading: 0, stats: S.NPC_TIERS[1], maxHull: S.NPC_TIERS[1].hull,
+    });
+    raft.throttle = 0;
+    S.World.world.player = null;
+    for (let i = 0; i < 60; i++) S.World.moveShip(raft, DT);
+    const along = raft.vx * Math.cos(current.dir) + raft.vy * Math.sin(current.dir);
+    const across = raft.vx * Math.sin(current.dir) - raft.vy * Math.cos(current.dir);
+    /* Along the current, not across it: a current has a direction, and a
+     * field that pushed every which way would be a well. */
+    return along > 1 && Math.abs(across) < along * 0.35;
+})());
+
+check("a current does not reach outside itself", (() => {
+    const out = S.World.spawnShip({
+        x: current.x + current.r * 1.5, y: current.y, z: 10,
+        heading: 0, stats: S.NPC_TIERS[1], maxHull: S.NPC_TIERS[1].hull,
+    });
+    out.throttle = 0;
+    const x0 = out.x, y0 = out.y;
+    for (let i = 0; i < 60; i++) S.World.moveShip(out, DT);
+    return Math.hypot(out.x - x0, out.y - y0) < 6;
+})());
+
+/* ---- T6: the unstable belt ---------------------------------------- */
+
+newRun(4242, "null");
+const cinder = W.hazards.find((h) => h.kind === "cinder");
+check("NULL has unstable rock fields", !!cinder);
+
+check("a rock in an unstable field detonates when it breaks", (() => {
+    /* A rock inside the field, a ship standing next to it. */
+    const rock = W.rocks[0];
+    rock.x = cinder.x;
+    rock.y = cinder.y;
+    rock.alive = true;
+    rock.hull = 10;
+    rock.energyLeft = rock.energy;
+
+    const victim = S.World.spawnShip({
+        x: cinder.x + 60, y: cinder.y, z: 10,
+        heading: 0, stats: S.NPC_TIERS[1], maxHull: S.NPC_TIERS[1].hull,
+    });
+    victim.hull = 200;
+    victim.maxHull = 200;
+    victim.shield = 0;
+    victim.maxShield = 0;
+    victim.invuln = 0;
+    S.World.world.player = null;
+    const hull0 = victim.hull;
+    S.World.breakRock(rock, true);
+    return victim.hull < hull0;
+})());
+
+check("a blast does not respect a shield, only armour", (() => {
+    const rock = W.rocks[1];
+    rock.x = cinder.x;
+    rock.y = cinder.y;
+    rock.alive = true;
+    rock.hull = 10;
+
+    const shielded = S.World.spawnShip({
+        x: cinder.x + 60, y: cinder.y, z: 10,
+        heading: 0, stats: S.NPC_TIERS[1], maxHull: S.NPC_TIERS[1].hull,
+    });
+    shielded.hull = 200;
+    shielded.maxHull = 200;
+    shielded.maxShield = 200;
+    shielded.shield = 200;
+    shielded.invuln = 0;
+    const hull0 = shielded.hull;
+    const shield0 = shielded.shield;
+    S.World.breakRock(rock, true);
+    /* A blast is a physical event, not a shot: it goes through a shield.
+     * The hull takes the hit and the shield does not. Armour is still what
+     * reduces it - it is a damage cut, not a damage type - so a plated
+     * ship has less to lose than a bare one. */
+    return shielded.hull < hull0 && shielded.shield === shield0;
+})());
+
 /* ---- missiles ----------------------------------------------------------- */
 
 head("missiles");
@@ -287,6 +378,9 @@ newRun(9090, "rook");
 let mPlayer = S.Player.create(S.Storage.getShip());
 mPlayer.modules.missiles = 10;
 S.Stations.refreshStats(mPlayer);
+/* A full magazine: every gun draws on one now, so a test about the salvo
+ * has to give the ship the rounds to fire it. */
+mPlayer.magazine.missiles = 99;
 for (let i = 0; i < 30; i++) S.World.step(DT);
 S.NPCs.spawnAll(mPlayer);
 
@@ -311,6 +405,8 @@ check("a missile at level 1 still fires something",
             x: 10, y: 10, z: 10, heading: 0, maxHull: 50,
             stats: S.statsFor({ missiles: 1 }),
         });
+        /* The magazine, same as every other gun. */
+        cheap.magazine.missiles = 9;
         return S.World.fireMissiles(cheap, [], 0) === 1;
     })());
 check("a hull with no missile rack cannot fire missiles",
@@ -387,6 +483,8 @@ newRun(8181, "rook");
 const minePlayer = S.Player.create(S.Storage.getShip());
 minePlayer.modules.mines = 10;
 S.Stations.refreshStats(minePlayer);
+/* A full magazine: every gun draws on one now. */
+minePlayer.magazine.mines = 99;
 S.World.world.player = null;
 
 const cap = minePlayer.stats.mineCapacity;
@@ -1351,37 +1449,50 @@ head("hangar: weapons stay weapons");
 
 /* The rule that makes the matrix below provable rather than lucky: every
    weapon part, and the one hull that touches damage, must apply the SAME
-   factor to the blaster and the capacitor round. Two builds then scale
-   identically and the comparison between them cannot move. */
-check("every weapon part scales both guns by the same factor", S.PARTS
+   factor to EVERY gun on the mount - the blaster, the capacitor round and
+   now the plasma round. Two builds then scale identically and the
+   comparison between them cannot move.
+
+   The plasma joined the rule when it was added. It is the third gun, and
+   a part that buffed it differently from the other two would quietly tilt
+   every fight in the game. */
+check("every weapon part scales every gun by the same factor", S.PARTS
     .filter((p) => p.slot === "laser")
     .every((p) => p.mods.fireInterval === p.mods.ammoCooldown &&
+        p.mods.fireInterval === p.mods.plasmaCooldown &&
         p.mods.damage === p.mods.ammoDamage &&
-        p.gain.damage === p.gain.ammoDamage));
-check("every hull that touches damage scales both guns identically", S.HULLS
+        p.mods.damage === p.mods.plasmaDamage &&
+        p.gain.damage === p.gain.ammoDamage &&
+        p.gain.damage === p.gain.plasmaDamage));
+check("every hull that touches damage scales every gun identically", S.HULLS
     .filter((h) => h.bonus && h.bonus.damage)
-    .every((h) => h.bonus.damage === h.bonus.ammoDamage));
+    .every((h) => h.bonus.damage === h.bonus.ammoDamage &&
+        h.bonus.damage === h.bonus.plasmaDamage));
 check("no engine or shield part touches a weapon at all", S.PARTS
     .filter((p) => p.slot !== "laser")
     .every((p) => !("damage" in (p.mods || {})) && !("ammoDamage" in (p.mods || {})) &&
+        !("plasmaDamage" in (p.mods || {})) &&
         !("fireInterval" in (p.mods || {})) && !("ammoCooldown" in (p.mods || {})) &&
-        !("damage" in (p.gain || {})) && !("ammoDamage" in (p.gain || {}))));
+        !("plasmaCooldown" in (p.mods || {})) &&
+        !("damage" in (p.gain || {})) && !("ammoDamage" in (p.gain || {})) &&
+        !("plasmaDamage" in (p.gain || {}))));
 
 check("no part or hull touches a weapon's shield/armour split", (() => {
     /* Damage packets are rebuilt from raw damage after every multiplier, so
      * a part can double the SIZE of a shot but never change what the shot is
      * for. If this ever fails, buying a part would quietly kill the Ammo
      * track. */
-    const base = { blaster: 10, ammo: 1, shield: 10, armor: 10, thruster: 10 };
+    const base = { blaster: 10, ammo: 1, plasma: 1, shield: 10, armor: 10, thruster: 10 };
     const plain = S.statsFor(base);
-    const w = S.WEAPONS.blaster, a = S.WEAPONS.ammo;
+    const w = S.WEAPONS.blaster, a = S.WEAPONS.ammo, p = S.WEAPONS.plasma;
     return Math.abs(plain.blasterPacket.shield / plain.blasterPacket.armor - w.shield / w.armor) < 1e-9 &&
-        Math.abs(plain.ammoPacket.shield / plain.ammoPacket.armor - a.shield / a.armor) < 1e-9;
+        Math.abs(plain.ammoPacket.shield / plain.ammoPacket.armor - a.shield / a.armor) < 1e-9 &&
+        Math.abs(plain.plasmaPacket.shield / plain.plasmaPacket.armor - p.shield / p.armor) < 1e-9;
 })());
 
 check("the split is intact across every hull, part and level", (() => {
-    const base = { blaster: 6, ammo: 6, shield: 6, armor: 6, thruster: 6 };
-    const w = S.WEAPONS.blaster, a = S.WEAPONS.ammo;
+    const base = { blaster: 6, ammo: 6, plasma: 6, shield: 6, armor: 6, thruster: 6 };
+    const w = S.WEAPONS.blaster, a = S.WEAPONS.ammo, p = S.WEAPONS.plasma;
     for (const hull of S.HULLS) {
         for (const e of S.partsForSlot("engine")) {
             for (const l of S.partsForSlot("laser")) {
@@ -1394,6 +1505,7 @@ check("the split is intact across every hull, part and level", (() => {
                     const st = S.statsFor(base, {}, fit, hull.id);
                     if (Math.abs(st.blasterPacket.shield / st.blasterPacket.armor - w.shield / w.armor) > 1e-9) return false;
                     if (Math.abs(st.ammoPacket.shield / st.ammoPacket.armor - a.shield / a.armor) > 1e-9) return false;
+                    if (Math.abs(st.plasmaPacket.shield / st.plasmaPacket.armor - p.shield / p.armor) > 1e-9) return false;
                 }
             }
         }
@@ -1401,11 +1513,12 @@ check("the split is intact across every hull, part and level", (() => {
     return true;
 })());
 
-/* The load-bearing consequence. Across the whole 135-configuration matrix, a
+/* The load-bearing consequence. Across the whole 216-configuration matrix
+   (8 hulls x 3 engine parts x 3 laser parts x 3 shield parts), a
    shield-heavy target must still flip the winner between the two builds,
    and a bare hull must still be a laser fight. If a future part makes the
    round universally better, this fails - which is the point. */
-check("across ALL 135 fit-outs, the ammo build still wins on aliens", (() => {
+check("across ALL 216 fit-outs, the ammo build still wins on aliens", (() => {
     const buildL = { blaster: 10, ammo: 1, shield: 10, armor: 10, thruster: 10 };
     const buildA = { blaster: 1, ammo: 10, shield: 10, armor: 10, thruster: 10 };
     const hull = S.NPC_TIERS[8].hull;
@@ -1434,7 +1547,7 @@ check("across ALL 135 fit-outs, the ammo build still wins on aliens", (() => {
     return true;
 })());
 
-check("across ALL 135 fit-outs, a bare hull is still a laser fight", (() => {
+check("across ALL 216 fit-outs, a bare hull is still a laser fight", (() => {
     const buildL = { blaster: 10, ammo: 1, shield: 10, armor: 10, thruster: 10 };
     const buildA = { blaster: 1, ammo: 10, shield: 10, armor: 10, thruster: 10 };
     const hull = S.NPC_TIERS[8].hull;
@@ -1462,7 +1575,75 @@ check("across ALL 135 fit-outs, a bare hull is still a laser fight", (() => {
     return true;
 })());
 
+/* The same comparison, but with the rounds paid for.
+ *
+ * The time-to-kill test above says the Ammo track is the better build
+ * against a shield. That is not the whole claim any more: every gun draws
+ * from a magazine now, so a build is only worth its levels if it is worth
+ * its AMMUNITION. A capacitor round costs six energy and a laser round
+ * costs one, so the build that shoots faster is not necessarily the build
+ * that spends less.
+ *
+ * This is the test that keeps the Ammo track from quietly becoming a tax:
+ * against a shielded hull, the ammo build has to be cheaper in ENERGY as
+ * well as faster in seconds, or a pilot would be better off with a laser
+ * and a bigger shield. */
+check("the ammo build still wins on aliens once the rounds are paid for", (() => {
+    const buildL = { blaster: 10, ammo: 1, shield: 10, armor: 10, thruster: 10 };
+    const buildA = { blaster: 1, ammo: 10, shield: 10, armor: 10, thruster: 10 };
+    const hull = S.NPC_TIERS[8].hull;
+    const alien = S.faction("alien").shieldFrac;
+    const target = { hull, shield: Math.round(hull * alien) };
+    const laserCost = S.CONFIG.munitions.cost.laser;
+    const ammoCost = S.CONFIG.munitions.cost.ammo;
+
+    /* The energy a build spends is its ROUNDS fired times the price of a
+     * round - not its time on target. A shot that takes a second still
+     * costs a round. */
+    const energyToKill = (packet, interval, cost) =>
+        (timeToKill(packet, interval, target) / interval) * cost;
+
+    for (const hd of S.HULLS) {
+        for (const e of S.partsForSlot("engine")) {
+            for (const l of S.partsForSlot("laser")) {
+                for (const s of S.partsForSlot("shield")) {
+                    const fit = {
+                        engine: { key: e.key, level: S.PART_MAX },
+                        laser: { key: l.key, level: S.PART_MAX },
+                        shield: { key: s.key, level: S.PART_MAX },
+                    };
+                    const sl = S.statsFor(buildL, {}, fit, hd.id);
+                    const sa = S.statsFor(buildA, {}, fit, hd.id);
+                    const laser = energyToKill(sl.blasterPacket, sl.fireInterval, laserCost);
+                    const ammo = energyToKill(sa.ammoPacket, sa.ammoCooldown, ammoCost);
+                    if (!(ammo < laser)) return false;
+                }
+            }
+        }
+    }
+    return true;
+})());
+
+/* And against a bare hull the other way round: the laser is both faster
+ * AND cheaper once the rounds are paid for, so the Ammo track has to be a
+ * specialist rather than a general upgrade. */
+check("a bare hull is still a laser fight once the rounds are paid for", (() => {
+    const buildL = { blaster: 10, ammo: 1, shield: 10, armor: 10, thruster: 10 };
+    const buildA = { blaster: 1, ammo: 10, shield: 10, armor: 10, thruster: 10 };
+    const hull = S.NPC_TIERS[8].hull;
+    const target = { hull, shield: 0 };
+    const laserCost = S.CONFIG.munitions.cost.laser;
+    const ammoCost = S.CONFIG.munitions.cost.ammo;
+
+    const sl = S.statsFor(buildL);
+    const sa = S.statsFor(buildA);
+    const laser = (timeToKill(sl.blasterPacket, sl.fireInterval, target) / sl.fireInterval) * laserCost;
+    const ammo = (timeToKill(sa.ammoPacket, sa.ammoCooldown, target) / sa.ammoCooldown) * ammoCost;
+    return laser < ammo;
+})());
+
 check("no fit-out produces a negative or non-finite stat", (() => {
+
     for (const hd of S.HULLS) {
         for (const e of S.partsForSlot("engine")) {
             for (const l of S.partsForSlot("laser")) {

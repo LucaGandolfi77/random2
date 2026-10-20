@@ -88,6 +88,27 @@
             maxChunks: 14,
         },
 
+        /* The munitions economy.
+         *
+         * `capacity` is what one ship can carry of each kind. It is the
+         * ceiling that makes a dock a resupply trip rather than a formality:
+         * the hangar can hold a thousand rounds and the ship can still only
+         * take so many.
+         *
+         * `cost` is energy per round. The laser has to be cheap enough that
+         * the blaster is never a tax on playing the game at all; the heavy
+         * guns have to be expensive enough that a maxed blaster is still the
+         * better answer to a hull with no shields. */
+        munitions: {
+            capacity: { laser: 300, ammo: 30, plasma: 12, missiles: 12, mines: 12 },
+            cost: { laser: 1, ammo: 6, plasma: 12, missiles: 5, mines: 6 },
+            /* What a BUY press adds, so the button is not a hundred clicks. */
+            bundle: { laser: 50, ammo: 5, plasma: 2, missiles: 2, mines: 2 },
+            /* What a new pilot starts with. A pilot with no rounds at all
+             * cannot fight, and the first fight is not optional. */
+            starter: { laser: 120, ammo: 4, plasma: 2, missiles: 2, mines: 2 },
+        },
+
         player: {
             startEnergy: 250,
             /* Per the genre: energy is lost with the wreck and has to be
@@ -115,6 +136,62 @@
             ammoSpeed: 900,
             ammoLife: 0.55,
             ammoRadius: 7,
+
+            /* The lock-on shot. Fired with Ctrl at whatever the player has
+             * selected, so it is the answer to "I picked a target and I want
+             * to hit it" - it ignores the turret arc and can therefore reach
+             * something behind you, which the blaster never can.
+             *
+             * It is deliberately not free: a long cooldown, a modest tracking
+             * rate and a short life mean it is a precision tool, not a
+             * second DPS source. The blaster is still the better answer to a
+             * target you are already pointing at. */
+            attackRange: 430,
+            attackCooldown: 0.6,
+            attackSpeed: 900,
+            attackLife: 0.9,
+            attackTurn: 2.2,
+            attackRadius: 6,
+
+            /* The plasma round. Slower than the capacitor round and slower
+             * than the laser, and it does not home: it is a heavy slug you
+             * have to aim, and the pierce is what you are paying for. */
+            plasmaSpeed: 780,
+            plasmaLife: 0.95,
+            plasmaRadius: 7,
+
+            /* An unstable rock going off. The blast is a physical event,
+             * not a weapon: a shield does not stop it, only armour does. */
+            cinderRadius: 190,
+            cinderDamage: 46,
+
+            /* The mining beam.
+             *
+             * A TOOL, not a weapon: it cuts rock and nothing else. That is
+             * the whole point of it. A free beam that also hurt ships would
+             * be a free gun, and the laser and capacitor round tracks would
+             * be dead on arrival - the Ammo track in particular only exists
+             * because a shield is a real problem.
+             *
+             * It is free, it never runs out, and it puts the energy straight
+             * into the hold. Those three facts are what make it safe to
+             * turn every other gun into a consumable later: a player can
+             * always mine, so a player can always be solvent.
+             */
+            beamRange: 240,
+            /* Half-angle of the cone, in radians. A beam is a cone, not a
+             * ray, so a rock slightly off the nose still gets cut. */
+            beamCone: 0.5,
+            /* Rock hull per second. */
+            beamRate: 30,
+
+            /* Click-to-move. The waypoint is a straight line, not a route:
+             * the ship flies toward it and the player takes the pressure
+             * from everything on the way there. */
+            moveArrive: 30,
+            /* Inside this distance the throttle eases off, so the ship
+             * settles on the point instead of sailing past it. */
+            moveTaper: 140,
         },
 
         /* Shields come back, armour never does. That gap is what creates the
@@ -135,6 +212,11 @@
             instaShield: 3.0,
             leechTime: 10,
             repairTime: 6,
+            /* The cloak hides the ship from anything that has to ACQUIRE a
+             * target. It does not make the ship invulnerable: rounds already
+             * in the air still land, which is the difference between being
+             * unseen and being untouchable. */
+            cloakTime: 9,
             leechFraction: 0.25,
             repairPerSec: 6.5,
         },
@@ -264,9 +346,79 @@
             base: 45, mul: 1.44,
             blurb: "Drop proximity mines. The only defence that works while you flee.",
         },
+        {
+            key: "plasma", name: "Plasma", glyph: "✸",
+            base: 68, mul: 1.46,
+            blurb: "A heavy round that goes THROUGH shields. Slow, and the only thing that answers a shielded hull.",
+        },
     ];
 
     S.MODULE_MAX = 10;
+
+    /* ===== The auto-turret =====
+     *
+     * A thing bolted to the ship that shoots on its own. It is the oldest
+     * idea in the genre and it is here because it earns its place: it
+     * covers the player's back while they are busy with something else,
+     * and it costs them nothing but the rounds it burns.
+     *
+     * The rounds are the point. A free turret would be a free gun, and the
+     * laser track would be dead on arrival - so the turret draws on the
+     * SAME magazine the player does. That makes it a real decision: a
+     * turret that is shooting is a turret eating the rounds you were
+     * going to shoot with. */
+    S.TURRET = {
+        key: "turret", name: "Auto-Turret", glyph: "✜",
+        cost: 1400,
+        /* How far it can reach, and how long it waits between shots. */
+        range: 340,
+        interval: 0.85,
+        /* A turret is not a gunner. It is a mounted weapon on a moving
+         * platform, and it shoots at whatever is nearest. */
+        damageScale: 0.6,
+    };
+
+    /* ===== Munitions =====
+     *
+     * Every gun draws from a magazine, and a magazine is filled from a
+     * stockpile in the hangar. The stockpile is the reserve; the magazine is
+     * what the ship actually brought, and it is lost with the ship.
+     *
+     * The costs are what keep the tracks honest. A laser round has to be
+     * cheap or the blaster becomes a tax on playing the game at all, and
+     * the heavy guns have to cost enough that a maxed blaster is still the
+     * better answer to a bare hull - the Ammo track only exists because a
+     * shield is a real problem, and it has to be worth paying for.
+     */
+    S.MUNITIONS = [
+        {
+            key: "laser", name: "Laser Rounds", glyph: "⌖", weapon: "blaster",
+            blurb: "For the laser. Cheap, plentiful, and the answer to a bare hull.",
+        },
+        {
+            key: "ammo", name: "Capacitor Rounds", glyph: "▮", weapon: "ammo",
+            blurb: "For the capacitor round. The answer to a shield.",
+        },
+        {
+            key: "plasma", name: "Plasma Rounds", glyph: "✸", weapon: "plasma",
+            blurb: "For the plasma round. Goes through shields, and is slow.",
+        },
+        {
+            key: "missiles", name: "Missiles", glyph: "⋀", weapon: "missiles",
+            blurb: "For the salvo. A whole burst, and the splash hits everything near it.",
+        },
+        {
+            key: "mines", name: "Mines", glyph: "◉", weapon: "mines",
+            blurb: "For the mines. The only defence that works while you are fleeing.",
+        },
+    ];
+
+    S.munition = function (key) {
+        for (var i = 0; i < S.MUNITIONS.length; i++) {
+            if (S.MUNITIONS[i].key === key) return S.MUNITIONS[i];
+        }
+        return null;
+    };
 
     /* ===== Refits =====
      * The crystal sink. Crystals used to be pure score, which meant the only
@@ -373,18 +525,39 @@
      */
     S.WEAPONS = {
         blaster: { key: "blaster", name: "Laser", shield: 0.25, armor: 1.00 },
-        ammo:    { key: "ammo", name: "Ammo", shield: 3.00, armor: 0.65 },
+        ammo: { key: "ammo", name: "Ammo", shield: 3.00, armor: 0.65 },
         missile: { key: "missile", name: "Missile", shield: 0.60, armor: 1.10 },
-        mine:    { key: "mine", name: "Mine", shield: 2.00, armor: 0.50 },
+        mine: { key: "mine", name: "Mine", shield: 2.00, armor: 0.50 },
+        /* The plasma round is the third answer and the odd one out.
+         *
+         * A shot is normally stopped by a shield: the shield eats the
+         * shot's shield component and holds off its armour component
+         * entirely, which is what makes shields worth anything. A plasma
+         * round PIERCES - its armour component lands on the hull even
+         * while a shield is up.
+         *
+         * It is deliberately slow and heavy. A weapon that reaches
+         * through shields AND carries more armour damage than the laser
+         * would simply be a better laser; the point is that it answers a
+         * shielded hull, not that it is the best gun in the game. */
+        plasma: { key: "plasma", name: "Plasma", shield: 0.60, armor: 1.50, pierce: true },
     };
 
     /* Build a damage packet for a weapon profile at a given raw damage
      * number. Every source of damage in the game goes through here, so a new
      * weapon cannot accidentally ship as shield-only or armour-only by
-     * forgetting a field. */
+     * forgetting a field.
+     *
+     * `pierce` rides on the packet rather than being looked up from the
+     * weapon table at the point of damage, because the damage path is
+     * handed a packet and nothing else. */
     S.packet = function (weapon, damage) {
         var w = S.WEAPONS[weapon] || S.WEAPONS.blaster;
-        return { shield: damage * w.shield, armor: damage * w.armor };
+        return {
+            shield: damage * w.shield,
+            armor: damage * w.armor,
+            pierce: !!w.pierce,
+        };
     };
 
     /* ===== Pilots =====
@@ -473,6 +646,7 @@
     S.SCALABLE = [
         "damage", "fireInterval",
         "ammoDamage", "ammoCooldown",
+        "plasmaDamage", "plasmaCooldown",
         "missiles", "missileDamage", "missileCooldown",
         "mineCapacity", "mineDamage", "mineCooldown",
         "maxShield", "shieldRegen",
@@ -513,6 +687,7 @@
     S.resealPackets = function (stats) {
         stats.blasterPacket = S.packet("blaster", stats.damage);
         stats.ammoPacket = S.packet("ammo", stats.ammoDamage);
+        stats.plasmaPacket = S.packet("plasma", stats.plasmaDamage);
         stats.missilePacket = S.packet("missile", stats.missileDamage);
         stats.minePacket = S.packet("mine", stats.mineDamage);
         for (var k in S.INTEGER_STATS) {
@@ -581,12 +756,12 @@
             cost: 1500, color: "#e8913f",
             passive: "Overbore",
             blurb: "Trades its own plating for a heavier gun.",
-            detail: "both guns +6 · shield −20% · hull +6%",
+            detail: "every gun +6 · shield −20% · hull +6%",
             mods: { maxShield: 0.80, maxHull: 1.06 },
             /* Symmetric on purpose: an asymmetric flat bonus would tilt the
              * laser-versus-round comparison, and this hull is in the hangar
              * matrix test for exactly that reason. */
-            bonus: { damage: 6, ammoDamage: 6 },
+            bonus: { damage: 6, ammoDamage: 6, plasmaDamage: 6 },
         },
         {
             id: "lance", name: "LANCE", tag: "ESCORT", glyph: "◇",
@@ -624,16 +799,18 @@
     /* ----- Parts: three fitted components, nine in total -----
      *
      * THE LASER SLOT RULE. A weapon part may change rate and damage freely,
-     * but it must apply THE SAME FACTORS to the blaster and to the capacitor
-     * round. Because both builds then scale by the same factor, the
-     * laser-versus-round comparison is preserved exactly - and that
-     * comparison is the only thing keeping the Ammo track alive.
+     * but it must apply THE SAME FACTORS to every gun on the mount - the
+     * blaster, the capacitor round and the plasma round. Because every
+     * build then scales by the same factor, the laser-versus-round
+     * comparison is preserved exactly - and that comparison is the only
+     * thing keeping the Ammo track alive.
      *
      * It is also what these parts physically mean: the slot is the weapon
      * MOUNT, and it upgrades everything bolted to it. An earlier draft made
      * Pulse and Rail speed up the blaster alone, and content.test.js caught
-     * it immediately: 90 of 135 fit-outs had the round stop being worth
-     * buying, purely because of which gun a cosmetic part happened to buff.
+     * it immediately: nine tenths of the fit-outs had the round stop being
+     * worth buying, purely because of which gun a cosmetic part happened to
+     * buff.
      */
     S.PARTS = [
         {
@@ -665,34 +842,37 @@
             key: "pulse", slot: "laser", name: "Pulse", glyph: "⌖",
             cost: 240,
             blurb: "Spits small rounds very, very quickly. Shreds swarms.",
-            detail: "both guns: rate ×1.61 · damage ×1.08",
+            detail: "every gun: rate ×1.61 · damage ×1.08",
             mods: {
                 fireInterval: 0.62, damage: 1.08,
                 ammoCooldown: 0.62, ammoDamage: 1.08,
+                plasmaCooldown: 0.62, plasmaDamage: 1.08,
             },
-            gain: { damage: 1.1, ammoDamage: 1.1 },
+            gain: { damage: 1.1, ammoDamage: 1.1, plasmaDamage: 1.1 },
         },
         {
             key: "rail", slot: "laser", name: "Rail", glyph: "▮",
             cost: 380,
             blurb: "One enormous bolt, a long time between them. Built for elites.",
-            detail: "both guns: rate ×0.65 · damage ×1.85",
+            detail: "every gun: rate ×0.65 · damage ×1.85",
             mods: {
                 fireInterval: 1.55, damage: 1.85,
                 ammoCooldown: 1.55, ammoDamage: 1.85,
+                plasmaCooldown: 1.55, plasmaDamage: 1.85,
             },
-            gain: { damage: 2.6, ammoDamage: 2.6 },
+            gain: { damage: 2.6, ammoDamage: 2.6, plasmaDamage: 2.6 },
         },
         {
             key: "splitter", slot: "laser", name: "Splitter", glyph: "⋀",
             cost: 420,
             blurb: "A wide bus split across both mounts. No weakness either way.",
-            detail: "both guns: rate ×1.25 · damage ×1.18",
+            detail: "every gun: rate ×1.25 · damage ×1.18",
             mods: {
                 fireInterval: 0.80, damage: 1.18,
                 ammoCooldown: 0.80, ammoDamage: 1.18,
+                plasmaCooldown: 0.80, plasmaDamage: 1.18,
             },
-            gain: { damage: 1.6, ammoDamage: 1.6 },
+            gain: { damage: 1.6, ammoDamage: 1.6, plasmaDamage: 1.6 },
         },
 
         {
@@ -900,6 +1080,14 @@
             blurb: "Patch the hull back together while you keep flying.",
             detail: function () { return "6.5 hull/s · 50s cooldown · 30 ⚡"; },
         },
+        {
+            key: "cloak", name: "Cloak", glyph: "◌",
+            cost: 300,
+            cooldown: 38,
+            energy: 10,
+            blurb: "Nobody can see you. Nothing already in the air can still hit you.",
+            detail: function () { return S.CONFIG.cpu.cloakTime + "s unseen · 38s cooldown · 10 ⚡"; },
+        },
     ];
 
     S.cpu = function (key) {
@@ -931,6 +1119,12 @@
          * so that it answers a tier-6+ shield rather than quietly replacing
          * the laser as the best gun in the game. */
         var ammoDmg = 14 + g("ammo") * 10;
+        /* The plasma round. It pierces, so it answers a shielded hull - but
+         * it is slow and its per-shot damage is below the laser's rate of
+         * fire, so it is an answer to a problem rather than a better gun.
+         * The numbers are set so that at level 1 it is worse than the
+         * laser against armour and better against anything shielded. */
+        var plasmaDmg = 12 + g("plasma") * 8;
 
         /* Frame Plating is multiplicative on purpose: it stays the
          * cheapest-per-point option once Shield is invested in, which
@@ -947,6 +1141,11 @@
             ammoDamage: ammoDmg,
             ammoPacket: S.packet("ammo", ammoDmg),
             ammoCooldown: Math.max(0.9, 2.6 - g("ammo") * 0.16),
+            /* The plasma round: slow, heavy, and the only gun that reaches
+             * through a shield. */
+            plasmaDamage: plasmaDmg,
+            plasmaPacket: S.packet("plasma", plasmaDmg),
+            plasmaCooldown: Math.max(1.4, 3.4 - g("plasma") * 0.18),
             fireInterval: Math.max(0.1, 0.44 - g("blaster") * 0.032),
             /* Missiles: a burst rather than a stream. Count and per-missile
              * damage scale together, so the track keeps mattering at level 10
@@ -1037,9 +1236,24 @@
         return n;
     };
 
-    /* Tier 1..5 over levels 5..50. Feeds the "sector escalation" readout. */
+    /* Tier 1..5 over levels 5..50. Feeds the "sector escalation" readout,
+     * the repair bill and the tier of every pilot the sector throws at you.
+     *
+     * The constant is relative to the number of tracks, and it has to be.
+     * The level sum counts every track, and every track starts at level 1
+     * for free, so adding a tenth track would otherwise hand every ship in
+     * the game a free level - and a free level is a free tier, which is
+     * stronger pilots and a more expensive repair bill for every pilot who
+     * ever launches.
+     *
+     * `MODULES.length - 4` keeps the mapping identical to the one the
+     * nine-track table was calibrated against: a ship with every track at
+     * level 1 is tier 1, and a ship with every track at level 10 is tier 5,
+     * whatever the table happens to contain today.
+     */
     S.tierForShip = function (lv) {
-        return S.clamp(1 + Math.floor((S.levelSum(lv) - 5) / 15.5), 1, 5);
+        return S.clamp(
+            1 + Math.floor((S.levelSum(lv) - (S.MODULES.length - 4)) / 15.5), 1, 5);
     };
 
     /* Highest NPC tier the sector will roll, given lifetime crystals. */
@@ -1100,6 +1314,14 @@
         player: "#67e8f9",
         bullet: "#a5f3fc",
         npcBullet: "#ffb45e",
+        /* The plasma round. Lime, so a piercing shot is unmistakable in a
+         * fight where three other kinds of round are in the air - and
+         * distinct from the capacitor round's violet, which is the other
+         * slow heavy gun. */
+        plasma: "#a3e635",
+        /* The turret's tracer. Orange, so it is never mistaken for one of
+         * the player's own shots. */
+        turret: "#fb923c",
         energy: "#ffd166",
         crystal: "#7dd3fc",
         danger: "#ff5470",

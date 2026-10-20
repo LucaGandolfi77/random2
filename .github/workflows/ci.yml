@@ -108,6 +108,13 @@ jobs:
           # polygon, so geometry is added face by face and nothing else in CI
           # would notice the frame getting more expensive until a phone did.
           node ironfall-pwa/tests/render.test.js
+          # SECTOR 7: a headless sector simulation, the canvas renderer, a
+          # full boot against a fake DOM, and the content tables. The boot
+          # suite is the one that keeps the control schemes honest.
+          node sector7-pwa/tests/sim.test.js
+          node sector7-pwa/tests/render.test.js
+          node sector7-pwa/tests/boot.test.js
+          node sector7-pwa/tests/content.test.js
 
       - name: Analysis tooling tests
         run: |

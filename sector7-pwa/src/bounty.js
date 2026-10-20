@@ -202,7 +202,14 @@
         bounty.bounty = baseBounty(sec) + Math.round(bounty.timer * 1.6);
 
         /* It hunts you specifically, not whatever is nearest. */
-        if (!ship.target || !ship.target.alive) ship.target = player;
+        if (S.World.isCloaked(player)) {
+            /* You are not there any more. The hunter keeps its price
+             * climbing and looks for something else to shoot - it does not
+             * keep a lock on a ship it cannot see. */
+            if (ship.target === player) ship.target = null;
+        } else if (!ship.target || !ship.target.alive) {
+            ship.target = player;
+        }
     }
 
     /* Called from the kill path. Returns the payout if this kill ended the

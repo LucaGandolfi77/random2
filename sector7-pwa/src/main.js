@@ -21,8 +21,14 @@
     var last = 0;
     var audioArmed = false;
     var session = { kills: 0, distance: 0, startedAt: 0 };
+    /* Whether the empty-magazine warning has already been said for this
+     * magazine. It is said once, so holding FIRE on an empty gun is a
+     * click rather than a toast every frame. */
+    var drySaid = false;
     /* Which map the player has selected at the station. */
     var currentSector = "rook";
+    /* The stand-in ship the hangar edits when there is no live one. */
+    var hangarScratch = null;
 
     /* ===== Helpers ===== */
 
@@ -189,9 +195,25 @@
             var e = evs[i];
             switch (e.type) {
                 case "shoot":
-                    if (e.ship.isPlayer) S.Audio.shoot(true);
+                    if (e.ship.isPlayer) {
+                        /* A gun that fired has rounds in it, so the empty
+                         * magazine warning is allowed to say itself again
+                         * the next time it runs dry. */
+                        drySaid = false;
+                        S.Audio.shoot(true);
+                    }
                     else if (player && S.dist2(e.ship.x, e.ship.y, player.x, player.y) < 700 * 700) {
                         S.Audio.shoot(false);
+                    }
+                    break;
+
+                case "lockShot":
+                    /* Its own event, not a "shoot": the lock-on shot is a
+                     * different weapon with a different sound, and firing it
+                     * should be recognisable without looking at the screen. */
+                    if (e.ship.isPlayer) {
+                        drySaid = false;
+                        S.Audio.lockShot();
                     }
                     break;
 
@@ -314,7 +336,11 @@
                 case "cpu": {
                     var def = S.cpu(e.key);
                     if (e.ship.isPlayer) {
-                        S.Audio.cpu(e.key);
+                        /* The cloak has its own sound: it is the one CPU
+                         * where hearing it matters, because the whole
+                         * effect is that nothing can see you. */
+                        if (e.key === "cloak") S.Audio.cloak();
+                        else S.Audio.cpu(e.key);
                         vibrate(24);
                         if (def) S.UI.toast(def.name.toUpperCase() + " ACTIVE");
                     }
@@ -322,7 +348,29 @@
                 }
 
                 case "ammo":
-                    if (e.ship.isPlayer) { S.Audio.ammo(); vibrate(30); }
+                    if (e.ship.isPlayer) { drySaid = false; S.Audio.ammo(); vibrate(30); }
+                    break;
+
+                case "dry":
+                    /* The gun is empty. It says so, once: the player is
+                     * holding the button down and a click every frame
+                     * would be a machine gun of nothing. */
+                    if (e.ship.isPlayer) {
+                        S.Audio.dry();
+                        if (!drySaid) {
+                            drySaid = true;
+                            var d = S.munition(e.key);
+                            S.UI.toast("NO " + (d ? d.name.toUpperCase() : "ROUNDS"), true);
+                        }
+                    }
+                    break;
+
+                case "plasma":
+                    if (e.ship.isPlayer) { drySaid = false; S.Audio.plasma(); vibrate(36); }
+                    break;
+
+                case "turret":
+                    if (e.ship.isPlayer) S.Audio.turret();
                     break;
 
                 case "undock":
@@ -439,7 +487,12 @@
         var live = S.World.world.player;
         if (live && live.alive) return live;
         var save = S.Storage.getShip();
-        var scratch = {
+        /* The hangar is reachable from the menu, where there is no live ship
+         * to bank. The scratch is kept so the purchase can still be written
+         * back to the save - a pilot who buys a part in the menu and finds
+         * it gone when they reopen the hangar has been charged for nothing
+         * twice over. */
+        hangarScratch = {
             energy: save.energy,
             crystals: save.crystals,
             modules: save.modules,
@@ -450,8 +503,8 @@
             hullId: save.hullId,
             parts: save.parts,
         };
-        S.Stations.refreshStats(scratch);
-        return scratch;
+        S.Stations.refreshStats(hangarScratch);
+        return hangarScratch;
     }
 
     function openHangar() {
@@ -468,10 +521,28 @@
 
     function persistHangar() {
         var ship = S.World.world.player;
-        if (!ship || !ship.alive) return;
-        S.Stations.bank(ship);
-        S.Storage.saveShip(ship.saved);
-        S.Storage.saveHangar(ship.hangar);
+        if (ship && ship.alive) {
+            S.Stations.bank(ship);
+            S.Storage.saveShip(ship.saved);
+            S.Storage.saveHangar(ship.hangar);
+            hangarScratch = null;
+            return;
+        }
+        /* No live ship: the hangar is still real and still has to be
+         * written back, along with the money that was spent on it.
+         *
+         * The hangar lives in two places - its own key and the copy inside
+         * the ship save - and every write path has to write both, or the
+         * two drift apart and the pilot gets whichever one they did not
+         * change. */
+        if (!hangarScratch) return;
+        S.Storage.saveHangar(hangarScratch.hangar);
+        var save = S.Storage.getShip();
+        save.energy = Math.max(0, hangarScratch.energy);
+        save.crystals = Math.max(0, hangarScratch.crystals);
+        save.hangar = hangarScratch.hangar;
+        S.Storage.saveShip(save);
+        hangarScratch = null;
     }
 
     function selectHull(id) {
@@ -496,6 +567,51 @@
         if (!res.ok) {
             S.Audio.error();
             S.UI.toast(res.reason.toUpperCase(), true);
+            S.UI.refreshHangar();
+            return;
+        }
+        persistHangar();
+        S.UI.refreshHangar();
+    }
+
+    /* Buy a bundle of rounds into the hangar's reserve.
+     *
+     * The purchase goes to the RESERVE, not to the ship: the magazine is
+     * loaded when the ship launches, so the pilot can buy in the station
+     * and take the rounds out with them. */
+    function buyMunitions(key) {
+        var ship = hangarShip();
+        var res = S.Stations.buyMunitions(ship, key);
+        if (!res.ok) {
+            S.Audio.error();
+            S.UI.toast(res.reason.toUpperCase(), true);
+            S.UI.refreshHangar();
+            return;
+        }
+        S.Audio.upgrade();
+        var def = S.munition(key);
+        S.UI.toast("+" + res.bundle + " " + (def ? def.name.toUpperCase() : key));
+        persistHangar();
+        S.UI.refreshHangar();
+    }
+
+    /* Buy, fit or remove the auto-turret. */
+    function turretAction(what) {
+        var ship = hangarShip();
+        var res;
+        if (what === "buy") {
+            res = S.Stations.buyTurret(ship);
+            if (!res.ok) {
+                S.Audio.error();
+                S.UI.toast(res.reason.toUpperCase(), true);
+                S.UI.refreshHangar();
+                return;
+            }
+            S.Audio.upgrade();
+            S.UI.toast(S.TURRET.name.toUpperCase() + " FITTED");
+        } else {
+            S.Audio.error();
+            S.UI.toast("UNKNOWN ACTION", true);
             S.UI.refreshHangar();
             return;
         }
@@ -661,6 +777,9 @@
             /* The sector never stops. Docked, wrecked or on the menu, the AI
              * keeps flying and the loot keeps circulating. */
             S.Audio.setThrottle(0);
+            /* The cutter has to be silenced with the ship, or it hums on
+             * through a dock and a wreck. */
+            S.Audio.setMining(false, null);
         }
 
         S.NPCs.think(dt);
@@ -768,6 +887,7 @@
         currentSector = S.Sector.get(S.Storage.getShip().sector).id;
 
         S.Render.init(document.getElementById("game-canvas"));
+        S.Render.bindMinimap(document.getElementById("minimap"));
         S.Render.setForcedQuality(settings.quality);
         S.UI.init();
         S.Input.init(S.Render.canvas());
@@ -784,6 +904,8 @@
         S.UI.on("hangarClose", closeHangar);
         S.UI.on("hull", selectHull);
         S.UI.on("part", buyPart);
+        S.UI.on("munitions", buyMunitions);
+        S.UI.on("turret", turretAction);
         S.UI.on("sandbox", toggleSandbox);
         S.UI.on("cheat", cheat);
         S.UI.on("claim", claimContract);

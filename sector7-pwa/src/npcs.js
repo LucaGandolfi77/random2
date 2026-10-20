@@ -447,6 +447,11 @@
         for (var i = 0; i < W.ships.length; i++) {
             var s = W.ships[i];
             if (s === ship || !s.alive || s.docked) continue;
+            /* A cloaked ship cannot be acquired. The NPC forgets it on the
+             * next think tick, which is where an existing fight is broken
+             * too - the cloak does not have to be fired at the moment the
+             * fight starts to be worth having. */
+            if (S.World.isCloaked(s)) continue;
             /* Mutually hostile factions, plus the player, who is hostile to
              * everything. */
             if (!S.World.isHostileTo(ship, s)) continue;

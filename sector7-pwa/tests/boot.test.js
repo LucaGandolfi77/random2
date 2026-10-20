@@ -210,6 +210,37 @@ global.localStorage = {
     setItem: (k, v) => store.set(k, String(v)),
     removeItem: (k) => store.delete(k),
 };
+/* Pin the world's seed before anything reads it.
+ *
+ * Storage.getSeed() rolls a random seed the first time it is asked, so
+ * every run of this suite used to play a different map: the rock field, the
+ * NPC positions and the sector layout all moved under the tests, and a
+ * check that happened to depend on the map - a shot that flew into a rock
+ * on the way to a target, say - failed on some runs and not others. The
+ * suite was a coin flip, and a suite that is a coin flip is a suite that
+ * makes CI red for no reason.
+ *
+ * A fixed seed makes the whole run reproducible. */
+store.set("sector7.v2.seed", JSON.stringify(20261019));
+
+/* A seeded stand-in for Math.random, for the whole suite.
+ *
+ * The game's own RNG is seeded, but the loot scatter and the particle
+ * scatter reach for Math.random directly. That is the difference between a
+ * suite that plays the same game every run and one that plays a slightly
+ * different game every run - and the second kind is the kind that fails
+ * once every fifty runs for no reason anybody can point at.
+ *
+ * xorshift32: small, fast, and good enough for a scatter. */
+{
+    let s = 0x9e3779b9;
+    Math.random = function () {
+        s ^= s << 13; s >>>= 0;
+        s ^= s >>> 17;
+        s ^= s << 5; s >>>= 0;
+        return s / 4294967296;
+    };
+}
 global.requestAnimationFrame = (fn) => { rafQueue.push(fn); return rafQueue.length; };
 global.cancelAnimationFrame = () => {};
 global.document = {
@@ -350,6 +381,10 @@ section("station");
         W2.player.x = W2.station.x;
         W2.player.y = W2.station.y;
         W2.player.energy = 5000;
+        /* This section is about the DOCK mechanic, not about surviving
+         * while docking. A pilot killed halfway through the hold would
+         * leave the test measuring the wrong thing. */
+        W2.player.invuln = 9999;
 
         /* Hold DOCK until the progress bar fills, exactly as a thumb would. */
         dock._listeners.pointerdown[0]({ pointerId: 3, clientX: 340, clientY: 700, preventDefault() {}, stopPropagation() {} });
@@ -360,7 +395,11 @@ section("station");
         winFire("pointerup", { pointerId: 3 });
     } catch (e) { err = e; }
     check("docking from the pad runs clean", !err, err && (err.stack || err.message));
-    check("holding DOCK inside the ring docks the ship", S.Player.state.docked);
+    check("holding DOCK inside the ring docks the ship", S.Player.state.docked,
+        "alive=" + (S.World.world.player ? S.World.world.player.alive : "no ship") +
+        " hull=" + (S.World.world.player ? Math.round(S.World.world.player.hull) : "-") +
+        " progress=" + S.Player.state.dockProgress.toFixed(2) +
+        " inZone=" + S.World.inDockZone(S.World.world.player.x, S.World.world.player.y));
     check("the station panel is shown",
         !els.get("screen-station").classList.contains("hidden"));
 
@@ -527,6 +566,58 @@ section("cargo, ammo and CPUs");
     check("swapping between owned CPUs is free",
         result.swappedBack && result.swapFree, JSON.stringify(result));
 
+    /* --- the cloak: buy it, fit it, fire it, and see it ---------- */
+    err = null;
+    result = {};
+    try {
+        const p = S.World.world.player;
+        p.energy = 5000;
+        els.get("tab-cpus")._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+
+        const cpuRow = (key) => {
+            const rows = els.get("st-cpus").querySelectorAll("[data-cpu]");
+            return rows.find((b) => b.getAttribute("data-cpu") === key) || null;
+        };
+        const cloakRow = cpuRow("cloak");
+        result.rowRendered = !!cloakRow;
+        if (cloakRow) {
+            cloakRow._listeners.click[0]();
+            for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        }
+        result.bought = !!(p.cpus && p.cpus.cloak);
+        result.fitted = p.cpu === "cloak";
+
+        /* Fire it in flight. */
+        els.get("st-launch")._listeners.click[0];
+        for (let i = 0; i < 10; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        p.cooldownCpu = 0;
+        p.energy = 5000;
+        p.cpu = "cloak";
+        p.cpus.cloak = true;
+        els.get("btn-cpu")._listeners.pointerdown[0]({
+            pointerId: 21, clientX: 300, clientY: 690,
+            preventDefault() {}, stopPropagation() {},
+        });
+        for (let i = 0; i < 4; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        els.get("btn-cpu")._listeners.pointerup[0]({
+            pointerId: 21, preventDefault() {}, stopPropagation() {},
+        });
+        result.active = S.World.isCloaked(p);
+        /* The chip has to say so: the whole effect is invisible, so the
+         * player needs to be told that it is working. */
+        result.chip = els.get("cpu-timer").textContent;
+    } catch (e) { err = e; }
+    check("the cloak is offered in the CPU list", result.rowRendered,
+        err ? (err.stack || err.message) : JSON.stringify(result));
+    check("the cloak can be bought and fitted",
+        result.bought && result.fitted,
+        err ? (err.stack || err.message) : JSON.stringify(result));
+    check("the cloak runs when the CPU is fired", result.active,
+        err ? (err.stack || err.message) : JSON.stringify(result));
+    check("the HUD says the cloak is running",
+        /CLOAKED/.test(result.chip || ""), result.chip);
+
     /* --- the CPU button and the ammo button in flight ---------- */
     err = null;
     result = {};
@@ -566,6 +657,97 @@ section("cargo, ammo and CPUs");
         err ? (err.stack || err.message) : JSON.stringify(result));
     check("the AMMO button fires the capacitor round", result.ammoFired);
 
+    /* --- the plasma round, in flight --- */
+    err = null;
+    result = {};
+    try {
+        const p = S.World.world.player;
+        p.cooldownPlasma = 0;
+        p.aim = 0;
+        const plasmaBtn = els.get("btn-plasma");
+        plasmaBtn._listeners.pointerdown[0]({
+            pointerId: 13, clientX: 340, clientY: 640,
+            preventDefault() {}, stopPropagation() {},
+        });
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        plasmaBtn._listeners.pointerup[0]({
+            pointerId: 13, preventDefault() {}, stopPropagation() {},
+        });
+        result.fired = p.cooldownPlasma > 0;
+
+        /* The round itself, fired straight at the world. Checking the pool
+         * after the button has been through a frame is a question about
+         * what happened to be in front of the ship, not about the weapon:
+         * the round is consumed the instant it hits anything, so on some
+         * maps it was already gone. And the pool is cleared first, so the
+         * round we find is ours and not an NPC's blaster round that was
+         * already in the air. */
+        S.World.world.bullets.forEach((b) => { b.on = false; });
+        p.cooldownPlasma = 0;
+        S.World.firePlasma(p, 0);
+        const round = S.World.world.bullets.find((b) => b.on);
+        result.piercing = !!round && round.pierce === true;
+    } catch (e) { err = e; }
+    check("the PLS button fires the plasma round", !err && result.fired,
+        err ? (err.stack || err.message) : JSON.stringify(result));
+    check("the plasma round in the world is marked as piercing",
+        result.piercing, err ? (err.stack || err.message) : JSON.stringify(result));
+
+
+    /* --- the mining beam, in flight --- */
+    err = null;
+    result = {};
+    try {
+        const p = S.World.world.player;
+        /* A rock in front of the nose, and nothing else in the cone. */
+        const rocks = S.World.world.rocks;
+        for (const r of rocks) r.alive = false;
+        const rock = rocks[0];
+        rock.alive = true;
+        rock.hull = rock.maxHull = 200;
+        rock.energy = 20;
+        rock.energyLeft = 20;
+        rock.grade = 2;
+        rock.cache = 2;
+        p.x = 1200; p.y = 1200;
+        p.heading = Math.PI / 2;
+        rock.x = 1200; rock.y = 1300;
+        p.hold = 0;
+
+        const beamBtn = els.get("btn-beam");
+        beamBtn._listeners.pointerdown[0]({
+            pointerId: 14, clientX: 340, clientY: 660,
+            preventDefault() {}, stopPropagation() {},
+        });
+        for (let i = 0; i < 6; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.cutting = rock.hull < rock.maxHull;
+        result.hold = p.hold;
+        result.beamDrawn = !!S.World.world.beam;
+        beamBtn._listeners.pointerup[0]({
+            pointerId: 14, preventDefault() {}, stopPropagation() {},
+        });
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.released = !S.World.world.beam;
+
+        /* The key does the same thing. */
+        p.hold = 0;
+        rock.hull = rock.maxHull;
+        rock.energyLeft = 20;
+        winFire("keydown", { key: "c", repeat: false, preventDefault() {} });
+        for (let i = 0; i < 6; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.keyCuts = rock.hull < rock.maxHull;
+        winFire("keyup", { key: "c", preventDefault() {} });
+        for (let i = 0; i < 3; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        result.keyReleased = !S.World.world.beam;
+    } catch (e) { err = e; }
+    const binfo = err ? (err.stack || err.message) : JSON.stringify(result);
+    check("the BEAM button cuts the rock it is pointed at", result.cutting, binfo);
+    check("the beam puts the energy in the hold", result.hold > 0, binfo);
+    check("the beam is drawn while it is cutting", result.beamDrawn, binfo);
+    check("releasing the beam stops it", result.released, binfo);
+    check("the C key cuts the same way", result.keyCuts, binfo);
+    check("releasing the C key stops it", result.keyReleased, binfo);
+
     /* --- targeting: a tap on the right half locks, a second clears ---- */
     err = null;
     result = {};
@@ -599,6 +781,169 @@ section("cargo, ammo and CPUs");
     check("the target panel says which gun to use", !!result.note && result.note.length > 0,
         result.note);
     check("tapping again clears the lock", result.cleared);
+}
+
+/* ---------- the mouse ----------
+ * The desktop scheme: click a ship to lock it, click empty space to fly
+ * there, Ctrl to shoot at whatever is locked. The touch scheme is a
+ * different set of hands and must be untouched by any of it.
+ */
+section("mouse controls");
+{
+    let err = null;
+    const r = {};
+    let hostile = null;
+    try {
+        const canvas = els.get("game-canvas");
+        const p = S.World.world.player;
+        hostile = S.World.nearestHostile(p, 4000);
+
+        /* Both ships somewhere the camera can see, and far enough apart
+         * that the click lands on a hull and not on the player's paint. */
+        p.x = 600; p.y = 600;
+        hostile.x = 600; hostile.y = 720;
+        p.invuln = 99;
+        S.Render.snap(p.x, p.y);
+
+        /* Clear the space between them. The map is generated from a random
+         * seed, so a rock parked on the line would eat the round and the
+         * test would fail once every few runs - for a reason that has
+         * nothing to do with what it is testing. */
+        for (const rock of S.World.world.rocks) {
+            if (Math.abs(rock.x - 600) < 300 && Math.abs(rock.y - 660) < 300) {
+                rock.alive = false;
+            }
+        }
+
+        const mouseClick = (x, y) => {
+            const ev = {
+                pointerId: 41, pointerType: "mouse",
+                clientX: Math.round(x), clientY: Math.round(y),
+                target: canvas, preventDefault() {}, stopPropagation() {},
+            };
+            /* Every canvas pointerdown handler sees the event in a real
+             * browser, mouse included. */
+            for (const fn of canvas._listeners.pointerdown) fn(ev);
+        };
+        /* The other sections replay the frame clock from zero every time,
+         * which leaves the loop's own clock ahead of the timestamps it is
+         * given and makes most of those frames no-ops. This section needs
+         * real elapsed time - a round has to fly - so it runs on a clock
+         * that only ever goes forward. */
+        let clock = 100000;
+        const frames = (n) => {
+            for (let i = 0; i < n; i++) {
+                clock += 16.7;
+                const cb = rafQueue.shift(); rafQueue.push(cb); cb(clock);
+            }
+        };
+
+        /* --- click a ship: it becomes the lock --- */
+        const onHull = S.Render.toScreen(hostile.x, hostile.y, hostile.z);
+        /* A boolean, not the ship: a ship is not a serialisable thing and
+         * the failure report below stringifies this object. */
+        r.pickFound = S.World.pickShip(onHull[0], onHull[1]) === hostile;
+        mouseClick(onHull[0], onHull[1]);
+        frames(4);
+        r.locked = S.World.world.target === hostile;
+        r.panelVisible = !els.get("target-panel").classList.contains("hidden");
+
+        /* Clicking the same ship again drops the lock: a mouse player has
+         * to be able to let a target go. */
+        mouseClick(onHull[0], onHull[1]);
+        frames(4);
+        r.unlocked = S.World.world.target === null;
+        /* ...and clicking it once more takes the lock back. */
+        mouseClick(onHull[0], onHull[1]);
+        frames(4);
+        r.relocked = S.World.world.target === hostile;
+
+        /* --- Ctrl: the lock-on shot --- */
+        /* Nothing else may be in the way. A round hits any ship it passes,
+         * and where the other NPCs happen to be depends on the map seed -
+         * so without this the check fails whenever one of them drifts
+         * across the line. */
+        for (const s of S.World.world.ships) {
+            if (s === p || s === hostile) continue;
+            s.x = 3200; s.y = 3200;
+        }
+        const hullBefore = hostile.hull + hostile.shield;
+        p.cooldownAttack = 0;
+        winFire("keydown", {
+            key: "Control", ctrlKey: true, repeat: false, preventDefault() {},
+        });
+        frames(14);
+        r.fired = p.cooldownAttack > 0;
+        r.damaged = (hostile.hull + hostile.shield) < hullBefore;
+        r.noSideEffects = p.hull === p.maxHull;
+
+        /* --- click empty space: the ship flies there --- */
+        S.World.world.target = null;
+        const empty = S.Render.toScreen(600, 380, 0);
+        r.emptyIsEmpty = S.World.pickShip(empty[0], empty[1]) === null;
+        mouseClick(empty[0], empty[1]);
+        frames(4);
+        r.waypointSet = !!S.World.world.moveTarget;
+        const wp = S.World.world.moveTarget;
+        const gap0 = wp ? Math.hypot(wp.x - p.x, wp.y - p.y) : 0;
+        frames(40);
+        r.moved = wp
+            ? Math.hypot(wp.x - p.x, wp.y - p.y) < gap0 - 20
+            : false;
+        r.throttle = p.throttle;
+
+        /* And it arrives: the order is spent, the ship settles and the
+         * throttle goes back down. An order the ship circles forever is
+         * an order the player cannot escape. */
+        frames(300);
+        r.arrived = S.World.world.moveTarget === null;
+        r.stopped = p.throttle < 0.05;
+
+        /* --- a touch tap must not start a move order --- */
+        S.World.world.moveTarget = null;
+        const touchTap = {
+            pointerId: 42, clientX: Math.round(window.innerWidth * 0.8), clientY: 400,
+            target: canvas, preventDefault() {}, stopPropagation() {},
+        };
+        for (const fn of canvas._listeners.pointerdown) fn(touchTap);
+        frames(4);
+        r.touchMadeNoOrder = S.World.world.moveTarget === null;
+
+        /* --- the minimap is the same map at a wider scale --- */
+        S.World.world.moveTarget = null;
+        const mini = els.get("minimap");
+        mini.width = 132;
+        const miniTap = {
+            pointerId: 43, pointerType: "mouse", clientX: 300, clientY: 300,
+            preventDefault() {}, stopPropagation() {},
+        };
+        for (const fn of mini._listeners.pointerdown) fn(miniTap);
+        frames(4);
+        const mwp = S.World.world.moveTarget;
+        r.minimapOrdered = !!mwp;
+        /* The middle of the minimap is the player. A click off the middle
+         * has to put the waypoint off the middle too. */
+        r.minimapOffCentre = mwp
+            ? Math.hypot(mwp.x - p.x, mwp.y - p.y) > 50
+            : false;
+    } catch (e) { err = e; }
+    const info = err ? (err.stack || err.message) : JSON.stringify(r);
+    check("a click on a ship picks that ship", !err && r.pickFound === true, info);
+    check("a click on a ship locks it", r.locked, info);
+    check("clicking the locked ship again drops the lock", r.unlocked, info);
+    check("clicking it again takes the lock back", r.relocked, info);
+    check("the target panel comes up on a mouse lock", r.panelVisible, info);
+    check("Ctrl puts a lock-on round in the world", r.fired, info);
+    check("the lock-on round reaches the locked ship", r.damaged, info);
+    check("the lock-on round does not hurt the shooter", r.noSideEffects, info);
+    check("empty space is empty", r.emptyIsEmpty, info);
+    check("a click on empty space sets a move order", r.waypointSet, info);
+    check("the ship flies toward the move order", r.moved, info);
+    check("the ship arrives and the order is spent", r.arrived, info);
+    check("the ship stops when it arrives", r.stopped, info);
+    check("a touch tap does not set a move order", r.touchMadeNoOrder, info);
+    check("a click on the minimap sets a move order", r.minimapOrdered, info);
+    check("the minimap order is off the middle of the map", r.minimapOffCentre, info);
 }
 
 /* ---------- hangar ---------- */
@@ -820,6 +1165,113 @@ section("degraded environments");
     } catch (e) { err = e; }
     check("every audio call is safe with no AudioContext", !err, err && (err.stack || err.message));
     check("S.Audio never built a context when none is available", !S.Audio.ctx);
+}
+
+/* ---------- the hangar, from the menu ---------- */
+/* The hangar is reachable from the menu, where there is no live ship to
+ * bank. A purchase made there used to be written to a scratch object that
+ * was then thrown away: the toast said FITTED, the panel showed it, and
+ * both the part and the money were gone by the next reload. The earlier
+ * hangar section never caught it because it always ran docked. */
+section("hangar from the menu");
+{
+    let err = null;
+    const r = {};
+    try {
+        r.atMenu = S.World.world.player === null;
+
+        /* Money to spend. */
+        const give = S.Storage.getShip();
+        give.energy = 9000;
+        S.Storage.saveShip(give);
+
+        els.get("btn-hangar")._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        r.opened = !els.get("screen-hangar").classList.contains("hidden");
+
+        const row = els.get("hg-parts").querySelectorAll("[data-part]")
+            .find((b) => b.getAttribute("data-part") === "splitter");
+        r.foundRow = !!row;
+
+        const before = S.Storage.getHangar();
+        r.levelBefore = (before.parts && before.parts.splitter) || 0;
+        r.energyBefore = S.Storage.getShip().energy;
+
+        if (row) {
+            row._listeners.click[0]();
+            for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        }
+
+        const after = S.Storage.getHangar();
+        r.levelAfter = (after.parts && after.parts.splitter) || 0;
+        r.energyAfter = S.Storage.getShip().energy;
+    } catch (e) { err = e; }
+    const info = err ? (err.stack || err.message) : JSON.stringify(r);
+    check("the menu has no live ship to bank", r.atMenu, info);
+    check("the hangar opens from the menu", r.opened, info);
+    check("a part bought in the menu is actually bought", r.levelAfter > r.levelBefore, info);
+    check("the money spent in the menu is actually spent", r.energyAfter < r.energyBefore, info);
+}
+
+/* ---------- munitions ---------- */
+/* The hangar's munitions tab is the shop and the loadout in one place: buy
+ * rounds into the reserve, and the ship takes what it can carry when it
+ * launches. */
+section("munitions");
+{
+    let err = null;
+    const r = {};
+    try {
+        /* The menu hangar, with money. */
+        const give = S.Storage.getShip();
+        give.energy = 5000;
+        S.Storage.saveShip(give);
+
+        els.get("btn-hangar")._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+
+        /* The tab, and its rows. */
+        els.get("hg-tab-munitions")._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        const rows = els.get("hg-munitions").querySelectorAll("[data-mun]");
+        r.rowCount = rows.length;
+        r.laserRow = rows.find((b) => b.getAttribute("data-mun") === "laser") || null;
+
+        /* Buy a bundle of laser rounds. */
+        const before = S.Storage.getHangar().munitions.laser;
+        const energyBefore = S.Storage.getShip().energy;
+        if (r.laserRow) {
+            r.laserRow._listeners.click[0]();
+            for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        }
+        const after = S.Storage.getHangar().munitions.laser;
+        r.stockBefore = before;
+        r.stockAfter = after;
+        r.energyBefore = energyBefore;
+        r.energyAfter = S.Storage.getShip().energy;
+
+        /* The reserve is the hangar's, and the ship loads from it. */
+        r.reserveHeld = after > before;
+
+        /* Launch and check the magazine came with the ship. */
+        els.get("hg-close")._listeners.click[0]();
+        for (let i = 0; i < 5; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        els.get("btn-play")._listeners.click[0]();
+        for (let i = 0; i < 20; i++) { const cb = rafQueue.shift(); rafQueue.push(cb); cb(i * 16.7); }
+        const p = S.World.world.player;
+        r.magazine = p && p.magazine ? p.magazine.laser : -1;
+        r.hudMag = els.get("stat-mag").textContent;
+
+        /* And the HUD says what is left. */
+        r.hudHasNumbers = /\d/.test(r.hudMag || "");
+    } catch (e) { err = e; }
+    const info = err ? (err.stack || err.message) : JSON.stringify(r);
+    check("the hangar has a munitions tab with a row per ammunition",
+        r.rowCount === 5, info);
+    check("buying rounds puts them in the reserve", r.reserveHeld, info);
+    check("buying rounds costs energy", r.energyAfter < r.energyBefore, info);
+    check("the ship launches with a loaded magazine", r.magazine > 0, info);
+    check("the HUD shows the magazine", r.hudHasNumbers, info);
 }
 
 console.log("\n" + "-".repeat(56));
