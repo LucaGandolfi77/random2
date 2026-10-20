@@ -18,7 +18,7 @@
  * the app into a state that shows the product *doing* something, rather than
  * a title screen. census-pwa/shot.mjs does the same thing with Playwright.
  */
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { mkdirSync, writeFileSync, rmSync, existsSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
@@ -233,6 +233,23 @@ const SHOTS = [
         note: "this page, for the README and the social card",
         settle: 2500,
     },
+    {
+        name: "balance",
+        path: "/tools/balance/out/runs-report.html",
+        note: "the balance lab's own report",
+        /* The report is an artefact, not a page somebody designed: it is
+           what the Monte-Carlo harness writes when it is done. So it has to
+           be regenerated before it can be photographed, and it is
+           deterministic — same seed, same sessions, same report. */
+        pre: [
+            "node tools/balance/run.mjs --sessions 5000",
+            "python3 tools/balance/report.py tools/balance/out/runs.csv",
+        ],
+        w: 1400,
+        h: 1000,
+        dpr: 1,
+        settle: 900,
+    },
 ];
 
 /* ------------------------------------------------------------------- main */
@@ -306,6 +323,16 @@ if (!queue.length) {
 for (const shot of queue) {
     const label = shot.name.padEnd(11);
     try {
+        /* Some shots need something built first: a report, a data file.
+           It is done here rather than in the shell so that "regenerate the
+           screenshots" stays one command. */
+        if (shot.pre) {
+            for (const cmd of shot.pre) {
+                console.log("  ..   " + cmd);
+                execSync(cmd, { cwd: join(here, "..", ".."), stdio: "inherit" });
+            }
+        }
+
         await cdp.send(
             "Emulation.setDeviceMetricsOverride",
             {

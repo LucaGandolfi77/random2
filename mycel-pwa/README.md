@@ -37,7 +37,15 @@ its descendants, recursively: the network frays from where you cut it.
 | **Parasites** | 4, homing at 62px/s, popping path points within 26px for −0.2 biomass each; die after eating 140 |
 | **Toxic zones** | 6 zones, r 110–155. Inside: −16 biomass/s *and* −13px/s of tip erosion. The only thing that shortens the body |
 | **Rocks** | 12, r 30–58, blocking growth. Tips probe-repel 30px ahead |
-| **Bots** | 3 named rivals, respawning 3s after death |
+| **Bots** | 3 named rivals, respawning 3s after death; they branch on their own once biomass allows |
+| **Minimap** | bottom-left, screen-space: spores, toxics, rocks, parasites, every network's tips and the viewport rectangle |
+
+### Graphics notes
+
+Procedural soil pattern (256px tile) · cached radial gradients for toxic zones
+(+ drifting motes inside) · two-tone rock shading · wobbling worm trails with a
+pulsing head · screen shake on severed tips · cached vignette · glow via
+`shadowBlur` on network strokes only.
 
 ## The numbers
 
