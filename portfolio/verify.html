@@ -41,9 +41,9 @@
       <span class="it" lang="it">Questa pagina è generata da <code>tools/verify.mjs</code>. Ogni numero che il portfolio afferma ricalcolato sul repository e confrontato con il numero che la pagina mostra davvero. Se uno scivola, la CI diventa rossa. La colonna dei comandi è il comando che produce il numero: incollatelo in un terminale e ottieni la stessa risposta.</span>
     </p>
     <p class="ledger-summary">
-      <b>25</b>
-      <span class="en">claims · 25 pass · 0 fail</span>
-      <span class="it" lang="it">affermazioni · 25 ok · 0 ko</span>
+      <b>30</b>
+      <span class="en">claims · 30 pass · 0 fail</span>
+      <span class="it" lang="it">affermazioni · 30 ok · 0 ko</span>
     </p>
     <p class="ledger-back">
       <a href="./">&larr; <span class="en">Back to the portfolio</span><span class="it" lang="it">Torna al portfolio</span></a>
@@ -76,8 +76,8 @@
           <td class="value">44</td>
           <td class="state">PASS</td>
           <td class="where">
-            <span class="en">the first stat tile</span>
-            <span class="it" lang="it">la prima cifra</span>
+            <span class="en">the first stat tile, and the CV</span>
+            <span class="it" lang="it">la prima cifra, e il CV</span>
           </td>
           <td class="how">
             <pre><code>for d in */; do d=${d%/}; [ -f &quot;$d/index.html&quot; ] &amp;&amp; echo &quot;$d&quot;; done | grep -v '^portfolio$' | wc -l</code></pre>
@@ -92,8 +92,8 @@
           <td class="value">42/44</td>
           <td class="state">PASS</td>
           <td class="where">
-            <span class="en">the second stat tile</span>
-            <span class="it" lang="it">la seconda cifra</span>
+            <span class="en">the second stat tile, and the CV</span>
+            <span class="it" lang="it">la seconda cifra, e il CV</span>
           </td>
           <td class="how">
             <pre><code>deps=$(for d in */; do d=${d%/}; [ -f &quot;$d/index.html&quot; ] || continue; c=$(python3 -c &quot;import json;print(len(json.load(open('$d/package.json')).get('dependencies',{})))&quot; 2&gt;/dev/null || echo 0); if [ &quot;$c&quot; != 0 ] || [ -d &quot;$d/vendor&quot; ]; then echo &quot;$d&quot;; fi; done | wc -l); total=$(for d in */; do d=${d%/}; [ -f &quot;$d/index.html&quot; ] &amp;&amp; echo &quot;$d&quot;; done | grep -v '^portfolio$' | wc -l); echo &quot;$((total-deps))/$total&quot;</code></pre>
@@ -124,8 +124,8 @@
           <td class="value">0</td>
           <td class="state">PASS</td>
           <td class="where">
-            <span class="en">the fourth stat tile</span>
-            <span class="it" lang="it">la quarta cifra</span>
+            <span class="en">the fourth stat tile, and the CV</span>
+            <span class="it" lang="it">la quarta cifra, e il CV</span>
           </td>
           <td class="how">
             <pre><code>grep -rniE 'googletagmanager|google-analytics|gtag\(|adsense|doubleclick|hotjar|plausible\.io|matomo|mixpanel|segment\.io|amplitude\.com|clarity\.ms|connect\.facebook\.net|adservice' --include='*.html' --include='*.css' --include='*.js' --include='*.mjs' --include='*.ts' . | grep -v node_modules | grep -v '/dist/' | grep -v 'tools/verify.mjs' | grep -v 'portfolio/verify.html' | wc -l</code></pre>
@@ -140,8 +140,8 @@
           <td class="value">0</td>
           <td class="state">PASS</td>
           <td class="where">
-            <span class="en">the whole repository</span>
-            <span class="it" lang="it">tutto il repository</span>
+            <span class="en">the whole repository, and the CV</span>
+            <span class="it" lang="it">tutto il repository, e il CV</span>
           </td>
           <td class="how">
             <pre><code>grep -rnE '&lt;(script|img|iframe|source|video|audio|embed)[^&gt;]*[[:space:]]src=[&quot;'\''](https?:)?//|&lt;link[^&gt;]*rel=[&quot;'\''](stylesheet|icon|manifest|preload|prefetch|apple-touch-icon)[&quot;'\''][^&gt;]*href=[&quot;'\''](https?:)?//|@import[[:space:]]+url\([&quot;'\'']?(https?:)?//|url\([&quot;'\'']?(https?:)?//|fetch\([[:space:]]*[&quot;'\''](https?:)?//|from[[:space:]]+[&quot;'\''](https?:)?//' --include='*.html' --include='*.css' --include='*.js' --include='*.mjs' --include='*.ts' . | grep -v node_modules | grep -v '/dist/' | wc -l</code></pre>
@@ -281,7 +281,7 @@
             <span class="en">Case studies</span>
             <span class="it" lang="it">Case study</span>
           </th>
-          <td class="value">6</td>
+          <td class="value">9</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the hero and the work section</span>
@@ -404,6 +404,86 @@
             <button class="copy" type="button" hidden data-copy>Copy</button>
           </td>
         </tr>
+        <tr class="ok" id="balance_sessions">
+          <th scope="row">
+            <span class="en">THE BALANCE LAB — sessions per run</span>
+            <span class="it" lang="it">THE BALANCE LAB — sessioni per run</span>
+          </th>
+          <td class="value">5,000</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 07, the sessions chip</span>
+            <span class="it" lang="it">case 07, il chip delle sessioni</span>
+          </td>
+          <td class="how">
+            <pre><code>grep -o 'arg(&quot;sessions&quot;, [0-9]*' tools/balance/run.mjs | grep -o '[0-9]*'</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="shared_lines">
+          <th scope="row">
+            <span class="en">THE SHARED ENGINE — lines in the shared layer</span>
+            <span class="it" lang="it">THE SHARED ENGINE — righe nello strato condiviso</span>
+          </th>
+          <td class="value">1,655</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 08, the line-count chip</span>
+            <span class="it" lang="it">case 08, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files shared/ | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="shared_consumers">
+          <th scope="row">
+            <span class="en">THE SHARED ENGINE — projects that load it</span>
+            <span class="it" lang="it">THE SHARED ENGINE — progetti che lo caricano</span>
+          </th>
+          <td class="value">36</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 08, the consumers chip</span>
+            <span class="it" lang="it">case 08, il chip dei consumatori</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files | grep -E '\.(html|js|mjs)$' | xargs grep -l -E '(src|import|from)[[:space:]]*=?[[:space:]]*[&quot;'\''][^&quot;'\'']*shared/(arcade|chart|scene-reader)\.js' | cut -d/ -f1 | sort -u | grep -vE '^(index\.html|sw\.js|shared|portfolio)$' | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="eads_lines">
+          <th scope="row">
+            <span class="en">EADS STUDIO — lines of source</span>
+            <span class="it" lang="it">EADS STUDIO — righe di codice</span>
+          </th>
+          <td class="value">2,747</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 09, the line-count chip</span>
+            <span class="it" lang="it">case 09, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files EADS | grep -E '\.(py|html|js|css)$' | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="claims_checked">
+          <th scope="row">
+            <span class="en">Claims in the ledger</span>
+            <span class="it" lang="it">Affermazioni nel registro</span>
+          </th>
+          <td class="value">30</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">the CV, the numbers row</span>
+            <span class="it" lang="it">il CV, la riga dei numeri</span>
+          </td>
+          <td class="how">
+            <pre><code>node tools/verify.mjs --json | grep -c '&quot;id&quot;:'</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
         <tr class="ok" id="cloud_links">
           <th scope="row">
             <span class="en">Projects linked from the catalogue</span>
@@ -452,7 +532,7 @@
             <span class="en">Lines of source</span>
             <span class="it" lang="it">Righe di codice</span>
           </th>
-          <td class="value">134652</td>
+          <td class="value">135605</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the ledger</span>
@@ -468,7 +548,7 @@
             <span class="en">Lines of JavaScript</span>
             <span class="it" lang="it">Righe di JavaScript</span>
           </th>
-          <td class="value">104453</td>
+          <td class="value">104616</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the ledger</span>

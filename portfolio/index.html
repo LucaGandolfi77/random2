@@ -94,13 +94,13 @@
           I design and build interfaces that stay fast, accessible and usable
           with the network off. Forty-four shipped projects. Two of them use a
           third-party library; the other forty-two need nothing but a browser —
-          and six of them are worth reading the numbers on.
+          and nine of them are worth reading the numbers on.
         </span>
         <span class="it" lang="it">
           Progetto interfacce che restano veloci, accessibili e utilizzabili anche
           senza rete. Quarantaquattro progetti pubblicati. Due usano una libreria
           di terze parti; gli altri quarantadue si affidano solo al browser —
-          e sei di loro meritano la pena di leggerne i numeri.
+          e nove di loro meritano la pena di leggerne i numeri.
         </span>
       </p>
 
@@ -166,8 +166,8 @@
     <section id="work" aria-labelledby="work-h">
       <div class="sec-head">
         <h2 id="work-h">
-          <span class="en">Six projects, and the numbers behind them</span>
-          <span class="it" lang="it">Sei progetti, e i numeri che ci stanno dietro</span>
+          <span class="en">Nine projects, and the numbers behind them</span>
+          <span class="it" lang="it">Nove progetti, e i numeri che ci stanno dietro</span>
         </h2>
         <p>
           <span class="en">
@@ -678,6 +678,357 @@
             <figcaption>
               <span class="en">125 BPM in A phrygian — not chosen by a designer, derived from the seed. The four lanes are the only controls.</span>
               <span class="it" lang="it">125 BPM in La frigio — non scelto da un designer, ma derivato dal seme. Le quattro corsie sono gli unici comandi.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ---------- 07 THE BALANCE LAB ---------- -->
+      <article class="case">
+        <div class="case-body">
+          <p class="case-num">07</p>
+          <h3>THE BALANCE LAB</h3>
+          <p class="tagline">
+            <span class="en">The one property of a tycoon you cannot check by reading the code, so it gets measured instead.</span>
+            <span class="it" lang="it">L'unica proprietà di un tycoon che non puoi verificare leggendo il codice, quindi viene misurata.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">Balance is the one thing about a tycoon that reading the code cannot settle. A spreadsheet of expectations is not a simulation, and a playtest is a single sample from a distribution nobody has drawn.</span>
+                <span class="it" lang="it">Il bilanciamento è l'unica cosa di un tycoon che leggere il codice non può risolvere. Un foglio di aspettative non è una simulazione, e un playtest è un singolo campione di una distribuzione che nessuno ha mai tracciato.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">Node drives the real <code>metro-pwa/sim.js</code> headless over thousands of seeded sessions, with three policies — greedy, passive, random — so the difference between them is the skill gap and nothing else. Python, standard library only, reads the CSV and writes one self-contained HTML report with hand-written inline SVG. The same seed reproduces the same run, so a balance change is a diff and not an anecdote.</span>
+                <span class="it" lang="it">Node guida il vero <code>metro-pwa/sim.js</code> headless su migliaia di sessioni con semi, e tre politiche — greedy, passiva, casuale — così la differenza fra loro è solo lo scarto di abilità. Python, solo libreria standard, legge il CSV e scrive un unico rapporto HTML autoconsistente con SVG scritti a mano. Lo stesso seme riproduce la stessa partita, quindi un cambiamento di bilanciamento è un diff e non un aneddoto.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">5,000 sessions in 28 seconds. And the report found two things I did not want to hear: the greedy policy wins 100% of runs, and the day budgets are far larger than the time a goal needs. It says so in its own findings section, in the same place it would say everything was fine.</span>
+                <span class="it" lang="it">5.000 sessioni in 28 secondi. E il rapporto ha trovato due cose che non volevo sentire: la politica greedy vince il 100% delle partite, e i budget giornalieri sono molto più larghi del tempo che un obiettivo richiede. Lo dice nella sua sezione «findings», nello stesso posto in cui direbbe che va tutto bene.</span>
+              </p>
+            </div>
+          </div>
+
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">5,000 sessions of a real simulation have to fit in CI time, so the harness measures instead of estimating — and the analysis cannot use a plotting library, because the report has to be one file that opens offline.</span><span class="it" lang="it">5.000 sessioni di una simulazione vera devono stare nei tempi della CI, quindi l'harness misura invece di stimare — e l'analisi non può usare una libreria di grafici, perché il rapporto deve essere un file solo che si apre offline.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">Node ESM · Python standard library only · charts are hand-written SVG</span><span class="it" lang="it">Node ESM · Python solo libreria standard · i grafici sono SVG scritti a mano</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">5,000 seeded sessions in 28 s · one self-contained HTML report · CI runs 1,200 of them on every pull request</span><span class="it" lang="it">5.000 sessioni con semi in 28 s · un rapporto HTML autoconsistente · la CI ne gira 1.200 a ogni pull request</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> The harness plays three policies, and all three are dumb in the same way: they act on a timer rather than on the state of the network. A player who waits for a gap in demand beats all three, and the report has no idea that player exists.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> L'harness gioca tre politiche, e tutte e tre sono stupide nello stesso modo: agiscono su un timer invece che sullo stato della rete. Un giocatore che aspetta un vuoto nella domanda le batte tutte e tre, e il rapporto non sa che quel giocatore esiste.</span>
+          </p>
+
+          <div class="case-meta">
+            <span class="chip" data-claim="balance_sessions"><b>5,000</b> sessions</span>
+            <span class="chip">28 seconds</span>
+            <span class="chip">3 policies</span>
+            <span class="chip">Stdlib only</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="https://github.com/LucaGandolfi77/random2/tree/main/tools/balance">
+              <span class="en">Read the harness</span><span class="it" lang="it">Leggi l'harness</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/metro-pwa">
+              <span class="en">The game it measures</span><span class="it" lang="it">Il gioco che misura</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/tools/balance/run.mjs#L39">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
+          </div>
+          <p class="case-proof">
+            <span class="en">the harness and the report — <code>tools/balance/run.mjs:39</code> · <code>tools/balance/report.py:1</code> · <code>tools/balance/test.py</code></span>
+            <span class="it" lang="it">l'harness e il rapporto — <code>tools/balance/run.mjs:39</code> · <code>tools/balance/report.py:1</code> · <code>tools/balance/test.py</code></span>
+          </p>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <img src="shots/balance.png" width="1400" height="1000" loading="lazy" decoding="async"
+                 alt="The balance lab's own report: a findings section that says the greedy policy wins 100% of runs and the day budgets are far larger than the time a goal needs, above a table of outcomes by policy.">
+            <figcaption>
+              <span class="en">Not a mock-up: this is the file the harness writes when it finishes. The findings section is the point — the tool reports that the game is too easy for anyone who plays well.</span>
+              <span class="it" lang="it">Non è un mock-up: questo è il file che l'harness scrive quando finisce. La sezione «findings» è il punto — lo strumento dice che il gioco è troppo facile per chi gioca bene.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ---------- 08 THE SHARED ENGINE ---------- -->
+      <article class="case flip">
+        <div class="case-body">
+          <p class="case-num">08</p>
+          <h3>THE SHARED ENGINE</h3>
+          <p class="tagline">
+            <span class="en">One audio helper, one seeded RNG, one chart library — and thirty-six apps that use them instead of shipping their own.</span>
+            <span class="it" lang="it">Un helper audio, un RNG con semi, una libreria di grafici — e trentasei app che li usano invece di portarsi la propria copia.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">Every game in the arcade wants the same four things: a beep, a score, a best-run counter and a chart. Written forty times, that is forty slightly different implementations of the same four things, and forty places to fix a bug.</span>
+                <span class="it" lang="it">Ogni gioco dell'arcade vuole le stesse quattro cose: un beep, un punteggio, un contatore di record e un grafico. Scritte quaranta volte, sono quaranta implementazioni leggermente diverse delle stesse quattro cose, e quaranta posti in cui correggere un bug.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en"><code>shared/arcade.js</code> is the audio and state layer: WebAudio blips, particles, localStorage helpers, a seeded RNG, playtime tracking and the run log. <code>shared/chart.js</code> is a zero-dependency Canvas 2D chart library that reads its colours out of CSS at draw time, so a theme switch is a repaint rather than a re-authoring. <code>shared/scene-reader.js</code> is the reader the literary apps use to render a bilingual scene. One copy, one API, one place to fix it.</span>
+                <span class="it" lang="it"><code>shared/arcade.js</code> è lo strato audio e stato: beep WebAudio, particelle, helper di localStorage, un RNG con semi, il tracciamento del tempo giocato e il registro delle partite. <code>shared/chart.js</code> è una libreria di grafici Canvas 2D senza dipendenze che legge i colori dal CSS al momento del disegno, così cambiare tema è un ridisegno e non una riscrittura. <code>shared/scene-reader.js</code> è il lettore con cui le app letterarie rendono una scena bilingue. Una copia, un'API, un posto in cui correggere.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">1,655 lines shared by 36 projects and the hub, so not one game ships a copy of a beep. The seeded RNG is the part that earns its keep: the balance harness and the games use the same <code>mulberry32</code>, which is why a seed printed by the game reproduces a session in the harness exactly.</span>
+                <span class="it" lang="it">1.655 righe condivise da 36 progetti e dall'hub, così nessun gioco distribuisce una copia di un beep. L'RNG con semi è la parte che ripaga: l'harness del bilanciamento e i giochi usano lo stesso <code>mulberry32</code>, ed è per questo che un seme stampato dal gioco riproduce esattamente una sessione nell'harness.</span>
+              </p>
+            </div>
+          </div>
+
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">One shared file means one cache and one version for every app that loads it, and it means the folder can still be lifted into its own domain without dragging the repository's layout along.</span><span class="it" lang="it">Un file condiviso significa una cache e una versione per tutte le app che lo caricano, e significa che la cartella si può comunque spostare in un dominio suo senza portarsi dietro il layout del repository.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">Plain ES modules · WebAudio · Canvas 2D · no build step, no package manager</span><span class="it" lang="it">Moduli ES puri · WebAudio · Canvas 2D · nessuna build, nessun package manager</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">1,655 lines in three files · loaded by 36 projects and the hub · 91 self-tests on the shared library alone</span><span class="it" lang="it">1.655 righe in tre file · caricato da 36 progetti e dall'hub · 91 self-test solo sulla libreria condivisa</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> The shared layer is a single file per concern, which works until two apps need the same helper in different ways — and then the fix lands in the shared file and changes every other app's behaviour. A versioned API with a deprecation path would have cost more to set up and less to live with.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> Lo strato condiviso è un file solo per ogni problema, e funziona finché due app hanno bisogno dello stesso helper in modi diversi — e allora la correzione finisce nel file condiviso e cambia il comportamento di tutte le altre app. Un'API versionata con un percorso di deprecazione sarebbe costata di più da mettere su e meno da convivere.</span>
+          </p>
+
+          <div class="case-meta">
+            <span class="chip" data-claim="shared_lines"><b>1,655</b> lines</span>
+            <span class="chip" data-claim="shared_consumers"><b>36</b> projects</span>
+            <span class="chip">3 modules</span>
+            <span class="chip">91 self-tests</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="https://github.com/LucaGandolfi77/random2/tree/main/shared">
+              <span class="en">Read the source</span><span class="it" lang="it">Leggi il sorgente</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/tools/selftest.mjs">
+              <span class="en">The tests</span><span class="it" lang="it">I test</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/shared/arcade.js#L1">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
+          </div>
+          <p class="case-proof">
+            <span class="en">the three modules and their 91 self-tests — <code>shared/arcade.js:1</code> · <code>shared/chart.js:1</code> · <code>shared/scene-reader.js:1</code> · <code>tools/selftest.mjs:1</code></span>
+            <span class="it" lang="it">i tre moduli e i loro 91 self-test — <code>shared/arcade.js:1</code> · <code>shared/chart.js:1</code> · <code>shared/scene-reader.js:1</code> · <code>tools/selftest.mjs:1</code></span>
+          </p>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <svg class="diagram" viewBox="0 0 684 352" role="img" aria-labelledby="shared-title shared-desc">
+              <title id="shared-title">How the shared engine is used</title>
+              <desc id="shared-desc">Thirty-six projects load one of three shared modules instead of shipping their own copy: twenty-seven load the arcade helper, nine load the scene reader, and one loads the chart library. The arcade helper and the scene reader together are shared by thirty-six projects and the hub.</desc>
+              <defs>
+                <marker id="arrow-shared" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--faint)"/>
+                </marker>
+              </defs>
+
+              <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+                <!-- row 1 -->
+                <rect x="6" y="18" width="150" height="76" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="81" y="50" text-anchor="middle" font-size="15" font-weight="800" fill="var(--text)">27 games</text>
+                <text x="81" y="70" text-anchor="middle" font-size="11" fill="var(--muted)">and the hub</text>
+                <line x1="162" y1="56" x2="196" y2="56" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#arrow-shared)"/>
+                <rect x="202" y="18" width="208" height="76" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="218" y="48" font-size="13" font-weight="700" fill="var(--accent-2)" font-family="ui-monospace, Menlo, monospace">shared/arcade.js</text>
+                <text x="218" y="70" font-size="11" fill="var(--muted)">529 lines</text>
+                <text x="430" y="40" font-size="11.5" fill="var(--muted)">
+                  <tspan x="430" dy="0">WebAudio blips, particles, the</tspan>
+                  <tspan x="430" dy="16">localStorage helpers, the seeded</tspan>
+                  <tspan x="430" dy="16">RNG, playtime and the run log</tspan>
+                </text>
+
+                <!-- row 2 -->
+                <rect x="6" y="138" width="150" height="76" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="81" y="170" text-anchor="middle" font-size="15" font-weight="800" fill="var(--text)">9 literary apps</text>
+                <text x="81" y="190" text-anchor="middle" font-size="11" fill="var(--muted)">one scene format</text>
+                <line x1="162" y1="176" x2="196" y2="176" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#arrow-shared)"/>
+                <rect x="202" y="138" width="208" height="76" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="218" y="168" font-size="13" font-weight="700" fill="var(--accent-2)" font-family="ui-monospace, Menlo, monospace">shared/scene-reader.js</text>
+                <text x="218" y="190" font-size="11" fill="var(--muted)">220 lines</text>
+                <text x="430" y="160" font-size="11.5" fill="var(--muted)">
+                  <tspan x="430" dy="0">A bilingual scene reader: a scene</tspan>
+                  <tspan x="430" dy="16">is written once and renders in</tspan>
+                  <tspan x="430" dy="16">English and Italian</tspan>
+                </text>
+
+                <!-- row 3 -->
+                <rect x="6" y="258" width="150" height="76" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="81" y="290" text-anchor="middle" font-size="15" font-weight="800" fill="var(--text)">1 dashboard</text>
+                <text x="81" y="310" text-anchor="middle" font-size="11" fill="var(--muted)">the play-data one</text>
+                <line x1="162" y1="296" x2="196" y2="296" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#arrow-shared)"/>
+                <rect x="202" y="258" width="208" height="76" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="218" y="288" font-size="13" font-weight="700" fill="var(--accent-2)" font-family="ui-monospace, Menlo, monospace">shared/chart.js</text>
+                <text x="218" y="310" font-size="11" fill="var(--muted)">906 lines</text>
+                <text x="430" y="280" font-size="11.5" fill="var(--muted)">
+                  <tspan x="430" dy="0">Canvas 2D charts that read their</tspan>
+                  <tspan x="430" dy="16">colours from CSS at draw time, so a</tspan>
+                  <tspan x="430" dy="16">theme switch is a repaint</tspan>
+                </text>
+              </g>
+            </svg>
+            <figcaption>
+              <span class="en">Three files, 1,655 lines, and 36 projects that do not ship their own copy of a beep.</span>
+              <span class="it" lang="it">Tre file, 1.655 righe, e 36 progetti che non distribuiscono la propria copia di un beep.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <!-- ---------- 09 EADS STUDIO ---------- -->
+      <article class="case">
+        <div class="case-body">
+          <p class="case-num">09</p>
+          <h3>EADS STUDIO</h3>
+          <p class="tagline">
+            <span class="en">An embedded debugger that speaks gdb/MI over a serial link, wrapped in a Flask app.</span>
+            <span class="it" lang="it">Un debugger embedded che parla gdb/MI su un collegamento seriale, avvolto in un'app Flask.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">Debugging firmware on an RTEMS target means a debug server on the board, a serial link between two machines, and a machine interface protocol in between — a protocol designed for a person typing at a terminal, on a machine that is not the machine the firmware is on.</span>
+                <span class="it" lang="it"> Fare il debug di un firmware su un target RTEMS significa un debug server sulla board, un collegamento seriale fra due macchine e un protocollo di interfaccia macchina nel mezzo — un protocollo pensato per una persona che batte tasti al terminale, su una macchina che non è quella dove gira il firmware.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">A Flask app that owns the toolchain. It builds the project, spawns <code>gdbserver</code> against the target, launches <code>gdb --interpreter=mi3</code>, and speaks the machine interface protocol over pipes — a request in, a stream of out-of-band records out. Sessions live in an expiring registry, thirty minutes and a hundred at a time, so a crashed debug session cannot leak a process. Cppcheck and Doxygen are integrated as analysis profiles, and the interface disables the buttons for the tools that are not installed instead of failing when they are.</span>
+                <span class="it" lang="it">Un'app Flask che possiede la toolchain. Compila il progetto, avvia <code>gdbserver</code> contro il target, lancia <code>gdb --interpreter=mi3</code> e parla il protocollo di interfaccia macchina su pipe — una richiesta dentro, uno stream di record fuori banda. Le sessioni vivono in un registro che scade, trenta minuti e cento alla volta, così una sessione di debug crashata non lascia processi appesi. Cppcheck e Doxygen sono integrati come profili di analisi, e l'interfaccia disabilita i pulsanti degli strumenti non installati invece di fallire quando mancano.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">2,747 lines of Python and front end, with four test modules around it. The gdb/MI client is 109 lines, which is the point: the protocol is a request and a stream of records, and everything else in the app is the surrounding work — the builds, the analysis profiles, the sessions that have to be cleaned up.</span>
+                <span class="it" lang="it">2.747 righe di Python e front end, con quattro moduli di test intorno. Il client gdb/MI sono 109 righe, ed è il punto: il protocollo è una richiesta e uno stream di record, e tutto il resto dell'app è il lavoro attorno — le compilazioni, i profili di analisi, le sessioni da ripulare.</span>
+              </p>
+            </div>
+          </div>
+
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">The toolchain does not run on the developer's machine — it runs on the board, over a link that drops, through a protocol that was never designed to be driven by a browser.</span><span class="it" lang="it">La toolchain non gira sulla macchina dello sviluppatore — gira sulla board, su un collegamento che cade, attraverso un protocollo mai pensato per essere pilotato da un browser.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">Python · Flask · gdb/MI (mi3) · gdbserver · Cppcheck · Doxygen · RTEMS</span><span class="it" lang="it">Python · Flask · gdb/MI (mi3) · gdbserver · Cppcheck · Doxygen · RTEMS</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">2,747 lines · four test modules · an API a browser front end drives · a session registry that cannot leak a process</span><span class="it" lang="it">2.747 righe · quattro moduli di test · un'API pilotata da un front end nel browser · un registro di sessioni che non può lasciare processi appesi</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> The debugger works, and it has no idea what it is debugging: the MI client speaks the protocol faithfully but never checks that the symbols in the ELF match the firmware on the target, so a stale build looks exactly like a correct one until you read a variable and get nonsense.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> Il debugger funziona, e non sa cosa sta debuggando: il client MI parla il protocollo con fedeltà ma non verifica mai che i simboli nell'ELF corrispondano al firmware sul target, così una build vecchia sembra esattamente una build corretta finché non leggi una variabile e ottieni nonsense.</span>
+          </p>
+
+          <div class="case-meta">
+            <span class="chip" data-claim="eads_lines"><b>2,747</b> lines</span>
+            <span class="chip">Python · Flask</span>
+            <span class="chip">gdb/MI</span>
+            <span class="chip">RTEMS target</span>
+          </div>
+
+          <div class="case-actions">
+            <a class="btn btn-primary" href="https://github.com/LucaGandolfi77/random2/tree/main/EADS">
+              <span class="en">Read the source</span><span class="it" lang="it">Leggi il sorgente</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/tree/main/EADS/tests">
+              <span class="en">The tests</span><span class="it" lang="it">I test</span>
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/LucaGandolfi77/random2/blob/main/EADS/studio/services/gdbmi.py#L1">
+              <span class="en">The proof</span><span class="it" lang="it">La prova</span>
+            </a>
+          </div>
+          <p class="case-proof">
+            <span class="en">the gdb/MI client and the tests around it — <code>EADS/studio/services/gdbmi.py:1</code> · <code>EADS/studio/registry.py:1</code> · <code>EADS/tests/test_app.py:1</code></span>
+            <span class="it" lang="it">il client gdb/MI e i test intorno — <code>EADS/studio/services/gdbmi.py:1</code> · <code>EADS/studio/registry.py:1</code> · <code>EADS/tests/test_app.py:1</code></span>
+          </p>
+        </div>
+
+        <div class="case-media">
+          <figure>
+            <svg class="diagram" viewBox="0 0 684 360" role="img" aria-labelledby="eads-title eads-desc">
+              <title id="eads-title">EADS Studio architecture</title>
+              <desc id="eads-desc">A browser front end talks to a Flask API, which calls services for building, analysis and inspection. The gdb machine interface client drives gdb, which reaches an RTEMS board over a serial link. Cppcheck and Doxygen are optional analysis profiles.</desc>
+              <defs>
+                <marker id="arrow-eads" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--faint)"/>
+                </marker>
+              </defs>
+
+              <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+                <rect x="16" y="112" width="180" height="56" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="106" y="136" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)">The browser</text>
+                <text x="106" y="154" text-anchor="middle" font-size="10.5" fill="var(--muted)">one page: app.js</text>
+
+                <line x1="106" y1="168" x2="106" y2="198" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#arrow-eads)"/>
+
+                <rect x="16" y="200" width="180" height="56" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="106" y="224" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)">Flask API</text>
+                <text x="106" y="242" text-anchor="middle" font-size="10.5" fill="var(--muted)">web.py — the routes</text>
+
+                <line x1="106" y1="256" x2="106" y2="286" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#arrow-eads)"/>
+
+                <rect x="16" y="288" width="180" height="56" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="106" y="312" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)">Services</text>
+                <text x="106" y="330" text-anchor="middle" font-size="10.5" fill="var(--muted)">build · inspect · runner</text>
+
+                <line x1="196" y1="316" x2="250" y2="316" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#arrow-eads)"/>
+
+                <rect x="252" y="288" width="180" height="56" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="342" y="312" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)">gdb/MI client</text>
+                <text x="342" y="330" text-anchor="middle" font-size="10.5" fill="var(--muted)">gdbmi.py — 109 lines</text>
+
+                <line x1="432" y1="316" x2="486" y2="316" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#arrow-eads)"/>
+                <text x="459" y="304" text-anchor="middle" font-size="10" fill="var(--faint)">serial</text>
+
+                <rect x="488" y="288" width="180" height="56" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="578" y="312" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)">RTEMS board</text>
+                <text x="578" y="330" text-anchor="middle" font-size="10.5" fill="var(--muted)">the target</text>
+
+                <path d="M 252 300 C 226 300 226 140 250 140" fill="none" stroke="var(--faint)" stroke-width="1.5" marker-end="url(#arrow-eads)"/>
+                <rect x="252" y="112" width="180" height="56" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="342" y="136" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)">cppcheck · doxygen</text>
+                <text x="342" y="154" text-anchor="middle" font-size="10.5" fill="var(--muted)">optional analysis profiles</text>
+
+                <rect x="488" y="112" width="180" height="56" rx="12" fill="var(--surface)" stroke="var(--border)"/>
+                <text x="578" y="136" text-anchor="middle" font-size="13" font-weight="800" fill="var(--text)">Session registry</text>
+                <text x="578" y="154" text-anchor="middle" font-size="10.5" fill="var(--muted)">30 min · 100 max</text>
+                <path d="M 488 140 C 462 140 462 200 446 200" fill="none" stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="3 4"/>
+              </g>
+            </svg>
+            <figcaption>
+              <span class="en">An architecture diagram rather than a screenshot: this project needs a toolchain and a board, so there is nothing to photograph — and the shape of the thing is the interesting part.</span>
+              <span class="it" lang="it">Uno schema architetturale invece di uno screenshot: questo progetto richiede una toolchain e una board, quindi non c'è nulla da fotografare — e la forma della cosa è la parte interessante.</span>
             </figcaption>
           </figure>
         </div>

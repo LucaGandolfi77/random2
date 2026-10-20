@@ -523,6 +523,15 @@
     box-shadow: 0 26px 60px -34px rgba(0, 0, 0, 0.95);
   }
   .case-media img { width: 100%; }
+  /* A diagram instead of a screenshot, for the projects that have nothing
+     to photograph. It uses the page's own tokens, so it follows the theme. */
+  .case-media figure svg.diagram {
+    width: 100%;
+    height: auto;
+    display: block;
+    padding: 18px;
+    background: var(--surface);
+  }
   .case-media figcaption {
     margin-top: 11px;
     font-size: 12.5px;

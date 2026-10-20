@@ -4,7 +4,7 @@
 
 *One page, no build step, no dependencies.* It exists because the arcade
 presents 44 projects as a list of things to play, and that is the wrong shape
-for someone deciding whether to hire you. This page presents six of them as
+for someone deciding whether to hire you. This page presents nine of them as
 problems that were solved.
 
 **Live:** <https://lucagandolfi77.github.io/random2/portfolio/>
@@ -67,24 +67,29 @@ it fit on one sheet.
 
 ---
 
-## The six case studies
+## The nine case studies
 
-Each is written as **Problem → What I built → Result**, with real numbers.
+Each is written as **Problem → What I built → Result**, with real numbers, and
+each carries the same three lines — the constraint, the stack, what shipped —
+plus one honest fault of its own and a **proof**: the file and the line that
+substantiate the claim.
 
 | # | Project | Why it is on this page |
 |--:|---|---|
 | 01 | `census-pwa` | Real sampling theory, and a 60-seed test proving a claimed 95% interval covers ~75% under bias. The strongest "I can prove a claim" story. |
 | 02 | `stats-pwa` | A dashboard that labels its own heatmap an estimate and refuses to mix scoreboards. The strongest "I will not flatter your data" story. |
 | 03 | `bucio` | ~1,800 objects in ~30 draw calls. The only WebGL project, so it shows a different part of the range. |
-| 04 | `sector7-pwa` | 16k lines, a two-pool damage model, no build step. The biggest no-build project. |
+| 04 | `sector7-pwa` | 20k lines, a two-pool damage model, no build step. The biggest no-build project. |
 | 05 | `ironfall-pwa` | A draw-call budget test and two simulation/renderer invariants. The strongest "engineering discipline" story. |
 | 06 | `pulse-pwa` | A rhythm game with zero audio assets, seeded and reproducible. The most unusual project. |
+| 07 | `tools/balance/` | A Monte-Carlo harness that plays 5,000 seeded sessions of the real simulation. The strongest "I measure instead of guessing" story. |
+| 08 | `shared/` | One audio helper, one seeded RNG and one chart library, used by 36 projects. The strongest "I think in systems" story. |
+| 09 | `EADS/` | An embedded debugger speaking gdb/MI over a serial link. The strongest non-web project here. |
 
-`EADS/`, `new-star-soccer/`, `snap-pwa/` and `pokesurvivor-bot/` are linked from
-the catalogue instead. They are strong but none of them screenshots
-themselves into a case study: EADS is a Flask app that this repository does
-not serve, New Star Soccer needs a build to run, Snap Cam needs a camera, and
-the bot is a terminal program.
+`new-star-soccer/`, `snap-pwa/` and `pokesurvivor-bot/` are linked from the
+catalogue instead. They are strong but none of them screenshots themselves
+into a case study: New Star Soccer needs a build to run, Snap Cam needs a
+camera, and the bot is a terminal program.
 
 ---
 
@@ -93,7 +98,7 @@ the bot is a terminal program.
 | Section | What it is for |
 |---|---|
 | Hero | Positioning plus four numbers that are easy to verify. |
-| Six projects | The case studies above. |
+| Nine projects | The case studies above. |
 | Services | What you can hire him for: interface work, performance and accessibility audits, offline-first PWA builds — plus the availability facts only the author can fill in. |
 | Stack | Every skill linked to the project that proves it. No self-scored bars. |
 | Craft | Design tokens, accessibility, responsive, motion, performance budgets, offline — the parts that apply to every project. |

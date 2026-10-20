@@ -1007,14 +1007,20 @@ python app.py
 ## The portfolio page
 
 `portfolio/` is the same work presented for a different reader. The arcade is
-a shelf of things to play; the portfolio is six case studies written as
+a shelf of things to play; the portfolio is nine case studies written as
 *problem → constraint → approach → result*, with the numbers attached:
 
 **CENSUS** (a claimed 95% interval that covers only ~75% under bias) ·
 **STATS** (a dashboard that labels its own heatmap an estimate) ·
 **BUCIO** (~1,800 objects in ~30 draw calls) · **SECTOR 7** (a two-pool
-damage model, 16k lines, no build) · **IRONFALL** (a draw-call budget test) ·
-**PULSE** (a rhythm game with no audio files).
+damage model, 20k lines, no build) · **IRONFALL** (a draw-call budget test) ·
+**PULSE** (a rhythm game with no audio files) · **THE BALANCE LAB** (5,000
+seeded sessions measured) · **THE SHARED ENGINE** (1,655 lines used by 36
+projects) · **EADS STUDIO** (a gdb/MI debugger over a serial link).
+
+There is also a one-page CV at `portfolio/cv.html`: it prints to exactly one
+A4 sheet, and its figures carry the same machine-checked claims as the
+portfolio's.
 
 It is bilingual EN/IT with the language chosen by the browser on first visit.
 Both languages live in the markup as sibling elements and CSS picks one, so

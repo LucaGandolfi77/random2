@@ -113,10 +113,14 @@ function runShell(cmd) {
   return out.trim();
 }
 
-/* --------------------------------------------------------------- the page */
+/* --------------------------------------------------------------- the pages */
 
-function pageHtml() {
-  return readFileSync(PAGE, "utf8");
+/* The pages that state claims. Both are scraped, so a number on the CV is
+   checked as carefully as a number on the portfolio. */
+const PAGES = ["portfolio/index.html", "portfolio/cv.html"];
+
+function pageHtml(path) {
+  return readFileSync(join(ROOT, path || PAGES[0]), "utf8");
 }
 
 /* Numeric claims are read out of the page, not out of a copy of the page.
@@ -165,9 +169,10 @@ const CLAIMS = [
     id: "projects",
     label: "Projects shipped",
     labelIt: "Progetti pubblicati",
-    where: "the first stat tile",
-    whereIt: "la prima cifra",
+    where: "the first stat tile, and the CV",
+    whereIt: "la prima cifra, e il CV",
     expect: "44",
+    expectElsewhere: { "portfolio/cv.html": "44" },
     how: "for d in */; do d=${d%/}; [ -f \"$d/index.html\" ] && echo \"$d\"; done | grep -v '^portfolio$' | wc -l",
     compute: () => projects().length,
   },
@@ -175,9 +180,10 @@ const CLAIMS = [
     id: "zero_dep",
     label: "Projects with zero runtime dependencies",
     labelIt: "Progetti senza dipendenze runtime",
-    where: "the second stat tile",
-    whereIt: "la seconda cifra",
+    where: "the second stat tile, and the CV",
+    whereIt: "la seconda cifra, e il CV",
     expect: "42/44",
+    expectElsewhere: { "portfolio/cv.html": "42/44" },
     how: "deps=$(for d in */; do d=${d%/}; [ -f \"$d/index.html\" ] || continue; \
 c=$(python3 -c \"import json;print(len(json.load(open('$d/package.json')).get('dependencies',{})))\" 2>/dev/null || echo 0); \
 if [ \"$c\" != 0 ] || [ -d \"$d/vendor\" ]; then echo \"$d\"; fi; done | wc -l); \
@@ -221,9 +227,10 @@ echo \"$((total-deps))/$total\"",
     id: "trackers",
     label: "Trackers and ad scripts",
     labelIt: "Tracker e script pubblicitari",
-    where: "the fourth stat tile",
-    whereIt: "la quarta cifra",
+    where: "the fourth stat tile, and the CV",
+    whereIt: "la quarta cifra, e il CV",
     expect: "0",
+    expectElsewhere: { "portfolio/cv.html": "0" },
     how: "grep -rniE 'googletagmanager|google-analytics|gtag\\(|adsense|doubleclick|hotjar|plausible\\.io|matomo|mixpanel|segment\\.io|amplitude\\.com|clarity\\.ms|connect\\.facebook\\.net|adservice' \
 --include='*.html' --include='*.css' --include='*.js' --include='*.mjs' --include='*.ts' . \
 | grep -v node_modules | grep -v '/dist/' | grep -v 'tools/verify.mjs' | grep -v 'portfolio/verify.html' | wc -l",
@@ -233,8 +240,9 @@ echo \"$((total-deps))/$total\"",
     id: "external_loads",
     label: "Remote resources loaded at runtime",
     labelIt: "Risorse remote caricate a runtime",
-    where: "the whole repository",
-    whereIt: "tutto il repository",
+    where: "the whole repository, and the CV",
+    whereIt: "tutto il repository, e il CV",
+    expectElsewhere: { "portfolio/cv.html": "0" },
     how: "grep -rnE '<(script|img|iframe|source|video|audio|embed)[^>]*[[:space:]]src=[\"\'\\''](https?:)?//|<link[^>]*rel=[\"\'\\''](stylesheet|icon|manifest|preload|prefetch|apple-touch-icon)[\"\'\\''][^>]*href=[\"\'\\''](https?:)?//|@import[[:space:]]+url\\([\"\'\\'']?(https?:)?//|url\\([\"\'\\'']?(https?:)?//|fetch\\([[:space:]]*[\"\'\\''](https?:)?//|from[[:space:]]+[\"\'\\''](https?:)?//' \
 --include='*.html' --include='*.css' --include='*.js' --include='*.mjs' --include='*.ts' . \
 | grep -v node_modules | grep -v '/dist/' | wc -l",
@@ -433,6 +441,88 @@ if [ -f \"$d/service-worker.js\" ] || [ -f \"$d/sw.js\" ] || [ -f \"$d/public/se
     compute: () => grouped(sourceLines("pulse-pwa")),
   },
   {
+    id: "balance_sessions",
+    label: "THE BALANCE LAB — sessions per run",
+    labelIt: "THE BALANCE LAB — sessioni per run",
+    where: "case 07, the sessions chip",
+    whereIt: "case 07, il chip delle sessioni",
+    expect: "5,000",
+    how: "grep -o 'arg(\"sessions\", [0-9]*' tools/balance/run.mjs | grep -o '[0-9]*'",
+    compute: () => {
+      const m = read("tools/balance/run.mjs").match(/arg\("sessions",\s*(\d+)\)/);
+      return m ? grouped(Number(m[1])) : "0";
+    },
+  },
+  {
+    id: "shared_lines",
+    label: "THE SHARED ENGINE — lines in the shared layer",
+    labelIt: "THE SHARED ENGINE — righe nello strato condiviso",
+    where: "case 08, the line-count chip",
+    whereIt: "case 08, il chip delle righe",
+    expect: "1,655",
+    how: "git ls-files shared/ | xargs cat | wc -l",
+    compute: () => {
+      let n = 0;
+      for (const f of files()) {
+        if (!f.startsWith("shared/")) continue;
+        n += read(f).split("\n").length - 1;
+      }
+      return grouped(n);
+    },
+  },
+  {
+    id: "shared_consumers",
+    label: "THE SHARED ENGINE — projects that load it",
+    labelIt: "THE SHARED ENGINE — progetti che lo caricano",
+    where: "case 08, the consumers chip",
+    whereIt: "case 08, il chip dei consumatori",
+    expect: "36",
+    how: "git ls-files | grep -E '\\.(html|js|mjs)$' | xargs grep -l -E '(src|import|from)[[:space:]]*=?[[:space:]]*[\"'\\''][^\"'\\'']*shared/(arcade|chart|scene-reader)\\.js' | cut -d/ -f1 | sort -u | grep -vE '^(index\\.html|sw\\.js|shared|portfolio)$' | wc -l",
+    compute: () => {
+      const rx = /(?:src|import|from)\s*=?\s*["']([^"']*shared\/(?:arcade|chart|scene-reader)\.js)/;
+      const dirs = new Set();
+      for (const f of files()) {
+        if (!/\.(html|js|mjs)$/i.test(f)) continue;
+        if (f.startsWith("shared/")) continue;
+        if (rx.test(read(f))) dirs.add(f.split("/")[0]);
+      }
+      dirs.delete("index.html");
+      dirs.delete("sw.js");
+      dirs.delete("portfolio");
+      return dirs.size;
+    },
+  },
+  {
+    id: "eads_lines",
+    label: "EADS STUDIO — lines of source",
+    labelIt: "EADS STUDIO — righe di codice",
+    where: "case 09, the line-count chip",
+    whereIt: "case 09, il chip delle righe",
+    expect: "2,747",
+    how: "git ls-files EADS | grep -E '\\.(py|html|js|css)$' | xargs cat | wc -l",
+    compute: () => {
+      let n = 0;
+      for (const f of files()) {
+        if (!f.startsWith("EADS/")) continue;
+        if (!/\.(py|html|js|css)$/i.test(f)) continue;
+        n += read(f).split("\n").length - 1;
+      }
+      return grouped(n);
+    },
+  },
+  {
+    id: "claims_checked",
+    label: "Claims in the ledger",
+    labelIt: "Affermazioni nel registro",
+    where: "the CV, the numbers row",
+    whereIt: "il CV, la riga dei numeri",
+    /* The number of claims is the number of claims: the CV quotes it, and
+       the ledger checks that the CV quotes it correctly. */
+    expectElsewhere: { "portfolio/cv.html": () => String(CLAIMS.length) },
+    how: "node tools/verify.mjs --json | grep -c '\"id\":'",
+    compute: () => CLAIMS.length,
+  },
+  {
     id: "cloud_links",
     label: "Projects linked from the catalogue",
     labelIt: "Progetti linkati dal catalogo",
@@ -469,6 +559,10 @@ const STALE = [
   { literal: "44 PNG", claim: "png_total" },
   { literal: "46 published PNGs", claim: "png_total" },
   { literal: "every one of them", claim: "zero_dep" },
+  { literal: "Six projects", claim: "case_studies" },
+  { literal: "Sei progetti", claim: "case_studies" },
+  { literal: "six of them", claim: "case_studies" },
+  { literal: "sei di loro", claim: "case_studies" },
 ];
 
 /* The ledger scans the repository for trackers and for remote loads. It
@@ -553,31 +647,54 @@ function check() {
     if (error) {
       ok = false;
       note = error;
-    } else if (claim.expect !== undefined) {
-      shown = scrapeStat(html, claim.id);
-      if (shown === null) {
-        ok = false;
-        note = `the page has no tile for "${claim.id}"`;
-      } else if (String(value) !== shown) {
-        ok = false;
-        note = `the page says ${shown}, the repository says ${value}`;
+    } else {
+      /* A claim may be stated on more than one page. Each page that
+         states it has to state it the same way. */
+      const placements = [];
+      if (claim.expect !== undefined) placements.push([PAGES[0], claim.expect]);
+      for (const [path, expected] of Object.entries(claim.expectElsewhere || {})) {
+        placements.push([path, expected]);
+      }
+
+      for (const [path, expected] of placements) {
+        const want = typeof expected === "function" ? expected() : expected;
+        const page = path === PAGES[0] ? html : pageHtml(path);
+        const got = scrapeStat(page, claim.id);
+        if (got === null) {
+          ok = false;
+          note = `${path} has no tile for "${claim.id}"`;
+          break;
+        }
+        if (String(value) !== got && String(want) !== got) {
+          ok = false;
+          note = `${path} says ${got}, the repository says ${value}`;
+          break;
+        }
+        if (path === PAGES[0]) shown = got;
       }
     }
 
     results.push({ ...claim, value, shown, ok, note });
   }
 
-  /* A tile on the page that the ledger does not know about is a number
+  /* A tile on a page that the ledger does not know about is a number
      nobody is checking. */
   const known = new Set(CLAIMS.map((c) => c.id));
-  const unknown = pageClaimIds(html).filter((id) => !known.has(id));
+  const unknown = [];
+  for (const path of PAGES) {
+    for (const id of pageClaimIds(pageHtml(path))) {
+      if (!known.has(id)) unknown.push(`${path}: ${id}`);
+    }
+  }
 
   /* The prose lint. Comments are stripped first: a literal inside an HTML
      comment is not a claim anybody reads. */
-  const prose = html.replace(/<!--[\s\S]*?-->/g, " ");
   const stale = [];
-  for (const { literal, claim } of STALE) {
-    if (prose.includes(literal)) stale.push({ literal, claim });
+  for (const path of PAGES) {
+    const prose = pageHtml(path).replace(/<!--[\s\S]*?-->/g, " ");
+    for (const { literal, claim } of STALE) {
+      if (prose.includes(literal)) stale.push({ literal, claim, path });
+    }
   }
 
   return { results, unknown, stale };
