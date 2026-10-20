@@ -115,7 +115,7 @@ jobs:
           node sector7-pwa/tests/render.test.js
           node sector7-pwa/tests/boot.test.js
           node sector7-pwa/tests/content.test.js
-          # MUSTANG PWA: 1.652 assertions over the stage tables, the wiring
+          # MUSTANG PWA: 2.291 assertions over the stage tables, the wiring
           # between the markup and the game, and a headless play-through of
           # all 64 stages. It was never wired in, so a stale assertion sat
           # broken in the tree for a week.
