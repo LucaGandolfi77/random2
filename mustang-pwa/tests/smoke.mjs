@@ -1303,6 +1303,38 @@ ok("and the allied one is untouched", (() => {
     return S.checkpoint === 5;
 })(), "overlord checkpoint " + S.checkpoint);
 
+/* ===== Weather ===== */
+console.log("\nweather");
+// The weather belongs to the sector, and it is set up when the stage does.
+M.game.startGame();
+M.game.startStage(0);              // CHANNEL: rain
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+armPlayer();
+step(2);
+ok("the sector brings its own weather", S.stage.name === "CHANNEL");
+ok("the weather is set up for the stage", M.game.weatherKind() === "rain", M.game.weatherKind());
+ok("the rain is falling", M.game.weatherDropCount() > 0, String(M.game.weatherDropCount()));
+const y0 = M.game.weatherDropY(0);
+step(6);
+ok("and it keeps falling", M.game.weatherDropY(0) > y0, M.game.weatherDropY(0) + " vs " + y0);
+
+// A clear sector has no rain in it.
+M.game.startStage(8);              // NORMANDY: clear
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+step(2);
+ok("a clear sector has nothing falling", M.game.weatherKind() === "clear" && M.game.weatherDropCount() === 0,
+    M.game.weatherKind() + "/" + M.game.weatherDropCount());
+
+// And a snowy one has snow.
+M.game.startStage(16);             // ARDENNES: snow
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+step(2);
+ok("a snowy sector has snow in it", M.game.weatherKind() === "snow" && M.game.weatherDropCount() > 0,
+    M.game.weatherKind() + "/" + M.game.weatherDropCount());
+
 /* ===== Sector select ===== */
 console.log("\nsector select");
 M.game.setTheatre("overlord");

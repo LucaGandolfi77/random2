@@ -1303,6 +1303,99 @@
         state.boss = null;
     }
 
+    /* ===== Weather =====
+       The sky you are flying under is the sky of the sector. It does not
+       touch the gameplay: the rain does not make the enemies harder to
+       hit and the fog does not hide them. It is there so that eight
+       sectors do not look like one long stage, and so that the
+       briefing card can tell you what the day is like before you fly
+       into it.
+
+       Four kinds: rain, snow, fog and the smoke of a city under the
+       bombs. Which one belongs to which sector is in data.js, next to
+       the place and the date. */
+    const weather = { kind: "", drops: [], haze: 0 };
+
+    const WEATHER_KINDS = ["clear", "rain", "snow", "fog", "smoke"];
+
+    function currentWeather() {
+        const card = sectorCard();
+        const kind = card ? card.weather : "clear";
+        return WEATHER_KINDS.indexOf(kind) >= 0 ? kind : "clear";
+    }
+
+    function setupWeather(kind) {
+        weather.kind = kind;
+        weather.drops.length = 0;
+        weather.haze = 0;
+        const n = kind === "rain" ? 44 : kind === "snow" ? 34 : 0;
+        for (let i = 0; i < n; i++) {
+            weather.drops.push({
+                x: Math.random() * W,
+                y: Math.random() * H,
+                len: kind === "rain" ? 8 + Math.random() * 9 : 1.4 + Math.random() * 2,
+                sp: kind === "rain" ? 330 + Math.random() * 170 : 24 + Math.random() * 24,
+                drift: kind === "snow" ? (Math.random() - 0.5) * 26 : 0,
+                ph: Math.random() * 6,
+            });
+        }
+    }
+
+    function updateWeather(dt) {
+        const kind = currentWeather();
+        if (kind !== weather.kind) setupWeather(kind);
+        for (const d of weather.drops) {
+            d.y += d.sp * dt;
+            if (kind === "snow") {
+                d.x += (d.drift + Math.sin(d.ph + state.stageTime * 2.2) * 20) * dt;
+            }
+            if (d.y > H + 12) { d.y = -12; d.x = Math.random() * W; }
+            if (d.x < -12) d.x = W + 12;
+            if (d.x > W + 12) d.x = -12;
+        }
+    }
+
+    function drawWeather(ctx, th) {
+        const kind = weather.kind;
+        if (kind === "fog" || kind === "smoke") {
+            /* A haze that drifts up the screen. The smoke is darker and
+               warmer: it is a city on fire, not weather. */
+            const fumo = kind === "smoke" ? "60,50,40" : "200,214,228";
+            /* Thin bands that overlap, because a gradient would have to be
+               rebuilt every frame and the frame budget says no. */
+            ctx.save();
+            ctx.globalAlpha = kind === "smoke" ? 0.10 : 0.07;
+            ctx.fillStyle = "rgb(" + fumo + ")";
+            for (let i = 0; i < 6; i++) {
+                const y = ((state.stageTime * (kind === "smoke" ? 9 : 14)) + i * 150) % (H + 300) - 150;
+                ctx.fillRect(0, y, W, 130);
+            }
+            ctx.restore();
+            return;
+        }
+        if (kind === "rain") {
+            ctx.save();
+            ctx.strokeStyle = "rgba(178,204,236,0.45)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (const d of weather.drops) {
+                ctx.moveTo(d.x, d.y);
+                ctx.lineTo(d.x - 2.5, d.y + d.len);
+            }
+            ctx.stroke();
+            ctx.restore();
+            return;
+        }
+        if (kind === "snow") {
+            ctx.save();
+            ctx.fillStyle = "rgba(238,246,255,0.8)";
+            for (const d of weather.drops) {
+                ctx.fillRect(d.x, d.y, d.len, d.len);
+            }
+            ctx.restore();
+        }
+    }
+
     /* ===== Sectors =====
        Eight sectors per front, four stages each. A sector is the unit
        the campaign is measured in, and the unit you are allowed to start
@@ -1602,6 +1695,7 @@
             updateEnemies(dt);
             updateParticles(dt);
             updateFloaters(dt);
+            updateWeather(dt);
             return;
         }
 
@@ -1612,6 +1706,7 @@
             updateEnemies(dt);
             updateParticles(dt);
             updateFloaters(dt);
+            updateWeather(dt);
             state.player.deathTimer -= dt;
             Music.stop();
             if (state.player.deathTimer <= 0) {
@@ -1655,6 +1750,7 @@
         updateEnemies(dt);
         updateParticles(dt);
         updateFloaters(dt);
+        updateWeather(dt);
         resolveCollisions();
     }
 
@@ -2067,6 +2163,7 @@
         drawTerrain(ctx, th);
         drawWorld(ctx, th);
         drawPlayer(ctx, th);
+        drawWeather(ctx, th);
         drawHud(ctx, th);
         if (state.paused) drawPause(ctx, th);
         ctx.restore();
@@ -2287,7 +2384,8 @@
         /* the place and the date, then the one line that says what this is */
         ctx.font = "bold 13px Arial, sans-serif";
         ctx.fillStyle = th.accent;
-        ctx.fillText(card.place.toUpperCase() + "   " + card.date, W / 2, H / 2 + 58);
+        const cielo = card.weather && card.weather !== "clear" ? "   " + card.weather.toUpperCase() : "";
+        ctx.fillText(card.place.toUpperCase() + "   " + card.date + cielo, W / 2, H / 2 + 58);
         ctx.font = "italic 12px Arial, sans-serif";
         ctx.fillStyle = "rgba(240,240,240,0.78)";
         let y = H / 2 + 78;
@@ -2626,5 +2724,9 @@
         addScore: addScore,
         /* Exported so the tests can watch the demo fly. */
         startAttract: startAttract,
+        /* Exported so the tests can watch the weather. */
+        weatherKind: () => weather.kind,
+        weatherDropCount: () => weather.drops.length,
+        weatherDropY: (i) => (weather.drops[i] ? weather.drops[i].y : -1),
     };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -271,6 +271,12 @@ for (const theatre of ["overlord", "rising"]) {
         Object.values(carte).every((c) => c.place && c.date && c.line && c.line.length > 20));
     ok(theatre + " card lines are short enough to read on a phone",
         Object.values(carte).every((c) => c.line.length < 130));
+    ok(theatre + " cards all say what the weather is doing",
+        Object.values(carte).every((c) => ["clear", "rain", "snow", "fog", "smoke"].indexOf(c.weather) >= 0),
+        Object.values(carte).map((c) => c.weather).join(","));
+    ok(theatre + " has more than one kind of weather",
+        new Set(Object.values(carte).map((c) => c.weather)).size >= 3,
+        Object.values(carte).map((c) => c.weather).join(","));
 }
 
 /* ===== Hitbox ===== */
