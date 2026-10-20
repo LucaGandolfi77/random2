@@ -19,6 +19,20 @@ Chromium over the DevTools Protocol using only Node built-ins.
 its numbers carry the same `data-claim` attributes the ledger checks, so a
 figure on the CV is verified as carefully as a figure on the portfolio.
 
+### The self-audit
+
+`tools/audit/` loads every project in this repository in a real browser over
+the DevTools Protocol and checks it there: contrast ratios computed with the
+WCAG formula, tap targets under 48px, controls with no accessible name, form
+controls with no label, heading order, duplicate ids, and the two navigation
+timings from a cold cache. The report is committed at
+`portfolio/audit/report.html` with the failures in it. Both scripts skip
+cleanly when there is no browser.
+
+```bash
+node tools/audit/run.mjs            # both audits, then the report
+```
+
 ### The claims ledger
 
 Every number the portfolio states is machine-checked. `tools/verify.mjs`

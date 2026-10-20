@@ -1043,6 +1043,22 @@ Two details worth knowing if you touch it:
   photographing — the published CENSUS return, a seeded STATS profile, a
   sector in flight — because a title screen proves nothing.
 
+### The self-audit
+
+`tools/audit/` loads every project in this repository in a real browser and
+checks it there: contrast ratios computed with the WCAG formula, tap targets,
+accessible names, labels, heading order, duplicate ids, and the two
+navigation timings from a cold cache. The report is committed at
+`portfolio/audit/report.html` **with the failures in it** — a self-audit that
+finds nothing is a decoration.
+
+```bash
+node tools/audit/run.mjs            # both audits, then the report
+```
+
+It skips cleanly when there is no browser, so it can never be the reason a
+build goes red.
+
 ### The claims ledger
 
 Every number the portfolio states is recomputed from this repository by

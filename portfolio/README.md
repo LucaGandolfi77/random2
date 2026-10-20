@@ -245,6 +245,42 @@ required to render the page.
 
 ---
 
+## The self-audit
+
+`tools/audit/` loads every project in this repository in a real browser and
+checks it there, because that is the only place the computed styles live.
+
+```bash
+node tools/audit/run.mjs            # both audits, then the report
+node tools/audit/a11y.mjs            # accessibility only
+node tools/audit/perf.mjs            # performance only
+```
+
+The report is committed at [`audit/report.html`](audit/report.html). **The
+failures are in it.** A self-audit that finds nothing is a decoration; the
+whole point is that somebody else can check what it found.
+
+What it checks: images with no `alt`, controls with no accessible name, form
+controls with no label, duplicate ids, headings that skip a level, a document
+with no language, Italian text with no `lang`, `outline: none` on a focusable
+element, tap targets under 48px, and contrast ratios computed with the WCAG
+formula. The performance pass measures transferred bytes, request count and
+the two navigation timings from a cold cache on a fixed viewport.
+
+The report carries **no timestamp**, so it is byte-for-byte reproducible and
+can be committed and diffed.
+
+**It skips cleanly without a browser.** Both scripts print `SKIP` and exit 0
+when there is no Chromium, because a missing browser must never be the reason
+a build goes red. CI runs them, so the rule is exercised on every push.
+
+It has already paid for itself: the shared scene reader was throwing on load,
+so nine literary pages rendered an empty reader — three elements carried a
+class where the reader looked for an id. That one bug was found by the audit
+and not by reading the code.
+
+---
+
 ## Regenerating the screenshots
 
 The games draw themselves procedurally, so there is nothing to capture until
