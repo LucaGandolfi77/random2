@@ -9,7 +9,7 @@
     --border: rgba(255, 255, 255, 0.09);
     --text: #f4f5fb;
     --muted: rgba(233, 236, 250, 0.66);
-    --faint: rgba(233, 236, 250, 0.44);
+    --faint: rgba(233, 236, 250, 0.52);
     --accent: #8b5cf6;
     --accent-2: #ec4899;
     --ok: #34d399;
@@ -29,7 +29,7 @@
     --border: rgba(18, 20, 40, 0.13);
     --text: #171928;
     --muted: rgba(28, 31, 55, 0.7);
-    --faint: rgba(28, 31, 55, 0.5);
+    --faint: rgba(28, 31, 55, 0.72);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -150,6 +150,7 @@
     letter-spacing: -0.01em;
     text-decoration: none;
     margin-right: auto;
+    min-height: 48px;
     display: inline-flex;
     align-items: center;
     gap: 9px;
@@ -167,6 +168,9 @@
     color: var(--muted);
     text-decoration: none;
     padding: 8px 11px;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
     border-radius: 10px;
     transition: color 0.2s ease, background 0.2s ease;
   }
@@ -174,8 +178,8 @@
 
   .toggles { display: flex; gap: 8px; }
   .toggle {
-    min-height: 38px;
-    min-width: 44px;
+    min-height: 48px;
+    min-width: 48px;
     padding: 0 11px;
     display: inline-flex;
     align-items: center;
@@ -278,7 +282,7 @@
   .btn:active { transform: scale(0.96); }
   .btn-primary {
     color: #fff;
-    background: linear-gradient(135deg, #6d5bf0, #b44df0);
+    background: linear-gradient(135deg, #6d5bf0, #a63ae0);
     box-shadow: 0 10px 26px -10px rgba(139, 92, 246, 0.8);
   }
   @media (hover: hover) { .btn-primary:hover { filter: brightness(1.12); } }
@@ -356,23 +360,18 @@
   .stat { position: relative; }
   .claim-link {
     position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 30px;
-    height: 30px;
+    top: 0;
+    right: 0;
+    width: 48px;
+    height: 48px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     line-height: 1;
-    color: var(--faint);
+    color: var(--muted);
     border-radius: 9px;
     text-decoration: none;
-  }
-  .claim-link::after {
-    content: "";
-    position: absolute;
-    inset: -9px;
   }
   @media (hover: hover) {
     .claim-link:hover { color: var(--text); background: var(--surface-strong); }
@@ -462,7 +461,7 @@
     white-space: nowrap;
   }
   .case-actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
-  .case-actions .btn { min-height: 46px; padding: 0 18px; font-size: 14px; border-radius: 13px; }
+  .case-actions .btn { min-height: 48px; padding: 0 18px; font-size: 14px; border-radius: 13px; }
 
   /* The facts under a case: the constraint, the stack, what shipped.
      Same shape for every case, so nine of them read as one system. */
@@ -659,8 +658,13 @@
     color: var(--text);
   }
   .stack-grid a {
-    display: inline-block;
-    margin-top: 5px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    min-width: 48px;
+    justify-content: center;
+    padding: 0 8px;
+    margin-top: 2px;
     font-size: 12.5px;
     font-weight: 700;
     color: var(--accent-2);
@@ -722,7 +726,7 @@
     border: 1px solid var(--border);
     border-radius: 999px;
     padding: 9px 15px;
-    min-height: 42px;
+    min-height: 48px;
     transition: color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
   }
   .cloud a:hover { color: var(--text); border-color: rgba(255,255,255,0.26); transform: translateY(-1px); }

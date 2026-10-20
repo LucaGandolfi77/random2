@@ -132,6 +132,15 @@ jobs:
           node tools/verify.mjs --check
           node tools/verify.mjs --compare portfolio/verify.html
 
+      - name: The self-audit runs
+        # The accessibility and performance audits need a Chromium. When
+        # there is none they print SKIP and exit 0, so this step can never
+        # be the reason a build goes red — the same rule the in-browser
+        # smoke tests follow.
+        run: |
+          set -euo pipefail
+          node tools/audit/run.mjs
+
       - name: Corpus extract stays in sync
         # The extractor reads the literary PWAs' source with regexes, so a
         # rewrite of a corpus file can silently empty it. This asserts the

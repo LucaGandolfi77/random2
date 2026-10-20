@@ -92,6 +92,9 @@
 | 32 | **IRONFALL** | 3v3 lane MOBA, Warhammer 40k | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/ironfall-pwa/) |
 | 33 | **PULSE** | Procedural rhythm game | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pulse-pwa/) |
 | 34 | **Portfolio** | EN/IT case-study site | HTML + CSS + JS | ✅ | [⌘ Open](https://lucagandolfi77.github.io/random2/portfolio/) |
+| 35 | **Pokédex GO** | Low-poly creature collection, bilingual | Canvas 3D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pokemon-go-pwa/) |
+| 36 | **SARTORIA** | Couture tycoon: one runway per season | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sartoria-pwa/) |
+| 37 | **Mini Tower** | Tiny-tower builder: floors, shops, tenants | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/tiny-tower-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.

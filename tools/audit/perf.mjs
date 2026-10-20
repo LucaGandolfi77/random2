@@ -30,11 +30,17 @@ function projects() {
   const out = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
-    if (entry.name === "portfolio" || entry.name.startsWith(".")) continue;
+    if (entry.name.startsWith(".")) continue;
     if (existsSync(join(root, entry.name, "index.html"))) out.push(entry.name);
   }
   return out.sort();
 }
+
+const PAGES = [
+  ...projects().map((name) => ({ name, path: `/${name}/` })),
+  { name: "portfolio/cv.html", path: "/portfolio/cv.html" },
+  { name: "portfolio/verify.html", path: "/portfolio/verify.html" },
+];
 
 const args = process.argv.slice(2);
 const only = args.includes("--only") ? args[args.indexOf("--only") + 1] : null;
@@ -68,9 +74,10 @@ cdp.on("Network.requestWillBeSent", () => {
 });
 
 const apps = [];
-for (const name of projects()) {
+for (const page of PAGES) {
+  const name = page.name;
+  const path = page.path;
   if (only && name !== only) continue;
-  const path = `/${name}/`;
   try {
     bytes = 0;
     requests = 0;

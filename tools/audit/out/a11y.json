@@ -69,27 +69,27 @@
         "contrast": [
           {
             "el": "span.chip.honey “🍯 39”",
-            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+            "msg": "3.83:1 at worst on a gradient (rgb(133,121,101)) — needs 4.5:1"
           },
           {
             "el": "b#honey “39”",
-            "msg": "1.11:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+            "msg": "1.18:1 at worst on a gradient (rgb(133,121,101)) — needs 4.5:1"
           },
           {
             "el": "span.chip “🐝 10/10”",
-            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+            "msg": "3.83:1 at worst on a gradient (rgb(133,121,101)) — needs 4.5:1"
           },
           {
             "el": "b#pop “10”",
-            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+            "msg": "3.83:1 at worst on a gradient (rgb(133,121,101)) — needs 4.5:1"
           },
           {
             "el": "span#slots “10”",
-            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+            "msg": "3.83:1 at worst on a gradient (rgb(133,121,101)) — needs 4.5:1"
           },
           {
             "el": "span#season.chip “🌸 Primavera · Anno 1”",
-            "msg": "4.07:1 at worst on a gradient (rgb(138,125,105)) — needs 4.5:1"
+            "msg": "3.83:1 at worst on a gradient (rgb(133,121,101)) — needs 4.5:1"
           }
         ],
         "targets": [
@@ -123,30 +123,17 @@
       "path": "/anna-karenina-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -169,20 +156,7 @@
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button#reader-back.r-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#reader-again.r-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#reader-continue.r-btn.hidden",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
@@ -329,30 +303,17 @@
       "path": "/brothers-karamazov-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -538,30 +499,17 @@
       "path": "/divine-comedy-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -580,30 +528,17 @@
       "path": "/dorian-gray-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -627,12 +562,7 @@
       "findings": {
         "alt": [],
         "names": [],
-        "labels": [
-          {
-            "el": "input#name-input",
-            "msg": "form control with no label"
-          }
-        ],
+        "labels": [],
         "contrast": [
           {
             "el": "span.stat-label “CRYSTALS”",
@@ -769,18 +699,13 @@
       "name": "formica-pwa",
       "path": "/formica-pwa/",
       "lang": "it",
-      "manual": 10,
+      "manual": 15,
       "checked": 15,
       "error": null,
       "findings": {
         "alt": [],
         "names": [],
-        "labels": [
-          {
-            "el": "input#name-input",
-            "msg": "form control with no label"
-          }
-        ],
+        "labels": [],
         "contrast": [
           {
             "el": "button#btn-play.btn.primary “FONDA LA COLONIA”",
@@ -814,30 +739,17 @@
       "path": "/invisible-cities-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -905,30 +817,17 @@
       "path": "/ivan-ilyich-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -989,30 +888,17 @@
       "path": "/les-miserables-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -1030,18 +916,13 @@
       "name": "lumen-pwa",
       "path": "/lumen-pwa/",
       "lang": "en",
-      "manual": 8,
+      "manual": 13,
       "checked": 13,
       "error": null,
       "findings": {
         "alt": [],
         "names": [],
-        "labels": [
-          {
-            "el": "input#name-input",
-            "msg": "form control with no label"
-          }
-        ],
+        "labels": [],
         "contrast": [],
         "targets": [
           {
@@ -1487,16 +1368,7 @@
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button#tog-sound.toggle.on",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#tog-haptics.toggle.on",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [
           {
@@ -1587,62 +1459,77 @@
       }
     },
     {
+      "name": "portfolio",
+      "path": "/portfolio/",
+      "lang": "en",
+      "manual": 10,
+      "checked": 570,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "portfolio/cv.html",
+      "path": "/portfolio/cv.html",
+      "lang": "en",
+      "manual": 1,
+      "checked": 72,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
+      "name": "portfolio/verify.html",
+      "path": "/portfolio/verify.html",
+      "lang": "en",
+      "manual": 0,
+      "checked": 202,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    },
+    {
       "name": "pulse-pwa",
       "path": "/pulse-pwa/",
       "lang": "en",
-      "manual": 1,
+      "manual": 0,
       "checked": 20,
       "error": null,
       "findings": {
         "alt": [],
         "names": [],
         "labels": [],
-        "contrast": [
-          {
-            "el": "h1 “PULSE”",
-            "msg": "1.00:1 at worst on a gradient (rgb(255,90,122)) — needs 3:1"
-          },
-          {
-            "el": "button#btn-daily.ghost “Daily”",
-            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
-          },
-          {
-            "el": "button#btn-random.ghost “Random”",
-            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
-          },
-          {
-            "el": "button “Easy”",
-            "msg": "1.65:1 on rgb(179,179,179) — needs 4.5:1"
-          },
-          {
-            "el": "button “Hard”",
-            "msg": "1.65:1 on rgb(179,179,179) — needs 4.5:1"
-          },
-          {
-            "el": "kbd “D”",
-            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
-          },
-          {
-            "el": "kbd “F”",
-            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
-          },
-          {
-            "el": "kbd “J”",
-            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
-          },
-          {
-            "el": "kbd “K”",
-            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
-          },
-          {
-            "el": "kbd “Esc”",
-            "msg": "1.09:1 on rgb(255,255,255) — needs 4.5:1"
-          },
-          {
-            "el": "span.empty “No tracks yet — every seed is a new song.”",
-            "msg": "3.48:1 on rgb(255,255,255) — needs 4.5:1"
-          }
-        ],
+        "contrast": [],
         "targets": [
           {
             "el": "button#btn-daily.ghost “Daily”",
@@ -1745,12 +1632,7 @@
       "findings": {
         "alt": [],
         "names": [],
-        "labels": [
-          {
-            "el": "input#import-file",
-            "msg": "form control with no label"
-          }
-        ],
+        "labels": [],
         "contrast": [
           {
             "el": "button#modal-btn.btn.primary “Al lavoro!”",
@@ -1807,7 +1689,7 @@
       "name": "sartoria-pwa",
       "path": "/sartoria-pwa/",
       "lang": "it",
-      "manual": 2,
+      "manual": 1,
       "checked": 23,
       "error": null,
       "findings": {
@@ -1815,10 +1697,6 @@
         "names": [],
         "labels": [],
         "contrast": [
-          {
-            "el": "h1.logo “SARTORIA”",
-            "msg": "1.00:1 at worst on a gradient (rgb(244,223,174)) — needs 3:1"
-          },
           {
             "el": "span “sfilate”",
             "msg": "3.33:1 on rgb(28,21,30) — needs 4.5:1"
@@ -1866,18 +1744,13 @@
       "name": "sector7-pwa",
       "path": "/sector7-pwa/",
       "lang": "en",
-      "manual": 37,
+      "manual": 39,
       "checked": 39,
       "error": null,
       "findings": {
         "alt": [],
         "names": [],
-        "labels": [
-          {
-            "el": "input#name-input",
-            "msg": "form control with no label"
-          }
-        ],
+        "labels": [],
         "contrast": [
           {
             "el": "button#btn-play.btn.primary “LAUNCH”",
@@ -1896,14 +1769,6 @@
           {
             "el": "button#btn-sound.btn.ghost “🔊 Sound”",
             "msg": "125×44px tap target"
-          },
-          {
-            "el": "a “Luca Gandolfi”",
-            "msg": "68×11px tap target"
-          },
-          {
-            "el": "a “MIT”",
-            "msg": "18×11px tap target"
           }
         ],
         "headings": [],
@@ -2037,12 +1902,7 @@
       "findings": {
         "alt": [],
         "names": [],
-        "labels": [
-          {
-            "el": "input#caption",
-            "msg": "form control with no label"
-          }
-        ],
+        "labels": [],
         "contrast": [],
         "targets": [],
         "headings": [],
@@ -2100,12 +1960,7 @@
       "findings": {
         "alt": [],
         "names": [],
-        "labels": [
-          {
-            "el": "input#d-file",
-            "msg": "form control with no label"
-          }
-        ],
+        "labels": [],
         "contrast": [
           {
             "el": "p.kicker “random2 · local only”",
@@ -2170,19 +2025,14 @@
       "name": "territorio-pwa",
       "path": "/territorio-pwa/",
       "lang": "it",
-      "manual": 2,
+      "manual": 1,
       "checked": 14,
       "error": null,
       "findings": {
         "alt": [],
         "names": [],
         "labels": [],
-        "contrast": [
-          {
-            "el": "em “RITO”",
-            "msg": "1.00:1 at worst on a gradient (rgb(34,211,238)) — needs 3:1"
-          }
-        ],
+        "contrast": [],
         "targets": [],
         "headings": [],
         "live": [],
@@ -2196,30 +2046,17 @@
       "path": "/the-trial-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -2263,30 +2100,17 @@
       "path": "/underground-pwa/",
       "lang": "en",
       "manual": 0,
-      "checked": 4,
+      "checked": 10,
       "error": null,
       "findings": {
         "alt": [],
-        "names": [
-          {
-            "el": "button.ls-lang",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "a#ls-back.ls-btn",
-            "msg": "control with no accessible name"
-          },
-          {
-            "el": "button#ls-again.ls-btn",
-            "msg": "control with no accessible name"
-          }
-        ],
+        "names": [],
         "labels": [],
         "contrast": [],
         "targets": [
           {
-            "el": "button.ls-lang",
-            "msg": "21×12px tap target"
+            "el": "button#ls-lang.ls-lang “Lingua: Italiano”",
+            "msg": "114×24px tap target"
           },
           {
             "el": "a “← The Library — La Biblioteca”",
@@ -2304,7 +2128,7 @@
       "name": "virtual-farm-pwa",
       "path": "/virtual-farm-pwa/",
       "lang": "en",
-      "manual": 29,
+      "manual": 27,
       "checked": 50,
       "error": null,
       "findings": {
@@ -2381,18 +2205,6 @@
             "msg": "2.78:1 at worst on a gradient (rgb(76,175,80)) — needs 4.5:1"
           },
           {
-            "el": "h3 “🌱 Crops”",
-            "msg": "2.43:1 at worst on a gradient (rgb(255,224,178)) — needs 3:1"
-          },
-          {
-            "el": "h3 “🐄 Animals”",
-            "msg": "2.43:1 at worst on a gradient (rgb(255,224,178)) — needs 3:1"
-          },
-          {
-            "el": "h3 “🛠️ Tools”",
-            "msg": "2.43:1 at worst on a gradient (rgb(255,224,178)) — needs 3:1"
-          },
-          {
             "el": "button#sell-all-btn.btn.danger “Sell All Crops”",
             "msg": "3.68:1 at worst on a gradient (rgb(244,67,54)) — needs 4.5:1"
           },
@@ -2411,6 +2223,14 @@
           {
             "el": "p “📱 Install Virtual Farm Tycoon for the best …”",
             "msg": "2.16:1 at worst on a gradient (rgb(255,152,0)) — needs 4.5:1"
+          },
+          {
+            "el": "button#install-btn.btn.primary “Install”",
+            "msg": "3.12:1 at worst on a gradient (rgb(33,150,243)) — needs 4.5:1"
+          },
+          {
+            "el": "button#install-later.btn “Later”",
+            "msg": "2.78:1 at worst on a gradient (rgb(76,175,80)) — needs 4.5:1"
           }
         ],
         "targets": [
@@ -2447,12 +2267,7 @@
             "msg": "73×35px tap target"
           }
         ],
-        "headings": [
-          {
-            "el": "h3 “🌱 Crops”",
-            "msg": "heading jumps from h1 to h3"
-          }
-        ],
+        "headings": [],
         "live": [],
         "ids": [],
         "focus": [],
@@ -2473,23 +2288,23 @@
         "contrast": [
           {
             "el": "span#lvl-name.chip “Livello 1 · Primo strappo”",
-            "msg": "1.29:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+            "msg": "1.26:1 at worst on a gradient (rgb(58,44,32)) — needs 4.5:1"
           },
           {
             "el": "span#ops.chip “🪛 0/4”",
-            "msg": "1.29:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+            "msg": "1.26:1 at worst on a gradient (rgb(58,44,32)) — needs 4.5:1"
           },
           {
             "el": "button#levels-btn.iconbtn “☰”",
-            "msg": "1.59:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+            "msg": "1.55:1 at worst on a gradient (rgb(58,44,32)) — needs 4.5:1"
           },
           {
             "el": "button#retry-btn.iconbtn “↺”",
-            "msg": "1.59:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+            "msg": "1.55:1 at worst on a gradient (rgb(58,44,32)) — needs 4.5:1"
           },
           {
             "el": "button#sound-btn.iconbtn “🔊”",
-            "msg": "1.59:1 at worst on a gradient (rgb(59,45,33)) — needs 4.5:1"
+            "msg": "1.55:1 at worst on a gradient (rgb(58,44,32)) — needs 4.5:1"
           },
           {
             "el": "button.lvbtn “1☆☆☆”",

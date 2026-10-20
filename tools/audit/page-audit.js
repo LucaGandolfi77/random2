@@ -139,8 +139,13 @@
     }
   }
 
-  /* ---- tap targets ---- */
+  /* ---- tap targets ----
+     WCAG 2.5.8 exempts a target that is inline in a sentence: the size of
+     a link inside a paragraph is constrained by the line height of the
+     text around it, and making it 48px tall would break the paragraph. */
   for (const el of document.querySelectorAll("button, a[href], [role=button], [role=tab], input[type=checkbox], input[type=radio]")) {
+    const cs = getComputedStyle(el);
+    if (cs.display === "inline") continue;
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) continue;
     if (r.width < 48 || r.height < 48) {
@@ -166,12 +171,16 @@
       a: s.length >= 8 ? parseInt(s.slice(6, 8), 16) / 255 : 1,
     };
   }
+  /* Source-over compositing: the foreground is painted on top of the
+     background, and the result keeps whatever alpha is left. */
   function over(fg, bg) {
+    const a = fg.a + bg.a * (1 - fg.a);
+    if (a <= 0) return { r: 0, g: 0, b: 0, a: 0 };
     return {
-      r: fg.r * fg.a + bg.r * (1 - fg.a),
-      g: fg.g * fg.a + bg.g * (1 - fg.a),
-      b: fg.b * fg.a + bg.b * (1 - fg.a),
-      a: 1,
+      r: (fg.r * fg.a + bg.r * bg.a * (1 - fg.a)) / a,
+      g: (fg.g * fg.a + bg.g * bg.a * (1 - fg.a)) / a,
+      b: (fg.b * fg.a + bg.b * bg.a * (1 - fg.a)) / a,
+      a: a,
     };
   }
   function luminance(c) {
@@ -202,8 +211,8 @@
   }
   /* Walk the ancestors compositing their backgrounds. A gradient is not a
      single colour, so it comes back as its stops rather than a guess. */
-  function backgroundOf(el) {
-    let node = el;
+  function backgroundOf(el, skipSelf) {
+    let node = skipSelf ? el.parentElement : el;
     let acc = null;
     while (node && node.nodeType === 1) {
       const cs = getComputedStyle(node);
@@ -232,14 +241,64 @@
     if (cs.visibility === "hidden" || cs.display === "none" || Number(cs.opacity) === 0) continue;
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) continue;
-    const fg = parseColor(cs.color);
-    if (!fg) continue;
-    const bg = backgroundOf(el);
-    if (!bg) continue;
     const size = parseFloat(cs.fontSize);
     const weight = Number(cs.fontWeight) || 400;
     const need = (size >= 24 || (size >= 18.66 && weight >= 700)) ? 3 : 4.5;
     out.checked++;
+
+    /* Text painted with a gradient: the visible colour is the gradient, not
+       the `color` property, which is transparent. */
+    const clip = cs.webkitBackgroundClip || cs.backgroundClip;
+    if (clip === "text" && cs.backgroundImage && cs.backgroundImage !== "none") {
+      const stops = gradientStops(cs.backgroundImage);
+      const behind = backgroundOf(el, true);
+      if (!stops.length || !behind || !behind.solid) continue;
+      let worst = Infinity;
+      for (const raw of stops) {
+        const got = ratio(over(raw, behind.solid), behind.solid);
+        if (got < worst) worst = got;
+      }
+      if (worst < need) {
+        push("contrast", el, worst.toFixed(2) + ":1 at worst on gradient text — needs " + need + ":1");
+      }
+      continue;
+    }
+
+    const fg = parseColor(cs.color);
+    if (!fg) continue;
+
+    /* A transparent `color` means the text is painted by an ancestor that
+       clips a gradient to its text. The visible colour is that gradient. */
+    if (fg.a === 0) {
+      let owner = el.parentElement;
+      let found = null;
+      while (owner && owner.nodeType === 1) {
+        const ocs = getComputedStyle(owner);
+        if ((ocs.webkitBackgroundClip || ocs.backgroundClip) === "text" &&
+            ocs.backgroundImage && ocs.backgroundImage !== "none") {
+          found = owner;
+          break;
+        }
+        owner = owner.parentElement;
+      }
+      if (!found) continue;
+      const stops = gradientStops(getComputedStyle(found).backgroundImage);
+      const behind = backgroundOf(found, true);
+      if (stops.length && behind && behind.solid) {
+        let worst = Infinity;
+        for (const raw of stops) {
+          const got = ratio(over(raw, behind.solid), behind.solid);
+          if (got < worst) worst = got;
+        }
+        if (worst < need) {
+          push("contrast", el, worst.toFixed(2) + ":1 at worst on gradient text — needs " + need + ":1");
+        }
+      }
+      continue;
+    }
+
+    const bg = backgroundOf(el);
+    if (!bg) continue;
 
     if (bg.solid) {
       const got = ratio(over(fg, bg.solid), bg.solid);

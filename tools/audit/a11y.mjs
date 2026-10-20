@@ -21,19 +21,31 @@ import { writeReport } from "./report.mjs";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "../..");
 
-/* The projects to audit: every top-level folder that ships an index.html.
-   bucio and new-star-soccer build with a bundler, so their pages do not
-   run from the repository root; they are audited from their build output
-   when it exists and skipped otherwise. */
+/* The pages to audit: every top-level folder that ships an index.html, plus
+   the portfolio's own pages. bucio and new-star-soccer build with a
+   bundler, so their pages do not run from the repository root; they are
+   audited from the repository root anyway, which serves their unbuilt
+   index.html. */
 function projects() {
   const out = [];
   for (const entry of readdirSync(root, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
-    if (entry.name === "portfolio" || entry.name.startsWith(".")) continue;
+    if (entry.name.startsWith(".")) continue;
     if (existsSync(join(root, entry.name, "index.html"))) out.push(entry.name);
   }
   return out.sort();
 }
+
+/* The pages that are not a project folder but are still pages. */
+const EXTRA_PAGES = [
+  { name: "portfolio/cv.html", path: "/portfolio/cv.html" },
+  { name: "portfolio/verify.html", path: "/portfolio/verify.html" },
+];
+
+const PAGES = [
+  ...projects().map((name) => ({ name, path: `/${name}/` })),
+  ...EXTRA_PAGES,
+];
 
 const args = process.argv.slice(2);
 const only = args.includes("--only") ? args[args.indexOf("--only") + 1] : null;
@@ -59,9 +71,10 @@ await cdp.send("Runtime.enable", {}, sessionId);
 const source = readFileSync(join(here, "page-audit.js"), "utf8");
 
 const apps = [];
-for (const name of projects()) {
+for (const page of PAGES) {
+  const name = page.name;
+  const path = page.path;
   if (only && name !== only) continue;
-  const path = `/${name}/`;
   try {
     await cdp.send("Emulation.setDeviceMetricsOverride", {
       width: 1280, height: 900, deviceScaleFactor: 1, mobile: false,
