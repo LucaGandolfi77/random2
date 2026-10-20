@@ -329,6 +329,14 @@
         { min: 20000, label: "EXTEND" },
     ];
 
+    /* The sectors, in order: eight per front, four stages each. The
+       sector card and the sector select both read this list, so the
+       campaign has one shape and not two. */
+    const sectors = {
+        overlord: ["CHANNEL", "NORTH SEA", "NORMANDY", "BERLIN", "ARDENNES", "RHINE", "ALPS", "VIENNA"],
+        rising: ["MIDWAY", "MARSHALL", "ATTU", "RABAUL", "LEYTE", "SAIPAN", "IWO JIMA", "OKINAWA"],
+    };
+
     const pilotRanks = [
         { min: 300000, rank: "TRIPLE ACE" },
         { min: 150000, rank: "ACE" },
@@ -497,6 +505,7 @@
         pilotRanks: pilotRanks,
         extendTable: extendTable,
         sectorCards: sectorCards,
+        sectors: sectors,
         rankFor: rankFor,
         powPlan: powPlan,
         bossStages: bossStages,

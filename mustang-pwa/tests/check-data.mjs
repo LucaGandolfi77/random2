@@ -273,6 +273,21 @@ for (const theatre of ["overlord", "rising"]) {
         Object.values(carte).every((c) => c.line.length < 130));
 }
 
+/* ===== Sectors ===== */
+section("sectors");
+for (const theatre of ["overlord", "rising"]) {
+    const list = D.sectors[theatre];
+    ok(theatre + " has eight sectors", list.length === 8, String(list.length));
+    ok(theatre + " sectors have no duplicates", new Set(list).size === list.length);
+    ok(theatre + " sectors match the cards",
+        list.every((n) => !!D.sectorCards[theatre][n]), list.join(","));
+    const settori = [...new Set(D.allStages[theatre].map((s) => s.name))];
+    ok(theatre + " sectors match the stages",
+        list.join("|") === settori.join("|"), list.join("|") + " vs " + settori.join("|"));
+    ok(theatre + " has four stages to a sector",
+        D.allStages[theatre].length === list.length * 4, String(D.allStages[theatre].length));
+}
+
 /* ===== Extends ===== */
 section("extends");
 ok("three thresholds", D.extendTable.length === 3, String(D.extendTable.length));

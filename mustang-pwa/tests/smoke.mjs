@@ -90,6 +90,9 @@ const ids = [
     "overlay-play", "continue-btn", "continue-stage", "overlay-theme", "final-score", "final-high", "final-lives", "final-rank",
     "theatre-choices", "install-prompt", "install-btn", "install-later",
     "theatre-overlord", "theatre-rising",
+    "sector-row", "sector-choices",
+    "sector-0", "sector-1", "sector-2", "sector-3",
+    "sector-4", "sector-5", "sector-6", "sector-7",
 ];
 for (const id of ids) els[id] = makeEl(id);
 els["theatre-overlord"].dataset.theatre = "overlord";
@@ -1232,6 +1235,43 @@ ok("and the allied one is untouched", (() => {
     M.game.setTheatre("overlord");
     return S.checkpoint === 5;
 })(), "overlord checkpoint " + S.checkpoint);
+
+/* ===== Sector select ===== */
+console.log("\nsector select");
+M.game.setTheatre("overlord");
+M.game.startGame();
+/* The cleared sectors are a record of the campaign and they survive a
+   new run, so this section starts from a known one. */
+S.cleared = { overlord: [], rising: [] };
+M.game.setTheatre("overlord");
+ok("nothing is open at the start", els["sector-0"].disabled === true && els["sector-7"].disabled === true);
+ok("the sector row is hidden until something is open", els["sector-row"].classList.contains("hidden"));
+
+// The first sector is four stages. It opens when the last of them is
+// behind you, not when the first one is.
+for (let i = 0; i < 4; i++) ok("stage " + (i + 1) + " of the sector clears", playStageToTally(i));
+ok("the first sector is open", (S.cleared.overlord || []).indexOf(0) >= 0, JSON.stringify(S.cleared.overlord));
+ok("the open sector button says the name of the sector",
+    els["sector-0"].textContent === "CHANNEL", els["sector-0"].textContent);
+ok("an open sector button can be pressed", els["sector-0"].disabled === false);
+ok("a sector that is not open stays locked", els["sector-3"].disabled === true);
+ok("the sector row is on screen now", !els["sector-row"].classList.contains("hidden"));
+
+// Clicking an open sector starts that sector again.
+els["sector-0"]._h.click[0]();
+ok("clicking an open sector flies it", S.stageIndex === 0 && S.stage.n === 32, S.stageIndex + "/" + S.stage.n);
+
+// A locked sector does not start.
+M.game.startStage(5);
+els["sector-3"]._h.click[0]();
+ok("a locked sector does not start", S.stageIndex === 5, String(S.stageIndex));
+
+// The other front has its own sectors.
+M.game.setTheatre("rising");
+ok("the sectors change with the front", els["sector-0"].textContent === "MIDWAY", els["sector-0"].textContent);
+ok("the other front starts with nothing open", els["sector-0"].disabled === true);
+M.game.setTheatre("overlord");
+ok("and the first front still has its sector open", els["sector-0"].disabled === false);
 
 /* ===== Music variants ===== */
 console.log("\nmusic variants");

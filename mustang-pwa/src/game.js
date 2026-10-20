@@ -30,6 +30,7 @@
         difficulty: "arcade",
         checkpoint: 0,
         checkpoints: null,
+        cleared: { overlord: [], rising: [] },
         stage: null,
         stageNumber: 32,
         stageIndex: 0,
@@ -113,6 +114,10 @@
         DOME.finalLives = document.getElementById("final-lives");
         DOME.finalRank = document.getElementById("final-rank");
         DOME.theatreChoices = document.getElementById("theatre-choices");
+        DOME.sectorRow = document.getElementById("sector-row");
+        DOME.sectorChoices = document.getElementById("sector-choices");
+        DOME.sectorBtns = [];
+        for (let i = 0; i < 8; i++) DOME.sectorBtns.push(document.getElementById("sector-" + i));
         DOME.difficultyChoices = document.getElementById("difficulty-choices");
         DOME.difficultyRow = document.getElementById("difficulty-row");
         DOME.controlsHint = document.getElementById("controls-hint");
@@ -1183,6 +1188,79 @@
         state.boss = null;
     }
 
+    /* ===== Sectors =====
+       Eight sectors per front, four stages each. A sector is the unit
+       the campaign is measured in, and the unit you are allowed to start
+       a run from once you have cleared it. */
+    function sectorList() {
+        return D.sectors[state.theatre] || [];
+    }
+
+    function sectorIndexFor(stageIndex) {
+        const stages = currentStages();
+        const st = stages[clamp(stageIndex, 0, stages.length - 1)];
+        if (!st) return 0;
+        const i = sectorList().indexOf(st.name);
+        return i < 0 ? 0 : i;
+    }
+
+    function stagesPerSector() {
+        const list = sectorList();
+        if (!list.length) return 1;
+        return Math.max(1, Math.floor(currentStages().length / list.length));
+    }
+
+    function markSectorCleared() {
+        const i = sectorIndexFor(state.stageIndex);
+        /* Four stages to a sector: it opens when the last of them is
+           behind you, not when the first one is. */
+        const ultimo = (i + 1) * stagesPerSector() - 1;
+        if (state.stageIndex < ultimo) return false;
+        const fatti = state.cleared[state.theatre] || (state.cleared[state.theatre] = []);
+        if (fatti.indexOf(i) >= 0) return false;
+        fatti.push(i);
+        fatti.sort((a, b) => a - b);
+        return true;
+    }
+
+    function isSectorOpen(index) {
+        return (state.cleared[state.theatre] || []).indexOf(index) >= 0;
+    }
+
+    /* The eight buttons of the sector select: the name of the sector, and
+       locked until you have been through it. */
+    function markSectorButtons() {
+        const list = sectorList();
+        for (let i = 0; i < DOME.sectorBtns.length; i++) {
+            const b = DOME.sectorBtns[i];
+            if (!b) continue;
+            const nome = list[i] || "--";
+            const aperto = isSectorOpen(i);
+            b.textContent = nome;
+            b.disabled = !aperto;
+            b.classList.toggle("open", aperto);
+            b.dataset.sector = String(i);
+            b.title = aperto
+                ? "Fly " + nome + " again, from stage " + (currentStages().length - i * stagesPerSector())
+                : "Clear " + nome + " to open it";
+        }
+        if (DOME.sectorRow) DOME.sectorRow.classList.toggle("hidden", !(state.cleared[state.theatre] || []).length);
+    }
+
+    /* Starting a run from a sector you have already flown. A locked
+       sector does nothing: the button is disabled, and so is this. */
+    function startSector(index) {
+        if (!isSectorOpen(index)) return false;
+        const stages = currentStages();
+        const from = clamp(index * stagesPerSector(), 0, stages.length - 1);
+        resetGame();
+        state.checkpoint = from;
+        hideOverlay();
+        Sound.unlock();
+        startStage(from);
+        return true;
+    }
+
     /* The music knows how much trouble you are in: the march over the
        water, the boss, or the one that plays when you are one life from
        the end. The player hears the difference before they read the HUD. */
@@ -1257,6 +1335,8 @@
         }
         state.enemies.length = 0;
         state.ebullets.length = 0;
+        markSectorCleared();
+        markSectorButtons();
         save();
     }
 
@@ -1304,6 +1384,7 @@
         DOME.finalLives.textContent = state.lives;
         DOME.finalRank.textContent = D.rankFor(state.score);
         DOME.overlayPlay.textContent = "\u25B6 Play Again";
+        markSectorButtons();
         if (DOME.theatreChoices) DOME.theatreChoices.classList.add("hidden");
         if (DOME.difficultyRow) DOME.difficultyRow.classList.add("hidden");
         if (DOME.continueBtn) {
@@ -1631,6 +1712,11 @@
         DOME.soundBtn.addEventListener("click", toggleSound);
         DOME.overlayPlay.addEventListener("click", () => { Sound.unlock(); startGame(); });
         if (DOME.continueBtn) DOME.continueBtn.addEventListener("click", () => { Sound.unlock(); continueRun(); });
+        for (let i = 0; i < DOME.sectorBtns.length; i++) {
+            const b = DOME.sectorBtns[i];
+            if (!b || !b.addEventListener) continue;
+            b.addEventListener("click", () => { Sound.unlock(); startSector(i); });
+        }
         DOME.overlayTheme.addEventListener("click", cycleTheme);
 
         if (DOME.difficultyChoices) {
@@ -1662,6 +1748,7 @@
         state.highScore = state.highScores[id] || 0;
         DOME.overlayMsg.textContent = D.theatres[id].blurb;
         markTheatreButtons();
+        markSectorButtons();
         save();
     }
 
@@ -2114,6 +2201,7 @@
         DOME.overlayMsg.textContent = t.blurb;
         DOME.overlayStats.classList.add("hidden");
         DOME.overlayPlay.textContent = "\u25B6 Play";
+        markSectorButtons();
         if (DOME.continueBtn) DOME.continueBtn.classList.add("hidden");
         if (DOME.theatreChoices) {
             DOME.theatreChoices.classList.remove("hidden");
@@ -2149,6 +2237,10 @@
             theatre: state.theatre,
             difficulty: state.difficulty,
             checkpoint: state.checkpoints ? state.checkpoints[state.theatre] || 0 : 0,
+            cleared: {
+                overlord: (state.cleared.overlord || []).slice(),
+                rising: (state.cleared.rising || []).slice(),
+            },
             sound: state.sound,
         });
     }
@@ -2163,6 +2255,14 @@
             state.checkpoint = { overlord: 0, rising: 0 };
             state.checkpoints = { overlord: 0, rising: 0 };
             state.checkpoints[saved.theatre] = saved.checkpoint || 0;
+            state.cleared = { overlord: [], rising: [] };
+            if (saved.cleared && typeof saved.cleared === "object") {
+                for (const id of ["overlord", "rising"]) {
+                    const list = saved.cleared[id];
+                    if (!Array.isArray(list)) continue;
+                    state.cleared[id] = list.filter((n) => Number.isInteger(n) && n >= 0 && n < 8);
+                }
+            }
             state.sound = saved.sound !== false;
         }
         state.highScore = state.highScores[state.theatre] || 0;

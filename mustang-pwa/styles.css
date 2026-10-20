@@ -310,6 +310,32 @@ nav.controls {
     box-shadow: 0 0 14px var(--shadow);
 }
 
+/* The sector select: eight buttons, four to a row, locked until the
+   sector has been flown. */
+#sector-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.btn.chip.sector {
+    flex: 1 1 22%;
+    min-width: 0;
+    padding: 7px 4px;
+    font-size: 0.58rem;
+    letter-spacing: 0.4px;
+    line-height: 1.1;
+}
+
+.btn.chip.sector:disabled {
+    opacity: 0.32;
+}
+
+.btn.chip.sector.open {
+    border-color: var(--neon);
+    color: var(--neon);
+}
+
 .theatre-choices {
     display: flex;
     flex-direction: column;
