@@ -100,7 +100,41 @@ export const FILTRI = [
   { id: 'psichedelico', nome: 'Psychedelic', emoji: '🌀', animato: true, op: 'psichedelico' },
 ];
 
-export const filtroPerId = (id) => FILTRI.find((f) => f.id === id) ?? FILTRI[0];
+/* ---------- looks ----------
+
+   A look is a lens, a frame and a grade applied together, in one tap: the
+   thing a camera app is actually for. The pieces are all in the registry
+   above; a look only says which ones to use. */
+export const LOOKS = [
+  { id: 'look-disco',    nome: 'Disco',     emoji: '🪩', lente: 'robot',    cornice: 'prisma',    grado: 'vivido' },
+  { id: 'look-noir',     nome: 'Noir',      emoji: '🎩', lente: 'cilindro', cornice: 'vignetta',  grado: 'noir' },
+  { id: 'look-cinema',   nome: 'Cinema',    emoji: '🎞️', cornice: 'letterbox',                 grado: 'seppia' },
+  { id: 'look-onda',     nome: 'Wave',      emoji: '🌊', lente: 'arcoboca',  cornice: 'fulgore',   grado: 'freddo' },
+  { id: 'look-ghiaccio', nome: 'Ice Queen', emoji: '👸', lente: 'angelo',   cornice: 'gelo',      grado: 'cianotipo' },
+];
+
+/* Resolves a look into the filter object the renderer already understands,
+   so a look is drawn by exactly the same code as a single filter. */
+export function lookComeFiltro(look) {
+  const grado = look.grado ? filtroPerId(look.grado) : null;
+  return {
+    id: look.id,
+    nome: look.nome,
+    emoji: look.emoji,
+    volto: !!look.lente,
+    lente: look.lente || null,
+    cornice: look.cornice || null,
+    op: grado ? (grado.op ?? null) : null,
+    css: grado ? (grado.css ?? null) : null,
+  };
+}
+
+export const filtroPerId = (id) => {
+  const f = FILTRI.find((x) => x.id === id);
+  if (f) return f;
+  const look = LOOKS.find((x) => x.id === id);
+  return look ? lookComeFiltro(look) : FILTRI[0];
+};
 
 /* ============================================================
  * FACE ENGINE (MediaPipe, lazy loading)
@@ -340,7 +374,9 @@ export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
 
   if (filtro.quiz) return disegnaQuiz(ctx, fc, filtro, t);
 
-  switch (filtro.id) {
+  /* A look carries the lens it wants in `lente`; a plain filter is its own
+     lens. One switch, two kinds of entry. */
+  switch (filtro.lente || filtro.id) {
     case 'cagnolino': return disegnaCagnolino(ctx, fc);
     case 'occhiali':  return disegnaOcchiali(ctx, fc);
     case 'corona':    return disegnaCorona(ctx, fc);

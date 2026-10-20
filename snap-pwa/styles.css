@@ -457,3 +457,51 @@ button {
   #shutter:active .ring { transform: none; }
   #flash { transition: none; }
 }
+
+/* ---- looks ----
+   A look is a lens, a frame and a grade in one tap. They sit in their own
+   row above the filter carousel: they are combinations, not filters, and
+   mixing the two in one strip would make the strip unreadable. */
+.looks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100px + var(--sab));
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 max(16px, var(--sal)) 0 max(16px, var(--sar));
+  scrollbar-width: none;
+  z-index: 5;
+  -webkit-overflow-scrolling: touch;
+}
+.looks::-webkit-scrollbar { display: none; }
+.look {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: var(--target);
+  padding: 0 15px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  border: 1.5px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: transform var(--dur-fast) ease, border-color var(--dur-mid) ease, color var(--dur-mid) ease;
+}
+.look:active { transform: scale(0.94); }
+.look .emoji { font-size: 17px; line-height: 1; }
+.look.attiva {
+  border-color: var(--giallo);
+  background: rgba(255, 252, 0, 0.14);
+  color: var(--giallo);
+}
+
+/* The shutter moves up to make room for the looks row. */
+#shutter { bottom: calc(152px + var(--sab)); }

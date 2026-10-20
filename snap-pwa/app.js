@@ -4,7 +4,7 @@
  */
 
 import {
-  FILTRI, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
+  FILTRI, LOOKS, filtroPerId, ensureEngineVolto, disegnaLenteVolto, disegnaCornice, applicaFiltroPixel, applicaTermicaVivo, resetQuizStati,
 } from './filters.js';
 
 /* ---------- DOM references ---------- */
@@ -16,6 +16,7 @@ const flashEl = $('#flash');
 const statusEl = $('#status');
 const toastEl = $('#toast');
 const carousel = $('#carousel');
+const looksRow = $('#looks');
 
 /* ---------- state ---------- */
 const stato = {
@@ -449,26 +450,37 @@ function chiudiViewer() {
  * THE FILTER CAROUSEL
  * ============================================================ */
 function costruisciCarosello() {
-  for (const f of FILTRI) {
+  /* The looks go in their own row: they are combinations, not filters, and
+     mixing the two in one strip would make the strip unreadable. */
+  costruisciChip(looksRow, LOOKS, 'look', (id) => selezionaFiltro(id, 'look'));
+  costruisciChip(carousel, FILTRI, 'chip-filtro', (id) => selezionaFiltro(id, 'filtro'));
+}
+
+function costruisciChip(contenitore, voci, classe, alClick) {
+  for (const f of voci) {
     const chip = document.createElement('button');
-    chip.className = 'chip-filtro' + (f.id === stato.filtroId ? ' attiva' : '');
+    chip.className = classe + (f.id === stato.filtroId ? ' attiva' : '');
     chip.dataset.id = f.id;
     chip.innerHTML = `<span class="emoji">${f.emoji}</span><span class="nome">${f.nome}</span>`;
-    chip.addEventListener('click', () => selezionaFiltro(f.id));
-    carousel.appendChild(chip);
+    chip.addEventListener('click', () => alClick(f.id));
+    contenitore.appendChild(chip);
   }
 }
 
-function selezionaFiltro(id) {
+function selezionaFiltro(id, origine) {
   stato.filtroId = id;
   stato.landmarks = null;
   stato.engineStato = stato.engineStato === 'errore' ? 'idle' : stato.engineStato;
   resetQuizStati(); // the quizzes restart with a new draw
+  /* Only one of the two rows can be the active one: a look is a
+     combination, and a filter is one thing. */
   for (const c of carousel.children) c.classList.toggle('attiva', c.dataset.id === id);
-  const attivo = carousel.querySelector(`[data-id="${id}"]`);
+  for (const c of looksRow.children) c.classList.toggle('attiva', c.dataset.id === id);
+  const attivo = (origine === 'look' ? looksRow : carousel).querySelector(`[data-id="${id}"]`);
   attivo?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   const filtro = filtroPerId(id);
   if (!filtro.volto) nascondiStatus();
+  if (navigator.vibrate) navigator.vibrate(8);
 }
 
 /* ============================================================
