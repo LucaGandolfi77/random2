@@ -49,6 +49,10 @@
         /* Threading: cutting through an enemy while rolling. One hit, the
            chain goes up, and the chain is what makes it worth the risk:
            you cannot shoot while you roll. */
+        /* How long the menu has to sit untouched before the cabinet
+           starts playing the game by itself. */
+        attractDelay: 3,
+
         threadPoints: 300,
         threadChainMax: 9,
         threadDecay: 2.4,

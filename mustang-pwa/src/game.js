@@ -26,6 +26,8 @@
     const state = {
         phase: "menu",
         phaseTimer: 0,
+        attract: false,
+        menuIdle: 0,
         theatre: "overlord",
         difficulty: "arcade",
         checkpoint: 0,
@@ -1145,7 +1147,82 @@
         return clamp((state.weightKilled / state.weightTotal) * 100, 0, 100);
     }
 
+    /* ===== Attract mode =====
+       The cabinet played the game behind the title screen: the game
+       playing itself, with nobody touching it. This is that.
+
+       The demo is the real game — the same stage, the same enemies, the
+       same guns — with a bot flying the aircraft. The bot writes into
+       the same input the keyboard writes into, so the tilt, the firing
+       and the loops behave exactly as they do for a person.
+
+       The demo never touches the campaign: the checkpoints, the cleared
+       sectors and the high score are all left alone. */
+    function startAttract(index) {
+        if (state.attract) return;
+        state.attract = true;
+        const stages = currentStages();
+        const at = (typeof index === "number" && index >= 0 && index < stages.length)
+            ? index
+            : Math.floor(Math.random() * stages.length);
+        resetGame();
+        startStage(at);
+        Music.stop();
+    }
+
+    function stopAttract() {
+        state.attract = false;
+    }
+
+    /* The bot. It does not aim: the guns are automatic. It lines up with
+       the nearest enemy in front of it, and it gets out of the way of
+       anything that is on its way down. */
+    function botVector() {
+        const p = state.player;
+        if (!p) return { x: 0, y: 0 };
+        let x = 0, y = 0;
+
+        /* the nearest shot that is still on its way down */
+        let danger = null;
+        let best = 1e9;
+        for (const b of state.ebullets) {
+            if (b.dead) continue;
+            if (b.y < p.y - 30) continue;          // already past us
+            const d = Math.abs(b.x - p.x) + Math.max(0, b.y - p.y) * 0.5;
+            if (d < best && d < 120) { best = d; danger = b; }
+        }
+        if (danger) {
+            const dx = danger.x - p.x;
+            x = Math.abs(dx) < 10 ? 0 : (dx > 0 ? -1 : 1);
+            return { x: x, y: 0 };
+        }
+
+        /* the nearest enemy in front: line up with it */
+        let target = null;
+        let near = 1e9;
+        for (const e of state.enemies) {
+            if (e.delay > 0) continue;
+            if (e.y > p.y - 24) continue;           // level with us or below
+            const d = Math.hypot(e.x - p.x, e.y - p.y);
+            if (d < near) { near = d; target = e; }
+        }
+        if (target) {
+            const dx = target.x - p.x;
+            x = Math.abs(dx) < 5 ? 0 : (dx > 0 ? 1 : -1);
+            /* stay off the deck: the ground units are the ones that
+               reach you, and the higher you fly the more of them there
+               are in the way */
+            if (p.y < H - 140) y = 1;
+        } else {
+            /* nothing in front: drift, so the demo is not a statue */
+            x = Math.sin(state.tick / 37) * 0.8;
+        }
+        return { x: clamp(x, -1, 1), y: clamp(y, -1, 1) };
+    }
+
     function startGame() {
+        stopAttract();
+        state.menuIdle = 0;
         if (DOME.controlsHint) DOME.controlsHint.classList.add("hidden");
         store.set("mustang-hint-seen", true);
         resetGame();
@@ -1315,12 +1392,15 @@
     }
 
     function endStage() {
-        if (!state.checkpoints) state.checkpoints = { overlord: 0, rising: 0 };
-        if (state.stageIndex > state.checkpoints[state.theatre]) {
-            state.checkpoints[state.theatre] = state.stageIndex;
-            save();
+        /* The demo does not move the checkpoint: it is not a run. */
+        if (!state.attract) {
+            if (!state.checkpoints) state.checkpoints = { overlord: 0, rising: 0 };
+            if (state.stageIndex > state.checkpoints[state.theatre]) {
+                state.checkpoints[state.theatre] = state.stageIndex;
+                save();
+            }
+            state.checkpoint = state.checkpoints[state.theatre];
         }
-        state.checkpoint = state.checkpoints[state.theatre];
         const row = D.bonusFor(shootDownRate());
         state.accuracyBonus = row.pts;
         state.loopBonus = state.loops * config.loopBonus;
@@ -1335,7 +1415,7 @@
         }
         state.enemies.length = 0;
         state.ebullets.length = 0;
-        markSectorCleared();
+        if (!state.attract) markSectorCleared();
         markSectorButtons();
         save();
     }
@@ -1343,6 +1423,8 @@
     function advanceStage() {
         const stages = currentStages();
         if (state.stageIndex + 1 >= stages.length) {
+            /* the demo does not surrender: it starts again */
+            if (state.attract) { startAttract(); return; }
             addScore(1000000);
             save();
             state.phase = "victory";
@@ -1440,6 +1522,7 @@
             state.player.deathTimer -= dt;
             Music.stop();
             if (state.player.deathTimer <= 0) {
+                if (state.attract) { startAttract(); return; }
                 if (state.lives <= 0) { gameOver(); return; }
                 const p = state.player;
                 p.alive = true;
@@ -1450,6 +1533,16 @@
                 state.phase = "playing";
                 syncMusic();
                 Music.start();
+            }
+            return;
+        }
+
+        /* The attract mode: after a few seconds of nobody touching
+           anything, the cabinet starts playing the game by itself. */
+        if (state.phase === "menu") {
+            if (!state.attract) {
+                state.menuIdle += dt;
+                if (state.menuIdle >= config.attractDelay) startAttract();
             }
             return;
         }
@@ -1577,7 +1670,7 @@
             }
         }
 
-        const v = inputVector();
+        const v = state.attract ? botVector() : inputVector();
         const mag = Math.hypot(v.x, v.y);
         const authority = p.looping ? config.loopSteer : 1;
         if (p.looping) {
@@ -1601,7 +1694,7 @@
         p.y = clamp(p.y, config.playerTopMargin, H - config.playerBottomMargin);
 
         p.fireCool -= dt;
-        if (!p.looping && (input.fire || input.touch)) playerFire();
+        if (!p.looping && (input.fire || input.touch || state.attract)) playerFire();
 
         for (let i = 0; i < state.sideFighters.length; i++) {
             const f = state.sideFighters[i];
@@ -1667,7 +1760,7 @@
         if (e.code === "KeyP" || e.code === "Escape") togglePause();
         if (e.code === "Enter") {
             if (state.phase === "clear") advanceStage();
-            else if (state.phase === "menu" || state.phase === "gameover" || state.phase === "victory") startGame();
+            else if (state.attract || state.phase === "menu" || state.phase === "gameover" || state.phase === "victory") startGame();
         }
     }
 
@@ -1785,7 +1878,7 @@
     }
 
     function togglePause() {
-        if (state.phase === "menu" || state.phase === "gameover" || state.phase === "victory") return;
+        if (state.attract || state.phase === "menu" || state.phase === "gameover" || state.phase === "victory") return;
         state.paused = !state.paused;
         DOME.pauseBtn.textContent = state.paused ? "\u25B6 Resume" : "\u23F8 Pause";
         if (state.paused) {
@@ -2225,12 +2318,16 @@
         const idx = names.indexOf(state.theme);
         applyTheme(names[(idx + 1) % names.length]);
         save();
-        if (state.phase === "menu") showStartOverlay();
+        if (state.attract || state.phase === "menu") showStartOverlay();
     }
 
     function save() {
-        state.highScores[state.theatre] = Math.max(state.highScores[state.theatre] || 0, state.score);
-        state.highScore = state.highScores[state.theatre];
+        /* The demo does not score: it is not a run, and its points must
+           not end up in the high score of a front. */
+        if (!state.attract) {
+            state.highScores[state.theatre] = Math.max(state.highScores[state.theatre] || 0, state.score);
+            state.highScore = state.highScores[state.theatre];
+        }
         store.set("mustang-pwa", {
             highScores: state.highScores,
             theme: state.theme,
@@ -2367,5 +2464,7 @@
         /* Exported so the tests can add points the way the game does, rather
            than setting the score behind the extends' back. */
         addScore: addScore,
+        /* Exported so the tests can watch the demo fly. */
+        startAttract: startAttract,
     };
 })(typeof window !== "undefined" ? window : globalThis);

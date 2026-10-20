@@ -1273,6 +1273,45 @@ ok("the other front starts with nothing open", els["sector-0"].disabled === true
 M.game.setTheatre("overlord");
 ok("and the first front still has its sector open", els["sector-0"].disabled === false);
 
+/* ===== Attract mode ===== */
+console.log("\nattract mode");
+// After a few seconds of nobody touching anything, the cabinet plays
+// the game by itself.
+S.phase = "menu";
+S.menuIdle = 0;
+S.attract = false;
+let idle = 0;
+while (!S.attract && idle++ < 600) step(1);
+ok("the cabinet plays by itself after a few idle seconds", S.attract === true, idle + " frames");
+ok("the demo flies a stage", !!S.stage && S.stage.n >= 1, S.stage && String(S.stage.n));
+ok("the demo starts with a full set of lives", S.lives === CFG.startLives, String(S.lives));
+
+// The bot has to stay in the air long enough to be worth watching.
+M.game.startGame();
+M.game.startAttract(0);
+let survived = 0;
+while (S.player.alive && survived < 6000) { step(1); survived++; }
+ok("the bot stays in the air", survived > 300, survived + " frames");
+
+// The demo must not touch the campaign.
+const highBefore = S.highScore;
+const clearedBefore = JSON.stringify(S.cleared);
+const checkpointsBefore = JSON.stringify(S.checkpoints);
+M.game.startAttract();
+let demo = 0;
+while (demo++ < 900) step(1);
+ok("the demo does not open a sector", JSON.stringify(S.cleared) === clearedBefore,
+    JSON.stringify(S.cleared));
+ok("the demo does not move the checkpoint", JSON.stringify(S.checkpoints) === checkpointsBefore,
+    JSON.stringify(S.checkpoints));
+ok("the demo does not touch the high score", S.highScore === highBefore,
+    S.highScore + " vs " + highBefore);
+
+// Playing stops the demo.
+M.game.startGame();
+ok("playing stops the demo", S.attract === false);
+ok("and the game is a real game again", S.score === 0 && S.lives === CFG.startLives);
+
 /* ===== Music variants ===== */
 console.log("\nmusic variants");
 ok("the music starts on the march", M.Music.name === "flight", M.Music.name);
