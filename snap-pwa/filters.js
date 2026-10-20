@@ -309,6 +309,7 @@ const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
 export function disegnaLenteVolto(ctx, filtro, landmarks, geom, t = 0) {
   if (!landmarks?.length) return false;
+  const { specchio } = geom;
   const P = creaProiettore(geom, landmarks);
   const occhioSx = mid(P, 'occhioSxEst', 'occhioSxInt');
   const occhioDx = mid(P, 'occhioDxEst', 'occhioDxInt');
