@@ -84,11 +84,19 @@ export const FILTRI = [
   { id: 'caldo',    nome: 'Warm',     emoji: '🔥', css: 'sepia(0.35) saturate(1.35) hue-rotate(-12deg)', op: 'caldo' },
   { id: 'negativo', nome: 'Negative',  emoji: '🌓', css: 'invert(1)', op: 'negativo' },
   { id: 'duotone',  nome: 'Duotone',   emoji: '🟣', css: 'grayscale(1) sepia(1) hue-rotate(225deg) saturate(2.6) contrast(1.05)', op: 'duotone' },
+  { id: 'neon',     nome: 'Neon',      emoji: '🟪', css: 'saturate(2.4) contrast(1.28) hue-rotate(-12deg)', op: 'neon' },
+  { id: 'cianotipo', nome: 'Cyanotype', emoji: '💙', css: 'grayscale(1) contrast(1.25) sepia(0.55) hue-rotate(178deg) saturate(2.4)', op: 'cianotipo' },
   // `live: true` = the preview uses the same ramp as the photo (at a low
   // resolution); without it the CSS showed a red heatmap with black.
   // resolution); without it the CSS showed a red heatmap with black.
   { id: 'termica',  nome: 'Thermal',   emoji: '🌡️', css: 'none', live: true, op: 'termica' },
   { id: 'sogno',    nome: 'Dream',     emoji: '☁️', css: 'brightness(1.1) saturate(1.25) contrast(0.92)', cornice: 'bloom' },
+  { id: 'fulgore',  nome: 'Light Leak', emoji: '💫', cornice: 'fulgore' },
+  { id: 'pola',     nome: 'Instant Film', emoji: '📆', cornice: 'pola' },
+  { id: 'letterbox', nome: 'Cinema',  emoji: '🎞️', cornice: 'letterbox' },
+  { id: 'gelo',     nome: 'Frost',     emoji: '🧊', cornice: 'gelo' },
+  { id: 'glitch',   nome: 'Glitch',    emoji: '⚡', cornice: 'glitch' },
+  { id: 'prisma',   nome: 'Prism',     emoji: '🌈', cornice: 'prisma' },
   { id: 'psichedelico', nome: 'Psychedelic', emoji: '🌀', animato: true, op: 'psichedelico' },
 ];
 
@@ -1144,7 +1152,6 @@ export function disegnaCornice(ctx, filtro, W, H, t, bloom = false) {
     if (bloom) {
   // a real bloom (at the shot only: the canvas already holds the photo):
   // a downscaled copy put back with the 'lighter' blend
-      // a downscaled copy put back with the 'lighter' blend
       const tw = Math.max(2, Math.round(W / 10));
       const th = Math.max(2, Math.round(H / 10));
       const tmp = document.createElement('canvas');
@@ -1157,6 +1164,111 @@ export function disegnaCornice(ctx, filtro, W, H, t, bloom = false) {
       ctx.drawImage(tmp, 0, 0, W, H);
       ctx.restore();
     }
+  } else if (filtro.cornice === 'fulgore') {
+    // a warm flare that sweeps the corner, like a light leak on the film
+    const fase = (t * 0.14) % 1;
+    const cx = W * (0.08 + fase * 0.9);
+    const cy = H * 0.16;
+    const raggio = Math.max(W, H) * 0.6;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, raggio);
+    g.addColorStop(0, 'rgba(255, 198, 126, 0.40)');
+    g.addColorStop(0.35, 'rgba(255, 122, 92, 0.17)');
+    g.addColorStop(1, 'rgba(255, 70, 130, 0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  } else if (filtro.cornice === 'pola') {
+    // an instant film frame: a white border with a date back
+    const b = Math.round(Math.min(W, H) * 0.052);
+    ctx.fillStyle = '#f4f1e8';
+    ctx.fillRect(0, 0, W, b);
+    ctx.fillRect(0, H - b, W, b);
+    ctx.fillRect(0, 0, b, H);
+    ctx.fillRect(W - b, 0, b, H);
+    // the date back: the classic orange, with the date in a mono face
+    const d = new Date();
+    const testo = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+    const alt = Math.max(13, Math.round(Math.min(W, H) * 0.045));
+    ctx.save();
+    ctx.translate(W - b - alt * 0.6, H - b - alt * 1.1);
+    ctx.rotate(-0.06);
+    ctx.fillStyle = '#ff7a1a';
+    ctx.font = `700 ${alt}px "Courier New", ui-monospace, monospace`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(testo, 0, 0);
+    ctx.restore();
+  } else if (filtro.cornice === 'letterbox') {
+    // 2.39:1 bars, a frame counter and a touch of grain
+    const bar = Math.round(H * 0.115);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, bar);
+    ctx.fillRect(0, H - bar, W, bar);
+    const n = Math.floor(t * 24) % 10000;
+    const alt = Math.max(11, Math.round(Math.min(W, H) * 0.032));
+    ctx.font = `700 ${alt}px "Courier New", ui-monospace, monospace`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = 'rgba(255, 236, 120, 0.9)';
+    ctx.fillText(String(n).padStart(4, '0'), W - bar * 0.6, H - bar * 0.35);
+    ctx.textAlign = 'left';
+  } else if (filtro.cornice === 'gelo') {
+    // frost creeping in from the edges: overlapping translucent facets
+    const larg = Math.max(W, H) * 0.24;
+    ctx.save();
+    ctx.fillStyle = 'rgba(226, 244, 255, 0.30)';
+    for (let i = 0; i < 9; i++) {
+      const lato = i % 2 ? 0 : 1;
+      const y = (i / 9) * H + ((t * 12) % (H / 9));
+      const punto = lato ? W : 0;
+      ctx.beginPath();
+      ctx.moveTo(punto, y);
+      ctx.lineTo(punto + (lato ? -larg : larg) * (0.6 + (i % 3) * 0.25), y + H * 0.05);
+      ctx.lineTo(punto + (lato ? -larg : larg) * (0.4 + (i % 2) * 0.3), y + H * 0.13);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+    // a cold vignette over the whole frame
+    const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75);
+    g.addColorStop(0, 'rgba(180, 225, 255, 0)');
+    g.addColorStop(1, 'rgba(150, 205, 255, 0.28)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  } else if (filtro.cornice === 'glitch') {
+    // horizontal tear bands, each with a colour of its own
+    for (let i = 0; i < 5; i++) {
+      const y = ((t * 110 + i * 317) % (H + 240)) - 120;
+      const h = Math.max(6, H * 0.010 * (1 + (i % 3)));
+      const off = ((i * 53) % 44) - 22;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = i % 2 ? 'rgba(255, 0, 96, 0.22)' : 'rgba(0, 220, 255, 0.22)';
+      ctx.fillRect(off, y, W, h);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    // a couple of hard tears with a bright edge
+    for (let i = 0; i < 2; i++) {
+      const y = ((t * 70 + i * 211) % (H + 160)) - 80;
+      const h = Math.max(2, H * 0.004);
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillRect(0, y, W, h);
+    }
+  } else if (filtro.cornice === 'prisma') {
+    // a prism: the edges split into a spectrum
+    const raggi = Math.max(W, H) * 0.78;
+    const spalle = 7;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < spalle; i++) {
+      const a0 = (i / spalle) * Math.PI * 2 + t * 0.15;
+      const a1 = a0 + (Math.PI * 2) / spalle * 0.72;
+      const hue = (i / spalle) * 360;
+      ctx.beginPath();
+      ctx.moveTo(W / 2, H / 2);
+      ctx.arc(W / 2, H / 2, raggi, a0, a1);
+      ctx.closePath();
+      ctx.fillStyle = `hsla(${hue}, 85%, 60%, 0.055)`;
+      ctx.fill();
+    }
+    ctx.restore();
   }
 }
 
@@ -1198,6 +1310,26 @@ const OPS_PIXEL = {
   },
   caldo(d)  { return applicaMatrice(d, matriceHue(-12 * Math.PI / 180), [14, 4, -10]); },
   negativo(d) { return [255 - d[0], 255 - d[1], 255 - d[2]]; },
+  neon(d) {
+    // a split tone: magenta in the shadows, cyan in the highlights
+    const l = (0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255;
+    const s = 1 - l;
+    return [
+      clamp255(d[0] * (0.55 + 0.90 * l) + 95 * s),
+      clamp255(d[1] * (0.45 + 0.95 * l) + 6 * s),
+      clamp255(d[2] * (0.70 + 0.80 * l) + 110 * s),
+    ];
+  },
+  cianotipo(d) {
+    // a blue print: contrast first, then a cold tint
+    const l = 0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2];
+    const v = clamp255((l - 128) * 1.25 + 128);
+    return [
+      clamp255(v * 0.20 + 10),
+      clamp255(v * 0.50 + 28),
+      clamp255(v * 0.95 + 58),
+    ];
+  },
   duotone(d) {
     const t = clamp01((0.2126 * d[0] + 0.7152 * d[1] + 0.0722 * d[2]) / 255);
   // deep violet → bright pink
