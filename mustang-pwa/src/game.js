@@ -34,6 +34,9 @@
         checkpoint: 0,
         checkpoints: null,
         cleared: { overlord: [], rising: [] },
+        records: { overlord: {}, rising: {} },
+        sectorStages: [],
+        sectorIndex: -1,
         stage: null,
         stageNumber: 32,
         stageIndex: 0,
@@ -1328,6 +1331,14 @@
            behind you, not when the first one is. */
         const ultimo = (i + 1) * stagesPerSector() - 1;
         if (state.stageIndex < ultimo) return false;
+
+        /* The record: the best shoot-down rate over the four stages. */
+        const rec = state.records[state.theatre] || (state.records[state.theatre] = {});
+        const riga = rec[i] || (rec[i] = { rate: 0, clears: 0 });
+        riga.clears++;
+        const rate = sectorRate();
+        if (rate > riga.rate) riga.rate = Math.round(rate * 10) / 10;
+
         const fatti = state.cleared[state.theatre] || (state.cleared[state.theatre] = []);
         if (fatti.indexOf(i) >= 0) return false;
         fatti.push(i);
@@ -1339,6 +1350,31 @@
         return (state.cleared[state.theatre] || []).indexOf(index) >= 0;
     }
 
+    /* The shoot-down rate of the sector, over the stages of it you have
+       flown. Each stage keeps its own figure, so flying a stage again
+       replaces it instead of counting it twice. */
+    function sectorRate() {
+        let killed = 0;
+        let total = 0;
+        for (const s of state.sectorStages) {
+            if (!s) continue;
+            killed += s.killed;
+            total += s.total;
+        }
+        if (total <= 0) return 0;
+        return clamp((killed / total) * 100, 0, 100);
+    }
+
+    function medalFor(rate) {
+        for (const m of config.sectorMedals) if (rate >= m.min) return m.name;
+        return "";
+    }
+
+    function sectorRecord(index) {
+        const rec = state.records[state.theatre];
+        return rec[index] || null;
+    }
+
     /* The eight buttons of the sector select: the name of the sector, and
        locked until you have been through it. */
     function markSectorButtons() {
@@ -1348,13 +1384,23 @@
             if (!b) continue;
             const nome = list[i] || "--";
             const aperto = isSectorOpen(i);
-            b.textContent = nome;
+            const rec = sectorRecord(i);
+            const medaglia = rec ? medalFor(rec.rate) : "";
+            const riga = rec ? (medaglia ? medaglia + " " : "") + rec.rate.toFixed(0) + "%" : "--";
+            b.innerHTML = "<strong>" + nome + "</strong><small>" + riga + "</small>";
             b.disabled = !aperto;
             b.classList.toggle("open", aperto);
+            b.classList.toggle("gold", medaglia === "GOLD");
+            b.classList.toggle("silver", medaglia === "SILVER");
+            b.classList.toggle("bronze", medaglia === "BRONZE");
             b.dataset.sector = String(i);
-            b.title = aperto
-                ? "Fly " + nome + " again, from stage " + (currentStages().length - i * stagesPerSector())
-                : "Clear " + nome + " to open it";
+            b.title = rec
+                ? nome + " — flown " + rec.clears + (rec.clears === 1 ? " time" : " times")
+                    + ", best shoot-down " + rec.rate.toFixed(1) + "%"
+                    + (medaglia ? ", " + medaglia.toLowerCase() + " medal" : "")
+                : (aperto
+                    ? "Fly " + nome + " again, from stage " + (currentStages().length - i * stagesPerSector())
+                    : "Clear " + nome + " to open it");
         }
         if (DOME.sectorRow) DOME.sectorRow.classList.toggle("hidden", !(state.cleared[state.theatre] || []).length);
     }
@@ -1389,6 +1435,11 @@
     function startStage(index) {
         const stages = currentStages();
         state.stageIndex = clamp(index, 0, stages.length - 1);
+        /* The figures of a sector are its own: a new sector starts empty. */
+        if (sectorIndexFor(state.stageIndex) !== state.sectorIndex) {
+            state.sectorIndex = sectorIndexFor(state.stageIndex);
+            state.sectorStages = [];
+        }
         state.stage = stages[state.stageIndex];
         state.stageNumber = state.stage.n;
         state.stageTarget = 58 + (32 - state.stage.n) * 0.45;
@@ -1450,7 +1501,13 @@
         }
         state.enemies.length = 0;
         state.ebullets.length = 0;
-        if (!state.attract) markSectorCleared();
+        if (!state.attract) {
+            /* Each stage of the sector keeps its own shoot-down figure, so
+               flying it again replaces it instead of counting it twice. */
+            const pos = state.stageIndex % stagesPerSector();
+            state.sectorStages[pos] = { killed: state.weightKilled, total: state.weightTotal };
+            markSectorCleared();
+        }
         markSectorButtons();
         save();
     }
@@ -2417,6 +2474,10 @@
                 rising: (state.cleared.rising || []).slice(),
             },
             hitbox: state.hitbox,
+            records: {
+                overlord: Object.assign({}, state.records.overlord),
+                rising: Object.assign({}, state.records.rising),
+            },
             sound: state.sound,
         });
     }
@@ -2440,6 +2501,24 @@
                 }
             }
             state.hitbox = saved.hitbox !== false;
+            state.records = { overlord: {}, rising: {} };
+            if (saved.records && typeof saved.records === "object") {
+                for (const id of ["overlord", "rising"]) {
+                    const rec = saved.records[id];
+                    if (!rec || typeof rec !== "object") continue;
+                    for (const key of Object.keys(rec)) {
+                        const r = rec[key];
+                        if (!r || typeof r !== "object") continue;
+                        const rate = Number(r.rate);
+                        const clears = Number(r.clears);
+                        if (!Number.isFinite(rate) || rate < 0 || rate > 100) continue;
+                        state.records[id][key] = {
+                            rate: Math.round(rate * 10) / 10,
+                            clears: Number.isFinite(clears) && clears > 0 ? Math.floor(clears) : 1,
+                        };
+                    }
+                }
+            }
             state.sound = saved.sound !== false;
         }
         state.highScore = state.highScores[state.theatre] || 0;

@@ -57,6 +57,16 @@
            starts playing the game by itself. */
         attractDelay: 3,
 
+        /* The medals for a sector. The rate is the shoot-down rate the
+           arcade paid a bonus for, so the medal is the same judgement the
+           game already makes about a stage, over the four stages of the
+           sector together. */
+        sectorMedals: [
+            { name: "GOLD", min: 95 },
+            { name: "SILVER", min: 85 },
+            { name: "BRONZE", min: 70 },
+        ],
+
         threadPoints: 300,
         threadChainMax: 9,
         threadDecay: 2.4,

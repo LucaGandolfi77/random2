@@ -319,12 +319,26 @@ nav.controls {
 }
 
 .btn.chip.sector {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
     flex: 1 1 22%;
     min-width: 0;
-    padding: 7px 4px;
+    padding: 6px 3px;
     font-size: 0.58rem;
     letter-spacing: 0.4px;
-    line-height: 1.1;
+    line-height: 1.15;
+}
+
+.btn.chip.sector strong {
+    font-size: 0.6rem;
+    font-weight: 700;
+}
+
+.btn.chip.sector small {
+    font-size: 0.5rem;
+    letter-spacing: 0.3px;
+    opacity: 0.8;
 }
 
 .btn.chip.sector:disabled {
@@ -334,6 +348,23 @@ nav.controls {
 .btn.chip.sector.open {
     border-color: var(--neon);
     color: var(--neon);
+}
+
+/* The medals. The border and the small line carry the tier, so the
+   button stays readable at the size of a chip. */
+.btn.chip.sector.gold {
+    border-color: #ffd54f;
+    color: #ffd54f;
+}
+
+.btn.chip.sector.silver {
+    border-color: #cfd8e3;
+    color: #cfd8e3;
+}
+
+.btn.chip.sector.bronze {
+    border-color: #cd7f32;
+    color: #cd7f32;
 }
 
 .theatre-choices {
