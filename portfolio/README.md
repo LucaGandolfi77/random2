@@ -3,7 +3,7 @@
 > A UI/UX and frontend portfolio for Luca Gandolfi, bilingual EN/IT.
 
 *One page, no build step, no dependencies.* It exists because the arcade
-presents 48 projects as a list of things to play, and that is the wrong shape
+presents 44 projects as a list of things to play, and that is the wrong shape
 for someone deciding whether to hire you. This page presents six of them as
 problems that were solved.
 
@@ -70,12 +70,15 @@ the bot is a terminal program.
 
 ## How it is built
 
-Plain HTML, CSS and one inline `<script>`. No package.json, no bundler, no
+Plain HTML, CSS and one classic `<script>`. No package.json, no bundler, no
 dependencies — the same rule every other project in this repository follows.
 
 ```
 portfolio/
-├── index.html          everything: shell, CSS, both languages
+├── index.html          the shell: markup, both languages, the links
+├── assets/
+│   ├── portfolio.css   the stylesheet, extracted from index.html verbatim
+│   └── portfolio.js    the progressive enhancement, extracted verbatim
 ├── manifest.json       PWA manifest (CI requires manifest ↔ index.html link)
 ├── service-worker.js   cache-first shell, one cache per app
 ├── icons/              192 + 512, SVG like every other project here
@@ -84,6 +87,16 @@ portfolio/
 ├── shots/              committed; the site is static
 └── README.md
 ```
+
+The CSS and the JS live in `assets/` rather than inline, because Phase 1 of
+the expansion plan added a claims ledger and a print stylesheet, and by then
+the inline block was 600 lines of stylesheet hiding inside a markup file.
+Neither file was edited during the move: the extraction is byte-for-byte.
+
+`assets/portfolio.js` is loaded as a classic script at the end of `<body>`,
+without `defer` and without `async`, so the DOM above it is parsed before it
+runs. It is the only script on the page, and it is still optional — with
+JavaScript off the page is complete, bilingual and readable.
 
 **Both languages live in the markup** as sibling elements:
 
@@ -110,6 +123,10 @@ page does not load it. It would cost ~17 KB for a single media query, and it
 would tie the folder to this repository's layout — which matters because the
 page is otherwise self-contained and could be lifted into its own repo or
 domain later without changes.
+
+The two files in `assets/` are not a counter-example to that: they live
+inside the folder, they travel with it, and nothing outside the folder is
+required to render the page.
 
 ---
 

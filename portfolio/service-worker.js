@@ -4,11 +4,13 @@
  * demand: a visitor who never scrolls to the third case study should not pay
  * for it.
  */
-const CACHE_NAME = "portfolio-v1";
+const CACHE_NAME = "portfolio-v2";
 const ASSETS = [
     "./",
     "./index.html",
     "./manifest.json",
+    "./assets/portfolio.css",
+    "./assets/portfolio.js",
     "./icons/icon-192.svg",
     "./icons/icon-512.svg",
     "./shots/census.png",
