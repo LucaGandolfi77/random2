@@ -160,10 +160,11 @@
       if (down(12)) out.x -= 1;
       if (down(13)) out.x += 1;
       if (down(0) && !padPrev.a) state.passDown = true;
-      if (down(0)) padPrev.a = true; else padPrev.a = false;
-      if (down(2) && !padPrev.b) state.shootDown = true;
-      if (down(2)) padPrev.b = true; else padPrev.b = false;
-      if (down(2) === false && padPrev.b === true) state.shootUp = true;
+      padPrev.a = down(0);
+      var wasB = padPrev.b;
+      if (down(2) && !wasB) state.shootDown = true;
+      if (!down(2) && wasB) state.shootUp = true;
+      padPrev.b = down(2);
       if (down(1)) state.skillDown = true;
       if (down(9)) state.pause = true;
       if (down(5) || down(7)) state.sprint = true;
