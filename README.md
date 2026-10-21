@@ -946,6 +946,8 @@ byte buffer that the browser scales up with nearest-neighbour sampling.
 - **Every sound is synthesised.** The crowd is filtered noise, the whistle is
   two detuned squares, the music is a sixteen-step square-wave sequencer.
   There is not one audio file in the folder.
+- **Two cameras and a director.** The camera behind the play and the one
+  on the touchline, with a rule for when to change between them.
 - **A squad with attributes.** Ten players a club — two keepers, eight
   outfielders — each with pace, power and technique. You pick the five
   who start, the computer picks its best, and one substitution is

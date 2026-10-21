@@ -47,7 +47,28 @@
     var audio = opts.audio;
     var onAction = opts.onAction || function () {};
 
+    /*
+     * Every screen is built into the same element, so the handlers of
+     * the previous screen have to go: otherwise the title screen's
+     * handler is still listening when the squad picker's button is
+     * clicked, and the game answers a question nobody asked.
+     */
+    var bound = [];
+
+    function bind(root, type, fn) {
+      root.addEventListener(type, fn);
+      bound.push([root, type, fn]);
+    }
+
+    function unbindAll() {
+      for (var i = 0; i < bound.length; i++) {
+        bound[i][0].removeEventListener(bound[i][1], bound[i][2]);
+      }
+      bound.length = 0;
+    }
+
     function show(html, wire) {
+      unbindAll();
       screen.innerHTML = html;
       screen.classList.remove("hidden");
       screen.setAttribute("aria-hidden", "false");
@@ -90,7 +111,7 @@
 
     /* Wire the toggles and tell the caller what changed. */
     function wireSettings(root, settings, onChange) {
-      root.addEventListener("click", function (e) {
+      bind(root, "click", function (e) {
         var b = e.target.closest("button[data-setting]");
         if (!b) return;
         var name = b.getAttribute("data-setting");
@@ -126,7 +147,7 @@
         '</div>',
         function (root) {
           wireSettings(root, settings, state.onSetting);
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
@@ -151,7 +172,7 @@
         '</div>',
         function (root) {
           wireSettings(root, settings, actions.onSetting);
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
@@ -215,7 +236,7 @@
           '</div>' +
         '</div>',
         function (root) {
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-id]");
             if (!b) return;
             var id = b.getAttribute("data-id");
@@ -263,7 +284,7 @@
             if (audio) audio.blip(true);
             showSquadPicker(squad, chosen, options);
           });
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
@@ -324,7 +345,7 @@
         function (root) {
           var chosen = selected;
           var level = diff;
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var t = e.target.closest("button[data-team]");
             if (t) {
               chosen = Number(t.getAttribute("data-team"));
@@ -384,7 +405,7 @@
           '</div>' +
         '</div>',
         function (root) {
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
@@ -419,7 +440,7 @@
           '<div class="stack row">' + buttons + '</div>' +
         '</div>',
         function (root) {
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
@@ -451,7 +472,7 @@
           '<button class="btn primary" data-action="continue">Play my tie</button>' +
         '</div>',
         function (root) {
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
@@ -470,7 +491,7 @@
           '<button class="btn primary" data-action="continue">Back to the menu</button>' +
         '</div>',
         function (root) {
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
@@ -505,7 +526,7 @@
           '<button class="btn primary" data-action="back">Back</button>' +
         '</div>',
         function (root) {
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
@@ -524,7 +545,7 @@
           '<button class="btn primary" data-action="go">Let\'s go</button>' +
         '</div>',
         function (root) {
-          root.addEventListener("click", function (e) {
+          bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);

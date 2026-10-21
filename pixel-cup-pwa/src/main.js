@@ -76,6 +76,8 @@
     replayIndex: 0,
     replayTimer: 0,
     replayGoal: false,
+    shot: "top",        /* which camera is on: top or side */
+    shotTimer: 0,
   };
 
   /* ---- helpers ---- */
@@ -805,6 +807,20 @@
       handleEvents(m);
       audio.setExcitement(m.excitement);
       game.spin += dt * 6;
+      /* The camera: a director, not a tripod. It changes shot when the
+         other one has been the better choice for a moment. */
+      var want = Render.chooseShot(m);
+      if (want !== game.shot) {
+        game.shotTimer += dt;
+        if (game.shotTimer > 1.3) {
+          game.shot = want;
+          game.shotTimer = 0;
+          game.shake = Math.max(game.shake, 0.22);
+        }
+      } else {
+        game.shotTimer = 0;
+      }
+
       /* The ball leaves a short trail, so a hard shot reads as a hard
          shot and not as a dot teleporting about. */
       game.trail.push({ x: m.ball.x, y: m.ball.y, z: m.ball.z });
@@ -878,7 +894,11 @@
     if (game.mode === "match" && game.match) {
       var m = game.match;
       cam.shake = game.shake;
-      Render.updateCamera(cam, buf, STEP, { x: m.ball.x, z: m.ball.z });
+      if (game.shot === "side") {
+        Render.updateSideCamera(cam, buf, STEP, { x: m.ball.x, z: m.ball.z });
+      } else {
+        Render.updateCamera(cam, buf, STEP, { x: m.ball.x, z: m.ball.z });
+      }
       Render.drawScene(buf, cam, m, {
         homeKit: m.home.kit, awayKit: m.away.kit,
         homeShorts: m.home.shorts, awayShorts: m.away.shorts,
@@ -889,7 +909,8 @@
     } else if (game.mode === "shootout" && game.shootout) {
       /* The shoot-out is framed from behind the ball. */
       cam.fov = 0.52;
-      Render.aimCamera(cam, buf, 9, 3.2, 0, 28, 1.7, 0);
+      var goalX = Core.C.GOAL_LINE;
+      Render.aimCamera(cam, buf, goalX - 26, 3.4, 0, goalX, 1.8, 0);
       Render.drawShootoutScene(buf, cam, game.shootout, {
         homeKit: "#2f6fe0", awayKit: "#d8342c", spin: game.spin,
       });
@@ -1099,6 +1120,7 @@
             finished: game.shootout.finished,
           } : null,
           cup: game.cup ? { round: game.cup.round, done: game.cup.done } : null,
+          shot: game.shot,
           replay: game.mode === "replay" ? {
             index: game.replayIndex,
             frames: game.bestGoal ? game.bestGoal.n : 0,

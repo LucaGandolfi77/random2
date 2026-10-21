@@ -49,6 +49,13 @@
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
   function lerp(a, b, t) { return a + (b - a) * t; }
 
+  /* The size of the pitch, taken from the match so the picture and the
+     rules can never disagree about it. */
+  function pitchOf(m) {
+    var p = (m && m.pitch) || { len: 72, wid: 48 };
+    return { half: p.len / 2, wide: p.wid / 2 };
+  }
+
   /* Counters, so a preview can say how much work a frame did. */
   var stats = { crowd: 0, crowdFar: 0, crowdOff: 0, tris: 0 };
 
@@ -111,6 +118,33 @@
   }
 
   /*
+   * The two cameras, and the director that chooses between them.
+   *
+   * "top" is the camera behind the play, high enough to see the shape of
+   * the game; "side" is the camera on the touchline, which is what you
+   * want when the ball is out wide and the far side of the pitch is where
+   * the action is. A director changes camera when the other one has been
+   * the better choice for a moment, not the instant the ball moves.
+   */
+  function updateSideCamera(cam, buf, dt, focus) {
+    var pc = pitchOf(null);
+    /* From the front row of the stand, high enough to see across the
+       pitch and low enough to keep the players the right size. */
+    var lx = focus.x * 0.85;
+    var z = pc.wide + 2.5;
+    aimCamera(cam, buf, lx - 9, 13.5, z, lx, 1.4, focus.z * 0.4);
+  }
+
+  function chooseShot(m) {
+    if (!m || !m.ball) return "top";
+    /* Wide play wants the touchline camera. */
+    if (Math.abs(m.ball.z) > 12) return "side";
+    /* A ball in a corner wants it too. */
+    if (Math.abs(m.ball.x) > 26 && Math.abs(m.ball.z) > 7) return "side";
+    return "top";
+  }
+
+  /*
    * The attract-mode camera: a broadcast pan. It drifts slowly along
    * the pitch the way a camera operator pans before kick-off, and it
    * leans towards the ball when the ball wanders out of frame, so the
@@ -127,8 +161,11 @@
 
   function updateCamera(cam, buf, dt, focus) {
     var k = 1 - Math.pow(0.0008, dt);
-    var tx = focus.x - 29 * cam.zoom;
+    var tx = focus.x - 30 * cam.zoom;
     var tz = focus.z * 0.36;
+    /* The camera follows the ball at a fixed distance, even when that
+       takes it outside the stand: the stand the camera is behind is cut
+       away, the way the old football games cut the near crowd away. */
     cam.x += (tx - cam.x) * k;
     cam.z += (tz - cam.z) * k;
     cam.y = 14.6 * cam.zoom;
@@ -272,7 +309,13 @@
   var CELL = 4;
 
   function drawPitch(buf, cam, m) {
-    var L = 30, W = 21;
+    var pc = pitchOf(m);
+    var L = pc.half + 2, W = pc.wide + 3;
+    /* The ground the stadium stands on. Without it the pitch floats in
+       the sky whenever the camera looks past its edge. */
+    var surround = [26, 58, 36];
+    groundQuad(buf, cam, -(L + 70), -(W + 70), L + 70, W + 70, -0.08,
+               surround[0], surround[1], surround[2]);
     var x0 = -L, x1 = L, z0 = -W, z1 = W;
     var nx = Math.round((x1 - x0) / CELL), nz = Math.round((z1 - z0) / CELL);
     for (var i = 0; i < nx; i++) {
@@ -301,8 +344,9 @@
     }
   }
 
-  function drawPitchLines(buf, cam) {
-    var L = 28, W = 18;
+  function drawPitchLines(buf, cam, m) {
+    var pc = pitchOf(m);
+    var L = pc.half, W = pc.wide;
     var c = PAL.grassLine;
     var y = 0.07;
     /* touchlines and goal lines */
@@ -315,21 +359,21 @@
     /* penalty areas and goal areas */
     for (var s = -1; s <= 1; s += 2) {
       var gx = s * L;
-      groundLine(buf, cam, gx, -9.5, gx - s * 16, -9.5, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx, 9.5, gx - s * 16, 9.5, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx - s * 16, -9.5, gx - s * 16, 9.5, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx, -6.8, gx - s * 5.5, -6.8, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx, 6.8, gx - s * 5.5, 6.8, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx - s * 5.5, -6.8, gx - s * 5.5, 6.8, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx, -10.5, gx - s * 18, -10.5, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx, 10.5, gx - s * 18, 10.5, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx - s * 18, -10.5, gx - s * 18, 10.5, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx, -7.4, gx - s * 6, -7.4, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx, 7.4, gx - s * 6, 7.4, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx - s * 6, -7.4, gx - s * 6, 7.4, 0.35, c[0], c[1], c[2], y);
       /* penalty spot */
-      groundLine(buf, cam, gx - s * 11, 0, gx - s * 11, 0.001, 0.7, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx - s * 12, 0, gx - s * 12, 0.001, 0.7, c[0], c[1], c[2], y);
     }
     /* centre circle */
-    var seg = 26;
+    var seg = 28;
     for (var i = 0; i < seg; i++) {
       var a0 = (i / seg) * Math.PI * 2, a1 = ((i + 1) / seg) * Math.PI * 2;
-      groundLine(buf, cam, Math.cos(a0) * 7, Math.sin(a0) * 7,
-                 Math.cos(a1) * 7, Math.sin(a1) * 7, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, Math.cos(a0) * 8.5, Math.sin(a0) * 8.5,
+                 Math.cos(a1) * 8.5, Math.sin(a1) * 8.5, 0.35, c[0], c[1], c[2], y);
     }
     /* centre spot */
     groundLine(buf, cam, 0, 0, 0, 0.001, 0.7, c[0], c[1], c[2], y);
@@ -337,8 +381,9 @@
 
   /* ---- goals ------------------------------------------------------ */
 
-  function drawGoal(buf, cam, side) {
-    var L = 28, half = 4.5, h = 3.2, depth = 3;
+  function drawGoal(buf, cam, side, m) {
+    var pc = pitchOf(m);
+    var L = pc.half, half = 4.5, h = 3.2, depth = 3;
     var gx = side * L;
     var post = PAL.post, net = PAL.net;
     /* posts */
@@ -391,7 +436,8 @@
   /* ---- stands and crowd -------------------------------------------- */
 
   function drawStands(buf, cam, m) {
-    var W = 21.5, L = 31;
+    var pc = pitchOf(m);
+    var W = pc.wide + 3.5, L = pc.half + 3;
     /* The banks either side of the pitch, sloping up and away. */
     for (var s = -1; s <= 1; s += 2) {
       for (var row = 0; row < 8; row++) {
@@ -407,6 +453,11 @@
        picture, so they close the view off instead of leaving a strip of
        empty sky above the crossbar. */
     for (var s2 = -1; s2 <= 1; s2 += 2) {
+      /* The stand the camera is behind is cut away. Otherwise the front
+         rows sit in the foreground and hide the pitch, which is what the
+         old football games did not have to think about because they never
+         drew the near crowd. */
+      if (cam.x * s2 > pc.half + 2) continue;
       for (var row2 = 0; row2 < 7; row2++) {
         var x0 = s2 * (L + row2 * 1.3);
         var x1 = s2 * (L + (row2 + 1) * 1.3);
@@ -487,12 +538,18 @@
       var wave = Math.sin(t + (ax + (bx - ax) * u) * 0.21 + az * 0.13) * 0.5 + 0.5;
       var bob = (cheer > 0.3 && wave > 0.68) ? 1 : 0;
       var c = crowdColour(i, seed, homeKit, awayKit, cheer, wave);
+      /* Each spectator is a body and a head. A row of one-pixel marks is
+         a line, and a line of pixels across the screen is an artefact;
+         two pixels of a person is a crowd. */
       Raster.drawPixelOnce(buf, px, py - bob, invd, c[0], c[1], c[2]);
+      var hair = ((i * 13 + seed) % 5) < 2 ? [232, 216, 186] : [58, 46, 40];
+      Raster.drawPixelOnce(buf, px, py - 1 - bob, invd, hair[0], hair[1], hair[2]);
     }
   }
 
   function drawCrowd(buf, cam, m, homeKit, awayKit) {
-    var W = 21.5, L = 31;
+    var pc = pitchOf(m);
+    var W = pc.wide + 3.5, L = pc.half + 3;
     var cheer = m ? m.excitement : 0;
     var t = (m ? m.clock : 0) * 2.2;
     var cs = { x: 0, y: 0, d: 0 };
@@ -512,8 +569,10 @@
                      homeKit, awayKit, cheer, t, seed++);
       }
     }
-    /* Banks behind the goals: the rows run across the width. */
+    /* Banks behind the goals: the rows run across the width. The stand
+       the camera is behind is cut away, the same as the stand itself. */
     for (s = -1; s <= 1; s += 2) {
+      if (cam.x * s > pc.half + 2) continue;
       for (row2 = 0; row2 < 12; row2++) {
         var xe = s * (L + row2 * 1.3 + 0.65);
         var ye = row2 * 1.1 + 0.75;
@@ -659,9 +718,9 @@
     drawStands(buf, cam, m);
     drawCrowd(buf, cam, m, homeKit, awayKit);
     drawPitch(buf, cam, m);
-    drawPitchLines(buf, cam);
-    drawGoal(buf, cam, -1);
-    drawGoal(buf, cam, 1);
+    drawPitchLines(buf, cam, m);
+    drawGoal(buf, cam, -1, m);
+    drawGoal(buf, cam, 1, m);
 
     /* The marker under the player you are controlling. In the attract
        mode nobody is controlling anybody. */
@@ -714,13 +773,14 @@
     var awayKit = hexToRgb(opts.awayKit || "#d8342c");
     drawStands(buf, cam, null);
     drawCrowd(buf, cam, null, homeKit, awayKit);
-    drawPitch(buf, cam, null);
-    drawPitchLines(buf, cam);
-    drawGoal(buf, cam, 1);
-    drawGoal(buf, cam, -1);
+    drawPitch(buf, cam, s || null);
+    drawPitchLines(buf, cam, s || null);
+    drawGoal(buf, cam, 1, s || null);
+    drawGoal(buf, cam, -1, s || null);
 
-    var L = 28;
-    var spot = L - 11;
+    var pc = pitchOf(s);
+    var L = pc.half;
+    var spot = L - 12;
 
     /* The keeper. He dives as the ball is struck. */
     var keeperZ = 0;
@@ -755,9 +815,12 @@
     PAL: PAL,
     stats: stats,
     hexToRgb: hexToRgb,
+    pitchOf: pitchOf,
     createCamera: createCamera,
     updateCamera: updateCamera,
+    updateSideCamera: updateSideCamera,
     updateDemoCamera: updateDemoCamera,
+    chooseShot: chooseShot,
     aimCamera: aimCamera,
     drawScene: drawScene,
     drawShootoutScene: drawShootoutScene,

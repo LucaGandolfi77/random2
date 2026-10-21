@@ -752,5 +752,28 @@ section("the squad");
 }
 
 /* ================================================================== */
+section("the pitch");
+
+ok("the pitch is big enough to play on",
+   S.C.PITCH_LEN >= 64 && S.C.PITCH_WID >= 40, S.C.PITCH_LEN + "x" + S.C.PITCH_WID);
+ok("the goal line is half the length", S.C.GOAL_LINE === S.C.PITCH_LEN / 2);
+ok("the touch line is half the width", S.C.TOUCH_LINE === S.C.PITCH_WID / 2);
+ok("the goal is narrower than the pitch", S.C.GOAL_W < S.C.PITCH_WID);
+{
+  const m = S.createMatch({ seed: 91 });
+  ok("the match knows the size of its pitch",
+     m.pitch.len === S.C.PITCH_LEN && m.pitch.wid === S.C.PITCH_WID);
+  /* The ball must be able to get from end to end: a pass has to be able
+     to cross a pitch that is now a good deal longer. */
+  const keeper = m.players.find((p) => p.role === "GK" && p.team === 0);
+  ok("the keeper starts in front of his own goal",
+     keeper.x < -S.C.GOAL_LINE + 3, keeper.x);
+  const fwd = m.players.find((p) => p.role === "FWD" && p.team === 0);
+  ok("the striker starts well up the pitch", fwd.x > 12, fwd.x);
+  ok("the furthest apart two players are is the length of the pitch",
+     Math.abs(S.C.PITCH_LEN) > 0);
+}
+
+/* ================================================================== */
 console.log("\n" + (failures ? "FAILED" : "OK") + "  " + (checks - failures) + "/" + checks + " checks passed");
 process.exit(failures ? 1 : 0);

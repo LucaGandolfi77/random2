@@ -31,13 +31,13 @@
   /* ------------------------------------------------------------------ */
 
   var C = {
-    PITCH_LEN: 56,
-    PITCH_WID: 36,
+    PITCH_LEN: 72,
+    PITCH_WID: 48,
     GOAL_W: 9,
     GOAL_H: 3.2,
     GOAL_DEPTH: 3,
-    GOAL_LINE: 28,          // half the length
-    TOUCH_LINE: 18,         // half the width
+    GOAL_LINE: 36,          // half the length
+    TOUCH_LINE: 24,         // half the width
 
     HALF_SECONDS: 90,       // real seconds per half
     GRAVITY: 20,
@@ -56,16 +56,16 @@
     PLAYER_ACCEL: 46,
     PLAYER_FRICTION: 9,
 
-    SHOT_BASE: 15,
-    SHOT_POWER: 21,
-    PASS_BASE: 12,
-    PASS_POWER: 12,
+    SHOT_BASE: 17,
+    SHOT_POWER: 24,
+    PASS_BASE: 14,
+    PASS_POWER: 16,
     LOFT: 7.2,
 
     /* A cross is a different thing from a lofted pass: it goes right
        up, over the top of the defence, and lands in the box. */
-    CROSS_LIFT: 11.6,
-    CROSS_SPEED: 15,
+    CROSS_LIFT: 13.2,
+    CROSS_SPEED: 19,
     HEADER_MIN_Y: 1.15,   /* above this the ball is headed, not carried */
     HEADER_MAX_Y: 4.6,
     HEADER_RANGE: 2.1,
@@ -84,7 +84,7 @@
 
     CPU_REACTION: 0.16,
     CPU_PASS_RANGE: 26,
-    CPU_SHOOT_RANGE: 15,
+    CPU_SHOOT_RANGE: 18,
     CPU_AGGRESSION: 0.62,
     SHOT_COOLDOWN: 2.4,
     SHIELD_TIME: 0.55,
@@ -96,11 +96,11 @@
 
   /* Formation in team-local coordinates: x forward, z lateral. */
   var FORMATION = [
-    { role: "GK",  x: -27.0, z: 0 },
-    { role: "DEF", x: -13.0, z: -9 },
-    { role: "DEF", x: -12.0, z: 9 },
-    { role: "MID", x: 1.0,  z: 2 },
-    { role: "FWD", x: 14.0, z: 0 },
+    { role: "GK",  x: -35.0, z: 0 },
+    { role: "DEF", x: -18.0, z: -12 },
+    { role: "DEF", x: -16.0, z: 12 },
+    { role: "MID", x: 2.0,  z: 3 },
+    { role: "FWD", x: 19.0, z: 0 },
   ];
 
   /*
@@ -374,6 +374,7 @@
       /* In the attract mode nobody is playing: both sides are the
          computer and the match is a performance. */
       demo: !!opts.demo,
+      pitch: { len: C.PITCH_LEN, wid: C.PITCH_WID },
     };
 
     for (var t = 0; t < 2; t++) {
@@ -636,7 +637,7 @@
          roll to somebody else. */
       if (b.y < 2.4 && dist(p.x, p.z, b.x, b.z) < C.CLEARANCE_RANGE) {
         var away = p.z > 0 ? -1 : 1;
-        kick(m, p, p.dir * 15, 6.4, away * 5, 0);
+        kick(m, p, p.dir * 21, 7, away * 6, 0);
         pushEvent(m, "clearance", "Via!", 0.5);
         return true;
       }
@@ -1110,7 +1111,7 @@
         if (mate) {
           doPass(m, p, 0.85, p.dir, 0, true);
         } else {
-          kick(m, p, p.dir * 18, 7, 0, 0);
+          kick(m, p, p.dir * 26, 8, 0, 0);
         }
         p.hold = 0;
       }
@@ -1130,7 +1131,7 @@
     if (incoming) {
       /* Guess where the ball will cross the line and dive for it. */
       var t = (ownGoalX - b.x) / (b.vx || 1);
-      if (t > 0 && t < 2.2) {
+      if (t > 0 && t < 2.8) {
         var predZ = b.z + b.vz * t + (p.diveErr || 0);
         targetZ = clamp(predZ, -(C.GOAL_W / 2 + 2.4), C.GOAL_W / 2 + 2.4);
       }

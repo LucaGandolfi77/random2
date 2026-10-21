@@ -92,6 +92,22 @@ behind the menu, with both sides on the computer and a broadcast camera
 drifting slowly along the pitch. It is the first thing anybody sees,
 and a word on a blue screen is a waste of it.
 
+### The cameras
+
+There are two, and a director chooses between them: the camera behind
+the play, high enough to see the shape of the game, and the camera on the
+touchline, which is what you want when the ball is out wide or in a
+corner. It changes shot when the other one has been the better choice
+for a moment, not the instant the ball moves — and it cuts, the way a
+director cuts.
+
+The pitch is long enough that the camera, following the ball to the back
+of your own half, ends up outside the stand. So the stand the camera is
+behind is **cut away**, the way the old football games cut the near
+crowd away: otherwise the front rows sit in the foreground and hide the
+game. And the ground the stadium stands on is drawn around the pitch, so
+the picture never shows the pitch floating in the sky.
+
 ### The best goal
 
 Every match is recorded: the last twelve seconds at twenty frames a
@@ -157,7 +173,11 @@ therefore exercise the game you actually play, not a copy of it.
 
 ### The model
 
-- The pitch is 56 × 36 units; the goals are nine wide and 3.2 high.
+- The pitch is 72 × 48 units; the goals are nine wide and 3.2 high. The
+  picture takes its dimensions from the model, so the rules and the
+  drawing cannot disagree about how big the pitch is.
+- The stand the camera is behind is cut away, so the near rows never sit
+  in the foreground.
 - The ball has weight, bounce, friction and spin, and a strike bends in
   the air.
 - A cross is a different thing from a lofted pass: it goes right up, over
@@ -173,8 +193,8 @@ therefore exercise the game you actually play, not a copy of it.
 ### Tests
 
 ```bash
-node pixel-cup-pwa/tests/sim.test.mjs    # 137 checks: rules, physics, cup, shoot-out, balance
-node pixel-cup-pwa/tests/boot.test.mjs   # 72 checks: the whole game against a fake DOM
+node pixel-cup-pwa/tests/sim.test.mjs    # 145 checks: rules, physics, cup, shoot-out, balance
+node pixel-cup-pwa/tests/boot.test.mjs   # 80 checks: the whole game against a fake DOM
 node pixel-cup-pwa/tests/preview.mjs /tmp/pc.png 26   # writes a PNG of a live frame
 node pixel-cup-pwa/smoke.mjs             # the real page, in a real browser
 node pixel-cup-pwa/tools/gen-og.mjs      # writes the social card

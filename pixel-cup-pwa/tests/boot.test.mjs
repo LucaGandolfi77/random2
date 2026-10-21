@@ -59,7 +59,11 @@ class FakeElement {
   getAttribute(k) { return k in this.attributes ? this.attributes[k] : null; }
   removeAttribute(k) { delete this.attributes[k]; }
   addEventListener(type, fn) { (this._handlers[type] = this._handlers[type] || []).push(fn); }
-  removeEventListener() {}
+  removeEventListener(type, fn) {
+    const list = this._handlers[type] || [];
+    const i = list.indexOf(fn);
+    if (i >= 0) list.splice(i, 1);
+  }
   dispatch(type, ev) {
     const list = this._handlers[type] || [];
     for (const fn of list) fn(ev || { preventDefault() {}, target: this });
@@ -460,6 +464,61 @@ const wasAt = G.state().replay ? G.state().replay.index : -1;
 for (let i = 0; i < 20; i++) frame(20);
 ok("the replay plays", G.state().replay && G.state().replay.index > wasAt,
    JSON.stringify(G.state().replay));
+
+section("the screens");
+
+/* Every screen is built into the same element. If the handlers of the
+   old screen are still attached, clicking a button on the new one
+   answers a question the old screen was asking — which is how the
+   squad picker's "Kick off" ended up in the team picker's handler and
+   crashed the game. */
+const screenEl = elements.screen;
+function handlerCount() {
+  return (screenEl._handlers.click || []).length;
+}
+G.action("quick");
+G.action("start", 2);
+ok("the squad picker is showing", /class="xi"/.test(String(screen.innerHTML)));
+const afterSquad = handlerCount();
+G.action("back");
+G.action("quick");
+G.action("start", 2);
+ok("going back and forth does not pile handlers up", handlerCount() <= afterSquad,
+   handlerCount() + " vs " + afterSquad);
+
+/* And the game still works after all that. */
+const squadIds = globalThis.PixelCupCore.autoSelection(
+  globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"))).map((p) => p.id);
+G.action("kickoff", squadIds);
+ok("the match still starts", G.state().mode === "match", G.state().mode);
+
+section("the camera");
+
+const Camera = globalThis.PixelRender;
+
+/* The picture and the rules have to agree about the size of the pitch. */
+ok("the renderer draws the pitch the model plays on",
+   Camera.pitchOf(globalThis.PixelCupCore.createMatch({ seed: 3 })).half ===
+   globalThis.PixelCupCore.C.GOAL_LINE);
+const wide = globalThis.PixelCupCore.createMatch({ seed: 71 });
+wide.ball.x = 0; wide.ball.z = 0;
+ok("play down the middle uses the top camera", Camera.chooseShot(wide) === "top",
+   Camera.chooseShot(wide));
+wide.ball.z = 18;
+ok("play out wide uses the side camera", Camera.chooseShot(wide) === "side",
+   Camera.chooseShot(wide));
+wide.ball.x = 30; wide.ball.z = 9;
+ok("a corner uses the side camera", Camera.chooseShot(wide) === "side",
+   Camera.chooseShot(wide));
+
+/* The camera in the game follows the director. */
+G.action("quick");
+G.action("start", 0);
+G.action("kickoff", squadIds);
+const live2 = G.match();
+live2.ball.z = 20;
+for (let i = 0; i < 120; i++) frame(20);
+ok("the director changes the camera", G.state().shot === "side", G.state().shot);
 
 section("storage");
 const Storage = globalThis.PixelStorage;
