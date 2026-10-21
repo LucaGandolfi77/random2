@@ -241,6 +241,9 @@
       kickoffTeam: 0,
       /* The human always plays the home side; the AI plays the away side. */
       humanTeam: 0,
+      /* In the attract mode nobody is playing: both sides are the
+         computer and the match is a performance. */
+      demo: !!opts.demo,
     };
 
     for (var t = 0; t < 2; t++) {
@@ -889,15 +892,18 @@
     return true;
   }
 
-  function updateCPU(m, dt) {
-    var cpu = 1 - m.humanTeam;
-    var b = m.ball;
+  /*
+   * The intelligence of one team. The computer plays this way; in the
+   * attract mode both sides do, which is why it takes a team rather
+   * than assuming it is the away side.
+   */
+  function runTeamAI(m, team, dt) {
     var owner = ownerOf(m);
-    var weHaveBall = owner && owner.team === cpu;
-
+    var weHaveBall = owner && owner.team === team;
+    var chaser = -1;
     for (var i = 0; i < m.players.length; i++) {
       var p = m.players[i];
-      if (p.team !== cpu) continue;
+      if (p.team !== team) continue;
       if (p.slide > 0) { p.slide -= dt; continue; }
 
       if (p.role === "GK") { keeperAI(m, p, dt); continue; }
@@ -909,7 +915,7 @@
         if (owner === p) carrierAI(m, p, dt);
         else supportAI(m, p, dt, owner);
       } else {
-        var chaser = nearestToBall(m, cpu);
+        if (chaser < 0) chaser = nearestToBall(m, team);
         if (i === chaser) {
           if (owner) pressCarrier(m, p, owner, dt);
           else chaseAI(m, p, dt);
@@ -922,6 +928,10 @@
         tryChallenge(m, p, (i === chaser ? 0.05 : 0.025) + m.difficulty * 0.02);
       }
     }
+  }
+
+  function updateCPU(m, dt) {
+    runTeamAI(m, 1 - m.humanTeam, dt);
   }
 
   function keeperAI(m, p, dt) {
@@ -1276,7 +1286,7 @@
     }
 
     /* The clock only runs while the ball is in play. */
-    m.clock += dt;
+    if (!m.demo) m.clock += dt;
     if (m.clock >= m.halfSeconds) {
       if (m.half === 1) {
         m.half = 2;
@@ -1294,9 +1304,19 @@
       return m;
     }
 
+    if (m.demo) {
+      /* The attract mode: nobody is playing, so both sides are the
+         computer and the picture keeps itself busy. */
+      runTeamAI(m, m.humanTeam, dt);
+      runTeamAI(m, 1 - m.humanTeam, dt);
+      updateBall(m, dt);
+      updatePossession(m);
+      m.excitement = Math.max(0, m.excitement - dt * 0.55);
+      return m;
+    }
+
     updateHuman(m, input, dt);
     updateCPU(m, dt);
-
     /* AI for the human's teammates: they support and hold their shape. */
     for (var j = 0; j < m.players.length; j++) {
       var h = m.players[j];

@@ -63,6 +63,8 @@
     commentaryTime: 0,
     confetti: [],
     trail: [],
+    demo: null,           /* the match that plays itself on the title screen */
+    demoTime: 0,
   };
 
   /* ---- helpers ---- */
@@ -364,6 +366,43 @@
     if (window.R2) { R2.markPlayed("pixel-cup-pwa/"); R2.trackPlaytime("pixel-cup-pwa/"); }
   }
 
+  /* ---- the attract mode ---- */
+
+  /*
+   * The title screen is not a still picture: a match is being played
+   * behind the menu, with both sides on the computer. It is the first
+   * thing anybody sees, and a word on a blue screen is a waste of it.
+   */
+  function startDemo() {
+    var a = Math.floor(Math.random() * Core.TEAMS.length);
+    var b = (a + 1 + Math.floor(Math.random() * (Core.TEAMS.length - 1))) % Core.TEAMS.length;
+    game.demo = Core.createMatch({
+      seed: (Math.random() * 0xffffffff) >>> 0,
+      home: Core.TEAMS[a].id,
+      away: Core.TEAMS[b].id,
+      difficulty: 1,
+      demo: true,
+    });
+    game.demoTime = 0;
+    game.demoSwap = 0;
+  }
+
+  function updateDemo(dt) {
+    if (!game.demo) return;
+    game.demoTime += dt;
+    /* A new pairing every couple of minutes, so it never looks like a
+       loop. */
+    if (game.demoTime > 105) {
+      startDemo();
+      return;
+    }
+    Core.stepMatch(game.demo, dt, { mx: 0, my: 0 });
+    /* The demo's own events are not worth announcing, but the crowd
+       should still react to the match going on behind the menu. */
+    game.demo.events.length = 0;
+    audio.setExcitement(game.demo.excitement);
+  }
+
   /* ---- the menu ---- */
 
   function showTitle() {
@@ -372,6 +411,7 @@
     game.pauseMenu = false;
     audio.setPaused(false);
     var records = Storage.getRecords();
+    if (!game.demo) startDemo();
     ui.showTitle({
       hasCup: !!Storage.getCup(),
       settings: game.settings,
@@ -483,6 +523,12 @@
       else openPause();
     }
 
+    /* The attract mode runs on the title screen. */
+    if (game.mode === "title") {
+      updateDemo(dt);
+      game.spin += dt * 6;
+    }
+
     if (game.mode === "match" && game.match && !game.paused) {
       var m = game.match;
       var scale = game.slow > 0 ? 0.35 : 1;
@@ -584,8 +630,20 @@
           game.shootout.result === "G" ? [96, 214, 120] : [232, 88, 76], 2);
       }
     } else {
-      Raster.fillGradient(buf, 14, 18, 34, 26, 34, 60);
-      Font.drawTextCentered(buf, W / 2, 70, "PIXEL CUP 96", [255, 214, 64], 3);
+      /* The title screen: a match plays itself behind the menu. */
+      if (game.demo) {
+        var d = game.demo;
+        cam.fov = 0.47;
+        Render.updateDemoCamera(cam, buf, STEP, game.demoTime || 0, d.ball.x, d.ball.z);
+        Render.drawScene(buf, cam, d, {
+          homeKit: d.home.kit, awayKit: d.away.kit,
+          homeShorts: d.home.shorts, awayShorts: d.away.shorts,
+          spin: game.spin,
+        });
+      } else {
+        Raster.fillGradient(buf, 14, 18, 34, 26, 34, 60);
+        Font.drawTextCentered(buf, W / 2, 70, "PIXEL CUP 96", [255, 214, 64], 3);
+      }
     }
     drawConfetti();
     ctx.putImageData(image, 0, 0);

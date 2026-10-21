@@ -112,9 +112,14 @@ body {
   align-items: center;
   justify-content: center;
   padding: 12px;
-  background: rgba(7, 10, 20, 0.86);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  /* Not a black sheet: the match plays itself behind the menu, and the
+     scrim only has to make the panel readable. */
+  background: linear-gradient(180deg,
+    rgba(7, 10, 20, 0.93) 0%,
+    rgba(7, 10, 20, 0.55) 42%,
+    rgba(7, 10, 20, 0.9) 100%);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   overflow: auto;
   z-index: 20;
 }

@@ -72,6 +72,13 @@ because the camera always looks that way.
   music and vibration switches. Leaving the tab pauses the match by
   itself: nobody wants to come back to a match that ran on without them.
 
+### The attract mode
+
+The title screen is not a still picture: a match is playing itself
+behind the menu, with both sides on the computer and a broadcast camera
+drifting slowly along the pitch. It is the first thing anybody sees,
+and a word on a blue screen is a waste of it.
+
 ### The touches
 
 - A goal slows the world down for a third of a second, flashes the
@@ -140,7 +147,7 @@ therefore exercise the game you actually play, not a copy of it.
 ### Tests
 
 ```bash
-node pixel-cup-pwa/tests/sim.test.mjs    # 101 checks: rules, physics, cup, shoot-out, balance
+node pixel-cup-pwa/tests/sim.test.mjs    # 106 checks: rules, physics, cup, shoot-out, balance
 node pixel-cup-pwa/tests/boot.test.mjs   # 62 checks: the whole game against a fake DOM
 node pixel-cup-pwa/tests/preview.mjs /tmp/pc.png 26   # writes a PNG of a live frame
 node pixel-cup-pwa/smoke.mjs             # the real page, in a real browser

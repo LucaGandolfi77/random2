@@ -946,6 +946,9 @@ byte buffer that the browser scales up with nearest-neighbour sampling.
 - **Every sound is synthesised.** The crowd is filtered noise, the whistle is
   two detuned squares, the music is a sixteen-step square-wave sequencer.
   There is not one audio file in the folder.
+- **An attract mode.** The title screen is not a word on a blue screen: a
+  match plays itself behind the menu, both sides on the computer, with a
+  broadcast camera drifting along the pitch.
 - **Crosses and headers.** A cross is a high ball over the defence and into
   the box, on its own key; above 1.15 units the ball can only be headed,
   never carried, so an aerial chance is a real chance. The heads-up display

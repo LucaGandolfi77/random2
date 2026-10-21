@@ -110,6 +110,21 @@
     cam.focal = (buf.h / 2) / Math.tan(cam.fov / 2);
   }
 
+  /*
+   * The attract-mode camera: a broadcast pan. It drifts slowly along
+   * the pitch the way a camera operator pans before kick-off, and it
+   * leans towards the ball when the ball wanders out of frame, so the
+   * action never leaves the picture entirely.
+   */
+  function updateDemoCamera(cam, buf, dt, t, bx, bz) {
+    var drift = Math.sin(t * 0.085) * 11;
+    var lx = bx * 0.5 + drift;
+    var lz = bz * 0.32;
+    var back = 31 + Math.sin(t * 0.05) * 5;
+    var height = 15.5 + Math.sin(t * 0.07) * 1.5;
+    aimCamera(cam, buf, lx - back, height, lz * 0.45, lx, 1.2, lz);
+  }
+
   function updateCamera(cam, buf, dt, focus) {
     var k = 1 - Math.pow(0.0008, dt);
     var tx = focus.x - 29 * cam.zoom;
@@ -648,8 +663,9 @@
     drawGoal(buf, cam, -1);
     drawGoal(buf, cam, 1);
 
-    /* The marker under the player you are controlling. */
-    if (m.controlled >= 0 && m.players[m.controlled]) {
+    /* The marker under the player you are controlling. In the attract
+       mode nobody is controlling anybody. */
+    if (m.controlled >= 0 && !m.demo && m.players[m.controlled]) {
       var cp = m.players[m.controlled];
       var ring = PAL.grassLine;
       for (var i = 0; i < 10; i++) {
@@ -741,6 +757,7 @@
     hexToRgb: hexToRgb,
     createCamera: createCamera,
     updateCamera: updateCamera,
+    updateDemoCamera: updateDemoCamera,
     aimCamera: aimCamera,
     drawScene: drawScene,
     drawShootoutScene: drawShootoutScene,

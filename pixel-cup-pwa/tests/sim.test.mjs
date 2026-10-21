@@ -614,5 +614,35 @@ section("crosses and headers");
 }
 
 /* ================================================================== */
+section("the attract mode");
+
+{
+  /* A demo match has both sides on the computer and nobody at the
+     keyboard: the ball must move and the match must stay alive. */
+  const m = S.createMatch({ seed: 51, demo: true });
+  const startX = m.ball.x;
+  let moved = 0, goals = 0;
+  for (let i = 0; i < 60 * 60; i++) {
+    S.stepMatch(m, 1 / 60, { mx: 0, my: 0 });
+    if (Math.abs(m.ball.x - startX) > 1) moved++;
+  }
+  ok("the demo match plays itself", moved > 60, "frames with the ball moving: " + moved);
+  ok("the demo match stays alive", m.phase === "play" || m.phase === "goal" ||
+     m.phase === "kickoff", m.phase);
+  ok("the demo clock never runs out", m.clock === 0, m.clock);
+  ok("the demo stays finite",
+    Number.isFinite(m.ball.x) && m.players.every((p) => Number.isFinite(p.x)));
+
+  /* Somebody has to be holding the ball for the match to mean anything. */
+  let possession = 0;
+  for (let i = 0; i < 60 * 30; i++) {
+    S.stepMatch(m, 1 / 60, { mx: 0, my: 0 });
+    if (m.ball.owner >= 0) possession++;
+  }
+  ok("the demo has possession to fight over", possession > 60 * 5,
+     "frames with an owner: " + possession);
+}
+
+/* ================================================================== */
 console.log("\n" + (failures ? "FAILED" : "OK") + "  " + (checks - failures) + "/" + checks + " checks passed");
 process.exit(failures ? 1 : 0);
