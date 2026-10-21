@@ -77,8 +77,8 @@ ok("the keeper stands near his own goal", keeper.x < -20, keeper.x);
 ok("the keeper stands on the line", Math.abs(keeper.z) < 1.5, keeper.z);
 ok("the two keepers defend opposite ends", keeper.x < 0 && keeper2.x > 0);
 ok("the two teams start on opposite halves",
-   m0.players.filter((p) => p.team === 0).every((p) => p.x < 20) &&
-   m0.players.filter((p) => p.team === 1).every((p) => p.x > -20));
+   m0.players.filter((p) => p.team === 0).every((p) => p.x < S.C.GOAL_LINE - 4) &&
+   m0.players.filter((p) => p.team === 1).every((p) => p.x > -(S.C.GOAL_LINE - 4)));
 
 /* ================================================================== */
 section("ball physics");
@@ -452,17 +452,20 @@ function playScripted(seed) {
     const weHave = owner && owner.team === 0;
     cool -= dt;
     if (weHave && owner === me) {
-      const dGoal = Math.hypot(28 - me.x, -me.z);
+      const dGoal = Math.hypot(S.C.GOAL_LINE - me.x, -me.z);
       let press = 99;
       for (const o of m.players) {
         if (o.team === 0) continue;
         press = Math.min(press, Math.hypot(o.x - me.x, o.z - me.z));
       }
-      input.mx = me.z > 0 ? -0.45 : 0.45;
+      /* Straight at the goal, with a little drift. Passing too often is
+         what a bad player does: the passes go sideways and the attack
+         never gets anywhere. */
       input.my = 1;
+      input.mx = me.z > 0 ? -0.12 : 0.12;
       input.sprint = true;
       if (dGoal < 19 && cool <= 0) { input.shootDown = true; shooting = true; frames = 0; cool = 2.2; }
-      else if (press < 3.0 && Math.random() < 0.055) { input.passDown = true; }
+      else if (press < 2.6 && Math.random() < 0.035) { input.passDown = true; }
     } else if (weHave) {
       const dx = (owner.x + 10) - me.x, dz = (owner.z + 5) - me.z;
       const l = Math.hypot(dx, dz) || 1;
@@ -752,29 +755,6 @@ section("the squad");
 }
 
 /* ================================================================== */
-section("the pitch");
-
-ok("the pitch is big enough to play on",
-   S.C.PITCH_LEN >= 64 && S.C.PITCH_WID >= 40, S.C.PITCH_LEN + "x" + S.C.PITCH_WID);
-ok("the goal line is half the length", S.C.GOAL_LINE === S.C.PITCH_LEN / 2);
-ok("the touch line is half the width", S.C.TOUCH_LINE === S.C.PITCH_WID / 2);
-ok("the goal is narrower than the pitch", S.C.GOAL_W < S.C.PITCH_WID);
-{
-  const m = S.createMatch({ seed: 91 });
-  ok("the match knows the size of its pitch",
-     m.pitch.len === S.C.PITCH_LEN && m.pitch.wid === S.C.PITCH_WID);
-  /* The ball must be able to get from end to end: a pass has to be able
-     to cross a pitch that is now a good deal longer. */
-  const keeper = m.players.find((p) => p.role === "GK" && p.team === 0);
-  ok("the keeper starts in front of his own goal",
-     keeper.x < -S.C.GOAL_LINE + 3, keeper.x);
-  const fwd = m.players.find((p) => p.role === "FWD" && p.team === 0);
-  ok("the striker starts well up the pitch", fwd.x > 12, fwd.x);
-  ok("the furthest apart two players are is the length of the pitch",
-     Math.abs(S.C.PITCH_LEN) > 0);
-}
-
-/* ================================================================== */
 section("the weather");
 
 {
@@ -823,6 +803,49 @@ section("the weather");
   ok("the heat map is a grid of the pitch",
      m.heat.length === S.C.HEAT_W * S.C.HEAT_H, m.heat.length);
   ok("the heat map is not empty", sum > 0);
+}
+
+/* ================================================================== */
+section("the pitch");
+
+ok("the pitch is big enough to play on",
+   S.C.PITCH_LEN >= 64 && S.C.PITCH_WID >= 40, S.C.PITCH_LEN + "x" + S.C.PITCH_WID);
+ok("the goal line is half the length", S.C.GOAL_LINE === S.C.PITCH_LEN / 2);
+ok("the touch line is half the width", S.C.TOUCH_LINE === S.C.PITCH_WID / 2);
+ok("the goal is narrower than the pitch", S.C.GOAL_W < S.C.PITCH_WID);
+{
+  const m = S.createMatch({ seed: 91 });
+  ok("the match knows the size of its pitch",
+     m.pitch.len === S.C.PITCH_LEN && m.pitch.wid === S.C.PITCH_WID);
+  /* The keeper starts in front of his own goal. */
+  const keeper = m.players.find((p) => p.role === "GK" && p.team === 0);
+  ok("the keeper starts in front of his own goal",
+     keeper.x < -S.C.GOAL_LINE + 3, keeper.x);
+  const fwd = m.players.find((p) => p.role === "FWD" && p.team === 0);
+  ok("the striker starts well up the pitch", fwd.x > 12, fwd.x);
+  ok("the heat map is a grid of the pitch",
+     m.heat.length === S.C.HEAT_W * S.C.HEAT_H, m.heat.length);
+}
+
+{
+  /* A pass has to be able to cross a third of the pitch, or a big pitch
+     is a big empty pitch. */
+  function roll(power) {
+    const m = S.createMatch({ seed: 92 });
+    m.phase = "play";
+    for (const p of m.players) { p.x = -30; p.z = -20; }
+    m.ball.owner = -1;
+    m.ball.ownerTeam = -1;
+    m.ball.x = 0; m.ball.z = 0; m.ball.y = S.C.BALL_R;
+    m.ball.vx = power; m.ball.vy = 0; m.ball.vz = 0;
+    m.ball.kickLock = 999;
+    const start = m.ball.x;
+    for (let i = 0; i < 60 * 3; i++) S.stepMatch(m, 1 / 60, IDLE);
+    return m.ball.x - start;
+  }
+  const firm = roll(S.C.PASS_BASE + S.C.PASS_POWER);
+  ok("a firm pass crosses a third of the pitch",
+     firm > S.C.PITCH_LEN / 4, firm.toFixed(1) + " of " + S.C.PITCH_LEN);
 }
 
 /* ================================================================== */

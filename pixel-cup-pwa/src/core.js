@@ -31,20 +31,22 @@
   /* ------------------------------------------------------------------ */
 
   var C = {
-    PITCH_LEN: 72,
-    PITCH_WID: 48,
+    PITCH_LEN: 88,
+    PITCH_WID: 58,
     GOAL_W: 9,
     GOAL_H: 3.2,
     GOAL_DEPTH: 3,
-    GOAL_LINE: 36,          // half the length
-    TOUCH_LINE: 24,         // half the width
+    GOAL_LINE: 44,          // half the length
+    TOUCH_LINE: 29,         // half the width
 
     HALF_SECONDS: 90,       // real seconds per half
     GRAVITY: 20,
     BALL_R: 0.48,
     BOUNCE: 0.52,
-    GROUND_FRICTION: 2.1,    // per second, exponential
-    WET_FRICTION: 0.45,      // the ball skids on a wet pitch
+    /* The ball has to keep its pace across a long pitch. A high friction
+       makes a big pitch empty: every pass dies in a fifth of it. */
+    GROUND_FRICTION: 1.15,   // per second, exponential
+    WET_FRICTION: 0.28,      // the ball skids on a wet pitch
     WET_ACCEL: 0.82,         // and the players' feet slip
     AIR_DRAG: 0.25,
 
@@ -52,26 +54,26 @@
     DRIBBLE_OFFSET: 1.0,
     KICK_LOCK: 0.22,        // seconds the ball cannot be re-taken after a kick
 
-    PLAYER_SPEED: 8.2,
+    PLAYER_SPEED: 9.0,
     SPRINT_MULT: 1.52,
-    GK_SPEED: 9.4,
+    GK_SPEED: 10.2,
     PLAYER_ACCEL: 46,
     PLAYER_FRICTION: 9,
 
-    SHOT_BASE: 17,
-    SHOT_POWER: 24,
-    PASS_BASE: 14,
-    PASS_POWER: 16,
+    SHOT_BASE: 18,
+    SHOT_POWER: 26,
+    PASS_BASE: 15,
+    PASS_POWER: 18,
     LOFT: 7.2,
 
     /* A cross is a different thing from a lofted pass: it goes right
        up, over the top of the defence, and lands in the box. */
-    CROSS_LIFT: 13.2,
-    CROSS_SPEED: 19,
+    CROSS_LIFT: 14.5,
+    CROSS_SPEED: 21,
     /* The heat map: the pitch divided into cells, each counting the
        samples whose ball landed in it. */
-    HEAT_W: 36,
-    HEAT_H: 24,
+    HEAT_W: 44,
+    HEAT_H: 29,
     HEAT_HZ: 4,            /* how often the ball is sampled, in steps */
 
     HEADER_MIN_Y: 1.15,   /* above this the ball is headed, not carried */
@@ -92,7 +94,7 @@
 
     CPU_REACTION: 0.16,
     CPU_PASS_RANGE: 26,
-    CPU_SHOOT_RANGE: 18,
+    CPU_SHOOT_RANGE: 22,
     CPU_AGGRESSION: 0.62,
     SHOT_COOLDOWN: 2.4,
     SHIELD_TIME: 0.55,
@@ -104,11 +106,11 @@
 
   /* Formation in team-local coordinates: x forward, z lateral. */
   var FORMATION = [
-    { role: "GK",  x: -35.0, z: 0 },
-    { role: "DEF", x: -18.0, z: -12 },
-    { role: "DEF", x: -16.0, z: 12 },
-    { role: "MID", x: 2.0,  z: 3 },
-    { role: "FWD", x: 19.0, z: 0 },
+    { role: "GK",  x: -43.0, z: 0 },
+    { role: "DEF", x: -22.0, z: -14 },
+    { role: "DEF", x: -20.0, z: 14 },
+    { role: "MID", x: 2.0,  z: 4 },
+    { role: "FWD", x: 24.0, z: 0 },
   ];
 
   /*
@@ -653,7 +655,7 @@
          roll to somebody else. */
       if (b.y < 2.4 && dist(p.x, p.z, b.x, b.z) < C.CLEARANCE_RANGE) {
         var away = p.z > 0 ? -1 : 1;
-        kick(m, p, p.dir * 21, 7, away * 6, 0);
+        kick(m, p, p.dir * 24, 7, away * 6, 0);
         pushEvent(m, "clearance", "Via!", 0.5);
         return true;
       }
@@ -1105,7 +1107,10 @@
       }
       /* Anybody close to the carrier goes in for the ball. */
       if (!weHaveBall && p.role !== "GK") {
-        tryChallenge(m, p, (i === chaser ? 0.05 : 0.025) + m.difficulty * 0.02);
+        /* The same pressure the human's team applies, plus what the
+           difficulty buys. When the two sides pressed differently the
+           opposition simply won the ball twice as often. */
+        tryChallenge(m, p, (i === chaser ? 0.05 : 0.025) + m.difficulty * 0.015);
       }
     }
   }
@@ -1129,14 +1134,14 @@
         if (mate) {
           doPass(m, p, 0.85, p.dir, 0, true);
         } else {
-          kick(m, p, p.dir * 26, 8, 0, 0);
+          kick(m, p, p.dir * 28, 8, 0, 0);
         }
         p.hold = 0;
       }
       return;
     }
 
-    var incoming = (b.vx * p.dir) < -2 && Math.abs(b.x - ownGoalX) < 22;
+    var incoming = (b.vx * p.dir) < -2 && Math.abs(b.x - ownGoalX) < 26;
     /* A keeper is not a computer. Every time a new shot comes at him he
        guesses where it is going, and the guess is wrong by a bit — which
        is why a well-placed shot beats him. */
@@ -1149,14 +1154,14 @@
     if (incoming) {
       /* Guess where the ball will cross the line and dive for it. */
       var t = (ownGoalX - b.x) / (b.vx || 1);
-      if (t > 0 && t < 2.8) {
+      if (t > 0 && t < 3.2) {
         var predZ = b.z + b.vz * t + (p.diveErr || 0);
         targetZ = clamp(predZ, -(C.GOAL_W / 2 + 2.4), C.GOAL_W / 2 + 2.4);
       }
       var speed = 2.4;
       movePlayer(m, p, tx, targetZ, dt, speed);
       /* A dive: the keeper throws himself at the ball. */
-      if (Math.abs(b.x - ownGoalX) < 8 && b.y < 2.2 &&
+      if (Math.abs(b.x - ownGoalX) < 12 && b.y < 2.2 &&
           Math.abs(b.z - p.z) < 1.9 && Math.abs(b.x - p.x) < 2.2) {
         var power = len(b.vx, b.vz);
         var reach = 2.4;
@@ -1279,7 +1284,7 @@
     var tz = owner.z + owner.vz * 0.18;
     p.sprint = (dist(p.x, p.z, tx, tz) > 6 && p.stamina > 18) ? 1 : 0;
     movePlayer(m, p, tx, tz, dt, 1);
-    tryChallenge(m, p, 0.05 + m.difficulty * 0.02);
+    tryChallenge(m, p, 0.05 + m.difficulty * 0.015);
     if (p.slideCd <= 0 && dist(p.x, p.z, owner.x, owner.z) < C.TACKLE_RANGE &&
         m.rng() < 0.012) {
       p.facing = Math.atan2(owner.z - p.z, owner.x - p.x);
@@ -1329,8 +1334,20 @@
       /* Stick up = forward (+x for the human team). */
       nx = input.my;
       nz = input.mx;
+      /* Carry the ball and you shoulder the man trying to take it. The
+         computer's carrier does this; without it the human's carrier is
+         dispossessed every time he turns his shoulder, and the two sides
+         do not play the same game. */
+      if (m.ball.owner === p.index) {
+        for (var i = 0; i < m.players.length; i++) {
+          var o = m.players[i];
+          if (o.team === p.team) continue;
+          var dd = dist(o.x, o.z, p.x, p.z);
+          if (dd < 3.0) nz += sign(p.z - o.z || 1) * (3.0 - dd) * 0.42;
+        }
+      }
       var l = len(nx, nz);
-      nx /= l; nz /= l;
+      if (l > 0.001) { nx /= l; nz /= l; }
       p.facing = Math.atan2(nz, nx);
     } else if (m.ball.owner === p.index) {
       /* Standing still with the ball: face the goal. */
@@ -1531,7 +1548,7 @@
         /* Your own teammates crowd the ball carrier too, but they are not
            as committed as the opposition: they help, they do not hunt. */
         if (owner && owner.team !== h.team) {
-          tryChallenge(m, h, 0.025);
+          tryChallenge(m, h, 0.025 + m.difficulty * 0.01);
         }
       }
     }

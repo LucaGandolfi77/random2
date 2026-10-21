@@ -186,7 +186,7 @@
        pitch and low enough to keep the players the right size. */
     var lx = focus.x * 0.85;
     var z = pc.wide + 2.5;
-    aimCamera(cam, buf, lx - 9, 13.5, z, lx, 1.4, focus.z * 0.4);
+    aimCamera(cam, buf, lx - 11, 15.0, z, lx, 1.4, focus.z * 0.4);
   }
 
   function chooseShot(m) {
@@ -214,15 +214,24 @@
   }
 
   function updateCamera(cam, buf, dt, focus) {
+    var pc = pitchOf(null);
     var k = 1 - Math.pow(0.0008, dt);
-    var tx = focus.x - 30 * cam.zoom;
+    /* The camera keeps its distance, but it pulls back when the ball
+       goes near the goal: from thirty units the net fills the frame and
+       the pitch is squeezed into the bottom of it. */
+    var deep = clamp((Math.abs(focus.x) - 18) / 22, 0, 1);
+    var back = (34 + 12 * deep) * cam.zoom;
+    var tx = focus.x - back;
     var tz = focus.z * 0.36;
     /* The camera follows the ball at a fixed distance, even when that
        takes it outside the stand: the stand the camera is behind is cut
        away, the way the old football games cut the near crowd away. */
     cam.x += (tx - cam.x) * k;
     cam.z += (tz - cam.z) * k;
-    cam.y = 14.6 * cam.zoom;
+    cam.y = (16.0 + 2 * deep) * cam.zoom;
+    /* And it never aims past the end of the ground, or the view tilts up
+       into the stand. */
+    var look = clamp(focus.x + 11, -(pc.half + 3), pc.half + 3);
 
     /* Shake decays quickly; the noise is deterministic so the picture does
        not jitter differently on two machines. */
@@ -236,7 +245,7 @@
     }
 
     aimCamera(cam, buf, cam.x + cam.shakeX, cam.y + cam.shakeY, cam.z,
-              focus.x + 9, 1.1, focus.z * 0.5);
+              look, 1.1, focus.z * 0.5);
   }
 
   function toCam(cam, x, y, z, out) {
@@ -374,7 +383,9 @@
     var nx = Math.round((x1 - x0) / CELL), nz = Math.round((z1 - z0) / CELL);
     for (var i = 0; i < nx; i++) {
       var ax = x0 + i * CELL, bx = ax + CELL;
-      var band = Math.floor((ax + 40) / 8) % 2;
+      /* The mown bands. The offset keeps the index positive whatever the
+         size of the pitch. */
+      var band = Math.floor((ax + 400) / 8) % 2;
       for (var j = 0; j < nz; j++) {
         var az = z0 + j * CELL, bz = az + CELL;
         /* Skip what the camera cannot see. */
@@ -413,21 +424,21 @@
     /* penalty areas and goal areas */
     for (var s = -1; s <= 1; s += 2) {
       var gx = s * L;
-      groundLine(buf, cam, gx, -10.5, gx - s * 18, -10.5, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx, 10.5, gx - s * 18, 10.5, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx - s * 18, -10.5, gx - s * 18, 10.5, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx, -7.4, gx - s * 6, -7.4, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx, 7.4, gx - s * 6, 7.4, 0.35, c[0], c[1], c[2], y);
-      groundLine(buf, cam, gx - s * 6, -7.4, gx - s * 6, 7.4, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx, -12, gx - s * 22, -12, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx, 12, gx - s * 22, 12, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx - s * 22, -12, gx - s * 22, 12, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx, -8.5, gx - s * 7, -8.5, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx, 8.5, gx - s * 7, 8.5, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx - s * 7, -8.5, gx - s * 7, 8.5, 0.35, c[0], c[1], c[2], y);
       /* penalty spot */
-      groundLine(buf, cam, gx - s * 12, 0, gx - s * 12, 0.001, 0.7, c[0], c[1], c[2], y);
+      groundLine(buf, cam, gx - s * 14, 0, gx - s * 14, 0.001, 0.7, c[0], c[1], c[2], y);
     }
     /* centre circle */
     var seg = 28;
     for (var i = 0; i < seg; i++) {
       var a0 = (i / seg) * Math.PI * 2, a1 = ((i + 1) / seg) * Math.PI * 2;
-      groundLine(buf, cam, Math.cos(a0) * 8.5, Math.sin(a0) * 8.5,
-                 Math.cos(a1) * 8.5, Math.sin(a1) * 8.5, 0.35, c[0], c[1], c[2], y);
+      groundLine(buf, cam, Math.cos(a0) * 10, Math.sin(a0) * 10,
+                 Math.cos(a1) * 10, Math.sin(a1) * 10, 0.35, c[0], c[1], c[2], y);
     }
     /* centre spot */
     groundLine(buf, cam, 0, 0, 0, 0.001, 0.7, c[0], c[1], c[2], y);
@@ -494,10 +505,10 @@
     var W = pc.wide + 3.5, L = pc.half + 3;
     /* The banks either side of the pitch, sloping up and away. */
     for (var s = -1; s <= 1; s += 2) {
-      for (var row = 0; row < 8; row++) {
-        var z0 = s * (W + row * 1.25);
-        var z1 = s * (W + (row + 1) * 1.25);
-        var y0 = row * 1.05, y1 = (row + 1) * 1.05;
+      for (var row = 0; row < 6; row++) {
+        var z0 = s * (W + row * 1.5);
+        var z1 = s * (W + (row + 1) * 1.5);
+        var y0 = row * 1.15, y1 = (row + 1) * 1.15;
         var col = row % 2 ? wx.stand : wx.standDark;
         quad(buf, cam, [-L, y0, z0], [-L, y1, z1], [L, y1, z1], [L, y0, z0],
              col[0], col[1], col[2]);
@@ -623,14 +634,12 @@
        is drawn twice, once for the bodies and once for the heads, which
        is what makes the stand look packed rather than ruled. */
     for (s = -1; s <= 1; s += 2) {
-      for (row = 0; row < 8; row++) {
-        var zs = s * (W + row * 1.25 + 0.62);
-        var ys = row * 1.05 + 0.7;
+      for (row = 0; row < 6; row++) {
+        var zs = s * (W + row * 1.5 + 0.75);
+        var ys = row * 1.15 + 0.8;
         drawCrowdRow(buf, cam, cs, -L, ys, zs, L, ys, zs,
                      homeKit, awayKit, cheer, t, seed++);
-        drawCrowdRow(buf, cam, cs, -L, ys + 0.34, zs, L, ys + 0.34, zs,
-                     homeKit, awayKit, cheer, t, seed++);
-        drawCrowdRow(buf, cam, cs, -L, ys + 0.68, zs, L, ys + 0.68, zs,
+        drawCrowdRow(buf, cam, cs, -L, ys + 0.42, zs, L, ys + 0.42, zs,
                      homeKit, awayKit, cheer, t, seed++);
       }
     }
@@ -638,14 +647,12 @@
        the camera is behind is cut away, the same as the stand itself. */
     for (s = -1; s <= 1; s += 2) {
       if (cam.x * s > pc.half + 2) continue;
-      for (row2 = 0; row2 < 12; row2++) {
-        var xe = s * (L + row2 * 1.3 + 0.65);
-        var ye = row2 * 1.1 + 0.75;
+      for (row2 = 0; row2 < 7; row2++) {
+        var xe = s * (L + row2 * 1.6 + 0.8);
+        var ye = row2 * 1.2 + 0.85;
         drawCrowdRow(buf, cam, cs, xe, ye, -W, xe, ye, W,
                      homeKit, awayKit, cheer, t, seed++);
-        drawCrowdRow(buf, cam, cs, xe, ye + 0.34, -W, xe, ye + 0.34, W,
-                     homeKit, awayKit, cheer, t, seed++);
-        drawCrowdRow(buf, cam, cs, xe, ye + 0.68, -W, xe, ye + 0.68, W,
+        drawCrowdRow(buf, cam, cs, xe, ye + 0.42, -W, xe, ye + 0.42, W,
                      homeKit, awayKit, cheer, t, seed++);
       }
     }
@@ -864,7 +871,7 @@
 
     var pc = pitchOf(s);
     var L = pc.half;
-    var spot = L - 12;
+    var spot = L - 13;
 
     /* The keeper. He dives as the ball is struck. */
     var keeperZ = 0;

@@ -121,6 +121,12 @@ corner. It changes shot when the other one has been the better choice
 for a moment, not the instant the ball moves — and it cuts, the way a
 director cuts.
 
+**Or pick one yourself.** The pause sheet has a **CAMERA** row — AUTO,
+TOP or SIDE — and the choice is remembered. When the camera is not on
+auto the director keeps its hands off, and the heads-up display says
+which one you are watching (`AUTO · SIDE` when the director is choosing
+for you).
+
 The pitch is long enough that the camera, following the ball to the back
 of your own half, ends up outside the stand. So the stand the camera is
 behind is **cut away**, the way the old football games cut the near
@@ -193,9 +199,12 @@ therefore exercise the game you actually play, not a copy of it.
 
 ### The model
 
-- The pitch is 72 × 48 units; the goals are nine wide and 3.2 high. The
+- The pitch is 88 × 58 units; the goals are nine wide and 3.2 high. The
   picture takes its dimensions from the model, so the rules and the
   drawing cannot disagree about how big the pitch is.
+- The ball keeps its pace across the pitch. A high friction would make a
+  big pitch empty: every pass would die in a fifth of it, and the game
+  would be sprinting and long clearances instead of football.
 - The stand the camera is behind is cut away, so the near rows never sit
   in the foreground.
 - The ball has weight, bounce, friction and spin, and a strike bends in
@@ -213,8 +222,8 @@ therefore exercise the game you actually play, not a copy of it.
 ### Tests
 
 ```bash
-node pixel-cup-pwa/tests/sim.test.mjs    # 155 checks: rules, physics, cup, shoot-out, balance
-node pixel-cup-pwa/tests/boot.test.mjs   # 87 checks: the whole game against a fake DOM
+node pixel-cup-pwa/tests/sim.test.mjs    # 156 checks: rules, physics, cup, shoot-out, balance
+node pixel-cup-pwa/tests/boot.test.mjs   # 94 checks: the whole game against a fake DOM
 node pixel-cup-pwa/tests/preview.mjs /tmp/pc.png 26   # writes a PNG of a live frame
 node pixel-cup-pwa/smoke.mjs             # the real page, in a real browser
 node pixel-cup-pwa/tools/gen-og.mjs      # writes the social card

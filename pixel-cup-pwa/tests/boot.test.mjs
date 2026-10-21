@@ -520,6 +520,52 @@ live2.ball.z = 20;
 for (let i = 0; i < 120; i++) frame(20);
 ok("the director changes the camera", G.state().shot === "side", G.state().shot);
 
+section("the camera");
+
+G.action("quick");
+G.action("back");
+ok("the title screen offers the camera", /data-cam="auto"/.test(String(screen.innerHTML)) &&
+   /data-cam="side"/.test(String(screen.innerHTML)));
+
+G.action("quick");
+G.action("start", 0);
+G.action("kickoff", globalThis.PixelCupCore.autoSelection(
+  globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"))).map((p) => p.id));
+const live3 = G.match();
+
+/* The director chooses while the camera is on auto. */
+live3.ball.z = 18;
+for (let i = 0; i < 120; i++) frame(20);
+ok("the director picks the side camera for wide play",
+   G.state().shot === "side", G.state().shot);
+
+/* A fixed camera overrides the director. */
+G.camera("top");
+live3.ball.z = 0;
+for (let i = 0; i < 40; i++) frame(20);
+ok("a fixed camera overrides the director", G.state().shot === "top", G.state().shot);
+live3.ball.z = 18;
+for (let i = 0; i < 120; i++) frame(20);
+ok("the director keeps its hands off a fixed camera",
+   G.state().shot === "top", G.state().shot);
+
+/* The pause sheet offers it too. */
+pressKey("Escape");
+frame(20);
+ok("the pause sheet offers the camera", /data-cam="side"/.test(String(screen.innerHTML)));
+pressKey("Escape");
+frame(20);
+
+/* And the choice is remembered. */
+G.camera("side");
+ok("the camera is stored", globalThis.PixelStorage.getCamera() === "side",
+   globalThis.PixelStorage.getCamera());
+
+/* The heads-up display says which camera is on. */
+G.camera("auto");
+for (let i = 0; i < 20; i++) frame(20);
+ok("the state reports the camera", G.state().camera === "auto", G.state().camera);
+
 section("the weather and the report");
 
 G.action("quick");

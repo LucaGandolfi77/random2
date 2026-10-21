@@ -19,6 +19,9 @@
   var KEY_RECORDS = "pixel-cup-records";
   var KEY_CUP = "pixel-cup-cup";
   var KEY_SQUADS = "pixel-cup-squads";
+  /* Which camera the player wants. Its own key: this is a preference of
+     this game, not a setting the whole arcade should share. */
+  var KEY_CAMERA = "pixel-cup-camera";
 
   /*
    * The settings live in the shared arcade key when it is there, so the
@@ -131,6 +134,18 @@
     return all;
   }
 
+  /* The camera: "auto" lets the director choose, "top" and "side" are
+     the two fixed ones. */
+  function getCamera() {
+    var c = load(KEY_CAMERA, "auto");
+    return (c === "top" || c === "side" || c === "auto") ? c : "auto";
+  }
+
+  function setCamera(name) {
+    save(KEY_CAMERA, name);
+    return name;
+  }
+
   function getCup() { return load(KEY_CUP, null); }
   function setCup(cup) { save(KEY_CUP, cup); }
   function clearCup() { remove(KEY_CUP); }
@@ -140,6 +155,7 @@
     KEY_RECORDS: KEY_RECORDS,
     KEY_CUP: KEY_CUP,
     KEY_SQUADS: KEY_SQUADS,
+    KEY_CAMERA: KEY_CAMERA,
     load: load,
     save: save,
     getSettings: getSettings,
@@ -154,5 +170,7 @@
     getSquads: getSquads,
     getSquad: getSquad,
     setSquad: setSquad,
+    getCamera: getCamera,
+    setCamera: setCamera,
   };
 });

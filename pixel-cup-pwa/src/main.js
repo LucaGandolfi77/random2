@@ -78,6 +78,9 @@
     replayGoal: false,
     shot: "top",        /* which camera is on: top or side */
     shotTimer: 0,
+    weather: "day",     /* what the match is played in */
+    drops: [],          /* the rain */
+    camera: "auto",     /* auto, top or side */
   };
 
   /* ---- helpers ---- */
@@ -107,6 +110,41 @@
     }
   }
 
+  /* ---- the rain ---- */
+
+  /*
+   * The drops live in the interface, because they are screen-space and
+   * they move whether or not the match is running. The renderer only
+   * puts them on the glass.
+   */
+  function makeRain() {
+    game.drops.length = 0;
+    if (game.weather !== "rain") return;
+    for (var i = 0; i < 110; i++) {
+      game.drops.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        len: 2 + ((Math.random() * 3) | 0),
+        speed: 260 + Math.random() * 220,
+        slant: 0.22 + Math.random() * 0.2,
+      });
+    }
+  }
+
+  function updateRain(dt) {
+    if (!game.drops.length) return;
+    for (var i = 0; i < game.drops.length; i++) {
+      var d = game.drops[i];
+      d.y += d.speed * dt;
+      d.x -= d.speed * d.slant * dt;
+      if (d.y > H + 4) {
+        d.y = -4;
+        d.x = Math.random() * (W + 40);
+      }
+      if (d.x < -6) d.x += W + 12;
+    }
+  }
+
   /* ---- the settings ---- */
 
   function applySetting(name, on, settings) {
@@ -114,6 +152,23 @@
     if (name === "sound") audio.setSoundEnabled(on);
     if (name === "music") audio.setMusicEnabled(on);
     if (name === "haptics" && R2) R2.setSettings({ haptics: on });
+  }
+
+  /* Which camera is on, for the heads-up display. */
+  function cameraLabel() {
+    if (game.camera !== "auto") return game.camera.toUpperCase();
+    return "AUTO · " + game.shot.toUpperCase();
+  }
+
+  /* The camera the player wants. It takes effect at once: the next frame
+     is drawn from where they asked. */
+  function setCamera(name) {
+    game.camera = name;
+    Storage.setCamera(name);
+    if (name !== "auto" && name !== game.shot) {
+      game.shot = name;
+      game.shotTimer = 0;
+    }
   }
 
   /* ---- pausing ----------------------------------------------------- */
@@ -130,6 +185,7 @@
     audio.setPaused(true);
     ui.showPause(game.settings, {
       onSetting: applySetting,
+      onCamera: setCamera,
       onAction: onAction,
     });
     announce("Paused.");
@@ -154,7 +210,9 @@
       away: awayId,
       difficulty: options.difficulty == null ? 1 : options.difficulty,
       halfSeconds: options.halfSeconds || Core.C.HALF_SECONDS,
+      weather: options.weather || game.weather,
     });
+    makeRain();
     game.mode = "match";
     game.paused = false;
     game.flash = 0;
@@ -412,12 +470,16 @@
   function startDemo() {
     var a = Math.floor(Math.random() * Core.TEAMS.length);
     var b = (a + 1 + Math.floor(Math.random() * (Core.TEAMS.length - 1))) % Core.TEAMS.length;
+    /* The attract mode picks its own weather, and a new one whenever it
+       re-pairs. */
+    var names = Render.WEATHER_NAMES;
     game.demo = Core.createMatch({
       seed: (Math.random() * 0xffffffff) >>> 0,
       home: Core.TEAMS[a].id,
       away: Core.TEAMS[b].id,
       difficulty: 1,
       demo: true,
+      weather: names[Math.floor(Math.random() * names.length)],
     });
     game.demoTime = 0;
     game.demoSwap = 0;
@@ -655,25 +717,27 @@
     ui.showTitle({
       hasCup: !!Storage.getCup(),
       settings: game.settings,
+      camera: game.camera,
       onSetting: applySetting,
+      onCamera: setCamera,
     });
     if (records.matches) {
       announce("You have played " + records.matches + " matches and won " + records.wins + ".");
     }
   }
 
-  function onAction(action, extra, level) {
+  function onAction(action, extra, level, weather) {
     switch (action) {
       case "quick":
         game.pending = "quick";
         ui.showTeamSelect(Core.TEAMS, 0, "Quick match — pick your team", onAction,
-                          { difficulty: game.difficulty });
+                          { difficulty: game.difficulty, weather: game.weather });
         break;
       case "cup":
         game.pending = "cup";
         ui.showTeamSelect(Core.TEAMS, Math.floor(Math.random() * 8),
                           "The Cup — pick your team", onAction,
-                          { difficulty: game.difficulty });
+                          { difficulty: game.difficulty, weather: game.weather });
         break;
       case "shootout":
         ui.showShootoutIntro();
@@ -683,6 +747,10 @@
         break;
       case "start":
         game.difficulty = level == null ? 1 : level;
+        if (weather) {
+          game.weather = weather;
+          makeRain();
+        }
         game.pickedIndex = extra;
         game.pickedTeam = Core.TEAMS[extra].id;
         if (game.pending === "cup") {
@@ -824,16 +892,23 @@
       audio.setExcitement(m.excitement);
       game.spin += dt * 6;
       /* The camera: a director, not a tripod. It changes shot when the
-         other one has been the better choice for a moment. */
-      var want = Render.chooseShot(m);
-      if (want !== game.shot) {
-        game.shotTimer += dt;
-        if (game.shotTimer > 1.3) {
-          game.shot = want;
+         other one has been the better choice for a moment — unless the
+         player has asked for a fixed one, in which case the director
+         keeps its hands off. */
+      if (game.camera === "auto") {
+        var want = Render.chooseShot(m);
+        if (want !== game.shot) {
+          game.shotTimer += dt;
+          if (game.shotTimer > 1.3) {
+            game.shot = want;
+            game.shotTimer = 0;
+            game.shake = Math.max(game.shake, 0.22);
+          }
+        } else {
           game.shotTimer = 0;
-          game.shake = Math.max(game.shake, 0.22);
         }
-      } else {
+      } else if (game.shot !== game.camera) {
+        game.shot = game.camera;
         game.shotTimer = 0;
       }
 
@@ -889,6 +964,7 @@
     }
 
     /* The effects. */
+    updateRain(dt);
     if (game.flash > 0) game.flash = Math.max(0, game.flash - dt * 2.4);
     if (game.shake > 0) game.shake = Math.max(0, game.shake - dt * 1.8);
     if (game.bannerTime > 0) { game.bannerTime -= dt; if (game.bannerTime <= 0) game.banner = null; }
@@ -923,7 +999,11 @@
         trail: game.trail,
       });
       Render.drawRain(buf, game.drops);
-      ui.drawHUD(buf, m, { banner: game.banner, commentary: game.commentary });
+      ui.drawHUD(buf, m, {
+        banner: game.banner,
+        commentary: game.commentary,
+        camera: cameraLabel(),
+      });
     } else if (game.mode === "shootout" && game.shootout) {
       /* The shoot-out is framed from behind the ball. */
       cam.fov = 0.52;
@@ -1074,6 +1154,7 @@
     var settings = Storage.getSettings();
     audio.setSoundEnabled(settings.sound);
     audio.setMusicEnabled(settings.music);
+    game.camera = Storage.getCamera();
 
     /* The on-screen controls only make sense on a touch screen, and they
        must not sit on top of the menus. */
@@ -1140,6 +1221,7 @@
           } : null,
           cup: game.cup ? { round: game.cup.round, done: game.cup.done } : null,
           shot: game.shot,
+          camera: game.camera,
           replay: game.mode === "replay" ? {
             index: game.replayIndex,
             frames: game.bestGoal ? game.bestGoal.n : 0,
@@ -1150,6 +1232,7 @@
       /* The button handler, so a test can walk the menus without a
          browser: it is the same function the buttons call. */
       action: onAction,
+      camera: setCamera,
       match: function () { return game.match; },
       updateTouch: updateTouch,
     };

@@ -952,7 +952,8 @@ byte buffer that the browser scales up with nearest-neighbour sampling.
 - **A match report.** The numbers, a possession bar, and a heat map of
   where the ball actually spent the match.
 - **Two cameras and a director.** The camera behind the play and the one
-  on the touchline, with a rule for when to change between them.
+  on the touchline, with a rule for when to change between them — and a
+  CAMERA row in the pause sheet, so you can pin one yourself.
 - **A squad with attributes.** Ten players a club — two keepers, eight
   outfielders — each with pace, power and technique. You pick the five
   who start, the computer picks its best, and one substitution is

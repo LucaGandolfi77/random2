@@ -126,10 +126,42 @@
       });
     }
 
+    /*
+     * Which camera to watch the match through: the director's automatic
+     * one, or one of the two fixed ones.
+     */
+    function cameraHtml(camera) {
+      var opts = [["auto", "AUTO"], ["top", "TOP"], ["side", "SIDE"]];
+      return '<div class="row"><span class="lbl">Camera</span><div class="diffs">' +
+        opts.map(function (o) {
+          return '<button class="diff' + (camera === o[0] ? " sel" : "") +
+            '" data-cam="' + o[0] + '" aria-pressed="' +
+            (camera === o[0] ? "true" : "false") + '">' + o[1] + '</button>';
+        }).join("") + '</div></div>';
+    }
+
+    function wireCamera(root, camera, onChange) {
+      bind(root, "click", function (e) {
+        var b = e.target.closest("button[data-cam]");
+        if (!b) return;
+        camera = b.getAttribute("data-cam");
+        var all = root.querySelectorAll("button[data-cam]");
+        for (var i = 0; i < all.length; i++) {
+          all[i].classList.remove("sel");
+          all[i].setAttribute("aria-pressed", "false");
+        }
+        b.classList.add("sel");
+        b.setAttribute("aria-pressed", "true");
+        if (audio) audio.blip(true);
+        if (onChange) onChange(camera);
+      });
+    }
+
     function showTitle(state) {
       state = state || {};
       var hasCup = state.hasCup;
       var settings = state.settings || { sound: true, music: true, haptics: true };
+      var camera = state.camera || "auto";
       show(
         '<div class="menu">' +
           '<h1 class="logo">PIXEL CUP <span>96</span></h1>' +
@@ -143,10 +175,12 @@
             '<button class="btn ghost" data-action="how">How to play</button>' +
           '</div>' +
           settingsHtml(settings) +
+          cameraHtml(camera) +
           '<p class="foot">Plays offline. Your records stay on this device.</p>' +
         '</div>',
         function (root) {
           wireSettings(root, settings, state.onSetting);
+          wireCamera(root, camera, state.onCamera);
           bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
@@ -159,6 +193,7 @@
 
     function showPause(settings, actions) {
       settings = settings || { sound: true, music: true, haptics: true };
+      var camera = actions.camera || "auto";
       show(
         '<div class="menu">' +
           '<h2>Paused</h2>' +
@@ -168,10 +203,12 @@
             '<button class="btn ghost" data-action="quit">Quit to the menu</button>' +
           '</div>' +
           settingsHtml(settings) +
+          cameraHtml(camera) +
           '<p class="foot">Esc or the pause button brings you back.</p>' +
         '</div>',
         function (root) {
           wireSettings(root, settings, actions.onSetting);
+          wireCamera(root, camera, actions.onCamera);
           bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
@@ -392,7 +429,7 @@
             '<span class="sl"></span><span class="sv">' + esc(m.home.short) + '</span>' +
             '<span class="sv">' + esc(m.away.short) + '</span></div>' + body + '</div>' +
           '<h3 class="benchhead">Where the ball spent the match</h3>' +
-          '<canvas id="heat" class="heat" width="288" height="192" role="img" ' +
+          '<canvas id="heat" class="heat" width="352" height="232" role="img" ' +
             'aria-label="A map of the pitch, shaded by how long the ball spent in each part of it."></canvas>' +
           '<div class="stack row">' +
             '<button class="btn primary" data-action="back">Back</button>' +
@@ -400,7 +437,7 @@
         '</div>',
         function (root) {
           var canvas = root.querySelector("#heat");
-          drawHeat(canvas, m, 36, 24);
+          drawHeat(canvas, m, 44, 29);
           bind(root, "click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
@@ -733,6 +770,11 @@
         Font.drawPanel(buf, bxx - 2, byy - 2, bw + 4, 12, COL.panel, COL.border);
         Font.drawMeter(buf, bxx, byy, bw, 8, m.charge, COL.gold, COL.panelLight, null);
         Font.drawText(buf, bxx + bw / 2 - 9, byy + 9, "POWER", COL.dim, 1);
+      }
+
+      /* Which camera is on, and whether the director is choosing it. */
+      if (extra.camera) {
+        Font.drawTextCentered(buf, w / 2, 5, extra.camera, COL.dim, 1);
       }
 
       /* A contextual prompt: a ball in the air and a player under it is
