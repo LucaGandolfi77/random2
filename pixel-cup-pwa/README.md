@@ -92,6 +92,26 @@ behind the menu, with both sides on the computer and a broadcast camera
 drifting slowly along the pitch. It is the first thing anybody sees,
 and a word on a blue screen is a waste of it.
 
+### The weather
+
+Four conditions, and the rain is more than a filter: **the pitch is wet,
+so the rules know it**. The ball's skid doubles, the players' feet slip,
+and a pass into the mud is a gamble. A clear day, a dusk, a night under
+floodlights — with somebody in the crowd filming, one pixel at a time —
+and the rain.
+
+The palette is one table: the sky, the grass, the stands, the ambient
+light and the direction it comes from. The wetness is a friction and an
+acceleration multiplier in the rules.
+
+### The match report
+
+Openable at half-time and at full-time: the score, a possession bar, six
+numbers, and a **heat map** of where the ball actually spent the match. A
+score tells you it was 1–0; the heat map tells you the only goal came
+from a corner on the right and the whole game was played in your own
+half.
+
 ### The cameras
 
 There are two, and a director chooses between them: the camera behind
@@ -193,8 +213,8 @@ therefore exercise the game you actually play, not a copy of it.
 ### Tests
 
 ```bash
-node pixel-cup-pwa/tests/sim.test.mjs    # 145 checks: rules, physics, cup, shoot-out, balance
-node pixel-cup-pwa/tests/boot.test.mjs   # 80 checks: the whole game against a fake DOM
+node pixel-cup-pwa/tests/sim.test.mjs    # 155 checks: rules, physics, cup, shoot-out, balance
+node pixel-cup-pwa/tests/boot.test.mjs   # 87 checks: the whole game against a fake DOM
 node pixel-cup-pwa/tests/preview.mjs /tmp/pc.png 26   # writes a PNG of a live frame
 node pixel-cup-pwa/smoke.mjs             # the real page, in a real browser
 node pixel-cup-pwa/tools/gen-og.mjs      # writes the social card

@@ -946,6 +946,11 @@ byte buffer that the browser scales up with nearest-neighbour sampling.
 - **Every sound is synthesised.** The crowd is filtered noise, the whistle is
   two detuned squares, the music is a sixteen-step square-wave sequencer.
   There is not one audio file in the folder.
+- **Weather, and a wet pitch.** A clear day, a dusk, a night with
+  cameras blinking in the crowd, and rain — where the ground is slippery
+  and the rules know it, not just the picture.
+- **A match report.** The numbers, a possession bar, and a heat map of
+  where the ball actually spent the match.
 - **Two cameras and a director.** The camera behind the play and the one
   on the touchline, with a rule for when to change between them.
 - **A squad with attributes.** Ten players a club — two keepers, eight
@@ -1084,7 +1089,7 @@ python app.py
 ## The portfolio page
 
 `portfolio/` is the same work presented for a different reader. The arcade is
-a shelf of things to play; the portfolio is nine case studies written as
+a shelf of things to play; the portfolio is ten case studies written as
 *problem → constraint → approach → result*, with the numbers attached:
 
 **CENSUS** (a claimed 95% interval that covers only ~75% under bias) ·
@@ -1093,7 +1098,8 @@ a shelf of things to play; the portfolio is nine case studies written as
 damage model, 20k lines, no build) · **IRONFALL** (a draw-call budget test) ·
 **PULSE** (a rhythm game with no audio files) · **THE BALANCE LAB** (5,000
 seeded sessions measured) · **THE SHARED ENGINE** (1,655 lines used by 36
-projects) · **EADS STUDIO** (a gdb/MI debugger over a serial link).
+projects) · **EADS STUDIO** (a gdb/MI debugger over a serial link) ·
+**PIXEL CUP '96** (a software rasteriser whose depth test is exact).
 
 There is also a one-page CV at `portfolio/cv.html`: it prints to exactly one
 A4 sheet, and its figures carry the same machine-checked claims as the

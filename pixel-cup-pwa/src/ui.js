@@ -314,6 +314,105 @@
 
     function clampInt(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
+    /*
+     * The match report: the numbers, and a heat map of where the ball
+     * actually spent the match. A score tells you it was 1-0; a heat map
+     * tells you the only goal came from a corner on the right and the
+     * whole game was played in your own half.
+     */
+    function heatColour(t) {
+      /* A ramp from the grass through the gold to a hot red. */
+      if (t <= 0) return null;
+      if (t < 0.34) return [30 + t * 60, 70 + t * 90, 46];
+      if (t < 0.67) return [90 + (t - 0.34) * 330, 100 + (t - 0.34) * 250, 46];
+      return [200 + (t - 0.67) * 150, 160 - (t - 0.67) * 200, 60];
+    }
+
+    function drawHeat(canvas, m, cols, rows) {
+      if (!canvas || !canvas.getContext) return;
+      var g = canvas.getContext("2d");
+      var cw = canvas.width / cols, ch = canvas.height / rows;
+      var max = 1;
+      for (var i = 0; i < m.heat.length; i++) if (m.heat[i] > max) max = m.heat[i];
+      g.clearRect(0, 0, canvas.width, canvas.height);
+      /* the pitch */
+      g.fillStyle = "#16321f";
+      g.fillRect(0, 0, canvas.width, canvas.height);
+      g.strokeStyle = "#5f6a86";
+      g.lineWidth = 1;
+      g.strokeRect(0.5, 0.5, canvas.width - 1, canvas.height - 1);
+      g.beginPath();
+      g.moveTo(canvas.width / 2, 0);
+      g.lineTo(canvas.width / 2, canvas.height);
+      g.stroke();
+      /* the heat */
+      for (var y = 0; y < rows; y++) {
+        for (var x = 0; x < cols; x++) {
+          var v = m.heat[y * cols + x];
+          if (!v) continue;
+          var t = v / max;
+          var c = heatColour(t);
+          if (!c) continue;
+          g.fillStyle = "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
+          g.fillRect(Math.floor(x * cw), Math.floor(y * ch), Math.ceil(cw), Math.ceil(ch));
+        }
+      }
+    }
+
+    function showStats(m, options) {
+      options = options || {};
+      var s0 = m.stats[0], s1 = m.stats[1];
+      var poss = s0.possession + s1.possession;
+      var p0 = poss > 0 ? Math.round(100 * s0.possession / poss) : 50;
+      var p1 = 100 - p0;
+      /* A shot on target either scores or is saved. */
+      var t0 = m.score[0] + s1.saves;
+      var t1 = m.score[1] + s0.saves;
+      var rows = [
+        ["Shots", s0.shots, s1.shots],
+        ["On target", t0, t1],
+        ["Passes", s0.passes, s1.passes],
+        ["Tackles", s0.tackles, s1.tackles],
+        ["Saves", s0.saves, s1.saves],
+      ];
+      var body = rows.map(function (r) {
+        return '<div class="stat"><span class="sl">' + esc(r[0]) + '</span>' +
+          '<span class="sv">' + r[1] + '</span>' +
+          '<span class="sv">' + r[2] + '</span></div>';
+      }).join("");
+      show(
+        '<div class="menu wide">' +
+          '<h2>Match report</h2>' +
+          '<div class="score big"><b>' + esc(m.home.short) + '</b> ' +
+            m.score[0] + ' - ' + m.score[1] + ' <b>' + esc(m.away.short) + '</b></div>' +
+          '<div class="poss"><span class="pa">' + p0 + '%</span>' +
+            '<span class="pbar"><i style="width:' + p0 + '%"></i></span>' +
+            '<span class="pb">' + p1 + '%</span></div>' +
+          '<div class="statgrid"><div class="stat head">' +
+            '<span class="sl"></span><span class="sv">' + esc(m.home.short) + '</span>' +
+            '<span class="sv">' + esc(m.away.short) + '</span></div>' + body + '</div>' +
+          '<h3 class="benchhead">Where the ball spent the match</h3>' +
+          '<canvas id="heat" class="heat" width="288" height="192" role="img" ' +
+            'aria-label="A map of the pitch, shaded by how long the ball spent in each part of it."></canvas>' +
+          '<div class="stack row">' +
+            '<button class="btn primary" data-action="back">Back</button>' +
+          '</div>' +
+        '</div>',
+        function (root) {
+          var canvas = root.querySelector("#heat");
+          drawHeat(canvas, m, 36, 24);
+          bind(root, "click", function (e) {
+            var b = e.target.closest("button[data-action]");
+            if (!b) return;
+            if (audio) audio.blip(true);
+            if (options.onBack) options.onBack();
+          });
+        }
+      );
+      announce("Match report. " + m.home.name + " " + m.score[0] + ", " +
+               m.away.name + " " + m.score[1] + ". Possession " + p0 + " percent.");
+    }
+
     function showTeamSelect(teams, selected, title, action, opts) {
       opts = opts || {};
       var diff = opts.difficulty == null ? 1 : opts.difficulty;
@@ -331,12 +430,22 @@
           '" data-diff="' + d[0] + '" aria-pressed="' +
           (diff === Number(d[0]) ? "true" : "false") + '">' + d[1] + '</button>';
       }).join("");
+      /* The weather: what the match is played in. */
+      var wx = opts.weather || "day";
+      var weathers = [["day", "Day"], ["dusk", "Dusk"], ["night", "Night"], ["rain", "Rain"]]
+        .map(function (w) {
+          return '<button class="diff' + (wx === w[0] ? " sel" : "") +
+            '" data-wx="' + w[0] + '" aria-pressed="' +
+            (wx === w[0] ? "true" : "false") + '">' + w[1] + '</button>';
+        }).join("");
       show(
         '<div class="menu wide">' +
           '<h2>' + esc(title || "Pick your team") + '</h2>' +
           '<div class="teams">' + cards + '</div>' +
           '<div class="row"><span class="lbl">Difficulty</span>' +
             '<div class="diffs">' + levels + '</div></div>' +
+          '<div class="row"><span class="lbl">Weather</span>' +
+            '<div class="diffs">' + weathers + '</div></div>' +
           '<div class="stack row">' +
             '<button class="btn primary" data-action="start">Kick off</button>' +
             '<button class="btn ghost" data-action="back">Back</button>' +
@@ -345,6 +454,7 @@
         function (root) {
           var chosen = selected;
           var level = diff;
+          var weather = wx;
           bind(root, "click", function (e) {
             var t = e.target.closest("button[data-team]");
             if (t) {
@@ -372,10 +482,23 @@
               if (audio) audio.blip(true);
               return;
             }
+            var w = e.target.closest("button[data-wx]");
+            if (w) {
+              weather = w.getAttribute("data-wx");
+              var ws = root.querySelectorAll("button[data-wx]");
+              for (var q = 0; q < ws.length; q++) {
+                ws[q].classList.remove("sel");
+                ws[q].setAttribute("aria-pressed", "false");
+              }
+              w.classList.add("sel");
+              w.setAttribute("aria-pressed", "true");
+              if (audio) audio.blip(true);
+              return;
+            }
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
-            if (b.getAttribute("data-action") === "start") onAction("start", chosen, level);
+            if (b.getAttribute("data-action") === "start") onAction("start", chosen, level, weather);
             else onAction(b.getAttribute("data-action"));
           });
         }
@@ -386,7 +509,8 @@
       return '<div class="stat"><span>' + esc(label) + '</span><b>' + esc(value) + '</b></div>';
     }
 
-    function showHalftime(m) {
+    function showHalftime(m, options) {
+      options = options || {};
       show(
         '<div class="menu">' +
           '<h2>Half time</h2>' +
@@ -401,6 +525,7 @@
           '</div>' +
           '<div class="stack row">' +
             '<button class="btn primary" data-action="continue">Second half</button>' +
+            (options.report ? '<button class="btn" data-action="report">Report</button>' : '') +
             '<button class="btn" data-action="sub">Substitution</button>' +
           '</div>' +
         '</div>',
@@ -421,6 +546,9 @@
       options = options || {};
       var title = result === "win" ? "You win!" : (result === "draw" ? "A draw" : "You lose");
       var buttons = '<button class="btn primary" data-action="continue">Continue</button>';
+      if (options.report) {
+        buttons += '<button class="btn" data-action="report">Match report</button>';
+      }
       if (options.replay) {
         buttons = '<button class="btn primary" data-action="replay">Watch the best goal</button>' +
                   '<button class="btn ghost" data-action="continue">Continue</button>';
@@ -684,6 +812,7 @@
       showPause: showPause,
       showTeamSelect: showTeamSelect,
       showSquadPicker: showSquadPicker,
+      showStats: showStats,
       showHalftime: showHalftime,
       showFullTime: showFullTime,
       showBracket: showBracket,

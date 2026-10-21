@@ -520,6 +520,29 @@ live2.ball.z = 20;
 for (let i = 0; i < 120; i++) frame(20);
 ok("the director changes the camera", G.state().shot === "side", G.state().shot);
 
+section("the weather and the report");
+
+G.action("quick");
+ok("the picker offers the weather",
+  /data-wx="rain"/.test(String(screen.innerHTML)) &&
+  /data-wx="night"/.test(String(screen.innerHTML)));
+G.action("start", 0);
+G.action("kickoff", globalThis.PixelCupCore.autoSelection(
+  globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"))).map((p) => p.id));
+ok("the match has a weather", !!G.match().weather, G.match().weather);
+
+/* The report: the numbers and the heat map. */
+G.action("report");
+const reportHtml = String(screen.innerHTML);
+ok("the report is on screen", /Match report/.test(reportHtml));
+ok("the report has a heat map", /id="heat"/.test(reportHtml));
+ok("the report has the possession bar", /class="pbar"/.test(reportHtml));
+ok("the report has the statistics", /Shots/.test(reportHtml) && /On target/.test(reportHtml));
+
+/* Back out of it. */
+G.action("back");
+ok("the report can be left", !/Match report/.test(String(screen.innerHTML)));
+
 section("storage");
 const Storage = globalThis.PixelStorage;
 /* The flow above has already played matches, so start from a clean

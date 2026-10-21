@@ -144,6 +144,16 @@ const SHOTS = [
         hold: 17000,
     },
     {
+        name: "pixel-cup",
+        path: "/pixel-cup-pwa/",
+        note: "the match, a minute in",
+        /* PIXEL CUP '96 opens on the title screen with a match playing
+         * itself behind the menu, so there is something to photograph
+         * straight away. The attract mode runs until the page is asked
+         * for something else. */
+        hold: 6000,
+    },
+    {
         name: "portfolio",
         path: "/portfolio/",
         note: "this page, for the README and the social card",

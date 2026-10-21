@@ -41,9 +41,9 @@
       <span class="it" lang="it">Questa pagina è generata da <code>tools/verify.mjs</code>. Ogni numero che il portfolio afferma ricalcolato sul repository e confrontato con il numero che la pagina mostra davvero. Se uno scivola, la CI diventa rossa. La colonna dei comandi è il comando che produce il numero: incollatelo in un terminale e ottieni la stessa risposta.</span>
     </p>
     <p class="ledger-summary">
-      <b>30</b>
-      <span class="en">claims · 30 pass · 0 fail</span>
-      <span class="it" lang="it">affermazioni · 30 ok · 0 ko</span>
+      <b>32</b>
+      <span class="en">claims · 32 pass · 0 fail</span>
+      <span class="it" lang="it">affermazioni · 32 ok · 0 ko</span>
     </p>
     <p class="ledger-back">
       <a href="./">&larr; <span class="en">Back to the portfolio</span><span class="it" lang="it">Torna al portfolio</span></a>
@@ -281,7 +281,7 @@
             <span class="en">Case studies</span>
             <span class="it" lang="it">Case study</span>
           </th>
-          <td class="value">9</td>
+          <td class="value">10</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the hero and the work section</span>
@@ -404,6 +404,38 @@
             <button class="copy" type="button" hidden data-copy>Copy</button>
           </td>
         </tr>
+        <tr class="ok" id="pixelcup_lines">
+          <th scope="row">
+            <span class="en">PIXEL CUP '96 — lines of source</span>
+            <span class="it" lang="it">PIXEL CUP '96 — righe di codice</span>
+          </th>
+          <td class="value">8,706</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 10, the line-count chip</span>
+            <span class="it" lang="it">case 10, il chip delle righe</span>
+          </td>
+          <td class="how">
+            <pre><code>git ls-files pixel-cup-pwa | grep -E '\.(js|mjs|html|css)$' | xargs cat | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
+        <tr class="ok" id="pixelcup_model">
+          <th scope="row">
+            <span class="en">PIXEL CUP '96 — lines of rules</span>
+            <span class="it" lang="it">PIXEL CUP '96 — righe di regole</span>
+          </th>
+          <td class="value">1,844</td>
+          <td class="state">PASS</td>
+          <td class="where">
+            <span class="en">case 10, the rules chip</span>
+            <span class="it" lang="it">case 10, il chip delle regole</span>
+          </td>
+          <td class="how">
+            <pre><code>cat pixel-cup-pwa/src/core.js | wc -l</code></pre>
+            <button class="copy" type="button" hidden data-copy>Copy</button>
+          </td>
+        </tr>
         <tr class="ok" id="balance_sessions">
           <th scope="row">
             <span class="en">THE BALANCE LAB — sessions per run</span>
@@ -473,7 +505,7 @@
             <span class="en">Claims in the ledger</span>
             <span class="it" lang="it">Affermazioni nel registro</span>
           </th>
-          <td class="value">30</td>
+          <td class="value">32</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the CV, the numbers row</span>
@@ -532,7 +564,7 @@
             <span class="en">Lines of source</span>
             <span class="it" lang="it">Righe di codice</span>
           </th>
-          <td class="value">155121</td>
+          <td class="value">157163</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the ledger</span>
@@ -548,7 +580,7 @@
             <span class="en">Lines of JavaScript</span>
             <span class="it" lang="it">Righe di JavaScript</span>
           </th>
-          <td class="value">117949</td>
+          <td class="value">119688</td>
           <td class="state">PASS</td>
           <td class="where">
             <span class="en">the ledger</span>

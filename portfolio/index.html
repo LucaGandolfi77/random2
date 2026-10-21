@@ -101,13 +101,13 @@
           I design and build interfaces that stay fast, accessible and usable
           with the network off. Forty-six shipped projects. Two of them use a
           third-party library; the other forty-four need nothing but a browser —
-          and nine of them are worth reading the numbers on.
+          and ten of them are worth reading the numbers on.
         </span>
         <span class="it" lang="it">
           Progetto interfacce che restano veloci, accessibili e utilizzabili anche
           senza rete. Quarantasei progetti pubblicati. Due usano una libreria
           di terze parti; gli altri quarantaquattro si affidano solo al browser —
-          e nove di loro meritano la pena di leggerne i numeri.
+          e dieci di loro meritano la pena di leggerne i numeri.
         </span>
       </p>
 
@@ -1046,6 +1046,68 @@
           </figure>
         </div>
       </article>
+
+      <article class="case">
+        <div class="case-body">
+          <p class="case-num">10</p>
+          <h3>PIXEL CUP '96</h3>
+          <p class="tagline">
+            <span class="en">Arcade football with no images, no WebGL and no dependencies — every triangle of it drawn by hand into a 320×180 byte buffer.</span>
+            <span class="it" lang="it">Calcio arcade senza immagini, senza WebGL e senza dipendenze — ogni triangolo disegnato a mano dentro un buffer di 320×180 byte.</span>
+          </p>
+
+          <div class="steps">
+            <div class="step">
+              <h4><span class="en">The problem</span><span class="it" lang="it">Il problema</span></h4>
+              <p>
+                <span class="en">An arcade football game has to look like a stadium and play like football, and it has to do it in a browser tab on a phone. The usual answers are sprites or a 3D library, and both of them cost something: sprites are a pipeline and an asset budget, a 3D library is a dependency and a canvas context. The interesting question is what is left when you take both away.</span>
+                <span class="it" lang="it">Un gioco di calcio arcade deve sembrare uno stadio e giocare come il calcio, e deve farlo in una scheda del browser su un telefono. Le risposte solite sono gli sprite o una libreria 3D, e entrambe costano qualcosa: gli sprite sono una pipeline e un budget di asset, una libreria 3D è una dipendenza e un contesto canvas. La domanda interessante è che cosa resta quando si toglie entrambe.</span>
+              </p>
+            </div>
+            <div class="step">
+              <h4><span class="en">What I built</span><span class="it" lang="it">Cosa ho costruito</span></h4>
+              <p>
+                <span class="en">A software rasteriser. The pitch, the players, the ball, the goal and the crowd are triangles, projected by hand and filled one pixel at a time into a byte buffer that the browser scales up. The part that needed the thinking is the depth buffer: it tests 1/d rather than d, and 1/d is an affine function of the screen position across a plane, so interpolating it across a triangle is not an approximation but an identity. The pitch, the players and the goalposts share one buffer, with no sorting at all — and the picture takes the size of the pitch from the rules, so the two cannot drift apart.</span>
+                <span class="it" lang="it">Un rasterizzatore software. Il campo, i giocatori, la palla, la porta e il pubblico sono triangoli, proiettati a mano e riempiti un pixel alla volta dentro un buffer di byte che il browser ingrandisce. La parte che ha richiesto il ragionamento è il depth buffer: confronta 1/d invece di d, e 1/d è una funzione affine della posizione sullo schermo su un piano, quindi interpolarlo su un triangolo non è un'approssimazione ma un'identità. Campo, giocatori e pali condividono un solo buffer, senza nessun ordinamento — e l'immagine prende la misura del campo dalle regole, così le due non possono divergere.</span>
+              </p>
+              <p>
+                <span class="en">The rules live in a file with no DOM in it, loaded unchanged by the browser and by the Node tests, so the tests play the game you actually play and the balance is pinned by them rather than by feel. A match has to hold between one and a half and seven goals, a scripted player of ordinary ability has to score, and the opposition has to score too. When the rules move, the numbers are re-tuned deliberately instead of being relaxed.</span>
+                <span class="it" lang="it">Le regole stanno in un file senza DOM, caricato identico dal browser e dai test Node, così i test giocano il gioco che giochi davvero e l'equilibrio è fissato da loro e non dalla sensazione. Una partita deve stare fra un e mezzo e sette gol, uno giocatore di capacità ordinaria deve segnare, e anche l'avversario deve segnare. Quando le regole cambiano, i numeri si ritoccano di proposito invece di essere allentati.</span>
+              </p>
+            </div>
+            <div class="step result">
+              <h4><span class="en">Result</span><span class="it" lang="it">Risultato</span></h4>
+              <p>
+                <span class="en">8,706 lines, 1,844 of them the rules, and 155 checks that decide whether the game is still the game. The picture is 320×180 — 57,600 pixels — drawn at sixty frames a second by a rasteriser with no dependencies, and it is a football game: five a side, ninety seconds a half, crosses over the defence, headers, a cup to win and a shoot-out to settle.</span>
+                <span class="it" lang="it">8.706 righe, 1.844 delle quali sono le regole, e 155 controlli che decidono se il gioco è ancora il gioco. L'immagine è 320×180 — 57.600 pixel — disegnata a sessanta fotogrammi al secondo da un rasterizzatore senza dipendenze, ed è un gioco di calcio: cinque per squadra, novanta secondi a tempo, cross sulla difesa, testate, una coppa da vincere e un rigore da decidere.</span>
+              </p>
+            </div>
+          </div>
+
+          <dl class="case-facts">
+            <dt><span class="en">The constraint</span><span class="it" lang="it">Il vincolo</span></dt>
+            <dd><span class="en">No images, no WebGL, no dependencies — and a depth test that has to be <em>exact</em>, not nearly exact.</span><span class="it" lang="it">Nessuna immagine, nessun WebGL, nessuna dipendenza — e un depth test che deve essere <em>esatto</em>, non quasi esatto.</span></dd>
+            <dt><span class="en">Stack</span><span class="it" lang="it">Stack</span></dt>
+            <dd><span class="en">A hand-written rasteriser and a software renderer over a 2D canvas · the rules are DOM-free, so they are played and tested in Node</span><span class="it" lang="it">Un rasterizzatore scritto a mano e un renderer software su canvas 2D · le regole sono senza DOM, così vengono giocate e testate in Node</span></dd>
+            <dt><span class="en">Shipped</span><span class="it" lang="it">Pubblicato</span></dt>
+            <dd><span class="en">Installable PWA · works offline · 155 checks, and a balance that has to be re-tuned whenever the rules move</span><span class="it" lang="it">PWA installabile · funziona offline · 155 controlli, e un equilibrio da ritoccare ogni volta che le regole cambiano</span></dd>
+          </dl>
+
+          <p class="case-critique">
+            <span class="en"><b>What I'd do differently.</b> The depth test is exact, but the anti-aliasing is not: a player is a staircase of pixels and the crowd is one pixel per person, which is why a stand seen edge-on still reads as lines. And the balance is pinned by a scripted player who is a better footballer than I am, so the real balance is very likely a shade easier than the tests say.</span>
+            <span class="it" lang="it"><b>Cosa farei diversamente.</b> Il depth test è esatto, ma l'antialiasing non lo è: un giocatore è una scala di pixel e il pubblico è un pixel a testa, ed è per questo che una tribuna vista di lato sembra ancora una serie di linee. E l'equilibrio è fissato da uno giocatore scripted che è un calciatore migliore di me, quindi l'equilibrio vero è quasi certamente un filo più facile di quanto dicano i test.</span>
+          </p>
+
+          <div class="case-meta">
+            <span class="chip" data-claim="pixelcup_lines"><b>8,706</b> lines</span>
+            <span class="chip" data-claim="pixelcup_model"><b>1,844</b> of them rules</span>
+            <span class="chip">Software rasteriser</span>
+            <span class="chip">0 dependencies</span>
+            <span class="chip">155 checks</span>
+          </div>
+        </div>
+      </article>
+
 
     </section>
 

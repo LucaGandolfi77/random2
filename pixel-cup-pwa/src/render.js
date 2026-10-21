@@ -27,15 +27,7 @@
   /* ---- palette ---------------------------------------------------- */
 
   var PAL = {
-    skyTop: [28, 44, 96],
-    skyBottom: [96, 158, 224],
-    grass: [[46, 118, 62], [38, 104, 54]],
     grassLine: [222, 228, 226],
-    stand: [74, 78, 108],
-    standDark: [52, 56, 84],
-    wall: [30, 32, 52],
-    post: [236, 238, 240],
-    net: [176, 186, 196],
     ball: [244, 246, 250],
     ballDark: [26, 28, 38],
     skin: [[232, 184, 140], [196, 136, 92], [148, 96, 62], [92, 60, 40]],
@@ -43,8 +35,70 @@
     flash: [255, 255, 255],
   };
 
-  /* Light direction, in world space. */
-  var LX = -0.42, LY = 0.86, LZ = 0.30;
+  /*
+   * The weather. Each one is a whole picture: the sky, the grass, the
+   * stands, the light and how much of it reaches the ground. The rain is
+   * more than a filter — the pitch is wet, and the rules know it.
+   */
+  var WEATHER = {
+    day: {
+      label: "CLEAR DAY",
+      sky: [[34, 62, 122], [132, 190, 242]],
+      grass: [[46, 118, 62], [38, 104, 54]],
+      surround: [26, 58, 36],
+      stand: [74, 78, 108], standDark: [52, 56, 84], wall: [30, 32, 52],
+      post: [236, 238, 240], net: [176, 186, 196],
+      ambient: 0.44, light: [-0.42, 0.86, 0.30],
+      crowd: 1, flash: false, rain: false,
+    },
+    dusk: {
+      label: "DUSK",
+      sky: [[92, 44, 78], [240, 150, 86]],
+      grass: [[86, 112, 46], [68, 94, 38]],
+      surround: [42, 52, 28],
+      stand: [80, 58, 68], standDark: [54, 38, 50], wall: [40, 28, 40],
+      post: [246, 228, 208], net: [198, 178, 170],
+      ambient: 0.40, light: [-0.66, 0.58, 0.30],
+      crowd: 0.88, flash: false, rain: false,
+    },
+    night: {
+      label: "NIGHT",
+      sky: [[8, 12, 34], [28, 42, 82]],
+      grass: [[28, 68, 46], [22, 58, 40]],
+      surround: [14, 34, 24],
+      stand: [40, 44, 68], standDark: [26, 30, 48], wall: [18, 20, 38],
+      post: [212, 222, 238], net: [122, 142, 162],
+      ambient: 0.30, light: [-0.18, 0.96, 0.20],
+      crowd: 0.5, flash: true, rain: false,
+    },
+    rain: {
+      label: "RAIN",
+      sky: [[56, 60, 72], [118, 124, 134]],
+      grass: [[40, 92, 54], [34, 80, 46]],
+      surround: [24, 46, 34],
+      stand: [56, 60, 70], standDark: [38, 42, 52], wall: [28, 30, 38],
+      post: [224, 228, 234], net: [166, 174, 182],
+      ambient: 0.40, light: [-0.34, 0.88, 0.34],
+      crowd: 0.78, flash: false, rain: true,
+    },
+  };
+
+  var WEATHER_NAMES = ["day", "dusk", "night", "rain"];
+
+  /* The weather in force. The renderer draws one scene at a time and is
+     single-threaded, so this is the cheapest way to let every helper see
+     it without threading it through twenty arguments. */
+  var wx = WEATHER.day;
+
+  function setWeather(name) {
+    wx = WEATHER[name] || WEATHER.day;
+    return wx;
+  }
+
+  function weatherName() {
+    for (var k in WEATHER) if (WEATHER[k] === wx) return k;
+    return "day";
+  }
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
   function lerp(a, b, t) { return a + (b - a) * t; }
@@ -296,8 +350,8 @@
       var idx = faces[f][0], n = faces[f][1];
       /* Rotate the normal with the box. */
       var nx = n[0] * co - n[2] * si, nz = n[0] * si + n[2] * co;
-      var diff = Math.max(0, nx * LX + n[1] * LY + nz * LZ);
-      var amount = 0.44 + 0.62 * diff;
+      var diff = Math.max(0, nx * wx.light[0] + n[1] * wx.light[1] + nz * wx.light[2]);
+      var amount = wx.ambient + (1.12 - wx.ambient) * diff;
       var c = shade(rgb, amount);
       quad(buf, cam, corners[idx[0]], corners[idx[1]], corners[idx[2]], corners[idx[3]],
            c[0], c[1], c[2]);
@@ -313,7 +367,7 @@
     var L = pc.half + 2, W = pc.wide + 3;
     /* The ground the stadium stands on. Without it the pitch floats in
        the sky whenever the camera looks past its edge. */
-    var surround = [26, 58, 36];
+    var surround = wx.surround;
     groundQuad(buf, cam, -(L + 70), -(W + 70), L + 70, W + 70, -0.08,
                surround[0], surround[1], surround[2]);
     var x0 = -L, x1 = L, z0 = -W, z1 = W;
@@ -326,7 +380,7 @@
         /* Skip what the camera cannot see. */
         if (bx < cam.x - 6) continue;
         if (ax > cam.x + 150) continue;
-        var base = PAL.grass[band];
+        var base = wx.grass[band];
         /* A little variation so the grass is not a flat sheet. */
         var v = ((i * 7 + j * 13) % 5) * 0.022 - 0.04;
         var r = Raster.quantise(base[0] * (1 + v));
@@ -385,7 +439,7 @@
     var pc = pitchOf(m);
     var L = pc.half, half = 4.5, h = 3.2, depth = 3;
     var gx = side * L;
-    var post = PAL.post, net = PAL.net;
+    var post = wx.post, net = wx.net;
     /* posts */
     box(buf, cam, gx, h / 2, -half, 0.28, h, 0.28, 0, post);
     box(buf, cam, gx, h / 2, half, 0.28, h, 0.28, 0, post);
@@ -444,7 +498,7 @@
         var z0 = s * (W + row * 1.25);
         var z1 = s * (W + (row + 1) * 1.25);
         var y0 = row * 1.05, y1 = (row + 1) * 1.05;
-        var col = row % 2 ? PAL.stand : PAL.standDark;
+        var col = row % 2 ? wx.stand : wx.standDark;
         quad(buf, cam, [-L, y0, z0], [-L, y1, z1], [L, y1, z1], [L, y0, z0],
              col[0], col[1], col[2]);
       }
@@ -462,14 +516,14 @@
         var x0 = s2 * (L + row2 * 1.3);
         var x1 = s2 * (L + (row2 + 1) * 1.3);
         var y0 = row2 * 1.1, y1 = (row2 + 1) * 1.1;
-        var col2 = row2 % 2 ? PAL.stand : PAL.standDark;
+        var col2 = row2 % 2 ? wx.stand : wx.standDark;
         quad(buf, cam, [x0, y0, -W], [x0, y0, W], [x1, y1, W], [x1, y1, -W],
              col2[0], col2[1], col2[2]);
       }
       /* The back wall of the stand. */
       var bx = s2 * (L + 7 * 1.3);
       quad(buf, cam, [bx, 0, -W], [bx, 7.8, -W], [bx, 7.8, W], [bx, 0, W],
-           PAL.wall[0], PAL.wall[1], PAL.wall[2]);
+           wx.wall[0], wx.wall[1], wx.wall[2]);
     }
   }
 
@@ -541,9 +595,20 @@
       /* Each spectator is a body and a head. A row of one-pixel marks is
          a line, and a line of pixels across the screen is an artefact;
          two pixels of a person is a crowd. */
-      Raster.drawPixelOnce(buf, px, py - bob, invd, c[0], c[1], c[2]);
+      var dim = wx.crowd;
+      Raster.drawPixelOnce(buf, px, py - bob, invd,
+                           Raster.quantise(c[0] * dim),
+                           Raster.quantise(c[1] * dim),
+                           Raster.quantise(c[2] * dim));
       var hair = ((i * 13 + seed) % 5) < 2 ? [232, 216, 186] : [58, 46, 40];
-      Raster.drawPixelOnce(buf, px, py - 1 - bob, invd, hair[0], hair[1], hair[2]);
+      Raster.drawPixelOnce(buf, px, py - 1 - bob, invd,
+                           Raster.quantise(hair[0] * dim),
+                           Raster.quantise(hair[1] * dim),
+                           Raster.quantise(hair[2] * dim));
+      /* At night somebody in the crowd has a camera. */
+      if (wx.flash && ((i * 7 + seed * 3) % 89) === 0) {
+        Raster.drawPixelOnce(buf, px, py - bob, invd, 250, 248, 236);
+      }
     }
   }
 
@@ -704,12 +769,31 @@
     }
   }
 
+  /*
+   * The rain, drawn in screen space over the whole picture. The drops
+   * belong to the interface, which owns them and moves them; this only
+   * puts them on the glass.
+   */
+  function drawRain(buf, drops) {
+    if (!drops || !drops.length) return;
+    for (var i = 0; i < drops.length; i++) {
+      var d = drops[i];
+      for (var k = 0; k < d.len; k++) {
+        var y = Math.round(d.y + k);
+        var x = Math.round(d.x - k * d.slant);
+        if (x < 0 || y < 0 || x >= buf.w || y >= buf.h) continue;
+        Raster.setPixel(buf, x, y, 186, 200, 214);
+      }
+    }
+  }
+
   /* ---- assembling the scene ---------------------------------------- */
 
   function drawScene(buf, cam, m, opts) {
     opts = opts || {};
-    Raster.fillGradient(buf, PAL.skyTop[0], PAL.skyTop[1], PAL.skyTop[2],
-                        PAL.skyBottom[0], PAL.skyBottom[1], PAL.skyBottom[2]);
+    setWeather((m && m.weather) || opts.weather);
+    Raster.fillGradient(buf, wx.sky[0][0], wx.sky[0][1], wx.sky[0][2],
+                        wx.sky[1][0], wx.sky[1][1], wx.sky[1][2]);
     var homeKit = hexToRgb(opts.homeKit || "#2f6fe0");
     var awayKit = hexToRgb(opts.awayKit || "#d8342c");
     var homeShorts = hexToRgb(opts.homeShorts || "#12306e");
@@ -767,8 +851,8 @@
    */
   function drawShootoutScene(buf, cam, s, opts) {
     opts = opts || {};
-    Raster.fillGradient(buf, PAL.skyTop[0], PAL.skyTop[1], PAL.skyTop[2],
-                        PAL.skyBottom[0], PAL.skyBottom[1], PAL.skyBottom[2]);
+    Raster.fillGradient(buf, wx.sky[0][0], wx.sky[0][1], wx.sky[0][2],
+                        wx.sky[1][0], wx.sky[1][1], wx.sky[1][2]);
     var homeKit = hexToRgb(opts.homeKit || "#2f6fe0");
     var awayKit = hexToRgb(opts.awayKit || "#d8342c");
     drawStands(buf, cam, null);
@@ -816,6 +900,11 @@
     stats: stats,
     hexToRgb: hexToRgb,
     pitchOf: pitchOf,
+    WEATHER: WEATHER,
+    WEATHER_NAMES: WEATHER_NAMES,
+    setWeather: setWeather,
+    weatherName: weatherName,
+    drawRain: drawRain,
     createCamera: createCamera,
     updateCamera: updateCamera,
     updateSideCamera: updateSideCamera,

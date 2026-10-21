@@ -44,6 +44,8 @@
     BALL_R: 0.48,
     BOUNCE: 0.52,
     GROUND_FRICTION: 2.1,    // per second, exponential
+    WET_FRICTION: 0.45,      // the ball skids on a wet pitch
+    WET_ACCEL: 0.82,         // and the players' feet slip
     AIR_DRAG: 0.25,
 
     CONTROL_R: 1.75,        // how close a player must be to take the ball
@@ -66,6 +68,12 @@
        up, over the top of the defence, and lands in the box. */
     CROSS_LIFT: 13.2,
     CROSS_SPEED: 19,
+    /* The heat map: the pitch divided into cells, each counting the
+       samples whose ball landed in it. */
+    HEAT_W: 36,
+    HEAT_H: 24,
+    HEAT_HZ: 4,            /* how often the ball is sampled, in steps */
+
     HEADER_MIN_Y: 1.15,   /* above this the ball is headed, not carried */
     HEADER_MAX_Y: 4.6,
     HEADER_RANGE: 2.1,
@@ -375,6 +383,14 @@
          computer and the match is a performance. */
       demo: !!opts.demo,
       pitch: { len: C.PITCH_LEN, wid: C.PITCH_WID },
+      /* The weather is part of the rules, not a filter over the picture:
+         a wet pitch is a slippery pitch. */
+      weather: opts.weather || "day",
+      wet: (opts.weather || "day") === "rain",
+      /* Where the ball spent the match, in cells of the pitch. */
+      heat: new Uint16Array(C.HEAT_W * C.HEAT_H),
+      heatSamples: 0,
+      heatTick: 0,
     };
 
     for (var t = 0; t < 2; t++) {
@@ -827,8 +843,9 @@
       } else {
         b.vy = 0;
       }
-      /* Rolling friction, exponential so the ball never crawls forever. */
-      var f = Math.max(0, 1 - C.GROUND_FRICTION * dt);
+      /* Rolling friction, exponential so the ball never crawls forever.
+         A wet pitch takes the skid off the ball. */
+      var f = Math.max(0, 1 - C.GROUND_FRICTION * (m.wet ? C.WET_FRICTION : 1) * dt);
       b.vx *= f; b.vz *= f;
       b.spin *= (1 - 2.0 * dt);
     }
@@ -984,8 +1001,9 @@
       ax = (dx / d) * want;
       az = (dz / d) * want;
     }
-    p.vx = approach(p.vx, ax, C.PLAYER_ACCEL * dt);
-    p.vz = approach(p.vz, az, C.PLAYER_ACCEL * dt);
+    var accel = C.PLAYER_ACCEL * (m.wet ? C.WET_ACCEL : 1);
+    p.vx = approach(p.vx, ax, accel * dt);
+    p.vz = approach(p.vz, az, accel * dt);
     if (p.sprint > 0) {
       p.stamina = Math.max(0, p.stamina - C.STAMINA_DRAIN * dt);
       if (p.stamina <= 0) p.sprint = 0;
@@ -1520,6 +1538,18 @@
 
     updateBall(m, dt);
     updatePossession(m);
+
+    /* The heat map: one sample every few steps, wherever the ball is. */
+    m.heatTick++;
+    if (m.heatTick >= C.HEAT_HZ) {
+      m.heatTick = 0;
+      var hx = Math.floor((m.ball.x + C.GOAL_LINE) / (C.PITCH_LEN / C.HEAT_W));
+      var hz = Math.floor((m.ball.z + C.TOUCH_LINE) / (C.PITCH_WID / C.HEAT_H));
+      if (hx >= 0 && hx < C.HEAT_W && hz >= 0 && hz < C.HEAT_H) {
+        m.heat[hz * C.HEAT_W + hx]++;
+        m.heatSamples++;
+      }
+    }
 
     /* You control whoever has the ball. Without this the player keeps
        the man he started with while a team-mate runs off with the ball,

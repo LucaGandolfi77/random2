@@ -180,7 +180,20 @@
     var result = m.score[0] > m.score[1] ? "win" : (m.score[0] === m.score[1] ? "draw" : "loss");
     var options = { rematch: !game.cup, newCup: !!game.cup && result === "loss" };
     if (game.bestGoal && game.bestGoal.n > 4) options.replay = true;
+    if (options.replay) options.report = true;
     ui.showFullTime(m, result, options);
+    game.paused = true;
+  }
+
+  /* The match report: the numbers, and where the ball spent the match. */
+  function showReport(back) {
+    if (!game.match) return;
+    ui.showStats(game.match, {
+      onBack: function () {
+        if (back === "halftime") ui.showHalftime(game.match, { report: true });
+        else showFullTimeCard();
+      },
+    });
     game.paused = true;
   }
 
@@ -720,6 +733,9 @@
       case "sub":
         showSubstitution();
         break;
+      case "report":
+        showReport(game.reportBack || "fulltime");
+        break;
       case "kickoff":
         /* The five the player chose. */
         if (extra && game.pickedTeam) {
@@ -834,7 +850,8 @@
       }
       if (m.phase === "halftime" && !game.paused) {
         game.paused = true;
-        ui.showHalftime(m);
+        game.reportBack = "halftime";
+        ui.showHalftime(m, { report: true });
       } else if (m.phase === "fulltime" && !game.paused) {
         game.paused = true;
         if (game.cup) {
@@ -905,6 +922,7 @@
         spin: game.spin, flash: game.flash,
         trail: game.trail,
       });
+      Render.drawRain(buf, game.drops);
       ui.drawHUD(buf, m, { banner: game.banner, commentary: game.commentary });
     } else if (game.mode === "shootout" && game.shootout) {
       /* The shoot-out is framed from behind the ball. */
@@ -933,6 +951,7 @@
         homeShorts: rm.home.shorts, awayShorts: rm.away.shorts,
         spin: game.spin,
       });
+      Render.drawRain(buf, game.drops);
       ui.drawHUD(buf, rm, { banner: game.banner, commentary: game.commentary });
     } else {
       /* The title screen: a match plays itself behind the menu. */

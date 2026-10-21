@@ -775,5 +775,56 @@ ok("the goal is narrower than the pitch", S.C.GOAL_W < S.C.PITCH_WID);
 }
 
 /* ================================================================== */
+section("the weather");
+
+{
+  const m = S.createMatch({ seed: 81, weather: "rain" });
+  ok("the weather is on the match", m.weather === "rain", m.weather);
+  ok("the rain means a wet pitch", m.wet === true);
+  const dry = S.createMatch({ seed: 81, weather: "day" });
+  ok("a dry match is not wet", dry.wet === false);
+  ok("the weather defaults to a clear day",
+     S.createMatch({ seed: 82 }).weather === "day");
+}
+
+{
+  /* The same kick on a wet pitch travels further: the skid is the
+     whole point of the rain. */
+  function roll(weather) {
+    const m = S.createMatch({ seed: 82, weather: weather });
+    m.phase = "play";
+    /* The ball out on its own, with nobody near enough to touch it. */
+    for (const p of m.players) { p.x = -30; p.z = -20; }
+    m.ball.owner = -1;
+    m.ball.ownerTeam = -1;
+    m.ball.x = 20; m.ball.z = 20; m.ball.y = S.C.BALL_R;
+    m.ball.vx = 20; m.ball.vy = 0; m.ball.vz = 0;
+    m.ball.kickLock = 999;
+    const start = m.ball.x;
+    for (let i = 0; i < 60; i++) S.stepMatch(m, 1 / 60, IDLE);
+    return m.ball.x - start;
+  }
+  const dryRoll = roll("day");
+  const wetRoll = roll("rain");
+  ok("a ball rolls on a dry pitch", dryRoll > 1, dryRoll.toFixed(2));
+  ok("the rain makes the ball skid further", wetRoll > dryRoll,
+     wetRoll.toFixed(2) + " vs " + dryRoll.toFixed(2));
+}
+
+{
+  /* The heat map counts the ball's samples, and every sample lands in a
+     cell of the pitch. */
+  const m = S.createMatch({ seed: 83 });
+  for (let i = 0; i < 60 * 30; i++) S.stepMatch(m, 1 / 60, IDLE);
+  let sum = 0;
+  for (let i = 0; i < m.heat.length; i++) sum += m.heat[i];
+  ok("the heat map has samples", m.heatSamples > 100, m.heatSamples);
+  ok("the heat map sums to the samples", sum === m.heatSamples, sum + " vs " + m.heatSamples);
+  ok("the heat map is a grid of the pitch",
+     m.heat.length === S.C.HEAT_W * S.C.HEAT_H, m.heat.length);
+  ok("the heat map is not empty", sum > 0);
+}
+
+/* ================================================================== */
 console.log("\n" + (failures ? "FAILED" : "OK") + "  " + (checks - failures) + "/" + checks + " checks passed");
 process.exit(failures ? 1 : 0);

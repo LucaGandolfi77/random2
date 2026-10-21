@@ -441,6 +441,26 @@ if [ -f \"$d/service-worker.js\" ] || [ -f \"$d/sw.js\" ] || [ -f \"$d/public/se
     compute: () => grouped(sourceLines("pulse-pwa")),
   },
   {
+    id: "pixelcup_lines",
+    label: "PIXEL CUP '96 — lines of source",
+    labelIt: "PIXEL CUP '96 — righe di codice",
+    where: "case 10, the line-count chip",
+    whereIt: "case 10, il chip delle righe",
+    expect: "8,706",
+    how: "git ls-files pixel-cup-pwa | grep -E '\\.(js|mjs|html|css)$' | xargs cat | wc -l",
+    compute: () => grouped(sourceLines("pixel-cup-pwa")),
+  },
+  {
+    id: "pixelcup_model",
+    label: "PIXEL CUP '96 — lines of rules",
+    labelIt: "PIXEL CUP '96 — righe di regole",
+    where: "case 10, the rules chip",
+    whereIt: "case 10, il chip delle regole",
+    expect: "1,844",
+    how: "cat pixel-cup-pwa/src/core.js | wc -l",
+    compute: () => grouped(fileLines("pixel-cup-pwa/src/core.js")),
+  },
+  {
     id: "balance_sessions",
     label: "THE BALANCE LAB — sessions per run",
     labelIt: "THE BALANCE LAB — sessioni per run",
@@ -563,6 +583,8 @@ const STALE = [
   { literal: "Sei progetti", claim: "case_studies" },
   { literal: "six of them", claim: "case_studies" },
   { literal: "sei di loro", claim: "case_studies" },
+  { literal: "nine of them", claim: "case_studies" },
+  { literal: "nove di loro", claim: "case_studies" },
 ];
 
 /* The ledger scans the repository for trackers and for remote loads. It
@@ -601,6 +623,14 @@ function sourceLines(dir) {
     n += read(f).split("\n").length - 1;
   }
   return n;
+}
+
+/* The lines of source in one file: the same count the shell would make,
+   for a chip that quotes a single file rather than a whole project. */
+function fileLines(path) {
+  const f = files().find((x) => x === path);
+  if (!f) return 0;
+  return read(f).split("\n").length - 1;
 }
 
 /* Thousands separators, the way the chips write them. */
