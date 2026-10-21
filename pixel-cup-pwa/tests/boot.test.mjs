@@ -399,6 +399,48 @@ ok("the picker offers three difficulties",
 G.action("start", 1, 2);
 ok("the match starts with the chosen difficulty", G.state().mode === "match");
 
+section("the replay");
+
+G.action("quick");
+G.action("start", 0);
+const reel = G.match();
+const CoreM = globalThis.PixelCupCore;
+/* Move the keeper out of the way and put the ball in front of the goal. */
+const gk = reel.players.find((p) => p.role === "GK" && p.team === 1);
+gk.z = -13; gk.x = 22;
+reel.phase = "play";
+reel.ball.owner = -1;
+reel.ball.kickLock = 999;
+reel.ball.x = CoreM.C.GOAL_LINE - 2;
+reel.ball.z = 0;
+reel.ball.y = CoreM.C.BALL_R;
+reel.ball.vx = 20; reel.ball.vy = 0; reel.ball.vz = 0;
+for (let i = 0; i < 60; i++) frame(20);
+ok("the goal went in", reel.score[0] === 1, reel.score.join("-"));
+
+ok("a goal was recorded", G.state().bestGoal && G.state().bestGoal.frames > 4,
+   JSON.stringify(G.state().bestGoal));
+
+/* Let the goal celebration finish, then run the match out so the card
+   appears: past the half-time first, then out of the second half. */
+for (let i = 0; i < 200; i++) frame(20);
+reel.clock = reel.halfSeconds - 0.02;
+for (let i = 0; i < 6; i++) frame(20);
+ok("the half-time card appears", /Half time/.test(String(screen.innerHTML)));
+G.action("continue");
+for (let i = 0; i < 10; i++) frame(20);
+reel.clock = reel.halfSeconds - 0.02;
+for (let i = 0; i < 8; i++) frame(20);
+ok("the full-time card appears", /class="score big"/.test(String(screen.innerHTML)));
+ok("the card offers the replay", /Watch the best goal/.test(String(screen.innerHTML)));
+
+G.action("replay");
+ok("the replay starts", G.state().mode === "replay", G.state().mode);
+const wasAt = G.state().replay ? G.state().replay.index : -1;
+for (let i = 0; i < 20; i++) frame(20);
+ok("the replay plays", G.state().replay && G.state().replay.index > wasAt,
+   JSON.stringify(G.state().replay));
+
 section("storage");
 const Storage = globalThis.PixelStorage;
 /* The flow above has already played matches, so start from a clean

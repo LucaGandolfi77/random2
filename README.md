@@ -946,6 +946,10 @@ byte buffer that the browser scales up with nearest-neighbour sampling.
 - **Every sound is synthesised.** The crowd is filtered noise, the whistle is
   two detuned squares, the music is a sixteen-step square-wave sequencer.
   There is not one audio file in the folder.
+- **A best-goal replay.** Every match records its last twelve seconds at
+  twenty frames a second, and the card at full time offers to watch the
+  best goal of the match again — drawn by the same renderer, from a
+  synthetic match rebuilt out of the recording.
 - **An attract mode.** The title screen is not a word on a blue screen: a
   match plays itself behind the menu, both sides on the computer, with a
   broadcast camera drifting along the pitch.

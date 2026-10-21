@@ -265,6 +265,10 @@
       options = options || {};
       var title = result === "win" ? "You win!" : (result === "draw" ? "A draw" : "You lose");
       var buttons = '<button class="btn primary" data-action="continue">Continue</button>';
+      if (options.replay) {
+        buttons = '<button class="btn primary" data-action="replay">Watch the best goal</button>' +
+                  '<button class="btn ghost" data-action="continue">Continue</button>';
+      }
       if (options.rematch) buttons += '<button class="btn" data-action="rematch">Rematch</button>';
       if (options.newCup) buttons += '<button class="btn" data-action="newcup">New cup</button>';
       show(

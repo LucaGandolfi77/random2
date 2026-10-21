@@ -79,6 +79,19 @@ behind the menu, with both sides on the computer and a broadcast camera
 drifting slowly along the pitch. It is the first thing anybody sees,
 and a word on a blue screen is a waste of it.
 
+### The best goal
+
+Every match is recorded: the last twelve seconds at twenty frames a
+second, where the ten players were and where the ball was — about thirty
+kilobytes, written while the game is being played. When a goal goes in
+it is scored, on how far the ball travelled and how far it was from the
+goal when it got there, and the best one of the match is kept. At full
+time the card offers to watch it again.
+
+The replay is drawn by the same renderer as the game, from a synthetic
+match rebuilt out of the recording, so nothing in the renderer had to
+know that replays exist.
+
 ### The touches
 
 - A goal slows the world down for a third of a second, flashes the
@@ -148,7 +161,7 @@ therefore exercise the game you actually play, not a copy of it.
 
 ```bash
 node pixel-cup-pwa/tests/sim.test.mjs    # 106 checks: rules, physics, cup, shoot-out, balance
-node pixel-cup-pwa/tests/boot.test.mjs   # 62 checks: the whole game against a fake DOM
+node pixel-cup-pwa/tests/boot.test.mjs   # 69 checks: the whole game against a fake DOM
 node pixel-cup-pwa/tests/preview.mjs /tmp/pc.png 26   # writes a PNG of a live frame
 node pixel-cup-pwa/smoke.mjs             # the real page, in a real browser
 node pixel-cup-pwa/tools/gen-og.mjs      # writes the social card

@@ -44,8 +44,11 @@
     onAction: onAction,
   });
 
+  /* The recording: twenty frames a second for twelve seconds. */
+  var REC_MAX = 260, REC_STRIDE = 33, REC_HZ = 20;
+
   var game = {
-    mode: "title",       /* title | match | shootout */
+    mode: "title",       /* title | match | shootout | replay */
     match: null,
     cup: null,
     shootout: null,
@@ -65,6 +68,14 @@
     trail: [],
     demo: null,           /* the match that plays itself on the title screen */
     demoTime: 0,
+    rec: new Float32Array(REC_MAX * REC_STRIDE),
+    recHead: 0,
+    recN: 0,
+    recTick: 0,
+    bestGoal: null,
+    replayIndex: 0,
+    replayTimer: 0,
+    replayGoal: false,
   };
 
   /* ---- helpers ---- */
@@ -157,6 +168,20 @@
 
   function announce(text) { ui.announce(text); }
 
+  /*
+   * The card at the end of a match. It is shown twice: once when the
+   * match ends, and once more after the replay, so the replay is a
+   * detour rather than a dead end.
+   */
+  function showFullTimeCard() {
+    var m = game.match;
+    var result = m.score[0] > m.score[1] ? "win" : (m.score[0] === m.score[1] ? "draw" : "loss");
+    var options = { rematch: !game.cup, newCup: !!game.cup && result === "loss" };
+    if (game.bestGoal && game.bestGoal.n > 4) options.replay = true;
+    ui.showFullTime(m, result, options);
+    game.paused = true;
+  }
+
   function onMatchEnd() {
     var m = game.match;
     var result = m.score[0] > m.score[1] ? "win" : (m.score[0] === m.score[1] ? "draw" : "loss");
@@ -178,12 +203,7 @@
     }
     audio.whistle();
     audio.crowdRoar(result === "win" ? 1 : 0.5);
-    if (game.cup) {
-      ui.showFullTime(m, result, { newCup: result === "loss" });
-    } else {
-      ui.showFullTime(m, result, { rematch: true });
-    }
-    game.paused = true;
+    showFullTimeCard();
   }
 
   /* The events the model raises, turned into noise, words and movement. */
@@ -200,6 +220,7 @@
           setBanner("GOOOOL!", 2.2);
           setCommentary(e.text || "Che gola!", 2.6);
           addConfetti(W / 2, 40, 90);
+          keepBestGoal(m);
           announce("Goal! " + m.home.name + " " + m.score[0] + ", " + m.away.name + " " + m.score[1] + ".");
           break;
         case "post":
@@ -403,6 +424,129 @@
     audio.setExcitement(game.demo.excitement);
   }
 
+  /* ---- the recording, for the replay ---- */
+
+  /*
+   * The last twelve seconds of the match, at twenty frames a second:
+   * where the ten players were, and where the ball was. It is about
+   * thirty kilobytes, it is written while the match is being played,
+   * and it is what the best-goal replay is made of.
+   */
+  function recordFrame() {
+    var m = game.match;
+    if (!m || m.players.length < 10) return;
+    var o = game.recHead * REC_STRIDE;
+    for (var i = 0; i < 10; i++) {
+      var p = m.players[i];
+      game.rec[o + i * 3] = p.x;
+      game.rec[o + i * 3 + 1] = p.z;
+      game.rec[o + i * 3 + 2] = p.facing;
+    }
+    var b = o + 30;
+    game.rec[b] = m.ball.x;
+    game.rec[b + 1] = m.ball.y;
+    game.rec[b + 2] = m.ball.z;
+    game.recHead = (game.recHead + 1) % REC_MAX;
+    if (game.recN < REC_MAX) game.recN++;
+  }
+
+  /* The oldest frame is the one before the write head. */
+  function recOffset(index) {
+    var start = (game.recHead - game.recN + REC_MAX) % REC_MAX;
+    return ((start + index) % REC_MAX) * REC_STRIDE;
+  }
+
+  /* How far the ball travelled over the recording, and how far it was
+     from the goal when it got there: a long one is worth watching. */
+  function scoreGoal(m) {
+    var travel = 0;
+    var fromX = 0;
+    for (var i = 1; i < game.recN; i++) {
+      var a = recOffset(i - 1) + 30, b = recOffset(i) + 30;
+      var dx = game.rec[b] - game.rec[a];
+      var dz = game.rec[b + 2] - game.rec[a + 2];
+      travel += Math.sqrt(dx * dx + dz * dz);
+    }
+    /* Where the ball was when it crossed the line. */
+    var last = recOffset(game.recN - 1) + 30;
+    fromX = Math.abs(game.rec[last]);
+    var range = Math.max(0, Core.C.GOAL_LINE - fromX);
+    return travel + range * 2.2;
+  }
+
+  function keepBestGoal(m) {
+    var score = scoreGoal(m);
+    if (!game.bestGoal || score > game.bestGoal.score) {
+      game.bestGoal = {
+        score: score,
+        n: game.recN,
+        rec: game.rec.slice(0, REC_MAX * REC_STRIDE),
+        goals: [m.score[0], m.score[1]],
+        clock: m.clock,
+        half: m.half,
+      };
+    }
+  }
+
+  /*
+   * Rebuild a match-shaped object out of the recording, so the renderer
+   * can draw a replay without knowing anything about recordings.
+   */
+  function replayFrame(index, prevIndex) {
+    var m = game.match;
+    var o = recOffsetFrom(game.bestGoal, index);
+    var po = prevIndex >= 0 ? recOffsetFrom(game.bestGoal, prevIndex) : -1;
+    var players = [];
+    for (var i = 0; i < 10; i++) {
+      var x = game.bestGoal.rec[o + i * 3];
+      var z = game.bestGoal.rec[o + i * 3 + 1];
+      var anim = 0;
+      if (po >= 0) {
+        var px = game.bestGoal.rec[po + i * 3];
+        var pz = game.bestGoal.rec[po + i * 3 + 1];
+        anim = Math.sqrt((x - px) * (x - px) + (z - pz) * (z - pz)) * 2.4;
+      }
+      players.push({
+        index: i, id: i, team: i < 5 ? 0 : 1, role: "MID",
+        x: x, z: z, facing: game.bestGoal.rec[o + i * 3 + 2],
+        anim: anim, slide: 0, stamina: 100, dir: i < 5 ? 1 : -1,
+      });
+    }
+    var ball = {
+      x: game.bestGoal.rec[o + 30],
+      y: game.bestGoal.rec[o + 31],
+      z: game.bestGoal.rec[o + 32],
+      vx: 0, vy: 0, vz: 0, spin: 0, owner: -1,
+    };
+    return {
+      players: players, ball: ball, controlled: -1,
+      excitement: 0.85, demo: false,
+      clock: game.bestGoal.clock || 0,
+      half: game.bestGoal.half || 1,
+      home: { kit: m.home.kit, shorts: m.home.shorts, short: m.home.short, name: m.home.name },
+      away: { kit: m.away.kit, shorts: m.away.shorts, short: m.away.short, name: m.away.name },
+      score: game.bestGoal.goals || [0, 0],
+    };
+  }
+
+  function recOffsetFrom(best, index) {
+    var start = (game.recHead - best.n + REC_MAX) % REC_MAX;
+    return ((start + index) % REC_MAX) * REC_STRIDE;
+  }
+
+  function startReplay() {
+    if (!game.bestGoal) return false;
+    game.mode = "replay";
+    game.replayIndex = 0;
+    game.replayTimer = 0;
+    game.replayGoal = false;
+    game.paused = false;
+    ui.hide();
+    setBanner("THE BEST GOAL", 1.6);
+    audio.crowdRoar(0.4);
+    return true;
+  }
+
   /* ---- the menu ---- */
 
   function showTitle() {
@@ -485,6 +629,9 @@
       case "resume":
         closePause();
         break;
+      case "replay":
+        startReplay();
+        break;
       case "restart":
         var again = game.match;
         game.pauseMenu = false;
@@ -529,6 +676,30 @@
       game.spin += dt * 6;
     }
 
+    /* The replay runs at the speed it was recorded. */
+    if (game.mode === "replay" && game.bestGoal) {
+      game.replayTimer += dt;
+      var step = 1 / REC_HZ;
+      while (game.replayTimer >= step && game.replayIndex < game.bestGoal.n - 1) {
+        game.replayTimer -= step;
+        game.replayIndex++;
+      }
+      /* The last frame is the goal: hold it a moment, then go back to
+         the card. */
+      if (game.replayIndex >= game.bestGoal.n - 1) {
+        if (game.replayTimer > 2.4) {
+          game.mode = "match";
+          game.paused = true;
+          setBanner(null);
+          showFullTimeCard();
+        } else if (game.replayTimer > step * 3 && !game.replayGoal) {
+          game.replayGoal = true;
+          setBanner("GOOOOL!", 1.6);
+          audio.fanfare();
+        }
+      }
+    }
+
     if (game.mode === "match" && game.match && !game.paused) {
       var m = game.match;
       var scale = game.slow > 0 ? 0.35 : 1;
@@ -541,6 +712,13 @@
          shot and not as a dot teleporting about. */
       game.trail.push({ x: m.ball.x, y: m.ball.y, z: m.ball.z });
       if (game.trail.length > 12) game.trail.shift();
+      /* And the last twelve seconds go into the recorder, in case this
+         goal turns out to be the one worth watching again. */
+      game.recTick += dt;
+      if (game.recTick >= 1 / REC_HZ) {
+        game.recTick -= 1 / REC_HZ;
+        recordFrame();
+      }
       if (m.phase === "halftime" && !game.paused) {
         game.paused = true;
         ui.showHalftime(m);
@@ -554,8 +732,7 @@
             goals: m.score[0],
             conceded: m.score[1],
           });
-          ui.showFullTime(m, m.score[0] > m.score[1] ? "win" :
-                          (m.score[0] === m.score[1] ? "draw" : "loss"), {});
+          showFullTimeCard();
         } else {
           onMatchEnd();
         }
@@ -629,6 +806,16 @@
           game.shootout.result === "G" ? "GOOOOL!" : "MISSED!",
           game.shootout.result === "G" ? [96, 214, 120] : [232, 88, 76], 2);
       }
+    } else if (game.mode === "replay" && game.bestGoal) {
+      var rm = replayFrame(game.replayIndex, game.replayIndex - 1);
+      cam.shake = 0;
+      Render.updateCamera(cam, buf, STEP, { x: rm.ball.x, z: rm.ball.z });
+      Render.drawScene(buf, cam, rm, {
+        homeKit: rm.home.kit, awayKit: rm.away.kit,
+        homeShorts: rm.home.shorts, awayShorts: rm.away.shorts,
+        spin: game.spin,
+      });
+      ui.drawHUD(buf, rm, { banner: game.banner, commentary: game.commentary });
     } else {
       /* The title screen: a match plays itself behind the menu. */
       if (game.demo) {
@@ -815,6 +1002,11 @@
             finished: game.shootout.finished,
           } : null,
           cup: game.cup ? { round: game.cup.round, done: game.cup.done } : null,
+          replay: game.mode === "replay" ? {
+            index: game.replayIndex,
+            frames: game.bestGoal ? game.bestGoal.n : 0,
+          } : null,
+          bestGoal: game.bestGoal ? { frames: game.bestGoal.n } : null,
         };
       },
       /* The button handler, so a test can walk the menus without a
