@@ -31,8 +31,8 @@
     skyBottom: [96, 158, 224],
     grass: [[46, 118, 62], [38, 104, 54]],
     grassLine: [222, 228, 226],
-    stand: [64, 68, 96],
-    standDark: [42, 46, 70],
+    stand: [74, 78, 108],
+    standDark: [52, 56, 84],
     wall: [30, 32, 52],
     post: [236, 238, 240],
     net: [176, 186, 196],
@@ -392,7 +392,7 @@
        picture, so they close the view off instead of leaving a strip of
        empty sky above the crossbar. */
     for (var s2 = -1; s2 <= 1; s2 += 2) {
-      for (var row2 = 0; row2 < 12; row2++) {
+      for (var row2 = 0; row2 < 7; row2++) {
         var x0 = s2 * (L + row2 * 1.3);
         var x1 = s2 * (L + (row2 + 1) * 1.3);
         var y0 = row2 * 1.1, y1 = (row2 + 1) * 1.1;
@@ -401,8 +401,8 @@
              col2[0], col2[1], col2[2]);
       }
       /* The back wall of the stand. */
-      var bx = s2 * (L + 12 * 1.3);
-      quad(buf, cam, [bx, 0, -W], [bx, 13.4, -W], [bx, 13.4, W], [bx, 0, W],
+      var bx = s2 * (L + 7 * 1.3);
+      quad(buf, cam, [bx, 0, -W], [bx, 7.8, -W], [bx, 7.8, W], [bx, 0, W],
            PAL.wall[0], PAL.wall[1], PAL.wall[2]);
     }
   }
@@ -428,7 +428,7 @@
     else if (h < 0.84) rgb = [40, 38, 54];
     else if (h < 0.94) rgb = [214, 184, 108];
     else rgb = [96, 104, 128];
-    var f = (0.42 + 0.5 * wave) * (0.8 + 0.4 * h);
+    var f = (0.52 + 0.55 * wave) * (0.82 + 0.38 * h);
     return [
       Raster.quantise(rgb[0] * f),
       Raster.quantise(rgb[1] * f),
@@ -491,7 +491,9 @@
         var ys = row * 1.05 + 0.7;
         drawCrowdRow(buf, cam, cs, -L, ys, zs, L, ys, zs,
                      homeKit, awayKit, cheer, t, seed++);
-        drawCrowdRow(buf, cam, cs, -L, ys + 0.45, zs, L, ys + 0.45, zs,
+        drawCrowdRow(buf, cam, cs, -L, ys + 0.34, zs, L, ys + 0.34, zs,
+                     homeKit, awayKit, cheer, t, seed++);
+        drawCrowdRow(buf, cam, cs, -L, ys + 0.68, zs, L, ys + 0.68, zs,
                      homeKit, awayKit, cheer, t, seed++);
       }
     }
@@ -502,7 +504,9 @@
         var ye = row2 * 1.1 + 0.75;
         drawCrowdRow(buf, cam, cs, xe, ye, -W, xe, ye, W,
                      homeKit, awayKit, cheer, t, seed++);
-        drawCrowdRow(buf, cam, cs, xe, ye + 0.45, -W, xe, ye + 0.45, W,
+        drawCrowdRow(buf, cam, cs, xe, ye + 0.34, -W, xe, ye + 0.34, W,
+                     homeKit, awayKit, cheer, t, seed++);
+        drawCrowdRow(buf, cam, cs, xe, ye + 0.68, -W, xe, ye + 0.68, W,
                      homeKit, awayKit, cheer, t, seed++);
       }
     }
