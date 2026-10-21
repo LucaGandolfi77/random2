@@ -6,6 +6,9 @@ password prompt. It reads the game's current state through a small, read-only
 browser evaluation and drives movement through keyboard events, just as a
 human player would.
 
+After every run it goes back to the main menu and presses the game's Save
+button, so the finished run is uploaded to the cloud.
+
 Install:
 
     python3 -m pip install -r requirements.txt
@@ -33,8 +36,15 @@ from strategy import Snapshot, SurvivalStrategy
 
 
 LOGGER = logging.getLogger("pokesurvivor-bot")
-DEFAULT_URL = "https://pokesurvivor.org/play/"
+# The game only runs on its own site: pokesurvivor.com refuses to start
+# inside another site's frame, so the guide page is not a usable target.
+DEFAULT_URL = "https://pokesurvivor.com/"
 GAME_FRAME_RE = re.compile(r"https://pokesurvivor\.com(?:/|$)")
+# The game's "Guardar" button lives in the top bar of the game frame.  The
+# game only shows that bar outside a run, and only shows the button for a
+# signed-in account whose save mode is the cloud.
+SAVE_BUTTON_SELECTOR = "#btn-save"
+TOAST_SELECTOR = ".toast"
 
 
 @dataclass(frozen=True)
@@ -213,11 +223,10 @@ class PokéSurvivorBot:
     async def run(self) -> None:
         await self._initialize_session()
         for run_number in range(1, self.config.runs + 1):
-            if run_number > 1:
-                await self._return_to_menu()
             LOGGER.info("starting run %d/%d", run_number, self.config.runs)
             await self._start_run()
             await self._play_run(run_number)
+            await self._finish_run(run_number)
 
     async def _initialize_session(self) -> None:
         await self._wait_visible("#game")
@@ -376,6 +385,50 @@ class PokéSurvivorBot:
 
             await asyncio.sleep(self.config.tick)
 
+    async def _finish_run(self, run_number: int) -> None:
+        """Return to the menu and press the game's Save button.
+
+        The game keeps the top bar hidden while a run is on screen, and the
+        Save button lives in that top bar, so the bot goes back to the menu
+        first and saves from there.  The run's results are already in the
+        save slot; pressing the button uploads them to the cloud.
+        """
+
+        try:
+            await self._return_to_menu()
+        except BotError as exc:
+            LOGGER.warning("run %d: could not reach the menu to save: %s", run_number, exc)
+            return
+        await self._save_run(run_number)
+
+    async def _save_run(self, run_number: int) -> None:
+        """Press the game's Save button once the run is over.
+
+        The game keeps the finished run in its local save slot and only
+        uploads it to the cloud when the player presses "Guardar".  A guest
+        session or a browser-only save mode has no such button, so there is
+        nothing to press and nothing to report beyond a short log line.
+        """
+
+        if not await self._wait_for_optional(SAVE_BUTTON_SELECTOR, timeout_ms=3_000):
+            LOGGER.info(
+                "run %d: no save button to press (guest session or local save mode)",
+                run_number,
+            )
+            return
+
+        previous = await self._toast_text()
+        try:
+            await self.frame.locator(SAVE_BUTTON_SELECTOR).click(timeout=5_000)
+        except Exception as exc:
+            LOGGER.warning("run %d: could not press the save button: %s", run_number, exc)
+            return
+
+        LOGGER.info("run %d: pressed the save button", run_number)
+        message = await self._wait_for_toast_change(previous)
+        if message:
+            LOGGER.info("run %d: %s", run_number, message)
+
     async def _handle_overlay(self) -> bool:
         if await self._visible("#scr-levelup"):
             await self._choose_level_up()
@@ -430,6 +483,7 @@ class PokéSurvivorBot:
             texts[index].splitlines()[0],
             " (slot 1 priority)" if preferred_attack and preferred_attack.lower() in texts[index].lower() else "",
         )
+        await self._wait_for_cards("#cards")
         await cards.nth(index).click()
         await self._wait_hidden("#scr-levelup", timeout_ms=5_000)
         await self._select_attack_one()
@@ -450,6 +504,7 @@ class PokéSurvivorBot:
         # keeps the run from carrying an obsolete reward forever.
         index = 1 if count > 1 else 0
         LOGGER.info("choosing item card %d/%d", index + 1, count)
+        await self._wait_for_cards("#item-cards")
         await cards.nth(index).click()
         await self._wait_hidden("#scr-item", timeout_ms=5_000)
 
@@ -463,9 +518,27 @@ class PokéSurvivorBot:
             cards = self.frame.locator("#bond-cards .card")
             if await cards.count() == 0:
                 raise BotError("bond screen has no movement cards")
+            await self._wait_for_cards("#bond-cards")
             await cards.first.click()
             await asyncio.sleep(0.08)
         await self._wait_hidden("#scr-bond", timeout_ms=5_000)
+
+    async def _wait_for_cards(self, container: str, timeout_ms: int = 3_000) -> None:
+        """Wait until the game stops guarding freshly shown cards.
+
+        The game ignores clicks on the cards it has just shown for a short
+        moment, so the bot waits for the guard to clear before choosing one.
+        """
+
+        deadline = time.monotonic() + timeout_ms / 1000.0
+        while time.monotonic() < deadline:
+            try:
+                if await self.frame.locator(f"{container}.guard").count() == 0:
+                    return
+            except Exception:
+                return
+            await asyncio.sleep(0.05)
+        LOGGER.warning("cards in %s stayed guarded", container)
 
     async def _stop_run(self) -> None:
         await self._release_keys()
@@ -511,6 +584,39 @@ class PokéSurvivorBot:
             return await self.frame.locator(selector).is_visible()
         except Exception:
             return False
+
+    async def _wait_for_optional(self, selector: str, timeout_ms: int) -> bool:
+        """Wait for a selector to show up without raising when it never does."""
+
+        deadline = time.monotonic() + timeout_ms / 1000.0
+        while True:
+            if await self._visible(selector):
+                return True
+            if time.monotonic() >= deadline:
+                return False
+            await asyncio.sleep(0.10)
+
+    async def _toast_text(self) -> str:
+        """Read the game's toast message, even while it is fading out."""
+
+        try:
+            toast = self.frame.locator(TOAST_SELECTOR)
+            if await toast.count() == 0:
+                return ""
+            return (await toast.first.text_content() or "").strip()
+        except Exception:
+            return ""
+
+    async def _wait_for_toast_change(self, previous: str, timeout_ms: int = 6_000) -> str:
+        """Wait for the toast to report something new after the save button."""
+
+        deadline = time.monotonic() + timeout_ms / 1000.0
+        while time.monotonic() < deadline:
+            text = await self._toast_text()
+            if text and text != previous:
+                return text
+            await asyncio.sleep(0.10)
+        return ""
 
     async def _wait_visible(self, selector: str, timeout_ms: int | None = None) -> None:
         try:

@@ -1,6 +1,6 @@
 # PokéSurvivor Bot
 
-A local Python bot that plays [PokéSurvivor](https://pokesurvivor.org/play/)
+A local Python bot that plays [PokéSurvivor](https://pokesurvivor.com/)
 with real WASD keyboard events. It starts a temporary browser session, uses a
 guest account by default or logs in with supplied credentials, avoids enemies
 and telegraphed attacks, collects nearby rewards, and chooses level-up and item
@@ -13,6 +13,12 @@ During level-ups it prioritizes the attack in slot 1, other attack moves, and
 the Power/damage upgrade before generic stats. After every level-up choice it
 presses `1` to reactivate attack slot 1. Movement also avoids liquid tiles,
 raised wall formations, trees, rocks, chests, and other solid terrain props.
+
+After every run the bot goes back to the main menu and presses the game's
+**Guardar** (Save) button, which uploads the finished run to the cloud, and
+reports the message the game answers with. The game only shows that button
+for a signed-in account whose save mode is the cloud, so a guest session logs
+`no save button to press` instead of failing.
 
 At startup, the browser response for the published game bundle is given a
 read-only probe name so the bot can access the existing game object. The bot
@@ -36,6 +42,10 @@ Open a visible browser and play for up to three minutes:
 ```bash
 python3 bot.py --duration 180
 ```
+
+The bot opens the game on its own site, `https://pokesurvivor.com/`. The
+game refuses to start inside another site's frame, so the guide page at
+`pokesurvivor.org/play/` is not a usable target.
 
 For an existing username/password account, pass only the username. The
 password is requested interactively without echoing it:

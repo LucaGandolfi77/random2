@@ -261,5 +261,88 @@ class LoginFlowTests(unittest.IsolatedAsyncioTestCase):
         self.assertFalse(frame.visible["#scr-recover"])
 
 
+class FakeSaveLocator:
+    def __init__(self, frame: "FakeSaveFrame", selector: str) -> None:
+        self.frame = frame
+        self.selector = selector
+
+    @property
+    def first(self) -> "FakeSaveLocator":
+        return self
+
+    async def click(self, timeout: int = 0) -> None:
+        self.frame.clicked.append(self.selector)
+        if self.selector == "#btn-save":
+            self.frame.toast = "¡Partida guardada en la nube!"
+
+    async def count(self) -> int:
+        return 1 if self.frame.toast else 0
+
+    async def is_visible(self) -> bool:
+        return self.frame.visible.get(self.selector, False)
+
+    async def text_content(self) -> str:
+        return self.frame.toast
+
+
+class FakeSaveFrame:
+    def __init__(self, save_visible: bool = True) -> None:
+        self.visible = {"#btn-save": save_visible}
+        self.clicked: list[str] = []
+        self.toast = ""
+
+    def locator(self, selector: str) -> FakeSaveLocator:
+        return FakeSaveLocator(self, selector)
+
+
+class SaveRunTests(unittest.IsolatedAsyncioTestCase):
+    async def test_presses_the_save_button_after_a_run(self) -> None:
+        frame = FakeSaveFrame(save_visible=True)
+        bot = PokéSurvivorBot(BotConfig(timeout_ms=500), page=None, frame=frame)
+
+        await bot._save_run(1)
+
+        self.assertEqual(frame.clicked, ["#btn-save"])
+
+    async def test_skips_the_save_button_when_the_game_hides_it(self) -> None:
+        frame = FakeSaveFrame(save_visible=False)
+        bot = PokéSurvivorBot(BotConfig(timeout_ms=500), page=None, frame=frame)
+
+        await bot._save_run(1)
+
+        self.assertEqual(frame.clicked, [])
+
+    async def test_finish_run_goes_back_to_the_menu_before_saving(self) -> None:
+        frame = FakeSaveFrame(save_visible=True)
+        bot = PokéSurvivorBot(BotConfig(timeout_ms=500), page=None, frame=frame)
+        order: list[str] = []
+
+        async def fake_return_to_menu() -> None:
+            order.append("menu")
+
+        async def fake_save_run(run_number: int) -> None:
+            order.append("save")
+
+        bot._return_to_menu = fake_return_to_menu  # type: ignore[method-assign]
+        bot._save_run = fake_save_run  # type: ignore[method-assign]
+
+        await bot._finish_run(1)
+
+        self.assertEqual(order, ["menu", "save"])
+
+    async def test_finish_run_survives_a_menu_that_never_appears(self) -> None:
+        frame = FakeSaveFrame(save_visible=True)
+        bot = PokéSurvivorBot(BotConfig(timeout_ms=500), page=None, frame=frame)
+
+        async def failing_return_to_menu() -> None:
+            raise BotError("timed out waiting for visible #scr-menu")
+
+        bot._return_to_menu = failing_return_to_menu  # type: ignore[method-assign]
+
+        await bot._finish_run(1)
+
+        self.assertEqual(frame.clicked, [])
+
+
 if __name__ == "__main__":
     unittest.main()
