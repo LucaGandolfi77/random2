@@ -37,7 +37,7 @@ cube on top, and the ball is an icosahedron that spins.
 
 | Mode | What it is |
 |---|---|
-| **Quick Match** | One match against the computer. Pick your side, pick your difficulty. |
+| **Quick Match** | One match against the computer. Pick your side, pick your five, pick your difficulty. |
 | **Cup** | Eight teams, a knockout bracket, a trophy. Your tie is played; the others are simulated. Progress is saved, so the cup survives a closed tab. |
 | **Penalty Shoot-out** | Five kicks each, then sudden death. Stop the sweeping marker, then stop the power meter. |
 
@@ -71,6 +71,19 @@ because the camera always looks that way.
 - **Pause** opens a sheet with Resume, Restart and Quit, and the sound,
   music and vibration switches. Leaving the tab pauses the match by
   itself: nobody wants to come back to a match that ran on without them.
+
+### The squad
+
+Every club has ten players: two keepers and eight outfielders, each with
+**pace, power and technique**. You pick the five who start, and the
+computer picks its own best five. The attributes are not decoration:
+pace is the top speed, power is the tackle, technique is the weight
+behind a shot and a header. They are derived from the club's rating
+with a seeded spread, so the best five on the pitch are about as good
+as the club was before anybody had attributes at all.
+
+At half-time you may make one substitution: the same picker, but what
+comes back is a swap on the field rather than a new line-up.
 
 ### The attract mode
 
@@ -160,8 +173,8 @@ therefore exercise the game you actually play, not a copy of it.
 ### Tests
 
 ```bash
-node pixel-cup-pwa/tests/sim.test.mjs    # 106 checks: rules, physics, cup, shoot-out, balance
-node pixel-cup-pwa/tests/boot.test.mjs   # 69 checks: the whole game against a fake DOM
+node pixel-cup-pwa/tests/sim.test.mjs    # 137 checks: rules, physics, cup, shoot-out, balance
+node pixel-cup-pwa/tests/boot.test.mjs   # 72 checks: the whole game against a fake DOM
 node pixel-cup-pwa/tests/preview.mjs /tmp/pc.png 26   # writes a PNG of a live frame
 node pixel-cup-pwa/smoke.mjs             # the real page, in a real browser
 node pixel-cup-pwa/tools/gen-og.mjs      # writes the social card

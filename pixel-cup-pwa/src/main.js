@@ -547,6 +547,87 @@
     return true;
   }
 
+  /* ---- the squad ---- */
+
+  /*
+   * The five who start. The player's choice is remembered per club; the
+   * computer picks its own best five.
+   */
+  function squadFor(team) {
+    var squad = Core.makeSquad(team);
+    var saved = Storage.getSquad(team.id);
+    var picked = saved ? Core.validateSelection(squad, saved) : null;
+    return picked || Core.autoSelection(squad);
+  }
+
+  function showSquadPicker(team) {
+    var squad = Core.makeSquad(team);
+    var current = squadFor(team);
+    ui.showSquadPicker(squad, current, {
+      title: team.name + " — pick your five",
+      action: "kickoff",
+      onAction: onAction,
+    });
+  }
+
+  /* The team and the difficulty are chosen first; the five are chosen
+     next; then the whistle. */
+  function beginMatch() {
+    var team = Core.teamById(game.pickedTeam);
+    if (game.pending === "cup") {
+      var cup = game.cup;
+      startMatch(cup.teams[cup.playerIndex].id,
+                 cup.teams[cupOpponentFor(cup)].id,
+                 { difficulty: Math.min(2, 0.5 + game.difficulty * 0.75) });
+    } else {
+      var others = Core.TEAMS.filter(function (t) { return t.id !== team.id; });
+      var other = others[Math.floor(Math.random() * others.length)];
+      startMatch(team.id, other.id, { difficulty: game.difficulty });
+    }
+  }
+
+  /* Put the chosen men on the pitch, slot by slot. */
+  function applySubstitutions(ids) {
+    var m = game.match;
+    if (!m || !ids) return;
+    var squad = Core.makeSquad(m.home);
+    for (var s = 0; s < 5; s++) {
+      var on = m.players[s];
+      var sp = null;
+      for (var k = 0; k < squad.length; k++) if (squad[k].id === ids[s]) sp = squad[k];
+      if (sp && on.squadId !== sp.id) Core.substitute(m, 0, s, sp);
+    }
+    ui.hide();
+    Core.startSecondHalf(m);
+    game.paused = false;
+  }
+
+  /*
+   * A substitution at half-time: the same picker, but the five on the
+   * pitch are the ones already playing, and what comes back is a swap
+   * on the field rather than a new line-up.
+   */
+  function showSubstitution() {
+    var m = game.match;
+    if (!m) return;
+    var team = m.home;
+    var squad = Core.makeSquad(team);
+    var current = [];
+    for (var i = 0; i < 5; i++) {
+      var p = m.players[i];
+      current.push({
+        id: p.squadId, name: p.name, num: p.num, role: p.role,
+        pace: p.pace, power: p.power, technique: p.technique,
+      });
+    }
+    ui.showSquadPicker(squad, current, {
+      title: "Substitution",
+      hint: "Tap a man on the pitch to send him off, or a man on the bench to bring him on.",
+      action: "subconfirm",
+      onAction: onAction,
+    });
+  }
+
   /* ---- the menu ---- */
 
   function showTitle() {
@@ -587,20 +668,22 @@
         break;
       case "start":
         game.difficulty = level == null ? 1 : level;
+        game.pickedIndex = extra;
+        game.pickedTeam = Core.TEAMS[extra].id;
         if (game.pending === "cup") {
-          var cup = Core.createCup({
+          /* The cup is already drawn; the club the player picked is the
+             one they take through it. */
+          var cup = game.cup || Core.createCup({
             seed: (Math.random() * 0xffffffff) >>> 0,
             playerIndex: extra,
           });
-          Storage.setCup(cup);
+          for (var ci = 0; ci < cup.teams.length; ci++) {
+            if (cup.teams[ci].id === Core.TEAMS[extra].id) cup.playerIndex = ci;
+          }
           game.cup = cup;
-          startMatch(cup.teams[extra].id, cup.teams[cupOpponentFor(cup)].id,
-                     { difficulty: Math.min(2, 0.5 + game.difficulty * 0.75) });
-        } else {
-          var other = (extra + 1 + Math.floor(Math.random() * 7)) % Core.TEAMS.length;
-          startMatch(Core.TEAMS[extra].id, Core.TEAMS[other].id,
-                     { difficulty: game.difficulty });
+          Storage.setCup(cup);
         }
+        showSquadPicker(Core.TEAMS[extra]);
         break;
       case "how":
         ui.showHelp();
@@ -631,6 +714,20 @@
         break;
       case "replay":
         startReplay();
+        break;
+      case "sub":
+        showSubstitution();
+        break;
+      case "kickoff":
+        /* The five the player chose. */
+        if (extra && game.pickedTeam) {
+          var chosen = Core.validateSelection(Core.makeSquad(Core.teamById(game.pickedTeam)), extra);
+          if (chosen) Storage.setSquad(game.pickedTeam, extra);
+        }
+        beginMatch();
+        break;
+      case "subconfirm":
+        applySubstitutions(extra);
         break;
       case "restart":
         var again = game.match;

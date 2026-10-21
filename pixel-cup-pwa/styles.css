@@ -410,6 +410,129 @@ body {
 
 .diff:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
+/* ---------- the squad picker ---------- */
+
+.xi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.slot {
+  background: var(--panel-2);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  padding: 4px;
+  min-width: 0;
+}
+
+.slot .sl {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--dim);
+  text-align: center;
+  padding: 2px 0 4px;
+}
+
+.benchhead {
+  margin: 10px 0 6px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.bench {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.pl {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  grid-template-areas: "num name" "num role" "attrs attrs";
+  align-items: center;
+  gap: 0 6px;
+  width: 100%;
+  min-height: 48px;
+  padding: 5px 7px;
+  background: var(--panel-2);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pl:hover { background: #263154; }
+.pl.on { border-color: var(--gold); }
+.pl:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+.pl .num {
+  grid-area: num;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gold);
+  text-align: center;
+}
+
+.pl .nm {
+  grid-area: name;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pl .rl {
+  grid-area: role;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--dim);
+}
+
+.attrs {
+  grid-area: attrs;
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.attr {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex: 1 1 0;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--dim);
+}
+
+.attr .ab {
+  flex: 1 1 auto;
+  height: 4px;
+  background: #0d1220;
+  border-radius: 2px;
+  overflow: hidden;
+  min-width: 18px;
+}
+
+.attr .ab i {
+  display: block;
+  height: 100%;
+  background: var(--green);
+}
+
+.attr .av { min-width: 14px; text-align: right; }
+
 /* ---------- the touch controls ---------- */
 
 .touch {

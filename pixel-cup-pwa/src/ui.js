@@ -161,6 +161,138 @@
       );
     }
 
+    /*
+     * The squad picker. Five slots and five on the bench, and a tap
+     * swaps the two: tap a player on the bench and the weakest man of
+     * the same role in your five comes off; tap a man in your five and
+     * the best replacement for him comes on.
+     */
+    function attrsHtml(p) {
+      function bar(label, value) {
+        var w = Math.round(clampInt(value, 0, 99));
+        return '<span class="attr"><span class="al">' + label + '</span>' +
+          '<span class="ab"><i style="width:' + w + '%"></i></span>' +
+          '<span class="av">' + w + '</span></span>';
+      }
+      return '<span class="attrs">' +
+        bar("PAC", p.pace) + bar("POW", p.power) + bar("TEC", p.technique) +
+        '</span>';
+    }
+
+    function playerHtml(p, onPitch) {
+      return '<button class="pl' + (onPitch ? " on" : "") + '" data-id="' + p.id + '">' +
+        '<span class="num">' + p.num + '</span>' +
+        '<span class="nm">' + esc(p.name) + '</span>' +
+        '<span class="rl">' + p.role + '</span>' +
+        attrsHtml(p) +
+        '</button>';
+    }
+
+    function showSquadPicker(squad, current, options) {
+      options = options || {};
+      var slots = options.slots || ["GK", "DEF", "DEF", "MID", "FWD"];
+      var chosen = current.slice();
+      var xi = chosen.map(function (p, i) {
+        return '<div class="slot"><span class="sl">' + slots[i] + '</span>' +
+          playerHtml(p, true) + '</div>';
+      }).join("");
+      var bench = squad.filter(function (p) {
+        return chosen.indexOf(p) === -1;
+      }).map(function (p) { return playerHtml(p, false); }).join("");
+
+      show(
+        '<div class="menu wide">' +
+          '<h2>' + esc(options.title || "Pick your five") + '</h2>' +
+          '<p class="tagline">' + (options.hint ||
+            "Tap a man on the bench to bring him on; tap one in your five to send him off.") +
+            '</p>' +
+          '<div class="xi">' + xi + '</div>' +
+          '<h3 class="benchhead">The bench</h3>' +
+          '<div class="bench">' + bench + '</div>' +
+          '<div class="stack row">' +
+            '<button class="btn primary" data-action="start">Kick off</button>' +
+            '<button class="btn ghost" data-action="back">Back</button>' +
+          '</div>' +
+        '</div>',
+        function (root) {
+          root.addEventListener("click", function (e) {
+            var b = e.target.closest("button[data-id]");
+            if (!b) return;
+            var id = b.getAttribute("data-id");
+            var onPitch = b.classList.contains("on");
+            var picked = null;
+            for (var i = 0; i < chosen.length; i++) if (chosen[i].id === id) picked = chosen[i];
+            if (picked) {
+              /* He comes off; the best replacement for his role comes on. */
+              var slot = chosen.indexOf(picked);
+              var best = null;
+              for (var j = 0; j < squad.length; j++) {
+                var q = squad[j];
+                if (chosen.indexOf(q) !== -1) continue;
+                if (q.role !== picked.role) continue;
+                if (!best || attrScore(q) > attrScore(best)) best = q;
+              }
+              if (!best) {
+                for (var k = 0; k < squad.length; k++) {
+                  var r = squad[k];
+                  if (chosen.indexOf(r) !== -1) continue;
+                  if (!best || attrScore(r) > attrScore(best)) best = r;
+                }
+              }
+              if (!best) return;
+              chosen[slot] = best;
+            } else {
+              /* He comes on; the weakest man of his role comes off. */
+              var slot2 = -1, weakest = null;
+              for (var s = 0; s < chosen.length; s++) {
+                var c = chosen[s];
+                if (c.role !== bRole(squad, id)) continue;
+                if (!weakest || attrScore(c) < attrScore(weakest)) { weakest = c; slot2 = s; }
+              }
+              if (slot2 < 0) {
+                for (var t = 0; t < chosen.length; t++) {
+                  var c2 = chosen[t];
+                  if (!weakest || attrScore(c2) < attrScore(weakest)) { weakest = c2; slot2 = t; }
+                }
+              }
+              var incoming = null;
+              for (var u = 0; u < squad.length; u++) if (squad[u].id === id) incoming = squad[u];
+              if (!incoming || slot2 < 0) return;
+              chosen[slot2] = incoming;
+            }
+            if (audio) audio.blip(true);
+            showSquadPicker(squad, chosen, options);
+          });
+          root.addEventListener("click", function (e) {
+            var b = e.target.closest("button[data-action]");
+            if (!b) return;
+            if (audio) audio.blip(true);
+            if (b.getAttribute("data-action") === "start") {
+              var ids = chosen.map(function (p) { return p.id; });
+              if (options.onAction) options.onAction(options.action || "kickoff", ids);
+              else if (options.onStart) options.onStart(chosen);
+            } else if (options.onAction) {
+              options.onAction("back");
+            } else if (options.onBack) {
+              options.onBack();
+            }
+          });
+        }
+      );
+    }
+
+    function bRole(squad, id) {
+      for (var i = 0; i < squad.length; i++) if (squad[i].id === id) return squad[i].role;
+      return "MID";
+    }
+
+    function attrScore(p) {
+      if (!p) return 0;
+      return p.pace * 0.4 + p.power * 0.3 + p.technique * 0.3;
+    }
+
+    function clampInt(v, a, b) { return v < a ? a : (v > b ? b : v); }
+
     function showTeamSelect(teams, selected, title, action, opts) {
       opts = opts || {};
       var diff = opts.difficulty == null ? 1 : opts.difficulty;
@@ -246,7 +378,10 @@
             statRow("Possession", Math.round(m.stats[0].possession) + "s - " +
                     Math.round(m.stats[1].possession) + "s") +
           '</div>' +
-          '<button class="btn primary" data-action="continue">Second half</button>' +
+          '<div class="stack row">' +
+            '<button class="btn primary" data-action="continue">Second half</button>' +
+            '<button class="btn" data-action="sub">Substitution</button>' +
+          '</div>' +
         '</div>',
         function (root) {
           root.addEventListener("click", function (e) {
@@ -527,6 +662,7 @@
       showTitle: showTitle,
       showPause: showPause,
       showTeamSelect: showTeamSelect,
+      showSquadPicker: showSquadPicker,
       showHalftime: showHalftime,
       showFullTime: showFullTime,
       showBracket: showBracket,

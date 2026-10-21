@@ -946,6 +946,10 @@ byte buffer that the browser scales up with nearest-neighbour sampling.
 - **Every sound is synthesised.** The crowd is filtered noise, the whistle is
   two detuned squares, the music is a sixteen-step square-wave sequencer.
   There is not one audio file in the folder.
+- **A squad with attributes.** Ten players a club — two keepers, eight
+  outfielders — each with pace, power and technique. You pick the five
+  who start, the computer picks its best, and one substitution is
+  allowed at half-time.
 - **A best-goal replay.** Every match records its last twelve seconds at
   twenty frames a second, and the card at full time offers to watch the
   best goal of the match again — drawn by the same renderer, from a

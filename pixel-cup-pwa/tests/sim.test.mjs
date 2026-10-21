@@ -644,5 +644,113 @@ section("the attract mode");
 }
 
 /* ================================================================== */
+section("the squad");
+
+{
+  const team = S.teamById("azzurri");
+  const squad = S.makeSquad(team);
+  ok("a squad has ten players", squad.length === 10, squad.length);
+  ok("a squad has two keepers",
+     squad.filter((p) => p.role === "GK").length === 2);
+  ok("a squad has outfielders",
+     squad.filter((p) => p.role !== "GK").length === 8);
+  ok("every player has a name", squad.every((p) => p.name && p.name.length > 1));
+  ok("every player has three attributes",
+     squad.every((p) => p.pace > 0 && p.power > 0 && p.technique > 0));
+  ok("the attributes are in a sane range",
+     squad.every((p) => p.pace >= 30 && p.pace <= 99 &&
+                       p.power >= 30 && p.power <= 99 &&
+                       p.technique >= 30 && p.technique <= 99));
+  ok("the players are distinct", new Set(squad.map((p) => p.id)).size === 10);
+  ok("the numbers are distinct", new Set(squad.map((p) => p.num)).size === 10);
+  ok("a keeper wears one", squad.some((p) => p.role === "GK" && p.num === 1));
+
+  /* The same club always has the same squad. */
+  const again = S.makeSquad(team);
+  ok("the squad is the same every time",
+     again.map((p) => p.id + p.pace).join() === squad.map((p) => p.id + p.pace).join());
+
+  /* A different club is a different squad. */
+  const other = S.makeSquad(S.teamById("neri"));
+  ok("another club has another squad",
+     other.map((p) => p.pace).join() !== squad.map((p) => p.pace).join());
+}
+
+{
+  const squad = S.makeSquad(S.teamById("azzurri"));
+  const five = S.autoSelection(squad);
+  ok("the automatic five is five players", five.length === 5);
+  ok("the automatic five has a keeper", five[0].role === "GK", five[0].role);
+  ok("the automatic five has no second keeper",
+     five.slice(1).every((p) => p.role !== "GK"));
+  ok("the automatic five is all in the squad",
+     five.every((p) => squad.indexOf(p) !== -1));
+  ok("the automatic five has no repeats", new Set(five.map((p) => p.id)).size === 5);
+}
+
+{
+  const squad = S.makeSquad(S.teamById("azzurri"));
+  const five = S.autoSelection(squad);
+  const ids = five.map((p) => p.id);
+  ok("a valid selection is accepted", S.validateSelection(squad, ids) !== null);
+  ok("a selection of the wrong size is refused", S.validateSelection(squad, ids.slice(0, 4)) === null);
+  ok("a selection with a non-keeper in goal is refused",
+     S.validateSelection(squad, [five[1].id].concat(ids.slice(1))) === null);
+  ok("a selection with a stranger in it is refused",
+     S.validateSelection(squad, ["nobody"].concat(ids.slice(1))) === null);
+  ok("a selection with the same man twice is refused",
+     S.validateSelection(squad, [five[0].id, five[0].id, five[2].id, five[3].id, five[4].id]) === null);
+}
+
+{
+  /* A chosen five is the five who play. */
+  const squad = S.makeSquad(S.teamById("azzurri"));
+  const five = S.autoSelection(squad);
+  const ids = five.map((p) => p.id);
+  const m = S.createMatch({ seed: 61, home: "azzurri", away: "neri", squads: { azzurri: ids } });
+  const onPitch = m.players.filter((p) => p.team === 0);
+  ok("the chosen five are on the pitch", onPitch.length === 5);
+  ok("the chosen five are the ones who were picked",
+     onPitch.map((p) => p.squadId).join() === ids.join());
+  ok("the other side picks its own",
+     m.players.filter((p) => p.team === 1).every((p) => p.squadId));
+}
+
+{
+  /* A substitution swaps the man and his attributes, and keeps the
+     slot's place on the pitch. */
+  const m = S.createMatch({ seed: 62, home: "azzurri", away: "neri" });
+  const squad = S.makeSquad(S.teamById("azzurri"));
+  const onPitch = m.players.filter((p) => p.team === 0);
+  const bench = squad.filter((p) => onPitch.indexOf(squad.find((q) => q.id === p.id)) === -1);
+  const sub = bench[0];
+  const before = onPitch[3];
+  const slotX = before.x, slotZ = before.z;
+  ok("the substitution is applied", S.substitute(m, 0, 3, sub));
+  ok("the new man wears the shirt", m.players[3].squadId === sub.id, m.players[3].squadId);
+  ok("the new man has his attributes", m.players[3].pace === sub.pace);
+  ok("the slot keeps its place on the pitch",
+     m.players[3].x === slotX && m.players[3].z === slotZ);
+}
+
+{
+  /* The attributes have to matter, or the squad is decoration. */
+  const fast = S.createMatch({ seed: 63, home: "azzurri", away: "neri" });
+  const p = fast.players[0];
+  p.paceMul = 1.25;
+  p.vx = 0; p.vz = 0;
+  for (let i = 0; i < 30; i++) {
+    p.x += 0; p.z += 0;
+    S.stepMatch(fast, 1 / 60, { mx: 0, my: 0 });
+  }
+  ok("a quick player is a quick player", p.paceMul === 1.25);
+  const slow = S.createMatch({ seed: 64, home: "azzurri", away: "neri" });
+  ok("the two squads are not the same", fast.players[0].pace !== 0);
+  ok("the speed multiplier is applied to the player",
+     slow.players[0].paceMul > 0.9 && slow.players[0].paceMul < 1.2,
+     slow.players[0].paceMul);
+}
+
+/* ================================================================== */
 console.log("\n" + (failures ? "FAILED" : "OK") + "  " + (checks - failures) + "/" + checks + " checks passed");
 process.exit(failures ? 1 : 0);

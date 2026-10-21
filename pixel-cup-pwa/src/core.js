@@ -103,6 +103,122 @@
     { role: "FWD", x: 14.0, z: 0 },
   ];
 
+  /*
+   * A squad is ten players: two keepers and eight outfielders. The
+   * attributes are derived from the club's rating with a seeded spread,
+   * so the best five on the pitch are about as good as the club was
+   * before anybody had attributes at all.
+   */
+  var SURNAMES = [
+    "ROSSI", "FERRARI", "ESPOSITO", "RUSSO", "BIANCHI", "ROMANO", "COLOMBO",
+    "RICCI", "MARINO", "GRECO", "BRUNO", "GALLO", "CONTI", "MANCINI", "COSTA",
+    "GIORDANO", "RIZZO", "LOMBARDI", "MORETTI", "BARBIERI", "FONTANA",
+    "SANTORO", "MARIANI", "RINALDI", "CARUSO", "FERRARA", "MARTINI", "LEONE",
+    "LONGO", "GENTILE", "MARTINELLI", "VITALE", "LOMBARDO", "SERRA",
+    "COPPOLA", "PALMIERI", "MONTI", "MANCUSO", "LOCATELLI", "DE ROSA",
+  ];
+
+  var SQUAD_ROLES = ["GK", "GK", "DEF", "DEF", "DEF", "MID", "MID", "MID", "FWD", "FWD"];
+
+  function attrValue(p) {
+    if (p.role === "GK") return p.power * 0.35 + p.technique * 0.65;
+    return p.pace * 0.4 + p.power * 0.3 + p.technique * 0.3;
+  }
+
+  /* The attributes bend the behaviour by about a tenth either way, which
+     is enough to matter and small enough not to wreck the balance. */
+  function paceMul(p) { return 0.94 + (p.pace - 40) * 0.0022; }
+  function powerMul(p) { return 0.94 + (p.power - 40) * 0.0022; }
+  function techMul(p) { return 0.94 + (p.technique - 40) * 0.0022; }
+
+  var SQUAD_CACHE = {};
+
+  function makeSquad(team) {
+    if (SQUAD_CACHE[team.id]) return SQUAD_CACHE[team.id];
+    var seed = hashSeed(hashSeed(team.rating, 17), hashSeed(0, 7) ^ (team.id.length * 131));
+    var rng = makeRng(seed);
+    var squad = [];
+    for (var i = 0; i < SQUAD_ROLES.length; i++) {
+      var base = team.rating + (rng() - 0.5) * 26;
+      squad.push({
+        id: team.id + "-" + i,
+        name: SURNAMES[Math.floor(rng() * SURNAMES.length)],
+        role: SQUAD_ROLES[i],
+        pace: Math.round(clamp(base + (rng() - 0.5) * 16, 30, 99)),
+        power: Math.round(clamp(base + (rng() - 0.5) * 18, 30, 99)),
+        technique: Math.round(clamp(base + (rng() - 0.5) * 20, 30, 99)),
+        num: i + 1,
+      });
+    }
+    /* The best player wears the lowest number, and a keeper wears 1. */
+    squad.sort(function (a, b) { return attrValue(b) - attrValue(a); });
+    var num = 2, keepers = 0;
+    for (var j = 0; j < squad.length; j++) {
+      if (squad[j].role === "GK") {
+        squad[j].num = keepers === 0 ? 1 : 12;
+        keepers++;
+      } else {
+        squad[j].num = num++;
+      }
+    }
+    SQUAD_CACHE[team.id] = squad;
+    return squad;
+  }
+
+  /*
+   * The best five: the best keeper, then the best player for each
+   * outfield slot. A player whose role does not match the slot can
+   * still be picked, but only when nobody better is left.
+   */
+  function autoSelection(squad) {
+    var rest = squad.slice();
+    var out = [];
+    var gk = null;
+    for (var i = 0; i < rest.length; i++) {
+      if (rest[i].role === "GK" && (!gk || attrValue(rest[i]) > attrValue(gk))) gk = rest[i];
+    }
+    out.push(gk);
+    rest = rest.filter(function (p) { return p !== gk; });
+    for (var s = 1; s < FORMATION.length; s++) {
+      var want = FORMATION[s].role;
+      var best = null;
+      for (var j = 0; j < rest.length; j++) {
+        if (rest[j].role !== want) continue;
+        if (!best || attrValue(rest[j]) > attrValue(best)) best = rest[j];
+      }
+      if (!best) {
+        for (var k = 0; k < rest.length; k++) {
+          if (!best || attrValue(rest[k]) > attrValue(best)) best = rest[k];
+        }
+      }
+      out.push(best);
+      rest = rest.filter(function (p) { return p !== best; });
+    }
+    return out;
+  }
+
+  /*
+   * Check a chosen five. The keeper slot has to be a keeper; the
+   * outfield slots take anybody who is not the keeper. Returns the
+   * selection in slot order, or null if it does not make sense.
+   */
+  function validateSelection(squad, ids) {
+    if (!ids || ids.length !== FORMATION.length) return null;
+    var picked = [];
+    for (var i = 0; i < ids.length; i++) {
+      var p = null;
+      for (var j = 0; j < squad.length; j++) if (squad[j].id === ids[i]) p = squad[j];
+      if (!p) return null;
+      picked.push(p);
+    }
+    if (picked[0].role !== "GK") return null;
+    for (var k = 1; k < picked.length; k++) {
+      if (picked[k].role === "GK") return null;
+      if (picked.indexOf(picked[k]) !== k) return null;
+    }
+    return picked;
+  }
+
   /* ------------------------------------------------------------------ */
   /* Small helpers                                                       */
   /* ------------------------------------------------------------------ */
@@ -164,9 +280,13 @@
   /* Match creation                                                      */
   /* ------------------------------------------------------------------ */
 
-  function makePlayer(team, index, slot, dir, rng) {
+  function makePlayer(team, index, slot, dir, rng, squadPlayer) {
     var jx = (rng() - 0.5) * 1.6;
     var jz = (rng() - 0.5) * 1.6;
+    var sp = squadPlayer || {
+      id: team + "-" + index, role: slot.role, name: "", num: index + 1,
+      pace: 60, power: 60, technique: 60,
+    };
     return {
       id: team * 100 + index,   // stable identity, used for "last touch"
       index: -1,                // position in the players array
@@ -189,6 +309,16 @@
       anim: rng() * 6.28,
       sweat: 0,
       rated: 1,
+      /* Who this is, and how good he is. */
+      name: sp.name,
+      num: sp.num,
+      squadId: sp.id,
+      pace: sp.pace,
+      power: sp.power,
+      technique: sp.technique,
+      paceMul: paceMul(sp),
+      powerMul: powerMul(sp),
+      techMul: techMul(sp),
     };
   }
 
@@ -248,8 +378,10 @@
 
     for (var t = 0; t < 2; t++) {
       var dir = t === 0 ? 1 : -1;
+      var team = t === 0 ? home : away;
+      var chosen = resolveSelection(team, opts.squads);
       for (var i = 0; i < FORMATION.length; i++) {
-        var pl = makePlayer(t, i, FORMATION[i], dir, rng);
+        var pl = makePlayer(t, i, FORMATION[i], dir, rng, chosen[i]);
         pl.index = m.players.length;
         m.players.push(pl);
       }
@@ -258,6 +390,16 @@
     resetPositions(m, 0);
     m.controlled = nearestToBall(m, 0);
     return m;
+  }
+
+  /* The five who start: the ones the player chose, or the best five. */
+  function resolveSelection(team, squads) {
+    var squad = makeSquad(team);
+    if (squads && squads[team.id]) {
+      var picked = validateSelection(squad, squads[team.id]);
+      if (picked) return picked;
+    }
+    return autoSelection(squad);
   }
 
   function playerIndex(m, team, role, n) {
@@ -284,6 +426,24 @@
 
   /* Put everyone back on their formation lines and hand the ball to the
      team that gets it. */
+  /* Put a different man in a slot: the slot keeps its place on the
+     pitch, the player brings his attributes with him. */
+  function substitute(m, team, slot, squadPlayer) {
+    var idx = team * FORMATION.length + slot;
+    var p = m.players[idx];
+    if (!p || !squadPlayer) return false;
+    p.name = squadPlayer.name;
+    p.num = squadPlayer.num;
+    p.squadId = squadPlayer.id;
+    p.pace = squadPlayer.pace;
+    p.power = squadPlayer.power;
+    p.technique = squadPlayer.technique;
+    p.paceMul = paceMul(squadPlayer);
+    p.powerMul = powerMul(squadPlayer);
+    p.techMul = techMul(squadPlayer);
+    return true;
+  }
+
   function resetPositions(m, kickoffTeam) {
     for (var i = 0; i < m.players.length; i++) {
       var p = m.players[i];
@@ -511,7 +671,7 @@
     var dz = Math.sin(p.facing) + aimZ * 0.95;
     var l = len(dx, dz) || 1;
     dx /= l; dz /= l;
-    var power = C.SHOT_BASE * 0.75 + C.SHOT_POWER * charge * 0.8;
+    var power = (C.SHOT_BASE * 0.75 + C.SHOT_POWER * charge * 0.8) * (p.techMul || 1);
     /* The ball leaves from the head, not from the feet. */
     b.x = p.x + dx * 0.5;
     b.z = p.z + dz * 0.5;
@@ -534,7 +694,7 @@
   }
 
   function doShot(m, p, charge, aimX, aimZ, loft, curl) {
-    var power = C.SHOT_BASE + C.SHOT_POWER * charge;
+    var power = (C.SHOT_BASE + C.SHOT_POWER * charge) * (p.techMul || 1);
     var dx = Math.cos(p.facing) + aimX * 0.95;
     var dz = Math.sin(p.facing) + aimZ * 0.95;
     var l = len(dx, dz) || 1;
@@ -814,7 +974,8 @@
   function movePlayer(m, p, tx, tz, dt, speedScale) {
     var dx = tx - p.x, dz = tz - p.z;
     var d = len(dx, dz);
-    var maxSpeed = (p.role === "GK" ? C.GK_SPEED : C.PLAYER_SPEED) * (speedScale || 1);
+    var maxSpeed = (p.role === "GK" ? C.GK_SPEED : C.PLAYER_SPEED) *
+      (speedScale || 1) * (p.paceMul || 1);
     if (p.sprint > 0) maxSpeed *= C.SPRINT_MULT;
     var want = d > 0.05 ? Math.min(maxSpeed, d * 4.2) : 0;
     var ax = 0, az = 0;
@@ -863,7 +1024,7 @@
     if (defender.slideCd > 0) return false;
     if (defender.slide > 0) return false;
     if (dist(defender.x, defender.z, owner.x, owner.z) > C.TACKLE_RANGE) return false;
-    if (m.rng() < chance) {
+    if (m.rng() < chance * (defender.powerMul || 1)) {
       steal(m, defender, owner);
       pushEvent(m, "tackle", "Bella difesa!", 0.6);
       return true;
@@ -1616,6 +1777,12 @@
     FORMATION: FORMATION,
     teamById: teamById,
     makeRng: makeRng,
+    makeSquad: makeSquad,
+    autoSelection: autoSelection,
+    validateSelection: validateSelection,
+    substitute: substitute,
+    attrValue: attrValue,
+    FORMATION: FORMATION,
     createMatch: createMatch,
     stepMatch: stepMatch,
     startSecondHalf: startSecondHalf,

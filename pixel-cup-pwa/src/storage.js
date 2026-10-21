@@ -18,6 +18,7 @@
 
   var KEY_RECORDS = "pixel-cup-records";
   var KEY_CUP = "pixel-cup-cup";
+  var KEY_SQUADS = "pixel-cup-squads";
 
   /*
    * The settings live in the shared arcade key when it is there, so the
@@ -112,6 +113,24 @@
     return r;
   }
 
+  /* The chosen five, per club. */
+  function getSquads() {
+    var s = load(KEY_SQUADS, null);
+    return (s && typeof s === "object") ? s : {};
+  }
+
+  function getSquad(clubId) {
+    var all = getSquads();
+    return all[clubId] || null;
+  }
+
+  function setSquad(clubId, ids) {
+    var all = getSquads();
+    all[clubId] = ids;
+    save(KEY_SQUADS, all);
+    return all;
+  }
+
   function getCup() { return load(KEY_CUP, null); }
   function setCup(cup) { save(KEY_CUP, cup); }
   function clearCup() { remove(KEY_CUP); }
@@ -120,6 +139,7 @@
     KEY_SETTINGS: KEY_SETTINGS,
     KEY_RECORDS: KEY_RECORDS,
     KEY_CUP: KEY_CUP,
+    KEY_SQUADS: KEY_SQUADS,
     load: load,
     save: save,
     getSettings: getSettings,
@@ -131,5 +151,8 @@
     getCup: getCup,
     setCup: setCup,
     clearCup: clearCup,
+    getSquads: getSquads,
+    getSquad: getSquad,
+    setSquad: setSquad,
   };
 });

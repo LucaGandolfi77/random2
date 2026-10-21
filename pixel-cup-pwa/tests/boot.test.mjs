@@ -237,6 +237,14 @@ ok("the picker offers eight teams",
   (String(screen.innerHTML).match(/data-team="/g) || []).length === 8);
 
 G.action("start", 2);
+ok("the squad picker opened", /class="xi"/.test(String(screen.innerHTML)));
+ok("the squad picker lists ten players",
+  (String(screen.innerHTML).match(/data-id="/g) || []).length >= 10);
+
+/* Pick the best five and kick off. */
+const squad = globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"));
+const ids = globalThis.PixelCupCore.autoSelection(squad).map((p) => p.id);
+G.action("kickoff", ids);
 let st = G.state();
 ok("the match started", st.mode === "match", JSON.stringify(st));
 ok("the menu is out of the way", screen.classList.contains("hidden"));
@@ -302,6 +310,10 @@ section("the cup");
 G.action("cup");
 ok("the cup picker opened", /data-team="0"/.test(String(screen.innerHTML)));
 G.action("start", 1);
+ok("the cup squad picker opened", /class="xi"/.test(String(screen.innerHTML)));
+const cupIds = globalThis.PixelCupCore.autoSelection(
+  globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"))).map((p) => p.id);
+G.action("kickoff", cupIds);
 st = G.state();
 ok("the cup match started", st.mode === "match", JSON.stringify(st));
 ok("the cup is in play", st.cup && st.cup.round === 0, JSON.stringify(st.cup));
@@ -337,6 +349,8 @@ section("pausing");
 
 G.action("quick");
 G.action("start", 0);
+G.action("kickoff", globalThis.PixelCupCore.autoSelection(
+  globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"))).map((p) => p.id));
 ok("a match is running", G.state().mode === "match");
 
 /* Escape opens the pause sheet. */
@@ -375,6 +389,8 @@ ok("the pause sheet is replaced by the title", /PIXEL CUP/.test(String(screen.in
 /* Restarting from the pause sheet starts a fresh match. */
 G.action("quick");
 G.action("start", 0);
+G.action("kickoff", globalThis.PixelCupCore.autoSelection(
+  globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"))).map((p) => p.id));
 pressKey("Escape");
 frame(20);
 G.action("restart");
@@ -397,12 +413,16 @@ ok("the picker offers three difficulties",
 
 /* Choosing Legend and kicking off must reach the match. */
 G.action("start", 1, 2);
+G.action("kickoff", globalThis.PixelCupCore.autoSelection(
+  globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"))).map((p) => p.id));
 ok("the match starts with the chosen difficulty", G.state().mode === "match");
 
 section("the replay");
 
 G.action("quick");
 G.action("start", 0);
+G.action("kickoff", globalThis.PixelCupCore.autoSelection(
+  globalThis.PixelCupCore.makeSquad(globalThis.PixelCupCore.teamById("verdi"))).map((p) => p.id));
 const reel = G.match();
 const CoreM = globalThis.PixelCupCore;
 /* Move the keeper out of the way and put the ball in front of the goal. */
