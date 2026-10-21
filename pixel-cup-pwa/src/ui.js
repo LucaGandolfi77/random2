@@ -358,6 +358,8 @@
             '<p><b>Switch</b> — Q, to hand the ball to whoever is nearest.</p>' +
             '<p><b>Skill</b> — L: a through ball when you have it, a slide ' +
             'tackle when you do not.</p>' +
+            '<p><b>Cross</b> — C: a high ball over the defence and into the ' +
+            'box. When a cross drops near you, <b>Shoot</b> heads it.</p>' +
             '<p class="note">On a phone, use the stick on the left and the ' +
             'buttons on the right.</p>' +
           '</div>' +
@@ -443,6 +445,16 @@
         Font.drawPanel(buf, bxx - 2, byy - 2, bw + 4, 12, COL.panel, COL.border);
         Font.drawMeter(buf, bxx, byy, bw, 8, m.charge, COL.gold, COL.panelLight, null);
         Font.drawText(buf, bxx + bw / 2 - 9, byy + 9, "POWER", COL.dim, 1);
+      }
+
+      /* A contextual prompt: a ball in the air and a player under it is
+         a header waiting to happen, and nobody should have to guess. */
+      var me = m.players[m.controlled];
+      if (me && m.ball.owner < 0 && m.ball.y > 1.15 && m.ball.y < 4.6) {
+        var dx = me.x - m.ball.x, dz = me.z - m.ball.z;
+        if (dx * dx + dz * dz < 2.1 * 2.1) {
+          Font.drawTextCentered(buf, w / 2, 22, "HEAD IT!", [255, 214, 64], 1);
+        }
       }
 
       /* The commentary, in the language of the terraces. */

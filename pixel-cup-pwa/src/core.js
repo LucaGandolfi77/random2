@@ -62,6 +62,15 @@
     PASS_POWER: 12,
     LOFT: 7.2,
 
+    /* A cross is a different thing from a lofted pass: it goes right
+       up, over the top of the defence, and lands in the box. */
+    CROSS_LIFT: 11.6,
+    CROSS_SPEED: 15,
+    HEADER_MIN_Y: 1.15,   /* above this the ball is headed, not carried */
+    HEADER_MAX_Y: 4.6,
+    HEADER_RANGE: 2.1,
+    CLEARANCE_RANGE: 2.6,
+
     STAMINA_MAX: 100,
     STAMINA_DRAIN: 26,
     STAMINA_REGEN: 15,
@@ -176,6 +185,7 @@
       slideCd: 0,
       kickCd: 0,
       shotCd: 0,
+      aerialCd: 0,
       anim: rng() * 6.28,
       sweat: 0,
       rated: 1,
@@ -449,6 +459,77 @@
     return true;
   }
 
+  /*
+   * A cross: a high ball over the defence and into the box. It has its
+   * own button, because "up" on the stick already means "forwards", and
+   * a cross that anybody can trigger by running at the goal is not a
+   * cross at all.
+   */
+  function doCross(m, p) {
+    var b = m.ball;
+    var owner = ownerOf(m);
+    if (!owner || owner.team !== p.team) {
+      /* A loose ball at your feet: hoof it upfield rather than let it
+         roll to somebody else. */
+      if (b.y < 2.4 && dist(p.x, p.z, b.x, b.z) < C.CLEARANCE_RANGE) {
+        var away = p.z > 0 ? -1 : 1;
+        kick(m, p, p.dir * 15, 6.4, away * 5, 0);
+        pushEvent(m, "clearance", "Via!", 0.5);
+        return true;
+      }
+      return false;
+    }
+    /* Aim it at the space in front of the far post. */
+    var gz = (p.z > 0 ? -1 : 1) * (C.GOAL_W / 2 - 1.6);
+    var tx = p.dir * (C.GOAL_LINE - 3);
+    var dx = tx - p.x, dz = gz - p.z;
+    var l = len(dx, dz) || 1;
+    kick(m, p, dx / l * C.CROSS_SPEED, C.CROSS_LIFT, dz / l * C.CROSS_SPEED, 0);
+    m.stats[p.team].passes++;
+    pushEvent(m, "cross", "Cross!", 0.8);
+    m.excitement = clamp(m.excitement + 0.2, 0, 1);
+    return true;
+  }
+
+  /*
+   * A header. The ball has to be in the air and the player has to be
+   * under it, which is what makes a cross worth crossing.
+   */
+  function canHead(m, p) {
+    var b = m.ball;
+    if (b.owner >= 0) return false;
+    if (b.y < C.HEADER_MIN_Y || b.y > C.HEADER_MAX_Y) return false;
+    return dist(p.x, p.z, b.x, b.z) < C.HEADER_RANGE;
+  }
+
+  function doHeader(m, p, charge, aimX, aimZ) {
+    var b = m.ball;
+    var dx = Math.cos(p.facing) + aimX * 0.95;
+    var dz = Math.sin(p.facing) + aimZ * 0.95;
+    var l = len(dx, dz) || 1;
+    dx /= l; dz /= l;
+    var power = C.SHOT_BASE * 0.75 + C.SHOT_POWER * charge * 0.8;
+    /* The ball leaves from the head, not from the feet. */
+    b.x = p.x + dx * 0.5;
+    b.z = p.z + dz * 0.5;
+    b.y = Math.max(b.y, 1.45);
+    b.vx = dx * power;
+    b.vy = 1.2;
+    b.vz = dz * power;
+    b.spin = 0;
+    b.owner = -1;
+    b.ownerTeam = -1;
+    b.lastTouch = p.id;
+    b.lastTouchTeam = p.team;
+    b.kickLock = C.KICK_LOCK;
+    p.kickCd = 0.25;
+    m.stats[p.team].shots++;
+    p.shotCd = C.SHOT_COOLDOWN;
+    m.excitement = clamp(m.excitement + 0.4, 0, 1);
+    pushEvent(m, "header", "Che testa!", 1);
+    return true;
+  }
+
   function doShot(m, p, charge, aimX, aimZ, loft, curl) {
     var power = C.SHOT_BASE + C.SHOT_POWER * charge;
     var dx = Math.cos(p.facing) + aimX * 0.95;
@@ -464,7 +545,8 @@
     return true;
   }
 
-  /* A skill move: through-ball when attacking, slide tackle when defending. */
+  /* A skill move: through-ball when attacking, a clearance when the ball
+     is loose, a slide tackle when defending. */
   function doSkill(m, p) {
     var b = m.ball;
     var owner = ownerOf(m);
@@ -481,6 +563,13 @@
         return true;
       }
       return false;
+    }
+    /* A loose ball at your feet: the cross button hoofs it away. */
+    if (!owner && b.y < 2.4 && dist(p.x, p.z, b.x, b.z) < C.CLEARANCE_RANGE) {
+      var away = p.z > 0 ? -1 : 1;
+      kick(m, p, p.dir * 15, 6.4, away * 5, 0);
+      pushEvent(m, "clearance", "Via!", 0.5);
+      return true;
     }
     /* slide tackle */
     if (p.slideCd > 0) return false;
@@ -779,6 +868,27 @@
     return false;
   }
 
+  /*
+   * A ball in the air is a chance to head it. Whoever is under it gets
+   * it, and a cross into the box becomes a real opportunity rather than
+   * a ball everybody watches go past.
+   */
+  function aerialChance(m, p, dt) {
+    if (!canHead(m, p)) return false;
+    /* Do not thrash at it: one attempt per player per ball. */
+    if (p.aerialCd > 0) { p.aerialCd -= dt; return false; }
+    p.aerialCd = 0.6;
+    var goal = attackTarget(m, p.team);
+    var dx = goal.x - p.x, dz = goal.z - p.z;
+    var l = len(dx, dz) || 1;
+    p.facing = Math.atan2(dz, dx);
+    /* The power depends on how good the player is and on how much
+       charge there is in the swing. */
+    var charge = clamp(0.45 + m.difficulty * 0.15 + m.rng() * 0.3, 0, 1);
+    doHeader(m, p, charge, 0, 0);
+    return true;
+  }
+
   function updateCPU(m, dt) {
     var cpu = 1 - m.humanTeam;
     var b = m.ball;
@@ -791,6 +901,9 @@
       if (p.slide > 0) { p.slide -= dt; continue; }
 
       if (p.role === "GK") { keeperAI(m, p, dt); continue; }
+
+      /* A ball in the air is headed before anything else is considered. */
+      if (aerialChance(m, p, dt)) continue;
 
       if (weHaveBall) {
         if (owner === p) carrierAI(m, p, dt);
@@ -908,13 +1021,21 @@
       return;
     }
 
-    /* Pass? */
+    /* Pass when crowded. */
     if (pressure < 3.0 && m.rng() < 0.055 + m.difficulty * 0.03) {
       var t = pickPassTarget(m, p, p.dir, 0);
       if (t) {
         doPass(m, p, 0.35 + m.rng() * 0.3, p.dir, 0, false);
         return;
       }
+    }
+
+    /* Cross when wide and getting near the goal: a ball into the box is
+       the only way to score from out there. */
+    if (Math.abs(p.z) > 7 && Math.abs(p.x) > 12 && p.shotCd <= 0 &&
+        m.rng() < 0.02 + m.difficulty * 0.012) {
+      doCross(m, p);
+      return;
     }
 
     /* Otherwise drive at the goal, steering around opponents. */
@@ -1049,7 +1170,11 @@
       m.charging = false;
       var charge = m.charge;
       m.charge = 0;
-      if (m.ball.owner === p.index && p.shotCd <= 0) {
+      if (canHead(m, p)) {
+        /* The ball is in the air and you are under it: that is a header,
+           and it beats a shot off the ground. */
+        doHeader(m, p, charge, input.mx, input.my);
+      } else if (m.ball.owner === p.index && p.shotCd <= 0) {
         var loft = clamp(input.my, 0, 1);
         var curl = clamp(-input.mx, -1, 1) * 0.6;
         doShot(m, p, charge, input.mx, input.my, loft, curl);
@@ -1061,6 +1186,9 @@
 
     if (input.passDown && m.ball.owner === p.index) {
       doPass(m, p, 0.25, input.mx, input.my, false);
+    }
+    if (input.crossDown) {
+      doCross(m, p);
     }
     if (input.skillDown) {
       doSkill(m, p);
@@ -1101,6 +1229,7 @@
       if (p.slideCd > 0) p.slideCd -= dt;
       if (p.kickCd > 0) p.kickCd -= dt;
       if (p.shotCd > 0) p.shotCd -= dt;
+      if (p.aerialCd > 0) p.aerialCd -= dt;
       if (p.slide > 0) p.slide -= dt;
       p.sprint = 0;
     }
@@ -1174,6 +1303,9 @@
       if (h.team !== m.humanTeam) continue;
       if (h === m.players[m.controlled]) continue;
       if (h.role === "GK") { keeperAI(m, h, dt); continue; }
+      /* The human's teammates head the ball too, or a cross would only
+         ever be for the opposition. */
+      if (aerialChance(m, h, dt)) continue;
       var owner = ownerOf(m);
       if (owner && owner.team === h.team) {
         /* a human teammate has the ball: hold the shape, offer an option */
@@ -1473,6 +1605,9 @@
     doPass: doPass,
     doShot: doShot,
     doSkill: doSkill,
+    doCross: doCross,
+    doHeader: doHeader,
+    canHead: canHead,
     attackTarget: attackTarget,
     createShootout: createShootout,
     stepShootout: stepShootout,

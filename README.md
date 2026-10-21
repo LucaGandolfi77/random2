@@ -946,6 +946,10 @@ byte buffer that the browser scales up with nearest-neighbour sampling.
 - **Every sound is synthesised.** The crowd is filtered noise, the whistle is
   two detuned squares, the music is a sixteen-step square-wave sequencer.
   There is not one audio file in the folder.
+- **Crosses and headers.** A cross is a high ball over the defence and into
+  the box, on its own key; above 1.15 units the ball can only be headed,
+  never carried, so an aerial chance is a real chance. The heads-up display
+  tells you when the ball is yours to head.
 
 The commentary is in Italian, because the terraces always are: *"Che gola!"*,
 *"Che sprechi!"*, *"Attenzione al contropiede!"*.

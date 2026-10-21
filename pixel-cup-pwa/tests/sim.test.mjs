@@ -234,9 +234,15 @@ section("the clock");
 
 {
   /* Stepping the match without the interface reading the half-time card
-     stops the match at the break. */
+     stops the match at the break. A goal that lands just before the
+     break is played out first, so the test waits for the break rather
+     than assuming it happens on a particular frame. */
   const m = S.createMatch({ seed: 30, halfSeconds: 5 });
-  for (let i = 0; i < 60 * 6; i++) S.stepMatch(m, 1 / 60, IDLE);
+  let waited = 0;
+  while (m.phase !== "halftime" && waited < 20) {
+    S.stepMatch(m, 1 / 60, IDLE);
+    waited += 1 / 60;
+  }
   ok("the first half ends", m.phase === "halftime", m.phase);
   ok("the clock resets for the second half", m.clock === 0, m.clock);
   ok("it is the second half", m.half === 2);
@@ -244,7 +250,11 @@ section("the clock");
   S.startSecondHalf(m);
   ok("the second half kicks off", m.phase === "kickoff", m.phase);
   ok("the second half is played from the centre", m.ball.x === 0 && m.ball.z === 0);
-  for (let i = 0; i < 60 * 6; i++) S.stepMatch(m, 1 / 60, IDLE);
+  let full = 0;
+  while (m.phase !== "fulltime" && full < 30) {
+    S.stepMatch(m, 1 / 60, IDLE);
+    full += 1 / 60;
+  }
   ok("the match ends at full time", m.phase === "fulltime", m.phase);
 }
 
@@ -521,6 +531,86 @@ function playScripted(seed) {
   }
   ok("the goalkeeper never holds the ball for long", longest < 60 * 3,
      "longest hold: " + (longest / 60).toFixed(1) + "s");
+}
+
+/* ================================================================== */
+section("crosses and headers");
+
+{
+  /* A cross goes high: it must clear the heads of the people in front
+     of it, which is the whole point of crossing. */
+  const m = S.createMatch({ seed: 41 });
+  m.phase = "play";
+  const p = m.players[m.controlled];
+  p.x = 0; p.z = 0; p.facing = 0;
+  m.ball.owner = p.index;
+  m.ball.ownerTeam = p.team;
+  m.ball.x = 0; m.ball.z = 0; m.ball.y = S.C.BALL_R;
+  S.doCross(m, p);
+  ok("a cross puts the ball up", m.ball.vy > 8, m.ball.vy);
+  ok("a cross travels forward", m.ball.vx > 0, m.ball.vx);
+  ok("a cross counts as a pass", m.stats[p.team].passes === 1);
+  /* It comes down again in the opposition's half. */
+  let peak = 0;
+  for (let i = 0; i < 120; i++) {
+    S.stepMatch(m, 1 / 60, IDLE);
+    if (m.ball.y > peak) peak = m.ball.y;
+  }
+  ok("a cross goes over the heads", peak > 2.5, "peak " + peak.toFixed(2));
+}
+
+{
+  /* A ball in the air can be headed, and the header sends it where the
+     player is aiming. */
+  const m = S.createMatch({ seed: 42 });
+  m.phase = "play";
+  const p = m.players[m.controlled];
+  p.x = 0; p.z = 0; p.facing = 0;
+  m.ball.owner = -1;
+  m.ball.ownerTeam = -1;
+  m.ball.x = 0.4; m.ball.y = 2.2; m.ball.z = 0;
+  m.ball.vx = 0; m.ball.vy = 0; m.ball.vz = 0;
+  m.ball.kickLock = 0;
+  ok("a player under a high ball can head it", S.canHead(m, p));
+  const before = m.stats[p.team].shots;
+  S.doHeader(m, p, 0.7, 0, 0);
+  ok("a header counts as a shot", m.stats[p.team].shots === before + 1);
+  ok("a header sends the ball forward", m.ball.vx > 5, m.ball.vx);
+  ok("a header starts at head height", m.ball.y >= 1.4, m.ball.y);
+}
+
+{
+  /* A ball on the ground cannot be headed, and a high ball cannot be
+     picked up and carried. */
+  const m = S.createMatch({ seed: 43 });
+  m.phase = "play";
+  const p = m.players[m.controlled];
+  p.x = 0; p.z = 0;
+  m.ball.owner = -1;
+  m.ball.ownerTeam = -1;
+  m.ball.x = 0.2; m.ball.y = S.C.BALL_R; m.ball.z = 0;
+  m.ball.kickLock = 0;
+  ok("a ball on the ground cannot be headed", !S.canHead(m, p));
+  m.ball.y = 3.0;
+  m.ball.kickLock = 0;
+  S.stepMatch(m, 1 / 60, IDLE);
+  ok("a high ball is not picked up and carried", m.ball.owner === -1, m.ball.owner);
+}
+
+{
+  /* The cross button clears a loose ball away from danger. */
+  const m = S.createMatch({ seed: 44 });
+  m.phase = "play";
+  const p = m.players[m.controlled];
+  p.x = 0; p.z = 0;
+  m.ball.owner = -1;
+  m.ball.ownerTeam = -1;
+  m.ball.x = 0.5; m.ball.y = S.C.BALL_R; m.ball.z = 0;
+  m.ball.kickLock = 0;
+  const before = m.stats[p.team].passes;
+  S.doCross(m, p);
+  ok("a loose ball is cleared upfield", m.ball.vx > 5, m.ball.vx);
+  ok("a clearance is not counted as a pass", m.stats[p.team].passes === before);
 }
 
 /* ================================================================== */

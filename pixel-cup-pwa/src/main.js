@@ -231,6 +231,19 @@
         case "through":
           setCommentary("Passa! Passa!", 1.4);
           break;
+        case "header":
+          audio.kick(1.1);
+          game.shake = Math.max(game.shake, 0.25);
+          setCommentary(e.text || "Che testa!", 1.6);
+          break;
+        case "cross":
+          audio.kick(0.7);
+          setBanner("CROSS!", 1.1);
+          break;
+        case "clearance":
+          audio.kick(0.9);
+          setCommentary(e.text || "Via!", 1.2);
+          break;
         case "halftime":
           audio.whistle();
           setBanner("HALF TIME", 2);

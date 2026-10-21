@@ -51,6 +51,7 @@ cube on top, and the ball is an icosahedron that spins.
 | Sprint | Shift | **RUN** |
 | Switch player | Q | **SWAP** |
 | Skill move | L | **SKILL** |
+| Cross | C | **CROSS** |
 | Pause | Esc | the pause button, top right |
 
 A gamepad works too. "Up" is always towards the opponent's goal,
@@ -62,6 +63,11 @@ because the camera always looks that way.
   sideways to bend it and up to lift it.
 - **Skill** is a through ball when you have the ball and a sliding
   tackle when you do not.
+- **Cross** is a high ball over the defence and into the box. It has
+  its own key because "up" on the stick already means "forwards", and a
+  cross that anybody can trigger by running at the goal is not a cross at
+  all. When a cross drops near you, **Shoot** heads it — and the
+  heads-up display tells you when the ball is yours to head.
 - **Pause** opens a sheet with Resume, Restart and Quit, and the sound,
   music and vibration switches. Leaving the tab pauses the match by
   itself: nobody wants to come back to a match that ran on without them.
@@ -121,6 +127,9 @@ therefore exercise the game you actually play, not a copy of it.
 - The pitch is 56 × 36 units; the goals are nine wide and 3.2 high.
 - The ball has weight, bounce, friction and spin, and a strike bends in
   the air.
+- A cross is a different thing from a lofted pass: it goes right up, over
+  the defence, and lands in the box. Above 1.15 units the ball can only
+  be headed, never carried, so an aerial chance is a real chance.
 - A player who has just won the ball has half a second to turn away from
   the tackle before anybody can take it back.
 - A goalkeeper guesses where a shot is going, and he is often wrong —
@@ -131,7 +140,7 @@ therefore exercise the game you actually play, not a copy of it.
 ### Tests
 
 ```bash
-node pixel-cup-pwa/tests/sim.test.mjs    # 89 checks: rules, physics, cup, shoot-out, balance
+node pixel-cup-pwa/tests/sim.test.mjs    # 101 checks: rules, physics, cup, shoot-out, balance
 node pixel-cup-pwa/tests/boot.test.mjs   # 62 checks: the whole game against a fake DOM
 node pixel-cup-pwa/tests/preview.mjs /tmp/pc.png 26   # writes a PNG of a live frame
 node pixel-cup-pwa/smoke.mjs             # the real page, in a real browser

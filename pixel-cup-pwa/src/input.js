@@ -26,6 +26,7 @@
     sprint: ["ShiftLeft", "ShiftRight"],
     switch: ["KeyQ", "Tab"],
     skill: ["KeyL", "KeyE"],
+    cross: ["KeyC", "KeyR"],
     pause: ["Escape", "KeyP"],
   };
 
@@ -44,6 +45,7 @@
       sprint: false,
       switchDown: false,
       skillDown: false,
+      crossDown: false,
       tap: false,
       pause: false,
       anyKey: false,
@@ -69,6 +71,7 @@
       if (has(KEYS.pause, e.code)) { state.pause = true; e.preventDefault(); }
       if (has(KEYS.switch, e.code)) { state.switchDown = true; e.preventDefault(); }
       if (has(KEYS.skill, e.code)) state.skillDown = true;
+      if (has(KEYS.cross, e.code)) state.crossDown = true;
       if (has(KEYS.up, e.code) || has(KEYS.down, e.code) ||
           has(KEYS.left, e.code) || has(KEYS.right, e.code)) e.preventDefault();
     }
@@ -102,6 +105,7 @@
         if (name === "shoot") state.shootDown = true;
         if (name === "switch") state.switchDown = true;
         if (name === "skill") state.skillDown = true;
+        if (name === "cross") state.crossDown = true;
         state.tap = true;
         state.anyKey = true;
       }
@@ -196,6 +200,7 @@
       state.shootUp = false;
       state.switchDown = false;
       state.skillDown = false;
+      state.crossDown = false;
       state.tap = false;
       state.anyKey = false;
       state.pause = false;

@@ -478,6 +478,7 @@ body {
 .pad-skill { right: 76px; bottom: 74px; width: 60px; height: 60px; }
 .pad-switch { right: 0; bottom: 0; width: 58px; height: 58px; }
 .pad-sprint { right: 138px; bottom: 40px; width: 58px; height: 58px; }
+.pad-cross { right: 138px; bottom: 104px; width: 58px; height: 58px; background: #4d8bff2e; border-color: #4d8bff77; }
 
 /* ---------- the footer ---------- */
 
