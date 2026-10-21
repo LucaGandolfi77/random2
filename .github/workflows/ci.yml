@@ -120,6 +120,12 @@ jobs:
           # all 64 stages. It was never wired in, so a stale assertion sat
           # broken in the tree for a week.
           node mustang-pwa/tests/run-all.mjs
+          # PIXEL CUP '96: the rules and the balance of a football match, and
+          # the whole game booted against a fake DOM. The second one is what
+          # catches a typo in the wiring, which no amount of model testing
+          # would.
+          node pixel-cup-pwa/tests/sim.test.mjs
+          node pixel-cup-pwa/tests/boot.test.mjs
 
       - name: Analysis tooling tests
         run: |
@@ -202,6 +208,14 @@ jobs:
           out=$(node pulse-pwa/smoke.mjs http://localhost:8099/pulse-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  pulse-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # PIXEL CUP '96 plays a match: it picks a team, kicks off, presses
+          # the keys and checks the picture on the canvas actually changed.
+          out=$(node pixel-cup-pwa/smoke.mjs http://localhost:8099/pixel-cup-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  pixel-cup-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3

@@ -39,6 +39,8 @@
   - [Snap Cam](#snap-cam)
   - [IRONFALL](#ironfall)
   - [PULSE](#pulse)
+  - [PIXEL CUP '96](#pixel-cup-96)
+  - [CENSUS](#census)
 - [The tools](#the-tools)
   - [EADS Studio](#eads-studio)
 - [The portfolio page](#the-portfolio-page)
@@ -95,6 +97,7 @@
 | 35 | **Pokédex GO** | Low-poly creature collection, bilingual | Canvas 3D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pokemon-go-pwa/) |
 | 36 | **SARTORIA** | Couture tycoon: one runway per season | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sartoria-pwa/) |
 | 37 | **Mini Tower** | Tiny-tower builder: floors, shops, tenants | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/tiny-tower-pwa/) |
+| 38 | **PIXEL CUP '96** | Low-poly arcade football, five a side | Canvas 2D (software rasteriser) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pixel-cup-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -915,6 +918,44 @@ generator be tested over 500 seeds in Node.
 [▶ Play](https://lucagandolfi77.github.io/random2/pulse-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/pulse-pwa) ·
 [README](pulse-pwa/README.md)
+
+### PIXEL CUP '96
+
+*Low-poly arcade football, in a pixel buffer.* ⚽
+
+Five a side, ninety seconds a half, one ball and a crowd that will not shut
+up. The picture is **not** WebGL and **not** images: the pitch, the players,
+the ball, the goal and the crowd are triangles drawn by hand into a 320×180
+byte buffer that the browser scales up with nearest-neighbour sampling.
+
+- **Flat shading.** Every face has one colour, computed from its normal
+  against a single light and then quantised to a limited palette. That is
+  what makes the geometry read as low-poly rather than as a small smooth
+  render.
+- **A real depth buffer.** The rasteriser tests 1/d, and 1/d is an exact
+  affine function of the screen position across a plane, so interpolating it
+  across a triangle is not an approximation. Pitch, players and goalposts
+  share one buffer with no sorting at all.
+- **One copy of the rules.** `src/core.js` has no DOM in it and is loaded by
+  the browser *and* by the Node tests, so the tests exercise the game you
+  actually play.
+- **Three modes:** a quick match, an eight-team knockout cup whose progress
+  survives a closed tab, and a penalty shoot-out settled on a sweeping
+  marker.
+- **Every sound is synthesised.** The crowd is filtered noise, the whistle is
+  two detuned squares, the music is a sixteen-step square-wave sequencer.
+  There is not one audio file in the folder.
+
+The commentary is in Italian, because the terraces always are: *"Che gola!"*,
+*"Che sprechi!"*, *"Attenzione al contropiede!"*.
+
+**Files:** `index.html` · `styles.css` · `manifest.json` ·
+`service-worker.js` · `icons/` · `src/` (9 files) · `tests/` (3 files) ·
+`smoke.mjs` · `tools/gen-icons.mjs`
+
+[▶ Play](https://lucagandolfi77.github.io/random2/pixel-cup-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/pixel-cup-pwa) ·
+[README](pixel-cup-pwa/README.md)
 
 ### CENSUS
 

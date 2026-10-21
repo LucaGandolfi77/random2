@@ -95,6 +95,21 @@ is playable in about 450 ms with nothing downloaded. `src/song.js` and `src/char
 are DOM-free and deterministic, which is what lets the generator be tested over 500
 seeds in Node.
 
+`pixel-cup-pwa/` is a low-poly arcade football game whose picture is neither
+WebGL nor images: the pitch, the players, the ball, the goal and the crowd are
+triangles drawn by hand into a 320x180 byte buffer that the browser scales up
+with nearest-neighbour sampling. Faces are flat-shaded and quantised to a
+limited palette, which is what makes them read as low-poly rather than as a
+small smooth render, and the rasteriser tests 1/d against a depth buffer -
+1/d being an exact affine function of the screen position across a plane, so
+interpolating it across a triangle is not an approximation and the pitch, the
+players and the goalposts share one buffer with no sorting at all. The rules
+live in a DOM-free `core.js` that the browser and the Node tests load
+unchanged, and the balance is pinned by those tests: a scripted player of
+ordinary ability has to score, the opposition has to score too, and a match
+has to land between one and a half and seven goals. Every sound is
+synthesised, so there is not one audio file in the folder.
+
 ## Shared libraries
 
 `shared/arcade.js` — WebAudio blips, particles, localStorage helpers, seeded
@@ -117,6 +132,9 @@ node pulse-pwa/sim.test.mjs    # PULSE generator + chart
 node stats-pwa/smoke.mjs       # in-browser (skips if no playwright)
 node census-pwa/smoke.mjs      # in-browser (skips if no playwright)
 node pulse-pwa/smoke.mjs       # in-browser (skips if no playwright)
+node pixel-cup-pwa/sim.test.mjs  # PIXEL CUP '96 model
+node pixel-cup-pwa/boot.test.mjs # PIXEL CUP '96, the whole game on a fake DOM
+node pixel-cup-pwa/smoke.mjs      # in-browser (skips if no playwright)
 ```
 
 ## Layout
