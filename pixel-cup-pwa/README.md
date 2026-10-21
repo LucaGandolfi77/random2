@@ -37,7 +37,7 @@ cube on top, and the ball is an icosahedron that spins.
 
 | Mode | What it is |
 |---|---|
-| **Quick Match** | One match against the computer. Pick your side. |
+| **Quick Match** | One match against the computer. Pick your side, pick your difficulty. |
 | **Cup** | Eight teams, a knockout bracket, a trophy. Your tie is played; the others are simulated. Progress is saved, so the cup survives a closed tab. |
 | **Penalty Shoot-out** | Five kicks each, then sudden death. Stop the sweeping marker, then stop the power meter. |
 
@@ -51,6 +51,7 @@ cube on top, and the ball is an icosahedron that spins.
 | Sprint | Shift | **RUN** |
 | Switch player | Q | **SWAP** |
 | Skill move | L | **SKILL** |
+| Pause | Esc | the pause button, top right |
 
 A gamepad works too. "Up" is always towards the opponent's goal,
 because the camera always looks that way.
@@ -61,6 +62,9 @@ because the camera always looks that way.
   sideways to bend it and up to lift it.
 - **Skill** is a through ball when you have the ball and a sliding
   tackle when you do not.
+- **Pause** opens a sheet with Resume, Restart and Quit, and the sound,
+  music and vibration switches. Leaving the tab pauses the match by
+  itself: nobody wants to come back to a match that ran on without them.
 
 ### The touches
 
@@ -101,7 +105,11 @@ pixel-cup-pwa/
 │   ├── boot.test.mjs     the whole game against a fake DOM
 │   └── preview.mjs       renders a frame to a PNG, no browser needed
 ├── smoke.mjs             the real page in a real browser
-└── tools/gen-icons.mjs   writes the icons
+├── og-cover.png          the social card, made of the game's own pixels
+└── tools/
+    ├── gen-icons.mjs     writes the icons
+    ├── gen-og.mjs        writes the social card
+    └── png.mjs           enough PNG to save a picture, with zlib
 ```
 
 **One copy of the rules.** `src/core.js` has no DOM in it and is loaded
@@ -123,10 +131,11 @@ therefore exercise the game you actually play, not a copy of it.
 ### Tests
 
 ```bash
-node pixel-cup-pwa/tests/sim.test.mjs    # 87 checks: rules, physics, cup, shoot-out, balance
-node pixel-cup-pwa/tests/boot.test.mjs   # 27 checks: the whole game against a fake DOM
+node pixel-cup-pwa/tests/sim.test.mjs    # 89 checks: rules, physics, cup, shoot-out, balance
+node pixel-cup-pwa/tests/boot.test.mjs   # 62 checks: the whole game against a fake DOM
 node pixel-cup-pwa/tests/preview.mjs /tmp/pc.png 26   # writes a PNG of a live frame
 node pixel-cup-pwa/smoke.mjs             # the real page, in a real browser
+node pixel-cup-pwa/tools/gen-og.mjs      # writes the social card
 ```
 
 The balance is pinned by the tests as well: a scripted player of ordinary

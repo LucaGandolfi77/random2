@@ -50,6 +50,9 @@
     cup: null,
     shootout: null,
     paused: false,
+    pauseMenu: false,    /* the pause sheet is up */
+    difficulty: 1,       /* 0 rookie, 1 pro, 2 legend */
+    settings: Storage.getSettings(),
     flash: 0,
     slow: 0,
     shake: 0,
@@ -60,7 +63,6 @@
     commentaryTime: 0,
     confetti: [],
     trail: [],
-    pausedByMenu: false,
   };
 
   /* ---- helpers ---- */
@@ -88,6 +90,42 @@
         color: cols[(Math.random() * cols.length) | 0],
       });
     }
+  }
+
+  /* ---- the settings ---- */
+
+  function applySetting(name, on, settings) {
+    Storage.setSettings(settings);
+    if (name === "sound") audio.setSoundEnabled(on);
+    if (name === "music") audio.setMusicEnabled(on);
+    if (name === "haptics" && R2) R2.setSettings({ haptics: on });
+  }
+
+  /* ---- pausing ----------------------------------------------------- */
+
+  /*
+   * Pausing is more than stopping the simulation: the music ducks, the
+   * crowd goes quiet, and the sheet offers a way out. Without this there
+   * is no way out of a match at all.
+   */
+  function openPause() {
+    if (game.mode !== "match" || game.paused) return;
+    game.pauseMenu = true;
+    game.paused = true;
+    audio.setPaused(true);
+    ui.showPause(game.settings, {
+      onSetting: applySetting,
+      onAction: onAction,
+    });
+    announce("Paused.");
+  }
+
+  function closePause() {
+    if (!game.pauseMenu) return;
+    game.pauseMenu = false;
+    game.paused = false;
+    audio.setPaused(false);
+    ui.hide();
   }
 
   /* ---- the match ---- */
@@ -318,22 +356,31 @@
   function showTitle() {
     game.mode = "title";
     game.paused = true;
+    game.pauseMenu = false;
+    audio.setPaused(false);
     var records = Storage.getRecords();
-    ui.showTitle({ hasCup: !!Storage.getCup() });
+    ui.showTitle({
+      hasCup: !!Storage.getCup(),
+      settings: game.settings,
+      onSetting: applySetting,
+    });
     if (records.matches) {
       announce("You have played " + records.matches + " matches and won " + records.wins + ".");
     }
   }
 
-  function onAction(action, extra) {
+  function onAction(action, extra, level) {
     switch (action) {
       case "quick":
-        ui.showTeamSelect(Core.TEAMS, 0, "Quick match — pick your team", onAction);
         game.pending = "quick";
+        ui.showTeamSelect(Core.TEAMS, 0, "Quick match — pick your team", onAction,
+                          { difficulty: game.difficulty });
         break;
       case "cup":
         game.pending = "cup";
-        ui.showTeamSelect(Core.TEAMS, Math.floor(Math.random() * 8), "The Cup — pick your team", onAction);
+        ui.showTeamSelect(Core.TEAMS, Math.floor(Math.random() * 8),
+                          "The Cup — pick your team", onAction,
+                          { difficulty: game.difficulty });
         break;
       case "shootout":
         ui.showShootoutIntro();
@@ -342,6 +389,7 @@
         startShootout();
         break;
       case "start":
+        game.difficulty = level == null ? 1 : level;
         if (game.pending === "cup") {
           var cup = Core.createCup({
             seed: (Math.random() * 0xffffffff) >>> 0,
@@ -350,10 +398,11 @@
           Storage.setCup(cup);
           game.cup = cup;
           startMatch(cup.teams[extra].id, cup.teams[cupOpponentFor(cup)].id,
-                     { difficulty: 1 });
+                     { difficulty: Math.min(2, 0.5 + game.difficulty * 0.75) });
         } else {
           var other = (extra + 1 + Math.floor(Math.random() * 7)) % Core.TEAMS.length;
-          startMatch(Core.TEAMS[extra].id, Core.TEAMS[other].id, { difficulty: 1 });
+          startMatch(Core.TEAMS[extra].id, Core.TEAMS[other].id,
+                     { difficulty: game.difficulty });
         }
         break;
       case "how":
@@ -378,7 +427,21 @@
         break;
       case "rematch":
         var m = game.match;
-        startMatch(m.home.id, m.away.id, { difficulty: 1 });
+        startMatch(m.home.id, m.away.id, { difficulty: game.difficulty });
+        break;
+      case "resume":
+        closePause();
+        break;
+      case "restart":
+        var again = game.match;
+        game.pauseMenu = false;
+        startMatch(again.home.id, again.away.id, { difficulty: game.difficulty });
+        break;
+      case "quit":
+        game.pauseMenu = false;
+        game.paused = true;
+        audio.setPaused(false);
+        showTitle();
         break;
       case "newcup":
         showTitle();
@@ -401,6 +464,12 @@
   var last = 0, acc = 0;
 
   function update(dt) {
+    /* The pause key works whatever is on the screen. */
+    if (input.state.pause) {
+      if (game.pauseMenu) closePause();
+      else openPause();
+    }
+
     if (game.mode === "match" && game.match && !game.paused) {
       var m = game.match;
       var scale = game.slow > 0 ? 0.35 : 1;
@@ -409,6 +478,10 @@
       handleEvents(m);
       audio.setExcitement(m.excitement);
       game.spin += dt * 6;
+      /* The ball leaves a short trail, so a hard shot reads as a hard
+         shot and not as a dot teleporting about. */
+      game.trail.push({ x: m.ball.x, y: m.ball.y, z: m.ball.z });
+      if (game.trail.length > 12) game.trail.shift();
       if (m.phase === "halftime" && !game.paused) {
         game.paused = true;
         ui.showHalftime(m);
@@ -477,6 +550,7 @@
         homeKit: m.home.kit, awayKit: m.away.kit,
         homeShorts: m.home.shorts, awayShorts: m.away.shorts,
         spin: game.spin, flash: game.flash,
+        trail: game.trail,
       });
       ui.drawHUD(buf, m, { banner: game.banner, commentary: game.commentary });
     } else if (game.mode === "shootout" && game.shootout) {
@@ -609,12 +683,36 @@
     /* The on-screen controls only make sense on a touch screen, and they
        must not sit on top of the menus. */
     var touchEl = document.getElementById("touch");
+    var pauseBtn = document.getElementById("pause-btn");
     var isTouch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
     function updateTouch() {
-      if (!touchEl) return;
-      var on = isTouch && game.mode !== "title";
-      touchEl.className = "touch" + (on ? " on" : "");
+      if (touchEl) {
+        var on = isTouch && game.mode !== "title";
+        touchEl.className = "touch" + (on ? " on" : "");
+      }
+      if (pauseBtn) {
+        /* The pause button belongs to the match and to the shoot-out. */
+        pauseBtn.className = "iconbtn" + (game.mode === "title" ? " hidden" : "");
+      }
     }
+
+    if (pauseBtn) {
+      pauseBtn.addEventListener("click", function () {
+        if (game.pauseMenu) closePause();
+        else openPause();
+      });
+    }
+
+    /* Leaving the tab pauses the match: nobody wants to come back to a
+       match that ran on without them. */
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden" && game.mode === "match" && !game.paused) {
+        openPause();
+      }
+    });
+    window.addEventListener("blur", function () {
+      if (game.mode === "match" && !game.paused && !game.pauseMenu) openPause();
+    });
 
     /* The sound can only start after a gesture, so the first touch or key
        wakes it up. */

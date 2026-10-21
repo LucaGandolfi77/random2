@@ -941,7 +941,8 @@ byte buffer that the browser scales up with nearest-neighbour sampling.
   actually play.
 - **Three modes:** a quick match, an eight-team knockout cup whose progress
   survives a closed tab, and a penalty shoot-out settled on a sweeping
-  marker.
+  marker. Three difficulty levels, a pause sheet with a way out of the
+  match, and switches for the sound, the music and the vibration.
 - **Every sound is synthesised.** The crowd is filtered noise, the whistle is
   two detuned squares, the music is a sixteen-step square-wave sequencer.
   There is not one audio file in the folder.
@@ -950,8 +951,8 @@ The commentary is in Italian, because the terraces always are: *"Che gola!"*,
 *"Che sprechi!"*, *"Attenzione al contropiede!"*.
 
 **Files:** `index.html` · `styles.css` · `manifest.json` ·
-`service-worker.js` · `icons/` · `src/` (9 files) · `tests/` (3 files) ·
-`smoke.mjs` · `tools/gen-icons.mjs`
+`service-worker.js` · `icons/` · `og-cover.png` · `src/` (9 files) ·
+`tests/` (3 files) · `smoke.mjs` · `tools/` (3 files)
 
 [▶ Play](https://lucagandolfi77.github.io/random2/pixel-cup-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/pixel-cup-pwa) ·

@@ -140,6 +140,7 @@ el("screen");
 el("live");
 el("stick");
 el("stick-base");
+el("pause-btn", "button");
 
 /* ------------------------------------------------------------------ */
 /* Load the game exactly as index.html does.                          */
@@ -331,6 +332,72 @@ for (let i = 0; i < 600; i++) Core.stepMatch(m, 1 / 60, { mx: 0.3, my: 1 });
 ok("six hundred steps of a match stay finite",
   Number.isFinite(m.ball.x) && Number.isFinite(m.ball.z) &&
   m.players.every((p) => Number.isFinite(p.x)));
+
+section("pausing");
+
+G.action("quick");
+G.action("start", 0);
+ok("a match is running", G.state().mode === "match");
+
+/* Escape opens the pause sheet. */
+pressKey("Escape");
+frame(20);
+ok("the pause sheet opened", /Paused/.test(String(screen.innerHTML)),
+   String(screen.innerHTML).slice(0, 70));
+
+/* And the clock genuinely stops. */
+const frozen = G.state().clock;
+for (let i = 0; i < 40; i++) frame(20);
+ok("the clock is stopped while paused", G.state().clock === frozen,
+   frozen + " vs " + G.state().clock);
+
+/* Escape again, and the match is live. */
+pressKey("Escape");
+frame(20);
+ok("the pause sheet closed", screen.classList.contains("hidden"));
+for (let i = 0; i < 20; i++) frame(20);
+ok("the clock runs again", G.state().clock > frozen);
+
+/* The pause button does the same. */
+const pauseBtn = elements["pause-btn"];
+ok("there is a pause button", !!pauseBtn);
+if (pauseBtn) {
+  pauseBtn.dispatch("click", { target: pauseBtn });
+  frame(20);
+  ok("the pause button opens the sheet", /Paused/.test(String(screen.innerHTML)));
+}
+
+/* And there is a way out. */
+G.action("quit");
+ok("quitting returns to the title", G.state().mode === "title", G.state().mode);
+ok("the pause sheet is replaced by the title", /PIXEL CUP/.test(String(screen.innerHTML)));
+
+/* Restarting from the pause sheet starts a fresh match. */
+G.action("quick");
+G.action("start", 0);
+pressKey("Escape");
+frame(20);
+G.action("restart");
+ok("the match restarts", G.state().mode === "match");
+ok("the restart clears the pause", screen.classList.contains("hidden"));
+
+/* ------------------------------------------------------------------ */
+/* The settings and the difficulty                                   */
+/* ------------------------------------------------------------------ */
+
+section("settings and difficulty");
+
+G.action("quit");
+ok("back at the title", G.state().mode === "title");
+ok("the title screen offers the settings", /data-setting="sound"/.test(String(screen.innerHTML)));
+
+G.action("quick");
+ok("the picker offers three difficulties",
+  (String(screen.innerHTML).match(/data-diff="/g) || []).length === 3);
+
+/* Choosing Legend and kicking off must reach the match. */
+G.action("start", 1, 2);
+ok("the match starts with the chosen difficulty", G.state().mode === "match");
 
 section("storage");
 const Storage = globalThis.PixelStorage;

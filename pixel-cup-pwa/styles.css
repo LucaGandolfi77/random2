@@ -59,6 +59,35 @@ body {
   justify-content: center;
 }
 
+/* The pause button lives over the picture, because it has to be there
+   while the match is being played. */
+.iconbtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  appearance: none;
+  border: 2px solid var(--border);
+  background: rgba(16, 20, 34, 0.82);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 12;
+}
+
+.iconbtn:hover { background: rgba(40, 50, 84, 0.9); }
+.iconbtn:active { transform: translateY(1px); }
+.iconbtn.hidden { display: none; }
+.iconbtn:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
 #game {
   display: block;
   width: 100%;
@@ -289,6 +318,92 @@ body {
 .help p { margin: 0 0 8px; }
 .help b { color: var(--ink); }
 .help .note { color: #7f8bab; }
+
+/* ---------- the settings ---------- */
+
+.settings {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0 4px;
+  flex-wrap: wrap;
+}
+
+.toggle {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 48px;
+  padding: 0 12px;
+  background: var(--panel-2);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  color: var(--dim);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.toggle .tstate {
+  margin-left: auto;
+  font-weight: 800;
+  color: var(--dim);
+}
+
+.toggle.on {
+  border-color: var(--green);
+  color: var(--ink);
+}
+
+.toggle.on .tstate { color: var(--green); }
+.toggle:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+/* ---------- the difficulty picker ---------- */
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.row .lbl {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.diffs { display: flex; gap: 6px; }
+
+.diff {
+  appearance: none;
+  min-height: 48px;
+  min-width: 76px;
+  padding: 0 12px;
+  background: var(--panel-2);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  color: var(--dim);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.diff.sel {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: #2a2f4e;
+}
+
+.diff:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
 
 /* ---------- the touch controls ---------- */
 

@@ -51,6 +51,7 @@
     var nextTime = 0;
     var tempo = 148;
     var musicOn = true;
+    var paused = false;
     var excitement = 0;
     var targetCrowd = 0.06;
     var settings = { sound: true, music: true };
@@ -110,8 +111,21 @@
       excitement = v;
       targetCrowd = 0.05 + v * 0.4;
       if (crowdGain && ctx) {
-        crowdGain.gain.setTargetAtTime(targetCrowd, ctx.currentTime, 0.35);
+        crowdGain.gain.setTargetAtTime(paused ? 0 : targetCrowd, ctx.currentTime, 0.35);
       }
+    }
+
+    /*
+     * Pausing has to be more than stopping the simulation: the music
+     * ducks and the crowd goes quiet, or the game keeps making noise at
+     * somebody who is reading a menu.
+     */
+    function setPaused(on) {
+      paused = !!on;
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      musicGain.gain.setTargetAtTime(paused ? 0 : (musicOn ? 0.28 : 0), now, 0.09);
+      crowdGain.gain.setTargetAtTime(paused ? 0 : targetCrowd, now, 0.12);
     }
 
     function crowdRoar(amount) {
@@ -305,7 +319,7 @@
     function setMusicEnabled(on) {
       musicOn = on;
       if (musicGain && ctx) {
-        musicGain.gain.setTargetAtTime(on ? 0.28 : 0, ctx.currentTime, 0.1);
+        musicGain.gain.setTargetAtTime(paused ? 0 : (on ? 0.28 : 0), ctx.currentTime, 0.1);
       }
     }
 
@@ -320,6 +334,7 @@
       resume: resume,
       startCrowd: startCrowd,
       setExcitement: setExcitement,
+      setPaused: setPaused,
       crowdRoar: crowdRoar,
       crowdGroan: crowdGroan,
       kick: kickSound,

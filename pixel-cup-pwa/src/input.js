@@ -26,6 +26,7 @@
     sprint: ["ShiftLeft", "ShiftRight"],
     switch: ["KeyQ", "Tab"],
     skill: ["KeyL", "KeyE"],
+    pause: ["Escape", "KeyP"],
   };
 
   function has(list, code) {
@@ -65,6 +66,7 @@
       state.anyKey = true;
       if (has(KEYS.pass, e.code)) state.passDown = true;
       if (has(KEYS.shoot, e.code)) state.shootDown = true;
+      if (has(KEYS.pause, e.code)) { state.pause = true; e.preventDefault(); }
       if (has(KEYS.switch, e.code)) { state.switchDown = true; e.preventDefault(); }
       if (has(KEYS.skill, e.code)) state.skillDown = true;
       if (has(KEYS.up, e.code) || has(KEYS.down, e.code) ||

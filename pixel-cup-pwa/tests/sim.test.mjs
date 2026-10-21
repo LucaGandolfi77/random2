@@ -487,6 +487,27 @@ function playScripted(seed) {
 }
 
 {
+  /* The difficulty has to mean something: it is on the menu, so the
+     opposition must actually get better at it. */
+  function runAtDifficulty(difficulty, n) {
+    let cpu = 0, human = 0;
+    for (let s = 1; s <= n; s++) {
+      const m = S.createMatch({ seed: s * 313, halfSeconds: 90, difficulty });
+      run(m, 185);
+      cpu += m.score[1];
+      human += m.score[0];
+    }
+    return { cpu: cpu, human: human };
+  }
+  const rookie = runAtDifficulty(0, 16);
+  const legend = runAtDifficulty(2, 16);
+  ok("the opposition scores at every difficulty", rookie.cpu > 0 && legend.cpu > 0,
+     rookie.cpu + " / " + legend.cpu);
+  ok("the harder difficulty is a harder opponent", legend.cpu >= rookie.cpu,
+     "rookie " + rookie.cpu + " goals, legend " + legend.cpu + " goals");
+}
+
+{
   /* A goalkeeper gathers the ball and throws it out: the match must not
      stop dead with the ball in his hands. */
   const m = S.createMatch({ seed: 91, halfSeconds: 90 });

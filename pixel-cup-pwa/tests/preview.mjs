@@ -14,7 +14,7 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { writeFileSync } from "node:fs";
-import { deflateSync } from "node:zlib";
+import { encodePNG } from "../tools/png.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -22,47 +22,6 @@ const Core = require(resolve(here, "../src/core.js"));
 const Raster = require(resolve(here, "../src/raster.js"));
 const Render = require(resolve(here, "../src/render.js"));
 const Font = require(resolve(here, "../src/font.js"));
-
-/* ---- a minimal PNG writer ---------------------------------------- */
-
-function crc32(buf) {
-  let c, crc = 0xffffffff;
-  for (let n = 0; n < buf.length; n++) {
-    c = (crc ^ buf[n]) & 0xff;
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    crc = c ^ (crc >>> 8);
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
-function chunk(type, data) {
-  const len = Buffer.alloc(4);
-  len.writeUInt32BE(data.length);
-  const body = Buffer.concat([Buffer.from(type, "ascii"), data]);
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(body));
-  return Buffer.concat([len, body, crc]);
-}
-
-function writePNG(path, w, h, rgb) {
-  const raw = Buffer.alloc((w * 3 + 1) * h);
-  for (let y = 0; y < h; y++) {
-    raw[y * (w * 3 + 1)] = 0;                       /* filter: none */
-    rgb.copy(raw, y * (w * 3 + 1) + 1, y * w * 3, (y + 1) * w * 3);
-  }
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(w, 0);
-  ihdr.writeUInt32BE(h, 4);
-  ihdr[8] = 8;    /* bit depth */
-  ihdr[9] = 2;    /* colour type: truecolour */
-  const png = Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    chunk("IHDR", ihdr),
-    chunk("IDAT", deflateSync(raw, { level: 9 })),
-    chunk("IEND", Buffer.alloc(0)),
-  ]);
-  writeFileSync(path, png);
-}
 
 /* ---- the scene ---------------------------------------------------- */
 
@@ -134,5 +93,5 @@ for (let y = 0; y < outH; y++) {
     big[di + 2] = buf.data[si + 2];
   }
 }
-writePNG(out, outW, outH, big);
+writeFileSync(out, encodePNG(outW, outH, big));
 console.log("wrote " + out + "  (" + outW + "x" + outH + ")  score " + m.score.join("-") + "  phase " + m.phase);

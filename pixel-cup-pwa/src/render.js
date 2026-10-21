@@ -612,6 +612,24 @@
     }
   }
 
+  /*
+   * The ball's trail: a short line of fading marks behind it. It is what
+   * makes a struck ball read as fast.
+   */
+  function drawTrail(buf, cam, trail) {
+    if (!trail || trail.length < 2) return;
+    var n = trail.length;
+    for (var i = 0; i < n - 1; i++) {
+      var a = trail[i], b = trail[i + 1];
+      /* The oldest mark is the faintest. */
+      var f = (i + 1) / n;
+      var r = Raster.quantise(lerp(120, 255, f));
+      var g = Raster.quantise(lerp(150, 250, f));
+      var bl = Raster.quantise(lerp(120, 235, f));
+      line3(buf, cam, a.x, a.y + 0.1, a.z, b.x, b.y + 0.1, b.z, [r, g, bl]);
+    }
+  }
+
   /* ---- assembling the scene ---------------------------------------- */
 
   function drawScene(buf, cam, m, opts) {
@@ -655,6 +673,7 @@
     }
 
     if (m.ball) drawBall(buf, cam, m.ball, opts.spin || 0);
+    if (opts.trail) drawTrail(buf, cam, opts.trail);
 
     /* Goal flash. */
     if (opts.flash > 0) {
@@ -729,5 +748,6 @@
     tri: tri,
     line3: line3,
     groundLine: groundLine,
+    drawTrail: drawTrail,
   };
 });

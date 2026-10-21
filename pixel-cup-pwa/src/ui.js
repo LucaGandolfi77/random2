@@ -68,8 +68,47 @@
 
     /* ---- the menus ---- */
 
+    /*
+     * The settings block. It appears on the title screen and in the
+     * pause sheet, and it is the same block in both.
+     */
+    function toggleHtml(name, label, on) {
+      return '<button class="toggle' + (on ? " on" : "") + '" data-setting="' + name +
+        '" aria-pressed="' + (on ? "true" : "false") + '">' +
+        '<span class="tlabel">' + esc(label) + '</span>' +
+        '<span class="tstate">' + (on ? "ON" : "OFF") + '</span></button>';
+    }
+
+    function settingsHtml(settings) {
+      settings = settings || { sound: true, music: true, haptics: true };
+      return '<div class="settings">' +
+        toggleHtml("sound", "Sound", settings.sound) +
+        toggleHtml("music", "Music", settings.music) +
+        toggleHtml("haptics", "Vibration", settings.haptics) +
+        '</div>';
+    }
+
+    /* Wire the toggles and tell the caller what changed. */
+    function wireSettings(root, settings, onChange) {
+      root.addEventListener("click", function (e) {
+        var b = e.target.closest("button[data-setting]");
+        if (!b) return;
+        var name = b.getAttribute("data-setting");
+        var on = !settings[name];
+        settings[name] = on;
+        b.classList.toggle("on", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+        var state = b.querySelector(".tstate");
+        if (state) state.textContent = on ? "ON" : "OFF";
+        if (audio) audio.blip(on);
+        if (onChange) onChange(name, on, settings);
+      });
+    }
+
     function showTitle(state) {
-      var hasCup = state && state.hasCup;
+      state = state || {};
+      var hasCup = state.hasCup;
+      var settings = state.settings || { sound: true, music: true, haptics: true };
       show(
         '<div class="menu">' +
           '<h1 class="logo">PIXEL CUP <span>96</span></h1>' +
@@ -82,9 +121,11 @@
             '<button class="btn" data-action="shootout">Penalty Shoot-out</button>' +
             '<button class="btn ghost" data-action="how">How to play</button>' +
           '</div>' +
+          settingsHtml(settings) +
           '<p class="foot">Plays offline. Your records stay on this device.</p>' +
         '</div>',
         function (root) {
+          wireSettings(root, settings, state.onSetting);
           root.addEventListener("click", function (e) {
             var b = e.target.closest("button[data-action]");
             if (!b) return;
@@ -95,7 +136,34 @@
       );
     }
 
-    function showTeamSelect(teams, selected, title, action) {
+    function showPause(settings, actions) {
+      settings = settings || { sound: true, music: true, haptics: true };
+      show(
+        '<div class="menu">' +
+          '<h2>Paused</h2>' +
+          '<div class="stack">' +
+            '<button class="btn primary" data-action="resume">Resume</button>' +
+            '<button class="btn" data-action="restart">Restart the match</button>' +
+            '<button class="btn ghost" data-action="quit">Quit to the menu</button>' +
+          '</div>' +
+          settingsHtml(settings) +
+          '<p class="foot">Esc or the pause button brings you back.</p>' +
+        '</div>',
+        function (root) {
+          wireSettings(root, settings, actions.onSetting);
+          root.addEventListener("click", function (e) {
+            var b = e.target.closest("button[data-action]");
+            if (!b) return;
+            if (audio) audio.blip(true);
+            if (actions.onAction) actions.onAction(b.getAttribute("data-action"));
+          });
+        }
+      );
+    }
+
+    function showTeamSelect(teams, selected, title, action, opts) {
+      opts = opts || {};
+      var diff = opts.difficulty == null ? 1 : opts.difficulty;
       var cards = teams.map(function (t, i) {
         var cls = "team" + (i === selected ? " sel" : "");
         return '<button class="' + cls + '" data-team="' + i + '" ' +
@@ -105,10 +173,17 @@
           '<span class="trating">★ ' + t.rating + '</span>' +
           '</button>';
       }).join("");
+      var levels = [["0", "Rookie"], ["1", "Pro"], ["2", "Legend"]].map(function (d) {
+        return '<button class="diff' + (diff === Number(d[0]) ? " sel" : "") +
+          '" data-diff="' + d[0] + '" aria-pressed="' +
+          (diff === Number(d[0]) ? "true" : "false") + '">' + d[1] + '</button>';
+      }).join("");
       show(
         '<div class="menu wide">' +
           '<h2>' + esc(title || "Pick your team") + '</h2>' +
           '<div class="teams">' + cards + '</div>' +
+          '<div class="row"><span class="lbl">Difficulty</span>' +
+            '<div class="diffs">' + levels + '</div></div>' +
           '<div class="stack row">' +
             '<button class="btn primary" data-action="start">Kick off</button>' +
             '<button class="btn ghost" data-action="back">Back</button>' +
@@ -116,6 +191,7 @@
         '</div>',
         function (root) {
           var chosen = selected;
+          var level = diff;
           root.addEventListener("click", function (e) {
             var t = e.target.closest("button[data-team]");
             if (t) {
@@ -130,10 +206,23 @@
               if (audio) audio.blip(true);
               return;
             }
+            var d = e.target.closest("button[data-diff]");
+            if (d) {
+              level = Number(d.getAttribute("data-diff"));
+              var diffs = root.querySelectorAll("button[data-diff]");
+              for (var j = 0; j < diffs.length; j++) {
+                diffs[j].classList.remove("sel");
+                diffs[j].setAttribute("aria-pressed", "false");
+              }
+              d.classList.add("sel");
+              d.setAttribute("aria-pressed", "true");
+              if (audio) audio.blip(true);
+              return;
+            }
             var b = e.target.closest("button[data-action]");
             if (!b) return;
             if (audio) audio.blip(true);
-            if (b.getAttribute("data-action") === "start") onAction("start", chosen);
+            if (b.getAttribute("data-action") === "start") onAction("start", chosen, level);
             else onAction(b.getAttribute("data-action"));
           });
         }
@@ -420,6 +509,7 @@
       hide: hide,
       announce: announce,
       showTitle: showTitle,
+      showPause: showPause,
       showTeamSelect: showTeamSelect,
       showHalftime: showHalftime,
       showFullTime: showFullTime,

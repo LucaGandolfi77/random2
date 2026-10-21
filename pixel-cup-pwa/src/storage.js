@@ -16,9 +16,14 @@
 })(typeof self !== "undefined" ? self : this, function (R2) {
   "use strict";
 
-  var KEY_SETTINGS = "pixel-cup-settings";
   var KEY_RECORDS = "pixel-cup-records";
   var KEY_CUP = "pixel-cup-cup";
+
+  /*
+   * The settings live in the shared arcade key when it is there, so the
+   * mute on the hub and the mute in this game are the same switch.
+   */
+  var KEY_SETTINGS = (R2 && R2.getSettings) ? "random2-settings" : "pixel-cup-settings";
 
   var DEFAULT_SETTINGS = { sound: true, music: true, haptics: true };
 
