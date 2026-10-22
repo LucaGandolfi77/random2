@@ -1037,6 +1037,10 @@ that escalates every time the screaming starts.
 - **The balance is proven, not asserted**: a deliberately simple bot that
   walks into gunfire and never dodges must finish all 42 levels headlessly,
   and does — the same suite that guards the numbers runs in CI.
+- **Three shrines outside the campaign** — Endless Night (no clock, no exit),
+  Daily Hunt (one street picked by the date), and The Procession (all six
+  titans in a row) — each with its own biomass and its own records, so they
+  never touch the campaign's spine. See [`gulper-pwa/README.md`](gulper-pwa/README.md).
 
 ```bash
 python3 -m http.server 8080
