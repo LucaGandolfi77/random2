@@ -31,6 +31,9 @@
             opts = opts || {};
             if (!e || e.dead || e.removed) return 0;
             if (amount <= 0) return 0;
+            /* Something landed. A short buzz, so a phone player knows
+             * the hit connected without looking away from the mouth. */
+            S.Haptics && S.Haptics.pulse(e.kind === "player" ? 25 : 8);
 
             var armour = e.armour || 0;
             /* Weight is armour for the player as well as their genes:

@@ -235,6 +235,8 @@
             p.state = ST.player.idle;
             p.swallowTarget = null;
             p.swallowStage = 0;
+            /* Something was taken whole. The player should feel it. */
+            S.Haptics && S.Haptics.pulse(40);
 
             if (e.heldBy === p) e.heldBy = null;
             if (p.gripping === e) p.gripping = null;

@@ -48,6 +48,52 @@
     var hooks = {};
     var lastPointerType = "mouse";
 
+    /* Which device is driving right now.
+     *
+     * Touch, keyboard and gamepad each keep their own state and the
+     * last one to say something wins. They used to write into one
+     * shared pair of variables, which meant a gamepad plugged into a
+     * laptop silently erased whatever the mouse was doing - the
+     * movement went dead the moment the stick was centred. */
+    var active = "pointer";
+
+    /* The gamepad's own state, kept apart from everything else. */
+    var pad = {
+        mx: 0, my: 0,
+        aimX: 0, aimY: 0, aimActive: false,
+        attack: false, attackHeld: false,
+        swallow: false, swap: false, frenzy: false,
+        seen: false
+    };
+
+    /* The keyboard's own state. The movement vector is derived from
+     * the held keys every frame rather than counted up and down by the
+     * handlers: a key pressed while the window lost focus cannot then
+     * leave the player walking into a wall forever. */
+    function keyVector() {
+        var x = 0, y = 0;
+        for (var k in state.keys) {
+            if (!state.keys[k]) continue;
+            var m = MOVE_KEYS[k];
+            if (!m) continue;
+            x += m[0];
+            y += m[1];
+        }
+        /* Diagonals are not faster. */
+        if (x !== 0 && y !== 0) {
+            x *= 0.707;
+            y *= 0.707;
+        }
+        return { x: x, y: y };
+    }
+
+    /* Movement keys. WASD and the arrow keys both work, because one
+     * of them is always wrong for somebody. */
+    var MOVE_KEYS = {
+        w: [0, -1], a: [-1, 0], s: [0, 1], d: [1, 0],
+        arrowup: [0, -1], arrowleft: [-1, 0], arrowdown: [0, 1], arrowright: [1, 0]
+    };
+
     function bind(handlers) {
         hooks = handlers || {};
         els = {
@@ -127,6 +173,8 @@
         if (e.pointerType === "mouse" && e.button !== 0 && e.button !== 2) return;
         e.preventDefault();
         lastPointerType = e.pointerType;
+        /* The pointer spoke, so the pointer drives. */
+        active = "pointer";
         var half = window.innerWidth / 2;
 
         if (e.clientX < half && state.stickId === null) {
@@ -152,6 +200,9 @@
     }
 
     function onPointerMove(e) {
+        /* A pointer that moves takes the controls back. Without this a
+         * pad that was touched once keeps the mouse out forever. */
+        active = "pointer";
         if (e.pointerId === state.stickId) {
             e.preventDefault();
             var dx = e.clientX - state.baseX;
@@ -214,18 +265,32 @@
         if (state.keys[k]) return;
         state.keys[k] = true;
 
+        /* Movement. The keyboard moves the player: a game that says
+         * "WASD" on the box and does not deliver it is a game nobody
+         * can play on a desktop without a mouse. */
+        if (MOVE_KEYS[k]) {
+            e.preventDefault();
+            active = "keys";
+            return;
+        }
+
         if (k === " " || k === "spacebar") {
             e.preventDefault();
+            active = "keys";
             state.attack = true;
             state.attackHeld = true;
         } else if (k === "e" || k === "enter") {
+            active = "keys";
             state.swallow = true;
         } else if (k === "q" || k === "tab") {
             e.preventDefault();
+            active = "keys";
             state.swap = true;
         } else if (k === "f") {
+            active = "keys";
             state.frenzy = true;
         } else if (k === "1" || k === "2") {
+            active = "keys";
             state.weapon = k === "1" ? "lash" : "grasp";
         } else if (k === "escape") {
             hooks.onPause && hooks.onPause();
@@ -235,6 +300,14 @@
     function onKeyUp(e) {
         var k = e.key.toLowerCase();
         state.keys[k] = false;
+        if (MOVE_KEYS[k]) {
+            var still = keyVector();
+            if (still.x === 0 && still.y === 0) {
+                /* Hands off the keys: hand the stick back to whoever had
+                 * it, instead of freezing in place. */
+                active = "pointer";
+            }
+        }
         if (k === " " || k === "spacebar") state.attackHeld = false;
         if (k === "f") state.frenzy = false;
     }
@@ -246,31 +319,89 @@
         state.attackHeld = false;
         state.frenzy = false;
         state.keys = {};
+        pad.mx = 0; pad.my = 0;
+        pad.aimActive = false;
+        pad.attack = false;
+        pad.attackHeld = false;
+        pad.swallow = false;
+        pad.swap = false;
+        pad.frenzy = false;
         showStick(false);
         updateKnob();
     }
 
     /* Copy the intent into the world. Called once per frame. */
-    /* Basic gamepad support: left stick moves, face buttons act. */
+    /* The gamepad.
+     *
+     * It keeps its own state and only takes over when the player
+     * actually touches it. A pad that is plugged in but resting must
+     * not erase what the mouse or the keyboard was doing.
+     *
+     * Left stick moves, right stick aims, the face buttons act. GULPER
+     * is a game about aiming, so a pad that could not aim could not
+     * play it. */
+    var DEADZONE = 0.18;
+
     function pollGamepad() {
         if (typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return;
         var gps;
         try { gps = navigator.getGamepads(); } catch (e) { return; }
         if (!gps) return;
+
         for (var g = 0; g < gps.length; g++) {
             var gp = gps[g];
             if (!gp) continue;
-            var ax = gp.axes && gp.axes[0] ? gp.axes[0] : 0;
-            var ay = gp.axes && gp.axes[1] ? gp.axes[1] : 0;
-            if (Math.abs(ax) < 0.15) ax = 0;
-            if (Math.abs(ay) < 0.15) ay = 0;
-            state.mx = ax;
-            state.my = ay;
+
+            var axes = gp.axes || [];
+            var ax = axes[0] || 0, ay = axes[1] || 0;
+            var rx = axes[2] || 0, ry = axes[3] || 0;
+            if (Math.abs(ax) < DEADZONE) ax = 0;
+            if (Math.abs(ay) < DEADZONE) ay = 0;
+            if (Math.abs(rx) < DEADZONE) rx = 0;
+            if (Math.abs(ry) < DEADZONE) ry = 0;
+
             var bs = gp.buttons || [];
-            if (bs[0] && bs[0].pressed) state.attack = true;
-            if (bs[1] && bs[1].pressed) state.swallow = true;
-            if (bs[2] && bs[2].pressed) state.swap = true;
-            if (bs[3] && bs[3].pressed) state.frenzy = true;
+            var down = function (i) { return !!(bs[i] && bs[i].pressed); };
+            var attack = down(0) || down(7);
+            var swallow = down(1) || down(6);
+            var swap = down(2);
+            var frenzy = down(3);
+            var pause = down(9);
+
+            var moved = ax !== 0 || ay !== 0 || rx !== 0 || ry !== 0 ||
+                attack || swallow || swap || frenzy;
+
+            pad.mx = ax;
+            pad.my = ay;
+            pad.attack = attack;
+            pad.attackHeld = attack;
+            pad.swallow = swallow;
+            pad.swap = swap;
+            pad.frenzy = frenzy;
+
+            /* The right stick aims: the same buffer-space point the
+             * mouse would aim at, computed from the stick. */
+            if (rx !== 0 || ry !== 0) {
+                var size = S.Render.bufferSize();
+                var len = Math.sqrt(rx * rx + ry * ry) || 1;
+                var reach = Math.min(size.w, size.h) * 0.4;
+                pad.aimX = size.w / 2 + (rx / len) * reach;
+                pad.aimY = size.h / 2 + (ry / len) * reach;
+                pad.aimActive = true;
+                moved = true;
+            } else {
+                pad.aimActive = false;
+            }
+
+            if (pause && !pad.pauseLatch) {
+                pad.pauseLatch = true;
+                hooks.onPause && hooks.onPause();
+            } else if (!pause) {
+                pad.pauseLatch = false;
+            }
+
+            if (moved) active = "gamepad";
+            pad.seen = true;
             break;
         }
     }
@@ -278,10 +409,42 @@
     function read(world) {
         pollGamepad();
         var inp = world.input;
-        inp.mx = state.mx;
-        inp.my = state.my;
 
-        if (state.aimActive) {
+        /* Movement.
+         *
+         * The three sources are ranked by how deliberate they are: a
+         * key that is held down is the most explicit thing a player
+         * can do, a stick that is being pushed comes next, and the
+         * thumbstick is the fallback. Nothing here is a latch that can
+         * go stale: what is being held right now is what moves the
+         * player. */
+        var kv = keyVector();
+        var padMoving = pad.mx !== 0 || pad.my !== 0;
+
+        if (kv.x !== 0 || kv.y !== 0) {
+            inp.mx = kv.x;
+            inp.my = kv.y;
+            active = "keys";
+        } else if (padMoving) {
+            inp.mx = pad.mx;
+            inp.my = pad.my;
+            active = "gamepad";
+        } else {
+            inp.mx = state.mx;
+            inp.my = state.my;
+            active = "pointer";
+        }
+
+        /* Aim. A pushed right stick points where the player looks; a
+         * mouse hovering does too, and the stick wins because a player
+         * who pushes a stick means to aim somewhere. */
+        if (pad.aimActive) {
+            var pw = S.Render.unproject(pad.aimX, pad.aimY);
+            inp.aimX = pw.x;
+            inp.aimY = pw.y;
+            inp.aimActive = true;
+            active = "gamepad";
+        } else if (state.aimActive) {
             var w = S.Render.unproject(state.aimX, state.aimY);
             inp.aimX = w.x;
             inp.aimY = w.y;
@@ -290,14 +453,14 @@
             inp.aimActive = false;
         }
 
-        inp.attack = state.attack;
+        inp.attack = state.attack || pad.attack;
         state.attack = false;
-        inp.attackHeld = state.attackHeld;
-        inp.swallow = state.swallow;
+        inp.attackHeld = state.attackHeld || pad.attackHeld;
+        inp.swallow = state.swallow || pad.swallow;
         state.swallow = false;
-        inp.swap = state.swap;
+        inp.swap = state.swap || pad.swap;
         state.swap = false;
-        inp.frenzy = state.frenzy;
+        inp.frenzy = state.frenzy || pad.frenzy;
         if (state.weapon) {
             inp.weapon = state.weapon;
             state.weapon = null;
@@ -315,18 +478,43 @@
         read: read,
         setVisible: setVisible,
         releaseAll: releaseAll,
-        state: state
+        state: state,
+        /* Which device is driving: "pointer", "keys" or "gamepad". */
+        activeSource: function () { return active; },
+        /* The gamepad's own state, for tests and for anyone who wants
+         * to know what the pad is doing. */
+        pad: pad,
+        /* Press and release a key the way a keyboard does, so a test
+         * can drive the real path instead of poking the state. */
+        pressKey: function (key, down) {
+            if (down) onKeyDown({ key: key, preventDefault: function () { } });
+            else onKeyUp({ key: key });
+        }
     };
+
+    /* HAPTICS.
+     *
+     * The vibration is the one piece of feedback a phone player
+     * cannot see, so it has to be used where it matters: when a thing
+     * lands, when the player is hit, when something is swallowed.
+     *
+     * The driver is replaceable so a test can see the pulses without
+     * a phone. */
     S.Haptics = {
+        driver: function (ms) {
+            try {
+                if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+                    navigator.vibrate(ms);
+                }
+            } catch (e) { }
+        },
         pulse: function (ms) {
             try {
                 var d = S.Storage.data();
                 if (d.settings && d.settings.haptics === false) return;
             } catch (e) { }
             try {
-                if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
-                    navigator.vibrate(ms || 10);
-                }
+                S.Haptics.driver(ms || 10);
             } catch (e) { }
         }
     };
