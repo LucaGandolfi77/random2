@@ -172,9 +172,34 @@ await page.mouse.move(box.x + box.width * 0.72, box.y + box.height * 0.4);
 await page.mouse.down();
 await page.waitForTimeout(120);
 await page.mouse.up();
+/* The keyboard has to move the player. The box says WASD, so WASD
+ * works: a player with a keyboard and no mouse must be able to play. */
+const beforeMove = await page.evaluate(() => {
+    const w = window.GU.Main.world();
+    return { x: w.player.x, y: w.player.y };
+});
 await page.keyboard.down("d");
-await page.waitForTimeout(600);
+await page.waitForTimeout(700);
 await page.keyboard.up("d");
+await page.waitForTimeout(120);
+const afterMove = await page.evaluate(() => {
+    const w = window.GU.Main.world();
+    return { x: w.player.x, y: w.player.y };
+});
+ok(afterMove.x - beforeMove.x > 20,
+    "the keyboard moves the player right (" + (afterMove.x - beforeMove.x).toFixed(0) + " units)");
+
+await page.keyboard.down("w");
+await page.waitForTimeout(700);
+await page.keyboard.up("w");
+await page.waitForTimeout(120);
+const afterUp = await page.evaluate(() => {
+    const w = window.GU.Main.world();
+    return { x: w.player.x, y: w.player.y };
+});
+ok(afterUp.y - afterMove.y < -20,
+    "the keyboard moves the player up (" + (afterUp.y - afterMove.y).toFixed(0) + " units)");
+
 await page.keyboard.press("Space");
 await page.waitForTimeout(400);
 

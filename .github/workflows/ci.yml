@@ -126,19 +126,19 @@ jobs:
           # would.
           node pixel-cup-pwa/tests/sim.test.mjs
           node pixel-cup-pwa/tests/boot.test.mjs
-          # GULPER: the content tables (42 levels, 6 weapons, 6 biomes), the
+          # GULPER: the content tables (49 levels, 7 weapons, 7 biomes), the
           # renderer's draw calls and NaN guards, a full boot against a fake
           # DOM, and a deliberately simple bot that must finish every one of
-          # the 42 levels in a headless campaign. The bot is the balance
+          # the 49 levels in a headless campaign. The bot is the balance
           # proof: if a level cannot be finished, the numbers are wrong.
-          node gulper-pwa/tests/content.test.js
-          node gulper-pwa/tests/render.test.js
-          node gulper-pwa/tests/boot.test.js
-          node gulper-pwa/tests/sim.test.js
-          node gulper-pwa/tests/modes.test.js
-          node gulper-pwa/tests/phase2.test.js
-          node gulper-pwa/tests/meta.test.js
-          node gulper-pwa/tests/a11y.test.js
+          #
+          # The loop runs every suite in the folder, so a new test file
+          # cannot be written and then left out of CI by accident.
+          for suite in gulper-pwa/tests/*.test.js; do
+            echo "::group::$suite"
+            node "$suite"
+            echo "::endgroup::"
+          done
 
       - name: Analysis tooling tests
         run: |

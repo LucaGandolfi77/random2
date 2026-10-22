@@ -9,11 +9,11 @@ Play: [▶ Play](https://lucagandolfi77.github.io/random2/gulper-pwa/) ·
 
 ## The shape of it
 
-- **42 campaign levels** across six districts (docks, downtown, ward, arctic,
-  foundry, hive) — each a small mission, each a step up in size.
-- **Six titans** — one at the end of every district, fought at the mass the
+- **49 campaign levels** across seven districts (docks, downtown, ward, arctic,
+  foundry, hive, cathedral) — each a small mission, each a step up in size.
+- **Seven titans** — one at the end of every district, fought at the mass the
   campaign has grown you into.
-- **Six weapons** (lash, grasp, tendril, net, acid, shock), **adaptations**
+- **Seven weapons** (lash, grasp, tendril, net, acid, shock, barbed drag), **adaptations**
   (genome shards buy them), a **codex** of swallowed prey, and a save that
   lives entirely on the device.
 - **A software rasteriser** (no WebGL) and a **WebAudio** engine, so the
@@ -76,13 +76,24 @@ Plain `node tests/*.test.js`, no runner, no dependencies. The house rule:
 every phase ships only with all suites green — a feature without a working
 test is not shipped.
 
-- `boot.test.js` — boot, stubs, rasteriser sanity.
+- `boot.test.js` — boot, stubs, rasteriser sanity, service worker.
 - `content.test.js` — data shape, counts, level integrity.
-- `render.test.js` — render budget.
+- `render.test.js` — render budget, palette override.
 - `sim.test.js` — the campaign, played headlessly by a deliberately simple
-  bot that walks into gunfire and never dodges. All 42 must finish.
+  bot that walks into gunfire and never dodges. All 49 must finish.
 - `modes.test.js` — Endless Night survives three minutes, the daily hunt is
-  winnable at its handed-down mass, all six procession stages fall in a row.
+  winnable at its handed-down mass, all seven procession stages fall in a row.
+- `daily.test.js` — every level the daily can pick is winnable, every day of
+  the year produces a real street, and the ledger still matches the campaign
+  chain it was measured from.
+- `input.test.js` — keyboard, pointer and gamepad each drive the player, and
+  take turns without erasing each other.
+- `phase2.test.js`, `meta.test.js`, `a11y.test.js` — the stalker really
+  spawns, the medals and stats are real, the accessibility switches are real.
+
+The daily's entry masses are **measured, not typed**: `node tools/ledger.js`
+plays the campaign and rewrites the table in `src/modes.js`, and
+`daily.test.js` fails if the two ever drift apart.
 
 ## Roadmap
 

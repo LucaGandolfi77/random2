@@ -1019,7 +1019,7 @@ A tentacled predator hunts a drowned city: swallow people whole, grow with
 every meal, swap weapons of grasping biology, and survive the response force
 that escalates every time the screaming starts.
 
-- **42 levels in 6 biomes** — Rust Docks, Neon Downtown, Quarantine Ward,
+- **49 levels in 7 biomes** — Rust Docks, Neon Downtown, Quarantine Ward,
   Arctic Rig, Foundry, Orbital Hive — with six mission doctrines (eat, swarm,
   cull, snatch and deliver, take the marked, stay unseen) plus a titan boss
   closing each biome.
@@ -1035,7 +1035,7 @@ that escalates every time the screaming starts.
 - **Adaptation cards and genome shards** let a growing body pick its biology:
   chitin, acid glands, ambush lunges, frenzy metabolism.
 - **The balance is proven, not asserted**: a deliberately simple bot that
-  walks into gunfire and never dodges must finish all 42 levels headlessly,
+  walks into gunfire and never dodges must finish all 49 levels headlessly,
   and does — the same suite that guards the numbers runs in CI.
 - **Three shrines outside the campaign** — Endless Night (no clock, no exit),
   Daily Hunt (one street picked by the date), and The Procession (all six
