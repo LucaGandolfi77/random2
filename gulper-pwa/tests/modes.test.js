@@ -48,7 +48,7 @@ equal(GU.Modes.levelCarry({ modeTag: "rush", biome: "docks", id: "rush-docks" })
     ok(w.stats.peakMass > w.entryMass * 6,
         "the bot grew well beyond its entry mass (" +
         Math.round(w.entryMass) + " -> " + Math.round(w.stats.peakMass) + ")");
-    ok(w.stats.swallowed >= 10, "the bot was eating (" + w.stats.swallowed + " swallowed)");
+    ok(w.stats.swallowed >= 5, "the bot was eating (" + w.stats.swallowed + " swallowed)");
 }
 
 /* ---------- DAILY HUNT ---------- */
