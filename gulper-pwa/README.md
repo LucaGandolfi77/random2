@@ -114,7 +114,7 @@ titan, a stats screen, and a palette override in settings.
 Gamepad polling, a haptics pulse helper, accessibility settings
 (reduced motion, high contrast, text size) and the CSS to honour them.
 
-### Phase 6 — Hardening (planned)
+### Phase 6 — Hardening ✅ (shipped)
 
-A bot that clears Endless Night, the cathedral sim chain, a render budget
-check, and CI smoke coverage for every shrine.
+A bot that clears Endless Night, the cathedral sim chain (49 levels),
+a render budget, and smoke coverage for every shrine.
