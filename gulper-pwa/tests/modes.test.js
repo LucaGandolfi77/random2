@@ -16,8 +16,16 @@ const { GU, ok, equal, report, createLevel, playLevel } = require("./harness.js"
 /* Synthetic levels must never leak into the map, the unlock chain or
  * the level records. */
 ok(GU.Levels.total() === 49, "the campaign still has exactly 49 levels");
-ok(GU.Modes.STAGE_BIOMES.length === 6, "the procession has six titans");
-ok(GU.Modes.STAGE_CARRY.length === 6, "the procession has six entry masses");
+
+/* The procession walks every titan the campaign has - seven of them
+ * now, the Choirmaster included. The list is derived, not written
+ * out, so a new district brings its titan along by itself. */
+const titanCount = GU.Levels.list.filter(function (l) { return l.boss; }).length;
+ok(GU.Modes.STAGE_BIOMES.length === titanCount,
+    "the procession has one stage per titan (" + GU.Modes.STAGE_BIOMES.length + ")");
+ok(GU.Modes.stageCount === titanCount, "the procession knows how many stages there are");
+ok(GU.Modes.STAGE_BIOMES.indexOf("cathedral") >= 0,
+    "the newest district's titan is in the procession");
 
 /* The feast enters small: the save's carry must not reach it. */
 equal(GU.Modes.levelCarry({ modeTag: "feast", id: "endless" }), 0,
@@ -62,9 +70,12 @@ equal(GU.Modes.levelCarry({ modeTag: "rush", biome: "docks", id: "rush-docks" })
     equal(a.level.carry, b.level.carry, "the daily's entry biomass is deterministic");
     ok(a.level !== b.level, "each daily handout is its own level object");
 
-    /* The pick really is the date's slice of the list, and it is a real
-     * campaign street under it. */
-    equal(a.level.id, GU.Levels.list[GU.dailySeed(new Date(2026, 9, 22)) % GU.Levels.list.length].id,
+    /* The pick is the date's hashed slice of the campaign, and it is a
+     * real campaign street under it. The hash is what keeps the pick
+     * stable: adding a level to the campaign must not move the street
+     * a past date played. */
+    const ids = GU.Levels.list.map(function (l) { return l.id; });
+    equal(a.level.id, ids[GU.hashString("gulper-daily-" + GU.dailySeed(new Date(2026, 9, 22))) % ids.length],
         "the daily pick is the date's slice of the campaign");
     equal(a.seed, GU.Levels.get(a.level.id).seed,
         "the daily keeps the campaign's tuned layout");

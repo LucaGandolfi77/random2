@@ -192,7 +192,7 @@
                 (save.total || 0) + " swallowed";
             if (save.feast || save.rush.stage || save.daily.best) {
                 statLine += " · FEAST " + (save.feast || 0) +
-                    " · TITANS " + (save.rush.stage || 0) + "/6" +
+                    " · TITANS " + (save.rush.stage || 0) + "/" + S.Modes.stageCount +
                     (save.daily.best ? " · TODAY " + save.daily.best : "");
             }
             el.titleStats.textContent = statLine;
@@ -500,7 +500,7 @@
             ["DEATHS", save.stats.deaths || 0],
             ["RUNS", save.stats.runs || 0],
             ["FEAST BEST", save.feast || 0],
-            ["TITANS DOWN", (save.rush.stage || 0) + " / 6"],
+            ["TITANS DOWN", (save.rush.stage || 0) + " / " + S.Modes.stageCount],
             ["TODAY", save.daily.best || 0]
         ];
         for (var i = 0; i < rows.length; i++) {
