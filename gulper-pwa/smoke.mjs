@@ -129,6 +129,20 @@ const titlePixels = await page.evaluate(() => {
 ok(titlePixels.lit > 100, "the attract scene is drawn", titlePixels.lit + " lit pixels");
 ok(titlePixels.w >= 176, "the pixel buffer has a sane width", titlePixels.w);
 
+/* ---------- the shrines open ---------- */
+
+for (const id of ["#btn-daily", "#btn-endless", "#btn-rush"]) {
+    await page.click(id);
+    await page.waitForTimeout(400);
+    ok(await page.isVisible("#screen-intro"), "shrine " + id + " opens the intro");
+    await page.evaluate(() => document.getElementById("btn-intro-back").click());
+    await page.waitForTimeout(400);
+    ok(await page.isVisible("#screen-map"), "back from " + id + " returns to the map");
+    await page.evaluate(() => document.querySelector("[data-back='title']").click());
+    await page.waitForTimeout(400);
+    ok(await page.isVisible("#screen-title"), "returned to the title");
+}
+
 /* ---------- into a level ---------- */
 
 await page.click("#btn-play");
