@@ -38,6 +38,13 @@
             total: 0,
             /* Highest single-run biomass. */
             bestMass: 0,
+            /* The shrines outside the campaign. feast: the best mass the
+             * Everlasting Feast ever let you reach. daily: today's medal
+             * (reset by the next midnight). rush: how far the best
+             * Procession run walked. */
+            feast: 0,
+            daily: { ymd: null, best: 0 },
+            rush: { stage: 0, mass: 0 },
             /* Lifetime counters. */
             stats: { runs: 0, deaths: 0, swallowed: 0, bosses: 0, alarms: 0 },
             /* Settings. */
@@ -139,6 +146,35 @@
             d.shards += (stars || 0) * S.CONFIG.shards.perStar;
             write();
             return rec;
+        },
+
+        /* ===== The shrines ===== */
+        /* Endless Night: the biggest thing the tide ever let you become. */
+        recordFeast: function (mass) {
+            var d = read();
+            d.feast = Math.max(d.feast || 0, Math.round(mass || 0));
+            write();
+            return d.feast;
+        },
+
+        /* Daily Hunt: the medal is the day's best mass, and a new day
+         * starts a new medal. */
+        recordDaily: function (ymd, mass) {
+            var d = read();
+            if (d.daily.ymd !== ymd) d.daily = { ymd: ymd, best: 0 };
+            d.daily.best = Math.max(d.daily.best, Math.round(mass || 0));
+            write();
+            return d.daily.best;
+        },
+
+        /* The Procession: how many titans the best run put down, and the
+         * biggest thing you became along the way. */
+        recordRush: function (stages, mass) {
+            var d = read();
+            d.rush.stage = Math.max(d.rush.stage || 0, stages || 0);
+            d.rush.mass = Math.max(d.rush.mass || 0, Math.round(mass || 0));
+            write();
+            return d.rush;
         },
 
         /* ===== Genome ===== */

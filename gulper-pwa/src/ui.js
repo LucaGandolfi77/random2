@@ -74,6 +74,7 @@
         on("btn-continue", function () { hooks.onContinue && hooks.onContinue(); });
         on("btn-daily", function () { hooks.onDaily && hooks.onDaily(); });
         on("btn-endless", function () { hooks.onEndless && hooks.onEndless(); });
+        on("btn-rush", function () { hooks.onRush && hooks.onRush(); });
         on("btn-genome", function () { hooks.onGenome && hooks.onGenome(); });
         on("btn-codex", function () { hooks.onCodex && hooks.onCodex(); });
         on("btn-settings", function () { hooks.onSettings && hooks.onSettings(); });
@@ -171,9 +172,15 @@
         }
         total = S.Levels.total();
         if (el.titleStats) {
-            el.titleStats.textContent = cleared + " / " + total + " levels cleared · " +
+            var statLine = cleared + " / " + total + " levels cleared · " +
                 stars + " stars · " + save.shards + " shards · " +
                 (save.total || 0) + " swallowed";
+            if (save.feast || save.rush.stage || save.daily.best) {
+                statLine += " · FEAST " + (save.feast || 0) +
+                    " · TITANS " + (save.rush.stage || 0) + "/6" +
+                    (save.daily.best ? " · TODAY " + save.daily.best : "");
+            }
+            el.titleStats.textContent = statLine;
         }
         var cont = byId("btn-continue");
         if (cont) {
@@ -442,17 +449,41 @@
     /* ===== results ===== */
     function showResults(world, stars, extra) {
         extra = extra || {};
+        var tag = world.modeTag;
         if (el.resultTitle) {
-            el.resultTitle.textContent = world.status === "won" ? "LEVEL CLEAR" : "FAILED";
+            el.resultTitle.textContent =
+                tag === "feast" ? "THE TIDE TOOK YOU" :
+                tag === "rush" && world.status === "won" ? "TITAN DOWN" :
+                tag === "rush" ? "THE LINE HOLDS" :
+                world.status === "won" ? "LEVEL CLEAR" : "FAILED";
         }
         if (el.resultBrief) {
-            el.resultBrief.textContent = world.status === "won"
-                ? (world.level.name + " — done.")
-                : (world.failReason || "The level ended badly.");
+            el.resultBrief.textContent =
+                tag === "feast"
+                    ? (world.failReason || "The tide took you.") + " You lasted " +
+                      S.fmtTime(world.time) + "."
+                    : tag === "rush" && world.status === "won"
+                        ? "Titan " + (extra.stage || 1) + " of " + (extra.stages || 6) + " is down."
+                        : tag === "rush"
+                            ? (world.failReason || "The titan threw you back.")
+                            : world.status === "won"
+                                ? (world.level.name + " — done.")
+                                : (world.failReason || "The level ended badly.");
         }
         if (el.resultStars) {
-            el.resultStars.textContent = stars > 0 ? "★".repeat(stars) + "☆".repeat(3 - stars) : "☆☆☆";
-            el.resultStars.setAttribute("aria-label", stars + " of 3 stars");
+            if (tag === "rush") {
+                el.resultStars.textContent =
+                    world.status === "won"
+                        ? "TITAN " + (extra.stage || 1) + " OF " + (extra.stages || 6)
+                        : "TITAN " + Math.max(0, (extra.stage || 1) - 1) + " OF " + (extra.stages || 6);
+                el.resultStars.setAttribute("aria-label", "procession progress");
+            } else if (tag) {
+                el.resultStars.textContent = "";
+                el.resultStars.setAttribute("aria-label", "no stars outside the campaign");
+            } else {
+                el.resultStars.textContent = stars > 0 ? "★".repeat(stars) + "☆".repeat(3 - stars) : "☆☆☆";
+                el.resultStars.setAttribute("aria-label", stars + " of 3 stars");
+            }
         }
         if (el.resultStats) {
             el.resultStats.innerHTML = "";
@@ -460,9 +491,16 @@
                 ["BIOMASS", Math.round(world.stats.peakMass)],
                 ["SWALLOWED", world.stats.swallowed],
                 ["PEAK ALARM", Math.round(world.stats.alarmPeak)],
-                ["TIME", S.fmtTime(world.time)],
-                ["SHARDS", "+" + (extra.shards || 0)]
+                ["TIME", S.fmtTime(world.time)]
             ];
+            if (tag === "feast") rows.push(["BEST FEAST", extra.best || 0]);
+            else if (tag === "daily") rows.push(["BEST TODAY", extra.best || 0]);
+            else if (tag === "rush") {
+                rows.push(["TITANS DOWN", ((world.status === "won" ? extra.stage : extra.stage - 1) || 0) +
+                    " OF " + (extra.stages || 6)]);
+            } else {
+                rows.push(["SHARDS", "+" + (extra.shards || 0)]);
+            }
             for (var i = 0; i < rows.length; i++) {
                 var dt = document.createElement("dt");
                 dt.textContent = rows[i][0];
@@ -487,7 +525,9 @@
             else if (o.type === "stealth") detail = "Absorb " + o.count + " people without the alarm passing " + o.maxAlarm + ".";
             else if (o.type === "elite") detail = "Absorb " + o.count + " marked target" + (o.count > 1 ? "s" : "") + ".";
             else if (o.type === "snatch") detail = "Carry the specimen to the extraction point. Do not swallow it.";
-            else if (o.type === "survive") detail = "Stay alive for " + Math.round(o.time) + " seconds.";
+            else if (o.type === "survive") detail = o.time === 0
+                ? "There is no clock and no way out. Eat until the tide takes you."
+                : "Stay alive for " + Math.round(o.time) + " seconds.";
             else if (o.type === "cull") detail = "Absorb only the " + o.count + " marked people.";
             else if (o.type === "slay") detail = "Break its will, then take it whole if you are big enough.";
             el.introObjective.textContent = o.label + " — " + detail;

@@ -24,7 +24,7 @@ const SRC = path.join(__dirname, "..", "src");
 const FILES = [
     "config.js", "rng.js", "raster.js", "palette.js", "meshes.js",
     "particles.js", "storage.js", "species.js", "weapons.js", "body.js",
-    "biomes.js", "levels.js", "alarm.js", "combat.js", "absorb.js",
+    "biomes.js", "levels.js", "modes.js", "alarm.js", "combat.js", "absorb.js",
     "ai.js", "world.js", "audio.js", "render.js", "input.js"
 ];
 
@@ -479,6 +479,10 @@ function createLevel(id, opts) {
     stuck.blocked.length = 0; stuck.wander = 0; stuck.targetId = null;
     const world = GU.World.create(id, {
         seed: opts.seed,
+        /* Synthetic levels (the shrines) can be passed whole, with
+         * their own entry biomass. */
+        level: opts.level,
+        carry: opts.carry,
         adaptations: opts.adaptations || [],
         weapons: opts.weapons || { lash: 1, grasp: 1 },
         slots: opts.slots || GU.Body.loadout(GU.Storage.data()),

@@ -69,6 +69,12 @@
 
         arena: { w: 920, h: 640 },
 
+        /* ENDLESS NIGHT caps. The district keeps producing, but the
+         * arena stays a street: without a ceiling the waves fill it
+         * into a landfill and the run becomes a lockdown instead of a
+         * meal. */
+        endless: { preyCap: 14, foeCap: 6, rivalCap: 2 },
+
         player: {
             mass: 2, radius: 10, hp: 40, regen: 1.6,
             speed: 78, reach: 30,

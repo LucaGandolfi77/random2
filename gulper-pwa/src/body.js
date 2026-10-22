@@ -248,8 +248,10 @@
                 x: 0, y: 0, vx: 0, vy: 0,
                 facing: 0,
                 hp: base.hp, maxHp: base.hp,
-                /* The biomass carried in from the last level. */
-                mass: base.mass + (save.carry || 0),
+                /* The biomass carried in from the last level. A run can
+                 * hand down its own carry (the procession does), which
+                 * wins over the save. */
+                mass: base.mass + (run.carry !== undefined ? run.carry : (save.carry || 0)),
                 xp: 0, level: 1,
                 evoPoints: 0,
                 gape: base.gape,

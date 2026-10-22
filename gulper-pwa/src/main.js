@@ -18,6 +18,9 @@
     var pendingSeed = undefined;
     var pendingAdaptations = null;
     var lastLevelId = null;
+    /* The shrine run currently on the table, kept as whole level
+     * objects because S.Levels.get cannot see synthetic levels. */
+    var lastModeLevel = null;
 
     var lastT = 0;
     var acc = 0;
@@ -50,6 +53,7 @@
             },
             onDaily: startDaily,
             onEndless: startEndless,
+            onRush: function () { startRushStage(0); },
             onGenome: function () { S.UI.show("genome"); },
             onCodex: function () { S.UI.show("codex"); },
             onSettings: function () { S.UI.show("settings"); },
@@ -57,14 +61,27 @@
             onAdaptationPick: pickAdaptation,
             onIntroGo: function () { if (pendingLevel) startLevel(pendingLevel, pendingSeed, null); },
             onResume: resume,
-            onRestart: function () { if (lastLevelId) startLevel(S.Levels.get(lastLevelId)); },
+            onRestart: replay,
             onQuit: function () { mode = "menu"; enterMenu(); },
             onNext: function () {
+                /* The shrines walk home to the title menu; the
+                 * procession alone marches to its next titan. */
+                if (world && world.modeTag) {
+                    if (world.status === "won" && world.modeTag === "rush") {
+                        var i = S.Modes.stageOf(world.level);
+                        if (i >= 0 && i + 1 < S.Modes.stageCount) {
+                            startRushStage(i + 1);
+                            return;
+                        }
+                    }
+                    enterMenu();
+                    return;
+                }
                 var next = S.Levels.next(lastLevelId);
                 if (next) selectLevel(next.id);
                 else S.UI.show("map");
             },
-            onRetry: function () { if (lastLevelId) startLevel(S.Levels.get(lastLevelId)); },
+            onRetry: replay,
             onMap: function () { S.UI.show("map"); mode = "menu"; },
             onResetSave: function () { applySettings(); },
             onSetting: function (key, value, prop) {
@@ -172,32 +189,31 @@
     }
 
     function startDaily() {
-        var seed = S.dailySeed();
-        var ids = S.Levels.list.map(function (l) { return l.id; });
-        var pick = ids[seed % ids.length];
-        pendingLevel = S.Levels.get(pick);
-        pendingSeed = seed;
-        pendingAdaptations = S.Body.offerAdaptations(3, S.Rng(seed));
+        var daily = S.Modes.dailyLevel();
+        pendingLevel = daily.level;
+        pendingSeed = daily.seed;
+        pendingAdaptations = S.Body.offerAdaptations(3, S.Rng(daily.seed));
         S.UI.showIntro(pendingLevel, pendingAdaptations);
         mode = "intro";
     }
 
     function startEndless() {
-        /* ENDLESS NIGHT is a survive level that never stops producing. */
-        var level = {
-            id: "endless", biome: "downtown", index: 0,
-            name: "Endless Night", brief: "The district keeps producing. You keep taking.",
-            objective: { type: "survive", count: 1, time: 240, label: "SURVIVE" },
-            objectiveName: "ENDLESS", boss: false,
-            noise: 1.1, density: 1.2,
-            prey: 12, foes: 2, rivals: 0,
-            seed: Date.now() & 0xffff,
-            starTime: 240, starAlarm: 70, starMass: 300
-        };
-        pendingLevel = level;
-        pendingSeed = undefined;
+        /* ENDLESS NIGHT is the feast with no clock: eat until the tide
+         * takes you, and the score is the biggest thing you became. */
+        pendingLevel = S.Modes.feastLevel();
+        pendingSeed = pendingLevel.seed;
         pendingAdaptations = S.Body.offerAdaptations(3, S.Rng(Date.now() & 0xffff));
-        S.UI.showIntro(level, pendingAdaptations);
+        S.UI.showIntro(pendingLevel, pendingAdaptations);
+        mode = "intro";
+    }
+
+    /* THE PROCESSION is a run of six titans. A new run starts at the
+     * first one; a loss ends the run; the best distance is kept. */
+    function startRushStage(i) {
+        pendingLevel = S.Modes.stageLevel(i);
+        pendingSeed = pendingLevel.seed;
+        pendingAdaptations = S.Body.offerAdaptations(3, S.Rng(pendingLevel.seed));
+        S.UI.showIntro(pendingLevel, pendingAdaptations);
         mode = "intro";
     }
 
@@ -208,6 +224,13 @@
 
         world = S.World.create(level.id, {
             seed: seed,
+            /* Synthetic levels (the shrines) are passed whole; a campaign
+             * level being passed is harmless and identical to the
+             * lookup. */
+            level: level,
+            /* The shrines hand down their own biomass; campaign levels
+             * use the save's carry. */
+            carry: S.Modes.levelCarry(level),
             adaptations: adapt,
             weapons: save.weapons,
             slots: S.Body.loadout(save),
@@ -215,24 +238,6 @@
             showDamage: save.settings.showDamage !== false
         });
         if (!world) return;
-
-        /* The endless variant is not a real level, so it is patched in
-         * rather than looked up. */
-        if (level.id === "endless") {
-            world.level = level;
-            world.biome = S.Biomes[level.biome];
-            world.endless = true;
-            world.endlessT = 4;
-            world.endlessWave = 0;
-            world.objective.type = "survive";
-            world.objective.need = 1;
-            world.objective.count = 0;
-            world.timeLeft = level.objective.time;
-            world.colors = world.colors || {};
-            var layout = S.Biomes.layout(level.biome, world.rng, world.arena, 1);
-            world.props = layout.props;
-            world.hazards = layout.hazards;
-        }
 
         world.aimAssist = save.settings.aimAssist !== false;
         world.onSwallow = function (e) { S.World.onSwallow(world, e); };
@@ -246,6 +251,7 @@
         };
 
         lastLevelId = level.id;
+        lastModeLevel = level.modeTag ? level : null;
         S.Storage.data().lastLevel = level.id;
         S.Storage.save();
 
@@ -270,6 +276,30 @@
 
     function endLevel() {
         mode = "results";
+        var tag = world.modeTag;
+
+        /* The shrines settle their own accounts: no campaign stars, no
+         * shards, and never a touch of save.carry, the campaign's
+         * spine. A feast ends by hollowing out; the daily always pays
+         * its medal; the procession counts the titans that went down. */
+        if (tag) {
+            var peak = Math.round(world.stats.peakMass);
+            var extra = { mode: tag };
+            if (tag === "feast") {
+                extra.best = S.Storage.recordFeast(peak);
+            } else if (tag === "daily") {
+                extra.best = S.Storage.recordDaily(S.dailySeed(), peak);
+            } else if (tag === "rush") {
+                S.Storage.recordRush(
+                    world.status === "won" ? S.Modes.stageOf(world.level) + 1 : 0, peak);
+                extra.stage = S.Modes.stageOf(world.level) + 1;
+                extra.stages = S.Modes.stageCount;
+            }
+            S.UI.showResults(world, 0, extra);
+            S.UI.refreshTitle();
+            return;
+        }
+
         var stars = S.World.rate(world);
         var gained = 0;
         if (world.status === "won") {
@@ -290,6 +320,24 @@
         S.UI.showResults(world, stars, { shards: gained });
         S.UI.buildMap();
         S.UI.refreshTitle();
+    }
+
+    /* Replaying a shrine restarts that shrine: the feast takes a fresh
+     * tide, the daily keeps its level, a procession run starts again
+     * from the first titan. The campaign replays its own level. */
+    function replay() {
+        if (lastModeLevel && lastModeLevel.modeTag === "rush") {
+            startRushStage(0);
+            return;
+        }
+        if (lastModeLevel && lastModeLevel.modeTag === "feast") {
+            lastModeLevel = S.Modes.feastLevel();
+        }
+        var level = lastModeLevel || (lastLevelId && S.Levels.get(lastLevelId));
+        if (!level) return;
+        pendingLevel = level;
+        pendingSeed = level.modeTag ? level.seed : undefined;
+        startLevel(level, pendingSeed, null);
     }
 
     /* ===== the loop ===== */

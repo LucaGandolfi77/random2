@@ -6,7 +6,7 @@
  * batch if a single file 404s - and then the game does not work offline at
  * all, which is the one promise this file exists to keep.
  */
-const CACHE_NAME = "gulper-pwa-v1";
+const CACHE_NAME = "gulper-pwa-v2";
 
 const ASSETS = [
     "./",
@@ -26,6 +26,7 @@ const ASSETS = [
     "./src/body.js",
     "./src/biomes.js",
     "./src/levels.js",
+    "./src/modes.js",
     "./src/alarm.js",
     "./src/combat.js",
     "./src/absorb.js",

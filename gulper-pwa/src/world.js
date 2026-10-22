@@ -73,7 +73,9 @@
         /* Build a level. */
         create: function (levelId, opts) {
             opts = opts || {};
-            var level = S.Levels.get(levelId);
+            /* A synthetic level (the shrines outside the campaign) can be
+             * passed whole; otherwise the id is looked up as usual. */
+            var level = opts.level || S.Levels.get(levelId);
             if (!level) return null;
 
             var biome = S.Biomes[level.biome];
@@ -105,6 +107,13 @@
                 spawnT: C.alarm.spawnDelay,
                 lockdown: false,
                 foes: [],
+                /* The shrines. endless starts the wave producer; modeTag
+                 * routes the end-of-level bookkeeping. Campaign levels
+                 * carry neither. */
+                endless: !!level.endless,
+                endlessT: 4,
+                endlessWave: 0,
+                modeTag: level.modeTag || null,
                 input: {
                     mx: 0, my: 0, mag: 0,
                     aimX: 0, aimY: 0, aimActive: false,
@@ -129,8 +138,12 @@
                 messageT: 0
             };
 
-            /* The player. */
-            var p = S.Body.create({ genome: opts.genome || (S.Storage.data().genome || {}) }, opts.adaptations || []);
+            /* The player. opts.carry lets a shrine run hand you its own
+             * biomass without touching save.carry, the campaign's spine. */
+            var p = S.Body.create({
+                genome: opts.genome || (S.Storage.data().genome || {}),
+                carry: opts.carry
+            }, opts.adaptations || []);
             p.x = arena.x + arena.w / 2;
             p.y = arena.y + arena.h / 2;
             p.weapons = opts.weapons || { lash: 1, grasp: 1 };
@@ -441,20 +454,36 @@
                 if (world.endlessT <= 0) {
                     world.endlessT = Math.max(1.6, 5.5 - world.endlessWave * 0.35);
                     world.endlessWave++;
+
+                    /* Count the room first. Escalation raises what the
+                     * wave wants; the caps raise what the street can
+                     * hold. */
+                    var room = { prey: 0, foe: 0, rival: 0 };
+                    for (var u = 0; u < world.entities.length; u++) {
+                        var kind = world.entities[u].kind;
+                        if (kind === "prey") room.prey++;
+                        else if (kind === "foe") room.foe++;
+                        else if (kind === "rival") room.rival++;
+                    }
+
                     var preyIds = Object.keys(S.Species.prey);
-                    var n = 1 + Math.min(3, Math.floor(world.endlessWave / 3));
+                    var n = Math.min(1 + Math.min(3, Math.floor(world.endlessWave / 3)),
+                        Math.max(0, C.endless.preyCap - room.prey));
                     for (var q = 0; q < n; q++) {
                         var pos = S.World.freeSpot(world, 140);
                         var e = S.World.spawnPrey(world, S.Species.prey[world.rng.pick(preyIds)], pos.x, pos.y);
                         e.mass = 1 + Math.min(3, Math.floor(world.endlessWave / 6));
                     }
-                    /* And the response, which gets braver. */
-                    if (world.endlessWave % 3 === 0) {
+
+                    /* And the response, which gets braver, but never
+                     * braver than the street can hold. */
+                    if (world.endlessWave % 3 === 0 &&
+                        room.foe < Math.min(2 + Math.floor(world.endlessWave / 3), C.endless.foeCap)) {
                         var foeIds = ["cop", "swat", "rifleman", "heavy"];
                         var fp = S.World.freeSpot(world, 320);
                         S.World.spawnFoe(world, S.Species.foes[world.rng.pick(foeIds)], fp.x, fp.y);
                     }
-                    if (world.endlessWave % 9 === 0) {
+                    if (world.endlessWave % 9 === 0 && room.rival < C.endless.rivalCap) {
                         var rp = S.World.freeSpot(world, 320);
                         S.World.spawnRival(world, S.Species.rivals.champion, rp.x, rp.y);
                     }
