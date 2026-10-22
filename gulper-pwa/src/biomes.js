@@ -96,7 +96,7 @@
             darkness: 0.5,
             fog: 0.12,
             noise: 0.95, density: 1.0, speed: 0.95,
-            props: { container: 2, crate: 4, barrel: 2, lamp: 8, rubble: 2, console: 4, pillar: 6 },
+            props: { container: 10, crate: 14, barrel: 8, lamp: 10, rubble: 6, console: 8, pillar: 12 },
             hazards: { fence: 1, vent: 0, spill: 0 },
             brief: "The nave is still lit. Something is still singing."
         }
@@ -120,11 +120,40 @@
      * The centre of the arena is kept clear because that is where the
      * player starts, and because a level that begins with a container in
      * your face is a level that begins badly.
+     *
+     * A level may also ask for the ground to be kept clear: `clear` is
+     * a list of round zones and straight corridors that must stay
+     * empty. A level that needs to carry something to a corner needs a
+     * way to the corner, and a street full of containers does not have
+     * one - not for something the size of a bus.
      */
-    S.Biomes.layout = function (biomeId, rng, arena, density) {
+    S.Biomes.layout = function (biomeId, rng, arena, density, clear) {
         var b = S.Biomes[biomeId];
         var props = [];
         if (!b) return props;
+
+        var zones = (clear && clear.zones) || [];
+        var corridors = (clear && clear.corridors) || [];
+
+        /* Is this spot inside something that has to stay empty? */
+        function blocked(x, y, r) {
+            for (var i = 0; i < zones.length; i++) {
+                var z = zones[i];
+                if (S.dist(x, y, z.x, z.y) < z.r + r) return true;
+            }
+            for (var c = 0; c < corridors.length; c++) {
+                var k = corridors[c];
+                /* Distance from the point to the corridor's spine. */
+                var vx = k.x2 - k.x1, vy = k.y2 - k.y1;
+                var len2 = vx * vx + vy * vy || 1;
+                var t = ((x - k.x1) * vx + (y - k.y1) * vy) / len2;
+                if (t < 0) t = 0;
+                if (t > 1) t = 1;
+                var px = k.x1 + vx * t, py = k.y1 + vy * t;
+                if (S.dist(x, y, px, py) < k.r + r) return true;
+            }
+            return false;
+        }
 
         var kinds = ["container", "crate", "barrel", "pillar", "console", "rubble"];
         var plan = b.props;
@@ -142,12 +171,23 @@
                 for (var attempt = 0; attempt < 8; attempt++) {
                     var cand = rng.inRect(arena.x + 30, arena.y + 30, arena.w - 60, arena.h - 60);
                     if (S.dist(cand.x, cand.y, arena.x + arena.w / 2, arena.y + arena.h / 2) < 110) continue;
+                    if (blocked(cand.x, cand.y, fp.r + 6)) continue;
                     var ok = true;
                     for (var p = 0; p < props.length; p++) {
                         var q = props[p];
                         if (S.dist(cand.x, cand.y, q.x, q.y) < fp.r + q.r + 6) { ok = false; break; }
                     }
                     if (ok) { pos = cand; break; }
+                }
+                if (!pos) {
+                    /* Nothing free: put it somewhere that does not block
+                     * the reserved ground, even if it overlaps a little. */
+                    for (var attempt3 = 0; attempt3 < 12; attempt3++) {
+                        var cand2 = rng.inRect(arena.x + 30, arena.y + 30, arena.w - 60, arena.h - 60);
+                        if (blocked(cand2.x, cand2.y, fp.r + 6)) continue;
+                        pos = cand2;
+                        break;
+                    }
                 }
                 if (!pos) pos = rng.inRect(arena.x + 30, arena.y + 30, arena.w - 60, arena.h - 60);
                 props.push({
@@ -190,10 +230,33 @@
             var len = rng.range(180, 420);
             var hx = rng.range(arena.x + 80, arena.x + arena.w - 80);
             var hy = rng.range(arena.y + 80, arena.y + arena.h - 80);
-            hazards.push({
-                kind: "fence", horizontal: horizontal,
-                x: hx, y: hy, len: len, t: 0, phase: rng.range(0, 4)
-            });
+            /* A fence across the reserved corridor is a wall where the
+             * player has to walk. Try another spot before giving up on
+             * the fence entirely. */
+            var placed = false;
+            for (var tryF = 0; tryF < 6 && !placed; tryF++) {
+                if (tryF > 0) {
+                    hx = rng.range(arena.x + 80, arena.x + arena.w - 80);
+                    hy = rng.range(arena.y + 80, arena.y + arena.h - 80);
+                }
+                var crosses = false;
+                for (var cc = 0; cc < corridors.length; cc++) {
+                    var kk = corridors[cc];
+                    var vx2 = kk.x2 - kk.x1, vy2 = kk.y2 - kk.y1;
+                    var l2 = vx2 * vx2 + vy2 * vy2 || 1;
+                    var tt = ((hx - kk.x1) * vx2 + (hy - kk.y1) * vy2) / l2;
+                    if (tt < 0) tt = 0;
+                    if (tt > 1) tt = 1;
+                    var qx = kk.x1 + vx2 * tt, qy = kk.y1 + vy2 * tt;
+                    if (S.dist(hx, hy, qx, qy) < kk.r + len / 2) { crosses = true; break; }
+                }
+                if (crosses) continue;
+                hazards.push({
+                    kind: "fence", horizontal: horizontal,
+                    x: hx, y: hy, len: len, t: 0, phase: rng.range(0, 4)
+                });
+                placed = true;
+            }
         }
         var vcount = Math.round((haz.vent || 0) * mult);
         for (var v = 0; v < vcount; v++) {

@@ -57,8 +57,8 @@
         "foundry-5": 738, "foundry-6": 786, "foundry-boss": 814,
         "hive-1": 830, "hive-2": 854, "hive-3": 892, "hive-4": 894,
         "hive-5": 954, "hive-6": 999, "hive-boss": 1032, "cathedral-1": 1035,
-        "cathedral-2": 1066, "cathedral-3": 1085, "cathedral-4": 1133,
-        "cathedral-5": 1166, "cathedral-6": 1168, "cathedral-boss": 1218,
+        "cathedral-2": 1061, "cathedral-3": 1080, "cathedral-4": 1118,
+        "cathedral-5": 1151, "cathedral-6": 1153, "cathedral-boss": 1189,
     };
     /* LEDGER:END */
 

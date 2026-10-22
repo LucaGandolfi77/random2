@@ -69,7 +69,55 @@
         return best;
     }
 
+    /* What the district sends at wave n of Endless Night.
+     *
+     * The street can only hold so many people, so the escalation has to
+     * be in what it sends, not in how many: bigger prey, a braver
+     * response, and eventually something that makes more of itself.
+     * A run that only ever grows bigger stops being a run. */
+    function endlessTier(wave) {
+        var w = Math.max(1, wave | 0);
+        return {
+            /* How heavy the people are. Early on the district sends
+             * walk-ups; later it sends the ones who carry a badge. */
+            preyMass: 1 + Math.min(9, Math.floor(w / 5)),
+            /* The response gets braver in steps, not at random. */
+            foes: w < 5 ? ["cop"]
+                : w < 12 ? ["cop", "swat"]
+                    : w < 24 ? ["cop", "swat", "rifleman"]
+                        : ["swat", "rifleman", "heavy"],
+            /* How many of them the street is allowed to hold. */
+            foeCap: 3 + Math.min(7, Math.floor(w / 6)),
+            /* Something that makes more of itself shows up later. */
+            brooder: w >= 18 && w % 6 === 0,
+            /* The champions get heavier as the night goes on. */
+            rivalMass: 5 + Math.min(20, Math.floor(w / 4)),
+            rivalHp: 180 + Math.min(600, Math.floor(w / 3) * 60)
+        };
+    }
+
+    /* Which corner of the arena a specimen is taken to.
+     *
+     * The choice is made from the level's own number, so it is the same
+     * street every time and does not depend on how the scenery was
+     * rolled. */
+    function extractionCorner(arena, index) {
+        var corners = [
+            { x: arena.x + arena.w * 0.12, y: arena.y + arena.h * 0.14 },
+            { x: arena.x + arena.w * 0.88, y: arena.y + arena.h * 0.14 },
+            { x: arena.x + arena.w * 0.12, y: arena.y + arena.h * 0.86 },
+            { x: arena.x + arena.w * 0.88, y: arena.y + arena.h * 0.86 }
+        ];
+        return corners[((index || 0) - 1 + 4) % 4];
+    }
+
     S.World = {
+        /* Which corner of the arena a specimen is taken to. */
+        extractionCorner: extractionCorner,
+
+        /* What Endless Night sends at a given wave. */
+        endlessTier: endlessTier,
+
         /* Build a level. */
         create: function (levelId, opts) {
             opts = opts || {};
@@ -83,7 +131,26 @@
             var rng = S.Rng(seed);
             var arena = { x: 0, y: 0, w: C.arena.w, h: C.arena.h };
 
-            var layout = S.Biomes.layout(level.biome, rng, arena, level.density);
+            /* Where the specimen has to be taken, and the way there.
+             *
+             * This is decided before the scenery is placed, because the
+             * scenery has to leave a way through. A street packed with
+             * containers is fine until you are carrying something the
+             * size of a bus and the corner you need is walled in - and
+             * then the level cannot be finished by anybody. */
+            var extraction = null;
+            var clear = null;
+            if (level.objective.type === "snatch") {
+                var corner = S.World.extractionCorner(arena, level.index || 0);
+                var cx = arena.x + arena.w / 2, cy = arena.y + arena.h / 2;
+                extraction = { x: corner.x, y: corner.y, r: 62 };
+                clear = {
+                    zones: [{ x: corner.x, y: corner.y, r: 96 }],
+                    corridors: [{ x1: cx, y1: cy, x2: corner.x, y2: corner.y, r: 62 }]
+                };
+            }
+
+            var layout = S.Biomes.layout(level.biome, rng, arena, level.density, clear);
 
             var world = {
                 level: level,
@@ -168,20 +235,27 @@
             /* Populate. */
             S.World.populate(world);
 
-            /* The extraction point, for the levels that need one. A corner
-             * you cannot walk to is not an extraction, it is scenery: pick
-             * the corner that no fence stands between, closest wins. */
+            /* The extraction point, for the levels that need one.
+             *
+             * The corner was chosen before the scenery was placed, so
+             * that the way to it is clear. Now the fences are known, and
+             * a fence standing across the way would still wall it in -
+             * so if that happened, another corner is used, and the one
+             * that was kept clear is used only if it is reachable. */
             if (world.objective.type === "snatch") {
-                var best = null, bestScore = Infinity;
-                for (var cn = 0; cn < 4; cn++) {
-                    var ex = arena.x + arena.w * (cn === 0 || cn === 3 ? 0.12 : 0.88);
-                    var ey = arena.y + arena.h * (cn < 2 ? 0.14 : 0.86);
-                    var cx = arena.x + arena.w / 2, cy = arena.y + arena.h / 2;
-                    var score = (crossesFence(world, cx, cy, ex, ey) ? 100000 : 0) +
-                        S.dist(cx, cy, ex, ey);
-                    if (score < bestScore) { bestScore = score; best = { x: ex, y: ey }; }
+                var cx = arena.x + arena.w / 2, cy = arena.y + arena.h / 2;
+                if (crossesFence(world, cx, cy, extraction.x, extraction.y)) {
+                    var best = null, bestScore = Infinity;
+                    for (var cn = 0; cn < 4; cn++) {
+                        var ex = arena.x + arena.w * (cn === 0 || cn === 3 ? 0.12 : 0.88);
+                        var ey = arena.y + arena.h * (cn < 2 ? 0.14 : 0.86);
+                        var score = (crossesFence(world, cx, cy, ex, ey) ? 100000 : 0) +
+                            S.dist(cx, cy, ex, ey);
+                        if (score < bestScore) { bestScore = score; best = { x: ex, y: ey }; }
+                    }
+                    extraction = { x: best.x, y: best.y, r: 62 };
                 }
-                world.objective.extraction = { x: best.x, y: best.y, r: 62 };
+                world.objective.extraction = extraction;
             }
 
             return world;
@@ -476,25 +550,36 @@
                     }
 
                     var preyIds = Object.keys(S.Species.prey);
+                    var tier = endlessTier(world.endlessWave);
                     var n = Math.min(1 + Math.min(3, Math.floor(world.endlessWave / 3)),
                         Math.max(0, C.endless.preyCap - room.prey));
                     for (var q = 0; q < n; q++) {
                         var pos = S.World.freeSpot(world, 140);
                         var e = S.World.spawnPrey(world, S.Species.prey[world.rng.pick(preyIds)], pos.x, pos.y);
-                        e.mass = 1 + Math.min(3, Math.floor(world.endlessWave / 6));
+                        e.mass = tier.preyMass;
                     }
 
                     /* And the response, which gets braver, but never
                      * braver than the street can hold. */
-                    if (world.endlessWave % 3 === 0 &&
-                        room.foe < Math.min(2 + Math.floor(world.endlessWave / 3), C.endless.foeCap)) {
-                        var foeIds = ["cop", "swat", "rifleman", "heavy"];
+                    if (world.endlessWave % 3 === 0 && room.foe < tier.foeCap) {
                         var fp = S.World.freeSpot(world, 320);
-                        S.World.spawnFoe(world, S.Species.foes[world.rng.pick(foeIds)], fp.x, fp.y);
+                        var fdef = S.Species.foes[world.rng.pick(tier.foes)];
+                        var foe = S.World.spawnFoe(world, fdef, fp.x, fp.y);
+                        /* The late response comes armoured. */
+                        foe.hp = Math.round(foe.hp * (1 + Math.min(1.5, world.endlessWave / 60)));
+                        foe.maxHp = foe.hp;
                     }
                     if (world.endlessWave % 9 === 0 && room.rival < C.endless.rivalCap) {
                         var rp = S.World.freeSpot(world, 320);
-                        S.World.spawnRival(world, S.Species.rivals.champion, rp.x, rp.y);
+                        var champ = S.World.spawnRival(world, S.Species.rivals.champion, rp.x, rp.y);
+                        champ.mass = tier.rivalMass;
+                        champ.hp = champ.maxHp = tier.rivalHp;
+                    }
+                    /* And later in the night, something that makes more
+                     * of itself. */
+                    if (tier.brooder && room.rival < C.endless.rivalCap) {
+                        var bp = S.World.freeSpot(world, 320);
+                        S.World.spawnRival(world, S.Species.rivals.brooder, bp.x, bp.y);
                     }
                 }
             }

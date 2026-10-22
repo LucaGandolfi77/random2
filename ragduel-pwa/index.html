@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>RAGDUEL.IO — ragdoll stickman duels</title>
+  <meta name="description" content="One-thumb ragdoll stickman duels: drag & fling your whole body, grab falling weapons, climb the 5-duel ladder. Offline PWA.">
+  <meta name="theme-color" content="#0b0f1a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-512.svg">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RAGDUEL">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- round banner -->
+  <div id="banner" class="overlay-ghost hidden-child">
+    <h2 id="bannerTitle"></h2>
+    <h3 id="bannerSub"></h3>
+    <span id="bannerChip" class="chip hidden">☠ REVENGE MATCH</span>
+  </div>
+
+  <!-- main menu -->
+  <div id="menu" class="screen">
+    <div class="logo">RAGDUEL<span>.IO</span></div>
+    <p class="tag">one thumb · one ragdoll · one winner</p>
+    <div class="mrow names">
+      <input id="nameInput" maxlength="12" placeholder="P1 NAME" autocomplete="off" spellcheck="false">
+      <input id="name2Input" maxlength="12" placeholder="P2 NAME" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="mrow btns">
+      <button id="btnFight" class="btn primary">▶ 1P LADDER</button>
+      <button id="btnVersus" class="btn versus">👥 2P VERSUS</button>
+    </div>
+    <div class="mrow btns small">
+      <button id="btnHow" class="btn">HOW TO</button>
+      <button id="btnSound" class="btn icon" aria-label="toggle sound">🔊</button>
+    </div>
+    <p id="menuStats" class="stats"></p>
+  </div>
+
+  <!-- how to play -->
+  <div id="how" class="screen hidden">
+    <h1>HOW TO RAGDOLL</h1>
+    <ul>
+      <li><b>HOLD & DRAG, RELEASE</b> — aim and fling your whole body fists-first. Longer hold = harder hit.</li>
+      <li><b>QUICK TAP</b> — jump. Dodge low sweeps, drop on heads.</li>
+      <li><b>CRATES</b> drop now and then — walk into them for brooms, cones… benches.</li>
+    </ul>
+    <p class="how-title">1P LADDER</p>
+    <ul>
+      <li><b>A / D</b> — manual footwork on desktop. <b>SPACE</b> = jump. Hold <b>S</b> = auto-aim fling.</li>
+      <li>Win <b>5 duels in a row</b> to rank up. Get folded and the ladder resets.</li>
+      <li>Defeated rivals return as <b>☠ revenge matches</b>. Beat them again.</li>
+    </ul>
+    <p class="how-title">👥 2P VERSUS — first to 3</p>
+    <ul>
+      <li><b>TOUCH:</b> P1 plays the left half, P2 the right half. Drag to fling, tap to jump.</li>
+      <li><b>KEYBOARD:</b> P1 = <b>A / D / W</b> + hold <b>S</b> · P2 = <b>◀ ▶ ▲</b> + hold <b>▼</b>.</li>
+      <li>The arena re-themes every duel. Weapons drop for both — first there, first armed.</li>
+    </ul>
+    <button id="btnHowClose" class="btn primary">GOT IT</button>
+  </div>
+
+  <!-- round result -->
+  <div id="result" class="screen hidden">
+    <h1 id="resTitle">VICTORY</h1>
+    <p id="resSub"></p>
+    <div class="mrow btns">
+      <button id="btnNext" class="btn primary">NEXT DUEL ▶</button>
+      <button id="btnMenu" class="btn">MENU</button>
+    </div>
+  </div>
+
+  <!-- pause -->
+  <div id="paused" class="screen hidden">
+    <h1>PAUSED</h1>
+    <div class="mrow btns"><button id="btnResume" class="btn primary">RESUME ▶</button></div>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+
+  <script src="sim.js"></script>
+  <script src="game.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

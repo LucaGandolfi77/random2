@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a2340"/>
+      <stop offset="1" stop-color="#0b0f1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="26" y="26" width="460" height="460" rx="94" fill="none" stroke="#ffd23f" stroke-opacity=".22" stroke-width="8"/>
+  <!-- floor -->
+  <line x1="88" y1="402" x2="424" y2="402" stroke="#2a3550" stroke-width="12" stroke-linecap="round"/>
+  <!-- motion arcs -->
+  <g stroke="#ffd23f" stroke-opacity=".35" stroke-width="10" stroke-linecap="round" fill="none">
+    <path d="M92 210 q40 -34 96 -40"/>
+    <path d="M84 260 q52 -40 116 -46"/>
+    <path d="M92 310 q46 -34 100 -40"/>
+  </g>
+  <!-- stickman lunging right -->
+  <g stroke="#ffd23f" stroke-width="20" stroke-linecap="round" fill="none">
+    <path d="M288 196 L262 262"/>                        <!-- spine -->
+    <path d="M282 212 L336 224 L376 208"/>               <!-- front arm -->
+    <path d="M284 220 L242 258 L216 292"/>               <!-- back arm -->
+    <path d="M262 262 L318 306 L338 376"/>               <!-- front leg -->
+    <path d="M262 262 L206 318 L178 378"/>               <!-- back leg -->
+  </g>
+  <circle cx="298" cy="160" r="34" fill="#ffd23f"/>
+  <!-- angry face -->
+  <g stroke="#0b0f1a" stroke-width="5" stroke-linecap="round">
+    <circle cx="308" cy="156" r="3.5" fill="#0b0f1a" stroke="none"/>
+    <circle cx="322" cy="154" r="3.5" fill="#0b0f1a" stroke="none"/>
+    <path d="M300 146 L310 150 M330 144 L320 148"/>
+  </g>
+  <!-- broom -->
+  <line x1="376" y1="208" x2="452" y2="176" stroke="#b98a4e" stroke-width="14" stroke-linecap="round"/>
+  <rect x="444" y="158" width="26" height="38" rx="6" fill="#e8c46a" transform="rotate(-22 457 177)"/>
+  <!-- impact burst -->
+  <g stroke="#ff5e7a" stroke-width="10" stroke-linecap="round">
+    <line x1="470" y1="120" x2="486" y2="104"/>
+    <line x1="482" y1="150" x2="500" y2="146"/>
+    <line x1="462" y1="98" x2="468" y2="80"/>
+  </g>
+</svg>
