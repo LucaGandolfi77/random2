@@ -319,10 +319,10 @@
 
     function drawGround(world) {
         var biome = world.biome;
-        var pal = S.Palette.get(biome.palette);
-        var voidColor = S.Palette.snap(biome.palette, biome.sky[0]);
-        var groundA = S.Palette.snap(biome.palette, biome.ground);
-        var groundB = S.Palette.snap(biome.palette, biome.ground2);
+        var pal = S.Palette.get(world_palette_id());
+        var voidColor = S.Palette.snap(world_palette_id(), biome.sky[0]);
+        var groundA = S.Palette.snap(world_palette_id(), biome.ground);
+        var groundB = S.Palette.snap(world_palette_id(), biome.ground2);
 
         S.Raster.clear(buf, voidColor);
 
@@ -375,7 +375,7 @@
          * so they have to be visible on the ground, not just on the
          * scenery. */
         if (quality.glow) {
-            var glow = S.Palette.snap(biome.palette, biome.lampGlow);
+            var glow = S.Palette.snap(world_palette_id(), biome.lampGlow);
             for (i = 0; i < world.props.length; i++) {
                 var lamp = world.props[i];
                 if (!lamp.light) continue;
@@ -400,7 +400,7 @@
          * void, and the player has no idea how fast they are moving or
          * how big anything is. The lines are one pixel wide and they are
          * the only thing in the scene that gives the eye a ruler. */
-        var gridColor = S.Palette.snap(biome.palette, biome.ground2);
+        var gridColor = S.Palette.snap(world_palette_id(), biome.ground2);
         var step = 100;
         var spanX = (W * C.camera.unitsPerPixel) / 2;
         var spanY = (H * C.camera.unitsPerPixel) / 2;
@@ -442,7 +442,7 @@
             var p = list[i];
             var mesh = propMesh(p.kind);
             var colors = propColors(p.kind, p.tint);
-            var ramps = rampsFor(biome.palette, colors);
+            var ramps = rampsFor(world_palette_id(), colors);
             drawMesh(mesh, {
                 x: p.x, y: p.y, z: 0,
                 scale: 1, angle: p.rot || 0,
@@ -493,8 +493,11 @@
     function draw(world, dt) {
         if (!buf) return;
 
-        currentPalette = S.Storage.data().settings.palette;
-        if (!currentPalette || currentPalette === "auto") currentPalette = world.biome.palette;
+        /* One palette for the whole frame, decided in one place. Every
+         * draw call asks for it through world_palette_id(), so a palette
+         * override changes the entire picture and not one corner of
+         * it. */
+        currentPalette = S.Palette.effective(world.biome.palette);
 
         /* Camera. */
         var p = world.player;
@@ -610,7 +613,7 @@
 
     function drawEntity(world, e, isBoss) {
         var mesh = entityMesh(e);
-        var ramps = rampsFor(world.biome.palette, entityColors(e));
+        var ramps = rampsFor(world_palette_id(), entityColors(e));
         var scale = 1;
 
         if (e.kind === "prey") scale = 0.92;
@@ -630,7 +633,7 @@
         if (e.down && e.state === S.STATE.prey.down) {
             var c = toScreen(e.x, e.y, 2);
             S.Raster.ditherBlend(buf, Math.floor(c.x - 4), Math.floor(c.y - 1), 8, 2,
-                S.Palette.snap(world.biome.palette, "#101318"), 0.55, C.render.bayer);
+                S.Palette.snap(world_palette_id(), "#101318"), 0.55, C.render.bayer);
         }
     }
 
@@ -638,8 +641,8 @@
         var p = world.player;
         var biome = world.biome;
 
-        var ramp = S.Palette.ramp(biome.palette, "#8fbf5c");
-        var rampDark = S.Palette.ramp(biome.palette, "#2a3320");
+        var ramp = S.Palette.ramp(world_palette_id(), "#8fbf5c");
+        var rampDark = S.Palette.ramp(world_palette_id(), "#2a3320");
         var scale = p.radius / 11;
 
         /* The tentacles. Half of them are behind the body, which is what
@@ -669,7 +672,7 @@
 
         /* The body. */
         var mesh = entityMesh(p);
-        var ramps = rampsFor(biome.palette, entityColors(p));
+        var ramps = rampsFor(world_palette_id(), entityColors(p));
         var open = 0;
         if (p.state === S.STATE.player.swallowing) open = 1;
         drawMesh(mesh, {
@@ -684,7 +687,7 @@
             var mc = toScreen(p.x + Math.cos(p.facing) * p.radius * 0.9,
                 p.y + Math.sin(p.facing) * p.radius * 0.9, p.radius * 0.4);
             S.Raster.ditherBlend(buf, Math.floor(mc.x - 3), Math.floor(mc.y - 2), 6, 4,
-                S.Palette.snap(biome.palette, "#6b1f26"), 0.8, C.render.bayer);
+                S.Palette.snap(world_palette_id(), "#6b1f26"), 0.8, C.render.bayer);
         }
 
         /* The attack sweep. */
@@ -692,7 +695,7 @@
             attack.t -= 1 / 60;
             var a0 = p.facing - attack.arc / 2;
             var a1 = p.facing + attack.arc / 2;
-            var col = S.Palette.snap(biome.palette, attack.color);
+            var col = S.Palette.snap(world_palette_id(), attack.color);
             var steps = 8;
             for (var s = 0; s <= steps; s++) {
                 var ang = S.lerp(a0, a1, s / steps);
@@ -711,7 +714,7 @@
             var by = p.y + Math.sin(p.facing) * p.radius * (1.2 - bt);
             var bc = toScreen(bx, by, p.radius * 0.5);
             S.Raster.ditherBlend(buf, Math.floor(bc.x - 3), Math.floor(bc.y - 2), 6, 4,
-                S.Palette.snap(biome.palette, "#8fbf5c"), 0.7, C.render.bayer);
+                S.Palette.snap(world_palette_id(), "#8fbf5c"), 0.7, C.render.bayer);
         }
     }
 
@@ -728,10 +731,10 @@
                 }
                 var a = toScreen(x0, y0, 10);
                 var b = toScreen(x1, y1, 10);
-                drawLine(a.x, a.y, b.x, b.y, S.Palette.snap(world.biome.palette, "#66b3a4"));
+                drawLine(a.x, a.y, b.x, b.y, S.Palette.snap(world_palette_id(), "#66b3a4"));
                 /* Posts. */
-                S.Raster.fillRect(buf, Math.floor(a.x) - 1, Math.floor(a.y) - 2, 2, 4, S.Palette.snap(world.biome.palette, "#3a434f"));
-                S.Raster.fillRect(buf, Math.floor(b.x) - 1, Math.floor(b.y) - 2, 2, 4, S.Palette.snap(world.biome.palette, "#3a434f"));
+                S.Raster.fillRect(buf, Math.floor(a.x) - 1, Math.floor(a.y) - 2, 2, 4, S.Palette.snap(world_palette_id(), "#3a434f"));
+                S.Raster.fillRect(buf, Math.floor(b.x) - 1, Math.floor(b.y) - 2, 2, 4, S.Palette.snap(world_palette_id(), "#3a434f"));
             } else if (h.kind === "vent" && h.hot) {
                 var c = toScreen(h.x, h.y, 0);
                 var rad = h.r / C.camera.unitsPerPixel;
@@ -740,14 +743,14 @@
                     var dy = (y - c.y) / (rad * 0.5);
                     var half = Math.sqrt(Math.max(0, 1 - dy * dy)) * rad;
                     S.Raster.ditherBlend(buf, Math.floor(c.x - half), y, Math.ceil(half * 2), 1,
-                        S.Palette.snap(world.biome.palette, "#f98a2c"), 0.8, C.render.bayer);
+                        S.Palette.snap(world_palette_id(), "#f98a2c"), 0.8, C.render.bayer);
                 }
             } else if (h.kind === "spill") {
                 var cs = toScreen(h.x, h.y, 0);
                 var rads = h.r / C.camera.unitsPerPixel;
                 S.Raster.ditherBlend(buf, Math.floor(cs.x - rads), Math.floor(cs.y - rads),
                     Math.ceil(rads * 2), Math.ceil(rads * 2),
-                    S.Palette.snap(world.biome.palette, "#4fa87a"), 0.45, C.render.bayer);
+                    S.Palette.snap(world_palette_id(), "#4fa87a"), 0.45, C.render.bayer);
             }
         }
     }
@@ -756,7 +759,7 @@
         var ex = world.objective.extraction;
         var c = toScreen(ex.x, ex.y, 0);
         var rad = ex.r / C.camera.unitsPerPixel;
-        var col = S.Palette.snap(world.biome.palette, "#8fbf5c");
+        var col = S.Palette.snap(world_palette_id(), "#8fbf5c");
         for (var y = Math.floor(c.y - rad * 0.5); y <= c.y + rad * 0.5; y++) {
             if (y < 0 || y >= H) continue;
             var dy = (y - c.y) / (rad * 0.5);
@@ -770,7 +773,7 @@
 
     function drawMarker(world, e) {
         var c = toScreen(e.x, e.y, 40);
-        var col = S.Palette.snap(world.biome.palette, "#f2b23c");
+        var col = S.Palette.snap(world_palette_id(), "#f2b23c");
         var bob = Math.sin(world.time * 5) * 2;
         var x = Math.floor(c.x), y = Math.floor(c.y + bob);
         /* A little chevron. */
@@ -780,7 +783,7 @@
         /* A will bar under the target. */
         var w = Math.round(16 * S.clamp01(e.will / (e.maxWill || 1)));
         var barY = Math.floor(c.y + 14 + bob);
-        S.Raster.fillRect(buf, x - 9, barY, 18, 2, S.Palette.snap(world.biome.palette, "#14181f"));
+        S.Raster.fillRect(buf, x - 9, barY, 18, 2, S.Palette.snap(world_palette_id(), "#14181f"));
         S.Raster.fillRect(buf, x - 9, barY, w, 2, col);
     }
 
@@ -806,7 +809,7 @@
             var x = Math.floor(c.x - w / 2);
             var y = Math.floor(c.y);
             /* A shadow, so the number reads over any background. */
-            drawText(buf, p.text, x + 1, y + 1, S.Palette.snap(world.biome.palette, "#0a0c10"), p.big ? 2 : 1);
+            drawText(buf, p.text, x + 1, y + 1, S.Palette.snap(world_palette_id(), "#0a0c10"), p.big ? 2 : 1);
             drawText(buf, p.text, x, y, p.color, p.big ? 2 : 1);
         }
     }
@@ -852,7 +855,7 @@
          * void colour. Only on the high tier, because it is a per-pixel
          * cost and the low tier needs the cycles elsewhere. */
         if (quality.glow < 1) return;
-        var dark = S.Palette.snap(world.biome.palette, "#05070c");
+        var dark = S.Palette.snap(world_palette_id(), "#05070c");
         var cx = W / 2, cy = H / 2;
         var maxD = Math.sqrt(cx * cx + cy * cy);
         for (var y = 0; y < H; y += 1) {
@@ -882,7 +885,6 @@
             cam.shake = Math.min(C.camera.maxShake, cam.shake + amount);
         },
         bufferSize: function () { return { w: W, h: H, chunk: chunk }; },
-        setPalette: function (id) { currentPalette = id; },
         unproject: function (sx, sy, out) {
             return unproject(sx, sy, out || { x: 0, y: 0 });
         },

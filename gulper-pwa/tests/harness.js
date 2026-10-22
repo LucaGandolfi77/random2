@@ -56,6 +56,9 @@ global.matchMedia = () => ({ matches: false, addListener() {}, removeListener() 
 let drawCalls = 0;
 const badNumbers = [];
 
+/* The pixels of the last frame the renderer blitted. */
+let lastFrame = null;
+
 function checkNum(v, where) {
     if (typeof v === "number" && !isFinite(v)) {
         badNumbers.push(where + " -> " + String(v));
@@ -72,6 +75,9 @@ const ctxStub = {
     putImageData(img) {
         drawCalls++;
         if (!img || !img.data) return;
+        /* Keep the last frame: a test that wants to know what the game
+         * actually painted needs the pixels, not a promise. */
+        lastFrame = img.data;
         for (let i = 0; i < img.data.length; i += 4) {
             if (img.data[i + 3] === 0) continue;
             const r = img.data[i], g = img.data[i + 1], b = img.data[i + 2];
@@ -520,5 +526,18 @@ module.exports = {
     rasterStats,
     resetStats,
     badNumbers,
+    /* The pixels of the last frame, and a cheap fingerprint of them so
+     * two frames can be compared without keeping them around. */
+    lastFrame: () => lastFrame,
+    frameHash: () => {
+        if (!lastFrame) return "";
+        let h = 5381;
+        for (let i = 0; i < lastFrame.length; i += 4) {
+            h = ((h * 33) ^ lastFrame[i]) >>> 0;
+            h = ((h * 33) ^ lastFrame[i + 1]) >>> 0;
+            h = ((h * 33) ^ lastFrame[i + 2]) >>> 0;
+        }
+        return String(h);
+    },
     getDrawCalls: () => drawCalls
 };

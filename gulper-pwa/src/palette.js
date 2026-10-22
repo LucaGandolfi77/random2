@@ -182,6 +182,27 @@
             return { id: paletteId, colors: PALS[paletteId] || PALS.docks };
         },
 
+        /* The palette the player should actually see.
+         *
+         * Every draw call goes through here rather than reading the
+         * biome's own palette. A palette override that leaves one
+         * corner of the renderer reading the biome's palette is a
+         * palette override that does not work, and this is the one
+         * place that decides which palette is in force. */
+        effective: function (biomePaletteId) {
+            var chosen = null;
+            try {
+                var save = S.Storage.data();
+                if (save && save.settings && save.settings.palette) {
+                    chosen = save.settings.palette;
+                }
+            } catch (e) {
+                chosen = null;
+            }
+            if (!chosen || chosen === "auto") return biomePaletteId;
+            return PALS[chosen] ? chosen : biomePaletteId;
+        },
+
         /* Every biome palette we ship. */
         ids: function () {
             return Object.keys(PALS);

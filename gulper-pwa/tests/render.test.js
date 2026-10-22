@@ -12,7 +12,7 @@
  */
 "use strict";
 
-const { GU, ok, equal, report, createLevel, rasterStats, resetStats, badNumbers } = require("./harness.js");
+const { GU, ok, equal, report, createLevel, rasterStats, resetStats, badNumbers, lastFrame } = require("./harness.js");
 
 /* The scene: a full level, mid-hunt, with the camera on the player. */
 function scene(levelId, carry) {
@@ -100,6 +100,83 @@ ok(size.chunk >= 2, "at least two screen pixels per buffer pixel (" + size.chunk
     const back = GU.Render.unproject(sx, sy);
     ok(Math.abs(back.x - probe.x) < 0.01, "the projection round-trips in x (" + back.x.toFixed(3) + ")");
     ok(Math.abs(back.y - probe.y) < 0.01, "the projection round-trips in y (" + back.y.toFixed(3) + ")");
+}
+
+/* ---------- the palette override actually repaints the world ----------
+ * A palette setting that leaves one corner of the renderer on the
+ * biome's own colours is a setting that does nothing. The check is
+ * made on the pixels: the ground is most of the screen, so the colour
+ * that covers most of the frame must come from the palette that was
+ * asked for. */
+
+{
+    /* The colour that covers most of a frame, as a packed value. */
+    const dominant = function () {
+        const px = lastFrame();
+        if (!px) return null;
+        const counts = new Map();
+        for (let i = 0; i < px.length; i += 4) {
+            if (px[i + 3] === 0) continue;
+            const key = (px[i] << 16) | (px[i + 1] << 8) | px[i + 2];
+            counts.set(key, (counts.get(key) || 0) + 1);
+        }
+        let best = null, bestN = 0;
+        for (const [k, n] of counts) {
+            if (n > bestN) { bestN = n; best = k; }
+        }
+        return best;
+    };
+
+    /* The colours a palette is allowed to paint with. The palette
+     * stores them packed, the frame stores them as r,g,b bytes. */
+    const paletteColors = function (id) {
+        const set = new Set();
+        for (const packed of GU.Palette.get(id).colors) {
+            set.add((packed & 255) << 16 | ((packed >> 8) & 255) << 8 | ((packed >> 16) & 255));
+        }
+        return set;
+    };
+
+    const scene1 = scene("docks-1", 120);
+
+    GU.Storage.setSetting("palette", "auto");
+    GU.Render.draw(scene1, 1 / 60);
+    const withAuto = dominant();
+    ok(withAuto !== null, "the renderer painted a frame to compare");
+    ok(paletteColors("docks").has(withAuto),
+        "without an override the biome paints with its own palette");
+
+    GU.Storage.setSetting("palette", "cathedral");
+    GU.Render.draw(scene1, 1 / 60);
+    const withCathedral = dominant();
+    ok(paletteColors("cathedral").has(withCathedral),
+        "an override repaints the world in the chosen palette");
+    ok(!paletteColors("docks").has(withCathedral) ||
+        paletteColors("cathedral").has(withAuto),
+        "the override changed the picture, it did not just relabel it");
+
+    /* Back to the biome's own colours. */
+    GU.Storage.setSetting("palette", "auto");
+    GU.Render.draw(scene1, 1 / 60);
+    ok(paletteColors("docks").has(dominant()),
+        "the biome's own palette is back");
+
+    GU.Storage.setSetting("palette", "auto");
+}
+
+/* ---------- one source of truth for the palette ----------
+ * A draw call that reads the biome's palette directly is a draw call
+ * that ignores the override. There must be exactly one place that
+ * decides which palette is in force. */
+
+{
+    const src = require("fs").readFileSync(
+        require("path").join(__dirname, "..", "src", "render.js"), "utf8");
+    const reads = src.match(/\.biome\.palette|palette\.palette/g) || [];
+    ok(reads.length <= 1,
+        "the renderer decides the palette in one place (" + reads.length + " direct reads)");
+    ok(src.indexOf("S.Palette.effective(") >= 0,
+        "the renderer asks the palette which one is in force");
 }
 
 /* ---------- the pixel font draws every glyph ---------- */
