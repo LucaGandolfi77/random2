@@ -23,13 +23,16 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import csv
 import getpass
 import logging
+import os
 import re
 import sys
 import time
 import unicodedata
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any, Callable
 
 from strategy import Snapshot, SurvivalStrategy
@@ -45,6 +48,17 @@ GAME_FRAME_RE = re.compile(r"https://pokesurvivor\.com(?:/|$)")
 # signed-in account whose save mode is the cloud.
 SAVE_BUTTON_SELECTOR = "#btn-save"
 TOAST_SELECTOR = ".toast"
+# One row per finished run in the CSV report (see --csv).
+CSV_FIELDS = (
+    "run",
+    "started_at",
+    "ended_at",
+    "duration_s",
+    "outcome",
+    "hp_end_pct",
+    "max_enemies",
+    "summary",
+)
 
 
 @dataclass(frozen=True)
@@ -55,6 +69,7 @@ class BotConfig:
     headless: bool = False
     tick: float = 0.10
     timeout_ms: int = 30_000
+    csv_path: str = "runs.csv"
     width: int = 1280
     height: int = 720
     username: str | None = None
@@ -225,8 +240,9 @@ class PokéSurvivorBot:
         for run_number in range(1, self.config.runs + 1):
             LOGGER.info("starting run %d/%d", run_number, self.config.runs)
             await self._start_run()
-            await self._play_run(run_number)
+            info = await self._play_run(run_number)
             await self._finish_run(run_number)
+            self._write_run_record(run_number, info)
 
     async def _initialize_session(self) -> None:
         await self._wait_visible("#game")
@@ -254,21 +270,35 @@ class PokéSurvivorBot:
         await self._wait_visible("#scr-menu")
         await self._dismiss_recovery_prompt()
 
-    async def _dismiss_recovery_prompt(self) -> None:
-        """Permanently dismiss the optional email-link prompt after login."""
+    async def _dismiss_recovery_prompt(self) -> bool:
+        """Permanently dismiss the optional email-link prompt after login.
+
+        Returns True when the prompt was visible and got dismissed.
+        """
 
         if not await self._visible("#scr-recover"):
-            return
+            return False
         # Current builds expose "Do not ask me again" as #rec-never. Keep the
-        # temporary "Not now" button as a compatibility fallback.
-        if await self._visible("#rec-never"):
-            selector = "#rec-never"
-            LOGGER.info("choosing the permanent email-link dismissal")
-        else:
-            selector = "#rec-later"
-            LOGGER.info("choosing the temporary email-link dismissal")
+        # temporary "Not now" button as a compatibility fallback. The buttons
+        # can lag behind the overlay itself, so poll briefly for either one.
+        selector = None
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline:
+            if await self._visible("#rec-never"):
+                selector = "#rec-never"
+                LOGGER.info("choosing the permanent email-link dismissal")
+                break
+            if await self._visible("#rec-later"):
+                selector = "#rec-later"
+                LOGGER.info("choosing the temporary email-link dismissal")
+                break
+            await asyncio.sleep(0.10)
+        if selector is None:
+            LOGGER.warning("recovery prompt visible but no dismissal button found; leaving it alone")
+            return False
         await self.frame.locator(selector).click()
         await self._wait_hidden("#scr-recover", timeout_ms=5_000)
+        return True
 
     async def _login_with_credentials(self) -> None:
         username = self.config.username
@@ -323,26 +353,38 @@ class PokéSurvivorBot:
 
     async def _start_run(self) -> None:
         await self._wait_visible("#scr-menu")
+        # The recovery prompt can reappear between runs (e.g. right after a
+        # cloud save); it overlays the menu and would block the play click.
+        await self._dismiss_recovery_prompt()
         await self.frame.locator('#scr-menu [data-go="play"]').click()
         await self._wait_hidden("#scr-menu")
         self.strategy.reset()
         await self._focus_game()
 
-    async def _play_run(self, run_number: int) -> None:
+    async def _play_run(self, run_number: int) -> dict[str, Any]:
+        """Play one run and return the stats collected for the CSV report."""
         started = time.monotonic()
+        started_at = datetime.now().isoformat(timespec="seconds")
         self._last_log = started
+        max_enemies = 0
+        last_hp_pct = ""
+        outcome = "unknown"
+        summary = ""
 
         while True:
             elapsed = time.monotonic() - started
             if elapsed >= self.config.duration:
                 LOGGER.info("run %d reached %.1f seconds", run_number, elapsed)
+                outcome = "timeout"
                 await self._stop_run()
-                return
+                break
 
             if await self._visible("#scr-over"):
                 LOGGER.info("run %d ended", run_number)
+                outcome = "died"
                 await self._release_keys()
-                return
+                summary = await self._over_summary()
+                break
 
             if await self._handle_overlay():
                 await asyncio.sleep(0.06)
@@ -354,6 +396,12 @@ class PokéSurvivorBot:
                 LOGGER.warning("could not read game state: %s", exc)
                 await asyncio.sleep(0.25)
                 continue
+
+            max_enemies = max(
+                max_enemies, sum(1 for enemy in snapshot.enemies if not enemy.dead)
+            )
+            if snapshot.player is not None:
+                last_hp_pct = f"{100.0 * snapshot.player.hp / max(1.0, snapshot.player.max_hp):.1f}"
 
             if snapshot.player is None:
                 if time.monotonic() - self._last_log >= 5.0:
@@ -384,6 +432,45 @@ class PokéSurvivorBot:
                 )
 
             await asyncio.sleep(self.config.tick)
+
+        return {
+            "run": run_number,
+            "started_at": started_at,
+            "ended_at": datetime.now().isoformat(timespec="seconds"),
+            "duration_s": f"{time.monotonic() - started:.1f}",
+            "outcome": outcome,
+            "hp_end_pct": last_hp_pct,
+            "max_enemies": max_enemies,
+            "summary": summary,
+        }
+
+    async def _over_summary(self) -> str:
+        """Grab the result screen text for the CSV report (best effort)."""
+        try:
+            over = self.frame.locator("#scr-over")
+            if await over.count() == 0:
+                return ""
+            text = await over.first.inner_text()
+        except Exception:
+            return ""
+        return " ".join((text or "").split())[:300]
+
+    def _write_run_record(self, run_number: int, info: dict[str, Any]) -> None:
+        """Append one row per finished run to the CSV report file."""
+        path = self.config.csv_path
+        if not path:
+            return
+        new_file = not os.path.exists(path) or os.path.getsize(path) == 0
+        try:
+            with open(path, "a", newline="", encoding="utf-8") as handle:
+                writer = csv.writer(handle)
+                if new_file:
+                    writer.writerow(CSV_FIELDS)
+                writer.writerow([info.get(name, "") for name in CSV_FIELDS])
+        except OSError as exc:
+            LOGGER.warning("run %d: could not update %s: %s", run_number, path, exc)
+            return
+        LOGGER.info("run %d: stats appended to %s", run_number, path)
 
     async def _finish_run(self, run_number: int) -> None:
         """Return to the menu and press the game's Save button.
@@ -430,6 +517,11 @@ class PokéSurvivorBot:
             LOGGER.info("run %d: %s", run_number, message)
 
     async def _handle_overlay(self) -> bool:
+        if await self._visible("#scr-recover"):
+            # Only claim the overlay when a known dismissal button exists,
+            # otherwise fall through so the run loop keeps making progress.
+            if await self._dismiss_recovery_prompt():
+                return True
         if await self._visible("#scr-levelup"):
             await self._choose_level_up()
             return True
@@ -558,6 +650,9 @@ class PokéSurvivorBot:
         if await self._visible("#scr-over"):
             await self.frame.locator("#btn-again").click()
         await self._wait_visible("#scr-menu")
+        # Same overlay that can block the play click can also block the
+        # top-bar save button right after a run.
+        await self._dismiss_recovery_prompt()
 
     async def _focus_game(self) -> None:
         canvas = self.frame.locator("#game")
@@ -711,6 +806,11 @@ def parse_args(
     )
     parser.add_argument("--headless", action="store_true", help="hide the browser window")
     parser.add_argument("--tick", type=float, default=0.10, help="controller interval in seconds")
+    parser.add_argument(
+        "--csv",
+        default="runs.csv",
+        help="CSV file where finished-run stats are appended (empty string disables)",
+    )
     parser.add_argument("--debug", action="store_true", help="enable verbose logging")
     args = parser.parse_args(argv)
     if args.duration <= 0:
@@ -732,6 +832,7 @@ def parse_args(
         runs=args.runs,
         headless=args.headless,
         tick=args.tick,
+        csv_path=args.csv,
         username=username or None,
         password=password,
     )

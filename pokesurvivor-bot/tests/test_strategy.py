@@ -137,6 +137,63 @@ class StrategyTests(unittest.TestCase):
         )
         self.assertIn("a", keys)
 
+    def test_damaging_liquid_still_avoided(self) -> None:
+        strategy = SurvivalStrategy()
+        for kind in ("lava", "swamp", "poison", "spark", "ice"):
+            with self.subTest(kind=kind):
+                keys = strategy.choose(
+                    snapshot(
+                        {
+                            "state": "playing",
+                            "player": {"x": 0, "y": 0, "hp": 100, "maxHp": 100},
+                            "terrain": [{"x": 32, "y": 0, "kind": kind}],
+                        }
+                    ),
+                    now=0.0,
+                )
+                self.assertIn("a", keys)
+
+    def test_water_is_only_mildly_unattractive(self) -> None:
+        # Plain water is harmless: a heal pickup on the far side outweighs
+        # the gentle aversion, so the bot crosses the water instead of
+        # refusing to enter it.
+        strategy = SurvivalStrategy()
+        keys = strategy.choose(
+            snapshot(
+                {
+                    "state": "playing",
+                    "player": {"x": 0, "y": 0, "hp": 100, "maxHp": 100},
+                    "terrain": [
+                        {"x": 32, "y": 0, "kind": "water"},
+                        {"x": 64, "y": 0, "kind": "water"},
+                    ],
+                    "pickups": [{"x": 110, "y": 0, "kind": "heal"}],
+                }
+            ),
+            now=0.0,
+        )
+        self.assertIn("d", keys)
+
+    def test_water_without_rewards_still_loses_to_land_drift(self) -> None:
+        # With nothing to chase, the mild water aversion plus the patrol
+        # drift keeps the bot on land (no deliberate walk into the lake).
+        strategy = SurvivalStrategy()
+        keys = strategy.choose(
+            snapshot(
+                {
+                    "state": "playing",
+                    "player": {"x": 0, "y": 0, "hp": 100, "maxHp": 100},
+                    "terrain": [
+                        {"x": 32, "y": 0, "kind": "water"},
+                        {"x": 64, "y": 0, "kind": "water"},
+                        {"x": 96, "y": 0, "kind": "water"},
+                    ],
+                }
+            ),
+            now=0.0,
+        )
+        self.assertNotIn("d", keys)
+
     def test_avoids_a_tree_to_the_right(self) -> None:
         strategy = SurvivalStrategy()
         keys = strategy.choose(

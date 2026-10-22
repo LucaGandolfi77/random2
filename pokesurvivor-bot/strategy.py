@@ -302,6 +302,14 @@ def _keys_for_vector(x: float, y: float) -> frozenset[str]:
     return frozenset(keys)
 
 
+# Terrain kinds reported by the game's World.kindAt probe.  Plain water is
+# harmless, so below it only gets a mild aversion; every other non-floor
+# kind (walls, lava, swamp, poison, spark, ice, and the legacy generic
+# 'liquid') damages or blocks the player and stays a hard obstacle.
+SOFT_TERRAIN = frozenset({"water"})
+DAMAGING_TERRAIN = frozenset({"liquid", "lava", "swamp", "poison", "spark", "ice"})
+
+
 class SurvivalStrategy:
     """Keep moving, orbit threats, and collect nearby rewards."""
 
@@ -326,10 +334,13 @@ class SurvivalStrategy:
             hx, hy, urgency = _hazard_force(player, hazard)
             desired = _add(desired, (hx, hy), 4.0 * urgency)
 
-        # `wall` is the game's raised rock/formation terrain and `liquid`
-        # covers water plus the damaging lava, poison, spark, and ice arenas.
-        # The world samples are tile centres; a generous radius keeps the bot
-        # from scraping their edges while orbiting enemies.
+        # `wall` is the game's raised rock/formation terrain.  Plain water is
+        # harmless, so it only gets a mild aversion: the bot prefers land but
+        # still crosses water for pickups or to escape a horde.  Damaging
+        # liquids (lava, swamp, poison, spark, ice, and the legacy generic
+        # 'liquid' kind) stay hard obstacles, exactly like walls.  The world
+        # samples are tile centres; a generous radius keeps the bot from
+        # scraping their edges while orbiting enemies.
         nearest_floor: tuple[TerrainState | None, float] = (None, float("inf"))
         standing_on_obstacle = False
         for tile in snapshot.terrain:
@@ -338,8 +349,17 @@ class SurvivalStrategy:
                 if distance < nearest_floor[1]:
                     nearest_floor = (tile, distance)
                 continue
-            radius = 72.0 if tile.kind == "liquid" else 86.0
-            force = 6.0 if tile.kind == "liquid" else 7.0
+            if tile.kind in SOFT_TERRAIN:
+                # Mild, distance-based aversion: weaker than the pickup
+                # attraction and the enemy escape forces, so it only biases
+                # the movement when nothing better pulls the other way.
+                falloff = max(0.0, 1.0 - distance / 96.0)
+                if falloff > 0.0:
+                    away = _unit(px - tile.x, py - tile.y, self._last_direction)
+                    desired = _add(desired, away, 0.7 * falloff)
+                continue
+            radius = 72.0 if tile.kind in DAMAGING_TERRAIN else 86.0
+            force = 6.0 if tile.kind in DAMAGING_TERRAIN else 7.0
             ox, oy, touching = _obstacle_force(
                 player, tile.x, tile.y, radius, force, self._last_direction
             )
@@ -359,9 +379,9 @@ class SurvivalStrategy:
             desired = _add(desired, (ox, oy))
             standing_on_obstacle = standing_on_obstacle or touching
 
-        # If a sample says the player is already on water/wall/another solid
-        # object, head toward the closest sampled floor rather than continuing
-        # the enemy orbit and getting pinned against it.
+        # If a sample says the player is already on a wall or damaging
+        # liquid, head toward the closest sampled floor rather than
+        # continuing the enemy orbit and getting pinned against it.
         if standing_on_obstacle and nearest_floor[0] is not None:
             floor = nearest_floor[0]
             escape = _unit(floor.x - px, floor.y - py, self._last_direction)
