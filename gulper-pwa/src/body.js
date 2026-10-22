@@ -445,10 +445,20 @@
             if (!unlocked.length) unlocked = ["lash"];
 
             var a = unlocked.indexOf("lash") >= 0 ? "lash" : unlocked[0];
+
+            /* The second hand is the player's choice, as long as they
+             * own what they are holding. */
             var b = null;
-            var preference = ["grasp", "siphon", "inject", "shock", "blade"];
-            for (var i = 0; i < preference.length; i++) {
-                if (unlocked.indexOf(preference[i]) >= 0) { b = preference[i]; break; }
+            if (save.loadout && unlocked.indexOf(save.loadout) >= 0 && save.loadout !== a) {
+                b = save.loadout;
+            }
+            if (!b) {
+                /* Nothing chosen yet: take the best of what is owned, in
+                 * order of how much it earns its place. */
+                var preference = ["grasp", "drag", "siphon", "inject", "shock", "blade"];
+                for (var i = 0; i < preference.length; i++) {
+                    if (unlocked.indexOf(preference[i]) >= 0) { b = preference[i]; break; }
+                }
             }
             if (!b) {
                 for (var j = 0; j < unlocked.length; j++) {

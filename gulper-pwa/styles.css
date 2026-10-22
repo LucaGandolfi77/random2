@@ -327,9 +327,16 @@ body { position: fixed; inset: 0; }
 .abtn.frenzy { border-color: var(--blood); color: var(--blood); }
 .abtn.frenzy.on { background: var(--blood); color: #fff; }
 
-/* Accessibility toggles. */
+/* Accessibility toggles.
+ *
+ * The contrast filter is applied to the screens and the canvas, not to
+ * the body. A filter on an ancestor makes it the containing block for
+ * its fixed descendants, which would break the full-screen game canvas
+ * and the menu overlays - they would size themselves to the body
+ * instead of the viewport. */
 body.reduced-motion * { animation: none !important; transition: none !important; }
-body.high-contrast { filter: contrast(1.25); }
+body.high-contrast .screen,
+body.high-contrast #game-canvas { filter: contrast(1.3); }
 body.text-large { font-size: 115%; }
 
 .screen {
@@ -465,6 +472,9 @@ body.text-large { font-size: 115%; }
 .card .desc { font-size: 10px; color: var(--ink-dim); line-height: 1.45; }
 .card .row { display: flex; align-items: center; gap: 6px; }
 .card .pips { display: flex; gap: 3px; }
+/* The weapon in the second hand. */
+.btn.equip { border-color: var(--amber); color: var(--amber); }
+.btn.equip.on { background: var(--amber); color: #14181f; border-color: var(--amber); }
 .pip { width: 12px; height: 6px; background: var(--panel-2); border: 1px solid var(--line); }
 .pip.on { background: var(--chitin); border-color: var(--chitin); }
 .card .cost { font-family: var(--mono); font-size: 10px; color: var(--amber); margin-left: auto; }

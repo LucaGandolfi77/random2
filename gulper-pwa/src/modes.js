@@ -94,8 +94,12 @@
 
     S.Modes = {
         /* ENDLESS NIGHT. time 0 means the objective has no clock and no
-         * win path: the run only ends when you are hollowed out. */
-        feastLevel: function () {
+         * win path: the run only ends when you are hollowed out.
+         *
+         * The seed can be handed in. The live game picks a fresh one
+         * every night; a test asks for a fixed one, so that what it
+         * measures is the rules and not the luck of the draw. */
+        feastLevel: function (seed) {
             return {
                 id: "endless", biome: "downtown", index: 0,
                 name: "Endless Night",
@@ -104,7 +108,7 @@
                 objectiveName: "ENDLESS", boss: false,
                 noise: 1.1, density: 1.2,
                 prey: 12, foes: 2, rivals: 0,
-                seed: Date.now() & 0xffff,
+                seed: seed !== undefined ? seed : (Date.now() & 0xffff),
                 starTime: 240, starAlarm: 70, starMass: 300,
                 /* Starts the wave producer in World.create. */
                 endless: true,

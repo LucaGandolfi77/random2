@@ -9,7 +9,7 @@
  */
 "use strict";
 
-const { GU, ok, equal, report, createLevel, playLevel } = require("./harness.js");
+const { GU, ok, equal, report, createLevel, playLevel, botStep } = require("./harness.js");
 
 /* ---------- the three shrines stay out of the campaign ---------- */
 
@@ -38,7 +38,9 @@ equal(GU.Modes.levelCarry({ modeTag: "rush", biome: "docks", id: "rush-docks" })
 /* ---------- ENDLESS NIGHT ---------- */
 
 {
-    const lv = GU.Modes.feastLevel();
+    /* A fixed seed: what is measured here is the rules, not the luck
+     * of the draw. The live game deals a new one every night. */
+    const lv = GU.Modes.feastLevel(20261022);
     const w = createLevel(lv.id, { level: lv, seed: lv.seed, carry: GU.Modes.levelCarry(lv) });
 
     ok(!!w, "Endless Night builds a world from its synthetic level");
@@ -53,10 +55,10 @@ equal(GU.Modes.levelCarry({ modeTag: "rush", biome: "docks", id: "rush-docks" })
     const status = playLevel(w, 180);
     equal(status, "playing", "the bot survives three minutes without a win or a time-out");
     ok(w.endlessWave >= 40, "the district kept producing (" + w.endlessWave + " waves in 180s)");
-    ok(w.stats.peakMass > w.entryMass * 4,
+    ok(w.stats.peakMass > w.entryMass * 5,
         "the bot grew well beyond its entry mass (" +
         Math.round(w.entryMass) + " -> " + Math.round(w.stats.peakMass) + ")");
-    ok(w.stats.swallowed >= 3, "the bot was eating (" + w.stats.swallowed + " swallowed)");
+    ok(w.stats.swallowed >= 5, "the bot was eating (" + w.stats.swallowed + " swallowed)");
 }
 
 /* ---------- DAILY HUNT ---------- */
@@ -145,6 +147,27 @@ equal(GU.Modes.levelCarry({ modeTag: "rush", biome: "docks", id: "rush-docks" })
     GU.Storage.recordRush(3, 500);
     ok(GU.Storage.recordRush(5, 400).stage === 5, "the best run reaches furthest");
     ok(GU.Storage.recordRush(2, 900).mass === 900, "the best mass is kept across runs");
+}
+
+/* The feast is deterministic: the same seed gives the same night. A
+ * test that measured a random night could only ever measure the luck
+ * of the draw, and its thresholds had to be loosened until they meant
+ * nothing. */
+{
+    const run = function (seed) {
+        const lv = GU.Modes.feastLevel(seed);
+        const w = createLevel(lv.id, { level: lv, seed: lv.seed, carry: 0 });
+        const dt = 1 / 30;
+        for (let i = 0; i < 90 * 30; i++) {
+            botStep(w);
+            GU.World.update(w, dt);
+            if (w.status !== "playing") break;
+        }
+        return Math.round(w.stats.peakMass) + "/" + w.stats.swallowed + "/" + w.endlessWave;
+    };
+    const a = run(4242);
+    const b = run(4242);
+    equal(a, b, "the same night plays out the same way every time");
 }
 
 process.exit(report("modes"));
