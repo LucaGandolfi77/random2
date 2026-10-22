@@ -1189,7 +1189,6 @@
             if (world.status !== "playing") return;
             world.status = "won";
             S.Audio.play("win");
-            S.Storage.bump("runs");
             S.Haptics && S.Haptics.pulse(60);
         },
 
@@ -1199,6 +1198,10 @@
             world.failReason = why || "You failed.";
             S.Audio.play("lose");
             S.Haptics && S.Haptics.pulse(50);
+            /* A level that ended badly. The runs counter was raised when
+             * the level began, so this is the other half of the story:
+             * how many of the runs you started did you finish. */
+            S.Results && S.Results.ended(world);
         },
 
         /* How well did you do? Three stars, each one a threshold. */

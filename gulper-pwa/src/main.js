@@ -259,6 +259,9 @@
         lastModeLevel = level.modeTag ? level : null;
         S.Storage.data().lastLevel = level.id;
         S.Storage.save();
+        /* A run started. Counted here, so a run that ends badly is
+         * still a run. */
+        S.Results.begin(world);
 
         mode = "playing";
         acc = 0;
@@ -281,49 +284,21 @@
 
     function endLevel() {
         mode = "results";
-        var tag = world.modeTag;
 
-        /* The shrines settle their own accounts: no campaign stars, no
-         * shards, and never a touch of save.carry, the campaign's
-         * spine. A feast ends by hollowing out; the daily always pays
-         * its medal; the procession counts the titans that went down. */
-        if (tag) {
-            var peak = Math.round(world.stats.peakMass);
-            var extra = { mode: tag };
-            if (tag === "feast") {
-                extra.best = S.Storage.recordFeast(peak);
-            } else if (tag === "daily") {
-                extra.best = S.Storage.recordDaily(S.dailySeed(), peak);
-            } else if (tag === "rush") {
-                S.Storage.recordRush(
-                    world.status === "won" ? S.Modes.stageOf(world.level) + 1 : 0, peak);
-                extra.stage = S.Modes.stageOf(world.level) + 1;
-                extra.stages = S.Modes.stageCount;
-            }
-            S.UI.showResults(world, 0, extra);
+        /* The books are settled by S.Results, which the test suite can
+         * call: main.js only shows what was decided. */
+        var out = S.Results.settle(world);
+
+        if (out.mode) {
+            /* The shrines settle their own accounts: no campaign stars,
+             * no shards, and never a touch of save.carry, the
+             * campaign's spine. */
+            S.UI.showResults(world, 0, out);
             S.UI.refreshTitle();
             return;
         }
 
-        var stars = S.World.rate(world);
-        var gained = 0;
-        if (world.status === "won") {
-            S.Storage.recordLevel(world.level.id, stars, world.stats.peakMass, true);
-            gained += C.shards.perLevel;
-            if (stars === 3) S.Storage.recordMedal();
-        }
-        if (world.level.boss && world.status === "won") {
-            S.Storage.bump("bosses");
-            gained += C.shards.eliteBonus;
-        }
-        if (gained) S.Storage.addShards(gained);
-        /* Keep the size you grew into. The campaign's spine is that the
-         * thing which was too heavy for you last level is a mouthful
-         * this one. */
-        var save = S.Storage.data();
-        save.carry = Math.max(save.carry || 0, Math.round(world.stats.peakMass));
-        S.Storage.save();
-        S.UI.showResults(world, stars, { shards: gained });
+        S.UI.showResults(world, out.stars, out);
         S.UI.buildMap();
         S.UI.refreshTitle();
     }

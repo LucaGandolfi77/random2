@@ -383,6 +383,21 @@
                     });
                 })(def, tier);
                 r2.appendChild(bw);
+
+                /* The second hand. A weapon you own but never draw is
+                 * a weapon you did not buy. */
+                if (tier && def.id !== "lash") {
+                    var held = save.loadout === def.id;
+                    var eq = document.createElement("button");
+                    eq.className = "btn tiny equip" + (held ? " on" : "");
+                    eq.textContent = held ? "IN HAND" : "EQUIP";
+                    eq.disabled = held;
+                    eq.addEventListener("click", function () {
+                        S.Storage.setLoadout(def.id);
+                        buildGenome();
+                    });
+                    r2.appendChild(eq);
+                }
                 card2.appendChild(r2);
                 el.weaponList.appendChild(card2);
             }
@@ -460,26 +475,79 @@
         }
         if (el.codexCount) el.codexCount.textContent = total + " SWALLOWED";
 
-        /* The Bill of Fare: rivals and titans, for the curious. */
+        /* The Bill of Fare: what else lives here.
+         *
+         * A rival is not swallowed, it is fought, so it keeps its own
+         * book. A name is only revealed once you have met it: the
+         * pleasure of a codex is finding out what the thing was
+         * called. */
         if (el.codexList) {
             var head = document.createElement("h3");
             head.textContent = "BILL OF FARE";
             head.style.marginTop = "14px";
             el.codexList.appendChild(head);
-            var rivals = Object.keys(S.Species.rivals);
-            for (var r = 0; r < rivals.length; r++) {
-                var rd = S.Species.rivals[rivals[r]];
+
+            var met = 0;
+
+            var rivalIds = Object.keys(S.Species.rivals);
+            for (var r = 0; r < rivalIds.length; r++) {
+                var rd = S.Species.rivals[rivalIds[r]];
+                var seen = S.Storage.encounters(rd.id);
+                if (seen) met++;
                 var ri = document.createElement("div");
-                ri.className = "codex-item";
+                ri.className = "codex-item" + (seen ? "" : " unknown");
                 var rn = document.createElement("div");
                 rn.className = "name";
-                rn.textContent = rd.name;
+                rn.textContent = seen ? rd.name : "???";
                 var rb = document.createElement("div");
                 rb.className = "bio";
-                rb.textContent = rd.bio || "A rival predator.";
+                rb.textContent = seen
+                    ? (rd.bio || "A rival predator that lives here.")
+                    : "Not yet encountered.";
+                var rc = document.createElement("div");
+                rc.className = "count";
+                rc.textContent = seen ? (seen === 1 ? "fought once" : "fought " + seen + " times") : "";
                 ri.appendChild(rn);
                 ri.appendChild(rb);
+                ri.appendChild(rc);
                 el.codexList.appendChild(ri);
+            }
+
+            /* The titans, one per district, in the order the campaign
+             * meets them. */
+            var titanIds = [];
+            for (var t = 0; t < S.Levels.list.length; t++) {
+                var lv = S.Levels.list[t];
+                if (lv.boss && lv.bossId && titanIds.indexOf(lv.bossId) < 0) {
+                    titanIds.push(lv.bossId);
+                }
+            }
+            for (var b = 0; b < titanIds.length; b++) {
+                var bd = S.Species.bosses[titanIds[b]];
+                if (!bd) continue;
+                var bseen = S.Storage.encounters(bd.id);
+                if (bseen) met++;
+                var bi = document.createElement("div");
+                bi.className = "codex-item" + (bseen ? "" : " unknown");
+                var bn = document.createElement("div");
+                bn.className = "name";
+                bn.textContent = bseen ? bd.name : "???";
+                var bb = document.createElement("div");
+                bb.className = "bio";
+                bb.textContent = bseen
+                    ? (bd.bio || "A titan.")
+                    : "Something is in there that has not been met yet.";
+                var bc = document.createElement("div");
+                bc.className = "count";
+                bc.textContent = bseen ? "put down" : "";
+                bi.appendChild(bn);
+                bi.appendChild(bb);
+                bi.appendChild(bc);
+                el.codexList.appendChild(bi);
+            }
+
+            if (el.codexCount) {
+                el.codexCount.textContent = total + " SWALLOWED · " + met + " MET";
             }
         }
     }
@@ -487,21 +555,24 @@
     /* ===== stats screen ===== */
     function buildStats() {
         if (!el.statsList) return;
-        var save = S.Storage.data();
+        /* The numbers come from S.Results, which is the same place the
+         * books are kept: the screen cannot disagree with them. */
+        var s = S.Results.summary();
         el.statsList.innerHTML = "";
         var rows = [
-            ["LEVELS CLEARED", (function () { var c = 0; for (var k in save.levels) if (save.levels[k].cleared) c++; return c; })() + " / " + S.Levels.total()],
-            ["STARS", (function () { var s = 0; for (var k in save.levels) s += (save.levels[k].stars || 0); return s; })()],
-            ["MEDALS", save.medals || 0],
-            ["SHARDS", save.shards],
-            ["SWALLOWED", save.total || 0],
-            ["BEST MASS", save.bestMass || 0],
-            ["BOSSES", save.stats.bosses || 0],
-            ["DEATHS", save.stats.deaths || 0],
-            ["RUNS", save.stats.runs || 0],
-            ["FEAST BEST", save.feast || 0],
-            ["TITANS DOWN", (save.rush.stage || 0) + " / " + S.Modes.stageCount],
-            ["TODAY", save.daily.best || 0]
+            ["LEVELS CLEARED", s.levels + " / " + s.totalLevels],
+            ["STARS", s.stars + " / " + s.maxStars],
+            ["MEDALS", s.medals],
+            ["SHARDS", s.shards],
+            ["SWALLOWED", s.swallowed],
+            ["BEST MASS", s.bestMass],
+            ["TITANS DOWN", s.bosses],
+            ["RUNS", s.runs],
+            ["DEATHS", s.deaths],
+            ["DOWNS", s.downs],
+            ["FEAST BEST", s.feast],
+            ["PROCESSION", s.rush + " / " + s.rushTotal],
+            ["TODAY", s.daily]
         ];
         for (var i = 0; i < rows.length; i++) {
             var dt = document.createElement("dt");

@@ -27,6 +27,7 @@ const ASSETS = [
     "./src/biomes.js",
     "./src/levels.js",
     "./src/modes.js",
+    "./src/results.js",
     "./src/alarm.js",
     "./src/combat.js",
     "./src/absorb.js",

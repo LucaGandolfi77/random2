@@ -165,34 +165,40 @@
             wraith: {
                 id: "wraith", name: "Wraith", mass: 3, hp: 70, speed: 132, sight: 260, r: 11,
                 mimic: true, colors: skin("#8a95a3", "#4d5866", "#e3975a"),
-                damage: 12, range: 34, cooldown: 0.8, threat: 3
+                damage: 12, range: 34, cooldown: 0.8, threat: 3,
+                bio: "It walks among the people until you are close enough to hear it."
             },
             brooder: {
                 id: "brooder", name: "Brooder", mass: 4, hp: 120, speed: 44, sight: 220, r: 14,
                 colors: skin("#8fbf5c", "#3f6b38", "#b8d97a"),
-                damage: 8, range: 120, cooldown: 1.6, kind: "spit", spawns: true, threat: 4
+                damage: 8, range: 120, cooldown: 1.6, kind: "spit", spawns: true, threat: 4,
+                bio: "It never hunts. It makes more of itself, and it is never in a hurry."
             },
             screamer: {
                 id: "screamer", name: "Screamer", mass: 3, hp: 64, speed: 96, sight: 300, r: 12,
                 colors: skin("#b84394", "#43103c", "#f0a3d4"),
-                damage: 6, range: 200, cooldown: 1.4, kind: "spit", scream: true, threat: 4
+                damage: 6, range: 200, cooldown: 1.4, kind: "spit", scream: true, threat: 4,
+                bio: "It does not fight well. It fights the whole district instead."
             },
             champion: {
                 id: "champion", name: "Champion", mass: 5, hp: 180, speed: 118, sight: 320, r: 13,
                 colors: skin("#e3975a", "#43291a", "#ffe9a8"),
-                damage: 17, range: 40, cooldown: 0.9, kind: "melee", threat: 6
+                damage: 17, range: 40, cooldown: 0.9, kind: "melee", threat: 6,
+                bio: "It came up through the same tunnels you did. It got there first."
             },
             smallling: {
                 id: "smallling", name: "Smallling", mass: 1, hp: 18, speed: 156, sight: 200, r: 6,
                 colors: skin("#8fbf5c", "#3f6b38", "#b8d97a"),
-                damage: 5, range: 20, cooldown: 0.6, kind: "melee", threat: 1
+                damage: 5, range: 20, cooldown: 0.6, kind: "melee", threat: 1,
+                bio: "Small, fast, and it comes in numbers. One is a nuisance."
             },
             /* A stalker hides until something small moves, then takes it
              * whole if it can. It thins the crowd you need. */
             stalker: {
                 id: "stalker", name: "Stalker", mass: 2, hp: 50, speed: 120, sight: 240, r: 9,
                 mimic: true, colors: skin("#6b3d21", "#2a1a0e", "#e3975a"),
-                damage: 9, range: 30, cooldown: 0.7, kind: "melee", threat: 3
+                damage: 9, range: 30, cooldown: 0.7, kind: "melee", threat: 3,
+                bio: "It hides among the people and takes the ones that walk alone."
             }
         },
 

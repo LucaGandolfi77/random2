@@ -24,7 +24,7 @@ const SRC = path.join(__dirname, "..", "src");
 const FILES = [
     "config.js", "rng.js", "raster.js", "palette.js", "meshes.js",
     "particles.js", "storage.js", "species.js", "weapons.js", "body.js",
-    "biomes.js", "levels.js", "modes.js", "alarm.js", "combat.js", "absorb.js",
+    "biomes.js", "levels.js", "modes.js", "results.js", "alarm.js", "combat.js", "absorb.js",
     "ai.js", "world.js", "audio.js", "render.js", "input.js"
 ];
 

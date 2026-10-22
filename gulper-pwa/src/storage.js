@@ -30,6 +30,9 @@
             carry: 0,
             /* Unlocked weapon ids and their tier. */
             weapons: { lash: 1, grasp: 1 },
+            /* The weapon in the second hand. Buying a weapon you never
+             * draw is not buying a weapon. */
+            loadout: "grasp",
             /* Unlocked adaptation ids. */
             adaptations: [],
             /* Codex. preyTypeId -> count swallowed. */
@@ -47,8 +50,14 @@
             feast: 0,
             daily: { ymd: null, best: 0 },
             rush: { stage: 0, mass: 0 },
-            /* Lifetime counters. */
-            stats: { runs: 0, deaths: 0, swallowed: 0, bosses: 0, alarms: 0 },
+            /* Lifetime counters.
+             *
+             * runs   levels started, won or lost
+             * deaths levels lost
+             * downs  times you were knocked down (a down is not a
+             *        death: you get back up)
+             */
+            stats: { runs: 0, deaths: 0, downs: 0, swallowed: 0, bosses: 0, alarms: 0 },
             /* Settings. */
             settings: {
                 sound: true,
@@ -141,6 +150,13 @@
             return d.levels[id] || { stars: 0, best: 0, cleared: false };
         },
 
+        /* Record a finished level.
+         *
+         * This only records. It does not pay: the payout is decided in
+         * one place, by S.Results.settle, so the number on the results
+         * screen and the number in the purse are the same number.
+         * (They were not: the record paid per star and the settlement
+         * paid per level, and the screen showed only one of them.) */
         recordLevel: function (id, stars, mass, cleared) {
             var d = read();
             var rec = d.levels[id] || { stars: 0, best: 0, cleared: false };
@@ -149,7 +165,6 @@
             rec.cleared = rec.cleared || !!cleared;
             d.levels[id] = rec;
             if (rec.best > d.bestMass) d.bestMass = rec.best;
-            d.shards += (stars || 0) * S.CONFIG.shards.perStar;
             write();
             return rec;
         },
@@ -183,12 +198,30 @@
             return d.rush;
         },
 
-        /* A medal: a level finished with all three stars. Lifetime count. */
-        recordMedal: function () {
+        /* A medal: a level finished with all three stars.
+         *
+         * One medal per level, ever. The first time you earn three
+         * stars on a street counts; farming the same street again
+         * does not make you more decorated. */
+        recordMedal: function (levelId) {
             var d = read();
-            d.medals = (d.medals || 0) + 1;
+            if (!levelId) {
+                d.medals = (d.medals || 0) + 1;
+            } else {
+                d.medalsByLevel = d.medalsByLevel || {};
+                if (!d.medalsByLevel[levelId]) {
+                    d.medalsByLevel[levelId] = 1;
+                    d.medals = (d.medals || 0) + 1;
+                }
+            }
             write();
             return d.medals;
+        },
+
+        /* Whether this level has earned its medal. */
+        hasMedal: function (levelId) {
+            var d = read();
+            return !!(d.medalsByLevel && d.medalsByLevel[levelId]);
         },
 
         /* ===== Genome ===== */
@@ -215,6 +248,18 @@
             return d.weapons[id];
         },
 
+        /* Which weapon is in the second hand. A weapon you do not own
+         * cannot be equipped, so the choice can never point at
+         * nothing. */
+        setLoadout: function (id) {
+            var d = read();
+            if (!d.weapons[id]) return d.loadout;
+            if (id === "lash") return d.loadout;
+            d.loadout = id;
+            write();
+            return d.loadout;
+        },
+
         unlockAdaptation: function (id) {
             var d = read();
             if (d.adaptations.indexOf(id) < 0) {
@@ -235,6 +280,23 @@
             d.total = (d.total || 0) + 1;
             d.stats.swallowed = (d.stats.swallowed || 0) + 1;
             write();
+        },
+
+        /* Something that was not a person: a rival or a titan, met and
+         * dealt with. The Bill of Fare keeps its own book, because a
+         * rival is not swallowed - it is fought. */
+        noteEncounter: function (typeId) {
+            var d = read();
+            d.met = d.met || {};
+            d.met[typeId] = (d.met[typeId] || 0) + 1;
+            write();
+            return d.met[typeId];
+        },
+
+        /* How many of a rival or titan have been met. */
+        encounters: function (typeId) {
+            var d = read();
+            return (d.met && d.met[typeId]) || 0;
         },
 
         /* ===== Stats ===== */

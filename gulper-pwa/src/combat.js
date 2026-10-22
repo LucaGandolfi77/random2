@@ -170,6 +170,9 @@
              * cut it down - what matters is that it is over. */
             if (e.kind === "boss" || e.kind === "rival") {
                 S.Body.addMass(world.player, e.mass * C.growth.massToBiomass * 0.5);
+                /* The Bill of Fare keeps its own book: a rival is not
+                 * swallowed, it is fought. */
+                if (e.def && e.def.id) S.Storage.noteEncounter(e.def.id);
                 world.onSwallow && world.onSwallow(e);
             }
 
@@ -217,7 +220,9 @@
             S.Body.loseMass(p, C.growth.deathMassLoss);
             S.Audio.play("lose");
             S.Alarm.notice(world, 18, true);
-            S.Storage.bump("deaths");
+            /* A down is not a death: you get up again, smaller. The
+             * deaths counter belongs to the level you failed. */
+            S.Storage.bump("downs");
 
             /* You lose your grip on whatever you were holding. */
             if (p.gripping) {

@@ -91,6 +91,41 @@ if (assets) {
     }
 }
 
+/* ---------- the harness loads what the page loads ---------- */
+
+/* A module that the page loads but the harness does not is a module
+ * the tests never run: a new src file can be added to index.html,
+ * forgotten in the harness, and every suite still passes against the
+ * old code. The two lists must agree, except for the two modules that
+ * need a browser and cannot be loaded under node. */
+{
+    const harness = fs.readFileSync(path.join(ROOT, "tests", "harness.js"), "utf8");
+    const block = harness.match(/const FILES = \[([\s\S]*?)\];/);
+    ok(!!block, "the harness has a file list");
+    if (block) {
+        const loaded = (block[1].match(/"([^"]+\.js)"/g) || [])
+            .map(function (q) { return q.replace(/"/g, ""); });
+        const browserOnly = ["ui.js", "main.js"];
+        for (const src of scripts) {
+            if (!src.startsWith("src/")) continue;
+            const name = src.replace("src/", "");
+            if (browserOnly.indexOf(name) >= 0) continue;
+            ok(loaded.indexOf(name) >= 0, "the harness loads " + name);
+        }
+        for (const name of loaded) {
+            ok(scripts.indexOf("src/" + name) >= 0, "the page loads " + name);
+        }
+        /* And they must be in the same order: the harness concatenates
+         * them, and a module that reads another at load time needs it
+         * to have come first. */
+        const order = scripts
+            .map(function (s) { return s.replace("src/", ""); })
+            .filter(function (n) { return loaded.indexOf(n) >= 0; });
+        equal(order.join(","), loaded.join(","),
+            "the harness loads the modules in the order the page does");
+    }
+}
+
 /* ---------- the manifest is complete ---------- */
 
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8"));
