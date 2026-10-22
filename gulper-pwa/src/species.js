@@ -186,6 +186,13 @@
                 id: "smallling", name: "Smallling", mass: 1, hp: 18, speed: 156, sight: 200, r: 6,
                 colors: skin("#8fbf5c", "#3f6b38", "#b8d97a"),
                 damage: 5, range: 20, cooldown: 0.6, kind: "melee", threat: 1
+            },
+            /* A stalker hides until something small moves, then takes it
+             * whole if it can. It thins the crowd you need. */
+            stalker: {
+                id: "stalker", name: "Stalker", mass: 2, hp: 50, speed: 120, sight: 240, r: 9,
+                mimic: true, colors: skin("#6b3d21", "#2a1a0e", "#e3975a"),
+                damage: 9, range: 30, cooldown: 0.7, kind: "melee", threat: 3
             }
         },
 

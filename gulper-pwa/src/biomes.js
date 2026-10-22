@@ -71,7 +71,7 @@
             fog: 0.24,
             noise: 1.15, density: 0.95, speed: 1.0,
             props: { container: 8, crate: 12, barrel: 14, lamp: 6, rubble: 10, console: 6, pillar: 6 },
-            hazards: { fence: 2, vent: 5 },
+            hazards: { fence: 2, vent: 5, spill: 2 },
             brief: "The floor is hot enough to melt a boot. It has melted worse."
         },
         hive: {
@@ -85,7 +85,7 @@
             /* The hive is the one place with no gravity worth speaking of. */
             lowG: 0.72,
             props: { container: 10, crate: 12, barrel: 8, lamp: 10, rubble: 6, console: 8, pillar: 10 },
-            hazards: { fence: 3, vent: 0 },
+            hazards: { fence: 3, vent: 0, spill: 1 },
             brief: "Ninety minutes of orbit. Everything drifts, including you."
         }
     };
@@ -190,6 +190,15 @@
                 x: rng.range(arena.x + 70, arena.x + arena.w - 70),
                 y: rng.range(arena.y + 70, arena.y + arena.h - 70),
                 r: rng.range(22, 34), t: rng.range(0, 6), period: rng.range(3.5, 6.5)
+            });
+        }
+        var scount = Math.round((haz.spill || 0) * mult);
+        for (var s = 0; s < scount; s++) {
+            hazards.push({
+                kind: "spill",
+                x: rng.range(arena.x + 90, arena.x + arena.w - 90),
+                y: rng.range(arena.y + 90, arena.y + arena.h - 90),
+                r: rng.range(34, 52), t: 0
             });
         }
 

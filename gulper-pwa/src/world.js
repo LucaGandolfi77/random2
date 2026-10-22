@@ -1057,6 +1057,14 @@
                             S.Combat.damagePlayer(world, 7, { burn: true });
                         }
                     }
+                } else if (h.kind === "spill") {
+                    /* A standing pool. It ticks on contact. */
+                    if (S.dist2(p.x, p.y, h.x, h.y) < h.r * h.r) {
+                        if (p.hazardCd <= 0) {
+                            p.hazardCd = 0.9;
+                            S.Combat.damagePlayer(world, 4, { stun: 0.15 });
+                        }
+                    }
                 }
             }
         },

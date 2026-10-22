@@ -741,6 +741,12 @@
                     S.Raster.ditherBlend(buf, Math.floor(c.x - half), y, Math.ceil(half * 2), 1,
                         S.Palette.snap(world.biome.palette, "#f98a2c"), 0.8, C.render.bayer);
                 }
+            } else if (h.kind === "spill") {
+                var cs = toScreen(h.x, h.y, 0);
+                var rads = h.r / C.camera.unitsPerPixel;
+                S.Raster.ditherBlend(buf, Math.floor(cs.x - rads), Math.floor(cs.y - rads),
+                    Math.ceil(rads * 2), Math.ceil(rads * 2),
+                    S.Palette.snap(world.biome.palette, "#4fa87a"), 0.45, C.render.bayer);
             }
         }
     }

@@ -92,10 +92,11 @@ Endless Night, Daily Hunt, The Procession, plus this README. The shrines
 each carry their own biomass and their own records, so they never disturb,
 and are never disturbed by, the campaign's spine.
 
-### Phase 2 — Rival predators and hazard patches (planned)
+### Phase 2 — Rival predators and hazard patches ✅ (shipped)
 
-Predators that eat the same prey you do, biome hazard patches, and the
-counter-play around them.
+A new rival predator, the Stalker (hides, then thins the crowd you need),
+and a new biome hazard, the acid spill (a standing pool that burns on
+contact). Docks, hive and foundry carry them; the campaign still clears.
 
 ### Phase 3 — Season Two: Sunken Cathedral (planned)
 

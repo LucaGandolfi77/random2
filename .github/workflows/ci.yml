@@ -136,6 +136,7 @@ jobs:
           node gulper-pwa/tests/boot.test.js
           node gulper-pwa/tests/sim.test.js
           node gulper-pwa/tests/modes.test.js
+          node gulper-pwa/tests/phase2.test.js
 
       - name: Analysis tooling tests
         run: |
