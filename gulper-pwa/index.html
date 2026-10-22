@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- ===== SEO =====
+         The description tracks what the game actually ships: six weapons,
+         forty-two levels, six biomes, and a growth system built on eating
+         people. A meta description that still advertises an earlier build
+         is worse than none, because a snippet is a promise. -->
+    <title>GULPER — free tentacle horror game in the browser</title>
+    <meta name="description" content="GULPER is a free browser game. You are a tentacled alien: capture people, engulf them whole, grow, change weapons and attack modes, and fight the response across 42 levels in 6 biomes. Fully offline.">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="author" content="Luca Gandolfi">
+    <meta name="copyright" content="© 2026 Luca Gandolfi">
+    <meta name="theme-color" content="#0a0c10">
+    <meta name="color-scheme" content="dark">
+
+    <link rel="canonical" href="https://lucagandolfi77.github.io/random2/gulper-pwa/">
+    <link rel="license" href="https://github.com/LucaGandolfi77/random2/blob/main/LICENSE">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GULPER">
+
+    <!-- 1200x630 is the one size every platform crops to. -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GULPER">
+    <meta property="og:title" content="GULPER — free tentacle horror game in the browser">
+    <meta property="og:description" content="You are a tentacled alien. Capture people, engulf them whole, grow, swap weapons and attack modes, and fight the response across 42 levels. A free PWA, fully offline.">
+    <meta property="og:url" content="https://lucagandolfi77.github.io/random2/gulper-pwa/">
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/gulper-pwa/og-cover.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="GULPER — a low-poly tentacled alien on a rust-coloured dock at night, pixel art">
+    <meta property="og:locale" content="en">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GULPER — free tentacle horror game in the browser">
+    <meta name="twitter:description" content="Capture people, engulf them whole, grow, swap weapons. 42 levels, 6 biomes, fully offline.">
+    <meta name="twitter:image" content="https://lucagandolfi77.github.io/random2/gulper-pwa/og-cover.png">
+
+    <!-- VideoGame rather than WebApplication, because it is a game and
+         the rich-result rules differ. There is deliberately NO
+         aggregateRating: an invented rating is fabricated data. -->
+    <script type="application/ld+json">{
+      "@context": "https://schema.org",
+      "@graph": [{
+        "@type": "VideoGame",
+        "@id": "https://lucagandolfi77.github.io/random2/gulper-pwa/#game",
+        "name": "GULPER",
+        "alternateName": "GULPER: The Engulfing",
+        "url": "https://lucagandolfi77.github.io/random2/gulper-pwa/",
+        "image": "https://lucagandolfi77.github.io/random2/gulper-pwa/og-cover.png",
+        "description": "A free browser action game. You play a tentacled alien that captures people and engulfs them whole in order to grow. Six weapons with different attack modes, forty-two levels across six biomes, and a response that escalates the more you take.",
+        "genre": ["Action", "Arcade", "Horror", "Survival"],
+        "gamePlatform": "Web browser",
+        "playMode": "SinglePlayer",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any modern browser",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "datePublished": "2026-10-22",
+        "author": {
+          "@type": "Person",
+          "name": "Luca Gandolfi",
+          "url": "https://github.com/LucaGandolfi77"
+        },
+        "publisher": { "@type": "Person", "name": "Luca Gandolfi" },
+        "sameAs": [
+          "https://github.com/LucaGandolfi77/random2/tree/main/gulper-pwa"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        }
+      }, {
+        "@type": "WebSite",
+        "@id": "https://lucagandolfi77.github.io/random2/#website",
+        "name": "PWA Arcade",
+        "url": "https://lucagandolfi77.github.io/random2/"
+      }]
+    }</script>
+</head>
+<body class="in-menu">
+
+    <!-- One landmark for the whole app. The canvas and the screens are
+         all "the page" to anything reading it. -->
+    <main id="app">
+
+    <canvas id="game-canvas" aria-label="GULPER battlefield"></canvas>
+
+    <!-- ===== HUD ===== -->
+    <div id="hud" class="hidden" aria-hidden="true">
+
+        <div class="hud-top">
+            <div class="hud-left">
+                <div class="chip-row">
+                    <span class="chip stage" id="hud-stage">SPAWN</span>
+                    <span class="chip mass" id="hud-mass">12</span>
+                    <span class="chip lvl" id="hud-level">LV 1</span>
+                </div>
+                <div class="bar bio" role="progressbar" aria-label="Biomass" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div id="bio-fill" class="fill"></div>
+                    <span id="bio-text" class="bar-text">12</span>
+                </div>
+                <div class="bar hp" role="progressbar" aria-label="Integrity" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                    <div id="hp-fill" class="fill"></div>
+                    <span id="hp-text" class="bar-text">46 / 46</span>
+                </div>
+                <div class="bar stam" role="progressbar" aria-label="Stamina" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                    <div id="stam-fill" class="fill"></div>
+                </div>
+            </div>
+
+            <div class="hud-mid">
+                <div id="obj-label" class="obj-label">ABSORB</div>
+                <div id="obj-progress" class="obj-progress">0 / 8</div>
+                <div id="obj-timer" class="obj-timer">3:00</div>
+            </div>
+
+            <div class="hud-right">
+                <div class="alarm-wrap">
+                    <span class="lbl">ALARM</span>
+                    <div class="bar alarm" role="progressbar" aria-label="Alarm" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div id="alarm-fill" class="fill"></div>
+                        <span id="alarm-text" class="bar-text">0</span>
+                    </div>
+                </div>
+                <canvas id="minimap" width="104" height="70" aria-label="Minimap"></canvas>
+            </div>
+        </div>
+
+        <!-- The prompt that only appears when something can be eaten. -->
+        <div id="swallow-prompt" class="prompt hidden">SWALLOW</div>
+        <div id="toast" class="toast"></div>
+        <div id="flash" class="flash"></div>
+
+        <div class="hud-bottom">
+            <div id="stick" class="stick" aria-hidden="true"><div id="stick-knob" class="knob"></div></div>
+
+            <div id="weapon-slots" class="weapon-slots"></div>
+
+            <div id="action-pad">
+                <button id="btn-frenzy" class="abtn small frenzy" aria-label="Feed frenzy (F)">FRENZY</button>
+                <button id="btn-swap" class="abtn small" aria-label="Swap weapon (Q)">SWAP</button>
+                <button id="btn-swallow" class="abtn swallow hidden" aria-label="Swallow (Space)">SWALLOW</button>
+                <button id="btn-attack" class="abtn attack" aria-label="Attack">ATTACK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCREENS ===== -->
+
+    <section id="screen-title" class="screen">
+        <div class="panel title-panel">
+            <h1 class="logo">GULPER</h1>
+            <p class="tagline">You are a small hungry thing with eight tentacles and a mouth that is bigger than you are. Take people whole. Get bigger. Take heavier things.</p>
+            <div class="menu">
+                <button id="btn-play" class="btn primary">CAMPAIGN</button>
+                <button id="btn-continue" class="btn">CONTINUE</button>
+                <button id="btn-daily" class="btn">DAILY HUNT</button>
+                <button id="btn-endless" class="btn">ENDLESS NIGHT</button>
+                <button id="btn-genome" class="btn">GENOME</button>
+                <button id="btn-codex" class="btn">CODEX</button>
+                <button id="btn-settings" class="btn">SETTINGS</button>
+            </div>
+            <p id="title-stats" class="fine-print"></p>
+        </div>
+    </section>
+
+    <section id="screen-map" class="screen hidden">
+        <div class="panel wide">
+            <header class="panel-head">
+                <h2>CAMPAIGN</h2>
+                <button class="btn tiny" data-back="title">BACK</button>
+            </header>
+            <div id="biome-list" class="biome-list"></div>
+        </div>
+    </section>
+
+    <section id="screen-genome" class="screen hidden">
+        <div class="panel wide">
+            <header class="panel-head">
+                <h2>GENOME</h2>
+                <span class="shards" id="genome-shards">0 SHARDS</span>
+                <button class="btn tiny" data-back="title">BACK</button>
+            </header>
+            <div class="genome-grid">
+                <section>
+                    <h3>ANATOMY</h3>
+                    <div id="track-list" class="track-list"></div>
+                </section>
+                <section>
+                    <h3>WEAPONS</h3>
+                    <div id="weapon-list" class="weapon-list"></div>
+                </section>
+                <section>
+                    <h3>ADAPTATIONS</h3>
+                    <div id="adapt-list" class="adapt-list"></div>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <section id="screen-codex" class="screen hidden">
+        <div class="panel wide">
+            <header class="panel-head">
+                <h2>CODEX</h2>
+                <span class="shards" id="codex-count">0</span>
+                <button class="btn tiny" data-back="title">BACK</button>
+            </header>
+            <p class="fine-print">Everything you have swallowed, and what it was doing when you got it.</p>
+            <div id="codex-list" class="codex-list"></div>
+        </div>
+    </section>
+
+    <section id="screen-results" class="screen hidden">
+        <div class="panel">
+            <h2 id="result-title">LEVEL CLEAR</h2>
+            <p id="result-brief" class="fine-print"></p>
+            <div id="result-stars" class="stars" aria-label="Stars">☆☆☆</div>
+            <dl id="result-stats" class="stat-list"></dl>
+            <div id="result-adapt" class="adapt-offer"></div>
+            <div class="menu row">
+                <button id="btn-result-next" class="btn primary">NEXT LEVEL</button>
+                <button id="btn-result-retry" class="btn">RETRY</button>
+                <button id="btn-result-map" class="btn">MAP</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="screen-pause" class="screen hidden">
+        <div class="panel">
+            <h2>PAUSED</h2>
+            <div class="menu">
+                <button id="btn-resume" class="btn primary">RESUME</button>
+                <button id="btn-pause-restart" class="btn">RESTART LEVEL</button>
+                <button id="btn-pause-quit" class="btn">LEAVE LEVEL</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="screen-settings" class="screen hidden">
+        <div class="panel">
+            <header class="panel-head">
+                <h2>SETTINGS</h2>
+                <button class="btn tiny" data-back="title">BACK</button>
+            </header>
+            <div class="settings-list">
+                <label class="setting"><input type="checkbox" id="set-sound"> <span>Sound</span></label>
+                <label class="setting"><input type="checkbox" id="set-music"> <span>Music</span></label>
+                <label class="setting"><input type="checkbox" id="set-haptics"> <span>Haptics</span></label>
+                <label class="setting"><input type="checkbox" id="set-aim"> <span>Aim assist</span></label>
+                <label class="setting"><input type="checkbox" id="set-damage"> <span>Damage numbers</span></label>
+                <label class="setting"><span>Quality</span>
+                    <select id="set-quality">
+                        <option value="auto">Auto</option>
+                        <option value="high">High</option>
+                        <option value="med">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </label>
+                <label class="setting"><span>Pixel size</span>
+                    <select id="set-pixel">
+                        <option value="auto">Auto</option>
+                        <option value="2">Small</option>
+                        <option value="3">Medium</option>
+                        <option value="4">Large</option>
+                    </select>
+                </label>
+            </div>
+            <div class="menu row">
+                <button id="btn-reset-save" class="btn danger">ERASE SAVE</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="screen-intro" class="screen hidden">
+        <div class="panel">
+            <span class="eyebrow" id="intro-biome">RUST DOCKS</span>
+            <h2 id="intro-name">Slack Water</h2>
+            <p id="intro-brief" class="brief"></p>
+            <p id="intro-objective" class="objective"></p>
+            <div id="intro-adapt" class="adapt-offer"></div>
+            <div class="menu row">
+                <button id="btn-intro-go" class="btn primary">HUNT</button>
+                <button id="btn-intro-back" class="btn">BACK</button>
+            </div>
+        </div>
+    </section>
+
+    </main>
+
+    <script src="../shared/arcade.js"></script>
+    <script src="src/config.js"></script>
+    <script src="src/rng.js"></script>
+    <script src="src/raster.js"></script>
+    <script src="src/palette.js"></script>
+    <script src="src/meshes.js"></script>
+    <script src="src/particles.js"></script>
+    <script src="src/storage.js"></script>
+    <script src="src/species.js"></script>
+    <script src="src/weapons.js"></script>
+    <script src="src/body.js"></script>
+    <script src="src/biomes.js"></script>
+    <script src="src/levels.js"></script>
+    <script src="src/alarm.js"></script>
+    <script src="src/combat.js"></script>
+    <script src="src/absorb.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/world.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/input.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

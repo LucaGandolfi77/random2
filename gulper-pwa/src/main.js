@@ -1,0 +1,376 @@
+/*
+ * GULPER - boot, the state machine and the loop.
+ *
+ * One loop drives everything. The world is stepped at a fixed rate so
+ * the physics never depend on the frame rate, and the renderer draws
+ * whatever the world currently is - including the attract scene behind
+ * the menus, which is a real level with the player standing still in it.
+ */
+(function (S) {
+    "use strict";
+
+    var C = S.CONFIG;
+
+    var canvas = null;
+    var world = null;
+    var mode = "menu";           /* menu | intro | playing | paused | results */
+    var pendingLevel = null;
+    var pendingSeed = undefined;
+    var pendingAdaptations = null;
+    var lastLevelId = null;
+
+    var lastT = 0;
+    var acc = 0;
+
+    var perf = { frames: 0, total: 0, tier: "high", locked: false, samples: [] };
+
+    /* ===== boot ===== */
+    function boot() {
+        canvas = document.getElementById("game-canvas");
+        if (!canvas) return;
+
+        S.Render.init(canvas);
+        applySettings();
+
+        S.Input.bind({
+            onAttack: function () { },
+            onSwallow: function () { },
+            onSwap: function () { },
+            onPause: function () {
+                if (mode === "playing") pause();
+                else if (mode === "paused") resume();
+            }
+        });
+
+        S.UI.init({
+            onPlay: function () { S.UI.show("map"); },
+            onContinue: function () {
+                var id = S.Levels.firstUncleared();
+                if (id) selectLevel(id);
+            },
+            onDaily: startDaily,
+            onEndless: startEndless,
+            onGenome: function () { S.UI.show("genome"); },
+            onCodex: function () { S.UI.show("codex"); },
+            onSettings: function () { S.UI.show("settings"); },
+            onLevelSelect: selectLevel,
+            onAdaptationPick: pickAdaptation,
+            onIntroGo: function () { if (pendingLevel) startLevel(pendingLevel, pendingSeed, null); },
+            onResume: resume,
+            onRestart: function () { if (lastLevelId) startLevel(S.Levels.get(lastLevelId)); },
+            onQuit: function () { mode = "menu"; enterMenu(); },
+            onNext: function () {
+                var next = S.Levels.next(lastLevelId);
+                if (next) selectLevel(next.id);
+                else S.UI.show("map");
+            },
+            onRetry: function () { if (lastLevelId) startLevel(S.Levels.get(lastLevelId)); },
+            onMap: function () { S.UI.show("map"); mode = "menu"; },
+            onResetSave: function () { applySettings(); },
+            onSetting: function (key, value, prop) {
+                applySettings();
+                if (prop === "pixel") {
+                    var size = value === "auto" ? null : parseInt(value, 10);
+                    S.Render.resize(size);
+                }
+                if (key === "quality" && value !== "auto") {
+                    perf.locked = true;
+                    S.Render.setQuality(value);
+                }
+                if (key === "quality" && value === "auto") {
+                    perf.locked = false;
+                }
+            },
+            onScreen: function (name) {
+                if (name === "none") {
+                    S.Input.setVisible(true);
+                } else {
+                    S.Input.setVisible(false);
+                }
+            }
+        });
+
+        window.addEventListener("resize", onResize);
+        window.addEventListener("orientationchange", function () {
+            setTimeout(onResize, 120);
+        });
+        document.addEventListener("visibilitychange", function () {
+            if (document.hidden && mode === "playing") pause();
+        });
+
+        /* The audio context needs a gesture on mobile. */
+        var unlock = function () {
+            S.Audio.unlock();
+            window.removeEventListener("pointerdown", unlock);
+            window.removeEventListener("keydown", unlock);
+        };
+        window.addEventListener("pointerdown", unlock);
+        window.addEventListener("keydown", unlock);
+
+        onResize();
+        enterMenu();
+
+        lastT = performance.now();
+        requestAnimationFrame(loop);
+    }
+
+    function onResize() {
+        var save = S.Storage.data();
+        var size = save.settings.pixelSize;
+        var forced = (size && size !== "auto") ? parseInt(size, 10) : null;
+        S.Render.resize(forced);
+    }
+
+    function applySettings() {
+        var save = S.Storage.data();
+        var s = save.settings;
+        S.Audio.setSettings({ sound: s.sound !== false, music: s.music !== false });
+        if (s.quality && s.quality !== "auto") {
+            perf.locked = true;
+            S.Render.setQuality(s.quality);
+        } else {
+            perf.locked = false;
+            S.Render.setQuality("high");
+        }
+    }
+
+    /* ===== the attract scene =====
+     * The menus sit over a real level with real people wandering in it.
+     * It costs nothing to keep, because the simulation is already
+     * running, and it means the first thing a player sees is the game. */
+    function enterMenu() {
+        mode = "menu";
+        world = S.World.create("docks-1", { seed: 20261022 });
+        if (world) {
+            world.attract = true;
+            world.alarmMult = 0;
+            world.player.x = world.arena.x + world.arena.w * 0.5;
+            world.player.y = world.arena.y + world.arena.h * 0.55;
+        }
+        S.Audio.music("docks");
+        S.UI.show("title");
+    }
+
+    /* ===== the flow ===== */
+    function selectLevel(id) {
+        var level = S.Levels.get(id);
+        if (!level) return;
+        pendingLevel = level;
+        pendingSeed = undefined;
+        pendingAdaptations = S.Body.offerAdaptations(3, S.Rng(Date.now() & 0xffff));
+        S.UI.showIntro(level, pendingAdaptations);
+        mode = "intro";
+    }
+
+    function pickAdaptation(id) {
+        /* Choosing an adaptation unlocks it for good. The first level
+         * therefore teaches the mechanic, and the pool grows from
+         * there. */
+        S.Storage.unlockAdaptation(id);
+        S.Storage.save();
+        if (pendingLevel) startLevel(pendingLevel, pendingSeed, id);
+    }
+
+    function startDaily() {
+        var seed = S.dailySeed();
+        var ids = S.Levels.list.map(function (l) { return l.id; });
+        var pick = ids[seed % ids.length];
+        pendingLevel = S.Levels.get(pick);
+        pendingSeed = seed;
+        pendingAdaptations = S.Body.offerAdaptations(3, S.Rng(seed));
+        S.UI.showIntro(pendingLevel, pendingAdaptations);
+        mode = "intro";
+    }
+
+    function startEndless() {
+        /* ENDLESS NIGHT is a survive level that never stops producing. */
+        var level = {
+            id: "endless", biome: "downtown", index: 0,
+            name: "Endless Night", brief: "The district keeps producing. You keep taking.",
+            objective: { type: "survive", count: 1, time: 240, label: "SURVIVE" },
+            objectiveName: "ENDLESS", boss: false,
+            noise: 1.1, density: 1.2,
+            prey: 12, foes: 2, rivals: 0,
+            seed: Date.now() & 0xffff,
+            starTime: 240, starAlarm: 70, starMass: 300
+        };
+        pendingLevel = level;
+        pendingSeed = undefined;
+        pendingAdaptations = S.Body.offerAdaptations(3, S.Rng(Date.now() & 0xffff));
+        S.UI.showIntro(level, pendingAdaptations);
+        mode = "intro";
+    }
+
+    function startLevel(level, seed, adaptId) {
+        if (!level) return;
+        var save = S.Storage.data();
+        var adapt = adaptId ? [adaptId] : [];
+
+        world = S.World.create(level.id, {
+            seed: seed,
+            adaptations: adapt,
+            weapons: save.weapons,
+            slots: S.Body.loadout(save),
+            difficulty: "standard",
+            showDamage: save.settings.showDamage !== false
+        });
+        if (!world) return;
+
+        /* The endless variant is not a real level, so it is patched in
+         * rather than looked up. */
+        if (level.id === "endless") {
+            world.level = level;
+            world.biome = S.Biomes[level.biome];
+            world.endless = true;
+            world.endlessT = 4;
+            world.endlessWave = 0;
+            world.objective.type = "survive";
+            world.objective.need = 1;
+            world.objective.count = 0;
+            world.timeLeft = level.objective.time;
+            world.colors = world.colors || {};
+            var layout = S.Biomes.layout(level.biome, world.rng, world.arena, 1);
+            world.props = layout.props;
+            world.hazards = layout.hazards;
+        }
+
+        world.aimAssist = save.settings.aimAssist !== false;
+        world.onSwallow = function (e) { S.World.onSwallow(world, e); };
+        world.onStage = function (stage) {
+            S.UI.toast("EVOLVED — " + stage.name.toUpperCase());
+            S.Render.shake(4);
+        };
+        world.onLockdown = function () {
+            S.UI.toast("LOCKDOWN");
+            S.Render.shake(5);
+        };
+
+        lastLevelId = level.id;
+        S.Storage.data().lastLevel = level.id;
+        S.Storage.save();
+
+        mode = "playing";
+        acc = 0;
+        S.Audio.music(world.biome.id);
+        S.UI.show("none");
+    }
+
+    function pause() {
+        if (mode !== "playing") return;
+        mode = "paused";
+        S.UI.show("pause");
+    }
+
+    function resume() {
+        if (mode !== "paused") return;
+        mode = "playing";
+        S.UI.show("none");
+        lastT = performance.now();
+    }
+
+    function endLevel() {
+        mode = "results";
+        var stars = S.World.rate(world);
+        var gained = 0;
+        if (world.status === "won") {
+            S.Storage.recordLevel(world.level.id, stars, world.stats.peakMass, true);
+            gained += C.shards.perLevel;
+        }
+        if (world.level.boss && world.status === "won") {
+            S.Storage.bump("bosses");
+            gained += C.shards.eliteBonus;
+        }
+        if (gained) S.Storage.addShards(gained);
+        /* Keep the size you grew into. The campaign's spine is that the
+         * thing which was too heavy for you last level is a mouthful
+         * this one. */
+        var save = S.Storage.data();
+        save.carry = Math.max(save.carry || 0, Math.round(world.stats.peakMass));
+        S.Storage.save();
+        S.UI.showResults(world, stars, { shards: gained });
+        S.UI.buildMap();
+        S.UI.refreshTitle();
+    }
+
+    /* ===== the loop ===== */
+    function loop(t) {
+        requestAnimationFrame(loop);
+        var dt = (t - lastT) / 1000;
+        lastT = t;
+        if (!isFinite(dt) || dt < 0) dt = 0;
+        if (dt > C.maxDt) dt = C.maxDt;
+
+        if (world) {
+            if (mode === "playing") {
+                S.Input.read(world);
+                acc += dt;
+                var steps = 0;
+                while (acc >= C.fixedStep && steps < C.maxCatchupSteps) {
+                    S.World.update(world, C.fixedStep);
+                    acc -= C.fixedStep;
+                    steps++;
+                }
+                if (steps >= C.maxCatchupSteps) acc = 0;
+                if (world.status !== "playing") endLevel();
+            } else if (mode === "menu" || mode === "intro" || mode === "results") {
+                /* The attract scene keeps moving behind the menus. */
+                world.input.mx = 0;
+                world.input.my = 0;
+                world.input.attack = false;
+                world.input.attackHeld = false;
+                world.input.swallow = false;
+                world.input.swap = false;
+                world.input.frenzy = false;
+                S.World.update(world, dt);
+                world.alarm = 0;
+            }
+
+            S.Render.draw(world, dt);
+            if (mode === "playing") S.UI.updateHud(world);
+        }
+
+        measure(dt);
+    }
+
+    /* Automatic quality.
+     *
+     * The user should not have to think about this. A budget phone gets
+     * a simpler-looking game, not a broken one, and a tier that could
+     * only be all-or-nothing would have forced exactly that choice. */    function measure(dt) {
+        if (perf.locked) return;
+        perf.frames++;
+        perf.total += dt;
+        if (perf.frames < C.perfSampleFrames) return;
+
+        var avg = (perf.total / perf.frames) * 1000;
+        perf.frames = 0;
+        perf.total = 0;
+
+        if (avg > C.perfDowngradeMs && perf.tier !== "low") {
+            perf.tier = perf.tier === "high" ? "med" : "low";
+            S.Render.setQuality(perf.tier);
+        } else if (avg < C.perfUpgradeMs && perf.tier !== "high") {
+            perf.tier = perf.tier === "low" ? "med" : "high";
+            S.Render.setQuality(perf.tier);
+        }
+    }
+
+    /* The chosen adaptation is handed over through a global because the
+     * intro screen and the level start are two separate events and a
+     * closure would have meant threading it through both. */
+    window.__gulperPicked = null;
+
+    S.Main = {
+        boot: boot,
+        startLevel: startLevel,
+        selectLevel: selectLevel,
+        world: function () { return world; },
+        mode: function () { return mode; }
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+    } else {
+        boot();
+    }
+})(window.GU = window.GU || {});

@@ -1173,6 +1173,21 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="arcade action survival" data-playable="gulper-pwa/" style="--c1:#7fd6c2; --c2:#04131f; --tile-glow:rgba(127,214,194,.5); --shimmer-delay:2.35s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#0b3b4a,#04131f)">&#128025;</div>
+            <h2>GULPER</h2>
+          </div>
+          <p class="tagline">You are the thing in the water: a tentacled predator that swallows people whole and grows with every meal. 42 levels across six drowned districts, six weapons of grasping biology, and a response force that never stops coming.</p>
+          <div class="chips"><span class="chip">ARCADE</span><span class="chip">KAIJU</span><span class="chip">42 LEVELS</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="gulper-pwa/">&#9654;&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/gulper-pwa" aria-label="GULPER source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="sim puzzle educational" data-playable="census-pwa/" style="--c1:#c9a227; --c2:#8a3b3b; --tile-glow:rgba(201,162,39,.5); --shimmer-delay:.95s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#c9a227,#8a3b3b)">&#128203;</div>
@@ -2224,7 +2239,8 @@
       "ironfall-pwa":    ["grid",    { period: 4.4 }],
       "pulse-pwa":       ["pulse",   { period: 3.8 }],
       "sartoria-pwa":    ["runway",  { period: 6.5 }],
-      "pixel-cup-pwa":   ["arc",     { period: 2.4 }]
+      "pixel-cup-pwa":   ["arc",     { period: 2.4 }],
+      "gulper-pwa":      ["vortex",  { period: 5.2 }]
     };
 
     function tilePalette(card) {
@@ -2672,6 +2688,7 @@
       { slug: "ironfall-pwa/",   name: "IRONFALL",    emoji: "♖", key: "ironfall-pwa" },
       { slug: "pulse-pwa/",      name: "PULSE",       emoji: "🎵", key: "pulse-pwa" },
       { slug: "pixel-cup-pwa/",  name: "PIXEL CUP",   emoji: "⚽", key: "pixel-cup-pwa" },
+      { slug: "gulper-pwa/",     name: "GULPER",      emoji: "🐙", key: "gulper-pwa" },
     ];
     function readJSON(key) { return R2.loadJSON(key, null); }
     function timeAgo(ts) {

@@ -126,6 +126,15 @@ jobs:
           # would.
           node pixel-cup-pwa/tests/sim.test.mjs
           node pixel-cup-pwa/tests/boot.test.mjs
+          # GULPER: the content tables (42 levels, 6 weapons, 6 biomes), the
+          # renderer's draw calls and NaN guards, a full boot against a fake
+          # DOM, and a deliberately simple bot that must finish every one of
+          # the 42 levels in a headless campaign. The bot is the balance
+          # proof: if a level cannot be finished, the numbers are wrong.
+          node gulper-pwa/tests/content.test.js
+          node gulper-pwa/tests/render.test.js
+          node gulper-pwa/tests/boot.test.js
+          node gulper-pwa/tests/sim.test.js
 
       - name: Analysis tooling tests
         run: |
@@ -216,6 +225,14 @@ jobs:
           out=$(node pixel-cup-pwa/smoke.mjs http://localhost:8099/pixel-cup-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  pixel-cup-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # GULPER plays a level: it opens the campaign map, starts a level,
+          # lets the bot hunt for a few seconds and checks the HUD clock.
+          out=$(node gulper-pwa/smoke.mjs http://localhost:8099/gulper-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  gulper-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3

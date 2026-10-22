@@ -41,6 +41,7 @@
   - [PULSE](#pulse)
   - [PIXEL CUP '96](#pixel-cup-96)
   - [CENSUS](#census)
+  - [GULPER](#gulper)
 - [The tools](#the-tools)
   - [EADS Studio](#eads-studio)
 - [The portfolio page](#the-portfolio-page)
@@ -98,6 +99,7 @@
 | 36 | **SARTORIA** | Couture tycoon: one runway per season | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sartoria-pwa/) |
 | 37 | **Mini Tower** | Tiny-tower builder: floors, shops, tenants | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/tiny-tower-pwa/) |
 | 38 | **PIXEL CUP '96** | Low-poly arcade football, five a side | Canvas 2D (software rasteriser) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pixel-cup-pwa/) |
+| 39 | **GULPER** | Tentacled kaiju arcade: eat, grow, survive the response | Canvas 2D (software rasteriser) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/gulper-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -1008,6 +1010,42 @@ wards.
 python3 -m http.server 8080
 # open http://localhost:8080/census-pwa/
 ```
+
+### GULPER
+
+*You are the thing in the water.* 🐙
+
+A tentacled predator hunts a drowned city: swallow people whole, grow with
+every meal, swap weapons of grasping biology, and survive the response force
+that escalates every time the screaming starts.
+
+- **42 levels in 6 biomes** — Rust Docks, Neon Downtown, Quarantine Ward,
+  Arctic Rig, Foundry, Orbital Hive — with six mission doctrines (eat, swarm,
+  cull, snatch and deliver, take the marked, stay unseen) plus a titan boss
+  closing each biome.
+- **Mass is everything.** Every swallow widens your gape, reach and armour;
+  getting knocked down costs 28% of your mass, so a run that stops eating
+  hollows out and dies.
+- **Six weapons**, from lash to swallow-tube, each with tiers that change how
+  a level is fought: stand off at scaled reach, grip and carry, or channel a
+  drain through a whole crowd.
+- **ALARM escalation** — screams raise the city's alarm, the response squads
+  grow from two constables to six heavy units mid-level, and stealth levels
+  fail outright the moment the district is fully alerted.
+- **Adaptation cards and genome shards** let a growing body pick its biology:
+  chitin, acid glands, ambush lunges, frenzy metabolism.
+- **The balance is proven, not asserted**: a deliberately simple bot that
+  walks into gunfire and never dodges must finish all 42 levels headlessly,
+  and does — the same suite that guards the numbers runs in CI.
+
+```bash
+python3 -m http.server 8080
+# open http://localhost:8080/gulper-pwa/
+```
+
+[▶ Play](https://lucagandolfi77.github.io/random2/gulper-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/gulper-pwa) ·
+[README](gulper-pwa/README.md)
 
 ## The tools
 
