@@ -15,7 +15,7 @@ const { GU, ok, equal, report } = require("./harness.js");
 
 const levels = GU.Levels.list;
 
-ok(levels.length === 42, "the campaign has 42 levels, found " + levels.length);
+ok(levels.length === 49, "the campaign has 49 levels, found " + levels.length);
 
 const seenIds = new Set();
 const seenNames = new Set();
@@ -46,7 +46,7 @@ for (const t of ["swarm", "stealth", "elite", "snatch", "survive", "cull", "slay
 
 /* Every biome has six levels and a boss. */
 const campaign = GU.Levels.campaign();
-equal(campaign.length, 6, "there are six biomes");
+equal(campaign.length, 7, "there are seven biomes");
 for (const b of campaign) {
     equal(b.levels.length, 7, b.id + " has seven levels");
     ok(b.levels[6] === b.boss, b.id + " ends with its boss");
@@ -70,7 +70,7 @@ for (const id of Object.keys(GU.PALETTES)) {
 
 /* ---------- weapons ---------- */
 
-equal(GU.Weapons.order.length, 6, "there are six weapons");
+equal(GU.Weapons.order.length, 7, "there are seven weapons");
 for (const id of GU.Weapons.order) {
     const w = GU.Weapons.get(id);
     ok(!!w, id + " exists");

@@ -237,6 +237,12 @@
                 sight: 380, r: 26, colors: skin("#b85708", "#3e2c11", "#f5d066"),
                 damage: 20, range: 90, cooldown: 0.9, kind: "spit", summons: true, armour: 6, threat: 11,
                 bio: "She has been waiting for something small and hungry to arrive."
+            },
+            choirmaster: {
+                id: "choirmaster", name: "The Choirmaster", mass: 7, hp: 700, speed: 84,
+                sight: 360, r: 28, colors: skin("#c9a84a", "#3e2c11", "#f5e8c8"),
+                damage: 22, range: 140, cooldown: 0.8, kind: "spit", summons: true, armour: 8, threat: 12,
+                bio: "The last note has not been sung. It never will be."
             }
         }
     };

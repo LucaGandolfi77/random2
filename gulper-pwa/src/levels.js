@@ -44,6 +44,10 @@
         hive: {
             name: "Orbital Hive", brief: "Resin, hymn and a deep place that has gone on without the city.",
             foeHpMult: 1.7
+        },
+        cathedral: {
+            name: "Sunken Cathedral", brief: "Stone, silence and a light that never went out.",
+            foeHpMult: 1.85
         }
     };
 
@@ -286,6 +290,35 @@
         "The Matriarch counted your kind among her own. Correct the hymn.",
         { prey: 8, foes: 3, time: 320, starTime: 255, starMass: 33 });
 
+    /* ================= SUNKEN CATHEDRAL ================= */
+    mission("cathedral", 1, "swarm", "Nave of Echoes",
+        "The choir still sings. Take the voices, one at a time.",
+        { label: "HERD THE NAVE", count: 7, time: 180 },
+        { prey: 10, foes: 2, noise: 0.95, density: 1.0, starTime: 135, starAlarm: 60, starMass: 24 });
+    mission("cathedral", 2, "stealth", "Cloister Walk",
+        "The candles do not flicker for you. Walk where the light is not.",
+        { label: "MOVE UNSEEN", count: 6, time: 200, maxAlarm: 85 },
+        { prey: 9, foes: 1, noise: 0.9, density: 0.95, starTime: 150, starAlarm: 60, starMass: 26 });
+    mission("cathedral", 3, "cull", "The Reliquary",
+        "The reliquaries hold the marked. Take only the marked.",
+        { label: "CULL THE MARKED", count: 6, time: 220 },
+        { prey: 11, foes: 2, noise: 1.0, density: 1.0, starTime: 165, starAlarm: 75, starMass: 28 });
+    mission("cathedral", 4, "elite", "The High Altar",
+        "A prelate walks the altar with a censer and a list. Take the list.",
+        { label: "TAKE THE MARKED", count: 3, time: 240 },
+        { prey: 9, foes: 2, noise: 1.0, density: 1.0, starTime: 180, starAlarm: 80, starMass: 26 });
+    mission("cathedral", 5, "snatch", "The Bell Tower",
+        "The bell ringer signs every hour. Take the signature with the ringer.",
+        { label: "SNATCH AND DELIVER", count: 1, time: 280 },
+        { prey: 10, foes: 2, noise: 1.0, density: 1.0, starTime: 195, starAlarm: 85, starMass: 24 });
+    mission("cathedral", 6, "survive", "The Long Vigil",
+        "The candles burn for an hour. Be there when they go out.",
+        { label: "OUTLAST THE RESPONSE", count: 1, time: 160 },
+        { prey: 10, foes: 3, noise: 1.0, density: 1.0, starTime: 162, starAlarm: 90, starMass: 28 });
+    titan("cathedral", "choirmaster", "The Choir",
+        "The Choir has sung for a thousand years. Silence it.",
+        { prey: 7, foes: 3, time: 260, starTime: 200, starMass: 36 });
+
     /* ================= the API ================= */
 
     S.Levels = {
@@ -345,7 +378,7 @@
         /* The campaign as the map shows it: one row per biome, seven
          * level ids, boss last. */
         campaign: function () {
-            var order = ["docks", "downtown", "ward", "arctic", "foundry", "hive"];
+            var order = ["docks", "downtown", "ward", "arctic", "foundry", "hive", "cathedral"];
             var out = [];
             for (var b = 0; b < order.length; b++) {
                 var id = order[b];

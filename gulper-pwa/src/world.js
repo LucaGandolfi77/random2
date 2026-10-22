@@ -718,6 +718,9 @@
                     p.attackFx = { t: 0.22, arc: w.arc, extend: 1.1, color: "#e3975a" };
                     S.Audio.play("blade");
                     break;
+                case "drag":
+                    S.World.drag(world, w, angle, dmgMul);
+                    break;
             }
         },
 
@@ -856,10 +859,50 @@
             return hit;
         },
 
+        /* BARBED DRAG: a yank. Targets in the arc are hauled toward the
+         * player, not pushed away - the barbs bite and pull. */
+        drag: function (world, w, angle, dmgMul) {
+            var p = world.player;
+            var hit = null;
+            var bestD = Infinity;
+            var caught = [];
+            for (var i = 0; i < world.entities.length; i++) {
+                var e = world.entities[i];
+                if (e.dead || e.removed) continue;
+                if (e.heldBy === p) continue;
+                var d = S.dist(p.x, p.y, e.x, e.y);
+                if (d > w.reach + e.r) continue;
+                var a = Math.atan2(e.y - p.y, e.x - p.x);
+                if (Math.abs(S.angleDelta(angle, a)) > w.arc / 2) continue;
+                caught.push({ e: e, d: d, a: a });
+            }
+            caught.sort(function (x, y) { return x.d - y.d; });
+
+            for (var c = 0; c < caught.length; c++) {
+                var ent = caught[c].e;
+                var dist = caught[c].d;
+                var ang = caught[c].a;
+                var power = p.power || 1;
+                S.Combat.damage(world, ent, (w.damage || 0) * dmgMul * power, { bleed: w.bleed });
+                if (w.will) S.Combat.willDamage(world, ent, w.will * (1 + (power - 1) * 0.4));
+                /* Pull toward the player. */
+                var pull = (w.knock || 80) * 0.6;
+                var nx = (p.x - ent.x) / (dist || 1);
+                var ny = (p.y - ent.y) / (dist || 1);
+                ent.vx += nx * pull;
+                ent.vy += ny * pull;
+                S.Particles.burst(world.particles, ent.x, ent.y, 10, 3, world.colors.impact, {
+                    speed: 60, life: 0.25, angle: ang + Math.PI, spread: 1.0
+                });
+                if (dist < bestD) { bestD = dist; hit = ent; }
+            }
+            p.attackFx = { t: 0.18, arc: w.arc, extend: 1.0, color: "#e3975a" };
+            S.Audio.play(caught.length ? "grab" : "lash");
+            return hit;
+        },
         /* SIPHON: drink a person from a distance. */
         siphon: function (world, w) {
             var p = world.player;
-            var target = null, bestD = Infinity;
             for (var i = 0; i < world.entities.length; i++) {
                 var e = world.entities[i];
                 if (e.dead || e.removed) continue;

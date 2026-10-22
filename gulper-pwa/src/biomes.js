@@ -87,6 +87,18 @@
             props: { container: 10, crate: 12, barrel: 8, lamp: 10, rubble: 6, console: 8, pillar: 10 },
             hazards: { fence: 3, vent: 0, spill: 1 },
             brief: "Ninety minutes of orbit. Everything drifts, including you."
+        },
+        cathedral: {
+            id: "cathedral", name: "Sunken Cathedral", palette: "cathedral",
+            sky: ["#04030a", "#1a1224"],
+            ground: "#2a2236", ground2: "#1e1828",
+            accent: "#c9a84a", lamp: "#e8d4a8", lampGlow: "#f5e8c8",
+            darkness: 0.5,
+            fog: 0.12,
+            noise: 0.95, density: 1.0, speed: 0.95,
+            props: { container: 2, crate: 4, barrel: 2, lamp: 8, rubble: 2, console: 4, pillar: 6 },
+            hazards: { fence: 1, vent: 0, spill: 0 },
+            brief: "The nave is still lit. Something is still singing."
         }
     };
 

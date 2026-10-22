@@ -98,9 +98,11 @@ A new rival predator, the Stalker (hides, then thins the crowd you need),
 and a new biome hazard, the acid spill (a standing pool that burns on
 contact). Docks, hive and foundry carry them; the campaign still clears.
 
-### Phase 3 — Season Two: Sunken Cathedral (planned)
+### Phase 3 — Season Two: Sunken Cathedral ✅ (shipped)
 
-A new biome and a seventh weapon, Barbed Drag.
+A seventh biome, the Sunken Cathedral, with seven new levels and a new
+titan, the Choirmaster. A seventh weapon, the Barbed Drag, that yanks
+prey in instead of pushing them away. The campaign now runs to 49 levels.
 
 ### Phase 4 — Meta (planned)
 

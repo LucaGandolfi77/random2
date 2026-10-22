@@ -102,11 +102,24 @@
                 { drain: 2.8, will: 1.05, reach: 100, alarm: 1.3, cooldown: 0.04 },
                 { drain: 3.6, will: 1.25, reach: 115, alarm: 1.15, cooldown: 0.03 }
             ]
+        },
+        drag: {
+            id: "drag", name: "BARBED DRAG", short: "DRG", mode: "drag",
+            desc: "A barbed line. Yank them in, then take them whole.",
+            unlockCost: 18, tierCost: [18, 36, 70],
+            damage: 4, will: 0.55,
+            reach: 44, arc: 1.2, knock: 90,
+            cooldown: 0.6, stamina: 0.5,
+            tiers: [
+                {},
+                { damage: 6, will: 0.65, reach: 50, arc: 1.3, knock: 110, cooldown: 0.5 },
+                { damage: 8, will: 0.75, reach: 58, arc: 1.45, knock: 135, cooldown: 0.42 }
+            ]
         }
     };
 
     S.Weapons = {
-        order: ["lash", "grasp", "inject", "shock", "blade", "siphon"],
+        order: ["lash", "grasp", "inject", "shock", "blade", "siphon", "drag"],
 
         /* The definition table, for menus and tests. */
         get: function (id) {
