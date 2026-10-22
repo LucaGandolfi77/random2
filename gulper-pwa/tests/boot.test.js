@@ -60,6 +60,37 @@ for (const src of scripts) {
 }
 ok(sw.includes('"../shared/arcade.js"'), "the service worker precaches the shared library");
 
+/* ---------- the service worker never serves a stale build ---------- */
+
+/* A cache-first worker serves the file the player downloaded months
+ * ago, forever: the game can be updated and the player never sees it.
+ * The worker must serve the cached copy AND refresh it in the
+ * background, so the next load is the new build. */
+ok(/CACHE_NAME\s*=\s*"gulper-pwa-v3"/.test(sw),
+    "the cache name moves on when the game changes");
+ok(/stale-while-revalidate/i.test(sw),
+    "the service worker documents its revalidate strategy");
+ok(/cache\.match\(req\)/.test(sw),
+    "the service worker looks the file up in the cache");
+ok(/event\.waitUntil\(network\)/.test(sw),
+    "the background refresh is kept alive by the worker");
+ok(!/caches\.match\(req\)\.then\(\(hit\)\s*=>\s*\{\s*if \(hit\) return hit;/.test(sw),
+    "the service worker does not serve the cache and stop there");
+
+/* Every file the page needs must be reachable offline: the worker
+ * precaches the list, and the list is the list the page loads. */
+const assets = sw.match(/const ASSETS = \[([\s\S]*?)\];/);
+ok(!!assets, "the service worker has an asset list");
+if (assets) {
+    const listed = assets[1].match(/"\.\/[^"]+"/g) || [];
+    for (const src of scripts) {
+        if (src.startsWith("../")) continue;
+        const rel = "./" + src.replace(/^\.\.\//, "");
+        ok(listed.indexOf('"' + rel + '"') >= 0,
+            "the precache list holds " + rel);
+    }
+}
+
 /* ---------- the manifest is complete ---------- */
 
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8"));
