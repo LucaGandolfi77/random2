@@ -51,6 +51,7 @@
             genomeShards: byId("genome-shards"),
             codexList: byId("codex-list"),
             codexCount: byId("codex-count"),
+            statsList: byId("stats-list"),
             resultTitle: byId("result-title"),
             resultBrief: byId("result-brief"),
             resultStars: byId("result-stars"),
@@ -63,7 +64,7 @@
             introAdapt: byId("intro-adapt")
         };
 
-        ["title", "map", "genome", "codex", "results", "pause", "settings", "intro"].forEach(function (name) {
+        ["title", "map", "genome", "codex", "stats", "results", "pause", "settings", "intro"].forEach(function (name) {
             screens[name] = byId("screen-" + name);
         });
 
@@ -77,6 +78,7 @@
         on("btn-rush", function () { hooks.onRush && hooks.onRush(); });
         on("btn-genome", function () { hooks.onGenome && hooks.onGenome(); });
         on("btn-codex", function () { hooks.onCodex && hooks.onCodex(); });
+        on("btn-stats", function () { hooks.onStats && hooks.onStats(); });
         on("btn-settings", function () { hooks.onSettings && hooks.onSettings(); });
         on("btn-result-next", function () { hooks.onNext && hooks.onNext(); });
         on("btn-result-retry", function () { hooks.onRetry && hooks.onRetry(); });
@@ -108,6 +110,7 @@
         var setHaptics = byId("set-haptics"), setAim = byId("set-aim");
         var setDamage = byId("set-damage"), setQuality = byId("set-quality");
         var setPixel = byId("set-pixel");
+        var setPalette = byId("set-palette");
         if (setSound) setSound.checked = save.settings.sound !== false;
         if (setMusic) setMusic.checked = save.settings.music !== false;
         if (setHaptics) setHaptics.checked = save.settings.haptics !== false;
@@ -115,6 +118,7 @@
         if (setDamage) setDamage.checked = save.settings.showDamage !== false;
         if (setQuality) setQuality.value = save.settings.quality || "auto";
         if (setPixel) setPixel.value = save.settings.pixelSize || "auto";
+        if (setPalette) setPalette.value = save.settings.palette || "auto";
 
         function bindSetting(node, key, prop) {
             if (!node) return;
@@ -131,6 +135,7 @@
         bindSetting(setDamage, "showDamage");
         bindSetting(setQuality, "quality");
         bindSetting(setPixel, "pixelSize", "pixel");
+        bindSetting(setPalette, "palette");
 
         buildCodex();
         buildGenome();
@@ -158,6 +163,7 @@
         if (name === "map") buildMap();
         if (name === "genome") buildGenome();
         if (name === "codex") buildCodex();
+        if (name === "stats") buildStats();
         if (name === "title") refreshTitle();
         hooks.onScreen && hooks.onScreen(name);
     }
@@ -444,6 +450,58 @@
             el.codexList.appendChild(item);
         }
         if (el.codexCount) el.codexCount.textContent = total + " SWALLOWED";
+
+        /* The Bill of Fare: rivals and titans, for the curious. */
+        if (el.codexList) {
+            var head = document.createElement("h3");
+            head.textContent = "BILL OF FARE";
+            head.style.marginTop = "14px";
+            el.codexList.appendChild(head);
+            var rivals = Object.keys(S.Species.rivals);
+            for (var r = 0; r < rivals.length; r++) {
+                var rd = S.Species.rivals[rivals[r]];
+                var ri = document.createElement("div");
+                ri.className = "codex-item";
+                var rn = document.createElement("div");
+                rn.className = "name";
+                rn.textContent = rd.name;
+                var rb = document.createElement("div");
+                rb.className = "bio";
+                rb.textContent = rd.bio || "A rival predator.";
+                ri.appendChild(rn);
+                ri.appendChild(rb);
+                el.codexList.appendChild(ri);
+            }
+        }
+    }
+
+    /* ===== stats screen ===== */
+    function buildStats() {
+        if (!el.statsList) return;
+        var save = S.Storage.data();
+        el.statsList.innerHTML = "";
+        var rows = [
+            ["LEVELS CLEARED", (function () { var c = 0; for (var k in save.levels) if (save.levels[k].cleared) c++; return c; })() + " / " + S.Levels.total()],
+            ["STARS", (function () { var s = 0; for (var k in save.levels) s += (save.levels[k].stars || 0); return s; })()],
+            ["MEDALS", save.medals || 0],
+            ["SHARDS", save.shards],
+            ["SWALLOWED", save.total || 0],
+            ["BEST MASS", save.bestMass || 0],
+            ["BOSSES", save.stats.bosses || 0],
+            ["DEATHS", save.stats.deaths || 0],
+            ["RUNS", save.stats.runs || 0],
+            ["FEAST BEST", save.feast || 0],
+            ["TITANS DOWN", (save.rush.stage || 0) + " / 6"],
+            ["TODAY", save.daily.best || 0]
+        ];
+        for (var i = 0; i < rows.length; i++) {
+            var dt = document.createElement("dt");
+            dt.textContent = rows[i][0];
+            var dd = document.createElement("dd");
+            dd.textContent = rows[i][1];
+            el.statsList.appendChild(dt);
+            el.statsList.appendChild(dd);
+        }
     }
 
     /* ===== results ===== */
@@ -724,6 +782,7 @@
         buildMap: buildMap,
         buildGenome: buildGenome,
         buildCodex: buildCodex,
+        buildStats: buildStats,
         refreshTitle: refreshTitle,
         toast: toast,
         flash: flash

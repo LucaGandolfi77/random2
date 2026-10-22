@@ -493,7 +493,8 @@
     function draw(world, dt) {
         if (!buf) return;
 
-        currentPalette = world.biome.palette;
+        currentPalette = S.Storage.data().settings.palette;
+        if (!currentPalette || currentPalette === "auto") currentPalette = world.biome.palette;
 
         /* Camera. */
         var p = world.player;

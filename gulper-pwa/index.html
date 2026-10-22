@@ -170,6 +170,7 @@
                 <button id="btn-rush" class="btn">THE PROCESSION</button>
                 <button id="btn-genome" class="btn">GENOME</button>
                 <button id="btn-codex" class="btn">CODEX</button>
+                <button id="btn-stats" class="btn">STATS</button>
                 <button id="btn-settings" class="btn">SETTINGS</button>
             </div>
             <p id="title-stats" class="fine-print"></p>
@@ -219,6 +220,17 @@
             </header>
             <p class="fine-print">Everything you have swallowed, and what it was doing when you got it.</p>
             <div id="codex-list" class="codex-list"></div>
+        </div>
+    </section>
+
+    <section id="screen-stats" class="screen hidden">
+        <div class="panel wide">
+            <header class="panel-head">
+                <h2>STATS</h2>
+                <button class="btn tiny" data-back="title">BACK</button>
+            </header>
+            <p class="fine-print">The shape of every run you have made.</p>
+            <dl id="stats-list" class="result-stats"></dl>
         </div>
     </section>
 
@@ -274,6 +286,18 @@
                         <option value="2">Small</option>
                         <option value="3">Medium</option>
                         <option value="4">Large</option>
+                    </select>
+                </label>
+                <label class="setting"><span>Palette</span>
+                    <select id="set-palette">
+                        <option value="auto">Biome</option>
+                        <option value="docks">Rust</option>
+                        <option value="downtown">Neon</option>
+                        <option value="ward">Ward</option>
+                        <option value="arctic">Ice</option>
+                        <option value="foundry">Ember</option>
+                        <option value="hive">Hive</option>
+                        <option value="cathedral">Cathedral</option>
                     </select>
                 </label>
             </div>

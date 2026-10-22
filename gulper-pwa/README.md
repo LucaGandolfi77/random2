@@ -104,9 +104,10 @@ A seventh biome, the Sunken Cathedral, with seven new levels and a new
 titan, the Choirmaster. A seventh weapon, the Barbed Drag, that yanks
 prey in instead of pushing them away. The campaign now runs to 49 levels.
 
-### Phase 4 — Meta (planned)
+### Phase 4 — Meta ✅ (shipped)
 
-Medals, the Bill of Fare codex, a stats screen, and additional palettes.
+Medals for perfect clears, a Bill of Fare that lists every prey, rival and
+titan, a stats screen, and a palette override in settings.
 
 ### Phase 5 — Layers (planned)
 

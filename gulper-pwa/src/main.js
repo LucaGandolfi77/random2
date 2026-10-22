@@ -56,6 +56,7 @@
             onRush: function () { startRushStage(0); },
             onGenome: function () { S.UI.show("genome"); },
             onCodex: function () { S.UI.show("codex"); },
+            onStats: function () { S.UI.show("stats"); },
             onSettings: function () { S.UI.show("settings"); },
             onLevelSelect: selectLevel,
             onAdaptationPick: pickAdaptation,
@@ -305,6 +306,7 @@
         if (world.status === "won") {
             S.Storage.recordLevel(world.level.id, stars, world.stats.peakMass, true);
             gained += C.shards.perLevel;
+            if (stars === 3) S.Storage.recordMedal();
         }
         if (world.level.boss && world.status === "won") {
             S.Storage.bump("bosses");

@@ -38,6 +38,8 @@
             total: 0,
             /* Highest single-run biomass. */
             bestMass: 0,
+            /* Medals: levels finished with all three stars. */
+            medals: 0,
             /* The shrines outside the campaign. feast: the best mass the
              * Everlasting Feast ever let you reach. daily: today's medal
              * (reset by the next midnight). rush: how far the best
@@ -54,6 +56,7 @@
                 haptics: true,
                 quality: "auto",
                 pixelSize: "auto",
+                palette: "auto",
                 aimAssist: true,
                 showDamage: true
             },
@@ -175,6 +178,14 @@
             d.rush.mass = Math.max(d.rush.mass || 0, Math.round(mass || 0));
             write();
             return d.rush;
+        },
+
+        /* A medal: a level finished with all three stars. Lifetime count. */
+        recordMedal: function () {
+            var d = read();
+            d.medals = (d.medals || 0) + 1;
+            write();
+            return d.medals;
         },
 
         /* ===== Genome ===== */
