@@ -251,13 +251,22 @@
                 world.objective.specimen = spec.id;
             }
 
-            /* Rivals. */
+            /* Rivals.
+             *
+             * A level may name the rivals it wants - "stalker" is a
+             * predator that hides until something small moves, and a
+             * street that wants that particular hunger says so.
+             * Otherwise the street gets whoever lives there. Every
+             * species in the table has to be reachable from somewhere,
+             * or it is content that exists and never appears. */
             var rivalCount = level.rivals || 0;
-            var rivalIds = ["wraith", "brooder", "screamer", "champion"];
+            var rivalIds = level.rivalKinds || ["wraith", "brooder", "screamer", "champion", "stalker"];
             for (var r = 0; r < rivalCount; r++) {
                 var rid = rivalIds[(rng.int(0, rivalIds.length - 1) + r) % rivalIds.length];
+                var rdef = S.Species.rivals[rid];
+                if (!rdef) rdef = S.Species.rivals.wraith;
                 var rpos = S.World.freeSpot(world, 260);
-                S.World.spawnRival(world, S.Species.rivals[rid], rpos.x, rpos.y);
+                S.World.spawnRival(world, rdef, rpos.x, rpos.y);
             }
 
             /* The boss. */
@@ -1181,6 +1190,7 @@
             world.status = "won";
             S.Audio.play("win");
             S.Storage.bump("runs");
+            S.Haptics && S.Haptics.pulse(60);
         },
 
         fail: function (world, why) {
@@ -1188,6 +1198,7 @@
             world.status = "lost";
             world.failReason = why || "You failed.";
             S.Audio.play("lose");
+            S.Haptics && S.Haptics.pulse(50);
         },
 
         /* How well did you do? Three stars, each one a threshold. */

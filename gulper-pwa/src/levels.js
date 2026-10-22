@@ -75,6 +75,9 @@
             prey: tbl.prey,
             foes: tbl.foes,
             rivals: tbl.rivals || 0,
+            /* The rivals this street wants, when it wants particular
+             * ones. Unset means whoever lives in the district. */
+            rivalKinds: tbl.rivalKinds,
             noise: tbl.noise !== undefined ? tbl.noise : 1.0,
             density: tbl.density !== undefined ? tbl.density : 1.0,
             /* A level may pin its own seed (a layout that proved itself
@@ -186,7 +189,7 @@
     mission("ward", 3, "swarm", "Triage Hour",
         "Gurneys line the corridor and the orderlies are busy. Feed on the queue.",
         { label: "HERD THE STREETS", count: 6, time: 210 },
-        { prey: 13, foes: 2, rivals: 1, noise: 0.95, density: 1.05, starTime: 158, starAlarm: 70, starMass: 17 });
+        { prey: 13, foes: 2, rivals: 1, rivalKinds: ["stalker"], noise: 0.95, density: 1.05, starTime: 158, starAlarm: 70, starMass: 17 });
     mission("ward", 4, "elite", "The Sealed Wing",
         "Ward marshals carry the sealing list. Three of them carry it badly.",
         { label: "TAKE THE MARKED", count: 3, time: 270 },
@@ -211,7 +214,7 @@
     mission("arctic", 2, "swarm", "Waypoint Mess",
         "Catering cooks rest between barge runs. Peel the kitchen off the manifest.",
         { label: "HERD THE STREETS", count: 6, time: 225 },
-        { prey: 13, foes: 2, rivals: 1, noise: 1.0, density: 1.05, starTime: 170, starAlarm: 78, starMass: 17 });
+        { prey: 13, foes: 2, rivals: 1, rivalKinds: ["stalker"], noise: 1.0, density: 1.05, starTime: 170, starAlarm: 78, starMass: 17 });
     mission("arctic", 3, "cull", "Core Sample",
         "Sample crews drill through your hunting run tonight. Retire the drill.",
         { label: "CULL THE MARKED", count: 7, time: 280 },
@@ -240,7 +243,7 @@
     mission("foundry", 2, "swarm", "Pour Line Lunch",
         "Two hundred hands at half-hour lunch. Accept graciously.",
         { label: "HERD THE STREETS", count: 7, time: 240 },
-        { prey: 14, foes: 3, rivals: 1, noise: 1.05, density: 1.05, starTime: 185, starAlarm: 85, starMass: 20 });
+        { prey: 14, foes: 3, rivals: 1, rivalKinds: ["stalker"], noise: 1.05, density: 1.05, starTime: 185, starAlarm: 85, starMass: 20 });
     mission("foundry", 3, "survive", "Crucible Watch",
         "The melt pours tonight and guards stand thick along the trough. Be thicker.",
         { label: "OUTLAST THE RESPONSE", count: 1, time: 175 },
@@ -265,7 +268,7 @@
     mission("hive", 1, "swarm", "Communion Line",
         "The brood-tenders queue to the umbilical in their hundreds. Commune instead.",
         { label: "HERD THE STREETS", count: 7, time: 250 },
-        { prey: 15, foes: 2, rivals: 1, noise: 1.0, density: 1.05, starTime: 190, starAlarm: 85, starMass: 20 });
+        { prey: 15, foes: 2, rivals: 1, rivalKinds: ["stalker"], noise: 1.0, density: 1.05, starTime: 190, starAlarm: 85, starMass: 20 });
     mission("hive", 2, "elite", "The Hymn",
         "Four of the Mother's hands walk the aisle tonight. Claim the choir first.",
         { label: "TAKE THE MARKED", count: 4, time: 320 },

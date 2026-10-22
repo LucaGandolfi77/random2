@@ -15,6 +15,35 @@ ok(GU.Species.rivals.stalker, "the stalker exists as a rival predator");
 equal(GU.Species.rivals.stalker.kind, "melee", "the stalker fights up close");
 ok(GU.Species.rivals.stalker.mimic === true, "the stalker hides until it moves");
 
+/* The stalker has to exist in the world, not only in the table. A
+ * species nothing spawns is content that never appears. */
+{
+    const withStalker = GU.Levels.list.filter(function (l) {
+        return l.rivalKinds && l.rivalKinds.indexOf("stalker") >= 0;
+    });
+    ok(withStalker.length >= 3,
+        "several streets want a stalker (" + withStalker.length + ")");
+
+    let spawned = 0;
+    for (const lvl of withStalker) {
+        const world = createLevel(lvl.id, { seed: lvl.seed });
+        if (!world) continue;
+        const rivals = world.entities.filter(function (e) {
+            return e.kind === "rival" && e.def && e.def.id === "stalker";
+        });
+        if (rivals.length > 0) spawned++;
+    }
+    ok(spawned === withStalker.length,
+        "every street that wants a stalker gets one (" + spawned + "/" + withStalker.length + ")");
+}
+
+/* And the ordinary districts still get their ordinary rivals. */
+{
+    const world = createLevel("ward-3", { seed: GU.Levels.get("ward-3").seed });
+    const rivals = world.entities.filter(function (e) { return e.kind === "rival"; });
+    ok(rivals.length >= 1, "a street with rivals has rivals (" + rivals.length + ")");
+}
+
 {
     /* A stalker dropped among prey eats them. */
     const world = createLevel("docks-1", { seed: 1 });
