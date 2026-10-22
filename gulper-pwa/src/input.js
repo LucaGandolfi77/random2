@@ -251,7 +251,32 @@
     }
 
     /* Copy the intent into the world. Called once per frame. */
+    /* Basic gamepad support: left stick moves, face buttons act. */
+    function pollGamepad() {
+        if (typeof navigator === "undefined" || typeof navigator.getGamepads !== "function") return;
+        var gps;
+        try { gps = navigator.getGamepads(); } catch (e) { return; }
+        if (!gps) return;
+        for (var g = 0; g < gps.length; g++) {
+            var gp = gps[g];
+            if (!gp) continue;
+            var ax = gp.axes && gp.axes[0] ? gp.axes[0] : 0;
+            var ay = gp.axes && gp.axes[1] ? gp.axes[1] : 0;
+            if (Math.abs(ax) < 0.15) ax = 0;
+            if (Math.abs(ay) < 0.15) ay = 0;
+            state.mx = ax;
+            state.my = ay;
+            var bs = gp.buttons || [];
+            if (bs[0] && bs[0].pressed) state.attack = true;
+            if (bs[1] && bs[1].pressed) state.swallow = true;
+            if (bs[2] && bs[2].pressed) state.swap = true;
+            if (bs[3] && bs[3].pressed) state.frenzy = true;
+            break;
+        }
+    }
+
     function read(world) {
+        pollGamepad();
         var inp = world.input;
         inp.mx = state.mx;
         inp.my = state.my;
@@ -291,5 +316,18 @@
         setVisible: setVisible,
         releaseAll: releaseAll,
         state: state
+    };
+    S.Haptics = {
+        pulse: function (ms) {
+            try {
+                var d = S.Storage.data();
+                if (d.settings && d.settings.haptics === false) return;
+            } catch (e) { }
+            try {
+                if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+                    navigator.vibrate(ms || 10);
+                }
+            } catch (e) { }
+        }
     };
 })(window.GU = window.GU || {});

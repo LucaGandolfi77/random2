@@ -876,6 +876,9 @@
         textWidth: textWidth,
         /* Screen shake, called by the world when something lands. */
         shake: function (amount) {
+            try {
+                if (S.Storage.data().settings.reducedMotion) return;
+            } catch (e) { }
             cam.shake = Math.min(C.camera.maxShake, cam.shake + amount);
         },
         bufferSize: function () { return { w: W, h: H, chunk: chunk }; },

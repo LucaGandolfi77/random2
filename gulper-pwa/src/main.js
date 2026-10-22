@@ -150,6 +150,10 @@
             perf.locked = false;
             S.Render.setQuality("high");
         }
+        /* Accessibility. */
+        document.body.classList.toggle("reduced-motion", !!s.reducedMotion);
+        document.body.classList.toggle("high-contrast", !!s.highContrast);
+        document.body.classList.toggle("text-large", s.textSize === "large");
     }
 
     /* ===== the attract scene =====

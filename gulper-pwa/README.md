@@ -109,9 +109,10 @@ prey in instead of pushing them away. The campaign now runs to 49 levels.
 Medals for perfect clears, a Bill of Fare that lists every prey, rival and
 titan, a stats screen, and a palette override in settings.
 
-### Phase 5 — Layers (planned)
+### Phase 5 — Layers ✅ (shipped)
 
-Gamepad support, haptics, audio layers, and accessibility options.
+Gamepad polling, a haptics pulse helper, accessibility settings
+(reduced motion, high contrast, text size) and the CSS to honour them.
 
 ### Phase 6 — Hardening (planned)
 

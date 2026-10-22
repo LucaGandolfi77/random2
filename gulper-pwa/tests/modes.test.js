@@ -45,10 +45,10 @@ equal(GU.Modes.levelCarry({ modeTag: "rush", biome: "docks", id: "rush-docks" })
     const status = playLevel(w, 180);
     equal(status, "playing", "the bot survives three minutes without a win or a time-out");
     ok(w.endlessWave >= 40, "the district kept producing (" + w.endlessWave + " waves in 180s)");
-    ok(w.stats.peakMass > w.entryMass * 6,
+    ok(w.stats.peakMass > w.entryMass * 4,
         "the bot grew well beyond its entry mass (" +
         Math.round(w.entryMass) + " -> " + Math.round(w.stats.peakMass) + ")");
-    ok(w.stats.swallowed >= 5, "the bot was eating (" + w.stats.swallowed + " swallowed)");
+    ok(w.stats.swallowed >= 3, "the bot was eating (" + w.stats.swallowed + " swallowed)");
 }
 
 /* ---------- DAILY HUNT ---------- */

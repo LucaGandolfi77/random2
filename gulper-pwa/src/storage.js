@@ -57,6 +57,9 @@
                 quality: "auto",
                 pixelSize: "auto",
                 palette: "auto",
+                reducedMotion: false,
+                highContrast: false,
+                textSize: "normal",
                 aimAssist: true,
                 showDamage: true
             },

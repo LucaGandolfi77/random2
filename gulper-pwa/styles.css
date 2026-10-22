@@ -327,7 +327,10 @@ body { position: fixed; inset: 0; }
 .abtn.frenzy { border-color: var(--blood); color: var(--blood); }
 .abtn.frenzy.on { background: var(--blood); color: #fff; }
 
-/* ===== screens ===== */
+/* Accessibility toggles. */
+body.reduced-motion * { animation: none !important; transition: none !important; }
+body.high-contrast { filter: contrast(1.25); }
+body.text-large { font-size: 115%; }
 
 .screen {
     position: fixed;

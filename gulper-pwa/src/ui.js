@@ -111,6 +111,9 @@
         var setDamage = byId("set-damage"), setQuality = byId("set-quality");
         var setPixel = byId("set-pixel");
         var setPalette = byId("set-palette");
+        var setReduced = byId("set-reduced");
+        var setContrast = byId("set-contrast");
+        var setTextSize = byId("set-textsize");
         if (setSound) setSound.checked = save.settings.sound !== false;
         if (setMusic) setMusic.checked = save.settings.music !== false;
         if (setHaptics) setHaptics.checked = save.settings.haptics !== false;
@@ -119,6 +122,9 @@
         if (setQuality) setQuality.value = save.settings.quality || "auto";
         if (setPixel) setPixel.value = save.settings.pixelSize || "auto";
         if (setPalette) setPalette.value = save.settings.palette || "auto";
+        if (setReduced) setReduced.checked = !!save.settings.reducedMotion;
+        if (setContrast) setContrast.checked = !!save.settings.highContrast;
+        if (setTextSize) setTextSize.value = save.settings.textSize || "normal";
 
         function bindSetting(node, key, prop) {
             if (!node) return;
@@ -136,6 +142,9 @@
         bindSetting(setQuality, "quality");
         bindSetting(setPixel, "pixelSize", "pixel");
         bindSetting(setPalette, "palette");
+        bindSetting(setReduced, "reducedMotion");
+        bindSetting(setContrast, "highContrast");
+        bindSetting(setTextSize, "textSize");
 
         buildCodex();
         buildGenome();
