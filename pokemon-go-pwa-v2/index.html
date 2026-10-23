@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Pokéball GO v2 — Throw 2.0</title>
+<meta name="description" content="Pokéball GO v2: a low-poly creature collector with power, timing and curveball throws. 1,025 species, 10 biomes, offline PWA, bilingual.">
+<meta name="theme-color" content="#0a0a14">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pokéball GO 2">
+<meta name="author" content="Luca Gandolfi">
+<link rel="canonical" href="https://lucagandolfi77.github.io/random2/pokemon-go-pwa-v2/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pokéball GO v2">
+<meta property="og:title" content="Pokéball GO v2 — Throw 2.0">
+<meta property="og:description" content="Hold, charge, curve, release. A low-poly creature collector with real throw physics and 1,025 species.">
+<meta property="og:url" content="https://lucagandolfi77.github.io/random2/pokemon-go-pwa-v2/">
+<meta property="og:image" content="https://lucagandolfi77.github.io/random2/pokemon-go-pwa-v2/icons/icon-512.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Pokéball GO v2",
+  "url": "https://lucagandolfi77.github.io/random2/pokemon-go-pwa-v2/",
+  "description": "A low-poly creature collector with power, timing and curveball throws. Installable, offline, bilingual.",
+  "genre": ["Creature collection", "Casual", "Arcade"],
+  "gamePlatform": "Web browser",
+  "playMode": "SinglePlayer",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any modern browser",
+  "inLanguage": ["en", "it"],
+  "isAccessibleForFree": true,
+  "author": { "@type": "Person", "name": "Luca Gandolfi" }
+}
+</script>
+</head>
+<body>
+<div class="app" id="app-root">
+  <div class="top-bar" id="top-bar">
+    <span class="tb-brand">Pokéball GO <span class="v2-badge">v2</span></span>
+    <span style="flex:1"></span>
+  </div>
+
+  <!-- CATCH TAB -->
+  <div class="tab-panel" id="tab-catch">
+    <div class="biome-bar" id="biome-selector" aria-label="Biome"></div>
+    <div class="nearby-radar" id="nearby-radar" aria-label="Nearby Pokémon"></div>
+    <div class="stage-wrap">
+      <canvas id="stage-canvas" aria-label="Catch stage. Hold and drag to aim, hold to charge, circle to curve, release to throw."></canvas>
+      <div id="ambient-overlay" class="ambient-overlay"></div>
+      <div id="combo-overlay" class="combo-overlay hidden"><span id="combo-text"></span></div>
+      <div id="throw-feedback" class="throw-feedback hidden" role="status" aria-live="polite"></div>
+      <div id="time-badge" class="time-badge"></div>
+      <div class="stage-overlay">
+        <div class="stage-info" id="stage-info">
+          <div style="font-family:var(--font-display);color:var(--accent-light);font-size:1.1rem;">Choose a biome</div>
+        </div>
+      </div>
+      <div class="stage-loadout" id="stage-loadout" aria-label="Ball and berry selection">
+        <button class="loadout-chip" id="loadout-ball" onclick="window.openLoadout('ball')" aria-label="Select ball"></button>
+        <button class="loadout-chip" id="loadout-berry" onclick="window.openLoadout('berry')" aria-label="Select berry"></button>
+      </div>
+      <button class="stage-menu-btn" id="stage-menu-btn" onclick="window.openStageMenu()" aria-label="Encounter actions">⋯</button>
+      <div class="throw-dock" id="throw-dock" aria-hidden="true">
+        <div class="power-shell"><div class="power-fill" id="power-fill"></div></div>
+        <div class="throw-readout">
+          <span id="throw-hint">Hold &amp; drag up · circle to curve</span>
+          <span id="curve-badge" class="curve-badge">CURVE</span>
+        </div>
+      </div>
+    </div>
+    <p class="swipe-hint" id="swipe-hint">Hold to charge · circle for curveball · release when the ring is small</p>
+  </div>
+
+  <!-- POKEDEX TAB -->
+  <div class="tab-panel hidden" id="tab-pokedex">
+    <div id="pokedex-filters" class="pd-filters"></div>
+    <div id="pokedex-gen" class="pd-gen"></div>
+    <p id="pokedex-count" class="pd-count"></p>
+    <div id="pokedex-grid"></div>
+  </div>
+
+  <!-- INVENTORY TAB -->
+  <div class="tab-panel hidden" id="tab-inventory">
+    <div id="inventory-grid"></div>
+  </div>
+
+  <!-- SHOP TAB -->
+  <div class="tab-panel hidden" id="tab-shop">
+    <div id="shop-grid"></div>
+  </div>
+
+  <!-- COLLECTION TAB -->
+  <div class="tab-panel hidden" id="tab-collection">
+    <div id="collection-filters" class="collection-filters"></div>
+    <p id="collection-count" class="pd-count"></p>
+    <div id="collection-grid"></div>
+  </div>
+
+  <!-- TRAINER TAB -->
+  <div class="tab-panel hidden" id="tab-trainer">
+    <div id="trainer-panel"></div>
+  </div>
+
+  <!-- RESEARCH TAB -->
+  <div class="tab-panel hidden" id="tab-research">
+    <div id="research-grid"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="tab-panel hidden" id="tab-settings">
+    <div class="settings-list">
+      <div class="setting-row">
+        <span class="setting-label">Sound Effects</span>
+        <button class="toggle on" id="tog-sound" aria-label="Sound" onclick="this.classList.toggle('on');toggleSound()"></button>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Haptics</span>
+        <button class="toggle on" id="tog-haptics" aria-label="Haptics" onclick="this.classList.toggle('on');toggleHaptics()"></button>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Aim Assist</span>
+        <button class="toggle on" id="tog-assist" aria-label="Aim assist" onclick="this.classList.toggle('on');toggleAssist()"></button>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Language / Lingua</span>
+        <button class="menu-button" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="switchLang()">EN ↔ IT</button>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">How to throw</span>
+        <button class="menu-button" style="padding:0.4rem 0.8rem;font-size:0.8rem;" onclick="window.showTutorial()">Tutorial</button>
+      </div>
+      <button class="danger-btn" onclick="resetGame()">Reset All Progress</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="tab-bar" id="tab-bar" aria-label="Main navigation">
+    <button class="tab-btn active" id="btn-catch" onclick="switchTab('catch')" aria-label="Catch" aria-current="page">
+      <span class="nav-icon">🎯</span><span class="nav-label" data-i18n="Catch">Catch</span>
+    </button>
+    <button class="tab-btn" id="btn-pokedex" onclick="switchTab('pokedex')" aria-label="Pokédex">
+      <span class="nav-icon">📖</span><span class="nav-label" data-i18n="Dex">Dex</span>
+    </button>
+    <button class="tab-btn" id="btn-inventory" onclick="switchTab('inventory')" aria-label="Items">
+      <span class="nav-icon">🎒</span><span class="nav-label" data-i18n="Bag">Bag</span>
+    </button>
+    <button class="tab-btn" id="btn-trainer" onclick="switchTab('trainer')" aria-label="Trainer">
+      <span class="nav-icon">👤</span><span class="nav-label" data-i18n="Trainer">Trainer</span>
+    </button>
+    <button class="tab-btn" id="btn-more" onclick="window.openMore()" aria-label="More">
+      <span class="nav-icon">⋯</span><span class="nav-label" data-i18n="More">More</span>
+    </button>
+  </nav>
+</div>
+
+<!-- More sheet -->
+<div id="more-sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="more-title">
+  <div class="sheet-backdrop" onclick="window.closeSheet('more')"></div>
+  <div class="sheet-panel">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <h3 class="sheet-title" id="more-title" data-i18n="More">More</h3>
+    <div class="more-grid">
+      <button class="more-item" onclick="switchTab('shop');window.closeSheet('more')"><span class="more-icon">🏪</span><span data-i18n="Shop">Shop</span></button>
+      <button class="more-item" onclick="switchTab('collection');window.closeSheet('more')"><span class="more-icon">📦</span><span data-i18n="Collection">Collection</span></button>
+      <button class="more-item" onclick="switchTab('research');window.closeSheet('more')"><span class="more-icon">🔬</span><span data-i18n="Research">Research</span></button>
+      <button class="more-item" onclick="switchTab('settings');window.closeSheet('more')"><span class="more-icon">⚙</span><span data-i18n="Settings">Settings</span></button>
+      <button class="more-item" onclick="window.closeSheet('more');window.showTutorial()"><span class="more-icon">?</span><span data-i18n="How to throw">How to throw</span></button>
+      <button class="more-item" id="more-install" onclick="window.installApp()"><span class="more-icon">⬇</span><span data-i18n="Install app">Install app</span></button>
+    </div>
+    <button class="sheet-close" onclick="window.closeSheet('more')" data-i18n="Close">Close</button>
+  </div>
+</div>
+
+<!-- Stage action sheet -->
+<div id="stage-sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="stage-title">
+  <div class="sheet-backdrop" onclick="window.closeSheet('stage')"></div>
+  <div class="sheet-panel">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <h3 class="sheet-title" id="stage-title" data-i18n="Encounter">Encounter</h3>
+    <div class="more-grid">
+      <button class="more-item" onclick="window.closeSheet('stage');window.doSpin()"><span class="more-icon">🌀</span><span data-i18n="Spin">Spin</span></button>
+      <button class="more-item" onclick="window.closeSheet('stage');spawnWildPokemon()"><span class="more-icon">🔄</span><span data-i18n="New encounter">New encounter</span></button>
+      <button class="more-item" onclick="window.closeSheet('stage');window.showTutorial()"><span class="more-icon">?</span><span data-i18n="How to throw">How to throw</span></button>
+    </div>
+    <button class="sheet-close" onclick="window.closeSheet('stage')" data-i18n="Close">Close</button>
+  </div>
+</div>
+
+<!-- Loadout sheet -->
+<div id="loadout-sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="loadout-title">
+  <div class="sheet-backdrop" onclick="window.closeSheet('loadout')"></div>
+  <div class="sheet-panel">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <h3 class="sheet-title" id="loadout-title" data-i18n="Loadout">Loadout</h3>
+    <div id="loadout-grid"></div>
+    <button class="sheet-close" onclick="window.closeSheet('loadout')" data-i18n="Done">Done</button>
+  </div>
+</div>
+
+<!-- Result Modal -->
+<div id="result-modal" class="result-modal hidden" role="dialog" aria-modal="true" aria-labelledby="result-title">
+  <div class="rm-panel">
+    <div class="rm-title" id="result-title">Result</div>
+    <div class="rm-body"></div>
+    <button class="rm-btn" onclick="closeResult()">Continue</button>
+  </div>
+</div>
+
+<!-- Pokémon Detail Modal -->
+<div id="detail-modal" class="detail-modal hidden" role="dialog" aria-modal="true" aria-labelledby="dm-name">
+  <div class="dm-panel">
+    <div class="dm-close" onclick="window.closeDetail()" role="button" aria-label="Close">✕</div>
+    <div class="dm-sprite" id="dm-sprite"></div>
+    <div class="dm-name" id="dm-name"></div>
+    <div class="dm-types" id="dm-types"></div>
+    <div class="dm-stats" id="dm-stats"></div>
+    <div class="dm-desc" id="dm-desc"></div>
+    <div class="dm-actions" id="dm-actions"></div>
+  </div>
+</div>
+
+<!-- Throw tutorial -->
+<div id="tutorial-modal" class="result-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tut-title">
+  <div class="rm-panel tutorial-panel">
+    <div class="rm-title" id="tut-title">How to throw</div>
+    <div class="tut-body" id="tut-body"></div>
+    <div class="tut-dots" id="tut-dots"></div>
+    <div class="tut-actions">
+      <button class="rm-btn" id="tut-next" onclick="window.nextTutorial()">Next</button>
+      <button class="rm-btn ghost" onclick="window.closeTutorial()">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Start Menu -->
+<div id="start-menu" class="menu-screen">
+  <div class="menu-panel">
+    <div class="menu-kicker">THROW 2.0</div>
+    <h1>Pokéball GO <span class="v2-badge">v2</span></h1>
+    <p class="sub">Hold, charge, curve, release. A low-poly creature collector with real throw physics, 1,025 species and 10 biomes. Bilingual English / Italiano.</p>
+    <button class="menu-button menu-cta" onclick="startGame()">Begin Adventure — Inizia l'Avventura</button>
+    <button class="menu-button" style="font-size:0.85rem;padding:0.5rem 1rem;" onclick="window.showTutorial()">How to throw — Come lanciare</button>
+    <button class="menu-button" style="font-size:0.85rem;padding:0.5rem 1rem;" onclick="switchLang()">Lingua: English / Italiano</button>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-box" class="toast-box"></div>
+
+<script type="module" src="src/config.js"></script>
+<script type="module" src="src/storage.js"></script>
+<script type="module" src="src/renderer.js"></script>
+<script type="module" src="src/main.js"></script>
+<script src="../shared/arcade.js"></script>
+</body>
+</html>

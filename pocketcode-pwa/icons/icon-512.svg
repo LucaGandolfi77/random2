@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="PocketCode">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#080b13"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="20%" cy="18%" r="70%">
+      <stop offset="0" stop-color="#22d3ee" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="102" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="102" fill="url(#glow)"/>
+  <path d="M147 179 235 256 147 333" fill="none" stroke="#22d3ee" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M275 333h117" fill="none" stroke="#a78bfa" stroke-width="35" stroke-linecap="round"/>
+  <circle cx="379" cy="147" r="19" fill="#34d399"/>
+</svg>

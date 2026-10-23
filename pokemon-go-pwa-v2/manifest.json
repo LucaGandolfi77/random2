@@ -1,0 +1,41 @@
+{
+  "id": "./",
+  "name": "Pokéball GO v2 — Throw 2.0",
+  "short_name": "Pokéball GO 2",
+  "description": "A low-poly creature collector with power, timing and curveball throws. 1,025 species, 10 biomes, offline PWA, bilingual.",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "orientation": "any",
+  "start_url": "./",
+  "scope": "./",
+  "background_color": "#0a0a14",
+  "theme_color": "#0a0a14",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-512.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Catch",
+      "short_name": "Catch",
+      "url": "./?tab=catch",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Pokédex",
+      "short_name": "Pokédex",
+      "url": "./?tab=pokedex",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Research",
+      "short_name": "Research",
+      "url": "./?tab=research",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

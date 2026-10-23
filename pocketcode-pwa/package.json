@@ -1,0 +1,11 @@
+{
+  "name": "pocketcode-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Static PWA for controlling OpenCode and Pi agents from a phone.",
+  "scripts": {
+    "icons": "node scripts/gen-icons.mjs",
+    "test": "node --test tests/shell.test.mjs && node tests/smoke.mjs"
+  }
+}

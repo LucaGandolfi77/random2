@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PocketCode · control your agents</title>
+  <meta name="description" content="PocketCode is a mobile command deck for your own OpenCode and Pi coding agents. Pair with a bridge on your machine, then chat, run tools and answer permission requests from your phone.">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#080b13">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PocketCode">
+  <meta property="og:title" content="PocketCode">
+  <meta property="og:description" content="A mobile command deck for your own OpenCode and Pi agents.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="app">
+    <header class="topbar" id="topbar">
+      <button class="icon-button" id="backButton" type="button" aria-label="Back" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg>
+      </button>
+      <div class="title-block">
+        <span class="logo-dot" aria-hidden="true"></span>
+        <div>
+          <h1 id="screenTitle">PocketCode</h1>
+          <p id="screenSubtitle">your agents, in your pocket</p>
+        </div>
+      </div>
+      <button class="icon-button" id="settingsButton" type="button" aria-label="Settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+      </button>
+    </header>
+
+    <main id="main">
+      <section class="screen" id="screen-connect" data-screen="connect">
+        <div class="hero">
+          <div class="hero-mark" aria-hidden="true">
+            <span class="prompt-mark">&gt;_</span>
+          </div>
+          <p class="eyebrow">Remote control for real agents</p>
+          <h2>Your terminal,<br>within reach.</h2>
+          <p class="lede">Pair this phone with OpenCode or the PocketCode bridge on your computer. Watch tools run, answer approvals, and keep the work moving from anywhere.</p>
+        </div>
+
+        <form id="connectForm" class="panel form" autocomplete="off">
+          <div class="field">
+            <label for="connectKind">Agent</label>
+            <select id="connectKind" name="kind">
+              <option value="pi">Pi · PocketCode bridge</option>
+              <option value="opencode">OpenCode · official server</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="connectName">Name <span>optional</span></label>
+            <input id="connectName" name="name" type="text" placeholder="Desk, laptop, homelab" maxlength="60">
+          </div>
+
+          <div class="field">
+            <label for="connectUrl">Server URL</label>
+            <input id="connectUrl" name="url" type="url" inputmode="url" placeholder="https://my-machine.tailnet.ts.net" spellcheck="false">
+            <p class="hint" id="urlHint">Use an HTTPS URL so this installed app can reach your machine.</p>
+          </div>
+
+          <div class="field" data-kind="opencode">
+            <label for="connectUser">Username</label>
+            <input id="connectUser" name="username" type="text" value="opencode" autocomplete="username">
+          </div>
+
+          <div class="field" data-kind="opencode">
+            <label for="connectPassword">Server password</label>
+            <input id="connectPassword" name="password" type="password" autocomplete="current-password" placeholder="OPENCODE_SERVER_PASSWORD">
+          </div>
+
+          <div class="field" data-kind="pi">
+            <label for="connectToken">Device token <span>optional</span></label>
+            <input id="connectToken" name="token" type="password" autocomplete="off" placeholder="pc_… or pair with a code below">
+          </div>
+
+          <div class="field" data-kind="pi">
+            <label for="connectCode">Pairing code</label>
+            <div class="code-row">
+              <input id="connectCode" name="code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="6 digits" autocomplete="one-time-code">
+              <button class="button ghost" id="pairButton" type="button">Pair</button>
+            </div>
+            <p class="hint">The bridge prints a six-digit code when it starts. Pairing stores a device token on this device only.</p>
+          </div>
+
+          <div class="form-actions">
+            <button class="button primary" type="submit" id="connectButton">Connect</button>
+            <button class="button subtle" type="button" id="demoButton">Try the demo</button>
+          </div>
+          <p class="form-status" id="connectStatus" role="status"></p>
+        </form>
+
+        <section class="saved" id="savedConnections" hidden>
+          <div class="section-heading">
+            <h3>Saved connections</h3>
+            <button class="text-button" id="manageConnections" type="button">Manage</button>
+          </div>
+          <div class="saved-list" id="savedList"></div>
+        </section>
+
+        <div class="note-strip">
+          <strong>How it works</strong>
+          <p>The app is only a remote. Your agent keeps running on your machine, with your files and your credentials. PocketCode never asks for model API keys.</p>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-sessions" data-screen="sessions">
+        <div class="connection-bar" id="sessionConnectionBar"></div>
+        <div class="section-heading sessions-heading">
+          <div>
+            <p class="eyebrow">Workspace</p>
+            <h2 id="sessionsTitle">Sessions</h2>
+          </div>
+          <button class="button primary compact" id="newSessionButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            New
+          </button>
+        </div>
+        <div class="status-line" id="sessionsStatus" role="status"></div>
+        <div class="session-list" id="sessionList"></div>
+        <div class="empty-state" id="sessionsEmpty" hidden>
+          <div class="empty-glyph" aria-hidden="true">&gt;_</div>
+          <h3>No sessions yet</h3>
+          <p>Start one and ask your agent to read, edit, or run something.</p>
+          <button class="button primary" type="button" data-action="new-session">Create a session</button>
+        </div>
+      </section>
+
+      <section class="screen chat-screen" id="screen-chat" data-screen="chat">
+        <div class="chat-meta">
+          <div class="chat-meta-main">
+            <span class="connection-dot" id="chatDot" aria-hidden="true"></span>
+            <span id="chatConnection">—</span>
+            <span class="meta-separator">/</span>
+            <span id="chatSessionTitle">Session</span>
+          </div>
+          <div class="chat-meta-actions">
+            <button class="chip" id="modelButton" type="button" title="Change model">
+              <span id="modelLabel">Model</span>
+            </button>
+            <button class="chip" id="agentButton" type="button" title="Change agent" hidden>
+              <span id="agentLabel">Agent</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-toolbar" id="chatToolbar" hidden>
+          <button class="toolbar-button" id="diffButton" type="button">Diff <span id="diffCount"></span></button>
+          <button class="toolbar-button" id="todoButton" type="button">Todos <span id="todoCount"></span></button>
+        </div>
+
+        <div class="timeline" id="timeline" aria-live="polite"></div>
+
+        <div class="composer-wrap">
+          <div class="composer-status" id="composerStatus" hidden></div>
+          <form class="composer" id="composerForm">
+            <textarea id="promptInput" rows="1" placeholder="Ask your agent…" enterkeyhint="send" autocomplete="off"></textarea>
+            <div class="composer-actions">
+              <button class="send-button" id="sendButton" type="submit" aria-label="Send">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4 14-3.5-5L5 12Z"/></svg>
+              </button>
+              <button class="abort-button" id="abortButton" type="button" hidden>Stop</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-settings" data-screen="settings">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">PocketCode</p>
+            <h2>Settings</h2>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Connections</h3>
+          <div class="saved-list" id="settingsConnections"></div>
+          <button class="button ghost wide" type="button" id="addConnectionButton">Add a connection</button>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Display</h3>
+          <label class="toggle-row">
+            <span>
+              <strong>Show reasoning</strong>
+              <small>Display thinking blocks when the agent sends them.</small>
+            </span>
+            <input type="checkbox" id="showReasoning" checked>
+          </label>
+          <label class="toggle-row">
+            <span>
+              <strong>Compact tool cards</strong>
+              <small>Collapse tool input and output by default.</small>
+            </span>
+            <input type="checkbox" id="compactTools" checked>
+          </label>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel-title">Privacy</h3>
+          <p class="panel-copy">Connection secrets and device tokens are stored in this browser. Conversations are kept by the agent on your machine. PocketCode only caches its own app shell for offline launch.</p>
+          <button class="button danger ghost wide" type="button" id="clearDataButton">Forget all connections</button>
+        </div>
+
+        <div class="panel about">
+          <h3 class="panel-title">About</h3>
+          <p class="panel-copy">PocketCode 1.0 · A static PWA with no analytics and no third-party scripts. Built to pair with <code>opencode serve</code> and <code>pocketcode-bridge</code>.</p>
+          <div class="about-links">
+            <a href="../" class="text-button">All projects</a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="sheet" id="sheet" hidden>
+    <div class="sheet-backdrop" data-close-sheet></div>
+    <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet-head">
+        <h2 id="sheetTitle">Choose</h2>
+        <button class="icon-button" type="button" data-close-sheet aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div id="sheetBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
