@@ -43,6 +43,7 @@
   - [CENSUS](#census)
   - [GULPER](#gulper)
 - [The tools](#the-tools)
+  - [PocketCode](#pocketcode)
   - [EADS Studio](#eads-studio)
 - [The portfolio page](#the-portfolio-page)
 - [The hub page](#the-hub-page)
@@ -100,6 +101,8 @@
 | 37 | **Mini Tower** | Tiny-tower builder: floors, shops, tenants | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/tiny-tower-pwa/) |
 | 38 | **PIXEL CUP '96** | Low-poly arcade football, five a side | Canvas 2D (software rasteriser) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pixel-cup-pwa/) |
 | 39 | **GULPER** | Tentacled kaiju arcade: eat, grow, survive the response | Canvas 2D (software rasteriser) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/gulper-pwa/) |
+| 40 | **Pokéball GO v2** | Throw 2.0: power, ring timing, curveball, uid collection | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pokemon-go-pwa-v2/) |
+| 41 | **PocketCode** | Remote control for OpenCode / Pi agents | Static PWA + Node bridge | Demo | [▶ Open](https://lucagandolfi77.github.io/random2/pocketcode-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -699,9 +702,16 @@ drawn procedurally, every sound is synthesized.
   each 32 stages across eight named sectors
 - **Aerial loop** makes you briefly invulnerable but blocks fire — three per
   stage, unspent loops pay 1,000 points each at the tally
-- **POW crates:** green = firepower up (2→4 guns), white = smart bomb,
-  grey = two side fighters, plus more
-- Three difficulty presets (Recruit / Arcade / Ace) remembered between runs
+- **Relentless pressure:** continuous interceptor flights between scripted
+  waves, plus a separate **Endless** sortie with escalating waves and bosses
+- **Four weapons** (cannon, spread, rockets, lancer) and **four abilities**
+  (shield, air strike, time warp, overdrive), all switched by POW crates
+- **Thirteen new enemies** — raiders, ricocheting darts, shield wardens,
+  telegraphed snipers, fortified bunkers and seaplane tenders join the roster —
+  plus elite variants and faceted **low-poly enemy aircraft**
+- **POW crates:** green = weapon level up, white = smart bomb,
+  grey = two side fighters, plus weapon and ability crates
+- Four difficulty presets (Recruit / Arcade / Ace / ACE+) remembered between runs
 - Continue system that restarts from the last cleared sector, per front
 
 | Action | Touch | Keyboard |
@@ -709,6 +719,7 @@ drawn procedurally, every sound is synthesized.
 | Move | drag anywhere | arrows / `WASD` |
 | Shoot | automatic | hold `Z` / `Space` |
 | Aerial loop | **LOOP** button | `X` / `Shift` |
+| Ability | **ABILITY** button | `C` |
 | Pause | **PAUSE** button | `P` / `Esc` |
 | Start / next stage | tap playfield | `Enter` |
 
@@ -1100,6 +1111,37 @@ DPR-aware and following the hub's light/dark toggle.
 python3 -m http.server 8080
 # open http://localhost:8080/stats-pwa/
 ```
+
+### PocketCode
+
+*Your agents, in your pocket.* 📱
+
+A phone-first PWA for driving a real coding agent on your own machine: pair
+with the dependency-free PocketCode bridge (Pi) or a running `opencode serve`,
+then chat, follow tool calls, answer permission requests, inspect diffs and
+todos, and switch model or agent without opening a laptop.
+
+- **Live timeline** — text, reasoning, tool calls and results stream over
+  authenticated SSE, with reconnect and replay by sequence number
+- **Approvals on the phone** — permission cards map to the Pi extension UI and
+  OpenCode permission APIs, with allow-once / always / reject
+- **Pairing, not passwords** — a six-digit, five-minute code exchanges for a
+  revocable `pc_` token; only its hash is stored on the bridge
+- **Two backends** — Pi over JSONL RPC, or the official OpenCode HTTP API with
+  Basic auth and an exact CORS allowlist
+- **Works offline** — the app shell is cached, and a built-in demo (no backend)
+  exercises chat, tools, approvals and model selection
+- **No build step, no dependencies, no trackers** — plain HTML/CSS/ES modules
+
+```bash
+cd pocketcode-bridge
+node cli.mjs --workspace ~/code/my-project --web-root ../pocketcode-pwa
+# open http://127.0.0.1:4319/, enter the pairing code printed by the CLI
+```
+
+**Source:** [`pocketcode-pwa/`](pocketcode-pwa/) and
+[`pocketcode-bridge/`](pocketcode-bridge/) · **Setup:**
+[`pocketcode-pwa/README.md`](pocketcode-pwa/README.md)
 
 ### EADS Studio
 

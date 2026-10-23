@@ -47,8 +47,37 @@
 
         startLives: 3,
         maxLives: 6,
-        maxEnemies: 22,
-        maxParticles: 340,
+        maxEnemies: 30,
+        maxEbullets: 260,
+        maxParticles: 380,
+
+        /* Relentless pressure: the scripted waves are the skeleton of a
+           stage, and these spawns are the noise between them. The interval
+           starts long and shrinks as the stage (or the endless run) goes
+           on. Pressure kills do not count toward the 1942 shoot-down rate:
+           they are score, not a measure of how cleanly you cleared a wave. */
+        pressureStart: 4.2,
+        pressureMin: 0.62,
+        pressureRamp: 0.75,
+        eliteBaseChance: 0.03,
+        eliteRamp: 0.22,
+
+        /* Endless sortie: one continuous sky, a boss every ninety seconds,
+           and a difficulty ramp that never stops climbing. */
+        endless: {
+            bossEvery: 90,
+            waveEvery: 45,
+            terrainNeed: 140000,
+            maxSpeedMul: 2.4,
+        },
+
+        abilityMaxCharges: 3,
+        shieldDuration: 10,
+        slowDuration: 3.5,
+        slowFactor: 0.45,
+        strikeDuration: 1.25,
+        overdriveDuration: 6,
+        overdriveFire: 0.55,
 
         /* Threading: cutting through an enemy while rolling. One hit, the
            chain goes up, and the chain is what makes it worth the risk:
@@ -104,6 +133,44 @@
         recruit: { label: "RECRUIT", speed: 0.82, hp: 0.6, fire: 0.7, bullet: 0.85, density: 0.8 },
         arcade: { label: "ARCADE", speed: 1.0, hp: 1.0, fire: 1.0, bullet: 1.0, density: 1.0 },
         ace: { label: "ACE", speed: 1.12, hp: 1.6, fire: 1.35, bullet: 1.15, density: 1.2 },
+        aceplus: { label: "ACE+", speed: 1.22, hp: 2.1, fire: 1.65, bullet: 1.3, density: 1.42, elite: 0.08 },
+    };
+
+    /* ===== Weapons =====
+       Four aircraft guns. The cannon is the one the game starts with and the
+       one the arcade gave you; the other three are picked up from POW crates.
+       Every weapon climbs through three levels. A level is not more damage
+       per bullet: it is another lane, another rocket or another pierce, so
+       the feel of each gun stays the same while its reach grows. */
+    const weapons = {
+        cannon: {
+            label: "COBRA", cooldown: 0.085, damage: 1, speed: 520,
+            lanes: [2, 3, 4], offsets: [[-6, 6], [-8, 0, 8], [-7, -2.5, 2.5, 7]], radius: 2.5,
+        },
+        spread: {
+            label: "SPREAD", cooldown: 0.13, damage: 1, speed: 460,
+            count: [3, 5, 7], arc: 0.15, radius: 2.4,
+        },
+        rocket: {
+            label: "ROCKETS", cooldown: 0.24, damage: 2, speed: 330,
+            count: [1, 2, 3], homing: true, splash: 22, radius: 3.2,
+        },
+        lancer: {
+            label: "LANCER", cooldown: 0.1, damage: 1, speed: 760,
+            count: [1, 2, 3], pierce: 2, radius: 2.2,
+        },
+    };
+
+    /* ===== Abilities =====
+       One ability is carried at a time, with up to three charges. The crate
+       that grants it decides which one; a second crate of the same kind adds
+       a charge, a different one replaces it. The button on the playfield
+       spends one charge. */
+    const abilities = {
+        shield: { label: "SHIELD", mark: "H", color: "#ec4899", duration: 10 },
+        strike: { label: "AIR STRIKE", mark: "A", color: "#14b8a6", duration: 1.25 },
+        slow: { label: "TIME WARP", mark: "T", color: "#84cc16", duration: 3.5 },
+        overdrive: { label: "OVERDRIVE", mark: "O", color: "#8b5cf6", duration: 6 },
     };
 
     /* ===== Music =====
@@ -273,10 +340,70 @@
             kind: "ground", w: 28, h: 16, r: 11, hp: 6, pts: 400, weight: 3,
             speed: 16, ai: "ground", fire: 1.8, fireSpeed: 0.9, art: "gun",
         },
+
+        /* --- the relentless layer: seven units that make a quiet stage
+               feel like a front line --- */
+        interceptor: {
+            kind: "air", w: 18, h: 22, r: 5, hp: 2, pts: 600, weight: 2,
+            speed: 310, ai: "slash", fire: 1.3, fireSpeed: 1.25, art: "interceptor",
+        },
+        gunship: {
+            kind: "air", w: 30, h: 30, r: 8, hp: 6, pts: 1200, weight: 4,
+            speed: 118, ai: "orbit", fire: 1.0, fireSpeed: 1.0, art: "gunship",
+        },
+        aegis: {
+            kind: "air", w: 24, h: 26, r: 6.5, hp: 4, pts: 1400, weight: 4,
+            speed: 120, ai: "weave", fire: 1.4, fireSpeed: 0.95, art: "aegis", shield: 4,
+        },
+        phantom: {
+            kind: "air", w: 22, h: 26, r: 6, hp: 3, pts: 1500, weight: 4,
+            speed: 168, ai: "phantom", fire: 1.1, fireSpeed: 1.1, art: "phantom",
+        },
+        minelayer: {
+            kind: "air", w: 28, h: 30, r: 8, hp: 5, pts: 1200, weight: 4,
+            speed: 108, ai: "weave", fire: 1.9, fireSpeed: 0.7, art: "bomber",
+        },
+        missileer: {
+            kind: "ground", w: 26, h: 16, r: 10, hp: 5, pts: 600, weight: 3,
+            speed: 0, ai: "missile", fire: 2.4, fireSpeed: 0.8, art: "flak",
+        },
+        destroyer: {
+            kind: "sea", w: 44, h: 112, r: 17, hp: 22, pts: 1500, weight: 7,
+            speed: 0, ai: "sea", fire: 1.35, fireSpeed: 1.0, art: "ship",
+        },
+
+        /* --- the second relentless layer: support aircraft and fortified
+               ground/sea units that arrive once the campaign has warmed up.
+               `unlockAfter` is progress through the 32-stage campaign:
+               0 is stage 32, 31 is stage 1. Endless is always fully open. --- */
+        raider: {
+            kind: "air", w: 28, h: 28, r: 7.5, hp: 6, pts: 1800, weight: 4,
+            speed: 205, ai: "mirror", fire: 1.25, fireSpeed: 1.1, art: "raider", unlockAfter: 10,
+        },
+        dart: {
+            kind: "air", w: 16, h: 20, r: 5, hp: 2, pts: 900, weight: 2,
+            speed: 330, ai: "ricochet", fire: 1.35, fireSpeed: 1.3, art: "dart", unlockAfter: 4,
+        },
+        warden: {
+            kind: "air", w: 28, h: 30, r: 8, hp: 4, pts: 2200, weight: 5,
+            speed: 96, ai: "warden", fire: 2.0, fireSpeed: 0.85, art: "warden", unlockAfter: 16,
+        },
+        sniper: {
+            kind: "ground", w: 30, h: 16, r: 11, hp: 6, pts: 800, weight: 4,
+            speed: 0, ai: "sniper", fire: 2.8, fireSpeed: 1.4, art: "sniper", unlockAfter: 6,
+        },
+        bunker: {
+            kind: "ground", w: 34, h: 26, r: 13, hp: 14, pts: 1500, weight: 6,
+            speed: 0, ai: "bunker", fire: 2.4, fireSpeed: 1.0, art: "bunker", unlockAfter: 12,
+        },
+        tender: {
+            kind: "sea", w: 40, h: 96, r: 16, hp: 28, pts: 2500, weight: 9,
+            speed: 14, ai: "tender", fire: 2.2, fireSpeed: 0.9, art: "tender", unlockAfter: 18,
+        },
     };
 
-    const groundArt = ["tank", "truck", "gun", "flak", "radar"];
-    const seaArt = ["ship", "sub", "patrol"];
+    const groundArt = ["tank", "truck", "gun", "flak", "radar", "sniper", "bunker"];
+    const seaArt = ["ship", "sub", "patrol", "tender"];
     /* ===== Airframe Shapes ===== */
     const artShapes = {
         radial: { span: 13, sweep: 2.5, tail: 6.5, len: 13, nose: 4.4, eng: 1, prop: true, propSp: 8.5 },
@@ -284,6 +411,13 @@
         bomber: { span: 26, sweep: 5, tail: 11, len: 21, nose: 4.6, eng: 2, prop: true, propSp: 15 },
         jet: { span: 15, sweep: 9, tail: 7.5, len: 15, nose: 2.8, eng: 0, prop: false, propSp: 12 },
         light: { span: 11, sweep: 3.5, tail: 5, len: 12, nose: 3.4, eng: 1, prop: true, propSp: 7.5 },
+        interceptor: { span: 14, sweep: 7, tail: 6, len: 16, nose: 3.4, eng: 0, prop: false, propSp: 11 },
+        gunship: { span: 18, sweep: 2, tail: 7, len: 15, nose: 3.6, eng: 2, prop: true, propSp: 11 },
+        aegis: { span: 16, sweep: 4, tail: 7, len: 15, nose: 3.8, eng: 1, prop: true, propSp: 9 },
+        phantom: { span: 17, sweep: 8, tail: 6.5, len: 16, nose: 3, eng: 0, prop: false, propSp: 12 },
+        raider: { span: 19, sweep: 5, tail: 8, len: 17, nose: 4, eng: 2, prop: true, propSp: 13 },
+        dart: { span: 11, sweep: 8, tail: 5, len: 13, nose: 3.2, eng: 0, prop: false, propSp: 11.5 },
+        warden: { span: 22, sweep: 2, tail: 9, len: 16, nose: 4.2, eng: 2, prop: true, propSp: 10 },
         boss: { span: 46, sweep: 9, tail: 17, len: 44, nose: 6, eng: 4, prop: true, propSp: 30 },
     };
 
@@ -296,6 +430,13 @@
         yellow: { label: "EXTRA AERIAL LOOP", mark: "L", color: "#ffd54f", text: "#111111" },
         black: { label: "1 UP", mark: "U", color: "#1c1c1c", text: "#ffffff" },
         red: { label: "1000 PTS", mark: "+", color: "#e53935", text: "#ffffff" },
+        blue: { label: "SPREAD GUNS", mark: "S", color: "#3b82f6", text: "#ffffff" },
+        purple: { label: "ROCKET PODS", mark: "R", color: "#a855f7", text: "#ffffff" },
+        cyan: { label: "LANCER", mark: "C", color: "#06b6d4", text: "#111111" },
+        pink: { label: "SHIELD", mark: "H", color: "#ec4899", text: "#ffffff" },
+        teal: { label: "AIR STRIKE", mark: "A", color: "#14b8a6", text: "#111111" },
+        lime: { label: "TIME WARP", mark: "T", color: "#84cc16", text: "#111111" },
+        violet: { label: "OVERDRIVE", mark: "O", color: "#8b5cf6", text: "#ffffff" },
     };
 
     /* ===== End of Stage Bonus ===== */
@@ -379,15 +520,14 @@
 
     /* ===== Power-up Schedule ===== */
     const powPlan = {
-        32: ["green"], 31: ["white"], 30: ["grey"], 29: ["red"],
-        28: ["green"], 27: ["orange", "black"], 26: ["grey"], 25: ["red"],
-        24: ["green"], 23: ["yellow"], 22: ["grey"], 21: ["white"],
-        20: ["green", "black"], 19: ["white"], 18: ["white", "grey", "yellow"],
-        17: ["yellow"], 16: ["green"], 15: ["orange", "black"], 14: ["grey"],
-        13: ["yellow"], 12: ["green"], 11: ["white"], 10: ["grey"],
-        9: ["yellow"], 8: ["green", "black"], 7: ["white"], 6: ["grey"],
-        5: ["yellow"], 4: ["green", "black"], 3: ["white"], 2: ["grey"],
-        1: ["white"],
+        32: ["green"], 31: ["white", "blue"], 30: ["grey", "pink"], 29: ["red", "purple"],
+        28: ["green", "teal"], 27: ["orange", "black", "cyan"], 26: ["grey", "lime"], 25: ["red", "violet"],
+        24: ["green"], 23: ["yellow", "blue"], 22: ["grey"], 21: ["white", "purple"],
+        20: ["green", "black"], 19: ["white", "cyan"], 18: ["white", "grey", "yellow"], 17: ["yellow", "pink"],
+        16: ["green"], 15: ["orange", "black", "teal"], 14: ["grey"], 13: ["yellow", "lime"],
+        12: ["green"], 11: ["white", "violet"], 10: ["grey"], 9: ["yellow", "blue"],
+        8: ["green", "black"], 7: ["white", "purple"], 6: ["grey"], 5: ["yellow", "cyan"],
+        4: ["green", "black"], 3: ["white", "pink"], 2: ["grey", "teal"], 1: ["white"],
     };
 
     const vFormationStages = [27, 20, 15, 8, 4];
@@ -435,14 +575,19 @@
                 ship: "Battleship", sub: "U-boat", patrol: "E-boat", boss: "Giant Bomber",
                 charger: "Fw 190 Dive", gunner: "Stuka Stalker", splitter: "G-6 Rocket",
                 flanker: "Blohm & Voss", battery: "88mm AT Gun",
+                interceptor: "Me 163 Komet", gunship: "Hs 129", aegis: "Do 335",
+                phantom: "Ho 229", minelayer: "Ju 88", missileer: "V-2 Battery",
+                destroyer: "Zerstörer", raider: "Me 410 Hornisse", dart: "He 162 Salamander",
+                warden: "Ju 88 Escort", sniper: "12.8cm Flak", bunker: "Atlantic Wall",
+                tender: "Seaplane Tender",
             },
             rows: eurRows,
             cadence: { sea: 3.2, land: 2.6, mixed: 3.8 },
             shapes: ["line", "line", "v", "column", "stream", "echelon"],
             roster: {
-                sea: ["zero", "fighter", "jet", "sub", "patrol", "ship", "kamikaze", "gunner", "flanker"],
-                land: ["zero", "fighter", "jet", "ace", "tank", "halftrack", "truck", "artillery", "flak", "radar", "diver", "battery"],
-                mixed: ["zero", "fighter", "jet", "ace", "heavy", "tank", "flak", "sub", "diver", "charger", "gunner", "splitter", "flanker"],
+                sea: ["zero", "fighter", "jet", "sub", "patrol", "ship", "kamikaze", "gunner", "flanker", "interceptor", "gunship", "aegis", "phantom", "minelayer", "destroyer", "raider", "dart", "warden", "tender"],
+                land: ["zero", "fighter", "jet", "ace", "tank", "halftrack", "truck", "artillery", "flak", "radar", "diver", "battery", "interceptor", "gunship", "aegis", "phantom", "minelayer", "missileer", "raider", "dart", "warden", "sniper", "bunker"],
+                mixed: ["zero", "fighter", "jet", "ace", "heavy", "tank", "flak", "sub", "diver", "charger", "gunner", "splitter", "flanker", "interceptor", "gunship", "aegis", "phantom", "minelayer", "missileer", "destroyer", "raider", "dart", "warden", "sniper", "bunker", "tender"],
             },
         },
         rising: {
@@ -463,14 +608,19 @@
                 ship: "Destroyer", sub: "PT Boat", patrol: "Patrol Boat", boss: "Super Fortress",
                 charger: "Dive Bomber", gunner: "Strafing Fury", splitter: "Multi-Aircraft",
                 flanker: "Turner-Hale", battery: "105mm Howitzer",
+                interceptor: "P-38 Lightning", gunship: "A-20 Havoc", aegis: "B-17 Fortress",
+                phantom: "P-61 Black Widow", minelayer: "B-25 Mitchell", missileer: "AA Rocket",
+                destroyer: "Fletcher Class", raider: "P-47D Thunderbolt", dart: "P-80 Shooting Star",
+                warden: "A-26 Escort", sniper: "90mm AA", bunker: "Cave Bunker",
+                tender: "Seaplane Tender",
             },
             rows: pacRows,
             cadence: { sea: 2.7, land: 3.6, mixed: 3.0 },
             shapes: ["line", "v", "v", "column", "stream", "column"],
             roster: {
-                sea: ["zero", "fighter", "jet", "sub", "patrol", "ship", "kamikaze", "bomber", "gunner", "flanker"],
-                land: ["zero", "fighter", "jet", "ace", "tank", "halftrack", "truck", "artillery", "flak", "radar", "diver", "battery"],
-                mixed: ["zero", "fighter", "jet", "ace", "heavy", "tank", "flak", "sub", "diver", "bomber", "charger", "gunner", "splitter", "flanker"],
+                sea: ["zero", "fighter", "jet", "sub", "patrol", "ship", "kamikaze", "bomber", "gunner", "flanker", "interceptor", "gunship", "aegis", "phantom", "minelayer", "destroyer", "raider", "dart", "warden", "tender"],
+                land: ["zero", "fighter", "jet", "ace", "tank", "halftrack", "truck", "artillery", "flak", "radar", "diver", "battery", "interceptor", "gunship", "aegis", "phantom", "minelayer", "missileer", "raider", "dart", "warden", "sniper", "bunker"],
+                mixed: ["zero", "fighter", "jet", "ace", "heavy", "tank", "flak", "sub", "diver", "bomber", "charger", "gunner", "splitter", "flanker", "interceptor", "gunship", "aegis", "phantom", "minelayer", "missileer", "destroyer", "raider", "dart", "warden", "sniper", "bunker", "tender"],
             },
         },
     };
@@ -513,6 +663,8 @@
         difficulty: difficulty,
         music: music,
         themes: themes,
+        weapons: weapons,
+        abilities: abilities,
         archetypes: archetypes,
         artShapes: artShapes,
         groundArt: groundArt,

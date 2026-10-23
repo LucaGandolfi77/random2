@@ -1,7 +1,7 @@
 {
   "name": "Mustang PWA",
   "short_name": "Mustang PWA",
-  "description": "A vertical scrolling WWII air shooter: aerial loops, POW crates, side fighters and sector boss planes across 32 stages on two fronts.",
+  "description": "A vertical scrolling WWII air shooter with relentless pressure, endless sorties, four weapons, four abilities and low-poly enemy aircraft.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

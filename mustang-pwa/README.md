@@ -10,6 +10,38 @@ No build step, no dependencies, no binary assets. Every aircraft, tank, warship
 and landscape is drawn procedurally on a 2D canvas; every sound is synthesised
 with WebAudio.
 
+## The relentless update
+
+The ten additions below are still here. On top of them the game now has:
+
+- **Continuous pressure.** Between the scripted waves a pressure spawner keeps
+  sending small flights at you. It starts slow, tightens as the stage goes on,
+  respects the on-screen enemy cap, and stops when a boss arrives. Pressure
+  kills pay score but are deliberately left out of the shoot-down rate, so the
+  end-of-stage tally still measures the planned formations.
+- **Endless sortie.** A second mode on the title screen: one continuous sky,
+  pressure from the first second, a difficulty ramp that never stops climbing,
+  a boss every ninety seconds, and a separate best score per front.
+- **Four weapons.** The default cannon, plus spread guns, homing rocket pods
+  and the piercing lancer. Every weapon has three levels; the green crate
+  upgrades the one you are carrying.
+- **Four abilities.** Shield, air strike, time warp and overdrive. One ability
+  is carried at a time, with up to three charges; the new **ABILITY** button
+  spends one.
+- **Thirteen more enemies.** Interceptors that slash across the screen, orbiting
+  gunships, shielded aegis escorts, blinking phantoms, minelayers, homing
+  missile batteries and heavy destroyers; then mid-campaign raiders that mirror
+  your line, ricocheting darts, shield-pulsing wardens, telegraphed snipers,
+  fortified bunkers and seaplane tenders that launch child fighters. Late
+  stages and endless waves also send **elite** versions with gold trim, more
+  hit points and double score.
+- **Low-poly enemies.** Every enemy aircraft and boss is now drawn as a set of
+  flat-shaded facets, while the player, side fighters, ground units and ships
+  keep the painted look. No WebGL, no assets, no new dependencies.
+- **ACE+.** A fourth difficulty preset above Ace, with a steeper elite chance
+  and denser pressure spawns. Bosses also gain a desperate final phase below
+  25% health.
+
 ## What this game adds on top of 1942
 
 The cabinet gave you a score, three lives, a loop and a road of green military
@@ -103,6 +135,7 @@ python3 -m http.server 8080
 | Move | drag anywhere on the playfield | arrow keys or `WASD` |
 | Shoot | automatic while playing | hold `Z` or `Space` |
 | Aerial loop | the **LOOP** button | `X` or `Shift` |
+| Ability | the **ABILITY** button | `C` |
 | Pause | the **PAUSE** button | `P` or `Esc` |
 | Next stage / start | tap the playfield | `Enter` |
 
@@ -148,10 +181,48 @@ barrage and escort fighters. At half health every boss wakes up: it turns hot
 red, moves faster and wider, fires more often, and throws out rings of twelve
 shot that turn as they travel.
 
-**Difficulty.** Three presets, chosen on the title screen and remembered between
+**Weapons.** The green crate is now a weapon upgrade rather than a flat
+"two guns become four". Each weapon climbs through three levels, and a level
+adds reach rather than damage per bullet:
+
+| Weapon | Crate | Behaviour |
+|---|---|---|
+| COBRA | default | twin autocannon; 2, 3, then 4 lanes |
+| SPREAD | blue `S` | 3, 5 or 7 rounds in a fan |
+| ROCKETS | purple `R` | homing rocket pods with splash |
+| LANCER | cyan `C` | fast rounds that pierce three enemies |
+
+**Abilities.** One ability is carried at a time, with up to three charges.
+The **ABILITY** button on the playfield (or `C`) spends one:
+
+| Ability | Crate | Effect |
+|---|---|---|
+| SHIELD | pink `H` | absorbs the next hit for ten seconds |
+| AIR STRIKE | teal `A` | sweeping explosions clear bullets and damage bosses |
+| TIME WARP | lime `T` | slows enemies and their bullets for 3.5 s |
+| OVERDRIVE | violet `O` | faster fire and an extra projectile for 6 s |
+
+**Relentless pressure.** The wave plan is still the skeleton of a stage, but
+between its waves a pressure spawner sends extra flights. Its interval shrinks
+with stage progress and difficulty; it respects `maxEnemies`, never spawns
+during the briefing or a boss, and stops just before the tally. Pressure
+enemies pay score but do not count toward the shoot-down rate.
+
+**Endless sortie.** Choose ENDLESS on the title screen for a run with no
+stage end: continuous pressure, a speed and health ramp that keeps climbing, a
+new wave every 45 seconds and a boss every 90. Killing a boss continues the
+run. The best endless score is kept per front.
+
+**Elite enemies and ACE+.** From the middle of a campaign, and increasingly in
+endless, some enemies appear as elites: gold facets, 1.5× hit points, faster
+fire and double score. The fourth difficulty, **ACE+**, raises enemy speed,
+health, fire rate, bullet speed and density above Ace and doubles the elite
+chance.
+
+**Difficulty.** Four presets, chosen on the title screen and remembered between
 runs. *Recruit* softens enemy speed, toughness, rate of fire, bullet speed and
 wave density. *Arcade* is the neutral preset, the one the original cabinet ran.
-*Ace* turns all of them up.
+*Ace* turns all of them up, and *ACE+* is the new top end.
 
 **Two fronts.** *Operation Overlord* (Europe, 1944) flies the P-51 Mustang
 against the Luftwaffe. *Operation Rising Sun* (Pacific, 1942) flies the A6M
@@ -163,13 +234,20 @@ colour is a different effect:
 
 | Crate | Effect |
 |---|---|
-| Green | firepower up, two guns become four |
-| White | smart bomb, wipes every enemy aircraft on screen |
-| Grey | two side fighters join your flanks |
-| Orange | enemy guns jammed for nine seconds |
-| Yellow | one extra aerial loop this stage |
-| Black | 1 UP |
-| Red | 1,000 points |
+| Green `P` | weapon level up; at level 3 it pays a score bonus |
+| White `B` | smart bomb, wipes every enemy aircraft on screen |
+| Grey `W` | two side fighters join your flanks |
+| Orange `J` | enemy guns jammed for nine seconds |
+| Yellow `L` | one extra aerial loop this stage |
+| Black `U` | 1 UP |
+| Red `+` | 1,000 points |
+| Blue `S` | spread guns |
+| Purple `R` | rocket pods |
+| Cyan `C` | lancer |
+| Pink `H` | shield ability |
+| Teal `A` | air strike ability |
+| Lime `T` | time warp ability |
+| Violet `O` | overdrive ability |
 
 **Yashichi.** A slow green plane drifts up from a bottom corner on stages 29,
 25, 21, 17, 13, 09, 05 and 01. Shoot it and it drops a medal worth 5,000.
@@ -204,8 +282,8 @@ No dependencies needed, plain `node`:
 ```bash
 node --check src/data.js && node --check src/audio.js && node --check src/art.js && node --check src/game.js
 node tests/run-all.mjs         # everything below, with a summary
-node tests/check-data.mjs      # 2005 assertions over stage, enemy, music, difficulty, bonus, sector tables
-node tests/smoke.mjs           # boots the game headless and plays it, 237 assertions
+node tests/check-data.mjs      # 3548 assertions over stage, enemy, weapon, ability, music, difficulty, bonus, sector tables
+node tests/smoke.mjs           # boots the game headless and plays it, including endless and pressure
 node tests/check-wiring.mjs    # DOM ids, asset paths, portability, precache list, manifest
 ```
 
@@ -228,10 +306,10 @@ styles.css              four themes (olive, retro, night, sepia) driven by [data
 manifest.json           installable metadata
 service-worker.js       cache-first precache, versioned by CACHE_NAME
 icons/                  hand-written SVG airframe
-src/data.js             config, palettes, enemy archetypes, POW table, 32+32 stage tables
+src/data.js             config, palettes, weapons, abilities, enemy archetypes, POW table, stage tables
 src/audio.js            WebAudio synthesis for every sound effect, plus the music scheduler
-src/art.js              procedural drawing: airframes, armour, warships, terrain, crates
-src/game.js             state, loop, input, AI, collisions, stage flow, HUD, storage
+src/art.js              procedural drawing: low-poly enemy airframes, armour, warships, terrain, crates
+src/game.js             state, loop, input, AI, collisions, stage flow, endless mode, HUD, storage
 scripts/gen-icons.mjs   raster icon generator, standard library only
 tests/                  node-only checks, no framework
 ```

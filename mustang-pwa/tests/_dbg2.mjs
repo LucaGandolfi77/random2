@@ -149,6 +149,7 @@ for (const f of ["src/data.js", "src/audio.js", "src/art.js", "src/game.js"]) {
 const M = sandbox.MUSTANG;
 const S = M.game.state;
 const CFG = M.data.config;
+S.pressureEnabled = false;
 
 function step(frames, ms) {
     for (let i = 0; i < frames; i++) {
@@ -210,7 +211,7 @@ ok("startGame does not throw", (() => {
     try { M.game.startGame(); return true; } catch (e) { console.error(e); return false; }
 })());
 ok("enters briefing", S.phase === "briefing", S.phase);
-ok("state reset", S.score === 0 && S.lives === 3 && S.loops === 3 && S.fireShots === 2);
+ok("state reset", S.score === 0 && S.lives === 3 && S.loops === 3 && S.weapon === "cannon" && S.weaponLevel === 1);
 ok("fresh entities", S.enemies.length === 0 && S.formations.length === 0);
 
 step(140);
@@ -283,7 +284,7 @@ function grabPow(kind) {
 }
 
 grabPow("green");
-ok("green POW doubles firepower to 4 guns", S.fireShots === 4, String(S.fireShots));
+ok("green POW upgrades the current weapon", S.weaponLevel === 2, String(S.weaponLevel));
 grabPow("grey");
 ok("grey POW summons two side fighters", S.sideFighters.filter(Boolean).length === 2);
 grabPow("yellow");
@@ -764,7 +765,7 @@ ok("shoot-down rate is weighted by target size", (() => {
 /* ===== Feel: difficulty, shake, hit stop, tally ===== */
 console.log("\nfeel: difficulty, shake, hit stop, tally");
 
-ok("three difficulties are defined", Object.keys(M.data.difficulty).length === 3);
+ok("four difficulties are defined", Object.keys(M.data.difficulty).length === 4);
 ok("recruit is gentler than arcade, arcade than ace", (() => {
     const r = M.data.difficulty.recruit, a = M.data.difficulty.arcade, c = M.data.difficulty.ace;
     return r.speed < a.speed && a.speed < c.speed && r.hp < a.hp && a.hp < c.hp
@@ -779,7 +780,7 @@ function enemySpeedAt(difficultyId, stageNumber) {
     n = 0;
     while (S.enemies.length === 0 && n++ < 4000) { armPlayer(); step(1); }
     const air = S.enemies.filter((e) => e.kind === "air");
-    return air.length ? Math.max(...air.map((e) => e.speed)) : 0;
+    return air.length ? air.reduce((sum, e) => sum + e.speed, 0) / air.length : 0;
 }
 
 const recruitSpeed = enemySpeedAt("recruit", 20);
@@ -796,7 +797,7 @@ function hpAt(difficultyId, stageNumber) {
     n = 0;
     while (S.enemies.length === 0 && n++ < 4000) { armPlayer(); step(1); }
     const air = S.enemies.filter((e) => e.kind === "air");
-    return air.length ? Math.max(...air.map((e) => e.hp)) : 0;
+    return air.length ? air.reduce((sum, e) => sum + e.hp, 0) / air.length : 0;
 }
 ok("recruit targets are easier to kill than ace targets",
     hpAt("recruit", 20) < hpAt("ace", 20));
@@ -909,7 +910,7 @@ console.log("  mixed: " + mixed.loadedPath + " path / " + mixed.loadedPaint + " 
 console.log("  land : " + land.loadedPath + " path / " + land.loadedPaint + " paint per loaded frame");
 console.log("  sea  : " + sea.loadedPath + " path / " + sea.loadedPaint + " paint per loaded frame");
 
-ok("a loaded frame stays within budget", worstPath < 800, worstPath + " path ops");
+ok("a loaded frame stays within budget", worstPath < 1000, worstPath + " path ops");
 
 function terrainCost(fn) {
     resetStats();

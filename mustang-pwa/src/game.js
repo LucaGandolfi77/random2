@@ -21,6 +21,7 @@
     const PLAYER_START_Y = H - 90;
     const FLASH_SCHEME = { body: "#ffffff", wing: "#ffffff", trim: "#ffffff" };
     const BOSS_FLASH = { body: "#ffffff", wing: "#ffffff", trim: "#ffd54f" };
+    const ELITE_SCHEME = { body: "#8a6d1f", wing: "#d4af37", trim: "#fff3b0" };
 
     /* ===== Game State ===== */
     const state = {
@@ -29,6 +30,8 @@
         attract: false,
         menuIdle: 0,
         hitbox: config.hitbox,
+        mode: "campaign",
+        runMode: "campaign",
         theatre: "overlord",
         difficulty: "arcade",
         checkpoint: 0,
@@ -45,15 +48,28 @@
         extendsGiven: 0,
         highScore: 0,
         highScores: { overlord: 0, rising: 0 },
+        endlessBest: { overlord: 0, rising: 0 },
         lives: config.startLives,
         loops: config.loopsPerStage,
-        fireShots: 2,
+        weapon: "cannon",
+        weaponLevel: 1,
+        ability: null,
+        abilityCharges: 0,
         silent: 0,
         bomberCombo: 0,
         thread: 0,
         threadTimer: 0,
         shake: 0,
         hitStop: 0,
+        shield: 0,
+        shieldTimer: 0,
+        slow: 0,
+        overdrive: 0,
+        strike: 0,
+        strikeTick: 0,
+        pressureEnabled: true,
+        pressureTimer: 0,
+        pressureSpawned: 0,
 
         weightTotal: 0,
         weightKilled: 0,
@@ -82,6 +98,7 @@
         waveIndex: 0,
         blockedFor: 0,
         landing: 0,
+        endlessRun: null,
 
         enemySpeedMul: 1,
         hpMul: 1,
@@ -105,6 +122,7 @@
         DOME.loopsEl = document.getElementById("loops");
         DOME.startBtn = document.getElementById("start-btn");
         DOME.loopBtn = document.getElementById("loop-btn");
+        DOME.abilityBtn = document.getElementById("ability-btn");
         DOME.pauseBtn = document.getElementById("pause-btn");
         DOME.soundBtn = document.getElementById("sound-btn");
         DOME.overlay = document.getElementById("overlay");
@@ -128,6 +146,10 @@
         for (let i = 0; i < 8; i++) DOME.sectorBtns.push(document.getElementById("sector-" + i));
         DOME.difficultyChoices = document.getElementById("difficulty-choices");
         DOME.difficultyRow = document.getElementById("difficulty-row");
+        DOME.modeChoices = document.getElementById("mode-choices");
+        DOME.modeRow = document.getElementById("mode-row");
+        DOME.endlessBest = document.getElementById("endless-best");
+        DOME.endlessBestValue = document.getElementById("endless-best-value");
         DOME.controlsHint = document.getElementById("controls-hint");
         DOME.installPrompt = document.getElementById("install-prompt");
         DOME.installBtn = document.getElementById("install-btn");
@@ -147,6 +169,12 @@
     }
 
     function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return m + ":" + (s < 10 ? "0" : "") + s;
+    }
 
     function rngFor(theatreId, stageNumber, salt) {
         const base = stageNumber * 2654435761 + (theatreId === "overlord" ? 0x9e37 : 0x85eb) + (salt || 0);
@@ -321,6 +349,16 @@
         return true;
     }
 
+    /* Campaign progress runs from stage 32 (0) down to stage 1 (31). A unit
+       with unlockAfter appears only once that much of the campaign is behind
+       the player. Endless uses a synthetic stage 1, so everything is open. */
+    function unitUnlocked(unitId, stage) {
+        const arch = archetypes[unitId];
+        if (!arch || !arch.unlockAfter) return true;
+        const n = stage && stage.n ? stage.n : state.stageNumber;
+        return 32 - n >= arch.unlockAfter;
+    }
+
     function biomeAtStageTime(t, topY) {
         return biomeAtWorld(H + state.stage.speed * t - topY);
     }
@@ -345,6 +383,7 @@
 
     /* ===== Formations ===== */
     let formationSeq = 0;
+    let enemySeq = 0;
 
     function makeFormation(units, shape, powKind) {
         const group = {
@@ -411,12 +450,23 @@
     }
 
     /* ===== Enemy spawning ===== */
+    function makeElite(e) {
+        if (e.elite) return;
+        e.elite = true;
+        e.hp *= 1.5;
+        e.maxHp *= 1.5;
+        e.pts = Math.round(e.pts * 2);
+        e.speed *= 1.12;
+    }
+
     function spawnEnemy(unitId, x, y, delay, group, opts) {
         const arch = archetypes[unitId];
         if (!arch) return null;
         const diff = D.difficulty[state.difficulty];
         const hpMul = arch.kind === "air" ? state.hpMul * diff.hp : diff.hp;
+        const elite = !!(opts && opts.elite);
         const e = {
+            id: ++enemySeq,
             unit: unitId,
             arch: arch,
             kind: arch.kind,
@@ -429,6 +479,10 @@
             pts: arch.pts,
             ai: arch.ai,
             art: arch.art,
+            shield: arch.shield || 0,
+            maxShield: arch.shield || 0,
+            elite: false,
+            pressure: !!(opts && opts.pressure),
             speed: arch.speed * (arch.kind === "air" ? state.enemySpeedMul : diff.speed),
             fireTimer: 0.8 + Math.random() * 1.5,
             delay: delay || 0,
@@ -437,10 +491,12 @@
             facing: 1,
             angle: arch.kind === "air" ? Math.PI : 0,
             flash: 0,
+            alpha: 1,
             group: group || null,
             leaving: false,
             child: !!(opts && opts.child),
         };
+        if (elite) makeElite(e);
         if (e.ai === "cross") {
             const dir = x < W / 2 ? 1 : -1;
             e.vx = dir * e.speed;
@@ -451,6 +507,32 @@
             e.facing = x < W / 2 ? 1 : -1;
         } else if (e.ai === "flank") {
             e.phaseName = "climb";
+        } else if (e.ai === "slash") {
+            e.facing = x < W / 2 ? 1 : -1;
+            e.phaseName = "aim";
+        } else if (e.ai === "orbit") {
+            e.phaseName = "enter";
+            e.orbitDir = x < W / 2 ? 1 : -1;
+        } else if (e.ai === "phantom") {
+            e.phaseName = "visible";
+        } else if (e.ai === "mirror") {
+            e.phaseName = "enter";
+            e.facing = x < W / 2 ? 1 : -1;
+        } else if (e.ai === "ricochet") {
+            const dir = x < W / 2 ? 1 : -1;
+            e.vx = dir * e.speed * 0.52;
+            e.vy = e.speed * 0.72;
+            e.facing = dir;
+        } else if (e.ai === "warden") {
+            e.auraTimer = 1.1;
+        } else if (e.ai === "sniper") {
+            e.phaseName = "recover";
+            e.fireTimer = 1.4 + Math.random() * 1.2;
+        } else if (e.ai === "bunker") {
+            e.fireTimer = 1.8 + Math.random();
+        } else if (e.ai === "tender") {
+            e.spawnTimer = 2.2;
+            e.spawned = 0;
         }
         state.enemies.push(e);
         if (!e.child) state.weightTotal += arch.weight;
@@ -489,8 +571,10 @@
             } else {
                 shape = pickShape(rng, stage.shapes, 3);
                 const biome = biomeAtStageTime(t, formationTopY(shape, 3));
-                const fits = stage.roster.filter((u) => unitFitsBiome(u, biome));
-                const pool = fits.length ? fits : stage.roster.filter((u) => archetypes[u].kind === "air");
+                const fits = stage.roster.filter((u) => unitFitsBiome(u, biome) && unitUnlocked(u, stage));
+                const pool = fits.length
+                    ? fits
+                    : stage.roster.filter((u) => archetypes[u].kind === "air" && unitUnlocked(u, stage));
                 unitId = pool.length ? pool[Math.floor(rng() * pool.length)] : "zero";
                 const arch = archetypes[unitId];
                 count2 = arch.kind === "air" ? 1 + Math.floor(rng() * 4) : 1 + Math.floor(rng() * 2);
@@ -531,7 +615,15 @@
         const arch = archetypes[wave.unit];
         if (!wave.force && !biomeReadyFor(arch.kind, formationTopY(wave.shape, wave.count))) return false;
         const units = new Array(wave.count).fill(wave.unit);
+        const start = state.enemies.length;
         makeFormation(units, wave.shape, wave.pow);
+        const diff = D.difficulty[state.difficulty];
+        const chance = config.eliteBaseChance * 0.5 + pressureProgress() * config.eliteRamp * 0.5 + (diff.elite || 0) * 0.5;
+        if (chance > 0) {
+            for (let i = start; i < state.enemies.length; i++) {
+                if (Math.random() < chance) makeElite(state.enemies[i]);
+            }
+        }
         return true;
     }
 
@@ -553,7 +645,13 @@
         spawnParticles(p.x, p.y, def.color, 14, 70, 2);
         switch (p.kind) {
             case "green":
-                state.fireShots = Math.min(4, state.fireShots + 2);
+                if (state.weaponLevel < 3) {
+                    state.weaponLevel++;
+                    floater(p.x, p.y - 32, (D.weapons[state.weapon].label) + " II", "#4caf50");
+                } else {
+                    addScore(config.powBonus);
+                    floater(p.x, p.y - 32, "WEAPON MAX", "#4caf50");
+                }
                 break;
             case "white":
                 smartBomb();
@@ -578,6 +676,101 @@
             case "red":
                 addScore(config.powBonus);
                 break;
+            case "blue":
+                equipWeapon("spread");
+                break;
+            case "purple":
+                equipWeapon("rocket");
+                break;
+            case "cyan":
+                equipWeapon("lancer");
+                break;
+            case "pink":
+                grantAbility("shield");
+                break;
+            case "teal":
+                grantAbility("strike");
+                break;
+            case "lime":
+                grantAbility("slow");
+                break;
+            case "violet":
+                grantAbility("overdrive");
+                break;
+        }
+    }
+
+    function equipWeapon(id) {
+        if (!D.weapons[id]) return;
+        state.weapon = id;
+        state.weaponLevel = 1;
+        floater(state.player.x, state.player.y - 34, D.weapons[id].label, "#3b82f6");
+    }
+
+    function grantAbility(id) {
+        const def = D.abilities[id];
+        if (!def) return;
+        if (state.ability === id) {
+            state.abilityCharges = Math.min(config.abilityMaxCharges, state.abilityCharges + 1);
+        } else {
+            state.ability = id;
+            state.abilityCharges = 1;
+        }
+        floater(state.player.x, state.player.y - 34, def.label + " x" + state.abilityCharges, def.color);
+    }
+
+    function activateAbility() {
+        if (state.paused || state.phase !== "playing" || !state.player || !state.player.alive) return;
+        if (!state.ability || state.abilityCharges <= 0) {
+            if (state.ability) Sound.hit();
+            return;
+        }
+        const id = state.ability;
+        state.abilityCharges--;
+        Sound.ability(id);
+        if (id === "shield") {
+            state.shield = 1;
+            state.shieldTimer = config.shieldDuration;
+            floater(state.player.x, state.player.y - 30, "SHIELD", "#ec4899");
+        } else if (id === "slow") {
+            state.slow = config.slowDuration;
+            floater(W / 2, 96, "TIME WARP", "#84cc16");
+        } else if (id === "strike") {
+            state.strike = config.strikeDuration;
+            state.strikeTick = 0;
+            floater(W / 2, 96, "AIR STRIKE", "#14b8a6");
+        } else if (id === "overdrive") {
+            state.overdrive = config.overdriveDuration;
+            floater(state.player.x, state.player.y - 30, "OVERDRIVE", "#8b5cf6");
+        }
+        if (state.abilityCharges <= 0) state.ability = null;
+    }
+
+    function updateAbilities(dt) {
+        if (state.shield > 0) {
+            state.shieldTimer -= dt;
+            if (state.shieldTimer <= 0) state.shield = 0;
+        }
+        if (state.slow > 0) state.slow = Math.max(0, state.slow - dt);
+        if (state.overdrive > 0) state.overdrive = Math.max(0, state.overdrive - dt);
+        if (state.strike > 0) {
+            state.strike = Math.max(0, state.strike - dt);
+            state.strikeTick -= dt;
+            if (state.strikeTick <= 0) {
+                state.strikeTick = 0.09;
+                const sx = 30 + Math.random() * (W - 60);
+                const sy = 90 + Math.random() * (H - 220);
+                spawnParticles(sx, sy, "#ffd54f", 8, 150, 3.2);
+                for (const e of state.enemies.slice()) {
+                    if (e.delay > 0) continue;
+                    if (circleHit(sx, sy, 34, e.x, e.y, e.r + 8)) {
+                        damageEnemy(e, e.kind === "boss" ? 2 : 3);
+                    }
+                }
+                for (const b of state.ebullets) {
+                    if (circleHit(sx, sy, 42, b.x, b.y, b.r)) b.dead = true;
+                }
+            }
         }
     }
 
@@ -633,38 +826,73 @@
     function playerFire() {
         const p = state.player;
         if (p.fireCool > 0) return;
-        p.fireCool = config.shotGap;
-        const speed = -config.shotSpeed;
-        if (state.fireShots >= 4) {
-            for (const dx of [-7, -2.5, 2.5, 7]) {
-                pushShot(p.x + dx, p.y - 17, speed, 2.3);
+        const def = D.weapons[state.weapon] || D.weapons.cannon;
+        const level = clamp(state.weaponLevel, 1, 3);
+        const over = state.overdrive > 0;
+        p.fireCool = def.cooldown * (over ? config.overdriveFire : 1);
+
+        if (state.weapon === "spread") {
+            const shots = def.count[level - 1] + (over ? 1 : 0);
+            const arc = def.arc;
+            for (let i = 0; i < shots; i++) {
+                const a = -Math.PI / 2 + (i - (shots - 1) / 2) * arc;
+                pushShot(p.x, p.y - 16, Math.sin(a) * def.speed, def.radius, {
+                    vx: Math.cos(a) * def.speed, damage: def.damage,
+                });
+            }
+        } else if (state.weapon === "rocket") {
+            const shots = def.count[level - 1] + (over ? 1 : 0);
+            for (let i = 0; i < shots; i++) {
+                const dx = shots === 1 ? 0 : (i - (shots - 1) / 2) * 9;
+                pushShot(p.x + dx, p.y - 14, -def.speed, def.radius, {
+                    damage: def.damage, homing: true, splash: def.splash,
+                });
+            }
+        } else if (state.weapon === "lancer") {
+            const shots = def.count[level - 1] + (over ? 1 : 0);
+            for (let i = 0; i < shots; i++) {
+                const dx = shots === 1 ? 0 : (i - (shots - 1) / 2) * 6;
+                pushShot(p.x + dx, p.y - 18, -def.speed, def.radius, {
+                    damage: def.damage, pierce: def.pierce,
+                });
             }
         } else {
-            pushShot(p.x - 6, p.y - 17, speed, 2.6);
-            pushShot(p.x + 6, p.y - 17, speed, 2.6);
+            const lanes = def.offsets[level - 1];
+            const offsets = over && lanes.length < 5 ? lanes.concat([0]) : lanes;
+            for (const dx of offsets) pushShot(p.x + dx, p.y - 17, -def.speed, def.radius, { damage: def.damage });
         }
-        Sound.shoot();
+        Sound.weaponFire(state.weapon);
     }
 
-    function pushShot(x, y, vy, r) {
-        const b = take("bullet", () => ({ x: 0, y: 0, vx: 0, vy: 0, r: 2 }));
+    function pushShot(x, y, vy, r, opts) {
+        const b = take("bullet", () => ({
+            x: 0, y: 0, vx: 0, vy: 0, r: 2, damage: 1, pierce: 0, homing: false, splash: 0, hits: [],
+        }));
         b.x = x;
         b.y = y;
-        b.vx = 0;
+        b.vx = (opts && opts.vx) || 0;
         b.vy = vy;
         b.r = r;
+        b.damage = (opts && opts.damage) || 1;
+        b.pierce = (opts && opts.pierce) || 0;
+        b.homing = !!(opts && opts.homing);
+        b.splash = (opts && opts.splash) || 0;
+        b.hits.length = 0;
         state.shots.push(b);
     }
 
-    function pushEnemyShot(x, y, vx, vy) {
-        const b = take("ebullet", () => ({ x: 0, y: 0, vx: 0, vy: 0, r: 3, life: 4, dead: false }));
+    function pushEnemyShot(x, y, vx, vy, opts) {
+        if (state.ebullets.length >= config.maxEbullets) return;
+        const b = take("ebullet", () => ({ x: 0, y: 0, vx: 0, vy: 0, r: 3, life: 4, dead: false, homing: 0, turn: 0 }));
         b.x = x;
         b.y = y;
         b.vx = vx;
         b.vy = vy;
-        b.r = 3;
-        b.life = 4;
+        b.r = (opts && opts.r) || 3;
+        b.life = (opts && opts.life) || 4;
         b.dead = false;
+        b.homing = (opts && opts.homing) || 0;
+        b.turn = (opts && opts.turn) || 0;
         state.ebullets.push(b);
     }
 
@@ -676,7 +904,17 @@
 
     function killPlayer() {
         const p = state.player;
-        if (!p.alive) return;
+        if (!p.alive) return false;
+        if (state.shield > 0) {
+            state.shield = 0;
+            state.shieldTimer = 0;
+            p.invuln = Math.max(p.invuln, 1.2);
+            Sound.shieldBreak();
+            shake(3);
+            spawnParticles(p.x, p.y, "#ec4899", 18, 140, 3);
+            floater(p.x, p.y - 24, "SHIELD BROKEN", "#ec4899");
+            return false;
+        }
         p.alive = false;
         p.deathTimer = 1.3;
         p.looping = false;
@@ -690,6 +928,7 @@
         spawnParticles(p.x, p.y, themes[state.theme].plane, 34, 190, 3.6);
         spawnParticles(p.x, p.y, "#ff8c1a", 18, 120, 3);
         save();
+        return true;
     }
 
     /* ===== Combat ===== */
@@ -730,7 +969,10 @@
         else Sound.hit();
         shake(e.kind === "air" ? 3.2 : 1.6);
         if (award) {
-            state.weightKilled += e.arch.weight;
+            /* Pressure flights and splitter children were never added to
+               weightTotal, so they must not be added to the kills either:
+               the shoot-down rate is about the planned formations. */
+            if (!e.pressure && !e.child) state.weightKilled += e.arch.weight;
             resolveFormation(e);
         } else {
             releaseFormation(e);
@@ -776,9 +1018,23 @@
         spawnParticles(e.x, e.y, "#ff3b2f", 26, 190, 3);
     }
 
-    function damageEnemy(e) {
-        e.hp--;
-        e.flash = 0.12;
+    function damageEnemy(e, amount) {
+        const dmg = amount === undefined ? 1 : amount;
+        if (e.shield > 0) {
+            e.shield -= dmg;
+            e.flash = 0.12;
+            if (e.shield < 0) {
+                const overflow = -e.shield;
+                e.shield = 0;
+                e.hp -= overflow;
+            }
+            Sound.hit();
+            spawnParticles(e.x, e.y - 8, "#7fe8f5", 4, 60, 2);
+            if (e.hp > 0) return;
+        } else {
+            e.hp -= dmg;
+            e.flash = 0.12;
+        }
         if (e.kind === "boss") {
             shake(2.2);
             state.hitStop = Math.max(state.hitStop, config.hitStopKill);
@@ -799,7 +1055,14 @@
             addScore(e.pts);
             state.weightKilled += e.arch.weight;
             floater(clamp(e.x, 46, W - 46), e.y - 20, String(e.pts), "#ffd54f");
-            endStage();
+            if (state.runMode === "endless" && state.endlessRun) {
+                state.endlessRun.nextBoss = state.endlessRun.time + config.endless.bossEvery;
+                state.endlessRun.level++;
+                syncMusic();
+                floater(W / 2, 120, "SECTOR CLEARED", "#7ef07e");
+            } else {
+                endStage();
+            }
             return;
         }
         destroyEnemy(e);
@@ -825,17 +1088,24 @@
 
         for (let i = state.shots.length - 1; i >= 0; i--) {
             const s = state.shots[i];
-            let hit = false;
+            let spent = false;
             for (const e of state.enemies) {
                 if (e.delay > 0) continue;
-                if (circleHit(s.x, s.y, s.r, e.x, e.y, e.r)) {
-                    damageEnemy(e);
-                    spawnParticles(s.x, s.y, "#ffe9a8", 3, 50, 1.8);
-                    hit = true;
-                    break;
+                if (s.hits.indexOf(e.id) >= 0) continue;
+                if (!circleHit(s.x, s.y, s.r, e.x, e.y, e.r)) continue;
+                s.hits.push(e.id);
+                damageEnemy(e, s.damage || 1);
+                spawnParticles(s.x, s.y, "#ffe9a8", 3, 50, 1.8);
+                if (s.splash > 0) {
+                    for (const o of state.enemies.slice()) {
+                        if (o === e || o.delay > 0) continue;
+                        if (circleHit(s.x, s.y, s.splash, o.x, o.y, o.r)) damageEnemy(o, 1);
+                    }
                 }
+                if (s.pierce > 0) s.pierce--;
+                else { spent = true; break; }
             }
-            if (hit) state.shots.splice(i, 1);
+            if (spent) state.shots.splice(i, 1);
         }
 
         collectPickups();
@@ -879,8 +1149,7 @@
                 if (e.kind === "boss") { killPlayer(); return; }
                 destroyEnemy(e);
                 killPlayer();
-                return;
-            }
+                return;            }
             if (!vulnerable) continue;
             for (let s = 0; s < state.sideFighters.length; s++) {
                 const f = state.sideFighters[s];
@@ -941,8 +1210,10 @@
     }
 
     function updateEnemy(e, dt) {
+        const rawDt = dt;
+        if (state.slow > 0) dt *= config.slowFactor;
         if (e.delay > 0) {
-            e.delay -= dt;
+            e.delay -= rawDt;
             e.y += 26 * dt;
             return;
         }
@@ -1045,6 +1316,161 @@
                 e.x = e.ox + Math.sin(e.t * 0.8 + e.phase) * 20;
                 e.angle = 0;
                 break;
+            case "slash": {
+                if (e.phaseName === "aim") {
+                    e.y += e.speed * 0.35 * dt;
+                    e.x = e.ox + (e.facing || 1) * 70 * dt;
+                    e.angle = Math.atan2(targetY - e.y, targetX - e.x) + Math.PI / 2;
+                    if (e.t > 0.42) {
+                        const a = Math.atan2(targetY - e.y, targetX - e.x);
+                        e.vx = Math.cos(a) * e.speed * 1.7;
+                        e.vy = Math.sin(a) * e.speed * 1.7;
+                        e.phaseName = "dash";
+                    }
+                } else {
+                    e.x += e.vx * dt;
+                    e.y += e.vy * dt;
+                    e.angle = Math.atan2(e.vy, e.vx) + Math.PI / 2;
+                    if (e.y > H + 40 || e.x < -60 || e.x > W + 60) e.leaving = true;
+                }
+                break;
+            }
+            case "orbit": {
+                if (e.phaseName === "enter") {
+                    e.y += e.speed * 0.9 * dt;
+                    if (e.y >= 170) {
+                        e.phaseName = "orbit";
+                        e.ox = clamp(e.x, 80, W - 80);
+                        e.oy = e.y;
+                    }
+                } else {
+                    e.x = e.ox + Math.sin(e.t * 1.15 + e.phase) * 104 * (e.orbitDir || 1);
+                    e.y = e.oy + Math.cos(e.t * 1.15 + e.phase) * 20;
+                    e.angle = Math.cos(e.t * 1.15 + e.phase) * 0.25;
+                    if (e.t > 9) e.leaving = true;
+                }
+                break;
+            }
+            case "phantom": {
+                const cyc = e.t % 3.6;
+                if (cyc < 0.8) e.alpha = 1;
+                else if (cyc < 1.2) e.alpha = 1 - (cyc - 0.8) / 0.4 * 0.75;
+                else if (cyc < 2.5) e.alpha = 0.25;
+                else if (cyc < 2.9) e.alpha = 0.25 + (cyc - 2.5) / 0.4 * 0.75;
+                else e.alpha = 1;
+                e.y += e.speed * 0.72 * dt;
+                e.x = e.ox + Math.sin(e.t * 1.4 + e.phase) * 72;
+                e.angle = Math.PI + Math.cos(e.t * 1.4 + e.phase) * 0.18;
+                if (e.y > H + 40) e.leaving = true;
+                break;
+            }
+            case "mirror": {
+                const want = clamp(targetX + (e.facing || 1) * 74, 34, W - 34);
+                if (e.phaseName === "enter") {
+                    e.y += e.speed * 0.8 * dt;
+                    e.x += clamp(want - e.x, -e.speed * 0.7 * dt, e.speed * 0.7 * dt);
+                    e.angle = Math.PI + clamp((want - e.x) * 0.003, -0.3, 0.3);
+                    if (e.y >= 168) e.phaseName = "track";
+                } else if (e.t > 10) {
+                    e.y += e.speed * 0.5 * dt;
+                    e.angle = Math.PI;
+                    if (e.y > H + 30) e.leaving = true;
+                } else {
+                    e.x += clamp(want - e.x, -e.speed * 0.7 * dt, e.speed * 0.7 * dt);
+                    e.y = 168 + Math.sin(e.t * 1.3 + e.phase) * 16;
+                    e.angle = Math.PI + clamp((want - e.x) * 0.003, -0.3, 0.3);
+                }
+                break;
+            }
+            case "ricochet":
+                e.x += e.vx * dt;
+                e.y += e.vy * dt;
+                if (e.x < 18) {
+                    e.x = 18;
+                    e.vx = Math.abs(e.vx);
+                    e.facing = 1;
+                } else if (e.x > W - 18) {
+                    e.x = W - 18;
+                    e.vx = -Math.abs(e.vx);
+                    e.facing = -1;
+                }
+                e.angle = Math.atan2(e.vy, e.vx) + Math.PI / 2;
+                if (e.y > H + 40) e.leaving = true;
+                break;
+            case "warden": {
+                e.y += e.speed * dt;
+                e.x = e.ox + Math.sin(e.t * 1.1 + e.phase) * 54;
+                e.angle = Math.PI + Math.cos(e.t * 1.1 + e.phase) * 0.12;
+                e.auraTimer -= dt;
+                if (e.auraTimer <= 0) {
+                    e.auraTimer = 2.6;
+                    let granted = 0;
+                    for (const o of state.enemies) {
+                        if (o === e || o.kind !== "air" || o.delay > 0) continue;
+                        if (o.y < -20 || o.y > H + 20 || (o.shield || 0) >= 4) continue;
+                        o.shield = Math.min(4, (o.shield || 0) + 2);
+                        granted++;
+                        if (granted >= 3) break;
+                    }
+                }
+                break;
+            }
+            case "sniper":
+                e.y += state.stage.speed * dt;
+                if (e.phaseName === "aim") {
+                    e.aimTime -= dt;
+                    if (e.aimTime <= 0) {
+                        const a = Math.atan2(e.aimY - e.y, e.aimX - e.x);
+                        const speed = config.enemyBulletSpeed * D.difficulty[state.difficulty].bullet * 1.9;
+                        pushEnemyShot(e.x, e.y, Math.cos(a) * speed, Math.sin(a) * speed, { r: 3.2, life: 5 });
+                        Sound.enemyShot();
+                        e.phaseName = "recover";
+                        e.fireTimer = 2.8 / D.difficulty[state.difficulty].fire;
+                    }
+                } else {
+                    e.fireTimer -= dt;
+                    if (e.fireTimer <= 0 && e.y > 0 && e.y < H - 30) {
+                        e.phaseName = "aim";
+                        e.aimTime = 1.05;
+                        e.aimX = targetX;
+                        e.aimY = targetY;
+                    }
+                }
+                break;
+            case "bunker":
+                e.y += state.stage.speed * dt;
+                e.fireTimer -= dt;
+                if (e.fireTimer <= 0 && e.y > 0 && e.y < H - 20) {
+                    const speed = 76 * D.difficulty[state.difficulty].bullet;
+                    for (let i = 0; i < 10; i++) {
+                        const a = e.phase + (i / 10) * Math.PI * 2;
+                        pushEnemyShot(e.x, e.y, Math.cos(a) * speed, Math.sin(a) * speed, { r: 3, life: 6 });
+                    }
+                    Sound.enemyShot();
+                    e.fireTimer = 2.8 / D.difficulty[state.difficulty].fire;
+                }
+                break;
+            case "tender":
+                e.y += state.stage.speed * dt;
+                e.spawnTimer -= dt;
+                if (e.spawnTimer <= 0) {
+                    const canSpawn = e.spawned < 4 && state.enemies.length < config.maxEnemies - 1
+                        && e.y > -10 && e.y < H - 20;
+                    if (canSpawn) {
+                        const child = Math.random() < 0.3 ? "fighter" : "zero";
+                        spawnEnemy(child, clamp(e.x + (Math.random() - 0.5) * 34, 24, W - 24),
+                            e.y + 24, 0, null, { child: true });
+                        e.spawned++;
+                        e.spawnTimer = 4.2;
+                    } else {
+                        e.spawnTimer = 1.2;
+                    }
+                }
+                break;
+            case "missile":
+                e.y += state.stage.speed * dt;
+                e.x += e.arch.speed * e.facing * dt;
+                break;
             case "yashichi":
                 e.y -= e.speed * dt;
                 e.x += Math.sin(e.t * 0.9 + e.phase) * 26 * dt;
@@ -1070,28 +1496,46 @@
                 break;
         }
 
+        if (e.ai === "sniper" || e.ai === "bunker" || e.ai === "tender") return;
         if (e.arch.fire <= 0) return;
         e.fireTimer -= dt;
         if (e.fireTimer > 0) return;
-        e.fireTimer = e.arch.fire * (0.75 + Math.random() * 0.7) / D.difficulty[state.difficulty].fire;
+        e.fireTimer = e.arch.fire * (0.75 + Math.random() * 0.7) / D.difficulty[state.difficulty].fire / (e.elite ? 1.3 : 1);
         if (e.y <= 0 || e.y >= H - 30) return;
 
-        if (e.ai === "ground") {
+        if (e.ai === "missile") {
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            pushEnemyShot(e.x, e.y, Math.cos(a) * 96, Math.sin(a) * 96, { homing: 2.4, turn: 2.4, life: 6, r: 3.4 });
+            Sound.enemyShot();
+        } else if (e.unit === "minelayer") {
+            pushEnemyShot(e.x, e.y + 12, (Math.random() - 0.5) * 26, 34, { homing: 1.6, turn: 1.6, life: 8, r: 4 });
+            Sound.enemyShot();
+        } else if (e.ai === "ricochet") {
+            const a = Math.atan2(targetY - e.y, targetX - e.x);
+            const speed = config.enemyBulletSpeed * e.arch.fireSpeed * D.difficulty[state.difficulty].bullet;
+            pushEnemyShot(e.x, e.y, Math.cos(a - 0.1) * speed, Math.sin(a - 0.1) * speed);
+            pushEnemyShot(e.x, e.y, Math.cos(a + 0.1) * speed, Math.sin(a + 0.1) * speed);
+            Sound.enemyShot();
+        } else if (e.ai === "ground") {
             if (Math.random() < 0.35) fireAt(e, targetX + (Math.random() - 0.5) * 60, H + 20, config.enemyBulletSpeedGround * D.difficulty[state.difficulty].bullet);
         } else if (e.ai === "climb") {
             fireAt(e, targetX, targetY, config.enemyBulletSpeed * D.difficulty[state.difficulty].bullet);
         } else if (e.ai === "sea" || e.ai === "flak") {
             fireAt(e, targetX, targetY, config.enemyBulletSpeedGround * D.difficulty[state.difficulty].bullet, e.kind === "sea" && Math.random() < 0.4 ? 3 : 1);
+        } else if (e.ai === "orbit") {
+            fireAt(e, targetX, targetY, config.enemyBulletSpeed * e.arch.fireSpeed * D.difficulty[state.difficulty].bullet, 3);
         } else if (e.ai !== "cross") {
             fireAt(e, targetX, targetY, config.enemyBulletSpeed * e.arch.fireSpeed * D.difficulty[state.difficulty].bullet);
         }
     }
 
     /* ===== Boss ===== */
-    function spawnBoss(tier) {
+    function spawnBoss(tier, scale) {
         const arch = archetypes.boss;
-        const hp = arch.hp + (tier - 1) * 70;
+        const mul = scale || 1;
+        const hp = Math.round((arch.hp + (tier - 1) * 70) * mul);
         const e = {
+            id: ++enemySeq,
             unit: "boss",
             arch: arch,
             kind: "boss",
@@ -1101,9 +1545,13 @@
             vx: 0, vy: 0,
             r: arch.r,
             hp: hp, maxHp: hp,
-            pts: arch.pts + (tier - 1) * 10000,
+            pts: Math.round((arch.pts + (tier - 1) * 10000) * Math.min(3, mul)),
             ai: "boss",
             art: "boss",
+            shield: 0,
+            elite: false,
+            pressure: false,
+            alpha: 1,
             fireTimer: 1.4,
             t: 0,
             phase: 0,
@@ -1125,6 +1573,7 @@
     }
 
     function updateBoss(e, dt) {
+        if (state.slow > 0) dt *= config.slowFactor;
         e.t += dt;
         e.flash = Math.max(0, e.flash - dt);
         const p = state.player;
@@ -1138,13 +1587,18 @@
         }
 
         const rage = e.enraged;
+        if (!e.desperate && e.hp <= e.maxHp * 0.25) {
+            e.desperate = true;
+            floater(e.x, e.y - 44, "DESPERATE", "#ff3b2f");
+            Sound.bigExplode();
+        }
         e.x = W / 2 + Math.sin(e.t * (rage ? 0.92 : 0.55)) * (rage ? 118 : 96);
         e.y = 190 + Math.sin(e.t * (rage ? 1.3 : 0.9)) * (rage ? 26 : 14);
         e.angle = Math.sin(e.t * (rage ? 0.92 : 0.55)) * 0.07;
 
         e.patternTimer -= dt;
         if (e.patternTimer <= 0) {
-            e.patternTimer = rage ? 1.15 : 1.7;
+            e.patternTimer = rage ? (e.desperate ? 0.85 : 1.15) : 1.7;
             const tier = e.tier;
             if (state.silent <= 0) {
                 if (tier >= 2) fireAt(e, px, py, config.enemyBulletSpeed * D.difficulty[state.difficulty].bullet, 3);
@@ -1162,7 +1616,7 @@
                 /* The second phase throws out rings of shot that turn as
                    they go, so two of them together make a spiral. */
                 if (rage) {
-                    const n = 12;
+                    const n = e.desperate ? 16 : 12;
                     const spin = e.t * 2.2;
                     for (let i = 0; i < n; i++) {
                         const a = (i / n) * Math.PI * 2 + spin;
@@ -1264,7 +1718,11 @@
         if (DOME.controlsHint) DOME.controlsHint.classList.add("hidden");
         store.set("mustang-hint-seen", true);
         resetGame();
-        startStage(0);
+        if (state.mode === "endless") startEndless();
+        else {
+            state.mode = "campaign";
+            startStage(0);
+        }
         hideOverlay();
         Sound.unlock();
     }
@@ -1277,11 +1735,24 @@
         state.score = 0;
         state.extendsGiven = 0;
         state.lives = config.startLives;
-        state.fireShots = 2;
+        state.loops = config.loopsPerStage;
+        state.weapon = "cannon";
+        state.weaponLevel = 1;
+        state.ability = null;
+        state.abilityCharges = 0;
         state.bomberCombo = 0;
         state.silent = 0;
         state.thread = 0;
         state.threadTimer = 0;
+        state.shield = 0;
+        state.shieldTimer = 0;
+        state.slow = 0;
+        state.overdrive = 0;
+        state.strike = 0;
+        state.strikeTick = 0;
+        state.pressureTimer = 0;
+        state.pressureSpawned = 0;
+        state.endlessRun = null;
         state.player = newPlayer();
         state.paused = false;
         state.acc = 0;
@@ -1506,6 +1977,7 @@
         const from = clamp(index * stagesPerSector(), 0, stages.length - 1);
         resetGame();
         state.checkpoint = from;
+        state.mode = "campaign";
         hideOverlay();
         Sound.unlock();
         startStage(from);
@@ -1535,6 +2007,8 @@
         }
         state.stage = stages[state.stageIndex];
         state.stageNumber = state.stage.n;
+        state.runMode = "campaign";
+        state.endlessRun = null;
         state.stageTarget = 58 + (32 - state.stage.n) * 0.45;
         state.segments = buildSegments(state.stage, H + state.stageTarget * state.stage.speed);
         const last = state.segments[state.segments.length - 1];
@@ -1549,10 +2023,91 @@
         state.weightKilled = 0;
         state.silent = 0;
         state.bomberCombo = 0;
+        state.shield = 0;
+        state.shieldTimer = 0;
+        state.slow = 0;
+        state.overdrive = 0;
+        state.strike = 0;
+        state.pressureTimer = config.pressureStart * 0.8;
+        state.pressureSpawned = 0;
         state.enemySpeedMul = (1 + (32 - state.stage.n) * config.curveSpeed) * D.difficulty[state.difficulty].speed;
         state.hpMul = Math.min(3, 1 + Math.floor((32 - state.stage.n) / 12));
         state.phase = "briefing";
         state.phaseTimer = 2.0;
+        Music.stop();
+
+        const p = state.player;
+        p.x = W / 2;
+        p.y = PLAYER_START_Y;
+        p.alive = true;
+        p.looping = false;
+        p.loopTimer = 0;
+        p.roll = 0;
+        p.invuln = 1.6;
+        p.fireCool = 0;
+
+        clearEntities();
+        syncMusic();
+        Sound.briefing();
+    }
+
+    function makeEndlessStage() {
+        const theatre = D.theatres[state.theatre];
+        const roster = [];
+        for (const key of Object.keys(theatre.roster)) {
+            for (const u of theatre.roster[key]) if (roster.indexOf(u) < 0) roster.push(u);
+        }
+        return {
+            n: 1,
+            name: "ENDLESS",
+            biome: "mixed",
+            speed: config.scrollStart + 6,
+            density: 1.35,
+            bossTier: 0,
+            pows: [],
+            vFormation: false,
+            yashichi: false,
+            roster: roster,
+            cadence: 2.6,
+            shapes: theatre.shapes.slice(),
+        };
+    }
+
+    function startEndless() {
+        resetGame();
+        state.mode = "endless";
+        state.runMode = "endless";
+        state.highScore = state.endlessBest[state.theatre] || 0;
+        state.stageIndex = 0;
+        state.stageNumber = 1;
+        state.stage = makeEndlessStage();
+        state.stageTarget = Infinity;
+        state.segments = buildSegments(state.stage, config.endless.terrainNeed);
+        const last = state.segments[state.segments.length - 1];
+        state.totalLen = last.start + last.len;
+        state.offset = H;
+        state.stageTime = 0;
+        state.wavePlan = [];
+        state.waveIndex = 0;
+        state.blockedFor = 0;
+        state.loops = config.loopsPerStage;
+        state.weightTotal = 0;
+        state.weightKilled = 0;
+        state.silent = 0;
+        state.bomberCombo = 0;
+        state.enemySpeedMul = D.difficulty[state.difficulty].speed;
+        state.hpMul = 1;
+        state.pressureTimer = 1.4;
+        state.pressureSpawned = 0;
+        state.endlessRun = {
+            time: 0,
+            wave: 1,
+            level: 1,
+            nextWave: config.endless.waveEvery,
+            nextBoss: config.endless.bossEvery,
+        };
+        state.phase = "briefing";
+        state.phaseTimer = 1.4;
         Music.stop();
 
         const p = state.player;
@@ -1626,6 +2181,7 @@
         const from = clamp(state.checkpoint, 0, stages.length - 1);
         resetGame();
         state.checkpoint = from;
+        state.mode = "campaign";
         hideOverlay();
         Sound.unlock();
         startStage(from);
@@ -1640,14 +2196,20 @@
     }
 
     function showEnd(victory) {
+        const endless = state.runMode === "endless";
         DOME.overlay.classList.remove("hidden");
-        DOME.overlayTitle.textContent = victory ? "SURRENDER" : "GAME OVER";
-        DOME.overlayMsg.textContent = victory
-            ? "The fleet is destroyed. The war is over."
-            : "You went down over " + (state.stage ? state.stage.name : "-") + " on stage " + state.stageNumber + ".";
+        DOME.overlayTitle.textContent = endless ? "ENDLESS OVER" : (victory ? "SURRENDER" : "GAME OVER");
+        DOME.overlayMsg.textContent = endless
+            ? "You held out for " + formatTime(state.endlessRun ? state.endlessRun.time : 0)
+                + " and reached wave " + (state.endlessRun ? state.endlessRun.wave : 1) + "."
+            : victory
+                ? "The fleet is destroyed. The war is over."
+                : "You went down over " + (state.stage ? state.stage.name : "-") + " on stage " + state.stageNumber + ".";
         DOME.overlayStats.classList.remove("hidden");
         DOME.finalScore.textContent = state.score;
-        DOME.finalHigh.textContent = state.highScore;
+        DOME.finalHigh.textContent = endless
+            ? (state.endlessBest[state.theatre] || 0)
+            : state.highScore;
         DOME.finalLives.textContent = state.lives;
         DOME.finalRank.textContent = D.rankFor(state.score);
         DOME.overlayPlay.textContent = "\u25B6 Play Again";
@@ -1655,10 +2217,12 @@
         if (DOME.theatreChoices) DOME.theatreChoices.classList.add("hidden");
         if (DOME.difficultyRow) DOME.difficultyRow.classList.add("hidden");
         if (DOME.hitboxRow) DOME.hitboxRow.classList.add("hidden");
+        if (DOME.modeRow) DOME.modeRow.classList.remove("hidden");
+        markModeButtons();
         if (DOME.continueBtn) {
             const resume = clamp(state.checkpoint, 0, currentStages().length - 1);
             DOME.continueStage.textContent = currentStages()[resume].n;
-            DOME.continueBtn.classList.toggle("hidden", resume <= 0);
+            DOME.continueBtn.classList.toggle("hidden", endless || resume <= 0);
         }
     }
 
@@ -1744,7 +2308,9 @@
         }
 
         updatePlayer(dt);
+        updateAbilities(dt);
         updateScroll(dt);
+        updatePressure(dt);
         updateBullets(dt);
         updatePickups(dt);
         updateEnemies(dt);
@@ -1754,11 +2320,105 @@
         resolveCollisions();
     }
 
+    function updateEndless(dt) {
+        const run = state.endlessRun;
+        if (!run) return;
+        run.time += dt;
+        if (run.time >= run.nextWave) {
+            run.wave++;
+            run.nextWave += config.endless.waveEvery;
+            run.level++;
+            floater(W / 2, 104, "WAVE " + run.wave, "#ffd54f");
+            Sound.briefing();
+        }
+        const speedMul = Math.min(config.endless.maxSpeedMul,
+            1 + run.time / 150 + (run.level - 1) * 0.06);
+        state.enemySpeedMul = speedMul * D.difficulty[state.difficulty].speed;
+        state.hpMul = Math.min(4.5, 1 + run.time / 150 + (run.level - 1) * 0.15);
+        if (state.stage) {
+            state.stage.speed = Math.min(config.scrollMax + 34,
+                config.scrollStart + run.time * 0.14 + (run.level - 1) * 1.2);
+        }
+        if (!state.boss && run.time >= run.nextBoss) {
+            spawnBoss(((run.level - 1) % 4) + 1, 1 + run.time / 120);
+        }
+        if (state.offset > state.totalLen - H * 3) {
+            /* The tape is deliberately longer than any sane run; if a pilot
+               does outlast it, append another stretch rather than let the
+               world run out of ground. */
+            const extra = buildSegments(state.stage, config.endless.terrainNeed);
+            let base = state.totalLen;
+            for (const seg of extra) {
+                state.segments.push({ type: seg.type, len: seg.len, start: base + seg.start });
+            }
+            const last = extra[extra.length - 1];
+            state.totalLen = base + last.start + last.len;
+        }
+    }
+
+    function pressureProgress() {
+        if (state.runMode === "endless" && state.endlessRun) {
+            return clamp(state.endlessRun.time / 180, 0, 1);
+        }
+        return clamp((32 - state.stageNumber) / 31, 0, 1);
+    }
+
+    function pressureInterval() {
+        const diff = D.difficulty[state.difficulty] || D.difficulty.arcade;
+        const progress = pressureProgress();
+        const base = config.pressureStart - progress * config.pressureRamp * 3.2;
+        const stageDensity = state.stage ? state.stage.density : 1;
+        return Math.max(config.pressureMin, base / (diff.density * Math.max(0.8, stageDensity * 0.9)));
+    }
+
+    /* The noise between the scripted waves. These enemies are score and
+       pressure, not part of the shoot-down rate: the tally still measures
+       how cleanly the planned formations were cleared. */
+    function updatePressure(dt) {
+        if (!state.pressureEnabled || state.attract || state.phase !== "playing") return;
+        if (!state.stage) return;
+        if (state.boss) return;
+        if (state.runMode === "campaign" && state.stageTime >= state.stageTarget - 2) return;
+        state.pressureTimer -= dt;
+        if (state.pressureTimer > 0) return;
+        if (state.enemies.length >= config.maxEnemies - 2) {
+            state.pressureTimer = 0.4;
+            return;
+        }
+        const diff = D.difficulty[state.difficulty] || D.difficulty.arcade;
+        state.pressureTimer = pressureInterval() * (0.75 + Math.random() * 0.5);
+        const air = state.stage.roster.filter((u) => {
+            const a = archetypes[u];
+            return a && a.kind === "air" && a.ai !== "climb" && a.ai !== "yashichi"
+                && unitUnlocked(u, state.stage);
+        });
+        if (!air.length) return;
+        const unit = air[Math.floor(Math.random() * air.length)];
+        const progress = pressureProgress();
+        const eliteChance = config.eliteBaseChance + progress * config.eliteRamp + (diff.elite || 0);
+        const count = progress > 0.55 && Math.random() < 0.35 ? 2 : 1;
+        const x0 = 30 + Math.random() * (W - 60);
+        for (let i = 0; i < count; i++) {
+            spawnEnemy(unit, clamp(x0 + (i - (count - 1) / 2) * 26, 24, W - 24),
+                -30 - i * 26, 0, null, {
+                    child: true,
+                    pressure: true,
+                    elite: Math.random() < eliteChance,
+                });
+            state.pressureSpawned++;
+        }
+    }
+
     function updateScroll(dt) {
         const stage = state.stage;
         if (!stage) return;
         state.offset += stage.speed * dt;
         state.stageTime += dt;
+
+        if (state.runMode === "endless") {
+            updateEndless(dt);
+            return;
+        }
 
         let guard = 0;
         while (state.waveIndex < state.wavePlan.length && state.stageTime >= state.wavePlan[state.waveIndex].t && guard < 40) {
@@ -1783,9 +2443,37 @@
         else endStage();
     }
 
+    function nearestEnemy(x, y) {
+        let best = null;
+        let near = 1e9;
+        for (const e of state.enemies) {
+            if (e.delay > 0) continue;
+            if (e.y < -30) continue;
+            const d = (e.x - x) * (e.x - x) + (e.y - y) * (e.y - y);
+            if (d < near) { near = d; best = e; }
+        }
+        return best;
+    }
+
+    function turnToward(b, tx, ty, turn, dt) {
+        const cur = Math.atan2(b.vy, b.vx);
+        const want = Math.atan2(ty - b.y, tx - b.x);
+        let diff = want - cur;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        const a = cur + clamp(diff, -turn * dt, turn * dt);
+        const speed = Math.hypot(b.vx, b.vy);
+        b.vx = Math.cos(a) * speed;
+        b.vy = Math.sin(a) * speed;
+    }
+
     function updateBullets(dt) {
         for (let i = state.shots.length - 1; i >= 0; i--) {
             const s = state.shots[i];
+            if (s.homing) {
+                const target = nearestEnemy(s.x, s.y);
+                if (target) turnToward(s, target.x, target.y, 4.5, dt);
+            }
             s.x += s.vx * dt;
             s.y += s.vy * dt;
             if (s.y < -20 || s.y > H + 20 || s.x < -20 || s.x > W + 20) {
@@ -1793,11 +2481,15 @@
                 give("bullet", s);
             }
         }
+        const enemyDt = dt * (state.slow > 0 ? config.slowFactor : 1);
         for (let i = state.ebullets.length - 1; i >= 0; i--) {
             const b = state.ebullets[i];
-            b.x += b.vx * dt;
-            b.y += b.vy * dt;
-            b.life -= dt;
+            if (b.homing > 0 && state.player) {
+                turnToward(b, state.player.x, state.player.y, b.homing, enemyDt);
+            }
+            b.x += b.vx * enemyDt;
+            b.y += b.vy * enemyDt;
+            b.life -= enemyDt;
             if (b.dead || b.life <= 0 || b.y < -20 || b.y > H + 20 || b.x < -20 || b.x > W + 20) {
                 state.ebullets.splice(i, 1);
                 give("ebullet", b);
@@ -1946,6 +2638,7 @@
         if (e.code === "KeyZ" || e.code === "Space") input.fire = true;
         if (e.repeat) return;
         if (e.code === "KeyX" || e.code === "ShiftLeft" || e.code === "ShiftRight") doLoop();
+        if (e.code === "KeyC") activateAbility();
         if (e.code === "KeyP" || e.code === "Escape") togglePause();
         if (e.code === "Enter") {
             if (state.phase === "clear") advanceStage();
@@ -1990,6 +2683,12 @@
 
         DOME.startBtn.addEventListener("click", () => { Sound.unlock(); startGame(); });
         DOME.loopBtn.addEventListener("click", (e) => { e.preventDefault(); Sound.unlock(); doLoop(); });
+        if (DOME.abilityBtn) DOME.abilityBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            Sound.unlock();
+            activateAbility();
+        });
         DOME.pauseBtn.addEventListener("click", togglePause);
         DOME.soundBtn.addEventListener("click", toggleSound);
         DOME.overlayPlay.addEventListener("click", () => { Sound.unlock(); startGame(); });
@@ -2009,6 +2708,12 @@
         if (DOME.difficultyChoices) {
             for (const btn of DOME.difficultyChoices.querySelectorAll(".chip")) {
                 btn.addEventListener("click", () => setDifficulty(btn.dataset.difficulty));
+            }
+        }
+
+        if (DOME.modeChoices) {
+            for (const btn of DOME.modeChoices.querySelectorAll(".chip")) {
+                btn.addEventListener("click", () => setMode(btn.dataset.mode));
             }
         }
 
@@ -2032,10 +2737,13 @@
         if (!D.theatres[id]) return;
         state.theatre = id;
         if (state.checkpoints) state.checkpoint = state.checkpoints[id] || 0;
-        state.highScore = state.highScores[id] || 0;
+        state.highScore = state.mode === "endless"
+            ? (state.endlessBest[id] || 0)
+            : (state.highScores[id] || 0);
         DOME.overlayMsg.textContent = D.theatres[id].blurb;
         markTheatreButtons();
         markSectorButtons();
+        markModeButtons();
         save();
     }
 
@@ -2046,6 +2754,28 @@
         config.reducedMotion = !!(global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches);
         DOME.soundBtn.setAttribute("aria-pressed", String(state.sound));
         save();
+    }
+
+    function setMode(id) {
+        if (id !== "campaign" && id !== "endless") return;
+        state.mode = id;
+        state.highScore = id === "endless"
+            ? (state.endlessBest[state.theatre] || 0)
+            : (state.highScores[state.theatre] || 0);
+        markModeButtons();
+        save();
+    }
+
+    function markModeButtons() {
+        if (!DOME.modeChoices) return;
+        for (const b of DOME.modeChoices.querySelectorAll(".chip")) {
+            b.classList.toggle("active", b.dataset.mode === state.mode);
+        }
+        if (DOME.endlessBest) {
+            const best = state.endlessBest[state.theatre] || 0;
+            DOME.endlessBest.classList.toggle("hidden", state.mode !== "endless");
+            if (DOME.endlessBestValue) DOME.endlessBestValue.textContent = String(best);
+        }
     }
 
     function markDifficultyButtons() {
@@ -2164,6 +2894,10 @@
         drawWorld(ctx, th);
         drawPlayer(ctx, th);
         drawWeather(ctx, th);
+        if (state.slow > 0) {
+            ctx.fillStyle = "rgba(132,204,22,0.07)";
+            ctx.fillRect(0, 0, W, H);
+        }
         drawHud(ctx, th);
         if (state.paused) drawPause(ctx, th);
         ctx.restore();
@@ -2174,14 +2908,38 @@
             if (e.delay > 0) continue;
             if (e.kind === "ground") {
                 Art.groundUnit(ctx, e.art, e.x, e.y, e.facing, state.stageTime, 1);
+                if (e.ai === "sniper" && e.phaseName === "aim") {
+                    const charge = clamp(e.aimTime / 1.05, 0, 1);
+                    ctx.save();
+                    ctx.strokeStyle = "rgba(255,92,58," + (0.22 + (1 - charge) * 0.44) + ")";
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(e.x, e.y);
+                    ctx.lineTo(e.aimX, e.aimY);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(e.aimX, e.aimY, 3 + charge * 9, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
             } else if (e.kind === "sea") {
                 Art.seaUnit(ctx, e.art, e.x, e.y, state.stageTime, 1);
             } else if (e.kind === "boss") {
                 drawBoss(ctx, e, th);
             } else {
-                const base = Art.schemeFor(state.theatre, e.unit);
-                Art.warbird(ctx, e.art, e.x, e.y, e.angle, 1,
-                    e.flash > 0 ? FLASH_SCHEME : base, state.stageTime, 1);
+                const base = e.elite ? ELITE_SCHEME : Art.schemeFor(state.theatre, e.unit);
+                const scheme = e.flash > 0 ? FLASH_SCHEME : base;
+                Art.lowPolyWarbird(ctx, e.art, e.x, e.y, e.angle, 1,
+                    scheme, state.stageTime, e.alpha === undefined ? 1 : e.alpha);
+                if (e.shield > 0) {
+                    Art.shieldRing(ctx, e.x, e.y, e.r + 8, state.stageTime, "#7fe8f5", 0.55 + e.shield / 12);
+                }
+                if (e.elite) {
+                    ctx.fillStyle = "#ffd54f";
+                    ctx.beginPath();
+                    ctx.arc(e.x + e.r * 0.9, e.y - e.r * 0.9, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
         }
 
@@ -2211,7 +2969,7 @@
         const scheme = e.enraged
             ? { body: "#6b120c", wing: "#ff5533", trim: "#ffd54f" }
             : Art.schemeFor(state.theatre, "bomber");
-        Art.warbird(ctx, "boss", e.x, e.y, e.angle, 1,
+        Art.lowPolyWarbird(ctx, "boss", e.x, e.y, e.angle, 1,
             e.flash > 0 ? BOSS_FLASH : scheme, state.stageTime, 1);
         const bw = 88;
         const bx = e.x - bw / 2;
@@ -2249,6 +3007,10 @@
         Art.warbird(ctx, theatre.planeArt, p.x, p.y, p.looping ? p.roll : p.tilt, 1,
             { body: th.plane, wing: th.planeGrad, trim: "#ffffff" }, state.stageTime, 1);
 
+        if (state.shield > 0) {
+            Art.shieldRing(ctx, p.x, p.y, 22, state.stageTime, "#ec4899", 0.6 + Math.sin(state.stageTime * 6) * 0.15);
+        }
+
         /* The hitbox: the circle that actually kills you, five and a half
            pixels across, drawn on top of an aircraft thirty pixels wide.
            Every modern shooter shows it, because the aircraft is not the
@@ -2273,27 +3035,55 @@
     function drawHud(ctx, th) {
         const stage = state.stage;
         if (stage && state.phase !== "menu") {
+            const endless = state.runMode === "endless" && state.endlessRun;
             ctx.textAlign = "left";
             ctx.fillStyle = "rgba(0,0,0,0.45)";
             ctx.fillRect(0, 0, W, 17);
             ctx.fillStyle = th.text;
             ctx.font = "bold 11px Arial, sans-serif";
-            ctx.fillText("STAGE " + stage.n + "  " + stage.name, 6, 13);
+            ctx.fillText(endless
+                ? "ENDLESS  WAVE " + state.endlessRun.wave + "  " + formatTime(state.endlessRun.time)
+                : "STAGE " + stage.n + "  " + stage.name, 6, 13);
             ctx.textAlign = "right";
             ctx.fillStyle = state.loops > 0 ? th.accent : "#ff6b5b";
             ctx.fillText("LOOPS " + state.loops, W - 6, 13);
 
-            const prog = clamp((state.offset - H) / Math.max(1, state.totalLen - H), 0, 1);
+            const prog = endless
+                ? clamp((state.endlessRun.time % config.endless.bossEvery) / config.endless.bossEvery, 0, 1)
+                : clamp((state.offset - H) / Math.max(1, state.totalLen - H), 0, 1);
             ctx.fillStyle = "rgba(0,0,0,0.35)";
             ctx.fillRect(0, 19, W, 3);
             ctx.fillStyle = th.accent;
             ctx.fillRect(0, 19, W * prog, 3);
 
+            const wdef = D.weapons[state.weapon] || D.weapons.cannon;
+            ctx.textAlign = "left";
+            ctx.fillStyle = th.plane;
+            ctx.font = "bold 10px Arial, sans-serif";
+            ctx.fillText(wdef.label + " " + "|".repeat(state.weaponLevel), 6, 34);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#ec4899";
+            if (state.ability) {
+                const adef = D.abilities[state.ability];
+                ctx.fillText(adef.mark + " " + adef.label + " x" + state.abilityCharges, W - 6, 34);
+            } else {
+                ctx.fillStyle = "rgba(240,240,240,0.45)";
+                ctx.fillText("NO ABILITY", W - 6, 34);
+            }
+
+            if (endless) {
+                ctx.textAlign = "center";
+                ctx.fillStyle = "rgba(240,240,240,0.7)";
+                ctx.font = "10px Arial, sans-serif";
+                const next = Math.max(0, Math.ceil(state.endlessRun.nextBoss - state.endlessRun.time));
+                ctx.fillText("BOSS IN " + next + "s", W / 2, 48);
+            }
+
             if (state.bomberCombo > 1) {
                 ctx.textAlign = "center";
                 ctx.fillStyle = "#ffd54f";
                 ctx.font = "bold 13px Arial, sans-serif";
-                ctx.fillText("BOMBER x" + state.bomberCombo, W / 2, 34);
+                ctx.fillText("BOMBER x" + state.bomberCombo, W / 2, 64);
             }
 
             /* The thread chain, and how long it has left. */
@@ -2301,14 +3091,27 @@
                 ctx.textAlign = "center";
                 ctx.fillStyle = "#9be7ff";
                 ctx.font = "bold 13px Arial, sans-serif";
-                ctx.fillText("THREADED x" + state.thread, W / 2, state.bomberCombo > 1 ? 50 : 34);
+                ctx.fillText("THREADED x" + state.thread, W / 2, state.bomberCombo > 1 ? 80 : 64);
             }
 
             if (state.silent > 0) {
                 ctx.textAlign = "center";
                 ctx.fillStyle = "#ff8c1a";
                 ctx.font = "bold 11px Arial, sans-serif";
-                ctx.fillText("GUNS JAMMED " + state.silent.toFixed(1) + "s", W / 2, 34);
+                ctx.fillText("GUNS JAMMED " + state.silent.toFixed(1) + "s", W / 2, 64);
+            }
+
+            ctx.textAlign = "center";
+            ctx.font = "bold 11px Arial, sans-serif";
+            if (state.slow > 0) {
+                ctx.fillStyle = "#84cc16";
+                ctx.fillText("TIME WARP " + state.slow.toFixed(1) + "s", W / 2, 96);
+            } else if (state.overdrive > 0) {
+                ctx.fillStyle = "#8b5cf6";
+                ctx.fillText("OVERDRIVE " + state.overdrive.toFixed(1) + "s", W / 2, 96);
+            } else if (state.strike > 0) {
+                ctx.fillStyle = "#14b8a6";
+                ctx.fillText("AIR STRIKE", W / 2, 96);
             }
         }
 
@@ -2372,13 +3175,17 @@
         ctx.fillText(t.name, W / 2, H / 2 - alto + 24);
         ctx.fillStyle = th.text;
         ctx.font = "bold 26px Arial, sans-serif";
-        ctx.fillText("STAGE " + state.stage.n, W / 2, H / 2 - 4);
+        ctx.fillText(state.runMode === "endless" ? "ENDLESS SORTIE" : "STAGE " + state.stage.n, W / 2, H / 2 - 4);
         ctx.font = "bold 17px Arial, sans-serif";
         ctx.fillStyle = th.plane;
-        ctx.fillText(state.stage.name, W / 2, H / 2 + 20);
+        ctx.fillText(state.runMode === "endless"
+            ? "WAVE " + (state.endlessRun ? state.endlessRun.wave : 1)
+            : state.stage.name, W / 2, H / 2 + 20);
         ctx.font = "11px Arial, sans-serif";
         ctx.fillStyle = "rgba(240,240,240,0.7)";
-        ctx.fillText(t.plane + "   " + t.year, W / 2, H / 2 + 38);
+        ctx.fillText(state.runMode === "endless"
+            ? "SURVIVE AS LONG AS YOU CAN"
+            : t.plane + "   " + t.year, W / 2, H / 2 + 38);
 
         if (!card) return;
         /* the place and the date, then the one line that says what this is */
@@ -2494,11 +3301,12 @@
         ctx.fillText("MOVE    arrows / WASD / drag", W / 2, H / 2 + 24);
         ctx.fillText("SHOOT   Z   (auto-fire on touch)", W / 2, H / 2 + 42);
         ctx.fillText("LOOP    X   or the LOOP button", W / 2, H / 2 + 60);
+        ctx.fillText("ABILITY C   or the ABILITY button", W / 2, H / 2 + 78);
         ctx.textAlign = "left";
     }
 
     /* ===== HUD, overlay, storage ===== */
-    const hudCache = { score: -1, high: -1, lives: -1, stage: -1, loops: -1, disabled: null };
+    const hudCache = { score: -1, high: -1, lives: -1, stage: -1, loops: -1, disabled: null, ability: "" };
 
     function setText(el, value, key) {
         if (hudCache[key] === value) return;
@@ -2510,12 +3318,25 @@
         setText(DOME.scoreEl, state.score, "score");
         setText(DOME.highScoreEl, state.highScore, "high");
         setText(DOME.livesEl, state.lives, "lives");
-        setText(DOME.stageEl, state.stage ? state.stage.n : 32, "stage");
+        setText(DOME.stageEl, state.runMode === "endless" ? "\u221E" : (state.stage ? state.stage.n : 32), "stage");
         setText(DOME.loopsEl, state.loops, "loops");
         const disabled = state.loops <= 0 || !state.player || !state.player.alive || state.phase !== "playing";
         if (hudCache.disabled !== disabled) {
             hudCache.disabled = disabled;
             DOME.loopBtn.disabled = disabled;
+        }
+        if (DOME.abilityBtn) {
+            const adef = state.ability ? D.abilities[state.ability] : null;
+            const label = adef ? adef.mark + " " + adef.label + " x" + state.abilityCharges : "NO ABILITY";
+            const visible = state.phase === "playing" && !state.paused;
+            const key = label + "|" + state.phase + "|" + state.paused;
+            if (hudCache.ability !== key) {
+                hudCache.ability = key;
+                DOME.abilityBtn.textContent = label;
+                DOME.abilityBtn.classList.toggle("hidden", !visible);
+                DOME.abilityBtn.disabled = !adef || state.abilityCharges <= 0
+                    || !visible || !state.player || !state.player.alive;
+            }
         }
     }
 
@@ -2534,6 +3355,8 @@
         }
         markDifficultyButtons();
         markHitboxButtons();
+        markModeButtons();
+        if (DOME.modeRow) DOME.modeRow.classList.remove("hidden");
         if (DOME.difficultyRow) DOME.difficultyRow.classList.remove("hidden");
     }
 
@@ -2558,11 +3381,21 @@
         /* The demo does not score: it is not a run, and its points must
            not end up in the high score of a front. */
         if (!state.attract) {
-            state.highScores[state.theatre] = Math.max(state.highScores[state.theatre] || 0, state.score);
-            state.highScore = state.highScores[state.theatre];
+            if (state.runMode === "endless") {
+                if (state.phase === "gameover" && state.endlessRun) {
+                    state.endlessBest[state.theatre] = Math.max(state.endlessBest[state.theatre] || 0, state.score);
+                }
+            } else {
+                state.highScores[state.theatre] = Math.max(state.highScores[state.theatre] || 0, state.score);
+            }
+            state.highScore = state.mode === "endless"
+                ? (state.endlessBest[state.theatre] || 0)
+                : state.highScores[state.theatre];
         }
         store.set("mustang-pwa", {
             highScores: state.highScores,
+            endlessBest: state.endlessBest,
+            mode: state.mode,
             theme: state.theme,
             theatre: state.theatre,
             difficulty: state.difficulty,
@@ -2584,6 +3417,8 @@
         const saved = store.get("mustang-pwa", null);
         if (saved) {
             state.highScores = Object.assign({ overlord: 0, rising: 0 }, saved.highScores || {});
+            state.endlessBest = Object.assign({ overlord: 0, rising: 0 }, saved.endlessBest || {});
+            state.mode = saved.mode === "endless" ? "endless" : "campaign";
             state.theme = themes[saved.theme] ? saved.theme : "olive";
             state.theatre = D.theatres[saved.theatre] ? saved.theatre : "overlord";
             state.difficulty = D.difficulty[saved.difficulty] ? saved.difficulty : "arcade";
@@ -2619,12 +3454,16 @@
             }
             state.sound = saved.sound !== false;
         }
-        state.highScore = state.highScores[state.theatre] || 0;
+        state.highScore = state.mode === "endless"
+            ? (state.endlessBest[state.theatre] || 0)
+            : (state.highScores[state.theatre] || 0);
+        state.runMode = state.mode;
         applyTheme(state.theme);
         Sound.setEnabled(state.sound);
         DOME.soundBtn.textContent = state.sound ? "\u{1F50A} Sound" : "\u{1F507} Muted";
         markDifficultyButtons();
         markHitboxButtons();
+        markModeButtons();
         if (store.get("mustang-install-dismissed", false)) DOME.installPrompt.classList.add("hidden");
         if (store.get("mustang-hint-seen", false) && DOME.controlsHint) DOME.controlsHint.classList.add("hidden");
     }
@@ -2716,9 +3555,14 @@
         state: state,
         startGame: startGame,
         startStage: startStage,
+        startEndless: startEndless,
         advanceStage: advanceStage,
         doLoop: doLoop,
+        activateAbility: activateAbility,
         setTheatre: setTheatre,
+        setMode: setMode,
+        unitUnlocked: unitUnlocked,
+        setPressure: (on) => { state.pressureEnabled = !!on; },
         /* Exported so the tests can add points the way the game does, rather
            than setting the score behind the extends' back. */
         addScore: addScore,

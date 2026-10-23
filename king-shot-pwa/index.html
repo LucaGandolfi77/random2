@@ -1,54 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="royal">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>King Shot PWA</title>
-    <meta name="theme-color" content="#ff6600">
+    <meta name="theme-color" content="#0b1026">
+    <meta name="description" content="Defend the castle! Draw your bow, arc arrows over the wall and hold the line against waves of monsters.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="King Shot">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
 </head>
 <body>
-    <div id="app">
-        <header>
-            <h1>KING SHOT</h1>
-            <div class="score-board">
-                <span class="score">SCORE: <span id="score">0</span></span>
-                <span class="high-score">HIGH: <span id="high-score">0</span></span>
+    <canvas id="game"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hud">
+        <div class="hud-top">
+            <div class="stat">
+                <span class="lbl">Score</span>
+                <span id="score" class="val">0</span>
             </div>
-        </header>
-
-        <main>
-            <canvas id="game-canvas"></canvas>
-            <div id="aim-circle" class="aim-circle hidden">
-                <div class="crosshair"></div>
+            <div class="stat center">
+                <span class="lbl">Wave</span>
+                <span id="wave" class="val">—</span>
             </div>
-        </main>
-
-        <nav class="controls">
-            <button id="start-btn" class="btn primary">▶ Start</button>
-            <button id="pause-btn" class="btn">⏸ Pause</button>
-        </nav>
-
-        <div id="overlay" class="overlay hidden">
-            <div class="panel">
-                <h2 id="overlay-title">KING SHOT</h2>
-                <p id="overlay-msg">Ready to fire the mighty arrow?</p>
-                <div id="overlay-stats" class="hidden">
-                    <p>Score: <span id="final-score">0</span></p>
-                    <p>High Score: <span id="final-high">0</span></p>
-                    <p>Level: <span id="final-level">1</span></p>
-                </div>
-                <button id="overlay-play" class="btn primary">▶ Play Again</button>
-                <button id="overlay-theme" class="btn">🎨 Change Theme</button>
+            <div class="stat right">
+                <span class="lbl">Best</span>
+                <span id="best" class="val">0</span>
             </div>
         </div>
+        <div class="hud-sub">
+            <div id="hearts" class="hearts" aria-label="Wall integrity"></div>
+            <span id="combo" class="combo hidden">×2</span>
+            <div class="hud-btns">
+                <button id="btnSound" class="icon-btn" aria-label="Toggle sound">🔊</button>
+                <button id="btnPause" class="icon-btn" aria-label="Pause">⏸</button>
+            </div>
+        </div>
+        <div id="effects" class="effects"></div>
+    </div>
 
-        <div id="install-prompt" class="install-prompt hidden">
-            <p>Install King Shot PWA for the best iPhone experience!</p>
-            <button id="install-btn" class="btn primary">Install</button>
-            <button id="install-later" class="btn">Later</button>
+    <!-- Wave banner -->
+    <div id="banner" class="banner" aria-live="polite">
+        <div id="bannerTitle" class="banner-title"></div>
+        <div id="bannerSub" class="banner-sub"></div>
+    </div>
+
+    <div id="hint" class="hint">Drag to aim &middot; release to loose</div>
+
+    <!-- Menu overlay -->
+    <div id="menu" class="overlay">
+        <div class="panel">
+            <div class="crown">👑</div>
+            <h1 class="title">KING SHOT</h1>
+            <p class="subtitle">Hold the wall against the horde</p>
+            <div class="menu-stats">
+                <span>Best <b id="menuBest">0</b></span>
+                <span class="dot">·</span>
+                <span>Games <b id="menuPlays">0</b></span>
+            </div>
+            <button id="btnPlay" class="btn primary">▶&nbsp; Play</button>
+            <button id="btnTheme" class="btn ghost">🎨 Theme: <span id="themeName">Royal Night</span></button>
+            <div class="howto">
+                <p><b>Drag & release</b> to shoot — arrows fly in an arc.</p>
+                <p>Don't let monsters reach the wall. Chain hits for combos.</p>
+                <p class="kbd-hint">Desktop: ← → aim · ↑ ↓ power · Space fires</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause overlay -->
+    <div id="paused" class="overlay hidden">
+        <div class="panel">
+            <h2 class="title small">PAUSED</h2>
+            <button id="btnResume" class="btn primary">▶&nbsp; Resume</button>
+            <button id="btnRestart" class="btn ghost">↻&nbsp; Restart</button>
+            <button id="btnMenu" class="btn ghost">🏠&nbsp; Menu</button>
+        </div>
+    </div>
+
+    <!-- Game over overlay -->
+    <div id="over" class="overlay hidden">
+        <div class="panel">
+            <div class="crown dim">💀</div>
+            <h2 class="title small">THE WALL HAS FALLEN</h2>
+            <div id="overNew" class="new-best hidden">★ NEW BEST ★</div>
+            <div class="result-score"><span id="overScore">0</span></div>
+            <div class="result-grid">
+                <div><span class="lbl">Wave</span><b id="overWave">1</b></div>
+                <div><span class="lbl">Kills</span><b id="overKills">0</b></div>
+                <div><span class="lbl">Best</span><b id="overBest">0</b></div>
+            </div>
+            <button id="btnMenuPlay" class="btn primary">↻&nbsp; Play Again</button>
+            <button id="btnMenu2" class="btn ghost">🏠&nbsp; Menu</button>
+            <button id="btnTheme2" class="btn ghost">🎨 Theme: <span id="themeName2">Royal Night</span></button>
         </div>
     </div>
 

@@ -25,6 +25,9 @@
         gunner: { body: "#c2a05a", wing: "#7d6634", trim: "#e04b3a" },
         splitter: { body: "#6f7a86", wing: "#454d58", trim: "#e0a63a" },
         flanker: { body: "#9aa6b4", wing: "#5c6773", trim: "#4ec9e0" },
+        raider: { body: "#8f99a4", wing: "#59636f", trim: "#ffb347" },
+        dart: { body: "#c9d0d8", wing: "#89929c", trim: "#ff6a4c" },
+        warden: { body: "#b9aa74", wing: "#7b7047", trim: "#9be7ff" },
     };
 
     const ALLIED = {
@@ -41,6 +44,9 @@
         gunner: { body: "#c9b47a", wing: "#8a7444", trim: "#d94a3a" },
         splitter: { body: "#88a8c6", wing: "#4e6f8f", trim: "#e0a63a" },
         flanker: { body: "#a8c4e0", wing: "#5c7fa6", trim: "#7fe8f5" },
+        raider: { body: "#8aa9c5", wing: "#506f8d", trim: "#ffd166" },
+        dart: { body: "#b7d2e8", wing: "#728fae", trim: "#ff8c66" },
+        warden: { body: "#c7b67c", wing: "#87774a", trim: "#9be7ff" },
     };
 
     const EARTH = {
@@ -50,12 +56,15 @@
         gun: { body: "#5f6346", dark: "#41452f", light: "#7c8059" },
         flak: { body: "#5a5e44", dark: "#3e412e", light: "#787c57" },
         radar: { body: "#6c6f5c", dark: "#494c3e", light: "#8a8d78" },
+        sniper: { body: "#595d43", dark: "#3b3e2c", light: "#797d58" },
+        bunker: { body: "#6a6658", dark: "#454236", light: "#8c8776" },
     };
 
     const STEEL = {
         ship: { body: "#5d6a76", dark: "#3b454e", light: "#7d8b98" },
         sub: { body: "#414c56", dark: "#2a323a", light: "#606d79" },
         patrol: { body: "#6a7682", dark: "#454e58", light: "#8b98a5" },
+        tender: { body: "#596773", dark: "#37434c", light: "#82909d" },
     };
 
     const FALLBACK_SCHEME = { body: "#9aa0a8", wing: "#60666e", trim: "#d0d4da" };
@@ -97,6 +106,173 @@
             ctx.ellipse(0, y, sp, sp * 0.18, a + i * Math.PI, 0, Math.PI * 2);
             ctx.stroke();
         }
+        ctx.restore();
+    }
+
+    /* ===== Low-poly enemy airframes =====
+       The player and the world keep the curved, painted look. Every enemy
+       aircraft is drawn as a small set of flat-shaded facets instead: one
+       polygon per panel, each with its own constant shade. That is what makes
+       the silhouette read as low-poly rather than as a smaller copy of the
+       player's aircraft. The geometry is derived once per airframe from the
+       same span/sweep/len numbers the detailed renderer uses, so a new shape
+       costs a table row and nothing else. */
+    const facetCache = {};
+    const lowPolyPalette = {};
+
+    function shadeHex(hex, factor) {
+        const n = parseInt(hex.slice(1), 16);
+        const r = Math.max(0, Math.min(255, Math.round(((n >> 16) & 255) * factor)));
+        const g = Math.max(0, Math.min(255, Math.round(((n >> 8) & 255) * factor)));
+        const b = Math.max(0, Math.min(255, Math.round((n & 255) * factor)));
+        return "#" + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+    }
+
+    function lowPolyScheme(c) {
+        const key = c.body + "|" + c.wing + "|" + c.trim;
+        let hit = lowPolyPalette[key];
+        if (hit) return hit;
+        hit = {
+            body: c.body,
+            bodyLight: shadeHex(c.body, 1.22),
+            bodyDark: shadeHex(c.body, 0.72),
+            wing: c.wing,
+            wingLight: shadeHex(c.wing, 1.28),
+            wingDark: shadeHex(c.wing, 0.7),
+            trim: c.trim,
+            canopy: shadeHex(c.trim, 1.35),
+            engine: "#26292e",
+        };
+        lowPolyPalette[key] = hit;
+        return hit;
+    }
+
+    function facetsFor(art, s) {
+        if (facetCache[art]) return facetCache[art];
+        const wingLead = -s.sweep;
+        const wingTrail = s.len * 0.42;
+        const facets = [];
+        const tri = (a, b, cc, tone) => facets.push({ p: [a, b, cc], tone: tone });
+
+        for (const side of [-1, 1]) {
+            const wing = [
+                [side * 1.6, wingLead],
+                [side * s.span, wingLead + s.sweep * 0.8],
+                [side * s.span, wingTrail],
+                [side * 1.6, wingTrail - 1],
+            ];
+            facets.push({ p: wing, tone: "wing" });
+            if (s.span > 12) {
+                facets.push({
+                    p: [
+                        [side * 1.6, wingLead],
+                        [side * s.span, wingLead + s.sweep * 0.8],
+                        [side * s.span * 0.82, wingLead + s.sweep * 0.8 + 2.2],
+                        [side * 1.6, wingLead + 2.2],
+                    ],
+                    tone: "wingLight",
+                });
+            }
+            facets.push({
+                p: [
+                    [side * 1.4, s.len * 0.34],
+                    [side * s.tail, s.len * 0.34 + 2],
+                    [side * s.tail, s.len * 0.72],
+                    [side * 1.4, s.len * 0.66],
+                ],
+                tone: "wingDark",
+            });
+        }
+
+        tri([0, -s.len], [s.nose * 0.55, -s.len * 0.7], [-s.nose * 0.55, -s.len * 0.7], "bodyLight");
+        facets.push({
+            p: [[0, -s.len * 0.7], [-s.nose * 0.85, -s.len * 0.08], [0, -s.len * 0.02]],
+            tone: "body",
+        });
+        facets.push({
+            p: [[0, -s.len * 0.7], [s.nose * 0.85, -s.len * 0.08], [0, -s.len * 0.02]],
+            tone: "bodyDark",
+        });
+        facets.push({
+            p: [[0, -s.len * 0.02], [-s.nose * 0.85, -s.len * 0.08], [-s.nose * 0.78, s.len * 0.46], [0, s.len * 0.2]],
+            tone: "body",
+        });
+        facets.push({
+            p: [[0, -s.len * 0.02], [s.nose * 0.85, -s.len * 0.08], [s.nose * 0.78, s.len * 0.46], [0, s.len * 0.2]],
+            tone: "bodyDark",
+        });
+        tri([0, s.len * 0.2], [-s.nose * 0.78, s.len * 0.46], [0, s.len * 0.78], "body");
+        tri([0, s.len * 0.2], [s.nose * 0.78, s.len * 0.46], [0, s.len * 0.78], "bodyDark");
+        tri([0, -s.len * 0.46], [s.nose * 0.44, -s.len * 0.17], [-s.nose * 0.44, -s.len * 0.17], "canopy");
+
+        if (s.eng > 0) {
+            const off = s.eng === 4 ? [-s.span * 0.62, -s.span * 0.22, s.span * 0.22, s.span * 0.62]
+                : s.eng === 2 ? [-s.span * 0.42, s.span * 0.42]
+                    : [0];
+            for (const o of off) {
+                facets.push({
+                    p: [[o - 1.6, -s.len * 0.34], [o + 1.6, -s.len * 0.34], [o + 1.2, -s.len * 0.1], [o - 1.2, -s.len * 0.1]],
+                    tone: "engine",
+                });
+            }
+        }
+
+        facetCache[art] = facets;
+        return facets;
+    }
+
+    function lowPolyWarbird(ctx, art, x, y, angle, scale, c, time, alpha) {
+        const s = SHAPES[art] || SHAPES.radial;
+        const facets = facetsFor(art, s);
+        const pal = lowPolyScheme(c);
+        ctx.save();
+        ctx.globalAlpha = alpha === undefined ? 1 : alpha;
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.scale(scale, scale);
+
+        if (s.prop) propeller(ctx, -s.len - 1, s.propSp, time, alpha === undefined ? 1 : alpha);
+
+        for (const f of facets) {
+            ctx.fillStyle = pal[f.tone] || pal.body;
+            ctx.beginPath();
+            const p = f.p;
+            ctx.moveTo(p[0][0], p[0][1]);
+            for (let i = 1; i < p.length; i++) ctx.lineTo(p[i][0], p[i][1]);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        /* A single dark line down the spine gives the flat panels a
+           centreline to read against, and costs one stroke per aircraft. */
+        ctx.strokeStyle = "rgba(0,0,0,0.28)";
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(0, -s.len * 0.7);
+        ctx.lineTo(0, s.len * 0.7);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    /* The ring an aegis carries, and the bubble a shield ability puts around
+       the player. Both are one stroke: the ability is readable without a
+       second sprite. */
+    function shieldRing(ctx, x, y, r, t, color, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha === undefined ? 0.8 : alpha;
+        ctx.strokeStyle = color || "#7fe8f5";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const sides = 6;
+        for (let i = 0; i <= sides; i++) {
+            const a = (i / sides) * Math.PI * 2 + t * 0.8;
+            const px = x + Math.cos(a) * r;
+            const py = y + Math.sin(a) * r;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
         ctx.restore();
     }
 
@@ -309,6 +485,54 @@
             ctx.ellipse(0, 0, 8, 3.5, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
+        } else if (art === "sniper") {
+            wheels(ctx, [[-10, 5], [10, 5]], 2.8, c.dark);
+            ctx.fillStyle = c.body;
+            roundRect(ctx, -12, -4, 24, 8, 1.8);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(0,0,0,0.35)";
+            ctx.lineWidth = 0.7;
+            ctx.stroke();
+            ctx.fillStyle = c.light;
+            roundRect(ctx, -5, -8, 10, 5, 1.2);
+            ctx.fill();
+            ctx.strokeStyle = c.dark;
+            ctx.lineWidth = 2.6;
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            ctx.moveTo(0, -5);
+            ctx.lineTo(23, -11);
+            ctx.stroke();
+            ctx.lineCap = "butt";
+            ctx.fillStyle = c.light;
+            roundRect(ctx, 20, -14, 5, 6, 1);
+            ctx.fill();
+        } else if (art === "bunker") {
+            ctx.fillStyle = c.dark;
+            roundRect(ctx, -17, -12, 34, 25, 4);
+            ctx.fill();
+            ctx.fillStyle = c.body;
+            ctx.beginPath();
+            ctx.moveTo(-14, -9);
+            ctx.lineTo(14, -9);
+            ctx.lineTo(17, 0);
+            ctx.lineTo(14, 10);
+            ctx.lineTo(-14, 10);
+            ctx.lineTo(-17, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = "rgba(0,0,0,0.4)";
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+            ctx.fillStyle = c.dark;
+            roundRect(ctx, -10, -2.5, 20, 5, 1);
+            ctx.fill();
+            ctx.fillStyle = c.light;
+            for (const px of [-12, 0, 12]) {
+                ctx.beginPath();
+                ctx.arc(px, 7, 1.4, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
         ctx.restore();
     }
@@ -371,6 +595,45 @@
             ctx.moveTo(0, -27);
             ctx.lineTo(0, -34);
             ctx.stroke();
+        } else if (art === "tender") {
+            ctx.fillStyle = "rgba(230,240,250,0.2)";
+            ctx.beginPath();
+            ctx.ellipse(0, 16, 23, 34, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = c.body;
+            ctx.beginPath();
+            ctx.moveTo(0, 48);
+            ctx.lineTo(17, 30);
+            ctx.lineTo(17, -34);
+            ctx.lineTo(-17, -34);
+            ctx.lineTo(-17, 30);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = c.light;
+            roundRect(ctx, -14, -30, 28, 62, 3);
+            ctx.fill();
+            ctx.strokeStyle = c.dark;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, -26);
+            ctx.lineTo(0, 26);
+            ctx.stroke();
+            ctx.fillStyle = c.dark;
+            roundRect(ctx, 7, -20, 9, 17, 1.5);
+            ctx.fill();
+            ctx.fillStyle = c.light;
+            roundRect(ctx, 9, -18, 5, 6, 1);
+            ctx.fill();
+            ctx.fillStyle = c.dark;
+            for (const py of [-9, 8]) {
+                ctx.beginPath();
+                ctx.moveTo(-10, py + 5);
+                ctx.lineTo(-5, py);
+                ctx.lineTo(-10, py - 5);
+                ctx.closePath();
+                ctx.fill();
+            }
         } else {
             ctx.fillStyle = "rgba(230,240,250,0.22)";
             ctx.beginPath();
@@ -646,6 +909,8 @@
 
     MUSTANG.art = {
         warbird: warbird,
+        lowPolyWarbird: lowPolyWarbird,
+        shieldRing: shieldRing,
         groundUnit: groundUnit,
         seaUnit: seaUnit,
         drawSea: drawSea,

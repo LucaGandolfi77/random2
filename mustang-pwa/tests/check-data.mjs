@@ -44,10 +44,12 @@ for (const [name, th] of Object.entries(D.themes)) {
 /* ===== Archetypes ===== */
 section("archetypes");
 const airKeys = ["zero", "fighter", "heavy", "jet", "diver", "bomber", "ace", "kamikaze",
-    "charger", "gunner", "splitter", "flanker"];
+    "charger", "gunner", "splitter", "flanker", "interceptor", "gunship", "aegis", "phantom", "minelayer",
+    "raider", "dart", "warden"];
 const specialKeys = ["yashichi"];
-const groundKeys = ["tank", "halftrack", "truck", "artillery", "flak", "radar", "battery"];
-const seaKeys = ["ship", "sub", "patrol"];
+const groundKeys = ["tank", "halftrack", "truck", "artillery", "flak", "radar", "battery", "missileer",
+    "sniper", "bunker"];
+const seaKeys = ["ship", "sub", "patrol", "destroyer", "tender"];
 for (const id of [...airKeys, ...specialKeys, ...groundKeys, ...seaKeys, "boss"]) {
     const a = D.archetypes[id];
     ok("archetype " + id + " exists", !!a);
@@ -62,11 +64,19 @@ for (const id of [...airKeys, ...specialKeys, ...groundKeys, ...seaKeys, "boss"]
 for (const id of airKeys) ok(id + " is an air unit", D.archetypes[id].kind === "air");
 ok("yashichi is a special unit", D.archetypes.yashichi.kind === "special");
 ok("boss is the toughest unit", D.archetypes.boss.hp > D.archetypes.bomber.hp);
+for (const id of ["raider", "dart", "warden", "sniper", "bunker", "tender"]) {
+    const u = D.archetypes[id];
+    ok(id + " has a campaign unlock gate", Number.isInteger(u.unlockAfter)
+        && u.unlockAfter >= 0 && u.unlockAfter <= 31, u.unlockAfter);
+}
+ok("the original roster needs no unlock gate",
+    ["zero", "fighter", "bomber", "tank", "ship"].every((id) => D.archetypes[id].unlockAfter === undefined));
 
 /* ===== Power-ups ===== */
 section("power-ups");
-const powIds = ["green", "white", "grey", "orange", "yellow", "black", "red"];
-ok("seven POW colours", Object.keys(D.powerups).length === powIds.length, Object.keys(D.powerups).join(","));
+const powIds = ["green", "white", "grey", "orange", "yellow", "black", "red",
+    "blue", "purple", "cyan", "pink", "teal", "lime", "violet"];
+ok("fourteen POW colours", Object.keys(D.powerups).length === powIds.length, Object.keys(D.powerups).join(","));
 for (const id of powIds) {
     const p = D.powerups[id];
     ok("POW " + id + " defined", !!p);
@@ -187,14 +197,18 @@ for (const id of theatreIds) {
 /* ===== Difficulty ===== */
 section("difficulty");
 const diffs = Object.keys(D.difficulty);
-ok("three difficulty presets", diffs.length === 3, diffs.join(","));
+ok("four difficulty presets", diffs.length === 4, diffs.join(","));
 for (const key of ["speed", "hp", "fire", "bullet", "density"]) {
     ok("difficulty scales " + key, diffs.every((k) => typeof D.difficulty[k][key] === "number" && D.difficulty[k][key] > 0));
 }
 ok("arcade is the neutral preset",
-    diffs.every((k) => D.difficulty[k].speed >= 0.8 && D.difficulty[k].speed <= 1.2));
+    D.difficulty.arcade.speed === 1 && D.difficulty.arcade.hp === 1
+    && D.difficulty.arcade.fire === 1 && D.difficulty.arcade.bullet === 1
+    && D.difficulty.arcade.density === 1);
 ok("recruit is strictly gentler than ace across the board",
     ["speed", "hp", "fire", "bullet", "density"].every((k) => D.difficulty.recruit[k] < D.difficulty.ace[k]));
+ok("ace+ is strictly harder than ace",
+    ["speed", "hp", "fire", "bullet", "density"].every((k) => D.difficulty.aceplus[k] > D.difficulty.ace[k]));
 ok("every preset has a label", diffs.every((k) => typeof D.difficulty[k].label === "string"));
 
 /* ===== Feel tuning ===== */
@@ -320,6 +334,39 @@ ok("a thread pays more than one thread of the chain",
 section("boss values");
 ok("tier 1 boss pays 20000", D.archetypes.boss.pts + (1 - 1) * 10000 === 20000, String(D.archetypes.boss.pts));
 ok("tier 4 boss pays 50000", D.archetypes.boss.pts + (4 - 1) * 10000 === 50000);
+
+/* ===== Weapons and abilities ===== */
+section("weapons and abilities");
+const weaponIds = ["cannon", "spread", "rocket", "lancer"];
+ok("four player weapons", Object.keys(D.weapons).length === weaponIds.length, Object.keys(D.weapons).join(","));
+for (const id of weaponIds) {
+    const w = D.weapons[id];
+    ok("weapon " + id + " is defined", !!w);
+    if (!w) continue;
+    ok("weapon " + id + " has a label", typeof w.label === "string" && w.label.length > 0);
+    ok("weapon " + id + " has a cooldown and damage", w.cooldown > 0 && w.damage > 0);
+}
+ok("every weapon has three levels",
+    weaponIds.every((id) => {
+        const w = D.weapons[id];
+        return (w.lanes && w.lanes.length === 3)
+            || (w.offsets && w.offsets.length === 3)
+            || (w.count && w.count.length === 3);
+    }));
+const abilityIds = ["shield", "strike", "slow", "overdrive"];
+ok("four abilities", Object.keys(D.abilities).length === abilityIds.length, Object.keys(D.abilities).join(","));
+for (const id of abilityIds) {
+    const a = D.abilities[id];
+    ok("ability " + id + " is defined", !!a);
+    if (!a) continue;
+    ok("ability " + id + " has a label and a mark", !!a.label && typeof a.mark === "string" && a.mark.length === 1);
+    ok("ability " + id + " has a colour", /^#[0-9a-f]{6}$/i.test(a.color), a.color);
+}
+ok("ability marks are unique", new Set(Object.values(D.abilities).map((a) => a.mark)).size === abilityIds.length);
+ok("pressure starts wider than it ends", D.config.pressureStart > D.config.pressureMin);
+ok("the endless boss clock exists", D.config.endless.bossEvery > 0 && D.config.endless.waveEvery > 0);
+ok("the enemy cap gives pressure room", D.config.maxEnemies >= 24, String(D.config.maxEnemies));
+ok("enemy bullets are capped", D.config.maxEbullets > 0, String(D.config.maxEbullets));
 
 /* ===== Report ===== */
 console.log("\n" + (failures === 0 ? "OK" : "FAILED") + ": " + (checks - failures) + "/" + checks + " checks passed");

@@ -1,5 +1,5 @@
 /* ===== Mustang PWA Service Worker ===== */
-const CACHE_NAME = "mustang-pwa-v1";
+const CACHE_NAME = "mustang-pwa-v3";
 const ASSETS = [
     "./", "./index.html", "./styles.css", "./manifest.json",
     "./src/data.js", "./src/audio.js", "./src/art.js", "./src/game.js",

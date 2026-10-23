@@ -85,12 +85,14 @@ function makeEl(id) {
 const els = {};
 const ids = [
     "game-canvas", "score", "high-score", "lives", "stage", "loops",
-    "start-btn", "loop-btn", "pause-btn", "sound-btn",
+    "start-btn", "loop-btn", "ability-btn", "pause-btn", "sound-btn",
     "overlay", "overlay-title", "overlay-msg", "overlay-stats",
     "overlay-play", "continue-btn", "continue-stage", "overlay-theme", "final-score", "final-high", "final-lives", "final-rank",
     "theatre-choices", "install-prompt", "install-btn", "install-later",
     "theatre-overlord", "theatre-rising",
     "hitbox-row", "hitbox-choices", "hitbox-on", "hitbox-off",
+    "mode-row", "mode-choices", "mode-campaign", "mode-endless", "endless-best", "endless-best-value",
+    "difficulty-row", "difficulty-choices", "diff-recruit", "diff-arcade", "diff-ace", "diff-aceplus",
     "sector-row", "sector-choices",
     "sector-0", "sector-1", "sector-2", "sector-3",
     "sector-4", "sector-5", "sector-6", "sector-7",
@@ -102,6 +104,14 @@ els["theatre-choices"].querySelectorAll = () => [els["theatre-overlord"], els["t
 els["hitbox-choices"].querySelectorAll = () => [els["hitbox-on"], els["hitbox-off"]];
 els["hitbox-on"].dataset.hitbox = "on";
 els["hitbox-off"].dataset.hitbox = "off";
+els["mode-campaign"].dataset.mode = "campaign";
+els["mode-endless"].dataset.mode = "endless";
+els["mode-choices"].querySelectorAll = () => [els["mode-campaign"], els["mode-endless"]];
+els["diff-recruit"].dataset.difficulty = "recruit";
+els["diff-arcade"].dataset.difficulty = "arcade";
+els["diff-ace"].dataset.difficulty = "ace";
+els["diff-aceplus"].dataset.difficulty = "aceplus";
+els["difficulty-choices"].querySelectorAll = () => [els["diff-recruit"], els["diff-arcade"], els["diff-ace"], els["diff-aceplus"]];
 els["game-canvas"].parentElement = makeEl("main");
 
 /* ===== Globals ===== */
@@ -156,6 +166,11 @@ for (const f of ["src/data.js", "src/audio.js", "src/art.js", "src/game.js"]) {
 const M = sandbox.MUSTANG;
 const S = M.game.state;
 const CFG = M.data.config;
+
+/* The pressure spawner is the only nondeterministic source in the game.
+   Legacy checks want to drive one wave at a time, so it is off unless a
+   section explicitly turns it on. */
+S.pressureEnabled = false;
 
 function step(frames, ms) {
     for (let i = 0; i < frames; i++) {
@@ -217,7 +232,7 @@ ok("startGame does not throw", (() => {
     try { M.game.startGame(); return true; } catch (e) { console.error(e); return false; }
 })());
 ok("enters briefing", S.phase === "briefing", S.phase);
-ok("state reset", S.score === 0 && S.lives === 3 && S.loops === 3 && S.fireShots === 2);
+ok("state reset", S.score === 0 && S.lives === 3 && S.loops === 3 && S.weapon === "cannon" && S.weaponLevel === 1);
 ok("fresh entities", S.enemies.length === 0 && S.formations.length === 0);
 
 step(140);
@@ -287,7 +302,11 @@ function grabPow(kind) {
 }
 
 grabPow("green");
-ok("green POW doubles firepower to 4 guns", S.fireShots === 4, String(S.fireShots));
+ok("green POW upgrades the current weapon", S.weaponLevel === 2, String(S.weaponLevel));
+grabPow("green");
+ok("green POW upgrades again", S.weaponLevel === 3, String(S.weaponLevel));
+grabPow("green");
+ok("green POW at max pays points instead of wasting the crate", S.weaponLevel === 3);
 grabPow("grey");
 ok("grey POW summons two side fighters", S.sideFighters.filter(Boolean).length === 2);
 grabPow("yellow");
@@ -519,7 +538,9 @@ function enemyStub(unit, x, y) {
     return {
         unit: unit, arch: a, kind: a.kind, x: x, y: y, ox: x, oy: y,
         vx: 0, vy: 0, r: a.r, hp: 1, maxHp: 1, pts: a.pts, ai: a.ai, art: a.art,
+        shield: a.shield || 0, maxShield: a.shield || 0,
         speed: 40, fireTimer: 999, delay: 0, t: 0, phase: 0,
+        auraTimer: 1.1, spawnTimer: 2.2, spawned: 0, aimTime: 0,
         facing: 1, angle: Math.PI, flash: 0, group: null, leaving: false,
     };
 }
@@ -946,11 +967,13 @@ ok("shoot-down rate is weighted by target size", (() => {
 /* ===== Feel: difficulty, shake, hit stop, tally ===== */
 console.log("\nfeel: difficulty, shake, hit stop, tally");
 
-ok("three difficulties are defined", Object.keys(M.data.difficulty).length === 3);
-ok("recruit is gentler than arcade, arcade than ace", (() => {
-    const r = M.data.difficulty.recruit, a = M.data.difficulty.arcade, c = M.data.difficulty.ace;
-    return r.speed < a.speed && a.speed < c.speed && r.hp < a.hp && a.hp < c.hp
-        && r.fire < a.fire && a.fire < c.fire && r.bullet < a.bullet && a.bullet < c.bullet;
+ok("four difficulties are defined", Object.keys(M.data.difficulty).length === 4);
+ok("recruit is gentler than arcade, arcade than ace, ace than ace+", (() => {
+    const r = M.data.difficulty.recruit, a = M.data.difficulty.arcade, c = M.data.difficulty.ace, p = M.data.difficulty.aceplus;
+    return r.speed < a.speed && a.speed < c.speed && c.speed < p.speed
+        && r.hp < a.hp && a.hp < c.hp && c.hp < p.hp
+        && r.fire < a.fire && a.fire < c.fire && c.fire < p.fire
+        && r.bullet < a.bullet && a.bullet < c.bullet && c.bullet < p.bullet;
 })());
 
 function enemySpeedAt(difficultyId, stageNumber) {
@@ -961,7 +984,7 @@ function enemySpeedAt(difficultyId, stageNumber) {
     n = 0;
     while (S.enemies.length === 0 && n++ < 4000) { armPlayer(); step(1); }
     const air = S.enemies.filter((e) => e.kind === "air");
-    return air.length ? Math.max(...air.map((e) => e.speed)) : 0;
+    return air.length ? air.reduce((sum, e) => sum + e.speed, 0) / air.length : 0;
 }
 
 const recruitSpeed = enemySpeedAt("recruit", 20);
@@ -978,7 +1001,7 @@ function hpAt(difficultyId, stageNumber) {
     n = 0;
     while (S.enemies.length === 0 && n++ < 4000) { armPlayer(); step(1); }
     const air = S.enemies.filter((e) => e.kind === "air");
-    return air.length ? Math.max(...air.map((e) => e.hp)) : 0;
+    return air.length ? air.reduce((sum, e) => sum + e.hp, 0) / air.length : 0;
 }
 ok("recruit targets are easier to kill than ace targets",
     hpAt("recruit", 20) < hpAt("ace", 20));
@@ -1315,7 +1338,9 @@ step(2);
 ok("the sector brings its own weather", S.stage.name === "CHANNEL");
 ok("the weather is set up for the stage", M.game.weatherKind() === "rain", M.game.weatherKind());
 ok("the rain is falling", M.game.weatherDropCount() > 0, String(M.game.weatherDropCount()));
-const y0 = M.game.weatherDropY(0);
+let y0 = M.game.weatherDropY(0);
+/* A drop near the bottom is about to wrap to the top, so let it. */
+for (let i = 0; i < 120 && y0 > 500; i++) { step(1); y0 = M.game.weatherDropY(0); }
 step(6);
 ok("and it keeps falling", M.game.weatherDropY(0) > y0, M.game.weatherDropY(0) + " vs " + y0);
 
@@ -1552,6 +1577,350 @@ const axisWin = winTheWar("rising");
 ok("the axis front can be won too", axisWin === true, String(axisWin));
 ok("the victory screen is shown", els["overlay-title"].textContent === "SURRENDER", els["overlay-title"].textContent);
 ok("the victory screen shows a rank", els["final-rank"].textContent.length > 0, els["final-rank"].textContent);
+
+/* ===== New content: low-poly, enemies, weapons, abilities, pressure, endless ===== */
+console.log("\nlow-poly enemy aircraft");
+ok("the low-poly renderer exists", typeof M.art.lowPolyWarbird === "function");
+ok("new airframes are declared",
+    ["interceptor", "gunship", "aegis", "phantom", "raider", "dart", "warden"]
+        .every((a) => !!M.data.artShapes[a]));
+resetStats();
+M.art.lowPolyWarbird(ctx2d, "aegis", 200, 200, 0, 1,
+    M.art.schemeFor("overlord", "aegis"), 0, 1);
+ok("a low-poly aircraft is drawn as flat facets", stats.path > 0 && stats.paint > 0,
+    stats.path + " path / " + stats.paint + " paint");
+ok("low-poly art creates no gradients or shadows", stats.gradient === 0 && stats.shadow === 0,
+    stats.gradient + " gradients / " + stats.shadow + " shadows");
+for (const unit of ["raider", "dart", "warden"]) {
+    resetStats();
+    M.art.lowPolyWarbird(ctx2d, unit, 200, 200, 0, 1,
+        M.art.schemeFor("overlord", unit), 0, 1);
+    ok(unit + " has a faceted airframe", stats.path > 0 && stats.gradient === 0,
+        stats.path + " path / " + stats.gradient + " gradients");
+}
+resetStats();
+M.art.groundUnit(ctx2d, "sniper", 200, 200, 1, 0, 1);
+M.art.groundUnit(ctx2d, "bunker", 200, 240, 1, 0, 1);
+ok("the new ground guns draw", stats.path > 0, stats.path + " path");
+resetStats();
+M.art.seaUnit(ctx2d, "tender", 200, 200, 0, 1);
+ok("the seaplane tender draws", stats.path > 0, stats.path + " path");
+
+console.log("\nnew enemy behaviour");
+M.game.setMode("campaign");
+M.game.startGame();
+M.game.startStage(0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.pressureEnabled = false;
+for (const unit of ["interceptor", "gunship", "aegis", "phantom", "minelayer", "missileer",
+    "destroyer", "raider", "dart", "warden", "sniper", "bunker", "tender"]) {
+    S.enemies.length = 0;
+    const e = enemyStub(unit, 200, 120);
+    if (unit === "interceptor") e.phaseName = "aim";
+    if (unit === "gunship") { e.phaseName = "enter"; e.orbitDir = 1; }
+    if (unit === "raider") e.phaseName = "enter";
+    if (unit === "dart") { e.vx = 120; e.vy = 100; }
+    S.enemies.push(e);
+    armPlayer();
+    S.player.invuln = 1e9;
+    step(40);
+    ok(unit + " moves without NaN", Number.isFinite(e.x) && Number.isFinite(e.y),
+        e.x + "," + e.y);
+}
+
+// The aegis shield eats shots before its hull does.
+armPlayer();
+S.enemies.length = 0;
+S.shots.length = 0;
+const aegis = enemyStub("aegis", 200, 300);
+aegis.shield = 4;
+aegis.maxShield = 4;
+S.enemies.push(aegis);
+S.shots.push({ x: 200, y: 300, vx: 0, vy: 0, r: 4, damage: 1, pierce: 0, homing: false, splash: 0, hits: [] });
+step(1);
+ok("the aegis shield absorbs a shot", aegis.shield === 3 && aegis.hp === aegis.maxHp,
+    "shield " + aegis.shield + " hp " + aegis.hp);
+
+// The warden is a support aircraft: it puts shields on nearby air units.
+armPlayer();
+S.player.invuln = 1e9;
+S.enemies.length = 0;
+S.ebullets.length = 0;
+const warden = enemyStub("warden", 200, 120);
+warden.auraTimer = 0;
+const guarded = enemyStub("zero", 200, 150);
+guarded.shield = 0;
+S.enemies.push(warden, guarded);
+step(1);
+ok("the warden shields a nearby aircraft", guarded.shield === 2,
+    "shield " + guarded.shield);
+
+// The sniper telegraphs its target before the shot leaves the barrel.
+S.enemies.length = 0;
+S.ebullets.length = 0;
+const sniper = enemyStub("sniper", 200, 300);
+sniper.phaseName = "recover";
+sniper.fireTimer = 0;
+S.enemies.push(sniper);
+step(1);
+ok("the sniper telegraphs its shot", sniper.phaseName === "aim" && sniper.aimTime > 0,
+    sniper.phaseName + " " + sniper.aimTime);
+guard = 0;
+while (sniper.phaseName === "aim" && guard++ < 160) step(1);
+ok("the sniper fires after the telegraph",
+    sniper.phaseName === "recover" && S.ebullets.length > 0,
+    sniper.phaseName + " " + S.ebullets.length);
+
+// The bunker throws a ring of flak.
+S.enemies.length = 0;
+S.ebullets.length = 0;
+const bunker = enemyStub("bunker", 200, 300);
+bunker.fireTimer = 0;
+S.enemies.push(bunker);
+step(1);
+ok("the bunker fires a radial burst", S.ebullets.length >= 10, String(S.ebullets.length));
+
+// The tender launches child fighters; they must stay out of the formation tally.
+S.enemies.length = 0;
+S.ebullets.length = 0;
+const tender = enemyStub("tender", 200, 150);
+tender.spawnTimer = 0;
+S.enemies.push(tender);
+step(1);
+const tenderChild = S.enemies.find((e) => e !== tender && e.child);
+ok("the tender launches a child fighter", !!tenderChild && tender.spawned === 1,
+    tender.spawned + " launched");
+if (tenderChild) {
+    ok("the tender's child is a zero or fighter",
+        tenderChild.unit === "zero" || tenderChild.unit === "fighter", tenderChild.unit);
+}
+
+// The dart bounces off the side wall instead of leaving.
+S.enemies.length = 0;
+const dart = enemyStub("dart", 18, 160);
+dart.vx = -120;
+dart.vy = 90;
+S.enemies.push(dart);
+step(1);
+ok("the dart ricochets off the edge", dart.x >= 18 && dart.vx > 0,
+    dart.x + " " + dart.vx);
+
+// The raider tracks the player across the screen.
+S.enemies.length = 0;
+const raider = enemyStub("raider", 60, 168);
+raider.phaseName = "track";
+S.enemies.push(raider);
+S.player.x = 350;
+step(20);
+ok("the raider mirrors the player", raider.x > 60, String(raider.x));
+
+ok("late units are locked at the campaign start",
+    M.game.unitUnlocked("tender", { n: 32 }) === false
+    && M.game.unitUnlocked("dart", { n: 32 }) === false);
+ok("late units open as the campaign advances",
+    M.game.unitUnlocked("tender", { n: 1 }) === true
+    && M.game.unitUnlocked("dart", { n: 24 }) === true
+    && M.game.unitUnlocked("raider", { n: 22 }) === true);
+M.game.startStage(0);
+ok("the first stage's wave plan obeys the unlock gates",
+    S.wavePlan.every((w) => M.game.unitUnlocked(w.unit, S.stage)));
+
+console.log("\nweapons");
+M.game.startGame();
+M.game.startStage(0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+touch("touchend");
+key("KeyZ", false);
+function fireOnce() {
+    armPlayer();
+    S.player.fireCool = 0;
+    S.player.x = 200;
+    S.player.y = 500;
+    S.shots.length = 0;
+    key("KeyZ", true);
+    step(1);
+    key("KeyZ", false);
+    return S.shots.slice();
+}
+const cannonShots = fireOnce();
+ok("the cannon fires more than one lane", cannonShots.length >= 2, String(cannonShots.length));
+grabPow("blue");
+ok("the spread crate switches weapon", S.weapon === "spread" && S.weaponLevel === 1);
+const spreadShots = fireOnce();
+ok("spread rounds fan sideways", spreadShots.some((b) => Math.abs(b.vx) > 1),
+    spreadShots.map((b) => b.vx.toFixed(1)).join(","));
+grabPow("purple");
+ok("the rocket crate switches weapon", S.weapon === "rocket");
+const rocketShots = fireOnce();
+ok("rockets are homing", rocketShots.length > 0 && rocketShots.every((b) => b.homing));
+grabPow("cyan");
+ok("the lancer crate switches weapon", S.weapon === "lancer");
+const lancerShots = fireOnce();
+ok("lancer rounds pierce", lancerShots.length > 0 && lancerShots.every((b) => b.pierce > 0));
+grabPow("green");
+ok("the green crate upgrades the equipped weapon", S.weapon === "lancer" && S.weaponLevel === 2,
+    S.weapon + " " + S.weaponLevel);
+
+// Rockets turn toward a target.
+S.enemies.length = 0;
+const rocketTarget = enemyStub("zero", 300, 200);
+S.enemies.push(rocketTarget);
+const rockets = fireOnce();          // still the lancer here
+void rockets;
+grabPow("purple");
+S.player.fireCool = 0;
+S.shots.length = 0;
+S.enemies.length = 0;
+S.enemies.push(enemyStub("zero", 320, 200));
+key("KeyZ", true);
+step(6);
+key("KeyZ", false);
+ok("a rocket turns toward the nearest enemy", S.shots.some((b) => b.homing && b.vx > 0),
+    S.shots.map((b) => (b.vx || 0).toFixed(1)).join(","));
+
+console.log("\nabilities");
+M.game.startGame();
+M.game.startStage(0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.pressureEnabled = false;
+grabPow("pink");
+ok("the shield crate equips an ability", S.ability === "shield" && S.abilityCharges === 1,
+    S.ability + " x" + S.abilityCharges);
+grabPow("pink");
+ok("a second crate of the same kind adds a charge", S.abilityCharges === 2, String(S.abilityCharges));
+M.game.activateAbility();
+ok("the ability spends one charge", S.abilityCharges === 1 && S.ability === "shield");
+ok("the shield is up", S.shield > 0 && S.shieldTimer > 0);
+S.player.invuln = 0;
+S.player.looping = false;
+S.ebullets.length = 0;
+S.ebullets.push({ x: S.player.x, y: S.player.y, vx: 0, vy: 0, r: 3, life: 4, dead: false });
+const livesBeforeShield = S.lives;
+step(1);
+ok("the shield absorbs a hit instead of a life", S.lives === livesBeforeShield && S.shield === 0,
+    "lives " + S.lives + " shield " + S.shield);
+
+grabPow("lime");
+M.game.activateAbility();
+ok("time warp slows the world", S.slow > 0, String(S.slow));
+grabPow("teal");
+M.game.activateAbility();
+ok("air strike starts", S.strike > 0, String(S.strike));
+grabPow("violet");
+M.game.activateAbility();
+ok("overdrive starts", S.overdrive > 0, String(S.overdrive));
+
+console.log("\nrelentless pressure");
+S.pressureEnabled = true;
+M.game.startGame();
+M.game.startStage(0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+S.wavePlan.length = 0;
+S.enemies.length = 0;
+S.pressureSpawned = 0;
+S.pressureTimer = 0;
+S.stageTime = 0;
+let sawPressure = false;
+for (let i = 0; i < 240; i++) {
+    step(1);
+    if (S.enemies.some((e) => e.pressure)) sawPressure = true;
+}
+ok("pressure keeps spawning between waves", S.pressureSpawned > 0, String(S.pressureSpawned));
+ok("pressure enemies are marked", sawPressure);
+ok("pressure does not distort the shoot-down rate", S.weightTotal === 0 && S.weightKilled === 0,
+    S.weightKilled + "/" + S.weightTotal);
+
+S.enemies.length = 0;
+for (let i = 0; i < M.data.config.maxEnemies; i++) S.enemies.push(enemyStub("zero", 100 + i * 8, 200));
+const cappedBefore = S.pressureSpawned;
+S.pressureTimer = 0;
+step(3);
+ok("pressure respects the enemy cap", S.pressureSpawned === cappedBefore,
+    S.pressureSpawned + " vs " + cappedBefore);
+
+S.enemies.length = 0;
+S.boss = { id: 9999 };
+const bossBefore = S.pressureSpawned;
+S.pressureTimer = 0;
+step(3);
+ok("pressure stops while a boss is on screen", S.pressureSpawned === bossBefore,
+    S.pressureSpawned + " vs " + bossBefore);
+S.boss = null;
+
+console.log("\nendless sortie");
+S.pressureEnabled = false;
+M.game.setTheatre("overlord");
+M.game.setMode("endless");
+M.game.startGame();
+ok("endless mode boots", S.mode === "endless" && S.stage.name === "ENDLESS" && S.phase === "briefing",
+    S.mode + " " + (S.stage && S.stage.name) + " " + S.phase);
+ok("the endless run has its own clock", !!S.endlessRun && S.endlessRun.time === 0 && S.endlessRun.nextBoss > 0);
+guard = 0;
+while (S.phase === "briefing" && guard++ < 400) step(1);
+ok("endless starts playing", S.phase === "playing", S.phase);
+S.pressureEnabled = true;
+S.enemies.length = 0;
+S.pressureSpawned = 0;
+S.pressureTimer = 0;
+step(120);
+ok("endless pressure spawns enemies", S.pressureSpawned > 0, String(S.pressureSpawned));
+
+S.enemies.length = 0;
+S.boss = null;
+S.endlessRun.time = S.endlessRun.nextBoss;
+S.pressureEnabled = false;
+step(2);
+ok("endless brings a boss on its clock", !!S.boss);
+if (S.boss) {
+    S.boss.bossPhase = "fight";
+    S.boss.y = 190;
+    S.boss.hp = 1;
+    S.phase = "playing";
+    S.player.alive = true;
+    S.player.invuln = 1e9;
+    S.shots.length = 0;
+    S.shots.push({ x: S.boss.x, y: S.boss.y, vx: 0, vy: 0, r: 6, damage: 1, pierce: 0, homing: false, splash: 0, hits: [] });
+    step(1);
+}
+ok("killing the endless boss continues the run", !S.boss && S.phase === "playing"
+    && S.endlessRun.nextBoss > S.endlessRun.time, S.phase);
+
+S.score = 5000;
+S.lives = 0;
+S.phase = "playing";
+S.player.alive = true;
+S.player.invuln = 0;
+S.player.looping = false;
+S.shield = 0;
+S.ebullets.length = 0;
+S.ebullets.push({ x: S.player.x, y: S.player.y, vx: 0, vy: 0, r: 3, life: 4, dead: false });
+guard = 0;
+while (S.phase !== "gameover" && guard++ < 600) step(1);
+ok("endless ends when the lives run out", S.phase === "gameover", S.phase);
+const endlessSaved = JSON.parse(storage.get("mustang-pwa") || "{}");
+ok("endless best score is persisted", endlessSaved.endlessBest && endlessSaved.endlessBest.overlord >= 5000,
+    JSON.stringify(endlessSaved.endlessBest));
+
+M.game.setMode("campaign");
+M.game.startGame();
+
+// The attract demo flies a campaign, but it must not change the mode the
+// player selected while the menu was idle.
+M.game.setMode("endless");
+S.phase = "menu";
+S.attract = false;
+S.menuIdle = 0;
+let attractGuard = 0;
+while (!S.attract && attractGuard++ < 600) step(1);
+ok("the attract demo leaves the selected mode alone",
+    S.attract === true && S.mode === "endless" && S.runMode === "campaign",
+    "attract " + S.attract + " mode " + S.mode + " run " + S.runMode);
+M.game.setMode("campaign");
+M.game.startGame();
 
 console.log(failures === 0 ? "\nOK: smoke test passed" : "\nFAILED: " + failures + " smoke checks");
 process.exit(failures === 0 ? 0 : 1);

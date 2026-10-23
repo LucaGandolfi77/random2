@@ -164,6 +164,19 @@
         },
 
         shoot() { this.tone(720, 0.045, "square", 0.055, 380); },
+        weaponFire(id) {
+            if (id === "rocket") this.tone(180, 0.12, "sawtooth", 0.08, 90);
+            else if (id === "lancer") this.tone(1180, 0.06, "square", 0.05, 640);
+            else if (id === "spread") this.tone(520, 0.06, "square", 0.05, 300);
+            else this.shoot();
+        },
+        ability(id) {
+            if (id === "shield") { this.tone(420, 0.22, "triangle", 0.1, 860); this.tone(640, 0.18, "sine", 0.07, 1200); }
+            else if (id === "slow") { this.tone(900, 0.5, "sine", 0.11, 220); this.burst(0.4, 0.05, 700); }
+            else if (id === "strike") { this.tone(160, 0.4, "sawtooth", 0.12, 60); this.burst(0.6, 0.18, 1400); }
+            else { this.tone(300, 0.3, "square", 0.1, 1200); this.burst(0.3, 0.06, 900); }
+        },
+        shieldBreak() { this.tone(900, 0.28, "sawtooth", 0.12, 180); this.burst(0.25, 0.12, 2600); },
         sideShoot() { this.tone(560, 0.05, "triangle", 0.04, 300); },
         enemyShot() {
             const now = Sound.ctx ? Sound.ctx.currentTime : 0;

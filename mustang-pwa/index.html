@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mustang PWA</title>
-    <meta name="description" content="A vertical scrolling WWII air shooter: aerial loops, POW crates, side fighters and sector bosses across 32 stages on two fronts.">
+    <meta name="description" content="A vertical scrolling WWII air shooter: relentless enemy pressure, endless sorties, four weapons, four abilities and low-poly enemy aircraft across two 32-stage fronts.">
     <meta name="theme-color" content="#14180f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -34,8 +34,9 @@
             <div id="controls-hint" class="controls-hint">
                 <p><b>Drag</b> to fly &middot; firing is automatic</p>
                 <p><b>LOOP</b> dodges through fire, but you cannot shoot while rolling</p>
-                <p>Three loops per stage. Whatever you do not spend is worth 1,000 points each.</p>
+                <p>Weapon crates change your gun. Ability crates charge the <b>ABILITY</b> button.</p>
             </div>
+            <button id="ability-btn" class="ability-btn hidden" aria-label="Use the equipped ability">NO ABILITY</button>
         </main>
 
         <nav class="controls">
@@ -49,12 +50,21 @@
             <div class="panel">
                 <h2 id="overlay-title">MUSTANG PWA</h2>
                 <p id="overlay-msg">Pick a front and take off.</p>
+                <div id="mode-row" class="choices-row">
+                    <span class="choices-label">MODE</span>
+                    <div id="mode-choices" class="chips">
+                        <button id="mode-campaign" class="btn chip" data-mode="campaign">CAMPAIGN</button>
+                        <button id="mode-endless" class="btn chip" data-mode="endless">ENDLESS</button>
+                    </div>
+                    <p id="endless-best" class="endless-best hidden">ENDLESS BEST <span id="endless-best-value">0</span></p>
+                </div>
                 <div id="difficulty-row" class="choices-row">
                     <span class="choices-label">DIFFICULTY</span>
                     <div id="difficulty-choices" class="chips">
                         <button id="diff-recruit" class="btn chip" data-difficulty="recruit">RECRUIT</button>
                         <button id="diff-arcade" class="btn chip" data-difficulty="arcade">ARCADE</button>
                         <button id="diff-ace" class="btn chip" data-difficulty="ace">ACE</button>
+                        <button id="diff-aceplus" class="btn chip" data-difficulty="aceplus">ACE+</button>
                     </div>
                 </div>
                 <div id="hitbox-row" class="choices-row">
