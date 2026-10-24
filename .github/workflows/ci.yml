@@ -139,6 +139,10 @@ jobs:
             node "$suite"
             echo "::endgroup::"
           done
+          # SAND LOOP: quantization determinism and palette repair, the board's
+          # cell queues, the loop/bucket rules (idle loses, perfect play wins),
+          # and the manifest + service-worker asset list.
+          node --test sand-loop-pwa/tests/*.test.mjs
 
       - name: Analysis tooling tests
         run: |
@@ -237,6 +241,14 @@ jobs:
           out=$(node gulper-pwa/smoke.mjs http://localhost:8099/gulper-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  gulper-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # SAND LOOP starts a built-in picture, loads a bucket and checks
+          # that sand is actually being captured and the art canvas is painted.
+          out=$(node sand-loop-pwa/smoke.mjs http://localhost:8099/sand-loop-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  sand-loop-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3

@@ -888,6 +888,21 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="puzzle casual" data-playable="sand-loop-pwa/" style="--c1:#f08a4b; --c2:#4fc4b5; --tile-glow:rgba(240,138,75,.55); --shimmer-delay:.52s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#f08a4b,#2f8f88)">⏳</div>
+            <h2>Sand Loop</h2>
+          </div>
+          <p class="tagline">Load any photo and it becomes coloured sand. Pour the palette into looping buckets and reveal the picture grain by grain.</p>
+          <div class="chips"><span class="chip">PUZZLE</span><span class="chip">IMAGE</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="sand-loop-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/sand-loop-pwa" aria-label="Sand Loop source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="shooter arcade" data-playable="plane-pwa/" style="--c1:#0ea5e9; --c2:#6366f1; --tile-glow:rgba(14,165,233,.55); --shimmer-delay:.65s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#38bdf8,#6366f1)">✈️</div>
@@ -2272,6 +2287,34 @@
           g.stroke();
         }
       },
+
+      /* SAND LOOP: grains fall into a small loop of buckets. */
+      sand: function (g, w, h, t, u) {
+        var period = u.period || 4.2, p = (t % period) / period;
+        var cx = w * 0.5, cy = h * 0.78, rx = w * 0.36, ry = h * 0.13;
+        g.strokeStyle = rgba(P2, 0.85); g.lineWidth = 4;
+        g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, 0, TAU); g.stroke();
+        for (var i = 0; i < 3; i++) {
+          var a = p * TAU + i * TAU / 3;
+          var bx = cx + Math.sin(a) * rx;
+          var by = cy - Math.cos(a) * ry;
+          g.fillStyle = rgba(i === 0 ? P1 : P2, 1);
+          g.beginPath();
+          g.moveTo(bx - 6, by - 7);
+          g.lineTo(bx + 6, by - 7);
+          g.lineTo(bx + 4, by + 6);
+          g.lineTo(bx - 4, by + 6);
+          g.closePath(); g.fill();
+        }
+        for (var k = 0; k < 9; k++) {
+          var yy = ((t * 42 + k * 13) % (cy - h * 0.32)) + h * 0.22;
+          var xx = cx + Math.sin(t * 2 + k * 1.7) * (5 + k * 0.8);
+          g.fillStyle = rgba(k % 2 ? P1 : P2, 0.55 + (k % 3) * 0.15);
+          g.fillRect(xx, yy, 1.8, 2.6);
+        }
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath(); g.arc(cx, h * 0.16, 4.5, 0, TAU); g.fill();
+      },
     };
 
     var SKETCH_BY_SLUG = {
@@ -2285,6 +2328,7 @@
       "virtual-farm-pwa":["grow",    { period: 3.4 }],
       "king-shot-pwa":   ["arc",     { period: 2.2 }],
       "piano-pwa":       ["lines",   { period: 3 }],
+      "sand-loop-pwa":   ["sand",    { period: 4.2 }],
       "mustang-pwa":     ["arc",     { period: 1.7 }],
       "plane-pwa":       ["trail",   { period: 2.8, dir: 1 }],
       "snake-pwa":       ["trail",   { period: 2.4, dir: 1 }],
@@ -2730,6 +2774,7 @@
       { slug: "snake-pwa/",      name: "Snake",        emoji: "🐍", key: "snake-pwa" },
       { slug: "king-shot-pwa/",  name: "King Shot",    emoji: "👑", key: "king-shot-pwa" },
       { slug: "piano-pwa/",      name: "Piano Fall",   emoji: "🎹", key: "piano-fall-pwa" },
+      { slug: "sand-loop-pwa/",  name: "Sand Loop",    emoji: "⏳", key: "sand-loop-pwa" },
       { slug: "plane-pwa/",      name: "Plane Shooter", emoji: "✈️", key: "plane-pwa" },
       { slug: "slot-pwa/",       name: "Slot Machine", emoji: "🎰", key: "slot-pwa" },
       { slug: "lumen-pwa/",      name: "LUMEN",       emoji: "🌊", key: "lumen-pwa" },

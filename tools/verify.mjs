@@ -171,8 +171,8 @@ const CLAIMS = [
     labelIt: "Progetti pubblicati",
     where: "the first stat tile, and the CV",
     whereIt: "la prima cifra, e il CV",
-    expect: "44",
-    expectElsewhere: { "portfolio/cv.html": "44" },
+    expect: "53",
+    expectElsewhere: { "portfolio/cv.html": "53" },
     how: "for d in */; do d=${d%/}; [ -f \"$d/index.html\" ] && echo \"$d\"; done | grep -v '^portfolio$' | wc -l",
     compute: () => projects().length,
   },
@@ -182,8 +182,8 @@ const CLAIMS = [
     labelIt: "Progetti senza dipendenze runtime",
     where: "the second stat tile, and the CV",
     whereIt: "la seconda cifra, e il CV",
-    expect: "42/44",
-    expectElsewhere: { "portfolio/cv.html": "42/44" },
+    expect: "51/53",
+    expectElsewhere: { "portfolio/cv.html": "51/53" },
     how: "deps=$(for d in */; do d=${d%/}; [ -f \"$d/index.html\" ] || continue; \
 c=$(python3 -c \"import json;print(len(json.load(open('$d/package.json')).get('dependencies',{})))\" 2>/dev/null || echo 0); \
 if [ \"$c\" != 0 ] || [ -d \"$d/vendor\" ]; then echo \"$d\"; fi; done | wc -l); \

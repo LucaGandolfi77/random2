@@ -19,6 +19,7 @@
   - [Plane Shooter](#plane-shooter)
   - [Slot Machine](#slot-machine)
   - [Snake](#snake)
+  - [Sand Loop](#sand-loop)
   - [LUMEN](#lumen)
   - [SECTOR 7](#sector-7)
   - [SINI](#sini)
@@ -103,6 +104,7 @@
 | 39 | **GULPER** | Tentacled kaiju arcade: eat, grow, survive the response | Canvas 2D (software rasteriser) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/gulper-pwa/) |
 | 40 | **Pokéball GO v2** | Throw 2.0: power, ring timing, curveball, uid collection | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pokemon-go-pwa-v2/) |
 | 41 | **PocketCode** | Remote control for OpenCode / Pi agents | Static PWA + Node bridge | Demo | [▶ Open](https://lucagandolfi77.github.io/random2/pocketcode-pwa/) |
+| 42 | **Sand Loop** | Photo-to-sand colour sort puzzle | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sand-loop-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -217,6 +219,33 @@ arrow keys/WASD on desktop.
 
 **Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
 `service-worker.js`, `icons/` (SVG).
+
+### Sand Loop
+
+*Pour the photo. Sort the sand.* ⏳
+
+A colour-sort puzzle that uses your own image as the level. The picture is
+quantized into 4–8 sand colours; buckets ride a loop, the hopper pours one
+colour at a time, and every captured grain clears a cell of the artwork until
+the sharp photo is revealed underneath.
+
+- Load a JPG/PNG/WebP/AVIF by picker, drag-and-drop or clipboard paste; four
+  procedural pictures are included and no binary art is shipped
+- Median-cut + Lab k-means quantization, rare-colour merging, majority
+  filtering and a tonal fallback for monochrome uploads
+- Deterministic per-picture colours, cell order, spills and score
+- Classic, Calm and Dense palettes; the loop deliberately holds fewer buckets
+  than colours
+- 1–3 stars from spill efficiency, bests per built-in picture and per custom
+  image hash, run history through `R2.stats`
+- Fingerprint-free palettes: every cup also carries a number and a pattern
+- Images are processed locally and never uploaded; only a 360×480 local
+  thumbnail is remembered, with a Forget action
+- Offline PWA, safe-area portrait layout, pause, reduced motion, synth SFX
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `engine`, `board`, `quantize`, `image-import`, `artworks`,
+`render`), `icons/` (SVG), `tests/`, `smoke.mjs`.
 
 ### LUMEN
 

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Sand Loop: Color Sort Puzzle</title>
+  <meta name="theme-color" content="#120e0a">
+  <meta name="description" content="A relaxing sand sort puzzle. Load any photo, pour its colours into looping buckets, and reveal the picture again grain by grain. Everything stays on your device.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sand Loop">
+  <meta property="og:title" content="Sand Loop: Color Sort Puzzle">
+  <meta property="og:description" content="Load a photo, sort its sand, reveal the picture. A calm colour-sort puzzle that runs offline.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar" id="topbar">
+      <button id="btnBack" class="icon-btn back hidden" type="button" aria-label="Back to menu">←</button>
+      <div class="brand" id="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>SAND <em>LOOP</em></span>
+      </div>
+      <div class="game-hud hidden" id="gameHud">
+        <div class="score-box">
+          <span>Score</span>
+          <b id="scoreValue">0</b>
+        </div>
+        <div class="spill-box" title="Spill tray">
+          <span>Spill</span>
+          <div class="spill-track"><i id="spillFill"></i></div>
+        </div>
+        <button id="btnSound" class="icon-btn" type="button" aria-label="Toggle sound">🔊</button>
+        <button id="btnPause" class="icon-btn" type="button" aria-label="Pause">⏸</button>
+      </div>
+      <button id="btnHowMenu" class="text-btn menu-only" type="button">How to play</button>
+    </header>
+
+    <main id="menuScreen" class="menu-screen">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Colour sort puzzle</p>
+          <h1>Pour the photo.<br><span>Sort the sand.</span></h1>
+          <p class="lede">Every picture becomes a bed of coloured sand. Load the right buckets onto the loop, catch each colour, and watch the photo come back through the clearing grains.</p>
+          <div class="hero-actions">
+            <button id="btnUploadHero" class="btn primary" type="button">
+              <span class="btn-glyph" aria-hidden="true">＋</span>
+              Load a photo
+            </button>
+            <button id="btnHowHero" class="btn ghost" type="button">How to play</button>
+          </div>
+          <p class="privacy-line">Your photo is processed in this tab. It is never uploaded.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-frame">
+            <div class="hero-sand"></div>
+            <div class="hero-bucket b1"></div>
+            <div class="hero-bucket b2"></div>
+            <div class="hero-bucket b3"></div>
+            <div class="hero-loop"></div>
+          </div>
+          <div class="hero-caption">Load a photo → sort its palette → keep the picture</div>
+        </div>
+      </section>
+
+      <section class="menu-section">
+        <div class="section-head">
+          <h2>Pick a picture</h2>
+          <span class="section-note">Four drawings, drawn in code</span>
+        </div>
+        <div id="artGrid" class="art-grid" aria-label="Built-in pictures"></div>
+      </section>
+
+      <section class="menu-section">
+        <div class="section-head">
+          <h2>Your photo</h2>
+          <span class="section-note">JPG, PNG, WebP, AVIF · kept on this device</span>
+        </div>
+        <div class="your-grid">
+          <button id="uploadCard" class="upload-card" type="button">
+            <span class="upload-icon" aria-hidden="true">＋</span>
+            <strong>Load an image</strong>
+            <span>Drop a file here, paste one, or choose from your device.</span>
+          </button>
+          <button id="recentCard" class="recent-card hidden" type="button">
+            <img id="recentThumb" alt="" />
+            <span class="recent-copy">
+              <small>Continue with</small>
+              <strong id="recentName">Your photo</strong>
+              <span id="recentMeta">Last picture</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <footer class="menu-footer">
+        <span>SAND LOOP · an original browser game inspired by sand-sort puzzles</span>
+        <button id="btnForget" class="link-btn hidden" type="button">Forget my saved photo</button>
+      </footer>
+    </main>
+
+    <main id="gameScreen" class="game-screen hidden">
+      <div class="art-wrap">
+        <div class="art-frame">
+          <canvas id="artCanvas" width="600" height="800" aria-label="The picture being cleared"></canvas>
+          <div class="art-shine"></div>
+        </div>
+      </div>
+      <div class="art-bar">
+        <div class="progress-track"><i id="progressFill"></i></div>
+        <span id="progressText">0%</span>
+        <span id="artLabel" class="art-label">Dune Sunset</span>
+      </div>
+      <div class="play-wrap">
+        <canvas id="playCanvas" aria-label="Sand loop and buckets"></canvas>
+        <div id="hint" class="hint" role="status" aria-live="polite"></div>
+      </div>
+      <div class="palette-wrap">
+        <div id="palette" class="palette" aria-label="Sand colours"></div>
+        <p id="paletteTip" class="palette-tip">Tap a colour to load a bucket</p>
+      </div>
+    </main>
+  </div>
+
+  <input id="fileInput" type="file" accept="image/*" hidden />
+
+  <div id="preview" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+    <div class="sheet preview-sheet">
+      <div class="preview-visual">
+        <canvas id="previewCanvas" width="600" height="800"></canvas>
+        <span class="preview-badge">Preview</span>
+      </div>
+      <div class="preview-copy">
+        <p class="eyebrow">Ready to sort</p>
+        <h2 id="previewTitle">Dune Sunset</h2>
+        <p id="previewHint" class="preview-hint">Warm ridges and a low sun</p>
+        <div class="palette-readout" id="previewSwatches" aria-label="Palette"></div>
+        <div class="field">
+          <span class="field-label">Sand colours</span>
+          <div class="segmented" id="difficulty" role="group" aria-label="Number of colours">
+            <button type="button" data-colors="4">Calm <small>4</small></button>
+            <button type="button" data-colors="6" class="on">Classic <small>6</small></button>
+            <button type="button" data-colors="8">Dense <small>8</small></button>
+          </div>
+        </div>
+        <p class="field-note" id="difficultyNote">Five buckets on the loop, one more colour in the tray.</p>
+        <button id="btnStart" class="btn primary wide" type="button">Play this picture</button>
+        <button id="btnPreviewBack" class="btn ghost wide" type="button">Back</button>
+        <p class="privacy-line">Played entirely offline. Your image is never sent anywhere.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="howto" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
+    <div class="sheet howto-sheet">
+      <p class="eyebrow">Three steps</p>
+      <h2 id="howtoTitle">How to play</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-number">1</span>
+          <div><strong>Load the colour</strong><p>The hopper pours one colour at a time. Tap that colour in the tray to put a bucket on the loop. The loop turns the matching bucket under the stream.</p></div>
+        </li>
+        <li>
+          <span class="step-number">2</span>
+          <div><strong>Keep it moving</strong><p>A bucket fills and leaves automatically. Load another before the tray fills up. If the loop is full, tap a bucket to recycle it.</p></div>
+        </li>
+        <li>
+          <span class="step-number">3</span>
+          <div><strong>Reveal the picture</strong><p>Every captured grain clears a grain of sand from the picture. The sand you miss falls into the spill tray. Empty the whole picture without overflowing the tray.</p></div>
+        </li>
+      </ol>
+      <div class="howto-notes">
+        <p><b>Numbers and patterns</b> on every cup are there so the game works without colour vision. Colours are labelled 1–8.</p>
+        <p><b>No timer.</b> Pause whenever you like. The only pressure is the spill tray.</p>
+        <p><b>Your photos stay here.</b> The last one is remembered as a small local thumbnail and can be forgotten from the menu.</p>
+      </div>
+      <button id="btnHowClose" class="btn primary wide" type="button">Got it</button>
+    </div>
+  </div>
+
+  <div id="pause" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="sheet pause-sheet">
+      <p class="eyebrow">Take your time</p>
+      <h2 id="pauseTitle">Paused</h2>
+      <div class="pause-stats" id="pauseStats"></div>
+      <button id="btnResume" class="btn primary wide" type="button">Resume</button>
+      <button id="btnQuit" class="btn ghost wide" type="button">Leave this picture</button>
+    </div>
+  </div>
+
+  <div id="result" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="sheet result-sheet">
+      <div class="result-visual">
+        <canvas id="resultCanvas" width="600" height="800"></canvas>
+      </div>
+      <div class="result-copy">
+        <p class="eyebrow" id="resultEyebrow">Picture complete</p>
+        <h2 id="resultTitle">The photo is back</h2>
+        <div id="resultStars" class="stars" aria-label="Stars"></div>
+        <div class="result-score"><span>Score</span><b id="resultScore">0</b></div>
+        <div class="result-grid">
+          <div><span>Grains</span><b id="resultGrains">0</b></div>
+          <div><span>Spilled</span><b id="resultSpilled">0</b></div>
+          <div><span>Best</span><b id="resultBest">0</b></div>
+          <div><span>Loop</span><b id="resultColors">6</b></div>
+        </div>
+        <p id="resultNote" class="result-note"></p>
+        <button id="btnAgain" class="btn primary wide" type="button">Play this picture again</button>
+        <button id="btnNewPicture" class="btn ghost wide" type="button">Choose another picture</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Preparing picture">
+    <div class="loading-card">
+      <div class="sand-spinner"><i></i><i></i><i></i></div>
+      <p id="loadingText">Preparing the sand…</p>
+    </div>
+  </div>
+
+  <div id="drop" class="drop-overlay hidden" aria-hidden="true">
+    <div class="drop-card">
+      <span aria-hidden="true">↓</span>
+      <strong>Drop an image</strong>
+      <p>It becomes the next sand picture.</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="../shared/arcade.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
