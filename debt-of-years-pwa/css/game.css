@@ -1,0 +1,5 @@
+html, body { background: #14110e; }
+#game canvas { outline: none; }
+@media (display-mode: standalone) {
+  html, body { background: #e9e0cc; }
+}

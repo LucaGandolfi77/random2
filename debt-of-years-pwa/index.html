@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#e9e0cc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Debt of Years">
+  <meta name="description" content="The Debt of Years is a small ink-and-ledger JRPG. Every spell is paid with someone's life. You choose whose.">
+  <title>The Debt of Years</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/icon-180.png">
+  <style>
+    :root {
+      --paper: #e9e0cc;
+      --ink: #1f1a17;
+      --ember: #b4532a;
+      --night: #14110e;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--night);
+      overflow: hidden;
+      overscroll-behavior: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    #game {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--night);
+    }
+    #game canvas {
+      display: block;
+      touch-action: none;
+    }
+    #boot {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+      transition: opacity 500ms ease;
+    }
+    #boot.hidden { opacity: 0; pointer-events: none; }
+    #boot .mark {
+      width: 54px;
+      height: 54px;
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ember);
+      font-size: 26px;
+      letter-spacing: -2px;
+    }
+    #boot h1 {
+      margin: 6px 0 0;
+      font-size: 22px;
+      font-weight: normal;
+      letter-spacing: 0.08em;
+    }
+    #boot p {
+      margin: 0;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.55;
+    }
+  </style>
+</head>
+<body>
+  <div id="boot">
+    <div class="mark">&#8734;</div>
+    <h1>The Debt of Years</h1>
+    <p>An ink-and-ledger JRPG</p>
+  </div>
+  <div id="game"></div>
+  <script src="./js/vendor/phaser.min.js"></script>
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
