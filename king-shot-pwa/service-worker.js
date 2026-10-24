@@ -1,5 +1,5 @@
 /* ===== King Shot PWA Service Worker ===== */
-const CACHE_NAME = "king-shot-pwa-v4";
+const CACHE_NAME = "king-shot-pwa-v5";
 const ASSETS = [
     "./",
     "./index.html",

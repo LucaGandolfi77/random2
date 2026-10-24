@@ -1,0 +1,16 @@
+{
+  "name": "Piano Fall PWA",
+  "short_name": "Piano Fall",
+  "description": "A landscape piano with Synthesia-style falling notes. Play freestyle or follow five built-in songs.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d0b14",
+  "theme_color": "#0d0b14",
+  "orientation": "landscape",
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+  ]
+}

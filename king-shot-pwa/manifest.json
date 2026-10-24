@@ -1,24 +1,16 @@
 {
   "name": "King Shot PWA",
   "short_name": "King Shot",
-  "description": "An iPhone-optimized shooting game where the king launches powerful arrows to defeat enemies. Tap to aim, release to shoot!",
+  "description": "Defend the castle! Drag to aim the royal bow, arc arrows over the wall and hold the line against waves of monsters.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#1a0d00",
-  "theme_color": "#ff6600",
+  "background_color": "#0b1026",
+  "theme_color": "#0b1026",
   "orientation": "portrait",
   "icons": [
-    {
-      "src": "icons/icon-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "icons/icon-512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml"
-    }
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
   ]
 }

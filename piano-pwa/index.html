@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Piano Fall PWA</title>
+    <meta name="theme-color" content="#0d0b14">
+    <meta name="description" content="A landscape piano PWA with Synthesia-style falling notes. Play freestyle or follow five built-in songs.">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Piano Fall">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+</head>
+<body>
+    <!-- falling-note lanes -->
+    <canvas id="fall"></canvas>
+
+    <!-- keyboard -->
+    <div id="keys" aria-label="Piano keyboard"></div>
+
+    <!-- HUD -->
+    <div id="hud" class="hud">
+        <div class="stat">
+            <span class="lbl">Score</span>
+            <span id="score" class="val">0</span>
+        </div>
+        <div class="center">
+            <div id="songName" class="song">Piano Fall</div>
+            <div class="progress"><div id="progressFill" class="progress-fill"></div></div>
+        </div>
+        <div class="right-cluster">
+            <span id="combo" class="combo hidden">×2</span>
+            <span id="acc" class="acc">100%</span>
+            <button id="btnSound" class="icon-btn" aria-label="Toggle sound">🔊</button>
+            <button id="btnPause" class="icon-btn" aria-label="Pause">⏸</button>
+        </div>
+    </div>
+
+    <!-- Menu overlay -->
+    <div id="menu" class="overlay">
+        <div class="panel wide">
+            <div class="crown">🎹</div>
+            <h1 class="title">PIANO FALL</h1>
+            <p class="subtitle">Catch the falling notes at the golden line</p>
+            <div id="songList" class="song-list"></div>
+            <button id="btnFreestyle" class="btn primary">🎵&nbsp; Freestyle — just play</button>
+            <div class="howto">
+                <p>Tap the keys when tiles reach the <b>gold line</b>.</p>
+                <p class="kbd-hint">Keyboard: A S D F G H J K L ; &nbsp;+&nbsp; W E T Y U O P</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause overlay -->
+    <div id="paused" class="overlay hidden">
+        <div class="panel">
+            <h2 class="title small">PAUSED</h2>
+            <button id="btnResume" class="btn primary">▶&nbsp; Resume</button>
+            <button id="btnQuit" class="btn ghost">🏠&nbsp; Menu</button>
+        </div>
+    </div>
+
+    <!-- Results overlay -->
+    <div id="results" class="overlay hidden">
+        <div class="panel">
+            <div class="crown dim">🎼</div>
+            <h2 id="resTitle" class="title small">SONG COMPLETE</h2>
+            <div id="resNew" class="new-best hidden">★ NEW BEST ★</div>
+            <div class="result-score"><span id="resScore">0</span></div>
+            <div class="result-grid">
+                <div><span class="lbl">Accuracy</span><b id="resAcc">100%</b></div>
+                <div><span class="lbl">Max combo</span><b id="resCombo">0</b></div>
+                <div><span class="lbl">Best</span><b id="resBest">0</b></div>
+            </div>
+            <button id="btnRetry" class="btn primary">↻&nbsp; Play Again</button>
+            <button id="btnMenu" class="btn ghost">🏠&nbsp; Menu</button>
+        </div>
+    </div>
+
+    <!-- Rotate prompt (portrait phones) -->
+    <div id="rotate" class="rotate hidden">
+        <div class="rotate-inner">🔄<br>Rotate your device<br><span>Landscape gives you a full piano</span></div>
+    </div>
+
+    <script src="../shared/arcade.js"></script>
+    <script src="piano.js"></script>
+</body>
+</html>

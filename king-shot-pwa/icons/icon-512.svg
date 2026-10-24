@@ -1,15 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 192 192">
   <defs>
-    <linearGradient id="gl" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff6600"/>
-      <stop offset="100%" stop-color="#cc3300"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a3e"/>
+      <stop offset="100%" stop-color="#0b1026"/>
     </linearGradient>
-    <filter id="shadow">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#ff6600" flood-opacity="0.5"/>
-    </filter>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe08a"/>
+      <stop offset="100%" stop-color="#f6c945"/>
+    </linearGradient>
   </defs>
-  <rect width="512" height="512" fill="#2a0a00" rx="64"/>
-  <rect x="64" y="64" width="384" height="384" fill="none" stroke="url(#gl)" stroke-width="8" rx="56"/>
-  <circle cx="256" cy="256" r="64" fill="url(#gl)" filter="url(#shadow)"/>
-  <path d="M256 210 L256 300 L224 300 L224 210 Z M268 210 L268 300 L292 300 L292 210 Z M256 310 L256 400 L224 400 L224 310 Z M268 310 L268 400 L292 400 L292 310 Z M224 256 L230 256 L230 262 L224 262 Z M268 256 L274 256 L274 262 L268 262 Z M256 244 L262 244 L262 250 L256 250 Z M292 244 L298 244 L298 250 L292 250 Z" fill="#fff"/>
+  <rect width="192" height="192" fill="url(#bg)" rx="40"/>
+  <circle cx="150" cy="44" r="14" fill="#efeaff" opacity="0.9"/>
+  <!-- arrow -->
+  <g transform="rotate(-35 96 108)">
+    <rect x="60" y="104" width="72" height="7" rx="3.5" fill="#d9cba0"/>
+    <path d="M132 96 L152 107.5 L132 119 Z" fill="#eef0f6"/>
+    <path d="M60 107.5 L44 96 L52 107.5 L44 119 Z" fill="url(#gold)"/>
+  </g>
+  <!-- crown -->
+  <path d="M58 76 L58 52 L74 66 L96 42 L118 66 L134 52 L134 76 Z" fill="url(#gold)"/>
+  <rect x="58" y="76" width="76" height="12" rx="5" fill="url(#gold)"/>
+  <circle cx="96" cy="82" r="4" fill="#c0394b"/>
 </svg>

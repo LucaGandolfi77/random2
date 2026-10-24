@@ -1,15 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
   <defs>
-    <linearGradient id="gl" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff6600"/>
-      <stop offset="100%" stop-color="#cc3300"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a1a3e"/>
+      <stop offset="100%" stop-color="#0b1026"/>
     </linearGradient>
-    <filter id="shadow">
-      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#ff6600" flood-opacity="0.5"/>
-    </filter>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffe08a"/>
+      <stop offset="100%" stop-color="#f6c945"/>
+    </linearGradient>
   </defs>
-  <rect width="192" height="192" fill="#2a0a00" rx="32"/>
-  <rect x="28" y="28" width="136" height="136" fill="none" stroke="url(#gl)" stroke-width="4" rx="24"/>
-  <circle cx="96" cy="96" r="24" fill="url(#gl)" filter="url(#shadow)"/>
-  <path d="M96 70 L96 100 L84 100 L84 70 Z M108 70 L108 100 L120 100 L120 70 Z M96 110 L96 140 L84 140 L84 110 Z M108 110 L108 140 L120 140 L120 110 Z M84 96 L90 96 L90 102 L84 102 Z M108 96 L114 96 L114 102 L108 102 Z M96 84 L102 84 L102 90 L96 90 Z M114 84 L120 84 L120 90 L114 90 Z" fill="#fff"/>
+  <rect width="192" height="192" fill="url(#bg)" rx="40"/>
+  <circle cx="150" cy="44" r="14" fill="#efeaff" opacity="0.9"/>
+  <!-- arrow -->
+  <g transform="rotate(-35 96 108)">
+    <rect x="60" y="104" width="72" height="7" rx="3.5" fill="#d9cba0"/>
+    <path d="M132 96 L152 107.5 L132 119 Z" fill="#eef0f6"/>
+    <path d="M60 107.5 L44 96 L52 107.5 L44 119 Z" fill="url(#gold)"/>
+  </g>
+  <!-- crown -->
+  <path d="M58 76 L58 52 L74 66 L96 42 L118 66 L134 52 L134 76 Z" fill="url(#gold)"/>
+  <rect x="58" y="76" width="76" height="12" rx="5" fill="url(#gold)"/>
+  <circle cx="96" cy="82" r="4" fill="#c0394b"/>
 </svg>
