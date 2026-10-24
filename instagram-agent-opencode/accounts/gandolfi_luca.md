@@ -79,22 +79,23 @@ proof; none explains an offer or introduces the person.
 
 - Absurdist comedy shot with film-production polish.
 - Recurring signatures: `#spreadingmadness`, `#spreadingbeauty`.
-- Background facts used in the bio: computer engineering student, aerospace and
-  defence (Alten), film producer, pianist.
-- Language: profile text is English with Italian location; audience appears
-  Italian. Pick one language for copy and stay in it.
+- Background facts used in the bio: computer engineering student, film
+  producer, pianist. The employer handle was removed to keep the profile
+  personal.
+- Language: Italian-first, with English punchlines and the two signature
+  hashtags. Audience is Italian.
 
-## Offer status
+## Positioning decision (2026-10-23)
 
-No offer is defined. Decide one of these before rewriting the link or the
-pinned posts:
+Personal creator account, not a business. The goal is reach and followers for
+the absurd comedy, not inbound video work. No offer, no linktree, no sponsor
+tone, no "3 tips".
 
-1. **Creator account** - the goal is reach and follows. The link is then a
-   showreel or a hub, and the CTA is "follow".
-2. **Video work** - the goal is inbound production jobs. The link is a single
-   showreel, the CTA is "DM", and one pin must explain what a client gets.
-
-The audit assumes option 2.
+- **Link:** none for now. Add one only if a YouTube or a single best-of page
+  exists. Never a linktree.
+- **CTA:** follow. The profile exists to show there is more of the same.
+- **Boundary:** drinking and the extreme nights stay in Close Friends, never in
+  the public feed.
 
 ## Audit score at snapshot: 38/100
 
@@ -113,68 +114,145 @@ The audit assumes option 2.
 | recent activity | 8/10 | 77.4k views in 30 days |
 | story presence | 2/6 | not verifiable from own profile |
 
-## Recommended rewrites (copy-ready)
+## Audit 2026-10-23 (last 30 days)
 
-Name field, pick one (30 characters max):
+Window 23/09 - 23/10. 35 posts captured from the Content tab; the sorted list
+was cut, so the true count is higher. Median 514 views, mean 917, range
+355 - 4,800. This is dashboard data, not reach data.
+
+### Top 5 by outlier multiple
+
+| Multiple | Post | Views | Likes | Shares |
+| --- | --- | --- | --- | --- |
+| 9.3x | Proviamo questo trend dei dump | 4,800* | 129 | 28 |
+| 5.3x | Ho paura di Marcello | 2,700 | 79 | 2 |
+| 4.3x | Questa vita ci fa sentire... | 2,200 | 1 | 3 |
+| 3.1x | Ogni presidente ha la sua first lady | 1,600 | 0 | 1 |
+| 2.9x | Carboserata stellare | 1,500 | 1 | 2 |
+
+### Bottom 5
+
+| Multiple | Post | Views | Likes | Shares |
+| --- | --- | --- | --- | --- |
+| 0.7x | Roaring among the stars | 355 | 3 | 2 |
+| 0.7x | L'ultimo giro siamo noi | 362 | 2 | 0 |
+| 0.7x | Siamo crazyyyyy | 369 | 1 | 0 |
+| 0.8x | Al pacino al weekend | 389 | 3 | 0 |
+| 0.8x | I ragazzi sono studiati | 411 | 4 | 0 |
+
+### Share rate (shares / views)
+
+| Rate | Post | Shares / views |
+| --- | --- | --- |
+| 0.58% | Proviamo questo trend dei dump | 28 / 4,800 |
+| 0.56% | Roaring among the stars | 2 / 355 |
+| 0.44% | Ci vediamo prossima settimana | 2 / 456 |
+| 0.23% | Festeggiando gli eventi mondiali | 3 / 1,300 |
+| 0.17% | La migliore situazione | 2 / 1,200 |
+
+\*Dashboard says 4,800; the reel insight page says 2,953 + 1,164 in two cards.
+The 129 likes at "8.1%" imply a reach around 1,600, so the cards are counting
+plays, not people. The exact split needs a fresh capture.
+
+### What the data says
+
+1. **Two accounts.** The top five are trend/relatable-joke posts. The bottom
+   five are event diaries. Median 514 views; groups at 2.9x-9.3x and
+   0.7x-0.8x. High confidence, n=35.
+2. **Shares move reach, likes do not.** The 4.8K reel has 28 shares. The 2.2K
+   and 1.6K posts have 3 and 1 shares but 1 and 0 likes. Almost every post
+   under 500 views has zero shares.
+3. **The best reel still leaks at the hook.** Skip rate 60.3%, so roughly
+   39.7% held to 3 seconds; average watch 6s. The shareable payload saved it.
+4. **The 4.8K reel earned zero follows.** 129 likes and 28 shares produced 0
+   follows. This is a profile problem, not a hook problem; the profile scored
+   38/100.
+5. **Volume is not the constraint.** At least 35 posts in the window, 16 on
+   11/10 alone, most at 400-2,200 views with 0-5 likes. One deliberate post a
+   day beats a dump day.
+6. **Comments are flat.** Median 0, almost everything 0-3. No question and no
+   reply round.
+7. **Day and time show nothing.** Do not optimise it; format is the variable.
+8. **The known ceiling is higher.** The 12k rose reel is outside this window;
+   the best of the 30 days is 4.8K. The absurd-costume comedy that produced
+   12k barely appears in this sample.
+
+```text
+STOP:     multi-post event dumps; captions only the people in the photo get;
+          posting to empty the camera roll.
+DO MORE:  one trend or relatable joke a day with a first line a stranger gets;
+          the dump trend and "Ho paura di Marcello" are the templates;
+          a real hook in the first two seconds; a profile that converts reach.
+```
+
+**Data gaps:** no per-post reach, non-follower share, saves; one retention
+graph only. Send the worst reel's retention to grade the hooks properly.
+
+## Final profile copy (2026-10-23)
+
+Name field (28 characters):
 
 ```text
 Luca Gandolfi | Video comici
-Luca Gandolfi | Film comici
-Luca Gandolfi | Comic films
-Luca Gandolfi | Absurd on film
 ```
 
-Bio, Italian:
+Bio (fits the 150-character limit):
 
 ```text
-Comicità assurda, girata come un film.
-La rosa ha fatto 12mila visualizzazioni.
-Giro anche video per brand. Scrivimi.
+Video comici girati come film.
+Rido delle cose sbagliate. Poi le giro.
+Fidenza · ingegneria · pianoforte
+#spreadingmadness #spreadingbeauty
 ```
 
-Bio, English:
+Link: **none for now.** Do not add a linktree. Add a single link only if a
+YouTube or a one-page best-of exists.
 
-```text
-Absurd comedy, shot like a film.
-The rose one did 12k plays, which still feels fake.
-I shoot brand videos too. So DM me.
-```
-
-Highlights:
-
-```text
-Chi sono · Dietro le quinte · Video / Lavori · Collab · 2024 (archive)
-```
-
-Pinned jobs:
+Pinned three, in this order:
 
 ```text
 1. Proof      the rose reel (12k plays) - already pinned
-2. The work   a 15-30s showreel: three clips, one sentence on what is delivered
-3. The person a 30s talking-head "who I am"
+2. More       "Ho paura di Marcello" (2.7K, 79 likes)
+3. Intro      the mock trailer - replace with it once it is shot
 ```
 
-Link: one destination, not a link tree. Showreel or a single page with the reel
-and a contact. Add a category that matches the offer and an email that is read.
+Until the intro exists, pin the 4.8K dump in slot 3. Three pins, three
+different jobs: proof, range, identity.
 
-Grid covers: same font, same corner, three or four words, e.g. `ROSA IN BOCCA`,
-`NAPOLEONE`, `GIN IN CAMPO`.
+Highlights (remove "Nuova"; fold "Torneo Bellezza" into "Serate"):
 
-Projected re-score if all field changes are made: **76/100**. The rest needs a
-new intro reel, a week of stories, redesigned covers, and a link.
+```text
+Chi sono · Video · Dietro le quinte · Serate · Escapril
+```
+
+Photo: crop the current stylised portrait to roughly 60% face, eyes visible.
+No new headshot is required. If a new shot happens, keep the warm grade and the
+side light; it should look like a film still, not a LinkedIn photo.
+
+Category: `Video creator`. No public email; keep the account personal.
+
+Grid: do not delete the 891 posts. Archive only the weakest event dumps that
+occupy the first nine, move them to "Serate". Reel covers: one real frame plus
+three words in the same font, like a film poster. No Canva templates.
+
+Intro reel: `accounts/gandolfi_luca-intro-reel.md`.
+
+Projected re-score if all field changes are made: **72/100** (the link stays at
+0/8 on purpose). The rest needs the intro, a week of stories, and the first nine
+covers.
 
 ## Checklist
 
-- [ ] Change the name field to include searchable words
-- [ ] Replace the bio with the proof + offer version
-- [ ] Add one link
+- [ ] Change the name field to `Luca Gandolfi | Video comici`
+- [ ] Replace the bio with the final version
+- [ ] Leave the link empty (no linktree)
 - [ ] Rename and trim the highlights
-- [ ] Pin a showreel and a talking-head intro
-- [ ] Redesign the first nine covers with short text
+- [ ] Pin the rose, Marcello, and the intro (or the 4.8K dump until then)
+- [ ] Archive the weakest event dumps from the first nine
 - [ ] Crop the profile photo closer
-- [ ] Set category and contact email
-- [ ] Decide creator vs video-work positioning
-- [ ] Fill `voice.md` (see below)
+- [ ] Set category to `Video creator`; no public email
+- [x] Fill `voice.md` from `accounts/gandolfi_luca-voice.md` (2026-10-23)
+- [ ] Shoot and post the intro mock trailer
 
 ## Restore on another computer
 
@@ -205,12 +283,14 @@ new intro reel, a week of stories, redesigned covers, and a link.
 ## The short version to paste into a new chat
 
 ```text
-Account @gandolfi_luca (Luca Gandolfi, Fidenza, Italy). Professional account.
-891 posts, 1,334 followers, 1,655 following. 77,457 views in the last 30 days.
-Absurdist comedy with film-production polish. Signatures: #spreadingmadness,
-#spreadingbeauty. Bio is an identity list (engineering student, Alten
-Aerospace & Defence, film producer, pianist) with no link and no offer.
-Top pins are comedy bits; best proof is a 12k-play rose reel. Audit 38/100.
-Undecided: creator account vs selling video work. Copy in Italian or English,
-not both.
+Account @gandolfi_luca (Luca Gandolfi, Fidenza, Italy). Personal creator
+account, professional tools on. Goal: reach for absurd comedy, not selling
+video work. 891 posts, 1,334 followers, 1,655 following. 77,457 views in the
+last 30 days. Absurdist comedy with film-production polish. Signatures:
+#spreadingmadness, #spreadingbeauty. Name field: "Luca Gandolfi | Video
+comici". Bio: "Video comici girati come film. / Rido delle cose sbagliate.
+Poi le giro. / Fidenza · ingegneria · pianoforte". No link, no linktree, no
+offer. Best proof: 12k rose reel; best recent: 4.8K dump with 28 shares and 0
+follows. Audit 38/100, profile target 72/100. Italian-first, English
+punchlines. Nothing is sold.
 ```

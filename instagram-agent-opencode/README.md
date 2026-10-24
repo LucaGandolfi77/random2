@@ -109,14 +109,25 @@ stats, current bio, highlights, pinned posts, the audit score, approved
 rewrites, and the restore steps for a new machine.
 
 ```text
-accounts/gandolfi_luca.md
+accounts/gandolfi_luca.md                  profile resume + audit + final copy
+accounts/gandolfi_luca-voice.md            filled voice profile
+accounts/gandolfi_luca-intro-reel.md       pinned intro script + beat sheet
+accounts/gandolfi_luca-plan-2026-10-26.md  the week built on the audit
 ```
 
-Copy one into the state directory after installing on another computer:
+Copy the account and voice files into the state directory after installing on
+another computer:
 
 ```bash
 mkdir -p ~/.config/opencode/instagram
-cp accounts/gandolfi_luca.md ~/.config/opencode/instagram/account.md
+cp accounts/gandolfi_luca.md accounts/gandolfi_luca-voice.md \
+   ~/.config/opencode/instagram/
+mv ~/.config/opencode/instagram/gandolfi_luca.md \
+   ~/.config/opencode/instagram/account.md
+mv ~/.config/opencode/instagram/gandolfi_luca-voice.md \
+   ~/.config/opencode/instagram/voice.md
+cp accounts/gandolfi_luca-plan-2026-10-26.md \
+   ~/.config/opencode/instagram/plan.md
 ```
 
 Never put passwords, 2FA codes, cookies, or recovery addresses in `accounts/`.
