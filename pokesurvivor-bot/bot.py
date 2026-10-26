@@ -48,6 +48,16 @@ GAME_FRAME_RE = re.compile(r"https://pokesurvivor\.com(?:/|$)")
 # signed-in account whose save mode is the cloud.
 SAVE_BUTTON_SELECTOR = "#btn-save"
 TOAST_SELECTOR = ".toast"
+# Mystery Dungeon orbs use the 5-8 keys (slot 1 is key 5).  The game enforces
+# a short internal cooldown between two orb uses.
+ORB_KEY_OFFSET = 5
+ORB_COOLDOWN_S = 1.1
+LOW_HEALTH_THRESHOLD = 0.45
+# When health is low, spend the most defensive orbs first.  `quick` helps
+# escaping a horde, the buffs come last because they do not stop damage.
+DEFENSIVE_ORB_PRIORITY = (
+    "blowback", "slumber", "slow", "quick", "focus", "luminous",
+)
 # One row per finished run in the CSV report (see --csv).
 CSV_FIELDS = (
     "run",
@@ -129,14 +139,30 @@ SNAPSHOT_SCRIPT = r"""
         type: String(prop.type || "tree"), solid: !!prop.solid, flat: !!prop.flat
       }))
     : [];
+  // Single-use Mystery Dungeon orbs sit in four inventory slots and are used
+  // with the 5-8 keys.  Each entry is {id, n} or null.
+  const orbs = player && Array.isArray(player.orbs)
+    ? player.orbs.map(orb => orb ? {
+        id: String(orb.id || ""), n: finite(orb.n, 1)
+      } : null)
+    : [];
+  // A rift is the timed gateway to a legendary boss arena.  `rift` holds its
+  // world position while it is open; `inArena` is true during the boss fight.
+  const rift = root && root.Rift && root.Rift.rift ? root.Rift.rift : null;
   return {
     state: game ? game.state : "unknown",
     player: player ? {
       x: finite(player.x), y: finite(player.y), r: finite(player.r, 16),
       hp: finite(player.hp), maxHp: finite(player.maxHp, 1), dead: !!player.dead,
       slotOneMove,
-      attackMoves
+      attackMoves,
+      orbs
     } : null,
+    rift: rift ? {
+      x: finite(rift.x), y: finite(rift.y),
+      ttl: finite(rift.ttl), t: finite(rift.t)
+    } : null,
+    inArena: !!(root && root.Rift && root.Rift.inArena),
     enemies: enemies.map(enemy => ({
       x: finite(enemy.x), y: finite(enemy.y), r: finite(enemy.r, 16),
       boss: !!enemy.boss, dead: !!enemy.dead
@@ -234,6 +260,8 @@ class PokéSurvivorBot:
         self.strategy = SurvivalStrategy()
         self.held_keys: set[str] = set()
         self._last_log = 0.0
+        self._orb_pending: set[tuple[int, str]] = set()
+        self._orb_cooldown_until = 0.0
 
     async def run(self) -> None:
         await self._initialize_session()
@@ -359,6 +387,8 @@ class PokéSurvivorBot:
         await self.frame.locator('#scr-menu [data-go="play"]').click()
         await self._wait_hidden("#scr-menu")
         self.strategy.reset()
+        self._orb_pending.clear()
+        self._orb_cooldown_until = 0.0
         await self._focus_game()
 
     async def _play_run(self, run_number: int) -> dict[str, Any]:
@@ -417,6 +447,7 @@ class PokéSurvivorBot:
 
             desired = self.strategy.choose(snapshot, elapsed)
             await self._set_keys(desired)
+            await self._use_orb_when_ready(snapshot)
 
             if time.monotonic() - self._last_log >= 5.0:
                 self._last_log = time.monotonic()
@@ -673,6 +704,56 @@ class PokéSurvivorBot:
         for key in sorted(self.held_keys):
             await self.page.keyboard.up(key)
         self.held_keys.clear()
+
+    async def _use_orb_when_ready(self, snapshot: Snapshot) -> None:
+        """Spend a carried orb, saving the defensive ones for low health.
+
+        Orbs are single-use pickups stored in four slots and activated with
+        the 5-8 keys.  The game ignores a second use while its own cooldown is
+        running, so the bot uses at most one orb per cooldown.  A slot that
+        was already pressed stays pending until the game removes or changes
+        it, which avoids burning two orbs on the same stale snapshot.
+        """
+
+        player = snapshot.player
+        if player is None or player.dead or snapshot.state != "playing":
+            self._orb_pending.clear()
+            return
+
+        available = {(orb.slot, orb.orb_id) for orb in player.orbs}
+        self._orb_pending &= available
+        pending = [slot for slot in available if slot not in self._orb_pending]
+        if not pending:
+            return
+
+        now = time.monotonic()
+        if now < self._orb_cooldown_until:
+            return
+
+        hp_ratio = player.hp / max(1.0, player.max_hp)
+        if hp_ratio < LOW_HEALTH_THRESHOLD:
+            rank = {orb_id: index for index, orb_id in enumerate(DEFENSIVE_ORB_PRIORITY)}
+            pending.sort(key=lambda entry: (rank.get(entry[1], len(rank)), entry[0]))
+            reason = "low health"
+        else:
+            pending.sort(key=lambda entry: entry[0])
+            reason = "available"
+
+        slot, orb_id = pending[0]
+        try:
+            await self.page.keyboard.press(str(slot + ORB_KEY_OFFSET))
+        except Exception as exc:
+            LOGGER.warning("could not use orb %s: %s", orb_id, exc)
+            return
+        self._orb_pending.add((slot, orb_id))
+        self._orb_cooldown_until = now + ORB_COOLDOWN_S
+        LOGGER.info(
+            "using orb %s from slot %d (%s, hp=%.0f%%)",
+            orb_id,
+            slot + 1,
+            reason,
+            hp_ratio * 100.0,
+        )
 
     async def _visible(self, selector: str) -> bool:
         try:

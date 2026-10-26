@@ -17,6 +17,13 @@ chests, and other solid terrain props. Plain **water** is harmless in the
 game, so it is only mildly unattractive: the bot prefers land but still
 crosses water when a pickup or an escape route is worth it.
 
+The bot also collects **Mystery Dungeon orbs** (`sphere` pickups) and uses
+them with the game's `5`-`8` keys as soon as one is available. With health
+below 45% it spends the most defensive orb first (blowback, slumber, slow,
+then the speed/critical buffs) so a bad fight gets an escape tool. When a
+**rift** (grieta) opens, the bot walks straight into it to reach the
+legendary boss arena; the game enters the arena automatically on contact.
+
 After every run the bot goes back to the main menu and presses the game's
 **Guardar** (Save) button, which uploads the finished run to the cloud, and
 reports the message the game answers with. The game only shows that button
@@ -115,7 +122,8 @@ Ogni `--tick` secondi (default `0.10`) il bot esegue:
 1. legge lo **snapshot** del mondo: giocatore (posizione, HP, mosse), nemici
    vivi (con flag boss), pickup, hazard telegrafati, terreno campionato su
    una griglia 9×9 di tile ogni 32px attorno al giocatore (`World.kindAt`),
-   props visibili (alberi, rocce, casse…);
+   props visibili (alberi, rocce, casse…), le **sfere** trasportate
+   (`player.orbs`) e la **grieta** aperta (`Rift.rift`, più `Rift.inArena`);
 2. se è comparsa una schermata di overlay (level-up, item, bond, pausa,
    prompt di recupero) la gestisce e salta il tick;
 3. altrimenti passa lo snapshot a `SurvivalStrategy.choose()`, che restituisce
@@ -139,7 +147,8 @@ tick. In ordine di importanza:
 | Fuga dai nemici | `2.5 × w²` | Entro 300px (`390` per i boss, peso `×1.35`); `w` cresce quadraticamente avvicinandosi |
 | Orbita dell'orda | `1.0` | Tangente attorno al centro di massa dei nemici entro 520px (boss `×1.5`); il verso **si inverte ogni 4.5s** per non incagliarsi su un ostacolo; se un nemico è sotto 190px si aggiunge una spinta radiale `1.8` |
 | Pattugliamento | `0.45` | Quando non ci sono nemici: cerchio lento e deterministico per non restare ferma allo spawn |
-| Pickup | `0.9` (`1.2` con HP < 45%) | Il più vicino tra `xp, xpBig, coin, heal, magnet, ticket, ticket10, item`; vale solo se: nessun nemico entro 170px, **oppure** è un heal con HP basso, **oppure** è a meno di 80px (il raggio magnetico del gioco fa il resto) |
+| Rift / grieta | `3.0` | Se una grieta è aperta e non si è già nell'arena, punta alla sua posizione. L'ingresso è automatico sotto i 30px; la forza resta sotto hazard e props solidi, sopra l'orbita dell'orda |
+| Pickup | `0.9` (`1.2` con HP < 45%) | Il più vicino tra `xp, xpBig, coin, heal, magnet, ticket, ticket10, item, sphere` (le `sphere` sono le sfere di Mystery Dungeon); vale solo se: nessun nemico entro 170px, **oppure** è un heal con HP basso, **oppure** è a meno di 80px (il raggio magnetico del gioco fa il resto) |
 
 Due meccanismi di sicurezza si aggiungono alla somma:
 

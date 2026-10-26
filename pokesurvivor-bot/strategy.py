@@ -14,6 +14,21 @@ from typing import Any, Iterable
 
 
 @dataclass(frozen=True)
+class OrbState:
+    slot: int
+    orb_id: str
+    count: int = 1
+
+    @classmethod
+    def from_payload(cls, payload: dict[str, Any], slot: int) -> "OrbState":
+        return cls(
+            slot=slot,
+            orb_id=str(payload.get("id", "")),
+            count=max(1, int(_number(payload.get("n"), 1.0))),
+        )
+
+
+@dataclass(frozen=True)
 class PlayerState:
     x: float
     y: float
@@ -23,6 +38,7 @@ class PlayerState:
     dead: bool = False
     slot_one_move: str | None = None
     attack_moves: tuple[str, ...] = ()
+    orbs: tuple[OrbState, ...] = ()
 
     @classmethod
     def from_payload(cls, payload: dict[str, Any]) -> "PlayerState":
@@ -38,6 +54,11 @@ class PlayerState:
                 str(name)
                 for name in payload.get("attackMoves", [])
                 if name
+            ),
+            orbs=tuple(
+                OrbState.from_payload(orb, slot)
+                for slot, orb in enumerate(payload.get("orbs") or [])
+                if isinstance(orb, dict) and orb.get("id")
             ),
         )
 
@@ -140,6 +161,25 @@ class HazardState:
 
 
 @dataclass(frozen=True)
+class RiftState:
+    x: float
+    y: float
+    ttl: float = 0.0
+    age: float = 0.0
+
+    @classmethod
+    def from_payload(cls, payload: dict[str, Any] | None) -> "RiftState | None":
+        if not isinstance(payload, dict):
+            return None
+        return cls(
+            x=_number(payload.get("x")),
+            y=_number(payload.get("y")),
+            ttl=_number(payload.get("ttl")),
+            age=_number(payload.get("t")),
+        )
+
+
+@dataclass(frozen=True)
 class Snapshot:
     state: str
     player: PlayerState | None
@@ -148,6 +188,8 @@ class Snapshot:
     hazards: tuple[HazardState, ...] = ()
     terrain: tuple[TerrainState, ...] = ()
     props: tuple[PropState, ...] = ()
+    rift: RiftState | None = None
+    in_arena: bool = False
 
     @classmethod
     def from_payload(cls, payload: dict[str, Any]) -> "Snapshot":
@@ -180,6 +222,8 @@ class Snapshot:
                 for prop in payload.get("props", [])
                 if isinstance(prop, dict)
             ),
+            rift=RiftState.from_payload(payload.get("rift")),
+            in_arena=bool(payload.get("inArena", False)),
         )
 
 
@@ -429,6 +473,17 @@ class SurvivalStrategy:
             angle = now / self.orbit_period
             desired = _add(desired, (cos(angle), sin(angle)), 0.45)
 
+        # A rift is a timed gateway to a legendary boss arena.  Aim straight
+        # for it: the game enters the arena automatically once the player is
+        # close enough, so no extra key press is needed.  The rift force is
+        # kept below hazards and solid props but above the normal horde orbit.
+        if snapshot.rift is not None and not snapshot.in_arena:
+            rift = snapshot.rift
+            rift_distance = hypot(rift.x - px, rift.y - py)
+            if rift_distance > 24.0:
+                target = _unit(rift.x - px, rift.y - py, self._last_direction)
+                desired = _add(desired, target, 3.0)
+
         # Experience and reward pickups are useful targets when approaching
         # them is not immediately dangerous.  The game's magnet radius handles
         # the final collection, so the bot does not need pixel-perfect aiming.
@@ -438,7 +493,10 @@ class SurvivalStrategy:
             (
                 pickup
                 for pickup in snapshot.pickups
-                if pickup.kind in {"xp", "xpBig", "coin", "heal", "magnet", "ticket", "ticket10", "item"}
+                if pickup.kind in {
+                    "xp", "xpBig", "coin", "heal", "magnet", "ticket",
+                    "ticket10", "item", "sphere",
+                }
             ),
         )
         low_health = player.hp / max(1.0, player.max_hp) < 0.45
@@ -458,9 +516,11 @@ class SurvivalStrategy:
 __all__ = [
     "EnemyState",
     "HazardState",
+    "OrbState",
     "PickupState",
     "PropState",
     "PlayerState",
+    "RiftState",
     "Snapshot",
     "SurvivalStrategy",
     "TerrainState",

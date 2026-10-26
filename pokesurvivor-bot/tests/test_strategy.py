@@ -19,7 +19,7 @@ from bot import (  # noqa: E402
     parse_args,
     patch_game_bundle,
 )
-from strategy import Snapshot, SurvivalStrategy  # noqa: E402
+from strategy import OrbState, Snapshot, SurvivalStrategy  # noqa: E402
 
 
 def snapshot(payload: dict) -> Snapshot:
@@ -194,6 +194,53 @@ class StrategyTests(unittest.TestCase):
         )
         self.assertNotIn("d", keys)
 
+    def test_walks_into_an_open_rift(self) -> None:
+        strategy = SurvivalStrategy()
+        keys = strategy.choose(
+            snapshot(
+                {
+                    "state": "playing",
+                    "player": {"x": 0, "y": 0, "hp": 100, "maxHp": 100},
+                    "rift": {"x": -400, "y": 0, "ttl": 30, "t": 0},
+                }
+            ),
+            now=0.0,
+        )
+        self.assertIn("a", keys)
+
+    def test_ignores_the_rift_once_inside_the_arena(self) -> None:
+        strategy = SurvivalStrategy()
+        keys = strategy.choose(
+            snapshot(
+                {
+                    "state": "playing",
+                    "player": {"x": 0, "y": 0, "hp": 100, "maxHp": 100},
+                    "rift": {"x": -400, "y": 0, "ttl": 30, "t": 0},
+                    "inArena": True,
+                }
+            ),
+            now=0.0,
+        )
+        self.assertNotIn("a", keys)
+
+    def test_reads_carried_orbs_from_the_snapshot(self) -> None:
+        current = snapshot(
+            {
+                "state": "playing",
+                "player": {
+                    "x": 0,
+                    "y": 0,
+                    "hp": 100,
+                    "maxHp": 100,
+                    "orbs": [{"id": "quick", "n": 2}, None, {"id": "focus", "n": 1}],
+                },
+            }
+        )
+        self.assertEqual(
+            current.player.orbs,
+            (OrbState(slot=0, orb_id="quick", count=2), OrbState(slot=2, orb_id="focus", count=1)),
+        )
+
     def test_avoids_a_tree_to_the_right(self) -> None:
         strategy = SurvivalStrategy()
         keys = strategy.choose(
@@ -316,6 +363,66 @@ class LoginFlowTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(frame.recovery_choice, "#rec-later")
         self.assertFalse(frame.visible["#scr-recover"])
+
+
+class FakeKeyboard:
+    def __init__(self) -> None:
+        self.pressed: list[str] = []
+
+    async def press(self, key: str) -> None:
+        self.pressed.append(key)
+
+
+class FakeOrbPage:
+    def __init__(self) -> None:
+        self.keyboard = FakeKeyboard()
+
+
+class OrbUseTests(unittest.IsolatedAsyncioTestCase):
+    @staticmethod
+    def orb_snapshot(hp: float, orbs: list[dict | None]) -> Snapshot:
+        return snapshot(
+            {
+                "state": "playing",
+                "player": {
+                    "x": 0,
+                    "y": 0,
+                    "hp": hp,
+                    "maxHp": 100,
+                    "orbs": orbs,
+                },
+            }
+        )
+
+    async def test_uses_the_first_orb_when_healthy(self) -> None:
+        page = FakeOrbPage()
+        bot = PokéSurvivorBot(BotConfig(), page=page, frame=None)
+
+        await bot._use_orb_when_ready(
+            self.orb_snapshot(100, [{"id": "quick", "n": 1}, {"id": "blowback", "n": 1}])
+        )
+
+        self.assertEqual(page.keyboard.pressed, ["5"])
+
+    async def test_low_health_spends_the_defensive_orb_first(self) -> None:
+        page = FakeOrbPage()
+        bot = PokéSurvivorBot(BotConfig(), page=page, frame=None)
+
+        await bot._use_orb_when_ready(
+            self.orb_snapshot(20, [{"id": "quick", "n": 1}, {"id": "blowback", "n": 1}])
+        )
+
+        self.assertEqual(page.keyboard.pressed, ["6"])
+
+    async def test_does_not_burn_the_same_orb_twice(self) -> None:
+        page = FakeOrbPage()
+        bot = PokéSurvivorBot(BotConfig(), page=page, frame=None)
+        current = self.orb_snapshot(20, [{"id": "blowback", "n": 2}])
+
+        await bot._use_orb_when_ready(current)
+        await bot._use_orb_when_ready(current)
+
+        self.assertEqual(page.keyboard.pressed, ["5"])
 
 
 class FakeSaveLocator:
