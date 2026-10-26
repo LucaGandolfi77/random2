@@ -1,0 +1,22 @@
+# Godot 4
+.godot/
+.import/
+export.cfg
+*.translation
+
+# Builds
+build/
+exports/
+*.aab
+*.apk
+*.ipa
+*.pck
+*.zip
+
+# Local
+.DS_Store
+*.tmp
+*.log
+
+# Test artifacts
+tests/.output/

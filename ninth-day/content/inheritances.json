@@ -1,0 +1,72 @@
+{
+	"offers": {
+		"morning": ["burnt_sugar", "steady_hand", "backwards_bell"],
+		"afternoon": ["ash_lung", "iven_mark", "counterweight"],
+		"night": ["ninth_step", "quiet_room", "cracked_brass"]
+	},
+	"cards": {
+		"burnt_sugar": {
+			"name": "The Smell of Burnt Sugar",
+			"type": "Bond",
+			"description": "Mara burned the first batch and laughed. You kept the laugh.",
+			"effect": "+10 max HP to the party.",
+			"modifiers": {"max_hp": 10}
+		},
+		"steady_hand": {
+			"name": "Iven's Steady Hand",
+			"type": "Skill",
+			"description": "He does not miss. More importantly, he does not hurry.",
+			"effect": "+1 attack to the party.",
+			"modifiers": {"attack": 1}
+		},
+		"backwards_bell": {
+			"name": "The Bell That Rings Backwards",
+			"type": "Skill",
+			"description": "A note played in reverse. The dark answers a beat too late.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"ash_lung": {
+			"name": "Ash in the Lungs",
+			"type": "Stat",
+			"description": "You learn to breathe where the air has learned to burn.",
+			"effect": "+5 max HP to the party.",
+			"modifiers": {"max_hp": 5}
+		},
+		"iven_mark": {
+			"name": "A Mark at Fifty Paces",
+			"type": "Bond",
+			"description": "Iven's signal, scratched into a beam. He trusts you to look up.",
+			"effect": "+1 speed to the party.",
+			"modifiers": {"speed": 1}
+		},
+		"counterweight": {
+			"name": "The Counterweight",
+			"type": "Stat",
+			"description": "The foundry taught you where to stand when the floor begins to fall.",
+			"effect": "+3 defense to the party.",
+			"modifiers": {"defense": 3}
+		},
+		"ninth_step": {
+			"name": "The Ninth Step",
+			"type": "Skill",
+			"description": "There is a stair in the Spire that only appears when you stop counting.",
+			"effect": "+1 attack and +1 speed to the party.",
+			"modifiers": {"attack": 1, "speed": 1}
+		},
+		"quiet_room": {
+			"name": "A Room With No Bell",
+			"type": "Bond",
+			"description": "For one hour, the city was allowed to be ordinary.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"cracked_brass": {
+			"name": "Cracked Brass",
+			"type": "Skill",
+			"description": "The flaw is not the end of the Bell. It is the part that remembers.",
+			"effect": "+5 max HP and +1 attack to the party.",
+			"modifiers": {"max_hp": 5, "attack": 1}
+		}
+	}
+}

@@ -1,0 +1,172 @@
+{
+	"day_01_morning": {
+		"title": "The Crack",
+		"start": "wake",
+		"nodes": {
+			"wake": {
+				"bg": "spire",
+				"lines": [
+					{"id": "d1m_001", "speaker": "Narration", "text": "You wake to the sound of a bell that should not be ringing."},
+					{"id": "d1m_002", "speaker": "Narration", "text": "The Spire room is cold. Dust hangs in the light. On the sill, a cup of tea has gone entirely still."},
+					{"id": "d1m_003", "speaker": "Cael", "text": "Ninth day."},
+					{"id": "d1m_004", "speaker": "Narration", "text": "You do not know how you know. The words are already there, the way a bruise is already there."},
+					{"id": "d1m_005", "speaker": "Mara", "text": "Cael. The Bell is cracking."},
+					{"id": "d1m_006", "speaker": "Narration", "text": "Mara Voss stands in the doorway with soot on her sleeves and her jaw set. Below the Spire, all of Aurel is holding its breath."},
+					{"id": "d1m_007", "speaker": "Mara", "text": "If it rings again, the day starts over. You know that. You always know that."},
+					{"id": "d1m_008", "speaker": "Cael", "text": "Then we have until noon."}
+				],
+				"next": "choice"
+			},
+			"choice": {
+				"bg": "spire",
+				"prompt": "Mara holds out her hand. Above you, the Bell gives a sound like a tooth breaking.",
+				"choices": [
+					{
+						"text": "Take her hand.",
+						"next": "hand",
+						"flag": "mara_trust",
+						"bond": ["mara", 1]
+					},
+					{
+						"text": "Look up at the Bell.",
+						"next": "bell",
+						"flag": "bell_curious"
+					}
+				]
+			},
+			"hand": {
+				"bg": "spire",
+				"lines": [
+					{"id": "d1m_009", "speaker": "Mara", "text": "Good. We do this together, or not at all."},
+					{"id": "d1m_010", "speaker": "Narration", "text": "Her hand is warm. The Bell cracks again, and somewhere below, a choir begins to sing."},
+					{"id": "d1m_011", "speaker": "Cael", "text": "That is not a hymn."},
+					{"id": "d1m_012", "speaker": "Mara", "text": "No. It is the Hollow Choir. It has come to finish the crack."}
+				]
+			},
+			"bell": {
+				"bg": "spire",
+				"lines": [
+					{"id": "d1m_013", "speaker": "Narration", "text": "The Bell hangs above you like a held breath. A hairline of white runs through the brass, bright as frost."},
+					{"id": "d1m_014", "speaker": "Cael", "text": "Nine days. Nine chances."},
+					{"id": "d1m_015", "speaker": "Mara", "text": "Then stop counting and move. The Hollow Choir is already inside the wall."}
+				]
+			}
+		}
+	},
+	"day_01_afternoon": {
+		"title": "Ember Row",
+		"start": "market",
+		"nodes": {
+			"market": {
+				"bg": "ember_row",
+				"lines": [
+					{"id": "d1a_001", "speaker": "Narration", "text": "Ember Row is usually loud by afternoon. Today the stalls stand empty, their awnings ticking in the wind."},
+					{"id": "d1a_002", "speaker": "Iven", "text": "You are late, Bellkeeper."},
+					{"id": "d1a_003", "speaker": "Narration", "text": "Iven Sorn lowers his arbalest. He has the patient eyes of a man who has been counting exits."},
+					{"id": "d1a_004", "speaker": "Cael", "text": "Where is everyone?"},
+					{"id": "d1a_005", "speaker": "Iven", "text": "The Watch closed the checkpoint at noon. Said the ashfall was unhealthy."},
+					{"id": "d1a_006", "speaker": "Narration", "text": "He tilts his chin toward the foundry. Black smoke is rising in a column that does not bend."},
+					{"id": "d1a_007", "speaker": "Iven", "text": "Elias went in to fix a counterweight. He has not come out."}
+				],
+				"next": "choice"
+			},
+			"choice": {
+				"bg": "ember_row",
+				"prompt": "The foundry gates are shut. Somewhere inside, something heavy is striking metal.",
+				"choices": [
+					{
+						"text": "Ask Iven to come with you.",
+						"next": "together",
+						"flag": "iven_joined",
+						"bond": ["iven", 1]
+					},
+					{
+						"text": "Follow the ashfall alone.",
+						"next": "alone",
+						"flag": "went_alone"
+					}
+				]
+			},
+			"together": {
+				"bg": "foundry",
+				"lines": [
+					{"id": "d1a_008", "speaker": "Iven", "text": "I thought you would never ask."},
+					{"id": "d1a_009", "speaker": "Narration", "text": "He checks his bow, then the door, then you. It is, you think, the closest thing to affection he allows himself."},
+					{"id": "d1a_010", "speaker": "Cael", "text": "Stay behind me."},
+					{"id": "d1a_011", "speaker": "Iven", "text": "Not a chance."}
+				]
+			},
+			"alone": {
+				"bg": "foundry",
+				"lines": [
+					{"id": "d1a_012", "speaker": "Narration", "text": "You go in through the ash door. The heat presses against your face like a hand."},
+					{"id": "d1a_013", "speaker": "Narration", "text": "Behind you, Iven curses softly and follows anyway."},
+					{"id": "d1a_014", "speaker": "Iven", "text": "You are going to get us both killed."},
+					{"id": "d1a_015", "speaker": "Cael", "text": "Probably."}
+				]
+			}
+		}
+	},
+	"day_01_night": {
+		"title": "What the Bell Keeps",
+		"start": "spire",
+		"nodes": {
+			"spire": {
+				"bg": "spire_night",
+				"lines": [
+					{"id": "d1n_001", "speaker": "Narration", "text": "Night comes to Aurel the way water comes to a hull. Slowly, then all at once."},
+					{"id": "d1n_002", "speaker": "Mara", "text": "The crack held. For now."},
+					{"id": "d1n_003", "speaker": "Iven", "text": "And tomorrow?"},
+					{"id": "d1n_004", "speaker": "Mara", "text": "Tomorrow the Bell rings again, and we begin again."},
+					{"id": "d1n_005", "speaker": "Narration", "text": "The three of you sit beneath the great brass mouth. Somewhere in the city, a child is laughing. It sounds very far away."},
+					{"id": "d1n_006", "speaker": "Cael", "text": "We should remember this."}
+				],
+				"next": "choice"
+			},
+			"choice": {
+				"bg": "spire_night",
+				"prompt": "The Bell will take the day when it rings. You can anchor one thing against the dark.",
+				"choices": [
+					{
+						"text": "Keep the warmth of this room.",
+						"next": "warmth",
+						"flag": "anchored_warmth",
+						"bond": ["mara", 1]
+					},
+					{
+						"text": "Keep the crack in the Bell.",
+						"next": "crack",
+						"flag": "anchored_crack"
+					},
+					{
+						"text": "Keep nothing. Let it go.",
+						"next": "nothing",
+						"flag": "anchored_nothing"
+					}
+				]
+			},
+			"warmth": {
+				"bg": "spire_night",
+				"lines": [
+					{"id": "d1n_007", "speaker": "Narration", "text": "You hold on to the tea, the soot, the two people beside you. It is not a grand memory. It is enough."},
+					{"id": "d1n_008", "speaker": "Mara", "text": "Whatever happens tomorrow, this happened."}
+				]
+			},
+			"crack": {
+				"bg": "spire_night",
+				"lines": [
+					{"id": "d1n_009", "speaker": "Narration", "text": "You fix the crack in your mind: its whiteness, its angle, the exact note the Bell made when it split."},
+					{"id": "d1n_010", "speaker": "Cael", "text": "Next time, we go straight for the source."}
+				]
+			},
+			"nothing": {
+				"bg": "spire_night",
+				"lines": [
+					{"id": "d1n_011", "speaker": "Narration", "text": "You let the day go. It leaves quietly, without ceremony, like a guest who knows they were never invited."},
+					{"id": "d1n_012", "speaker": "Iven", "text": "That is either wisdom or surrender."},
+					{"id": "d1n_013", "speaker": "Cael", "text": "Ask me on the ninth day."}
+				]
+			}
+		}
+	}
+}

@@ -1,0 +1,39 @@
+; Engine configuration file.
+; Ninth Day — greybox Echo prototype.
+
+config_version=5
+
+[application]
+
+config/name="Ninth Day"
+config/description="A dark, elegant time-loop JRPG built for one thumb."
+config/icon="res://icon.svg"
+run/main_scene="res://src/screens/title.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+
+[autoload]
+
+RunState="*res://src/core/run_state.gd"
+
+[display]
+
+window/size/viewport_width=540
+window/size/viewport_height=960
+window/handheld/orientation=1
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+environment/defaults/default_clear_color=Color(0.035, 0.031, 0.04, 1)
+textures/vram_compression/import_etc2_astc=true
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[gui]
+
+theme/default_font_multichannel_signed_distance_field=true

@@ -1,0 +1,46 @@
+name: Ninth Day tests
+
+on:
+  push:
+    paths:
+      - "ninth-day/**"
+      - ".github/workflows/ninth-day-tests.yml"
+  pull_request:
+    paths:
+      - "ninth-day/**"
+      - ".github/workflows/ninth-day-tests.yml"
+  workflow_dispatch:
+
+jobs:
+  battle-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Fetch Godot 4.7.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="4.7.2-stable"
+          ARCH="linux.x86_64"
+          ZIP="Godot_v${VERSION}_${ARCH}.zip"
+          URL="https://github.com/godotengine/godot/releases/download/${VERSION}/${ZIP}"
+          DEST="${RUNNER_TEMP}/godot"
+          mkdir -p "$DEST"
+          curl -L --fail --silent --show-error -o "${DEST}/${ZIP}" "$URL"
+          unzip -o -q "${DEST}/${ZIP}" -d "$DEST"
+          BIN="${DEST}/Godot_v${VERSION}_${ARCH}"
+          chmod +x "$BIN"
+          echo "GODOT_BIN=${BIN}" >> "$GITHUB_ENV"
+          "$BIN" --version
+
+      - name: Import project
+        run: "$GODOT_BIN --headless --path ninth-day --import"
+
+      - name: Run battle tests
+        run: "$GODOT_BIN --headless --path ninth-day -s tests/test_battle.gd"
+
+      - name: Run end-to-end flow test
+        run: "$GODOT_BIN --headless --path ninth-day res://tests/flow_bootstrap.tscn"
