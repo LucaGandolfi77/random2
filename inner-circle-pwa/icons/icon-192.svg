@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-labelledby="title">
+  <title id="title">Inner Circle</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf2e3"/>
+      <stop offset="1" stop-color="#efdcc2"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ef5a5a"/>
+      <stop offset="1" stop-color="#c53649"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="43" fill="url(#bg)"/>
+  <circle cx="162" cy="27" r="8" fill="#f0b429" opacity=".8"/>
+  <path d="M28 35l2.6 7.4L38 45l-7.4 2.6L28 55l-2.6-7.4L18 45l7.4-2.6z" fill="#6c7bff" opacity=".8"/>
+  <path d="M166 152l2 5.5 5.5 2-5.5 2-2 5.5-2-5.5-5.5-2 5.5-2z" fill="#21bfa7" opacity=".85"/>
+  <circle cx="52" cy="103" r="32" fill="#57a9f5" stroke="#fbf2e3" stroke-width="4"/>
+  <circle cx="52" cy="103" r="27" fill="#d8ecff"/>
+  <path d="M27 103c0-15 11-27 25-27s25 12 25 27" fill="#3d2c26"/>
+  <circle cx="45" cy="102" r="2.3" fill="#29232b"/>
+  <circle cx="59" cy="102" r="2.3" fill="#29232b"/>
+  <path d="M45 110c4 4 10 4 14 0" fill="none" stroke="#a94b50" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="140" cy="103" r="35" fill="#21bfa7" stroke="#fbf2e3" stroke-width="4"/>
+  <circle cx="140" cy="103" r="30" fill="#c7f4e9"/>
+  <path d="M112 103c0-17 14-30 30-30 15 0 27 10 29 24-5-4-13-5-20-1-7-5-18-4-24 2-5 4-12 5-15 5z" fill="#4c3329"/>
+  <circle cx="132" cy="102" r="2.4" fill="#29232b"/>
+  <circle cx="148" cy="102" r="2.4" fill="#29232b"/>
+  <path d="M133 111c4 4 10 4 14 0" fill="none" stroke="#a94b50" stroke-width="2.4" stroke-linecap="round"/>
+  <circle cx="96" cy="99" r="46" fill="#ef5a5a" stroke="#fbf2e3" stroke-width="5"/>
+  <circle cx="96" cy="99" r="40" fill="#ffd7d4"/>
+  <path d="M60 106c0-23 16-40 36-40s36 17 36 40c-8-5-16-9-25-9-5 0-9 1-13 3-9-5-22-4-34 6z" fill="#2b2523"/>
+  <circle cx="84" cy="101" r="3" fill="#29232b"/>
+  <circle cx="108" cy="101" r="3" fill="#29232b"/>
+  <circle cx="85" cy="100" r="1" fill="#fff"/>
+  <circle cx="109" cy="100" r="1" fill="#fff"/>
+  <path d="M86 112c6 6 15 6 21 0" fill="none" stroke="#9e3c47" stroke-width="3" stroke-linecap="round"/>
+  <path d="M62 132c8 12 21 18 34 18s27-6 34-18c-3 16-17 27-34 27S65 148 62 132z" fill="url(#shirt)"/>
+  <circle cx="70" cy="87" r="3" fill="#f8a6a2" opacity=".8"/>
+  <circle cx="122" cy="87" r="3" fill="#f8a6a2" opacity=".8"/>
+  <path d="M38 154c14 8 33 12 58 12s44-4 58-12" fill="none" stroke="#29232b" stroke-width="3" stroke-linecap="round" opacity=".18"/>
+</svg>

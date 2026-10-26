@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Inner Circle — A Merge Game About Friends</title>
+  <meta name="theme-color" content="#f7eddd">
+  <meta name="description" content="Drop round photo stickers of your friends, merge matching faces, and grow your inner circle. Customize all eleven tiers, earn Hype, and use party tricks. Everything stays on your device.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Inner Circle">
+  <meta property="og:title" content="Inner Circle — A Merge Game About Friends">
+  <meta property="og:description" content="Drop your friends, merge matching faces, and grow the circle. Add your own round photo stickers. Offline, private, no trackers.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-noise" aria-hidden="true"></div>
+  <div class="app" id="app">
+    <header class="topbar">
+      <button class="brand" id="btnBrand" type="button" aria-label="Inner Circle home">
+        <span class="brand-mark" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+        <span class="brand-type">INNER<em>CIRCLE</em></span>
+      </button>
+      <div class="top-actions">
+        <a class="arcade-link" href="../" aria-label="Back to the random2 arcade">arcade ↗</a>
+        <button class="icon-btn" id="btnSound" type="button" aria-label="Mute sound" aria-pressed="true">🔊</button>
+        <button class="icon-btn" id="btnHelp" type="button" aria-label="How to play">?</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ============================== HOME ============================== -->
+      <section id="homeScreen" class="screen home-screen is-active" aria-labelledby="homeTitle">
+        <section class="dare-card" id="dareCard" hidden aria-labelledby="dareCardTitle">
+          <div class="dare-card-copy">
+            <p class="mini-label">FRIEND DARE</p>
+            <h2 id="dareCardTitle"><span id="dareName">A friend</span> dared you.</h2>
+            <p>Same drops, same rules. Beat <b id="dareTarget">0</b> to take the crown.</p>
+          </div>
+          <div class="dare-card-actions">
+            <button class="btn btn-primary" id="btnAcceptDare" type="button">Accept dare →</button>
+            <button class="btn btn-ghost" id="btnDismissDare" type="button">Not now</button>
+          </div>
+        </section>
+
+        <div class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="spark-dot"></span> A merge game about your people</p>
+            <h1 id="homeTitle">Drop.<br>Merge.<br><span>Keep them close.</span></h1>
+            <p class="lede">Round photo stickers fall into a very crowded circle. Match two friends, grow the friendship, and try not to bury everybody.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary" id="btnPlay" type="button">
+                <span>Play a round</span><span class="btn-arrow" aria-hidden="true">→</span>
+              </button>
+              <button class="btn btn-ghost" id="btnDaily" type="button">
+                <span>Daily circle</span><span class="btn-dot" id="dailyLiveDot" aria-hidden="true"></span>
+              </button>
+            </div>
+            <p class="privacy-line">Photos stay in your browser. No uploads, accounts or trackers.</p>
+          </div>
+
+          <div class="hero-art" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="hero-disc disc-a"><canvas id="heroAvatar0" width="180" height="180"></canvas><span class="disc-tag">BESTIE</span></div>
+            <div class="hero-disc disc-b"><canvas id="heroAvatar1" width="180" height="180"></canvas><span class="disc-tag">PLUS ONE</span></div>
+            <div class="hero-disc disc-c"><canvas id="heroAvatar2" width="180" height="180"></canvas><span class="disc-tag">NEW FACE</span></div>
+            <span class="doodle star-1">✦</span>
+            <span class="doodle star-2">✶</span>
+            <span class="doodle squiggle">〰</span>
+            <span class="sticker-note">11 friends.<br>one circle.</span>
+          </div>
+        </div>
+
+        <section class="cast-panel">
+          <div class="section-head">
+            <div>
+              <p class="mini-label">YOUR CAST</p>
+              <h2>Meet the circle</h2>
+            </div>
+            <button class="text-btn" id="btnSquad" type="button">Photo booth →</button>
+          </div>
+          <div class="cast-strip" id="homeCast" aria-label="The eleven friendship tiers"></div>
+          <p class="cast-note" id="castNote">Illustrated friends for now. Add photos of your own crew in the Photo Booth.</p>
+        </section>
+
+        <div class="home-grid">
+          <section class="daily-card" aria-labelledby="dailyHeading">
+            <div class="daily-top">
+              <span class="pill pill-live"><span></span> DAILY</span>
+              <span class="daily-date" id="dailyDate">—</span>
+            </div>
+            <h2 id="dailyHeading">Today’s rule</h2>
+            <p class="daily-rule" id="dailyRuleName">Hype Train</p>
+            <p class="daily-blurb" id="dailyRuleBlurb">Start with Hype and use party tricks from the first drop.</p>
+            <div class="daily-stats">
+              <div><span>Today’s best</span><b id="dailyBest">—</b></div>
+              <div><span>Streak</span><b id="dailyStreak">0 days</b></div>
+            </div>
+            <button class="btn btn-small btn-ink" id="btnDailyCard" type="button">Take the daily →</button>
+          </section>
+
+          <section class="stats-card" aria-labelledby="statsHeading">
+            <div class="section-head compact">
+              <div>
+                <p class="mini-label">YOUR LITTLE LEGACY</p>
+                <h2 id="statsHeading">Circle records</h2>
+              </div>
+              <button class="text-btn" id="btnYearbook" type="button">Yearbook →</button>
+            </div>
+            <div class="record-grid">
+              <div><span>Best score</span><b id="statBest">0</b></div>
+              <div><span>Best chain</span><b id="statChain">x0</b></div>
+              <div><span>Top friend</span><b id="statTop">—</b></div>
+              <div><span>Runs</span><b id="statRuns">0</b></div>
+            </div>
+            <div class="record-list-wrap">
+              <h3>Local hall of fame</h3>
+              <ol class="record-list" id="recordList">
+                <li class="empty-record">Your first run goes here.</li>
+              </ol>
+            </div>
+          </section>
+        </div>
+
+        <section class="moves-strip" aria-labelledby="movesHeading">
+          <div class="section-head">
+            <div>
+              <p class="mini-label">EARN HYPE. CAUSE A SCENE.</p>
+              <h2 id="movesHeading">Three party tricks</h2>
+            </div>
+            <button class="text-btn" id="btnHelpHome" type="button">How it works →</button>
+          </div>
+          <div class="moves-row">
+            <article class="move-card move-swap">
+              <span class="move-icon">↔</span>
+              <div><h3>Switch</h3><p>Swap the friend in your hand for the next one.</p></div>
+              <span class="move-cost">20 HYPE</span>
+            </article>
+            <article class="move-card move-hug">
+              <span class="move-icon">✺</span>
+              <div><h3>Group Hug</h3><p>Shake the jar. Jostle the pile. Cause a beautiful mess.</p></div>
+              <span class="move-cost">45 HYPE</span>
+            </article>
+            <article class="move-card move-plus">
+              <span class="move-icon">＋</span>
+              <div><h3>Plus One</h3><p>A wildcard guest who joins the first friend they touch.</p></div>
+              <span class="move-cost">100 HYPE</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="badge-panel" aria-labelledby="badgeHeading">
+          <div class="section-head">
+            <div>
+              <p class="mini-label">TINY ACHIEVEMENTS</p>
+              <h2 id="badgeHeading">Stickers you’ve earned</h2>
+            </div>
+            <span class="badge-count" id="badgeCount">0 / 10</span>
+          </div>
+          <div class="badge-grid" id="badgeGrid"></div>
+        </section>
+
+        <footer class="home-footer">
+          <p><strong>Made for your group chat.</strong> Every photo is cropped and stored locally. Close the tab and it stays on your device; clear the squad and it’s gone.</p>
+          <p class="tiny">Original game · no Suika assets or code · works offline once installed.</p>
+        </footer>
+      </section>
+
+      <!-- ============================== GAME ============================== -->
+      <section id="gameScreen" class="screen game-screen" aria-labelledby="gameTitle" hidden>
+        <div class="game-top">
+          <button class="round-back" id="btnQuitGame" type="button" aria-label="Leave game">←</button>
+          <div class="game-title-wrap">
+            <p class="mini-label" id="gameModeLabel">CLASSIC</p>
+            <h1 id="gameTitle">Make the circle.</h1>
+          </div>
+          <div class="game-top-actions">
+            <button class="icon-btn" id="btnPause" type="button" aria-label="Pause game">Ⅱ</button>
+          </div>
+        </div>
+
+        <div class="game-layout">
+          <div class="board-column">
+            <div class="game-hud">
+              <div class="score-block">
+                <span>SCORE</span>
+                <b id="gameScore">0</b>
+                <small class="score-best" id="gameBest">BEST 0</small>
+              </div>
+              <div class="hud-mid">
+                <div class="combo-badge" id="gameCombo" aria-live="polite">x1</div>
+                <div class="hype-wrap">
+                  <div class="hype-label"><span>HYPE</span><b id="hypeValue">20</b></div>
+                  <div class="hype-track"><i id="hypeFill"></i></div>
+                </div>
+              </div>
+              <div class="next-block">
+                <span>NEXT</span>
+                <canvas id="nextPreview" width="72" height="72" aria-label="Next friend"></canvas>
+              </div>
+            </div>
+
+            <div class="stage-wrap" id="stageWrap">
+              <canvas id="gameCanvas" width="400" height="600" tabindex="0" role="application" aria-label="Inner Circle playfield. Move left and right with the arrow keys, then press Space to drop. Use the party trick buttons below."></canvas>
+              <div class="board-toast hidden" id="boardToast" role="status" aria-live="polite"></div>
+              <div class="danger-banner" id="dangerBanner" aria-hidden="true">
+                <span>TOO CROWDED</span>
+                <i><b id="dangerFill"></b></i>
+              </div>
+              <div class="chat-pop hidden" id="chatPop" aria-live="polite">
+                <canvas id="chatPopAvatar" width="64" height="64" aria-hidden="true"></canvas>
+                <div><b id="chatPopName">Maya</b><span id="chatPopText">Hello?</span></div>
+              </div>
+            </div>
+
+            <div class="touch-hint" id="touchHint">
+              <span>Drag to aim.</span><span>Release to drop.</span>
+            </div>
+
+            <div class="power-tray" aria-label="Party tricks">
+              <button class="power-btn" id="powerSwap" type="button" data-power="swap">
+                <span class="power-glyph">↔</span>
+                <span class="power-copy"><b>SWITCH</b><small>20 hype</small></span>
+                <span class="power-ready" aria-hidden="true"></span>
+              </button>
+              <button class="power-btn" id="powerHug" type="button" data-power="hug">
+                <span class="power-glyph">✺</span>
+                <span class="power-copy"><b>GROUP HUG</b><small>45 hype</small></span>
+                <span class="power-ready" aria-hidden="true"></span>
+              </button>
+              <button class="power-btn" id="powerPlus" type="button" data-power="plus">
+                <span class="power-glyph">＋</span>
+                <span class="power-copy"><b>PLUS ONE</b><small>100 hype</small></span>
+                <span class="power-ready" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="key-hint">
+              <span><kbd>←</kbd><kbd>→</kbd> aim</span>
+              <span><kbd>space</kbd> drop</span>
+              <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> tricks</span>
+            </div>
+          </div>
+
+          <aside class="game-side">
+            <section class="side-card">
+              <div class="side-head"><span>THE LADDER</span><button class="text-btn" id="btnSideSquad" type="button">Edit</button></div>
+              <ol class="ladder" id="gameLadder"></ol>
+            </section>
+            <section class="side-card side-records">
+              <div class="side-head"><span>THIS DEVICE</span></div>
+              <p class="side-best">BEST <b id="sideBest">0</b></p>
+              <p class="side-note" id="sideModeNote">Classic run · 11 friends to find.</p>
+              <div class="side-rule" id="sideRule" hidden><span id="sideRuleLabel">DAILY RULE</span><b id="sideRuleName">—</b></div>
+            </section>
+            <section class="side-card chat-card" aria-labelledby="chatHeading">
+              <div class="side-head">
+                <span id="chatHeading">GROUP CHAT</span>
+                <button class="chat-toggle" id="btnChatToggle" type="button" aria-pressed="true">LIVE</button>
+              </div>
+              <div class="chat-log" id="chatLog">
+                <p class="chat-empty">The chat is listening…</p>
+              </div>
+            </section>
+            <section class="side-tip">
+              <span aria-hidden="true">💡</span>
+              <p id="sideTip">A small friend lands more predictably than a big one. Keep the low tiers moving.</p>
+            </section>
+          </aside>
+        </div>
+        <p class="visually-hidden" id="gameLive" aria-live="polite"></p>
+      </section>
+
+      <!-- ============================== YEARBOOK ============================== -->
+      <section id="yearbookScreen" class="screen yearbook-screen" aria-labelledby="yearbookTitle" hidden>
+        <div class="squad-head yearbook-head">
+          <button class="round-back" id="btnYearbookBack" type="button" aria-label="Back home">←</button>
+          <div>
+            <p class="mini-label">THE CIRCLE ARCHIVE</p>
+            <h1 id="yearbookTitle">Yearbook.</h1>
+            <p class="squad-lede">Every circle you’ve made, every ridiculous chain, and the friends who caused them.</p>
+          </div>
+          <div class="squad-head-actions">
+            <button class="btn btn-small btn-ink" id="btnShareWrapped" type="button">Share Wrapped ↗</button>
+          </div>
+        </div>
+
+        <div class="yearbook-summary" id="yearbookSummary" aria-label="Circle totals"></div>
+
+        <section class="yearbook-block" aria-labelledby="superlativesHeading">
+          <div class="section-head">
+            <div><p class="mini-label">THE AWARDS NOBODY ASKED FOR</p><h2 id="superlativesHeading">Superlatives</h2></div>
+          </div>
+          <div class="superlative-grid" id="superlativeGrid"></div>
+        </section>
+
+        <section class="yearbook-block" aria-labelledby="memoryHeading">
+          <div class="section-head">
+            <div><p class="mini-label">THE HIGHLIGHTS REEL</p><h2 id="memoryHeading">Memory wall</h2></div>
+            <span class="badge-count" id="memoryCount"></span>
+          </div>
+          <div class="memory-grid" id="memoryGrid"></div>
+        </section>
+
+        <section class="yearbook-block" aria-labelledby="dareLogHeading">
+          <div class="section-head">
+            <div><p class="mini-label">FRIEND VS FRIEND</p><h2 id="dareLogHeading">Dare log</h2></div>
+          </div>
+          <div class="dare-log" id="dareLog">
+            <p class="empty-record">No dares yet. Finish a run, then dare someone to beat it.</p>
+          </div>
+        </section>
+
+        <div class="squad-footer">
+          <p>Everything here is generated from runs and photos stored on this device. Nothing is uploaded, and no challenge link contains a photo.</p>
+          <button class="btn btn-primary" id="btnYearbookDone" type="button">Back to the circle →</button>
+        </div>
+      </section>
+
+      <!-- ============================== PHOTO BOOTH ============================== -->
+      <section id="squadScreen" class="screen squad-screen" aria-labelledby="squadTitle" hidden>
+        <div class="squad-head">
+          <button class="round-back" id="btnSquadBack" type="button" aria-label="Back home">←</button>
+          <div>
+            <p class="mini-label">THE PHOTO BOOTH</p>
+            <h1 id="squadTitle">Cast your circle.</h1>
+            <p class="squad-lede">Pick a photo for any of the eleven tiers. Faces are cropped into circles. Everything is processed right here.</p>
+          </div>
+          <div class="squad-head-actions">
+            <button class="btn btn-small btn-ink" id="btnAddPhotos" type="button">＋ Add photos</button>
+            <button class="text-btn danger-text" id="btnResetSquad" type="button">Demo faces</button>
+          </div>
+        </div>
+        <div class="squad-status" id="squadStatus" role="status">Loading your squad…</div>
+        <div class="squad-grid" id="squadGrid"></div>
+        <div class="squad-footer">
+          <p>Tip: use the drag-and-zoom editor to center a face. Photos are saved as small compressed thumbnails in this browser — originals are discarded.</p>
+          <button class="btn btn-primary" id="btnSquadDone" type="button">Back to the circle →</button>
+        </div>
+        <input type="file" id="multiUpload" accept="image/png,image/jpeg,image/webp,image/avif,image/gif,image/bmp" multiple hidden aria-label="Add multiple photos to the circle">
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- ============================== HELP ============================== -->
+  <div class="modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
+    <div class="modal-card help-card">
+      <button class="modal-x" data-close="helpModal" type="button" aria-label="Close">✕</button>
+      <p class="mini-label">THE WHOLE IDEA</p>
+      <h2 id="helpTitle">How to grow a circle</h2>
+      <div class="help-steps">
+        <div><span>01</span><h3>Drop a friend</h3><p>Drag left or right, then release. The next friend is always waiting in the corner.</p></div>
+        <div><span>02</span><h3>Match two</h3><p>Two identical tiers merge into the next friendship stage. Chain quick merges for a score multiplier.</p></div>
+        <div><span>03</span><h3>Keep them below the line</h3><p>If anyone sits above the dashed line for too long, the circle is officially too crowded.</p></div>
+        <div><span>04</span><h3>Spend your Hype</h3><p>Merges fill the Hype bar. Use Switch, Group Hug and Plus One to rescue a messy pile.</p></div>
+      </div>
+      <div class="help-controls">
+        <div><b>Touch</b><span>Drag to aim · release to drop</span></div>
+        <div><b>Keyboard</b><span>← → aim · Space drop · 1 2 3 tricks · P pause</span></div>
+        <div><b>Daily</b><span>A new seeded circle and rule every day.</span></div>
+        <div><b>Group chat</b><span>Friends react while you play. Toggle it in pause.</span></div>
+        <div><b>Dare</b><span>Finish a run, then send a friend the same seeded circle.</span></div>
+      </div>
+      <div class="help-privacy">📷 Your photos never leave this tab. They are cropped, compressed and stored in this browser only.</div>
+      <button class="btn btn-primary" id="btnHelpPlay" type="button">Let’s play →</button>
+    </div>
+  </div>
+
+  <!-- ============================== PAUSE ============================== -->
+  <div class="modal" id="pauseModal" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" hidden>
+    <div class="modal-card pause-card">
+      <p class="mini-label">TIME OUT</p>
+      <h2 id="pauseTitle">The circle waits.</h2>
+      <p class="modal-lede">Take a breath. Nobody is going anywhere.</p>
+      <div class="pause-actions">
+        <button class="btn btn-primary" id="btnResume" type="button">Resume →</button>
+        <button class="btn btn-ghost" id="btnRestart" type="button">Restart</button>
+        <button class="btn btn-ghost" id="btnPauseQuit" type="button">Leave</button>
+      </div>
+      <div class="setting-row">
+        <span>Sound</span><button class="toggle" id="btnPauseSound" role="switch" aria-checked="true" type="button"><i></i></button>
+        <span>Haptics</span><button class="toggle" id="btnPauseHaptics" role="switch" aria-checked="true" type="button"><i></i></button>
+        <span>Group chat</span><button class="toggle" id="btnPauseChat" role="switch" aria-checked="true" type="button"><i></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== RESULTS ============================== -->
+  <div class="modal" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden>
+    <div class="modal-card result-card">
+      <div class="result-confetti" aria-hidden="true"></div>
+      <p class="mini-label" id="resultKicker">THE CIRCLE GOT CROWDED</p>
+      <h2 id="resultTitle">Too many friends.</h2>
+      <div class="result-avatar-wrap">
+        <canvas id="resultAvatar" width="240" height="240" aria-label="Your top friend"></canvas>
+        <span class="result-tier" id="resultTier">New Face</span>
+      </div>
+      <div class="result-score"><span>SCORE</span><b id="resultScore">0</b><em id="resultBestTag" hidden>NEW BEST</em></div>
+      <div class="result-stats">
+        <div><span>BEST CHAIN</span><b id="resultChain">x0</b></div>
+        <div><span>MERGES</span><b id="resultMerges">0</b></div>
+        <div><span>RUN</span><b id="resultMode">Classic</b></div>
+      </div>
+      <p class="result-dare-line" id="resultDareLine" hidden></p>
+      <div class="result-badges" id="resultBadges" aria-label="Badges unlocked this run"></div>
+      <div class="result-actions">
+        <button class="btn btn-primary" id="btnReplay" type="button">Play again →</button>
+        <button class="btn btn-ghost" id="btnDare" type="button">Dare a friend ↗</button>
+        <button class="btn btn-ghost" id="btnShare" type="button">Share postcard ↗</button>
+        <button class="btn btn-ghost" id="btnResultHome" type="button">Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== CROP ============================== -->
+  <div class="modal" id="cropModal" role="dialog" aria-modal="true" aria-labelledby="cropTitle" hidden>
+    <div class="modal-card crop-card">
+      <button class="modal-x" data-close="cropModal" type="button" aria-label="Close crop editor">✕</button>
+      <p class="mini-label">THE PHOTO BOOTH</p>
+      <h2 id="cropTitle">Frame your friend.</h2>
+      <p class="modal-lede" id="cropTierName">Tier 1 · New Face</p>
+      <div class="crop-stage">
+        <canvas id="cropCanvas" width="360" height="360" aria-label="Photo crop preview"></canvas>
+      </div>
+      <label class="zoom-label" for="cropZoom">Zoom</label>
+      <input id="cropZoom" class="zoom-range" type="range" min="1" max="3" step="0.01" value="1">
+      <p class="crop-help">Drag the photo to reposition. Use the slider or + / − to zoom. Arrow keys nudge.</p>
+      <div class="crop-actions">
+        <button class="btn btn-ghost" id="btnCropCancel" type="button">Cancel</button>
+        <button class="btn btn-ghost" id="btnCropRemove" type="button">Remove photo</button>
+        <button class="btn btn-primary" id="btnCropSave" type="button">Use this crop →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== CONFIRM ============================== -->
+  <div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" hidden>
+    <div class="modal-card confirm-card">
+      <p class="mini-label">JUST CHECKING</p>
+      <h2 id="confirmTitle">Reset the cast?</h2>
+      <p class="modal-lede" id="confirmCopy">All custom photos will be removed from this browser. The illustrated friends come back.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-ghost" id="btnConfirmNo" type="button">Keep them</button>
+        <button class="btn btn-danger" id="btnConfirmYes" type="button">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================== DARE ============================== -->
+  <div class="modal" id="dareModal" role="dialog" aria-modal="true" aria-labelledby="dareTitle" hidden>
+    <div class="modal-card dare-modal-card">
+      <button class="modal-x" data-close="dareModal" type="button" aria-label="Close dare link">✕</button>
+      <p class="mini-label">SEEDED CHALLENGE</p>
+      <h2 id="dareTitle">Dare a friend.</h2>
+      <p class="modal-lede">They get exactly the same drops and need to beat <b id="dareModalScore">0</b>. Your photos are never included in the link.</p>
+      <label class="field-label" for="darePlayerName">Your name</label>
+      <input class="text-field" id="darePlayerName" maxlength="22" autocomplete="nickname" placeholder="A friend">
+      <label class="field-label" for="dareLink">Dare link</label>
+      <input class="text-field dare-link-field" id="dareLink" readonly aria-label="Generated dare link">
+      <p class="crop-help">The link contains a seed, your score and a name. No account and no photo.</p>
+      <div class="dare-modal-actions">
+        <button class="btn btn-ghost" id="btnCopyDare" type="button">Copy link</button>
+        <button class="btn btn-ghost" id="btnShareDare" type="button">Share ↗</button>
+        <button class="btn btn-primary" data-close="dareModal" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sr-status visually-hidden" id="srStatus" aria-live="polite"></div>
+  <script src="../shared/arcade.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

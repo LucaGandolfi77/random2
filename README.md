@@ -21,6 +21,7 @@
   - [Snake](#snake)
   - [Sand Loop](#sand-loop)
   - [Pixel Ants](#pixel-ants)
+  - [Inner Circle](#inner-circle)
   - [LUMEN](#lumen)
   - [SECTOR 7](#sector-7)
   - [SINI](#sini)
@@ -107,6 +108,7 @@
 | 41 | **PocketCode** | Remote control for OpenCode / Pi agents | Static PWA + Node bridge | Demo | [▶ Open](https://lucagandolfi77.github.io/random2/pocketcode-pwa/) |
 | 42 | **Sand Loop** | Photo-to-sand colour sort puzzle | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sand-loop-pwa/) |
 | 43 | **Pixel Ants** | Photo-to-pixel erosion puzzle | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pixel-ants-pwa/) |
+| 44 | **Inner Circle** | Photo-sticker friendship merge game | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/inner-circle-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -284,6 +286,53 @@ out to bite the exposed edge and carry each pixel home to its bucket.
 **Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
 `src/` (`main`, `engine`, `board`, `path`, `quantize`, `image-import`,
 `artworks`, `render`), `icons/` (SVG), `tests/`, `smoke.mjs`.
+
+### Inner Circle
+
+*Drop your friends. Grow the circle.* 🫂
+
+A Suika-like merge game built around your own people. Eleven round photo
+stickers fall into a glass circle; match two friends of the same tier and they
+become the next friendship stage, from New Face all the way to The Whole Crew.
+
+- **Eleven tiers, eleven photos.** The Photo Booth has a round slot for each
+  stage, picker/drag-and-drop/clipboard upload, bulk filling, drag-to-pan and
+  zoom, optional names and illustrated demo faces. Photos are re-encoded to
+  320px WebP/JPEG thumbnails; originals are discarded, nothing is uploaded and
+  a Demo faces reset removes the squad
+- **A real little physics toy:** fixed-step circle collisions, stacking,
+  squash-free upright faces, seeded drop queues, chain merges and a danger
+  line with a heartbeat warning. Two Whole Crew discs become a legendary
+  group-photo bonus instead of ending the run
+- **Hype and three party tricks:** Switch swaps the held friend with the next;
+  Group Hug agitates the whole pile; Plus One sends a rainbow wildcard guest
+  who joins the first friend they touch and advances that tier
+- **Circle Stories:** each friend gets an optional vibe and signature line.
+  The group chat reacts during the run, the Yearbook collects superlatives and
+  a memory wall of recent circles, and Circle Wrapped turns the whole local
+  history into a shareable poster
+- **Dare a friend:** a finished run can become a seed-and-target link. The
+  friend gets the same drops, a score target and a local dare log. No account,
+  no photos in the URL and no server
+- **Scoring with a social life:** chain multipliers, floating score stickers,
+  best chain, best tier, local hall of fame, ten achievement badges and
+  per-mode bests
+- **Daily Circle:** a seeded daily drop queue plus one of five rotating rules
+  (Hype Train, Tiny Table, Combo Club, Double Hype, Small but Mighty), with a
+  local daily best and streak
+- **Shareable photo finish:** an end-of-run postcard and a Yearbook Wrapped
+  card drawn on canvas, offered through the Web Share API when available and
+  downloaded otherwise
+- Touch drag-and-release, full keyboard controls, pause/auto-pause, sound and
+  haptics through `../shared/arcade.js`, reduced motion, safe areas, aria live
+  announcements and patterns/numbers so tiers don't rely on colour alone
+- Offline PWA, no dependencies, no build step, no binary art assets;
+  synthesized WebAudio effects and procedurally drawn default friends
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `engine`, `roster`, `faces`, `portrait`, `render`, `postcard`,
+`chat`, `dare`, `wrapped`), `icons/` (SVG), `tests/`, `smoke.mjs`. See
+[`inner-circle-pwa/README.md`](inner-circle-pwa/README.md).
 
 ### LUMEN
 

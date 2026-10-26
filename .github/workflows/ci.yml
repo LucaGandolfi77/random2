@@ -147,6 +147,10 @@ jobs:
           # routes, no gravity), the pathfinder over the holes, the ant/bucket
           # lifecycle and win condition, quantization, and the PWA asset list.
           node --test pixel-ants-pwa/tests/*.test.mjs
+          # INNER CIRCLE: circle collisions and merge chains, wildcard and
+          # power rules, danger timing, seeded daily queues, roster sanitising
+          # and the offline asset/manifest contract.
+          node --test inner-circle-pwa/tests/*.test.mjs
 
       - name: Analysis tooling tests
         run: |
@@ -261,6 +265,16 @@ jobs:
           out=$(node pixel-ants-pwa/smoke.mjs http://localhost:8099/pixel-ants-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  pixel-ants-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # INNER CIRCLE loads a real photo through the file input, starts the
+          # game, merges a pair, checks the canvas, HUD and group chat, arms
+          # Plus One, completes a run, builds a dare link and opens the
+          # Yearbook memory wall.
+          out=$(node inner-circle-pwa/smoke.mjs http://localhost:8099/inner-circle-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  inner-circle-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3
