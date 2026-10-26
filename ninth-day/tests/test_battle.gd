@@ -23,6 +23,8 @@ func _initialize() -> void:
 	_test_intents()
 	_test_hollow_echo()
 	_test_save_resume()
+	_test_modifier_save()
+	_test_unbound_enrage()
 	_test_store()
 	_test_encounters()
 	_test_modifiers()
@@ -291,6 +293,10 @@ func _test_encounters() -> void:
 	ash_saint.start(1, &"saint_of_ash")
 	_assert(ash_saint.enemies.size() == 1, "the Saint of Ash fights alone")
 	_assert(ash_saint.enemies[0].max_hp == 250, "the Saint of Ash is a Day 7 boss")
+	var unbound := _new_sim()
+	unbound.start(1, &"clockwork_unbound")
+	_assert(unbound.enemies.size() == 1, "the Unbound Saint fights alone")
+	_assert(unbound.enemies[0].max_hp == 300, "the Unbound Saint is a Day 8 boss")
 	var saved = JSON.parse_string(JSON.stringify(tutorial.to_save()))
 	var loaded := BattleSim.new()
 	loaded.load_save(saved)
@@ -317,6 +323,41 @@ func _test_inheritances() -> void:
 	_assert(String(card.get("name", "")) != "", "a card has a name")
 	var modifiers := InheritanceDB.modifiers([offers[0]])
 	_assert(not modifiers.is_empty(), "a card contributes modifiers")
+
+func _test_modifier_save() -> void:
+	var sim := _new_sim(707)
+	sim.apply_modifiers({"max_hp": 10, "attack": 2, "defense": 1, "speed": 1, "max_resolve": 1})
+	var cael := _find_actor(sim, &"cael")
+	var saved = JSON.parse_string(JSON.stringify(sim.to_save()))
+	var restored := BattleSim.new()
+	restored.load_save(saved)
+	var restored_cael := _find_actor(restored, &"cael")
+	_assert(restored_cael.max_hp == cael.max_hp, "saves keep max HP modifiers")
+	_assert(restored_cael.attack == cael.attack, "saves keep attack modifiers")
+	_assert(restored_cael.defense == cael.defense, "saves keep defense modifiers")
+	_assert(restored_cael.speed == cael.speed, "saves keep speed modifiers")
+	_assert(restored_cael.max_resolve == cael.max_resolve, "saves keep max Resolve modifiers")
+
+func _test_unbound_enrage() -> void:
+	var sim := _new_sim(909)
+	sim.start(909, &"clockwork_unbound")
+	var boss := sim.enemies[0]
+	_assert(boss.max_hp == 300, "the Unbound Saint is the Day 8 boss")
+	var before_attack := boss.attack
+	boss.hp = 151
+	sim.use_action(&"strike", boss.id)
+	_assert(sim.boss_enraged, "the Unbound Saint enrages at half HP")
+	_assert(boss.attack == before_attack + 4, "the enraged Saint hits harder")
+	var found := false
+	for line in sim.log_lines:
+		if line.contains("sheds its clockwork skin"):
+			found = true
+			break
+	_assert(found, "the phase change is telegraphed in the log")
+	var restored := BattleSim.new()
+	restored.load_save(JSON.parse_string(JSON.stringify(sim.to_save())))
+	_assert(restored.boss_enraged, "the enrage state survives a save")
+	_assert(restored.enemies[0].attack == boss.attack, "the enraged attack survives a save")
 
 func _test_determinism() -> void:
 	var a := _new_sim(777)

@@ -21,6 +21,7 @@ var phase: String = "player"
 var player_index: int = 0
 var enemy_index: int = 0
 var boss_stole_track: bool = false
+var boss_enraged: bool = false
 var log_lines: Array[String] = []
 
 func start(p_seed: int = 424242, p_encounter: StringName = &"full") -> void:
@@ -43,6 +44,7 @@ func start(p_seed: int = 424242, p_encounter: StringName = &"full") -> void:
 	player_index = 0
 	enemy_index = 0
 	boss_stole_track = false
+	boss_enraged = false
 	log_lines.clear()
 	_log(_encounter_intro())
 	_skip_dead_players()
@@ -231,6 +233,7 @@ func to_save() -> Dictionary:
 		"resonance": resonance,
 		"chord_ready": chord_ready,
 		"boss_stole_track": boss_stole_track,
+		"boss_enraged": boss_enraged,
 		"party": party.map(func(a: BattleActor) -> Dictionary: return _actor_save(a)),
 		"enemies": enemies.map(func(a: BattleActor) -> Dictionary: return _actor_save(a)),
 		"echo_track": echo_track.to_array() if echo_track != null else [],
@@ -264,6 +267,7 @@ func load_save(data: Dictionary) -> bool:
 	resonance = clampi(int(data.get("resonance", 0)), 0, 3)
 	chord_ready = bool(data.get("chord_ready", resonance >= 3))
 	boss_stole_track = bool(data.get("boss_stole_track", false))
+	boss_enraged = bool(data.get("boss_enraged", false))
 	log_lines.clear()
 	for line in data.get("log_lines", []):
 		log_lines.append(String(line))
@@ -276,6 +280,9 @@ func _actor_save(actor: BattleActor) -> Dictionary:
 		"id": String(actor.id),
 		"hp": actor.hp,
 		"max_hp": actor.max_hp,
+		"attack": actor.attack,
+		"defense": actor.defense,
+		"speed": actor.speed,
 		"resolve": actor.resolve,
 		"max_resolve": actor.max_resolve,
 		"guarding": actor.guarding,
@@ -292,7 +299,12 @@ func _apply_actor_states(actors: Array[BattleActor], states: Array) -> void:
 		var actor := _actor_by_id(StringName(String(state.get("id", ""))))
 		if actor == null:
 			continue
+		actor.max_hp = maxi(1, int(state.get("max_hp", actor.max_hp)))
 		actor.hp = clampi(int(state.get("hp", actor.hp)), 0, actor.max_hp)
+		actor.attack = maxi(1, int(state.get("attack", actor.attack)))
+		actor.defense = maxi(1, int(state.get("defense", actor.defense)))
+		actor.speed = maxi(1, int(state.get("speed", actor.speed)))
+		actor.max_resolve = maxi(1, int(state.get("max_resolve", actor.max_resolve)))
 		actor.resolve = clampi(int(state.get("resolve", actor.resolve)), 0, actor.max_resolve)
 		actor.guarding = bool(state.get("guarding", false))
 		actor.echo_available = bool(state.get("echo_available", true))
@@ -500,6 +512,10 @@ func _resolve_action(
 			var damage := _calculate_damage(action.power, actor.attack, t.defense, tone_bp, guard_bp, variance)
 			var applied := t.take_damage(damage)
 			_event(events, "%s %s %s on %s for %d." % [actor.display_name, verb, action.display_name, t.display_name, applied])
+			if t.is_boss and t.id == &"clockwork_unbound" and not boss_enraged and t.hp <= t.max_hp / 2:
+				boss_enraged = true
+				t.attack += 4
+				_event(events, "The Unbound Saint sheds its clockwork skin. Its strikes quicken.")
 			if not t.is_alive():
 				_event(events, "%s falls." % t.display_name)
 		if action.status_id != &"" and t.is_alive():
@@ -831,6 +847,8 @@ func _encounter_intro() -> String:
 			return "Sera Vane steps out of the Watch keep with a pike in her hand. She does not ask you to surrender."
 		&"saint_of_ash":
 			return "The Saint of Ash unfolds from the sanctuary floor. It is made of every memory Vey has taken."
+		&"clockwork_unbound":
+			return "The Unbound Saint descends the Spire stair. Its clockwork skin is open, and the Bell is inside."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -923,6 +941,17 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 		BattleAction.new(&"pyre", "Pyre", BattleTypes.Tone.EMBER, 34, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, false, "A mercy that leaves only ash."),
 	])
 
+	var unbound := BattleActor.new(&"clockwork_unbound", "The Unbound Saint", BattleTypes.Side.ENEMY, BattleTypes.Tone.BELL, 300, 24, 16, 16)
+	unbound.is_boss = true
+	unbound.max_resolve = 99
+	unbound.resolve = 99
+	unbound.actions = _actions([
+		BattleAction.new(&"procession", "Procession", BattleTypes.Tone.HUSH, 20, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 2, true, "A measured step that shakes the Spire."),
+		BattleAction.new(&"bell_gear", "Bell Gear", BattleTypes.Tone.EMBER, 24, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, true, "The Bell's own tooth, turning."),
+		BattleAction.new(&"rewind", "Rewind", BattleTypes.Tone.HUSH, 0, 0, BattleTypes.TargetRule.SELF, 35, &"", 0, true, "The Saint turns its hour back."),
+		BattleAction.new(&"ninth_toll", "The Ninth Toll", BattleTypes.Tone.BELL, 36, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"slowed", 1, false, "The Chord with no hand to guide it."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -954,6 +983,8 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			return [sera]
 		&"saint_of_ash":
 			return [ash_saint]
+		&"clockwork_unbound":
+			return [unbound]
 		_:
 			return out
 

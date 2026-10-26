@@ -54,7 +54,8 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 8. Finish Day 4, relaunch: title shows **Day 5 · Morning**.
 9. Finish Day 5, relaunch: title shows **Day 6 · Morning**.
 10. Finish Day 6, relaunch: title shows **Day 7 · Morning**.
-11. Finish Day 7, relaunch: the Bell Map shows the Day 7 slice-complete card.
+11. Finish Day 7, relaunch: title shows **Day 8 · Morning**.
+12. Finish Day 8, relaunch: the Bell Map shows the Day 8 slice-complete card and Day 9.
 
 ## Android export
 

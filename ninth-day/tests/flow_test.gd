@@ -571,8 +571,84 @@ func _run() -> void:
 		return _finish()
 	_assert(RunState.is_phase_completed(7, "night"), "Day 7 night is complete")
 	_assert(RunState.day == 8, "the cycle advances to Day 8")
-	_assert(RunState.next_phase() == "", "Day 8 has no authored phases yet")
-	_assert(RunState.inheritances.size() >= 21, "twenty-one memories are archived")
+	_assert(RunState.next_phase() == "morning", "Day 8 starts at morning")
+
+	# Day 8 morning: choose a district's memory to carry up the Spire.
+	map = get_tree().current_scene
+	map._on_phase_pressed("morning")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Ascent", "Day 8 opens on the Spire stair")
+	if not await _drive_story(story):
+		return _finish()
+	_assert(bool(RunState.get_flag("carried_ember")), "the district memory is chosen")
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("morning", 8)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("afternoon"), "Day 8 afternoon unlocks")
+
+	# Day 8 afternoon: the Unbound Saint enters its second phase.
+	map = get_tree().current_scene
+	map._on_phase_pressed("afternoon")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Unbound Saint", "Day 8 afternoon names the Unbound Saint")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BattleView"):
+		return _finish()
+	battle = get_tree().current_scene
+	_assert(battle.sim.encounter_id == &"clockwork_unbound", "Day 8 starts the Unbound Saint")
+	battle.sim.enemies[0].hp = 151
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	_assert(battle.sim.boss_enraged, "the Unbound Saint enrages below half HP")
+	battle.sim.enemies[0].hp = 1
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	battle._refresh()
+	_assert(battle.sim.phase == "victory", "the Unbound Saint can be defeated")
+	battle._on_result_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("afternoon", 8)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("night"), "Day 8 night unlocks")
+
+	# Day 8 night: choose the ending posture for Day 9.
+	map = get_tree().current_scene
+	map._on_phase_pressed("night")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Ninth Day", "Day 8 night opens the ninth day")
+	if not await _drive_story(story):
+		return _finish()
+	_assert(bool(RunState.get_flag("ending_ring")), "the ending posture is recorded")
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("night", 8)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_completed(8, "night"), "Day 8 night is complete")
+	_assert(RunState.day == 9, "the cycle reaches the ninth day")
+	_assert(RunState.next_phase() == "", "Day 9 has no authored phases yet")
+	_assert(RunState.inheritances.size() >= 24, "twenty-four memories are archived")
 	_assert(RunState.equipped.size() == 6, "the loadout caps at six memories")
 	_finish()
 

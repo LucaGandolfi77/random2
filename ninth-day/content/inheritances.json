@@ -34,6 +34,11 @@
 			"morning": ["vey_mercy", "sanctuary_key", "quiet_bell"],
 			"afternoon": ["ash_crown", "saint_pyre", "memory_ash"],
 			"night": ["mercy_kept", "pyre_oath", "no_bell_room"]
+		},
+		"8": {
+			"morning": ["spire_step", "ninth_key", "district_memory"],
+			"afternoon": ["unbound_gear", "clockwork_skin", "ascent_breath"],
+			"night": ["final_bell", "last_quarter", "day_eight"]
 		}
 	},
 	"cards": {
@@ -477,6 +482,69 @@
 			"description": "You know where the quiet is now. You can go back.",
 			"effect": "+1 defense and +1 max Resolve to the party.",
 			"modifiers": {"defense": 1, "max_resolve": 1}
+		},
+		"spire_step": {
+			"name": "The Spire Step",
+			"type": "Skill",
+			"description": "One stair at a time. The city is counting on your knees.",
+			"effect": "+1 speed to the party.",
+			"modifiers": {"speed": 1}
+		},
+		"ninth_key": {
+			"name": "The Ninth Key",
+			"type": "Bond",
+			"description": "A key with no door. It still fits the Bell.",
+			"effect": "+5 max HP to the party.",
+			"modifiers": {"max_hp": 5}
+		},
+		"district_memory": {
+			"name": "A District's Memory",
+			"type": "Bond",
+			"description": "One part of Aurel, carried up the stair in your hands.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"unbound_gear": {
+			"name": "An Unbound Gear",
+			"type": "Skill",
+			"description": "Still turning, even with nothing left to turn.",
+			"effect": "+1 attack and +1 defense to the party.",
+			"modifiers": {"attack": 1, "defense": 1}
+		},
+		"clockwork_skin": {
+			"name": "Clockwork Skin",
+			"type": "Stat",
+			"description": "It does not make you invulnerable. It makes you harder to stop.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"ascent_breath": {
+			"name": "The Ascent Breath",
+			"type": "Stat",
+			"description": "The stair teaches you where to put your weight.",
+			"effect": "+6 max HP to the party.",
+			"modifiers": {"max_hp": 6}
+		},
+		"final_bell": {
+			"name": "The Final Bell",
+			"type": "Skill",
+			"description": "One strike, held in the wrist for the ninth day.",
+			"effect": "+2 attack to the party.",
+			"modifiers": {"attack": 2}
+		},
+		"last_quarter": {
+			"name": "The Last Quarter",
+			"type": "Bond",
+			"description": "A quarter hour that belongs to no one but the four of you.",
+			"effect": "+5 max HP and +1 max Resolve to the party.",
+			"modifiers": {"max_hp": 5, "max_resolve": 1}
+		},
+		"day_eight": {
+			"name": "The Eighth Day",
+			"type": "Bond",
+			"description": "Almost. The word has never been so heavy.",
+			"effect": "+1 attack and +1 speed to the party.",
+			"modifiers": {"attack": 1, "speed": 1}
 		}
 	}
 }

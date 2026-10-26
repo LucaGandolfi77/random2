@@ -7,7 +7,7 @@ extends Node
 
 const SAVE_PATH := "user://ninth_day_run.json"
 const PHASES: Array[String] = ["morning", "afternoon", "night"]
-const LAST_AUTHORED_DAY := 7
+const LAST_AUTHORED_DAY := 8
 const DAY_PHASES := {
 	1: {
 		"morning": {"title": "Morning · The Crack", "type": "story · battle · inheritance", "encounter": "tutorial"},
@@ -43,6 +43,11 @@ const DAY_PHASES := {
 		"morning": {"title": "Morning · Vey's Sanctuary", "type": "story · choice", "encounter": ""},
 		"afternoon": {"title": "Afternoon · The Offer", "type": "story · optional battle · inheritance", "encounter": "saint_of_ash"},
 		"night": {"title": "Night · What Mercy Costs", "type": "story · choice", "encounter": ""},
+	},
+	8: {
+		"morning": {"title": "Morning · The Ascent", "type": "story · choice", "encounter": ""},
+		"afternoon": {"title": "Afternoon · The Unbound Saint", "type": "story · battle · inheritance", "encounter": "clockwork_unbound"},
+		"night": {"title": "Night · The Ninth Day", "type": "story · choice", "encounter": ""},
 	},
 }
 

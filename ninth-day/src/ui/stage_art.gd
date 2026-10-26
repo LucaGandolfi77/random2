@@ -20,6 +20,8 @@ func set_mode(bg_id: String) -> void:
 			tint = Palette.HUSH
 		"wren_house":
 			tint = Palette.BRASS
+		"spire_ascent":
+			tint = Palette.BRASS
 		_:
 			tint = Palette.BRASS
 	queue_redraw()
@@ -57,6 +59,8 @@ func _draw() -> void:
 			_draw_sanctuary()
 		"ash":
 			_draw_ash()
+		"spire_ascent":
+			_draw_spire_ascent()
 		"spire_night":
 			_draw_night_spire()
 		_:
@@ -261,6 +265,24 @@ func _draw_ash() -> void:
 		draw_line(Vector2(x, size.y * 0.62), Vector2(x + 8, size.y * 0.3), Color(tint.r, tint.g, tint.b, 0.08), 1.0)
 	draw_circle(Vector2(size.x * 0.5, size.y * 0.6), 12.0, Color(tint.r, tint.g, tint.b, 0.1))
 	draw_circle(Vector2(size.x * 0.5, size.y * 0.6), 6.0, Color(tint.r, tint.g, tint.b, 0.18))
+
+func _draw_spire_ascent() -> void:
+	var cx := size.x * 0.5
+	draw_line(Vector2(cx - 90, size.y * 0.88), Vector2(cx - 20, size.y * 0.68), Color(tint.r, tint.g, tint.b, 0.2), 1.0)
+	draw_line(Vector2(cx - 20, size.y * 0.68), Vector2(cx + 46, size.y * 0.52), Color(tint.r, tint.g, tint.b, 0.2), 1.0)
+	draw_line(Vector2(cx + 46, size.y * 0.52), Vector2(cx - 10, size.y * 0.38), Color(tint.r, tint.g, tint.b, 0.2), 1.0)
+	draw_line(Vector2(cx - 10, size.y * 0.38), Vector2(cx + 30, size.y * 0.26), Color(tint.r, tint.g, tint.b, 0.2), 1.0)
+	for i in 9:
+		var t := i / 9.0
+		var x := lerpf(size.x * 0.2, size.x * 0.72, t)
+		var y := lerpf(size.y * 0.88, size.y * 0.24, t)
+		draw_line(Vector2(x - 12, y), Vector2(x + 12, y), Color(tint.r, tint.g, tint.b, 0.14), 1.0)
+	draw_arc(Vector2(cx, size.y * 0.18), 46.0, PI, TAU, 32, Color(tint.r, tint.g, tint.b, 0.3), 1.5, true)
+	draw_line(Vector2(cx - 46, size.y * 0.18), Vector2(cx - 46, size.y * 0.26), Color(tint.r, tint.g, tint.b, 0.2), 1.0)
+	draw_line(Vector2(cx + 46, size.y * 0.18), Vector2(cx + 46, size.y * 0.26), Color(tint.r, tint.g, tint.b, 0.2), 1.0)
+	draw_circle(Vector2(cx, size.y * 0.27), 5.0, Color(tint.r, tint.g, tint.b, 0.36))
+	for i in 4:
+		draw_line(Vector2(22, size.y * (0.3 + i * 0.08)), Vector2(size.x - 22, size.y * (0.3 + i * 0.08)), Color(tint.r, tint.g, tint.b, 0.04), 1.0)
 
 func _draw_night_spire() -> void:
 	var cx := size.x * 0.5

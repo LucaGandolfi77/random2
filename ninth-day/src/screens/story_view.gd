@@ -181,6 +181,8 @@ func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if RunState.day == 8:
+		return "The Bell chamber is open. The ninth day begins with whatever you choose here."
 	if RunState.day == 7:
 		return "Vey closes the inner door. Whatever you chose, the sanctuary remembers it."
 	if RunState.day == 6:
@@ -319,12 +321,22 @@ func _background_caption(bg_id: String) -> String:
 			return "VEY'S SANCTUARY"
 		"ash":
 			return "THE ASH FIELD"
+		"spire_ascent":
+			return "THE SPIRE · ASCENT"
 		"spire_night":
 			return "THE SPIRE · NIGHT"
 		_:
 			return "AUREL"
 
 func _default_bg() -> String:
+	if RunState.day == 8:
+		match phase:
+			"morning":
+				return "spire_ascent"
+			"afternoon":
+				return "clockwork"
+			"night":
+				return "spire_night"
 	if RunState.day == 7:
 		match phase:
 			"morning":
