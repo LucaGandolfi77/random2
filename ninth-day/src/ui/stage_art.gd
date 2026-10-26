@@ -14,7 +14,7 @@ func _ready() -> void:
 func set_mode(bg_id: String) -> void:
 	mode = bg_id if bg_id != "" else "spire"
 	match mode:
-		"ember_row", "foundry", "checkpoint":
+		"ember_row", "foundry", "checkpoint", "bellows":
 			tint = Palette.EMBER
 		"spire_night":
 			tint = Palette.HUSH
@@ -39,6 +39,8 @@ func _draw() -> void:
 			_draw_foundry()
 		"checkpoint":
 			_draw_checkpoint()
+		"bellows":
+			_draw_bellows()
 		"spire_night":
 			_draw_night_spire()
 		_:
@@ -102,6 +104,28 @@ func _draw_foundry() -> void:
 		draw_circle(p, 2.0 + (i % 2), Color(tint.r, tint.g, tint.b, 0.32))
 	draw_line(Vector2(24, size.y * 0.24), Vector2(size.x - 24, size.y * 0.24), Color(tint.r, tint.g, tint.b, 0.08), 1.0)
 	draw_line(Vector2(24, size.y * 0.28), Vector2(size.x - 24, size.y * 0.28), Color(tint.r, tint.g, tint.b, 0.05), 1.0)
+
+func _draw_bellows() -> void:
+	var cx := size.x * 0.5
+	var base := size.y * 0.86
+	for i in 4:
+		var x := size.x * (0.2 + i * 0.2)
+		draw_line(Vector2(x, 0), Vector2(x, size.y * (0.48 + (i % 2) * 0.08)), Color(tint.r, tint.g, tint.b, 0.18), 1.0)
+		for j in 5:
+			draw_circle(Vector2(x, size.y * 0.1 + j * 18.0), 2.0, Color(tint.r, tint.g, tint.b, 0.2))
+	draw_arc(Vector2(cx, size.y * 0.58), 64.0, 0, TAU, 48, Color(tint.r, tint.g, tint.b, 0.22), 2.0, true)
+	for i in 12:
+		var angle := TAU * i / 12.0
+		var p1 := Vector2(cx + cos(angle) * 54.0, size.y * 0.58 + sin(angle) * 54.0)
+		var p2 := Vector2(cx + cos(angle) * 70.0, size.y * 0.58 + sin(angle) * 70.0)
+		draw_line(p1, p2, Color(tint.r, tint.g, tint.b, 0.2), 1.0)
+	draw_arc(Vector2(cx, base), 100.0, PI, TAU, 40, Color(tint.r, tint.g, tint.b, 0.1), 1.0, true)
+	draw_line(Vector2(cx - 100, base), Vector2(cx + 100, base), Color(tint.r, tint.g, tint.b, 0.16), 1.0)
+	for i in 6:
+		var x := size.x * (0.18 + (i % 3) * 0.28)
+		var row := 0 if i < 3 else 1
+		var y := size.y * (0.68 + row * 0.1)
+		draw_circle(Vector2(x, y), 2.0, Color(tint.r, tint.g, tint.b, 0.3))
 
 func _draw_checkpoint() -> void:
 	var base := size.y * 0.86

@@ -181,6 +181,16 @@ func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if RunState.day == 3:
+		match phase:
+			"morning":
+				return "The counterweight hall opens below you. The Ashwright is already waiting."
+			"afternoon":
+				return "The chains give. The hall begins to fall. There is still a way through."
+			"night":
+				return "The Choir's offer hangs in the air. What you keep now will survive the reset."
+			_:
+				return "The Bell waits."
 	if RunState.day == 2:
 		match phase:
 			"morning":
@@ -253,6 +263,8 @@ func _background_caption(bg_id: String) -> String:
 			return "THE WATCH CHECKPOINT · " + phase.to_upper()
 		"foundry":
 			return "THE FOUNDRY"
+		"bellows":
+			return "THE BELLOWS"
 		"spire_night":
 			return "THE SPIRE · NIGHT"
 		_:
@@ -265,7 +277,7 @@ func _default_bg() -> String:
 		"night":
 			return "spire_night"
 		_:
-			return "spire"
+			return "bellows" if RunState.day == 3 else "spire"
 
 func _clear_choices() -> void:
 	for child in _choice_box.get_children():

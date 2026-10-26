@@ -207,8 +207,83 @@ func _run() -> void:
 		return _finish()
 	_assert(RunState.is_phase_completed(2, "night"), "Day 2 night is complete")
 	_assert(RunState.day == 3, "the cycle advances to Day 3")
-	_assert(RunState.next_phase() == "", "Day 3 has no authored phases yet")
-	_assert(RunState.equipped.size() == 6, "six memories are equipped")
+	_assert(RunState.next_phase() == "morning", "Day 3 starts at morning")
+
+	# Day 3 morning: the descent.
+	map = get_tree().current_scene
+	map._on_phase_pressed("morning")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "Descent", "Day 3 opens below the foundry")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("morning", 3)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("afternoon"), "Day 3 afternoon unlocks")
+
+	# Day 3 afternoon: the Ashwright reforged, with the Choir.
+	map = get_tree().current_scene
+	map._on_phase_pressed("afternoon")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Counterweights", "Day 3 afternoon names the counterweights")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BattleView"):
+		return _finish()
+	battle = get_tree().current_scene
+	_assert(battle.sim.encounter_id == &"bellows", "Day 3 starts the Bellows fight")
+	_assert(battle.sim.enemies.size() == 2, "the Bellows fight is a duo")
+	for enemy in battle.sim.enemies:
+		enemy.hp = 1
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	battle.sim.use_action(&"strike", battle.sim.enemies[1].id)
+	battle._refresh()
+	_assert(battle.sim.phase == "victory", "the Bellows can be cleared")
+	battle._on_result_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("afternoon", 3)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("night"), "Day 3 night unlocks")
+
+	# Day 3 night: the Choir's offer ends the authored slice.
+	map = get_tree().current_scene
+	map._on_phase_pressed("night")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Choir's Offer", "Day 3 night names the Choir's offer")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("night", 3)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_completed(3, "night"), "Day 3 night is complete")
+	_assert(RunState.day == 4, "the cycle advances to Day 4")
+	_assert(RunState.next_phase() == "", "Day 4 has no authored phases yet")
+	_assert(RunState.inheritances.size() >= 9, "nine memories are archived")
+	_assert(RunState.equipped.size() == 6, "the loadout caps at six memories")
 	_finish()
 
 func _drive_story(story: Node) -> bool:

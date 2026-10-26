@@ -36,7 +36,7 @@ func _ready() -> void:
 
 	if RunState.day_complete:
 		outer.add_child(_completion_panel(RunState.day))
-	elif RunState.day >= 3 and RunState.is_phase_completed(RunState.day - 1, "night"):
+	elif RunState.day > RunState.LAST_AUTHORED_DAY and RunState.is_phase_completed(RunState.day - 1, "night"):
 		outer.add_child(_completion_panel(RunState.day - 1))
 
 	var scroll := ScrollContainer.new()
@@ -71,7 +71,7 @@ func _day_block(day_number: int) -> VBoxContainer:
 
 	var current := day_number == RunState.day
 	var finished_day := RunState.is_phase_completed(day_number, "night")
-	var has_content := day_number <= 2
+	var has_content := day_number <= RunState.LAST_AUTHORED_DAY
 	var unlocked := current or finished_day
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 9)
@@ -141,7 +141,7 @@ func _completion_panel(p_day: int) -> PanelContainer:
 	panel.add_child(box)
 	box.add_child(Ui.overline("DAY %d COMPLETE" % p_day))
 	box.add_child(Ui.label("The Bell has not rung. What you kept is still yours.", 13, Palette.PAPER, true))
-	box.add_child(Ui.label("This build ends after Day 2. Day 3 is not authored yet.", 11, Palette.MUTED, true))
+	box.add_child(Ui.label("This build ends after Day 3. Day 4 is not authored yet.", 11, Palette.MUTED, true))
 	var reset := Ui.button("Begin a new cycle", 48)
 	reset.add_theme_color_override("font_color", Palette.MUTED)
 	reset.pressed.connect(_on_new_cycle)

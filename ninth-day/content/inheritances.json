@@ -9,6 +9,11 @@
 			"morning": ["watch_whistle", "second_hand", "elias_ledger"],
 			"afternoon": ["hounds_patience", "gate_left_open", "the_debt"],
 			"night": ["ash_on_the_gate", "second_bolt", "last_lamp"]
+		},
+		"3": {
+			"morning": ["chainbreaker", "iron_lung", "counterweight_heart"],
+			"afternoon": ["choir_note", "ash_witness", "the_bellows"],
+			"night": ["refused_offer", "deep_air", "third_shift"]
 		}
 	},
 	"cards": {
@@ -137,6 +142,69 @@
 			"description": "A small light in the ash. Enough to see the next step, not the whole road.",
 			"effect": "+1 max Resolve to the party.",
 			"modifiers": {"max_resolve": 1}
+		},
+		"chainbreaker": {
+			"name": "Chainbreaker",
+			"type": "Skill",
+			"description": "Mara's swing, remembered in the wrists and the shoulders.",
+			"effect": "+2 attack to the party.",
+			"modifiers": {"attack": 2}
+		},
+		"iron_lung": {
+			"name": "Iron Lung",
+			"type": "Stat",
+			"description": "The Bellows teaches you to breathe where the air is a debt.",
+			"effect": "+6 max HP to the party.",
+			"modifiers": {"max_hp": 6}
+		},
+		"counterweight_heart": {
+			"name": "A Counterweight Heart",
+			"type": "Stat",
+			"description": "Something heavy and patient, keeping you upright when the floor gives.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"choir_note": {
+			"name": "One Note of the Choir",
+			"type": "Skill",
+			"description": "You keep a single note. It does not belong to them anymore.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"ash_witness": {
+			"name": "The Witness in the Ash",
+			"type": "Bond",
+			"description": "The Ashwright called you a witness. You decide what that means.",
+			"effect": "+1 speed to the party.",
+			"modifiers": {"speed": 1}
+		},
+		"the_bellows": {
+			"name": "The Bellows",
+			"type": "Skill",
+			"description": "Draw in. Hold. Give the fire somewhere to go.",
+			"effect": "+5 max HP and +1 attack to the party.",
+			"modifiers": {"max_hp": 5, "attack": 1}
+		},
+		"refused_offer": {
+			"name": "The Word No",
+			"type": "Bond",
+			"description": "Small enough for the Bell to take. Large enough to keep.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"deep_air": {
+			"name": "Deep Air",
+			"type": "Stat",
+			"description": "The lower you go, the older the air. You learn to move through it.",
+			"effect": "+1 defense and +1 speed to the party.",
+			"modifiers": {"defense": 1, "speed": 1}
+		},
+		"third_shift": {
+			"name": "The Third Shift",
+			"type": "Skill",
+			"description": "The foundry never sleeps. Neither do you, not anymore.",
+			"effect": "+1 attack and +1 speed to the party.",
+			"modifiers": {"attack": 1, "speed": 1}
 		}
 	}
 }

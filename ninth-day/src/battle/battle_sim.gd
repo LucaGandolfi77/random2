@@ -812,6 +812,8 @@ func _encounter_intro() -> String:
 			return "The Ashwright waits in the foundry heat, hammer raised."
 		&"watch_hound":
 			return "The Watch Hound steps out of the ash. It does not growl. It has already decided."
+		&"bellows":
+			return "The counterweights scream overhead. The Ashwright is waiting at the bottom, and the Choir is singing."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -861,6 +863,15 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			return [ashwright]
 		&"watch_hound":
 			return [hound]
+		&"bellows":
+			ashwright.max_hp = 170
+			ashwright.hp = 170
+			ashwright.attack = 20
+			ashwright.defense = 12
+			choir.max_hp = 95
+			choir.hp = 95
+			choir.attack = 16
+			return [ashwright, choir]
 		_:
 			return out
 
