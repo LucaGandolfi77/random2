@@ -226,7 +226,10 @@ func _refresh() -> void:
 	_result_button.visible = sim.is_finished()
 	_restart_button.visible = sim.phase == "defeat"
 	if sim.phase == "victory":
-		_result_label.text = "VICTORY — the song breaks."
+		if sim.encounter_id == &"clockwork_saint":
+			_result_label.text = "THE SAINT WITHDRAWS."
+		else:
+			_result_label.text = "VICTORY — the song breaks."
 		_result_label.add_theme_color_override("font_color", BELL)
 		_result_button.text = "BELL REST  ›"
 	elif sim.phase == "defeat":

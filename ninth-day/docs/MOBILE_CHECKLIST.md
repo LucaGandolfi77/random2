@@ -50,7 +50,8 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 4. Quit at Bell Rest, relaunch: **Continue** goes back to the same Bell Rest.
 5. Finish Day 1, relaunch: title shows **Day 2 · Morning**.
 6. Finish Day 2, relaunch: title shows **Day 3 · Morning**.
-7. Finish Day 3, relaunch: the Bell Map shows the Day 3 slice-complete card.
+7. Finish Day 3, relaunch: title shows **Day 4 · Morning**.
+8. Finish Day 4, relaunch: the Bell Map shows the Day 4 slice-complete card.
 
 ## Android export
 

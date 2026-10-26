@@ -707,14 +707,20 @@ func _end_round() -> void:
 	_prepare_enemy_intents()
 
 func _check_end() -> bool:
-	if living_enemies().is_empty():
-		phase = "victory"
-		_log("VICTORY — the song breaks. The Bell is quiet.")
-		return true
 	if living_party().is_empty():
 		phase = "defeat"
 		_log("DEFEAT — the Bell catches you. Rewind and try again.")
 		return true
+	if living_enemies().is_empty():
+		phase = "victory"
+		_log("VICTORY — the song breaks. The Bell is quiet.")
+		return true
+	if encounter_id == &"clockwork_saint":
+		for enemy in living_enemies():
+			if enemy.id == &"clockwork_saint" and enemy.hp * 10 <= enemy.max_hp * 4:
+				phase = "victory"
+				_log("THE CLOCKWORK SAINT WITHDRAWS — its bell heart is cracked, not broken.")
+				return true
 	return false
 
 # --- Enemy AI -----------------------------------------------------------
@@ -814,6 +820,8 @@ func _encounter_intro() -> String:
 			return "The Watch Hound steps out of the ash. It does not growl. It has already decided."
 		&"bellows":
 			return "The counterweights scream overhead. The Ashwright is waiting at the bottom, and the Choir is singing."
+		&"clockwork_saint":
+			return "The garden guardian wakes. Brass hands fold. Somewhere inside it, a small bell begins to ring."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -851,6 +859,17 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 		BattleAction.new(&"bay", "Bay", BattleTypes.Tone.HUSH, 10, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 1, false, "A sound the whole street remembers."),
 	])
 
+	var saint := BattleActor.new(&"clockwork_saint", "The Clockwork Saint", BattleTypes.Side.ENEMY, BattleTypes.Tone.HUSH, 200, 19, 14, 12)
+	saint.is_boss = true
+	saint.max_resolve = 99
+	saint.resolve = 99
+	saint.actions = _actions([
+		BattleAction.new(&"procession", "Procession", BattleTypes.Tone.HUSH, 16, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"slowed", 2, true, "A measured step that does not stop."),
+		BattleAction.new(&"bell_gear", "Bell Gear", BattleTypes.Tone.EMBER, 18, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, true, "A gear tooth strikes like a spark."),
+		BattleAction.new(&"rewind", "Rewind", BattleTypes.Tone.HUSH, 0, 0, BattleTypes.TargetRule.SELF, 20, &"", 0, true, "The Saint turns its own hour back."),
+		BattleAction.new(&"censure", "Censure", BattleTypes.Tone.HUSH, 24, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 1, false, "A verdict delivered in brass."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -872,6 +891,8 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			choir.hp = 95
 			choir.attack = 16
 			return [ashwright, choir]
+		&"clockwork_saint":
+			return [saint]
 		_:
 			return out
 

@@ -250,6 +250,15 @@ func _test_encounters() -> void:
 	_assert(bellows.enemies.size() == 2, "the Bellows encounter has two enemies")
 	_assert(bellows.enemies[0].is_boss, "the Ashwright leads the Bellows encounter")
 	_assert(bellows.enemies[0].max_hp == 170, "the Ashwright is reforged for Day 3")
+	var saint := _new_sim()
+	saint.start(1, &"clockwork_saint")
+	_assert(saint.enemies.size() == 1, "the Clockwork Saint fights alone")
+	_assert(saint.enemies[0].max_hp == 200, "the Clockwork Saint is a boss")
+	saint.enemies[0].hp = 81
+	_assert(not saint._check_end(), "the Clockwork Saint holds above its retreat threshold")
+	saint.enemies[0].hp = 80
+	_assert(saint._check_end(), "the Clockwork Saint retreats at 40 percent")
+	_assert(saint.phase == "victory", "the retreat counts as a victory")
 	var saved = JSON.parse_string(JSON.stringify(tutorial.to_save()))
 	var loaded := BattleSim.new()
 	loaded.load_save(saved)

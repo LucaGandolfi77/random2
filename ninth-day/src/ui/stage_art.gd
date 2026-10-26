@@ -14,9 +14,9 @@ func _ready() -> void:
 func set_mode(bg_id: String) -> void:
 	mode = bg_id if bg_id != "" else "spire"
 	match mode:
-		"ember_row", "foundry", "checkpoint", "bellows":
+		"ember_row", "foundry", "checkpoint", "bellows", "garden":
 			tint = Palette.EMBER
-		"spire_night":
+		"spire_night", "clockwork", "roof":
 			tint = Palette.HUSH
 		_:
 			tint = Palette.BRASS
@@ -41,6 +41,12 @@ func _draw() -> void:
 			_draw_checkpoint()
 		"bellows":
 			_draw_bellows()
+		"garden":
+			_draw_garden()
+		"clockwork":
+			_draw_clockwork()
+		"roof":
+			_draw_roof()
 		"spire_night":
 			_draw_night_spire()
 		_:
@@ -143,6 +149,48 @@ func _draw_checkpoint() -> void:
 	for i in 3:
 		draw_line(Vector2(20, size.y * 0.22 + i * 10), Vector2(left - 24, size.y * 0.22 + i * 10), Color(tint.r, tint.g, tint.b, 0.06), 1.0)
 		draw_line(Vector2(right + 24, size.y * 0.22 + i * 10), Vector2(size.x - 20, size.y * 0.22 + i * 10), Color(tint.r, tint.g, tint.b, 0.06), 1.0)
+
+func _draw_garden() -> void:
+	var base := size.y * 0.84
+	draw_arc(Vector2(size.x * 0.5, size.y * 0.52), 96.0, PI, TAU, 40, Color(tint.r, tint.g, tint.b, 0.16), 1.5, true)
+	for row in 3:
+		var y := size.y * (0.56 + row * 0.11)
+		for i in 7:
+			var x := size.x * (0.16 + i * 0.115)
+			draw_line(Vector2(x, y + 10), Vector2(x, y - 10), Color(tint.r, tint.g, tint.b, 0.16), 1.0)
+			draw_circle(Vector2(x, y - 12), 3.0 + (row % 2), Color(tint.r, tint.g, tint.b, 0.24))
+	draw_line(Vector2(24, base), Vector2(size.x - 24, base), Color(tint.r, tint.g, tint.b, 0.18), 1.0)
+	for i in 4:
+		var x := size.x * (0.2 + i * 0.2)
+		draw_line(Vector2(x, size.y * 0.74), Vector2(x, base), Color(tint.r, tint.g, tint.b, 0.08), 1.0)
+
+func _draw_clockwork() -> void:
+	var cx := size.x * 0.5
+	var cy := size.y * 0.56
+	draw_circle(Vector2(cx, cy), 44.0, Color(tint.r, tint.g, tint.b, 0.06))
+	draw_arc(Vector2(cx, cy), 44.0, 0, TAU, 48, Color(tint.r, tint.g, tint.b, 0.26), 2.0, true)
+	for gear in 2:
+		var center := Vector2(cx - 78 + gear * 156, cy + 26 - gear * 42)
+		var radius := 30.0 - gear * 6
+		draw_arc(center, radius, 0, TAU, 36, Color(tint.r, tint.g, tint.b, 0.2), 1.5, true)
+		for i in 10:
+			var angle := TAU * i / 10.0
+			draw_line(center + Vector2(cos(angle), sin(angle)) * radius, center + Vector2(cos(angle), sin(angle)) * (radius + 7), Color(tint.r, tint.g, tint.b, 0.18), 1.0)
+	draw_line(Vector2(cx - 8, cy - 20), Vector2(cx + 6, cy + 16), Color(tint.r, tint.g, tint.b, 0.24), 2.0, true)
+	draw_circle(Vector2(cx, cy), 5.0, Color(tint.r, tint.g, tint.b, 0.3))
+
+func _draw_roof() -> void:
+	var base := size.y * 0.8
+	draw_circle(Vector2(size.x * 0.78, size.y * 0.2), 26.0, Color(tint.r, tint.g, tint.b, 0.16))
+	draw_circle(Vector2(size.x * 0.76, size.y * 0.18), 23.0, Palette.BG_RAISED)
+	for i in 4:
+		var x := size.x * (0.1 + i * 0.26)
+		var h := size.y * (0.26 + (i % 2) * 0.1)
+		draw_rect(Rect2(Vector2(x, base - h), Vector2(size.x * 0.16, h)), Color(0.06, 0.05, 0.08, 0.9))
+		draw_line(Vector2(x, base - h), Vector2(x + size.x * 0.16, base - h), Color(tint.r, tint.g, tint.b, 0.16), 1.0)
+	draw_line(Vector2(0, base), Vector2(size.x, base), Color(tint.r, tint.g, tint.b, 0.16), 1.0)
+	draw_circle(Vector2(size.x * 0.68, base - 8), 5.0, Color(tint.r, tint.g, tint.b, 0.32))
+	draw_line(Vector2(size.x * 0.68, base - 8), Vector2(size.x * 0.68, base - 20), Color(tint.r, tint.g, tint.b, 0.26), 1.5)
 
 func _draw_night_spire() -> void:
 	var cx := size.x * 0.5

@@ -14,6 +14,11 @@
 			"morning": ["chainbreaker", "iron_lung", "counterweight_heart"],
 			"afternoon": ["choir_note", "ash_witness", "the_bellows"],
 			"night": ["refused_offer", "deep_air", "third_shift"]
+		},
+		"4": {
+			"morning": ["memory_rose", "oria_blessing", "garden_hush"],
+			"afternoon": ["saint_gear", "wren_song", "name_kept"],
+			"night": ["clockwork_heart", "procession_step", "first_wren"]
 		}
 	},
 	"cards": {
@@ -205,6 +210,69 @@
 			"description": "The foundry never sleeps. Neither do you, not anymore.",
 			"effect": "+1 attack and +1 speed to the party.",
 			"modifiers": {"attack": 1, "speed": 1}
+		},
+		"memory_rose": {
+			"name": "A Rose From the Memory Garden",
+			"type": "Bond",
+			"description": "It has no scent. It remembers having one.",
+			"effect": "+3 max HP to the party.",
+			"modifiers": {"max_hp": 3}
+		},
+		"oria_blessing": {
+			"name": "Oria's Blessing",
+			"type": "Bond",
+			"description": "A hand on the brow, a name spoken correctly.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"garden_hush": {
+			"name": "The Garden's Hush",
+			"type": "Stat",
+			"description": "The quiet between one name and the next.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"saint_gear": {
+			"name": "A Saint's Gear",
+			"type": "Skill",
+			"description": "It turns backward when you are not looking.",
+			"effect": "+1 attack to the party.",
+			"modifiers": {"attack": 1}
+		},
+		"wren_song": {
+			"name": "The Wren's Song",
+			"type": "Bond",
+			"description": "Four notes, repeated. You have heard them before the first day.",
+			"effect": "+1 speed to the party.",
+			"modifiers": {"speed": 1}
+		},
+		"name_kept": {
+			"name": "A Name Kept",
+			"type": "Bond",
+			"description": "The Bell cannot take what you refuse to let it hear.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"clockwork_heart": {
+			"name": "Clockwork Heart",
+			"type": "Stat",
+			"description": "A small brass thing that keeps time even when you do not.",
+			"effect": "+1 defense and +5 max HP to the party.",
+			"modifiers": {"defense": 1, "max_hp": 5}
+		},
+		"procession_step": {
+			"name": "The Procession Step",
+			"type": "Skill",
+			"description": "A measured pace that outlasts panic.",
+			"effect": "+1 attack and +1 speed to the party.",
+			"modifiers": {"attack": 1, "speed": 1}
+		},
+		"first_wren": {
+			"name": "The First Wren",
+			"type": "Bond",
+			"description": "A girl on a roof, counting bells. She gets to nine before you do.",
+			"effect": "+6 max HP to the party.",
+			"modifiers": {"max_hp": 6}
 		}
 	}
 }

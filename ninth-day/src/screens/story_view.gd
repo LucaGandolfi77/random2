@@ -181,6 +181,16 @@ func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if RunState.day == 4:
+		match phase:
+			"morning":
+				return "The garden closes around you. At the chapel root, something brass has begun to wake."
+			"afternoon":
+				return "The Saint's bell heart rings once. The garden holds its breath."
+			"night":
+				return "Wren is still counting on the roof. What you keep now will survive the reset."
+			_:
+				return "The Bell waits."
 	if RunState.day == 3:
 		match phase:
 			"morning":
@@ -237,6 +247,8 @@ func _speaker_color(speaker: String) -> Color:
 			return Palette.HUSH
 		"Oria":
 			return Palette.PAPER
+		"Wren":
+			return Palette.BRASS
 		_:
 			return Palette.BRASS
 
@@ -250,6 +262,8 @@ func _speaker_glyph(speaker: String) -> String:
 			return "I"
 		"Oria":
 			return "O"
+		"Wren":
+			return "W"
 		_:
 			return "◉"
 
@@ -265,19 +279,35 @@ func _background_caption(bg_id: String) -> String:
 			return "THE FOUNDRY"
 		"bellows":
 			return "THE BELLOWS"
+		"garden":
+			return "THE MEMORY GARDENS"
+		"clockwork":
+			return "THE CLOCKWORK SAINT"
+		"roof":
+			return "THE SPIRE ROOF · NIGHT"
 		"spire_night":
 			return "THE SPIRE · NIGHT"
 		_:
 			return "AUREL"
 
 func _default_bg() -> String:
+	if RunState.day == 4:
+		match phase:
+			"morning":
+				return "garden"
+			"afternoon":
+				return "clockwork"
+			"night":
+				return "roof"
+	if RunState.day == 3 and phase == "morning":
+		return "bellows"
 	match phase:
 		"afternoon":
 			return "ember_row"
 		"night":
 			return "spire_night"
 		_:
-			return "bellows" if RunState.day == 3 else "spire"
+			return "spire"
 
 func _clear_choices() -> void:
 	for child in _choice_box.get_children():
