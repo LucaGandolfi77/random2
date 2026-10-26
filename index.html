@@ -775,7 +775,7 @@
     <header class="hero">
       <p class="kicker">GitHub Pages · PWA Arcade</p>
       <h1>random<span class="grad">2</span></h1>
-      <p class="sub">A shelf of installable mini-games and one dev tool. Everything runs right in the browser — no accounts, no downloads.</p>
+      <p class="sub">A shelf of installable mini-games, a media player and one dev tool. Everything runs right in the browser — no accounts, no downloads.</p>
       <p class="hint">On iPhone: tap <strong>Share → Add to Home Screen</strong> inside a game for fullscreen, offline play.</p>
       <p class="hint">🐍 Snake daily challenge seed: <strong id="daily-seed">—</strong> · rolls over at midnight</p>
 
@@ -928,6 +928,21 @@
           <div class="actions">
             <a class="btn btn-play" href="inner-circle-pwa/">▶&nbsp; Play</a>
             <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/inner-circle-pwa" aria-label="Inner Circle source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card reveal" data-tags="app music video" data-playable="purr-player-pwa/" style="--c1:#9bd6a3; --c2:#d9a06b; --tile-glow:rgba(155,214,163,.55); --shimmer-delay:.64s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#9bd6a3,#b97b4e)">🐱</div>
+            <h2>Purr Player</h2>
+          </div>
+          <p class="tagline">A music and video player with the cat behind the glass. Your MP3s and films stay on the phone, in a library that survives a reload.</p>
+          <div class="chips"><span class="chip">MUSIC</span><span class="chip">VIDEO</span><span class="chip">OFFLINE</span><span class="chip">INDEXEDDB</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="purr-player-pwa/">▶&nbsp; Open</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/purr-player-pwa" aria-label="Purr Player source code">
               <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
             </a>
           </div>
@@ -1466,7 +1481,7 @@
     </main>
 
     <footer>
-      <p>All games are procedural — no binary assets, no tracking, works offline once installed.</p>
+      <p>Games are procedural; the player uses one cat photo as its background. No tracking, and everything works offline once installed.</p>
       <p><a href="https://github.com/LucaGandolfi77/random2">github.com/LucaGandolfi77/random2</a></p>
       <p><a href="portfolio/">Portfolio — the same work as six case studies ↗</a></p>
       <div class="foot-badges">
@@ -2421,6 +2436,7 @@
 
     var SKETCH_BY_SLUG = {
       "inner-circle-pwa":["faces",   { period: 4.4 }],
+      "purr-player-pwa": ["pulse",   { period: 3.4 }],
       "sector7-pwa":     ["orbit",   null],
       "bucio":           ["vortex",  null],
       "territorio-pwa":  ["grid",    { period: 5.5 }],

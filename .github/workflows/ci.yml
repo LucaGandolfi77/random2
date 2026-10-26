@@ -151,6 +151,9 @@ jobs:
           # power rules, danger timing, seeded daily queues, roster sanitising
           # and the offline asset/manifest contract.
           node --test inner-circle-pwa/tests/*.test.mjs
+          # PURR PLAYER: filename/format helpers, plus the manifest, icon set,
+          # service-worker precache list and the no-remote-resources rule.
+          node --test purr-player-pwa/tests/*.test.mjs
 
       - name: Analysis tooling tests
         run: |

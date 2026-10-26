@@ -73,8 +73,13 @@ for (const file of EXTRA) {
   pages.push({ file, loc: BASE + urlPath(file) });
 }
 
+const today = new Date().toISOString().slice(0, 10);
+
 const body = pages.map((p) => {
-  const date = lastmod(p.file) || lastmod(p.file.replace(/index\.html$/, "")) || "2026-01-01";
+  /* A page that is staged but not committed yet has no git date. Give it
+     today's date rather than a placeholder that would go stale on the first
+     deploy; once the commit exists, its real date takes over. */
+  const date = lastmod(p.file) || lastmod(p.file.replace(/index\.html$/, "")) || today;
   return `  <url>\n    <loc>${p.loc}</loc>\n    <lastmod>${date}</lastmod>\n  </url>`;
 }).join("\n");
 

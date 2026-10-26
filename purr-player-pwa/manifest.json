@@ -1,0 +1,19 @@
+{
+  "name": "Purr Player — musica e video",
+  "short_name": "Purr Player",
+  "description": "Un lettore MP3 e video che vive sul tuo telefono. Libreria salvata sul dispositivo, riproduzione offline e un gatto di sfondo.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "it",
+  "background_color": "#100c0d",
+  "theme_color": "#100c0d",
+  "categories": ["music", "video", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

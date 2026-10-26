@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Purr Player — musica e video</title>
+  <meta name="theme-color" content="#100c0d">
+  <meta name="description" content="Un lettore musicale e video che vive sul tuo telefono. Scegli i tuoi MP3 e video, ascoltali offline e guarda il gatto. Niente upload, niente account.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Purr Player">
+  <meta property="og:title" content="Purr Player — musica e video">
+  <meta property="og:description" content="I tuoi MP3 e video, con un gatto di sfondo. Offline, privato, installabile.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <img class="bg-photo" src="icons/cat-bg.jpg" alt="">
+    <div class="bg-shade"></div>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">🐾</span>
+        <span class="brand-copy">
+          <strong>PURR <em>PLAYER</em></strong>
+          <small>musica e video, sul tuo telefono</small>
+        </span>
+      </div>
+      <div class="top-actions">
+        <button id="installBtn" class="icon-btn install" type="button" hidden aria-label="Installa Purr Player">⤓</button>
+        <button id="libraryBtn" class="icon-btn" type="button" aria-expanded="false" aria-controls="libraryPanel" aria-label="Apri la libreria">☰</button>
+        <button id="addBtn" class="btn primary" type="button" aria-label="Aggiungi file">＋ <span>Aggiungi</span></button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <section id="emptyState" class="empty">
+        <div class="glass empty-card">
+          <p class="eyebrow">Il tuo gatto, la tua musica</p>
+          <h1>Metti un po' di<br><span>musica in casa.</span></h1>
+          <p class="lede">Scegli i tuoi MP3 o i tuoi video. Restano su questo dispositivo, si riproducono anche offline e non vengono mai caricati da nessuna parte.</p>
+          <div class="empty-actions">
+            <button id="emptyAdd" class="btn primary big" type="button">＋ Scegli file</button>
+            <button id="emptyHow" class="btn ghost" type="button">Come funziona</button>
+          </div>
+          <p class="hint">MP3, M4A, OGG, MP4, WebM e tutto ciò che Chrome sa riprodurre.</p>
+        </div>
+      </section>
+
+      <section id="audioStage" class="audio-stage hidden" aria-live="polite">
+        <div id="disc" class="disc-wrap">
+          <img class="disc-photo" src="icons/cat-bg.jpg" alt="Il gatto di Purr Player">
+          <span class="disc-ring" aria-hidden="true"></span>
+          <span class="disc-hole" aria-hidden="true">🐾</span>
+        </div>
+        <p class="eyebrow">In riproduzione</p>
+        <h1 id="audioTitle" class="now-title">—</h1>
+        <p id="audioMeta" class="now-meta">Audio</p>
+        <div id="eq" class="eq" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </section>
+
+      <section id="videoStage" class="video-stage hidden" aria-label="Video in riproduzione">
+        <video id="videoEl" class="video-el" playsinline controls preload="metadata"></video>
+        <p id="videoMeta" class="video-caption">Video</p>
+      </section>
+
+      <audio id="audioEl" preload="metadata"></audio>
+    </main>
+
+    <footer class="player" id="player" aria-label="Controlli di riproduzione">
+      <div class="progress-row">
+        <span id="curTime" class="time">0:00</span>
+        <input id="seek" class="seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Posizione del brano" disabled>
+        <span id="durTime" class="time">0:00</span>
+      </div>
+      <div class="player-main">
+        <div id="playerArt" class="player-art" aria-hidden="true">
+          <img src="icons/icon-192.png" alt="">
+          <span id="artBadge" class="art-badge">♪</span>
+        </div>
+        <div class="player-copy">
+          <strong id="trackTitle">Nessun brano</strong>
+          <span id="trackMeta">Aggiungi un file per iniziare</span>
+        </div>
+        <div class="controls">
+          <button id="shuffleBtn" class="icon-btn subtle" type="button" aria-pressed="false" aria-label="Riproduzione casuale">⤨</button>
+          <button id="prevBtn" class="icon-btn" type="button" aria-label="Brano precedente" disabled>⏮</button>
+          <button id="playBtn" class="play-btn" type="button" aria-label="Riproduci" disabled>▶</button>
+          <button id="nextBtn" class="icon-btn" type="button" aria-label="Brano successivo" disabled>⏭</button>
+          <button id="repeatBtn" class="icon-btn subtle" type="button" aria-label="Ripetizione disattivata">⟲</button>
+        </div>
+        <button id="muteBtn" class="icon-btn mute-btn" type="button" aria-label="Muta">🔊</button>
+      </div>
+      <div class="volume-row desktop-only">
+        <span>Volume</span>
+        <input id="volume" class="volume" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume">
+      </div>
+    </footer>
+  </div>
+
+  <div id="libraryBackdrop" class="backdrop hidden"></div>
+  <aside id="libraryPanel" class="library-panel" aria-hidden="true" aria-labelledby="libraryTitle">
+    <div class="library-head">
+      <div>
+        <p class="eyebrow">Libreria</p>
+        <h2 id="libraryTitle">I tuoi file</h2>
+        <p id="libraryCount" class="library-count">0 file</p>
+      </div>
+      <button id="libraryClose" class="icon-btn" type="button" aria-label="Chiudi la libreria">✕</button>
+    </div>
+    <div class="library-tools">
+      <button id="libraryAdd" class="btn primary wide" type="button">＋ Aggiungi file</button>
+    </div>
+    <ul id="trackList" class="track-list" aria-label="File nella libreria"></ul>
+    <div id="libraryEmpty" class="library-empty">
+      <span aria-hidden="true">🎧</span>
+      <p>La libreria è vuota.<br>Aggiungi un MP3 o un video.</p>
+    </div>
+    <div class="library-foot">
+      <span id="storageInfo">Spazio usato: —</span>
+      <button id="clearBtn" class="link-btn" type="button" disabled>Svuota libreria</button>
+    </div>
+  </aside>
+
+  <dialog id="howDialog" class="how-dialog">
+    <form method="dialog">
+      <p class="eyebrow">Tre cose da sapere</p>
+      <h2>Come funziona</h2>
+      <ol class="steps">
+        <li><b>Scegli i file.</b> Tocca “Aggiungi” e seleziona uno o più MP3 o video dal telefono. Puoi anche trascinarli qui da un computer.</li>
+        <li><b>Ascolta o guarda.</b> Il lettore in basso resta sempre a portata di pollice. I video hanno i controlli nativi, quindi puoi andare a schermo intero.</li>
+        <li><b>Torna quando vuoi.</b> La libreria è salvata in IndexedDB sul dispositivo: alla riapertura i file sono ancora lì, anche senza rete.</li>
+      </ol>
+      <p class="privacy-line">Nessun upload, nessun account, nessun tracker. I file non lasciano mai il telefono.</p>
+      <button class="btn primary wide" value="close">Ho capito</button>
+    </form>
+  </dialog>
+
+  <div id="drop" class="drop-overlay hidden" aria-hidden="true">
+    <div class="drop-card">
+      <span aria-hidden="true">↓</span>
+      <strong>Lascia qui i file</strong>
+      <p>MP3 e video entrano nella libreria.</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <input id="fileInput" type="file" accept="audio/*,video/*" multiple hidden>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

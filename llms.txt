@@ -1,8 +1,10 @@
 # random2
 
-A monorepo of installable mini-games (PWAs) and two analysis tools. Every
-web project runs entirely in the browser, works offline once installed, uses
-zero binary art assets (everything is drawn procedurally) and zero trackers.
+A monorepo of installable mini-games, a media player (all PWAs) and two
+analysis tools. Every web project runs entirely in the browser, works offline
+once installed, and has zero trackers. The games use no binary art assets
+(everything is drawn procedurally); `purr-player-pwa/` adds one photo as its
+background and app icons.
 
 ## Portfolio
 

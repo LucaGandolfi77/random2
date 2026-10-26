@@ -1,9 +1,10 @@
 # random2 · Play
 
-> A monorepo of installable mini-games (PWAs) and one desktop dev tool.
-> Every game runs entirely in the browser, is fully playable offline once
-> installed, uses **zero binary art assets** (everything is drawn procedurally
-> on canvas) and **zero trackers**.
+> A monorepo of installable mini-games, a media player (all PWAs) and one
+> desktop dev tool. Everything runs entirely in the browser and is fully
+> playable offline once installed, with **zero trackers**. The games use
+> **zero binary art assets** (everything is drawn procedurally on canvas);
+> Purr Player adds a single photo as its background and app icons.
 
 **Live arcade:** <https://lucagandolfi77.github.io/random2/>
 
@@ -45,6 +46,7 @@
   - [PIXEL CUP '96](#pixel-cup-96)
   - [CENSUS](#census)
   - [GULPER](#gulper)
+  - [Purr Player](#purr-player)
 - [The tools](#the-tools)
   - [PocketCode](#pocketcode)
   - [EADS Studio](#eads-studio)
@@ -109,6 +111,7 @@
 | 42 | **Sand Loop** | Photo-to-sand colour sort puzzle | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sand-loop-pwa/) |
 | 43 | **Pixel Ants** | Photo-to-pixel erosion puzzle | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pixel-ants-pwa/) |
 | 44 | **Inner Circle** | Photo-sticker friendship merge game | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/inner-circle-pwa/) |
+| 45 | **Purr Player** | MP3 and video player, cat background, persistent library | Vanilla JS + IndexedDB + Media Session | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/purr-player-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -1177,6 +1180,35 @@ python3 -m http.server 8080
 [▶ Play](https://lucagandolfi77.github.io/random2/gulper-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/gulper-pwa) ·
 [README](gulper-pwa/README.md)
+
+### Purr Player
+
+*Your music and films, with the cat behind the glass.* 🐱
+
+A local media player that reads MP3s and videos straight from the phone, keeps
+the library in IndexedDB and never uploads a byte.
+
+- **MP3 and video** — multi-file picker, drag and drop on desktop, one queue
+  with previous/next, shuffle and repeat.
+- **The library survives a reload.** Chosen files are stored as blobs in
+  IndexedDB and rehydrated as object URLs on the next visit; they also play
+  with the network off.
+- **Android-native touches** — Media Session controls on the lock screen,
+  native video fullscreen/PiP, safe-area layout and a custom install prompt.
+- **A photo, not a sprite sheet.** The background and icons are derived from
+  one cat photo; the app is otherwise plain HTML, CSS and ES modules with no
+  dependencies.
+- **Private by construction** — no upload, no account, no tracker, and
+  `Svuota libreria` removes only the app's copy of the files.
+
+```bash
+python3 -m http.server 8080
+# open http://localhost:8080/purr-player-pwa/
+```
+
+[▶ Open](https://lucagandolfi77.github.io/random2/purr-player-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/purr-player-pwa) ·
+[README](purr-player-pwa/README.md)
 
 ## The tools
 
