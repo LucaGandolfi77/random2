@@ -1,0 +1,15 @@
+name = "crew-of-one-api"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "crew-of-one"
+database_id = "replace-with-your-d1-id"
+
+[[kv_namespaces]]
+binding = "DAILY"
+id = "replace-with-your-kv-id"
+
+[vars]
+ENVIRONMENT = "development"

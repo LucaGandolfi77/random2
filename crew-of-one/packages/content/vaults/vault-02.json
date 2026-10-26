@@ -1,0 +1,41 @@
+{
+  "id": "vault-02",
+  "name": "The Night Watch",
+  "chapter": 1,
+  "loopSeconds": 30,
+  "maxEchoes": 3,
+  "parEchoes": 1,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 48, "y": 448 },
+  "exit": { "x": 272, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 144, "y": 32, "w": 32, "h": 192 },
+    { "x": 144, "y": 272, "w": 32, "h": 208 }
+  ],
+  "plates": [],
+  "doors": [],
+  "guards": [
+    {
+      "id": "guard-night",
+      "path": [{ "x": 160, "y": 248 }],
+      "facing": 3,
+      "waitMs": 0,
+      "speed": 55,
+      "visionRange": 170,
+      "visionAngleDeg": 100,
+      "hearingRadius": 140
+    }
+  ],
+  "gem": { "x": 272, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "The guard follows echoes. It cannot catch them.",
+    "Walk into his light, then rewind. Your echo will keep him busy."
+  ]
+}

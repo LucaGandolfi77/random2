@@ -1,0 +1,40 @@
+{
+  "id": "vault-01",
+  "name": "The Gallery",
+  "chapter": 1,
+  "loopSeconds": 30,
+  "maxEchoes": 3,
+  "parEchoes": 1,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 56, "y": 448 },
+  "exit": { "x": 272, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 32, "y": 160, "w": 160, "h": 32 }
+  ],
+  "plates": [
+    {
+      "id": "plate-a",
+      "x": 80,
+      "y": 288,
+      "radius": 24,
+      "mode": "hold",
+      "targets": ["door-a"]
+    }
+  ],
+  "doors": [
+    { "id": "door-a", "x": 192, "y": 160, "w": 96, "h": 32, "mode": "plate" }
+  ],
+  "guards": [],
+  "gem": { "x": 272, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "The door only opens while someone stands on the plate.",
+    "Rewind. Your echo will repeat everything you did."
+  ]
+}

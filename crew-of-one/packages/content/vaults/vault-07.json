@@ -1,0 +1,54 @@
+{
+  "id": "vault-07",
+  "name": "The Long Way",
+  "chapter": 2,
+  "loopSeconds": 30,
+  "maxEchoes": 3,
+  "parEchoes": 1,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 160, "y": 448 },
+  "exit": { "x": 272, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 96, "y": 32, "w": 32, "h": 224 },
+    { "x": 96, "y": 320, "w": 32, "h": 160 },
+    { "x": 128, "y": 160, "w": 64, "h": 32 }
+  ],
+  "plates": [
+    {
+      "id": "plate-a",
+      "x": 64,
+      "y": 288,
+      "radius": 24,
+      "mode": "hold",
+      "targets": ["door-a"]
+    }
+  ],
+  "doors": [
+    {
+      "id": "gate-a",
+      "x": 96,
+      "y": 256,
+      "w": 32,
+      "h": 64,
+      "mode": "oneway",
+      "passDirection": 3
+    },
+    { "id": "door-a", "x": 192, "y": 160, "w": 96, "h": 32, "mode": "plate" }
+  ],
+  "guards": [],
+  "cameras": [],
+  "levers": [],
+  "lasers": [],
+  "gem": { "x": 272, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "The side gate only opens one way. You can get in, but not out.",
+    "Let an echo take the one-way route and hold the plate. Take the long way yourself."
+  ]
+}

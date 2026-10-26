@@ -1,0 +1,51 @@
+{
+  "id": "vault-05",
+  "name": "The Archive",
+  "chapter": 2,
+  "loopSeconds": 30,
+  "maxEchoes": 3,
+  "parEchoes": 1,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 48, "y": 448 },
+  "exit": { "x": 272, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 }
+  ],
+  "plates": [],
+  "doors": [],
+  "guards": [],
+  "cameras": [
+    {
+      "id": "camera-a",
+      "x": 272,
+      "y": 128,
+      "facing": 2,
+      "fovDeg": 60,
+      "range": 260,
+      "sweepDeg": 40,
+      "sweepMs": 5000,
+      "phaseMs": 0
+    }
+  ],
+  "levers": [
+    {
+      "id": "lever-a",
+      "x": 272,
+      "y": 448,
+      "radius": 28,
+      "mode": "hold",
+      "targetIds": ["camera-a"]
+    }
+  ],
+  "gem": { "x": 272, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "The camera covers the whole corridor. The breaker lever is at the bottom.",
+    "The lever only works while someone holds it. Leave an echo behind."
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "id": "vault-03",
+  "name": "Two Hands",
+  "chapter": 1,
+  "loopSeconds": 30,
+  "maxEchoes": 4,
+  "parEchoes": 2,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 56, "y": 448 },
+  "exit": { "x": 272, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 32, "y": 160, "w": 160, "h": 32 }
+  ],
+  "plates": [
+    {
+      "id": "plate-a",
+      "x": 80,
+      "y": 288,
+      "radius": 24,
+      "mode": "hold",
+      "targets": ["door-a"]
+    },
+    {
+      "id": "plate-b",
+      "x": 240,
+      "y": 288,
+      "radius": 24,
+      "mode": "hold",
+      "targets": ["door-a"]
+    }
+  ],
+  "doors": [
+    { "id": "door-a", "x": 192, "y": 160, "w": 96, "h": 32, "mode": "plate" }
+  ],
+  "guards": [],
+  "gem": { "x": 272, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "Both plates must be held at the same time.",
+    "You only have two hands. Good thing you have more than one self."
+  ]
+}

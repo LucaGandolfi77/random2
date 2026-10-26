@@ -1,0 +1,20 @@
+{
+  "name": "crew-of-one",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "scripts": {
+    "dev:web": "pnpm --filter @crew-of-one/web dev",
+    "dev:api": "pnpm --filter @crew-of-one/api dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "validate:vaults": "tsx tools/validate-vaults.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.0"
+  }
+}

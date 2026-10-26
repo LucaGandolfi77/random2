@@ -1,0 +1,14 @@
+node_modules/
+dist/
+dev-dist/
+.wrangler/
+.env
+.env.*
+!.env.example
+*.local
+.DS_Store
+coverage/
+playwright-report/
+test-results/
+art/exports/*.png
+art/exports/*.json

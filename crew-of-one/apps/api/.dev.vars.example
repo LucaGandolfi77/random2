@@ -1,0 +1,2 @@
+ENTITLEMENT_SECRET=replace-with-a-long-random-string
+LEMON_SQUEEZY_WEBHOOK_SECRET=replace-with-your-webhook-secret
