@@ -19,7 +19,8 @@ The slice runs:
 
 **Title → Bell Map → Day 1 Morning (story + Hollow Choir tutorial) → Bell Rest → Afternoon (story + Ashwright) → Bell Rest → Night (story + choice) → Bell Rest → Day 1 complete**
 
-- The story has branching choices that set flags and raise bonds.
+- The story is authored in **Ink** and runs on the vendored **inkgd** runtime.
+- Branching choices set flags and raise bonds.
 - Each battle is a full Echo Track encounter with previews and a confirm step.
 - Bell Rest offers three Inheritance cards per phase and equips the one you take.
 - Progress, choices, and equipped memories autosave and resume.
@@ -42,6 +43,27 @@ Requires Godot 4.7.x Android export templates, Android build-tools 35, and JDK 1
 
 The current debug build is **55 MB** because it includes both `arm64-v8a` and `x86_64` (for emulator testing). Package `com.ninthday.game`, version `0.1.0`, min SDK 24, target SDK 36. It has been exported and signature-verified. A release preset should ship `arm64-v8a` only. See [`docs/MOBILE_CHECKLIST.md`](docs/MOBILE_CHECKLIST.md).
 
+## Authoring Ink
+
+Day 1 lives in [`content/ink/day_01.ink`](content/ink/day_01.ink). Lines carry presentation tags:
+
+```ink
+The Bell is cracking. # id:d1m_005 # speaker:Mara # bg:spire
+* [Take her hand.] # flag:mara_trust # bond:mara:1
+```
+
+- `id` marks a line as seen for future skip-read support.
+- `speaker`, `bg`, `portrait`, and `expression` drive presentation.
+- `flag` and `bond` are mirrored into `RunState` when the choice is taken.
+
+Compile the source to the JSON consumed by inkgd:
+
+```bash
+INKLECATE_BIN=/path/to/inklecate ./ninth-day/tools/compile_ink.sh
+```
+
+The compiled `day_01.ink.json` is checked in, so players never need inklecate. The runtime adapter is [`src/narrative/story_service.gd`](src/narrative/story_service.gd); inkgd is vendored at [`addons/inkgd`](addons/inkgd) from the `godot4` branch, commit `fea9098`.
+
 ## Run the tests
 
 ```bash
@@ -53,8 +75,8 @@ GODOT_BIN=/path/to/godot ./ninth-day/tools/run_tests.sh
 
 Two suites run headlessly:
 
-1. **Battle suite** — deterministic simulation, Echo rules, tones, Resonance, Chord, encounters, previews, save/restore, narrative runner, inheritances.
-2. **Flow suite** — boots the real screens and drives `title → map → story → battle → Bell Rest → map` across all three Day 1 phases.
+1. **Battle suite** — deterministic simulation, Echo rules, tones, Resonance, Chord, encounters, previews, save/restore, and inheritances.
+2. **Flow suite** — boots the real screens and drives `title → map → Ink story → battle → Bell Rest → map` across all three Day 1 phases, including tag parsing and choice flags.
 
 ## Controls
 
@@ -81,8 +103,11 @@ Two suites run headlessly:
 ```
 ninth-day/
   project.godot
+  addons/
+    inkgd/                       # vendored Ink runtime (MIT)
   content/
-    stories/day_01.json          # Day 1 dialogue, choices, flags
+    ink/day_01.ink               # Day 1 story source
+    ink/day_01.ink.json          # compiled Ink consumed at runtime
     inheritances.json            # Bell Rest cards and modifiers
   docs/
     GDD.md
@@ -90,7 +115,7 @@ ninth-day/
     MOBILE_CHECKLIST.md
   src/
     core/run_state.gd            # meta save: day, phases, flags, bonds, cards
-    narrative/story_service.gd   # dialogue runner (InkService-shaped API)
+    narrative/story_service.gd   # InkPlayer adapter and tag/flag bridge
     progression/inheritance_db.gd
     battle/
       battle_types.gd            # enums and tone rules
@@ -117,6 +142,7 @@ ninth-day/
   tools/
     run_tests.sh
     fetch_godot.sh
+    compile_ink.sh
     export_android.sh
     make_icons.gd
     capture_battle.gd/.tscn      # screenshot helper
@@ -145,7 +171,7 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 ## Known limitations
 
 - Day 2–9 content is not authored yet.
-- The dialogue runner is a small, deterministic JSON-based stand-in for **inkgd**. Its API mirrors the planned `InkService`, so the swap is isolated to `story_service.gd` and `story_view.gd`.
+- Ink state is not saved mid-scene; quitting during a story phase returns to the Bell Map.
 - Art is typographic greybox: no portraits, backgrounds, music, SFX, or haptics yet.
 - The turn model is party-phase then enemy-phase, not the final speed timeline.
 - Statuses are minimal: Burning, Marked, Slowed. Slowed is displayed but does not yet alter order.
@@ -155,14 +181,17 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 
 ## Next
 
-1. Replace the dialogue stand-in with `inkgd` and port Day 1 to `.ink`.
-2. Author Day 2 and the Bell Map's bond/knowledge unlocks.
-3. Add party swap, items, and the speed timeline.
+1. Author Day 2 and the Bell Map's bond/knowledge unlocks.
+2. Add party swap, items, and the speed timeline.
+3. Persist mid-scene Ink state and add skip-read support.
 4. Art pass: portraits, paper/brass UI, tone VFX, sound, haptics.
-5. Safe-area and touch-target audit on device.
-6. Android debug export, then the iOS pass.
+5. Run the debug APK on physical Android hardware and complete the safe-area/touch audit.
+6. iOS export and store integrations.
 7. Cosmetic archive and the free-story monetization boundary.
 
-## License
+## Third-party notices
+
+- **inkgd** — MIT, © 2018–2023 Paul Joannon, © 2019–2023 Frédéric Maquin. Vendored from the `godot4` branch at commit `fea9098`.
+- **Ink** — MIT, © inkle Ltd. Day 1 is compiled with `inklecate`.
 
 Add a project license before distributing builds.

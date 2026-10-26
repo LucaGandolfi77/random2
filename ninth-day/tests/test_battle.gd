@@ -25,7 +25,6 @@ func _initialize() -> void:
 	_test_store()
 	_test_encounters()
 	_test_modifiers()
-	_test_story()
 	_test_inheritances()
 	_test_determinism()
 	print("----------------------------------")
@@ -258,30 +257,6 @@ func _test_modifiers() -> void:
 	_assert(cael.attack == before_attack + 1, "an inheritance can raise attack")
 	_assert(cael.max_resolve == before_resolve + 1, "an inheritance can raise max Resolve")
 	_assert(cael.resolve == before_resolve + 1, "raising max Resolve also raises current Resolve")
-
-func _test_story() -> void:
-	var state = load("res://src/core/run_state.gd").new()
-	var service := StoryService.new()
-	service.state = state
-	_assert(service.start("day_01_morning"), "the Day 1 morning story loads")
-	_assert(service.story_title() == "The Crack", "the story reports its title")
-	_assert(String(service.current_line().get("id", "")) == "d1m_001", "the first line is ready")
-	for i in 7:
-		service.advance()
-	_assert(String(service.current_line().get("id", "")) == "d1m_008", "advancing reaches the final setup line")
-	service.advance()
-	_assert(service.current_choices().size() == 2, "the story offers two anchored choices")
-	_assert(service.current_prompt().contains("Mara"), "the choice prompt names the moment")
-	service.choose(0)
-	_assert(bool(state.get_flag("mara_trust")), "a choice sets its flag")
-	_assert(state.bond_rank("mara") >= 1, "a choice raises its bond")
-	_assert(String(service.current_line().get("id", "")) == "d1m_009", "the choice branches to the right line")
-	for i in 4:
-		service.advance()
-	_assert(service.is_finished(), "the story reaches its end")
-	_assert(not service.start("missing_story"), "an unknown story is rejected")
-	service.free()
-	state.free()
 
 func _test_inheritances() -> void:
 	var offers := InheritanceDB.offers("morning")

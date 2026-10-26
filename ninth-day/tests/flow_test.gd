@@ -32,6 +32,11 @@ func _run() -> void:
 
 	var story := get_tree().current_scene
 	_assert(story.service.story_title() == "The Crack", "the story opens on the right scene")
+	if not await _wait_for_story_ready(story):
+		return _finish()
+	_assert(String(story.service.current_line().get("id", "")) == "d1m_001", "Ink returns the first line")
+	_assert(String(story.service.current_line().get("speaker", "")) == "Narration", "Ink tags parse the speaker")
+	_assert(String(story.service.current_line().get("bg", "")) == "spire", "Ink tags parse the background")
 	var steps := 0
 	while story._mode != "ended" and steps < 40:
 		steps += 1
@@ -131,8 +136,10 @@ func _run() -> void:
 	_finish()
 
 func _drive_story(story: Node) -> bool:
+	if not await _wait_for_story_ready(story):
+		return false
 	var steps := 0
-	while story._mode != "ended" and steps < 40:
+	while story._mode != "ended" and steps < 60:
 		steps += 1
 		if story._mode == "choices":
 			story.service.choose(0)
@@ -141,6 +148,15 @@ func _drive_story(story: Node) -> bool:
 		await get_tree().process_frame
 	_assert(story._mode == "ended", "the story reaches its closing card")
 	return story._mode == "ended"
+
+func _wait_for_story_ready(story: Node) -> bool:
+	for i in 60:
+		await get_tree().process_frame
+		var line: Dictionary = story.service.current_line()
+		if not line.is_empty():
+			return true
+	_assert(false, "timed out waiting for Ink to return a line")
+	return false
 
 func _wait_for_scene(scene_name: String) -> bool:
 	for i in 120:

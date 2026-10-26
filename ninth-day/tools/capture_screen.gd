@@ -46,10 +46,17 @@ func _ready() -> void:
 	add_child(scene)
 	scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
+	if screen in ["story", "story_afternoon", "story_night", "choices"]:
+		for i in 60:
+			await get_tree().process_frame
+			if not scene.service.current_line().is_empty():
+				break
 	if screen == "choices":
-		await get_tree().process_frame
-		for i in 8:
+		var steps := 0
+		while scene._mode != "choices" and steps < 60:
+			steps += 1
 			scene.service.advance()
+			await get_tree().process_frame
 	if screen == "rest":
 		await get_tree().process_frame
 		scene._on_card_selected("burnt_sugar")

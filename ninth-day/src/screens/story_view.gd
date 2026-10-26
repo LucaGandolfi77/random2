@@ -126,7 +126,7 @@ func _on_choices_ready(prompt: String, choices: Array) -> void:
 	_continue_button.visible = false
 	_clear_choices()
 	_prompt_label.text = prompt
-	_prompt_label.visible = true
+	_prompt_label.visible = prompt != ""
 	for i in choices.size():
 		var choice: Dictionary = choices[i]
 		var button := Ui.button(String(choice.get("text", "...")), 50)
