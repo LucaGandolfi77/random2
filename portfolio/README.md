@@ -3,7 +3,7 @@
 > A UI/UX and frontend portfolio for Luca Gandolfi, bilingual EN/IT.
 
 *One page, no build step, no dependencies.* It exists because the arcade
-presents 44 projects as a list of things to play, and that is the wrong shape
+presents 54 projects as a list of things to play, and that is the wrong shape
 for someone deciding whether to hire you. This page presents nine of them as
 problems that were solved.
 
@@ -46,7 +46,7 @@ dashed and carries a `TODO` badge, so nobody can mistake it for a fact.
 
 ## The hero canvas
 
-`assets/hero.js` draws one point per project in the arcade — forty-four of
+`assets/hero.js` draws one point per project in the arcade — fifty-four of
 them — drifting slowly, with a line to each near neighbour. Every pixel is
 computed and there is not one image file in it, which is the point: the page
 claims "0 binary art assets" in words, and here it performs the claim.
@@ -102,7 +102,7 @@ substantiate the claim.
 | 05 | `ironfall-pwa` | A draw-call budget test and two simulation/renderer invariants. The strongest "engineering discipline" story. |
 | 06 | `pulse-pwa` | A rhythm game with zero audio assets, seeded and reproducible. The most unusual project. |
 | 07 | `tools/balance/` | A Monte-Carlo harness that plays 5,000 seeded sessions of the real simulation. The strongest "I measure instead of guessing" story. |
-| 08 | `shared/` | One audio helper, one seeded RNG and one chart library, used by 36 projects. The strongest "I think in systems" story. |
+| 08 | `shared/` | One audio helper, one seeded RNG and one chart library, used by 42 projects. The strongest "I think in systems" story. |
 | 09 | `EADS/` | An embedded debugger speaking gdb/MI over a serial link. The strongest non-web project here. |
 
 `new-star-soccer/`, `snap-pwa/` and `pokesurvivor-bot/` are linked from the

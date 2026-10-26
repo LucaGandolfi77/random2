@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#172017"/>
+      <stop offset="0.55" stop-color="#0d130e"/>
+      <stop offset="1" stop-color="#070a07"/>
+    </linearGradient>
+    <linearGradient id="pixels" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6d37a"/>
+      <stop offset="0.45" stop-color="#ff8a62"/>
+      <stop offset="1" stop-color="#4d9d92"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="42" fill="url(#bg)"/>
+  <rect x="24" y="24" width="144" height="144" rx="18" fill="#0d130e" stroke="#c9f27c" stroke-opacity="0.25" stroke-width="2"/>
+  <g>
+    <rect x="38" y="38" width="21" height="21" fill="#f6d37a"/>
+    <rect x="59" y="38" width="21" height="21" fill="#e8a05f"/>
+    <rect x="80" y="38" width="21" height="21" fill="#ff8a62"/>
+    <rect x="101" y="38" width="21" height="21" fill="#d76f5d"/>
+    <rect x="122" y="38" width="21" height="21" fill="#c18a5c"/>
+    <rect x="38" y="59" width="21" height="21" fill="#e8a05f"/>
+    <rect x="59" y="59" width="21" height="21" fill="#ff8a62"/>
+    <rect x="80" y="59" width="21" height="21" fill="#d76f5d"/>
+    <rect x="101" y="59" width="21" height="21" fill="#78a36a"/>
+    <rect x="122" y="59" width="21" height="21" fill="#4d9d92"/>
+    <rect x="38" y="80" width="21" height="21" fill="#d76f5d"/>
+    <rect x="59" y="80" width="21" height="21" fill="#78a36a"/>
+    <rect x="122" y="80" width="21" height="21" fill="#3d7e78"/>
+    <rect x="38" y="101" width="21" height="21" fill="#78a36a"/>
+    <rect x="59" y="101" width="21" height="21" fill="#4d9d92"/>
+    <rect x="80" y="101" width="21" height="21" fill="#3d7e78"/>
+    <rect x="101" y="101" width="21" height="21" fill="#b96f5c"/>
+    <rect x="122" y="101" width="21" height="21" fill="#e8a05f"/>
+  </g>
+  <g fill="#070a07" stroke="#c9f27c" stroke-opacity="0.18" stroke-width="1">
+    <rect x="101" y="80" width="21" height="21"/>
+    <rect x="80" y="122" width="21" height="21"/>
+    <rect x="101" y="122" width="21" height="21"/>
+  </g>
+  <g transform="translate(96 96)">
+    <rect x="-9" y="-3" width="7" height="7" fill="#c9f27c"/>
+    <rect x="-2" y="-3" width="7" height="7" fill="#eaffbd"/>
+    <rect x="4" y="-3" width="5" height="7" fill="#c9f27c"/>
+    <g stroke="#c9f27c" stroke-width="1.4" stroke-linecap="round">
+      <path d="M-6 4L-9 8M0 4L-1 9M5 4L8 8"/>
+      <path d="M-9 -1L-13 -3M11 -1L14 -3"/>
+    </g>
+  </g>
+  <g transform="translate(96 152)">
+    <path d="M-36-15h72l-8 22c-2 6-54 6-56 0z" fill="#172017" stroke="#c9f27c" stroke-opacity="0.42" stroke-width="2"/>
+    <rect x="-36" y="-18" width="72" height="7" rx="3" fill="#c9f27c"/>
+  </g>
+</svg>

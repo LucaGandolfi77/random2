@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Pixel Ants: Eat the Picture</title>
+  <meta name="theme-color" content="#0b0f0c">
+  <meta name="description" content="A calm pixel-erosion puzzle. Load a photo, send coloured ants to its exposed edge, and carry every pixel away one bucket at a time. Everything stays on your device.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pixel Ants">
+  <meta property="og:title" content="Pixel Ants: Eat the Picture">
+  <meta property="og:description" content="Load a photo, send coloured ants to the exposed edge, and carry every pixel away. A calm offline pixel puzzle.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar" id="topbar">
+      <button id="btnBack" class="icon-btn back hidden" type="button" aria-label="Back to menu">←</button>
+      <div class="brand" id="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>PIXEL <em>ANTS</em></span>
+      </div>
+      <div class="game-hud hidden" id="gameHud">
+        <div class="score-box">
+          <span>Score</span>
+          <b id="scoreValue">0</b>
+        </div>
+        <div class="time-box" title="Elapsed time">
+          <span>Time</span>
+          <b id="timeValue">00:00</b>
+        </div>
+        <button id="btnSound" class="icon-btn" type="button" aria-label="Toggle sound">🔊</button>
+        <button id="btnPause" class="icon-btn" type="button" aria-label="Pause">⏸</button>
+      </div>
+      <button id="btnHowMenu" class="text-btn menu-only" type="button">How to play</button>
+    </header>
+
+    <main id="menuScreen" class="menu-screen">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Pixel erosion puzzle</p>
+          <h1>Send the colony.<br><span>Eat the picture.</span></h1>
+          <p class="lede">Every photo becomes a wall of coloured pixels — 540, 2,160, 4,860 or 8,640 of them. Load a bucket, and its ants crawl to the exposed edge, bite out one pixel, and carry it home. The holes open new routes into the picture.</p>
+          <div class="hero-actions">
+            <button id="btnUploadHero" class="btn primary" type="button">
+              <span class="btn-glyph" aria-hidden="true">＋</span>
+              Load a photo
+            </button>
+            <button id="btnHowHero" class="btn ghost" type="button">How to play</button>
+          </div>
+          <p class="privacy-line">Your photo is processed in this tab. It is never uploaded.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-frame">
+            <div class="hero-pixels"></div>
+            <div class="hero-hole h1"></div>
+            <div class="hero-hole h2"></div>
+            <div class="hero-ant a1"></div>
+            <div class="hero-ant a2"></div>
+            <div class="hero-ant a3"></div>
+            <div class="hero-bucket"></div>
+            <div class="hero-path"></div>
+          </div>
+          <div class="hero-caption">photo → edge pixels → buckets → empty frame</div>
+        </div>
+      </section>
+
+      <section class="menu-section">
+        <div class="section-head">
+          <h2>Pick a picture</h2>
+          <span class="section-note">Four drawings, drawn in code</span>
+        </div>
+        <div id="artGrid" class="art-grid" aria-label="Built-in pictures"></div>
+      </section>
+
+      <section class="menu-section">
+        <div class="section-head">
+          <h2>Your photo</h2>
+          <span class="section-note">JPG, PNG, WebP, AVIF · kept on this device</span>
+        </div>
+        <div class="your-grid">
+          <button id="uploadCard" class="upload-card" type="button">
+            <span class="upload-icon" aria-hidden="true">＋</span>
+            <strong>Load an image</strong>
+            <span>Drop a file here, paste one, or choose from your device.</span>
+          </button>
+          <button id="recentCard" class="recent-card hidden" type="button">
+            <img id="recentThumb" alt="" />
+            <span class="recent-copy">
+              <small>Continue with</small>
+              <strong id="recentName">Your photo</strong>
+              <span id="recentMeta">Last picture</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <footer class="menu-footer">
+        <span>PIXEL ANTS · an original browser game about eating pixels from the edge</span>
+        <button id="btnForget" class="link-btn hidden" type="button">Forget my saved photo</button>
+      </footer>
+    </main>
+
+    <main id="gameScreen" class="game-screen hidden">
+      <div class="scene-wrap">
+        <canvas id="sceneCanvas" width="660" height="960" aria-label="The picture, the ant trails and the bucket rail"></canvas>
+      </div>
+      <div class="art-bar">
+        <div class="progress-track"><i id="progressFill"></i></div>
+        <span id="progressText">0%</span>
+        <span id="artLabel" class="art-label">Dune Sunset</span>
+      </div>
+      <div class="play-foot">
+        <div id="hint" class="hint" role="status" aria-live="polite"></div>
+        <div class="palette-wrap">
+          <div id="palette" class="palette" aria-label="Pixel colours"></div>
+          <p id="paletteTip" class="palette-tip">Tap a colour to send ants · tap a bucket to recall</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <input id="fileInput" type="file" accept="image/*" hidden />
+
+  <div id="preview" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+    <div class="sheet preview-sheet">
+      <div class="preview-visual">
+        <canvas id="previewCanvas" width="600" height="810"></canvas>
+        <span class="preview-badge">Preview</span>
+      </div>
+      <div class="preview-copy">
+        <p class="eyebrow">Ready to erode</p>
+        <h2 id="previewTitle">Dune Sunset</h2>
+        <p id="previewHint" class="preview-hint">Warm ridges and a low sun</p>
+        <div class="palette-readout" id="previewSwatches" aria-label="Palette"></div>
+        <div class="field">
+          <span class="field-label">Pixel colours</span>
+          <div class="segmented" id="difficulty" role="group" aria-label="Number of colours">
+            <button type="button" data-colors="4">Calm <small>4</small></button>
+            <button type="button" data-colors="6" class="on">Classic <small>6</small></button>
+            <button type="button" data-colors="8">Dense <small>8</small></button>
+          </div>
+        </div>
+        <p class="field-note" id="difficultyNote">Four rails for six colours. Two will have to wait their turn.</p>
+        <div class="field">
+          <span class="field-label">Pixels in the picture</span>
+          <div class="segmented four" id="detail" role="group" aria-label="Pixel count">
+            <button type="button" data-detail="coarse">Coarse <small>540 px</small></button>
+            <button type="button" data-detail="standard" class="on">Standard <small>2,160 px</small></button>
+            <button type="button" data-detail="fine">Fine <small>4,860 px</small></button>
+            <button type="button" data-detail="ultra">Ultra <small>8,640 px</small></button>
+          </div>
+        </div>
+        <p class="field-note" id="detailNote">The balanced 40 × 54 wall — the original pixel grain. 2,160 pixels.</p>
+        <button id="btnStart" class="btn primary wide" type="button">Play this picture</button>
+        <button id="btnPreviewBack" class="btn ghost wide" type="button">Back</button>
+        <p class="privacy-line">Played entirely offline. Your image is never sent anywhere.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="howto" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
+    <div class="sheet howto-sheet">
+      <p class="eyebrow">Three steps</p>
+      <h2 id="howtoTitle">How to play</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-number">1</span>
+          <div><strong>Load a colour</strong><p>Tap a palette colour to send its ants down a rail. Ants can only bite pixels on the exposed edge of the picture. One ant carries one pixel.</p></div>
+        </li>
+        <li>
+          <span class="step-number">2</span>
+          <div><strong>Open the picture</strong><p>Every stolen pixel leaves a hole. Holes expose the pixels beside them, so the picture erodes inward from all four sides. If a colour is walled in, load another colour to cut a route to it.</p></div>
+        </li>
+        <li>
+          <span class="step-number">3</span>
+          <div><strong>Clear the frame</strong><p>A bucket closes when it is full, when its colour is gone, or when you tap it to recall. The frame is empty only after every pixel reaches a bucket. There is no timer and no spill tray — only holes.</p></div>
+        </li>
+      </ol>
+      <div class="howto-notes">
+        <p><b>Numbers and patterns</b> on every cup and bucket keep the game playable without colour vision.</p>
+        <p><b>Recall a bucket</b> by tapping it on the rail. Its ants finish their trip, so carried pixels are never lost.</p>
+        <p><b>The edge is the only door.</b> A colour with no exposed pixel waits until another bucket opens a route.</p>
+        <p><b>Your photos stay here.</b> The last one is remembered as a small local thumbnail and can be forgotten from the menu.</p>
+      </div>
+      <button id="btnHowClose" class="btn primary wide" type="button">Got it</button>
+    </div>
+  </div>
+
+  <div id="pause" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="sheet pause-sheet">
+      <p class="eyebrow">The colony rests</p>
+      <h2 id="pauseTitle">Paused</h2>
+      <div class="pause-stats" id="pauseStats"></div>
+      <button id="btnResume" class="btn primary wide" type="button">Resume</button>
+      <button id="btnQuit" class="btn ghost wide" type="button">Leave this picture</button>
+    </div>
+  </div>
+
+  <div id="result" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="sheet result-sheet">
+      <div class="result-visual">
+        <canvas id="resultCanvas" width="600" height="810"></canvas>
+      </div>
+      <div class="result-copy">
+        <p class="eyebrow" id="resultEyebrow">Frame cleared</p>
+        <h2 id="resultTitle">The colony ate the picture</h2>
+        <div id="resultStars" class="stars" aria-label="Stars"></div>
+        <div class="result-score"><span>Score</span><b id="resultScore">0</b></div>
+        <div class="result-grid">
+          <div><span>Pixels</span><b id="resultPixels">0</b></div>
+          <div><span>Time</span><b id="resultTime">00:00</b></div>
+          <div><span>Best</span><b id="resultBest">0</b></div>
+          <div><span>Colours</span><b id="resultColors">6</b></div>
+        </div>
+        <p id="resultNote" class="result-note"></p>
+        <button id="btnAgain" class="btn primary wide" type="button">Play this picture again</button>
+        <button id="btnNewPicture" class="btn ghost wide" type="button">Choose another picture</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loading" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Preparing picture">
+    <div class="loading-card">
+      <div class="pixel-spinner"><i></i><i></i><i></i></div>
+      <p id="loadingText">Cutting the picture into pixels…</p>
+    </div>
+  </div>
+
+  <div id="drop" class="drop-overlay hidden" aria-hidden="true">
+    <div class="drop-card">
+      <span aria-hidden="true">↓</span>
+      <strong>Drop an image</strong>
+      <p>It becomes the next pixel wall.</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="../shared/arcade.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

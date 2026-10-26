@@ -457,6 +457,8 @@ img { display: block; }
 .cup.active .dot { animation: cup-pulse 1.1s ease-in-out infinite; }
 .cup.done { opacity: 0.32; pointer-events: none; }
 .cup.done .dot { filter: grayscale(0.8); }
+.cup.buried { opacity: 0.42; }
+.cup.buried .dot { filter: saturate(0.45); }
 @keyframes cup-pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.1); }

@@ -1,24 +1,18 @@
 /*
  * Sand Loop — the sand board
  * --------------------------
- * The board is the quantized picture: one colour index per cell, plus a
- * shuffled queue of cells for every colour. When the engine captures a grain
- * we clear the next cell of that colour, which reveals the sharp photo
- * underneath. A spilled grain changes nothing: its sand is still in the
- * picture and the engine puts it back in the hopper later.
+ * The board is the quantized picture, stored as one bottom-up stack per
+ * column. A captured grain may only take a cell from the three rows nearest
+ * the bottom; everything above that cell falls one row, so the top of the
+ * column empties and the sharp photo shows through.
  *
- * Pure and deterministic: the browser and the tests use the same queues.
+ * Pure and deterministic: the browser and the tests use the same columns and
+ * the same seeded choice between eligible cells.
  */
 
 import { mulberry32 } from "./quantize.js";
 
-function shuffle(list, rng) {
-  for (let i = list.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    const t = list[i]; list[i] = list[j]; list[j] = t;
-  }
-  return list;
-}
+export const ACCESSIBLE_ROWS = 3;
 
 export function createBoard(spec) {
   const width = spec.width;
@@ -35,38 +29,67 @@ export function createBoard(spec) {
   const cleared = new Uint8Array(total);
   const clearedByColor = new Array(palette.length).fill(0);
   const remaining = new Array(palette.length).fill(0);
-  const queues = palette.map(() => []);
-  for (let i = 0; i < indices.length; i++) {
-    const color = indices[i];
-    if (color < 0 || color >= palette.length) throw new Error("board: colour index out of range");
-    queues[color].push(i);
-    remaining[color]++;
+  const columns = Array.from({ length: width }, () => []);
+
+  for (let y = height - 1; y >= 0; y--) {
+    for (let x = 0; x < width; x++) {
+      const index = y * width + x;
+      const color = indices[index];
+      if (color < 0 || color >= palette.length) throw new Error("board: colour index out of range");
+      columns[x].push({ color, index });
+      remaining[color]++;
+    }
   }
 
-  /* Different colours get different streams, so clearing a photo does not
-   * walk the picture in one obvious raster line. */
-  queues.forEach((queue, color) => shuffle(queue, mulberry32((seed ^ (color * 0x9e3779b1)) >>> 0)));
-
+  const accessibleRows = Math.min(ACCESSIBLE_ROWS, height);
+  const pickRng = mulberry32((seed ^ 0x9e3779b1) >>> 0);
   let captured = 0;
 
   function captureCell(color) {
-    if (color < 0 || color >= queues.length) return -1;
-    const queue = queues[color];
-    while (queue.length) {
-      const index = queue.pop();
-      if (!cleared[index]) {
-        cleared[index] = 1;
-        clearedByColor[color]++;
-        remaining[color]--;
-        captured++;
-        return index;
+    if (color < 0 || color >= palette.length) return -1;
+
+    const candidates = [];
+    for (let x = 0; x < width; x++) {
+      const column = columns[x];
+      const depth = Math.min(accessibleRows, column.length);
+      for (let k = 0; k < depth; k++) {
+        if (column[k].color === color) candidates.push({ x, k, cell: column[k] });
       }
     }
-    return -1;
+    if (!candidates.length) return -1;
+
+    const pick = candidates[Math.floor(pickRng() * candidates.length)];
+    const column = columns[pick.x];
+    const row = height - 1 - pick.k;
+    column.splice(pick.k, 1);
+
+    cleared[pick.cell.index] = 1;
+    clearedByColor[color]++;
+    remaining[color]--;
+    captured++;
+
+    return { index: pick.cell.index, x: pick.x, row, color };
   }
 
   function remainingColor(color) {
     return remaining[color] || 0;
+  }
+
+  function accessibleCount(color) {
+    if (color < 0 || color >= palette.length) return 0;
+    let count = 0;
+    for (let x = 0; x < width; x++) {
+      const column = columns[x];
+      const depth = Math.min(accessibleRows, column.length);
+      for (let k = 0; k < depth; k++) {
+        if (column[k].color === color) count++;
+      }
+    }
+    return count;
+  }
+
+  function accessibleByColor() {
+    return palette.map((_, color) => accessibleCount(color));
   }
 
   function allCleared() {
@@ -81,8 +104,15 @@ export function createBoard(spec) {
     total,
     cleared,
     clearedByColor,
+    accessibleRows,
     captureCell,
     remainingColor,
+    accessibleCount,
+    accessibleByColor,
+    columnColors(x) {
+      const column = columns[x];
+      return column ? column.map((cell) => cell.color) : [];
+    },
     allCleared,
     get captured() { return captured; },
     get progress() { return total ? captured / total : 1; },

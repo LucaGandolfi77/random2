@@ -427,7 +427,9 @@ function startPrepared() {
   state.engine = createEngine({
     counts: grid.counts,
     seed: (grid.hash ^ (state.colors * 2654435761)) >>> 0,
-    config: Object.assign({}, preset)
+    config: Object.assign({}, preset),
+    capture: (color) => state.board.captureCell(color),
+    accessible: (color) => state.board.accessibleCount(color)
   });
   state.renderer = state.renderer || new Renderer(el.artCanvas, el.playCanvas);
   state.renderer.setBoard(spec.photo, grid);
@@ -476,6 +478,10 @@ function buildPalette(grid) {
 
 function deployColor(color) {
   if (!state.engine || state.screen !== "game" || state.paused) return;
+  if (state.engine.remainingColor(color) > 0 && state.board.accessibleCount(color) === 0) {
+    toast("That colour is buried — it will surface as the picture drops.");
+    return;
+  }
   const r = state.engine.deploy(color);
   if (r.ok) {
     sound.deploy();
@@ -549,15 +555,19 @@ function updateHud(force) {
   }
 
   /* cups */
+  const reachable = state.board.accessibleByColor();
   for (const cup of state.cups) {
     const remain = state.engine.remainingColor(cup.color);
     const active = s.currentColor === cup.color;
     const loaded = s.buckets.some((b) => b && b.color === cup.color);
+    const buried = remain > 0 && reachable[cup.color] === 0;
     cup.count.textContent = String(remain);
     cup.loaded.classList.toggle("hidden", !loaded);
     cup.node.classList.toggle("done", remain <= 0);
+    cup.node.classList.toggle("buried", buried);
     cup.node.classList.toggle("active", active && remain > 0);
     cup.node.setAttribute("aria-pressed", active ? "true" : "false");
+    cup.node.setAttribute("aria-label", colorName(cup.color) + (buried ? ", buried under the picture" : ", taps load a bucket"));
   }
 
   /* hint */
@@ -591,8 +601,7 @@ function consumeEvents() {
   for (const evt of events) {
     state.renderer.addEvent(evt);
     if (evt.type === "capture") {
-      const cell = state.board.captureCell(evt.color);
-      if (cell >= 0) state.renderer.clearCell(cell);
+      if (evt.cell) state.renderer.collapseCell(evt.cell);
       const s = state.engine.getState();
       if (s.captured % 4 === 0) sound.capture();
     } else if (evt.type === "spill") {

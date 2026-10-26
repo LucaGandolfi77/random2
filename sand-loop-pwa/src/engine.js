@@ -7,7 +7,7 @@
  *   · a hopper pours them in colour runs
  *   · buckets ride a loop; the bucket in front of the hopper is open
  *   · the loop turns automatically to a bucket of the current colour
- *   · matching grains reveal the photo; the rest fill the spill tray
+ *   · matching grains take a cell from the board; the rest fill the tray
  *
  * The simulation does not know about pixels, canvases or audio. It emits a
  * small event list that the renderer and the UI consume.
@@ -90,6 +90,11 @@ export function createEngine(spec) {
     stars: 0
   };
 
+  const captureCell = typeof spec.capture === "function" ? spec.capture : null;
+  const accessible = typeof spec.accessible === "function"
+    ? spec.accessible
+    : (color) => state.reserve[color] || 0;
+
   const events = [];
   let emitAcc = 0;
   let nextGrainId = 1;
@@ -105,7 +110,7 @@ export function createEngine(spec) {
   function chooseColor() {
     const available = [];
     for (let c = 0; c < counts.length; c++) {
-      if (state.reserve[c] > 0) available.push(c);
+      if (state.reserve[c] > 0 && accessible(c) > 0) available.push(c);
     }
     if (!available.length) return -1;
 
@@ -114,11 +119,11 @@ export function createEngine(spec) {
       pool = available.filter((c) => c !== state.currentColor);
     }
     let sum = 0;
-    for (let i = 0; i < pool.length; i++) sum += state.reserve[pool[i]];
+    for (let i = 0; i < pool.length; i++) sum += accessible(pool[i]);
     if (sum <= 0) return pool[0];
     let pick = rng() * sum;
     for (let i = 0; i < pool.length; i++) {
-      pick -= state.reserve[pool[i]];
+      pick -= accessible(pool[i]);
       if (pick <= 0) return pool[i];
     }
     return pool[pool.length - 1];
@@ -168,7 +173,10 @@ export function createEngine(spec) {
     let color = -1;
     while (state.upcoming.length) {
       const candidate = state.upcoming.shift();
-      if (state.reserve[candidate] > 0) { color = candidate; break; }
+      if (state.reserve[candidate] > 0 && accessible(candidate) > 0) {
+        color = candidate;
+        break;
+      }
     }
     if (color < 0) color = chooseColor();
     if (color < 0) {
@@ -178,7 +186,7 @@ export function createEngine(spec) {
     }
     state.currentColor = color;
     state.runLeft = config.runMin + Math.floor(rng() * (config.runMax - config.runMin + 1));
-    state.runLeft = Math.min(state.runLeft, state.reserve[color]);
+    state.runLeft = Math.min(state.runLeft, state.reserve[color], accessible(color));
     fillPreview();
     selectForColor();
     emit("color", { color });
@@ -190,7 +198,8 @@ export function createEngine(spec) {
     if (state.currentColor >= 0) {
       state.runLeft = Math.min(
         config.runMin + Math.floor(rng() * (config.runMax - config.runMin + 1)),
-        state.reserve[state.currentColor]
+        state.reserve[state.currentColor],
+        accessible(state.currentColor)
       );
       fillPreview();
       emit("color", { color: state.currentColor });
@@ -253,6 +262,17 @@ export function createEngine(spec) {
     const slot = state.selected;
     const bucket = slot == null ? null : state.buckets[slot];
     if (bucket && state.aligned && bucket.color === grain.color) {
+      const cell = captureCell ? captureCell(grain.color) : null;
+      if (captureCell && (cell == null || cell === -1)) {
+        state.pending[grain.color]--;
+        state.reserve[grain.color]++;
+        state.spilled++;
+        state.combo = 0;
+        emit("spill", { color: grain.color, x: grain.x });
+        checkLose();
+        return;
+      }
+
       state.pending[grain.color]--;
       state.capturedByColor[grain.color]++;
       state.captured++;
@@ -260,7 +280,10 @@ export function createEngine(spec) {
       if (state.combo > state.bestCombo) state.bestCombo = state.combo;
       state.score += 9 * multiplier();
       bucket.fill++;
-      emit("capture", { color: grain.color, x: grain.x, slot });
+      if (state.runLeft > 0) {
+        state.runLeft = Math.min(state.runLeft, accessible(grain.color));
+      }
+      emit("capture", { color: grain.color, x: grain.x, slot, cell });
       if (bucket.fill >= config.bucketCapacity) {
         state.score += 130 * multiplier();
         emit("bucketFull", { slot, color: bucket.color, x: grain.x });

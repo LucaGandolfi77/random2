@@ -143,6 +143,10 @@ jobs:
           # cell queues, the loop/bucket rules (idle loses, perfect play wins),
           # and the manifest + service-worker asset list.
           node --test sand-loop-pwa/tests/*.test.mjs
+          # PIXEL ANTS: the erosion rules (only exposed pixels, holes open
+          # routes, no gravity), the pathfinder over the holes, the ant/bucket
+          # lifecycle and win condition, quantization, and the PWA asset list.
+          node --test pixel-ants-pwa/tests/*.test.mjs
 
       - name: Analysis tooling tests
         run: |
@@ -249,6 +253,14 @@ jobs:
           out=$(node sand-loop-pwa/smoke.mjs http://localhost:8099/sand-loop-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  sand-loop-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # PIXEL ANTS starts a built-in picture, loads a colour and checks that
+          # exposed pixels are being stolen, carried and delivered.
+          out=$(node pixel-ants-pwa/smoke.mjs http://localhost:8099/pixel-ants-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  pixel-ants-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3

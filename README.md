@@ -20,6 +20,7 @@
   - [Slot Machine](#slot-machine)
   - [Snake](#snake)
   - [Sand Loop](#sand-loop)
+  - [Pixel Ants](#pixel-ants)
   - [LUMEN](#lumen)
   - [SECTOR 7](#sector-7)
   - [SINI](#sini)
@@ -105,6 +106,7 @@
 | 40 | **Pokéball GO v2** | Throw 2.0: power, ring timing, curveball, uid collection | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pokemon-go-pwa-v2/) |
 | 41 | **PocketCode** | Remote control for OpenCode / Pi agents | Static PWA + Node bridge | Demo | [▶ Open](https://lucagandolfi77.github.io/random2/pocketcode-pwa/) |
 | 42 | **Sand Loop** | Photo-to-sand colour sort puzzle | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/sand-loop-pwa/) |
+| 43 | **Pixel Ants** | Photo-to-pixel erosion puzzle | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pixel-ants-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -226,14 +228,14 @@ arrow keys/WASD on desktop.
 
 A colour-sort puzzle that uses your own image as the level. The picture is
 quantized into 4–8 sand colours; buckets ride a loop, the hopper pours one
-colour at a time, and every captured grain clears a cell of the artwork until
-the sharp photo is revealed underneath.
+colour at a time, and every captured grain takes a cell from the bottom three
+rows. The cells above fall one row, revealing the sharp photo from the top.
 
 - Load a JPG/PNG/WebP/AVIF by picker, drag-and-drop or clipboard paste; four
   procedural pictures are included and no binary art is shipped
 - Median-cut + Lab k-means quantization, rare-colour merging, majority
   filtering and a tonal fallback for monochrome uploads
-- Deterministic per-picture colours, cell order, spills and score
+- Deterministic per-picture colours, bottom-row gravity, spills and score
 - Classic, Calm and Dense palettes; the loop deliberately holds fewer buckets
   than colours
 - 1–3 stars from spill efficiency, bests per built-in picture and per custom
@@ -246,6 +248,42 @@ the sharp photo is revealed underneath.
 **Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
 `src/` (`main`, `engine`, `board`, `quantize`, `image-import`, `artworks`,
 `render`), `icons/` (SVG), `tests/`, `smoke.mjs`.
+
+### Pixel Ants
+
+*Eat the picture, one pixel at a time.* 🐜
+
+A portrait-first erosion puzzle built from your own photo. The image becomes a
+wall of 540, 2,160, 4,860 or 8,640 coloured pixels, and a colony of ants is sent
+out to bite the exposed edge and carry each pixel home to its bucket.
+
+- Four pixel counts (540, 2,160, 4,860 or 8,640) at the same 20:27 portrait
+  shape; bucket capacity and ant limits scale with the wall
+- Ants prefer the outermost available ring, so the picture erodes from its
+  edges inward instead of tunnelling straight into the middle
+- The whole picture is fair game, but only exposed pixels can be stolen: every
+  bite opens the cell behind it, and the wall erodes inward from all four sides
+- No gravity and no sharp photo underneath — stolen pixels leave permanent
+  holes on a neutral substrate, so the route you dig is the run
+- Buckets hold ants, not paint: each ant reserves one matching pixel, walks it
+  back, and a full bucket closes only after the last carrier is home
+- Classic, Calm and Dense palettes; fewer rails than colours means a colour can
+  be walled in until another bucket opens a way to it
+- Load a JPG/PNG/WebP/AVIF by picker, drag-and-drop or clipboard paste; four
+  procedural pictures ship with the game and no binary art is included
+- Median-cut + Lab k-means quantization, rare-colour merging, majority
+  filtering and a tonal fallback for monochrome uploads
+- Deterministic levels, 1–3 stars from time plus idle ants, best scores per
+  built-in picture and custom image hash at each pixel count, run history
+  through `R2.stats`
+- Fingerprint-free palettes: every cup also carries a number and a pattern
+- Images are processed locally and never uploaded; only a 360 × 486 local
+  thumbnail is remembered, with a Forget action
+- Offline PWA, safe-area portrait layout, pause, reduced motion, synth SFX
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `engine`, `board`, `path`, `quantize`, `image-import`,
+`artworks`, `render`), `icons/` (SVG), `tests/`, `smoke.mjs`.
 
 ### LUMEN
 

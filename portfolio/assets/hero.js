@@ -5,7 +5,7 @@
  * page perform the claim instead: every pixel below is computed, and there
  * is not one image file in it.
  *
- * One point per project in the arcade — forty-four of them — drifting
+ * One point per project in the arcade — fifty-four of them — drifting
  * slowly, with a line to each near neighbour. The shape is the catalogue.
  *
  * The house rules apply:
@@ -25,9 +25,9 @@
   var ctx = canvas.getContext("2d");
   if (!ctx) return;
 
-  /* The forty-four projects, in the order the catalogue lists them. The
+  /* The fifty-four projects, in the order the catalogue lists them. The
      count is the point: one point per project, and no more. */
-  var COUNT = 44;
+  var COUNT = 54;
 
   var points = [];
   var raf = null;

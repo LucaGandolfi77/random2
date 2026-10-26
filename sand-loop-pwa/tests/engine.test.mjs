@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createEngine } from "../src/engine.js";
+import { createBoard } from "../src/board.js";
 
 const RULES = {
   slots: 3,
@@ -124,4 +125,55 @@ test("a run never captures more grains than the picture holds", () => {
   assert.ok(s.captured <= s.total);
   const sum = s.capturedByColor.reduce((a, b) => a + b, 0);
   assert.equal(sum, s.captured);
+});
+
+test("a capture event carries the bottom-row cell removed from the board", () => {
+  const width = 6, height = 8;
+  const palette = [{ hex: "#000" }, { hex: "#fff" }];
+  const indices = new Uint16Array(width * height);
+  for (let i = 0; i < indices.length; i++) indices[i] = i % 2;
+  const board = createBoard({ width, height, palette, indices, seed: 21 });
+  const engine = createEngine({
+    counts: board.remainingByColor(),
+    seed: 21,
+    config: Object.assign({}, RULES),
+    capture: (color) => board.captureCell(color),
+    accessible: (color) => board.accessibleCount(color)
+  });
+
+  const s = playPerfect(engine, 120);
+  assert.equal(s.status, "won", `ended ${s.status}: ${s.captured}/${s.total}`);
+  assert.equal(s.captured, board.total);
+  assert.equal(board.allCleared(), true);
+
+  const captures = engine.drainEvents().filter((e) => e.type === "capture");
+  assert.equal(captures.length, board.total);
+  for (const evt of captures) {
+    assert.ok(evt.cell);
+    assert.ok(evt.cell.row >= height - board.accessibleRows);
+  }
+});
+
+test("a refused board capture spills instead of clearing a cell", () => {
+  const engine = createEngine({
+    counts: [20, 20],
+    seed: 2,
+    config: Object.assign({}, RULES, { slots: 1 }),
+    capture: () => -1,
+    accessible: () => 1
+  });
+  engine.deploy(engine.getState().currentColor);
+
+  let sawSpill = false, sawCapture = false;
+  for (let i = 0; i < 1200; i++) {
+    engine.update(1 / 60);
+    for (const evt of engine.drainEvents()) {
+      if (evt.type === "spill") sawSpill = true;
+      if (evt.type === "capture") sawCapture = true;
+    }
+    if (sawSpill) break;
+  }
+  assert.equal(sawSpill, true);
+  assert.equal(sawCapture, false);
+  assert.equal(engine.getState().captured, 0);
 });

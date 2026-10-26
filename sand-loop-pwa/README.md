@@ -1,14 +1,14 @@
 # Sand Loop: Color Sort Puzzle
 
-A portrait-first colour-sort puzzle where the picture itself is the sand. Load any photo and the game turns it into a mosaic of coloured grains. Buckets ride a loop, the hopper pours one colour at a time, and every grain you catch clears a piece of the artwork until the sharp photo is revealed underneath.
+A portrait-first colour-sort puzzle where the picture itself is the sand. Load any photo and the game turns it into a mosaic of coloured grains. Buckets ride a loop, the hopper pours one colour at a time, and every grain you catch takes a cell from the bottom three rows. The cells above fall one row, so the sharp photo is revealed from the top until the whole picture is back.
 
 An original browser implementation inspired by sand-sort puzzles. No assets or code from the original game are used.
 
 ## How to Play
 
-1. **Load the colour.** The hopper pours a single colour. Tap that colour in the tray and a bucket rides the loop into place. The loop turns automatically.
+1. **Load the colour.** The hopper pours a single colour. Tap that colour in the tray and a bucket rides the loop into place. The loop turns automatically. Dimmed colours are buried and will surface as the picture drops.
 2. **Keep the loop stocked.** A bucket fills and leaves on its own. Load another before the next run, and tap a bucket to recycle it if the loop is full.
-3. **Clear the picture.** A matching bucket reveals the photo grain by grain. Sand that misses falls into the spill tray. Fill the tray and the run ends.
+3. **Clear the picture.** A matching bucket takes a cell from the three bottom rows. The cells above drop one row and the photo is revealed from the top. Sand that misses falls into the spill tray. Fill the tray and the run ends.
 
 There is no timer. Pause whenever you like. The only pressure is the spill tray.
 
@@ -59,7 +59,7 @@ The 3:4 center crop is intentional: the artwork frame is portrait. The full phot
 3. Median cut plus a few k-means iterations in CIE Lab reduce the cells to 4, 6 or 8 sand colours.
 4. Near-duplicate and rare colours are merged, then the palette is refilled by splitting the widest cluster. A monochrome upload becomes a set of tonal variants, so it is still playable.
 5. A 3 x 3 majority filter removes single-cell speckle, keeping the sand regions readable.
-6. The board stores one colour index per cell and a seeded shuffle of cells per colour. Capturing a grain clears the next cell, which reveals the sharp photo underneath.
+6. The board stores the picture as one bottom-up stack per column. A capture may only take a cell from the three bottom rows; the cells above fall one row, the top becomes empty and the sharp photo shows through.
 
 Every colour also carries a number and a pattern (stripe, dots, cross, chevron, ring) on the cups, so the game does not rely on colour vision alone.
 
@@ -99,7 +99,7 @@ sand-loop-pwa/
 ├── src/
 │   ├── main.js          # boot, menus, input, persistence, audio
 │   ├── engine.js        # pour, loop, buckets, spill, score
-│   ├── board.js         # cell grid, per-colour queues, reveal progress
+│   ├── board.js         # bottom-up columns, gravity, reveal progress
 │   ├── quantize.js      # lab colour, median cut, k-means, smoothing
 │   ├── image-import.js  # decode, crop, board build, recent thumbnail
 │   ├── artworks.js      # four procedural source pictures

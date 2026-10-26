@@ -107,6 +107,8 @@ export class Renderer {
     this.sandCanvas.height = ART_H;
     this.sandCtx = this.sandCanvas.getContext("2d");
     this.sandCtx.imageSmoothingEnabled = false;
+    this.shiftCanvas = document.createElement("canvas");
+    this.shiftCtx = this.shiftCanvas.getContext("2d");
     this.photo = null;
     this.grid = null;
     this.effects = [];
@@ -120,6 +122,8 @@ export class Renderer {
   setBoard(photo, grid) {
     this.photo = photo;
     this.grid = grid;
+    this.shiftCanvas.width = Math.max(1, Math.ceil(ART_W / grid.width));
+    this.shiftCanvas.height = ART_H;
     this.buildSand();
     this.effects.length = 0;
     this.artFlashes.length = 0;
@@ -169,33 +173,35 @@ export class Renderer {
     }
   }
 
-  clearCell(index) {
-    if (!this.grid) return;
+  /* Take one cell out near the bottom and let the column above it fall by
+   * one cell. The top cell becomes empty, which reveals the sharp photo. */
+  collapseCell(cell) {
+    if (!this.grid || !cell) return;
     const g = this.grid;
     const cw = ART_W / g.width;
     const chh = ART_H / g.height;
-    const x = (index % g.width) * cw;
-    const y = Math.floor(index / g.width) * chh;
-    const rng = mulberry32((index * 40503 + 7) >>> 0);
+    if (cell.x < 0 || cell.x >= g.width || cell.row < 0 || cell.row >= g.height) return;
 
+    const sx = cell.x * cw;
+    const sy = cell.row * chh;
+    const above = cell.row * chh;
     const ctx = this.sandCtx;
-    ctx.save();
-    ctx.globalCompositeOperation = "destination-out";
-    for (let i = 0; i < 4; i++) {
-      const cx = x + cw * (0.25 + rng() * 0.5);
-      const cy = y + chh * (0.25 + rng() * 0.5);
-      ctx.beginPath();
-      ctx.arc(cx, cy, Math.max(cw, chh) * (0.42 + rng() * 0.25), 0, TAU);
-      ctx.fill();
+
+    if (above > 0) {
+      this.shiftCtx.clearRect(0, 0, this.shiftCanvas.width, Math.ceil(above));
+      this.shiftCtx.drawImage(this.sandCanvas, sx, 0, cw, above, 0, 0, cw, above);
+      ctx.clearRect(sx, 0, cw, chh);
+      ctx.drawImage(this.shiftCanvas, 0, 0, cw, above, sx, chh, cw, above);
+    } else {
+      ctx.clearRect(sx, sy, cw, chh);
     }
-    ctx.restore();
 
     if (this.artFlashes.length > 220) this.artFlashes.splice(0, this.artFlashes.length - 220);
     this.artFlashes.push({
-      x: x + cw / 2,
-      y: y + chh / 2,
+      x: sx + cw / 2,
+      y: sy + chh / 2,
       life: 1,
-      color: g.palette[g.indices[index]].hex
+      color: g.palette[cell.color].hex
     });
   }
 

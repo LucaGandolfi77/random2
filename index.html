@@ -903,6 +903,21 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="puzzle casual" data-playable="pixel-ants-pwa/" style="--c1:#7ccf5a; --c2:#b45309; --tile-glow:rgba(124,207,90,.55); --shimmer-delay:.58s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#7ccf5a,#a16207)">🐜</div>
+            <h2>Pixel Ants</h2>
+          </div>
+          <p class="tagline">Your photo becomes a pixel wall. Send ants to the exposed edge and carry it home one coloured bite at a time.</p>
+          <div class="chips"><span class="chip">PUZZLE</span><span class="chip">IMAGE</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="pixel-ants-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/pixel-ants-pwa" aria-label="Pixel Ants source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="shooter arcade" data-playable="plane-pwa/" style="--c1:#0ea5e9; --c2:#6366f1; --tile-glow:rgba(14,165,233,.55); --shimmer-delay:.65s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#38bdf8,#6366f1)">✈️</div>
@@ -2288,6 +2303,42 @@
         }
       },
 
+      /* PIXEL ANTS: a pixel wall erodes while ants carry the bites home. */
+      ants: function (g, w, h, t, u) {
+        var period = u.period || 5.2, p = (t % period) / period;
+        var cols = 8, rows = 11, cw = w / cols, ch = h / rows;
+        g.fillStyle = rgba(P2, 0.10);
+        g.fillRect(0, 0, w, h * 0.78);
+        for (var r = 0; r < rows; r++) {
+          for (var c = 0; c < cols; c++) {
+            var hole = ((r * 7 + c * 11) % 13) < (p * 9);
+            if (hole) continue;
+            g.fillStyle = rgba((r + c) % 3 ? P2 : P1, 0.22 + ((r + c) % 4) * 0.06);
+            g.fillRect(c * cw + 1, r * ch + 1, cw - 2, ch - 2);
+          }
+        }
+        for (var b = 0; b < 3; b++) {
+          var bx = w * (0.22 + b * 0.28), by = h * 0.88;
+          g.fillStyle = rgba(b === 1 ? P1 : P2, 0.92);
+          g.fillRect(bx - 6, by - 5, 12, 10);
+          g.strokeStyle = "rgba(6,10,20,0.7)"; g.lineWidth = 1;
+          g.strokeRect(bx - 6, by - 5, 12, 10);
+        }
+        for (var k = 0; k < 7; k++) {
+          var q = (p + k / 7) % 1;
+          var sx = w * (0.16 + (k % 4) * 0.22);
+          var sy = h * (0.16 + Math.floor(k / 4) * 0.30);
+          var tx = w * (0.22 + (k % 3) * 0.28);
+          var ty = h * 0.83;
+          var ax = sx + (tx - sx) * q + Math.sin(q * TAU * 2 + k) * 4;
+          var ay = sy + (ty - sy) * q + Math.cos(q * TAU * 2 + k) * 3;
+          g.fillStyle = rgba(k % 2 ? P1 : P2, 1);
+          g.fillRect(ax - 1.6, ay - 1.2, 3.2, 2.4);
+          g.fillStyle = "rgba(6,10,20,0.8)";
+          g.fillRect(ax + (Math.cos(q * TAU) > 0 ? 2 : -3), ay - 0.8, 1, 1.6);
+        }
+      },
+
       /* SAND LOOP: grains fall into a small loop of buckets. */
       sand: function (g, w, h, t, u) {
         var period = u.period || 4.2, p = (t % period) / period;
@@ -2329,6 +2380,7 @@
       "king-shot-pwa":   ["arc",     { period: 2.2 }],
       "piano-pwa":       ["lines",   { period: 3 }],
       "sand-loop-pwa":   ["sand",    { period: 4.2 }],
+      "pixel-ants-pwa":  ["ants",    { period: 5.2 }],
       "mustang-pwa":     ["arc",     { period: 1.7 }],
       "plane-pwa":       ["trail",   { period: 2.8, dir: 1 }],
       "snake-pwa":       ["trail",   { period: 2.4, dir: 1 }],
@@ -2775,6 +2827,7 @@
       { slug: "king-shot-pwa/",  name: "King Shot",    emoji: "👑", key: "king-shot-pwa" },
       { slug: "piano-pwa/",      name: "Piano Fall",   emoji: "🎹", key: "piano-fall-pwa" },
       { slug: "sand-loop-pwa/",  name: "Sand Loop",    emoji: "⏳", key: "sand-loop-pwa" },
+      { slug: "pixel-ants-pwa/", name: "Pixel Ants",   emoji: "🐜", key: "pixel-ants-pwa" },
       { slug: "plane-pwa/",      name: "Plane Shooter", emoji: "✈️", key: "plane-pwa" },
       { slug: "slot-pwa/",       name: "Slot Machine", emoji: "🎰", key: "slot-pwa" },
       { slug: "lumen-pwa/",      name: "LUMEN",       emoji: "🌊", key: "lumen-pwa" },

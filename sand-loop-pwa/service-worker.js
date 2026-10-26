@@ -3,7 +3,7 @@
    never touch the cache: they are read locally and kept only in memory (and a
    small thumbnail in localStorage). */
 
-const CACHE_NAME = "sand-loop-pwa-v1";
+const CACHE_NAME = "sand-loop-pwa-v2";
 const ASSETS = [
   "./",
   "./index.html",
