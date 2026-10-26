@@ -810,6 +810,8 @@ func _encounter_intro() -> String:
 			return "The Hollow Choir unfolds from the dark. It has no face, only a note."
 		&"ashwright":
 			return "The Ashwright waits in the foundry heat, hammer raised."
+		&"watch_hound":
+			return "The Watch Hound steps out of the ash. It does not growl. It has already decided."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -838,6 +840,15 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 	])
 	out.append(choir)
 
+	var hound := BattleActor.new(&"watch_hound", "The Watch Hound", BattleTypes.Side.ENEMY, BattleTypes.Tone.HUSH, 105, 17, 10, 14)
+	hound.max_resolve = 99
+	hound.resolve = 99
+	hound.actions = _actions([
+		BattleAction.new(&"lockjaw", "Lockjaw", BattleTypes.Tone.HUSH, 16, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"marked", 2, true, "The Hound closes its jaw and does not let go."),
+		BattleAction.new(&"rake", "Iron Rake", BattleTypes.Tone.EMBER, 14, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"", 0, true, "A hooked paw opens the air."),
+		BattleAction.new(&"bay", "Bay", BattleTypes.Tone.HUSH, 10, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 1, false, "A sound the whole street remembers."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -848,6 +859,8 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			ashwright.max_hp = 120
 			ashwright.hp = 120
 			return [ashwright]
+		&"watch_hound":
+			return [hound]
 		_:
 			return out
 

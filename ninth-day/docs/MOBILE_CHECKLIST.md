@@ -48,7 +48,8 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 2. Start a battle, quit mid-turn, relaunch: **Continue** resumes the battle at the last player decision.
 3. Win a battle, quit on the victory screen, relaunch: **Continue** goes to Bell Rest.
 4. Quit at Bell Rest, relaunch: **Continue** goes back to the same Bell Rest.
-5. Finish Day 1, relaunch: title shows **Day 1 · complete**.
+5. Finish Day 1, relaunch: title shows **Day 2 · Morning**.
+6. Finish Day 2, relaunch: title shows **Day 3** with the slice-complete card.
 
 ## Android export
 

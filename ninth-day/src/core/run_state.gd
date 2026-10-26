@@ -7,20 +7,17 @@ extends Node
 
 const SAVE_PATH := "user://ninth_day_run.json"
 const PHASES: Array[String] = ["morning", "afternoon", "night"]
-const PHASE_TITLES := {
-	"morning": "Morning · The Crack",
-	"afternoon": "Afternoon · Ember Row",
-	"night": "Night · The Spire",
-}
-const PHASE_ENCOUNTERS := {
-	"morning": &"tutorial",
-	"afternoon": &"ashwright",
-	"night": &"full",
-}
-const PHASE_TYPES := {
-	"morning": "story · battle · inheritance",
-	"afternoon": "story · battle · inheritance",
-	"night": "story · choice",
+const DAY_PHASES := {
+	1: {
+		"morning": {"title": "Morning · The Crack", "type": "story · battle · inheritance", "encounter": "tutorial"},
+		"afternoon": {"title": "Afternoon · Ember Row", "type": "story · battle · inheritance", "encounter": "ashwright"},
+		"night": {"title": "Night · The Spire", "type": "story · choice", "encounter": ""},
+	},
+	2: {
+		"morning": {"title": "Morning · The Checkpoint", "type": "story · choice", "encounter": ""},
+		"afternoon": {"title": "Afternoon · The Watch Hound", "type": "story · battle · inheritance", "encounter": "watch_hound"},
+		"night": {"title": "Night · A Debt Paid", "type": "story · choice", "encounter": ""},
+	},
 }
 
 var day: int = 1
@@ -113,6 +110,16 @@ func complete_phase(phase: String) -> void:
 		day_complete = true
 	save()
 
+func advance_day() -> void:
+	pending_phase = ""
+	current_screen = "map"
+	if day < 9:
+		day += 1
+		day_complete = false
+	else:
+		day_complete = true
+	save()
+
 func is_phase_unlocked(phase: String) -> bool:
 	match phase:
 		"morning":
@@ -130,19 +137,32 @@ func is_day_unlocked(p_day: int) -> bool:
 	return is_phase_completed(p_day - 1, "night")
 
 func next_phase() -> String:
+	if not DAY_PHASES.has(day):
+		return ""
 	for phase in PHASES:
 		if not is_phase_completed(day, phase) and is_phase_unlocked(phase):
 			return phase
 	return ""
 
 func phase_title(phase: String) -> String:
-	return String(PHASE_TITLES.get(phase, phase.capitalize()))
+	return phase_title_for(day, phase)
+
+func phase_title_for(p_day: int, phase: String) -> String:
+	var data: Dictionary = DAY_PHASES.get(p_day, {}).get(phase, {})
+	return String(data.get("title", phase.capitalize()))
 
 func phase_type(phase: String) -> String:
-	return String(PHASE_TYPES.get(phase, "story"))
+	return phase_type_for(day, phase)
+
+func phase_type_for(p_day: int, phase: String) -> String:
+	var data: Dictionary = DAY_PHASES.get(p_day, {}).get(phase, {})
+	return String(data.get("type", "story"))
 
 func encounter_for_phase(phase: String) -> StringName:
-	return StringName(PHASE_ENCOUNTERS.get(phase, &"full"))
+	return StringName(phase_data(day, phase).get("encounter", ""))
+
+func phase_data(p_day: int, phase: String) -> Dictionary:
+	return DAY_PHASES.get(p_day, {}).get(phase, {})
 
 func set_flag(flag_id: String, value: Variant = true) -> void:
 	flags[flag_id] = value

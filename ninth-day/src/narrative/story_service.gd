@@ -17,6 +17,9 @@ const TITLES := {
 	"day_01_morning": "The Crack",
 	"day_01_afternoon": "Ember Row",
 	"day_01_night": "What the Bell Keeps",
+	"day_02_morning": "The Checkpoint",
+	"day_02_afternoon": "The Watch Hound",
+	"day_02_night": "A Debt Paid",
 }
 
 var story_id: String = ""
@@ -38,8 +41,8 @@ func start(p_story_id: String) -> bool:
 	_last_line.clear()
 	_last_bg = ""
 	_loaded = false
-	if not FileAccess.file_exists(INK_JSON):
-		push_warning("Missing compiled Ink story: " + INK_JSON)
+	if not FileAccess.file_exists(_ink_path_for(p_story_id)):
+		push_warning("Missing compiled Ink story for: " + p_story_id)
 		return false
 	if _player != null:
 		_player.queue_free()
@@ -48,7 +51,7 @@ func start(p_story_id: String) -> bool:
 	_player.loads_in_background = false
 	add_child(_player)
 	var resource = InkResource.new()
-	resource.json = FileAccess.get_file_as_string(INK_JSON)
+	resource.json = FileAccess.get_file_as_string(_ink_path_for(p_story_id))
 	_player.ink_file = resource
 	_player.loaded.connect(_on_loaded.bind(p_story_id))
 	_player.ended.connect(_on_ended)
@@ -172,3 +175,8 @@ func _emit_end() -> void:
 		return
 	_emitted_end = true
 	story_ended.emit(story_id)
+
+func _ink_path_for(p_story_id: String) -> String:
+	if p_story_id.begins_with("day_02_"):
+		return "res://content/ink/day_02.ink.json"
+	return INK_JSON

@@ -130,9 +130,85 @@ func _run() -> void:
 	rest._on_confirm()
 	if not await _wait_for_scene("BellMap"):
 		return _finish()
-	_assert(RunState.day_complete, "night completes Day 1")
-	_assert(RunState.next_phase() == "", "no phases remain in Day 1")
+	_assert(RunState.is_phase_completed(1, "night"), "night completes Day 1")
+	_assert(RunState.day == 2, "completing Day 1 advances to Day 2")
+	_assert(RunState.next_phase() == "morning", "Day 2 starts at morning")
 	_assert(RunState.equipped.size() == 3, "three memories are equipped")
+
+	# Day 2 morning: a choice-only phase.
+	map = get_tree().current_scene
+	map._on_phase_pressed("morning")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Checkpoint", "Day 2 opens at the Watch checkpoint")
+	if not await _drive_story(story):
+		return _finish()
+	_assert(bool(RunState.get_flag("watch_bluff")), "the Day 2 choice is recorded")
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("morning", 2)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_completed(2, "morning"), "Day 2 morning is complete")
+	_assert(RunState.is_phase_unlocked("afternoon"), "Day 2 afternoon unlocks")
+
+	# Day 2 afternoon: the Watch Hound.
+	map = get_tree().current_scene
+	map._on_phase_pressed("afternoon")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Watch Hound", "Day 2 afternoon names the Hound")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BattleView"):
+		return _finish()
+	battle = get_tree().current_scene
+	_assert(battle.sim.encounter_id == &"watch_hound", "Day 2 afternoon starts the Watch Hound fight")
+	_assert(battle.sim.enemies.size() == 1, "the Hound fights alone")
+	battle.sim.enemies[0].hp = 1
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	battle._refresh()
+	_assert(battle.sim.phase == "victory", "the Watch Hound can be defeated")
+	battle._on_result_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("afternoon", 2)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("night"), "Day 2 night unlocks")
+
+	# Day 2 night: the debt is settled and Day 3 is revealed as out of scope.
+	map = get_tree().current_scene
+	map._on_phase_pressed("night")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "A Debt Paid", "Day 2 night closes the debt")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("night", 2)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_completed(2, "night"), "Day 2 night is complete")
+	_assert(RunState.day == 3, "the cycle advances to Day 3")
+	_assert(RunState.next_phase() == "", "Day 3 has no authored phases yet")
+	_assert(RunState.equipped.size() == 6, "six memories are equipped")
 	_finish()
 
 func _drive_story(story: Node) -> bool:

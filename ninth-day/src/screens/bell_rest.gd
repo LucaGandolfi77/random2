@@ -48,7 +48,7 @@ func _rebuild_cards() -> void:
 	for child in _card_box.get_children():
 		_card_box.remove_child(child)
 		child.queue_free()
-	var offers := InheritanceDB.offers(phase)
+	var offers := InheritanceDB.offers(phase, RunState.day)
 	if offers.is_empty():
 		_card_box.add_child(Ui.label("The Bell offers nothing tonight.", 14, Palette.MUTED))
 		_confirm_button.text = "CONTINUE"
@@ -89,15 +89,17 @@ func _on_card_selected(card_id: String) -> void:
 func _on_confirm() -> void:
 	if _selected_id != "":
 		RunState.add_inheritance(_selected_id)
-	RunState.complete_phase(phase)
-	RunState.pending_phase = ""
-	RunState.current_screen = "map"
-	RunState.save()
-	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
+	_finish_phase()
 
 func _on_skip() -> void:
+	_finish_phase()
+
+func _finish_phase() -> void:
 	RunState.complete_phase(phase)
-	RunState.pending_phase = ""
-	RunState.current_screen = "map"
-	RunState.save()
+	if phase == "night":
+		RunState.advance_day()
+	else:
+		RunState.pending_phase = ""
+		RunState.current_screen = "map"
+		RunState.save()
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")

@@ -24,10 +24,18 @@ static func card(card_id: String) -> Dictionary:
 	_ensure()
 	return _data.get("cards", {}).get(card_id, {})
 
-static func offers(phase: String) -> Array[String]:
+static func offers(phase: String, p_day: int = 1) -> Array[String]:
 	_ensure()
 	var out: Array[String] = []
-	for card_id in _data.get("offers", {}).get(phase, []):
+	var offers_data = _data.get("offers", {})
+	var source: Variant = offers_data
+	if offers_data is Dictionary and offers_data.has(str(p_day)):
+		source = offers_data[str(p_day)]
+	elif offers_data is Dictionary and offers_data.has("day_%02d" % p_day):
+		source = offers_data["day_%02d" % p_day]
+	if not source is Dictionary:
+		return out
+	for card_id in source.get(phase, []):
 		out.append(String(card_id))
 	return out
 

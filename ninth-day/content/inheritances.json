@@ -1,8 +1,15 @@
 {
 	"offers": {
-		"morning": ["burnt_sugar", "steady_hand", "backwards_bell"],
-		"afternoon": ["ash_lung", "iven_mark", "counterweight"],
-		"night": ["ninth_step", "quiet_room", "cracked_brass"]
+		"1": {
+			"morning": ["burnt_sugar", "steady_hand", "backwards_bell"],
+			"afternoon": ["ash_lung", "iven_mark", "counterweight"],
+			"night": ["ninth_step", "quiet_room", "cracked_brass"]
+		},
+		"2": {
+			"morning": ["watch_whistle", "second_hand", "elias_ledger"],
+			"afternoon": ["hounds_patience", "gate_left_open", "the_debt"],
+			"night": ["ash_on_the_gate", "second_bolt", "last_lamp"]
+		}
 	},
 	"cards": {
 		"burnt_sugar": {
@@ -67,6 +74,69 @@
 			"description": "The flaw is not the end of the Bell. It is the part that remembers.",
 			"effect": "+5 max HP and +1 attack to the party.",
 			"modifiers": {"max_hp": 5, "attack": 1}
+		},
+		"watch_whistle": {
+			"name": "A Watchman's Whistle",
+			"type": "Skill",
+			"description": "One short note, two streets away. The Watch always comes too late.",
+			"effect": "+1 speed to the party.",
+			"modifiers": {"speed": 1}
+		},
+		"second_hand": {
+			"name": "The Second Hand",
+			"type": "Stat",
+			"description": "You learn to read the Hound's pause before it lunges.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"elias_ledger": {
+			"name": "Elias's Ledger",
+			"type": "Bond",
+			"description": "Every debt in Ember Row, written in a steady hand. He never charged interest.",
+			"effect": "+6 max HP to the party.",
+			"modifiers": {"max_hp": 6}
+		},
+		"hounds_patience": {
+			"name": "The Hound's Patience",
+			"type": "Skill",
+			"description": "It does not bark. It waits until you have somewhere to be.",
+			"effect": "+1 defense and +1 speed to the party.",
+			"modifiers": {"defense": 1, "speed": 1}
+		},
+		"gate_left_open": {
+			"name": "A Gate Left Open",
+			"type": "Bond",
+			"description": "Someone in the Watch looked away. You never learned who.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"the_debt": {
+			"name": "The Debt",
+			"type": "Stat",
+			"description": "What you owe the living is heavier than any bell.",
+			"effect": "+2 attack to the party.",
+			"modifiers": {"attack": 2}
+		},
+		"ash_on_the_gate": {
+			"name": "Ash on the Gate",
+			"type": "Stat",
+			"description": "The checkpoint burned before dawn. The Watch blamed the wind.",
+			"effect": "+5 max HP to the party.",
+			"modifiers": {"max_hp": 5}
+		},
+		"second_bolt": {
+			"name": "Iven's Second Bolt",
+			"type": "Bond",
+			"description": "He keeps one in reserve. Now he keeps it for you.",
+			"effect": "+1 attack to the party.",
+			"modifiers": {"attack": 1}
+		},
+		"last_lamp": {
+			"name": "The Last Lamp",
+			"type": "Skill",
+			"description": "A small light in the ash. Enough to see the next step, not the whole road.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
 		}
 	}
 }

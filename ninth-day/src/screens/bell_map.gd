@@ -35,7 +35,9 @@ func _ready() -> void:
 	outer.add_child(intro)
 
 	if RunState.day_complete:
-		outer.add_child(_completion_panel())
+		outer.add_child(_completion_panel(RunState.day))
+	elif RunState.day >= 3 and RunState.is_phase_completed(RunState.day - 1, "night"):
+		outer.add_child(_completion_panel(RunState.day - 1))
 
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -67,8 +69,10 @@ func _day_block(day_number: int) -> VBoxContainer:
 	var block := VBoxContainer.new()
 	block.add_theme_constant_override("separation", 6)
 
-	var unlocked := day_number == RunState.day
 	var current := day_number == RunState.day
+	var finished_day := RunState.is_phase_completed(day_number, "night")
+	var has_content := day_number <= 2
+	var unlocked := current or finished_day
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 9)
 	block.add_child(header)
@@ -95,9 +99,9 @@ func _day_block(day_number: int) -> VBoxContainer:
 	var state_text := "COMPLETE" if RunState.is_phase_completed(day_number, "night") else ("CURRENT" if current else "LOCKED")
 	name_box.add_child(Ui.label("Day %d · %s" % [day_number, state_text], 10, Palette.BRASS if current else Palette.MUTED))
 
-	if day_number == 1:
+	if has_content and (current or finished_day):
 		for phase in RunState.PHASES:
-			block.add_child(_phase_button(phase))
+			block.add_child(_phase_button(day_number, phase))
 	elif RunState.is_day_unlocked(day_number):
 		var open_label := Ui.label("  Not in this build yet.", 12, Palette.MUTED)
 		block.add_child(open_label)
@@ -108,15 +112,15 @@ func _day_block(day_number: int) -> VBoxContainer:
 	block.add_child(Ui.rule(Palette.LINE))
 	return block
 
-func _phase_button(phase: String) -> Button:
-	var completed := RunState.is_phase_completed(RunState.day, phase)
-	var unlocked := RunState.is_phase_unlocked(phase)
+func _phase_button(day_number: int, phase: String) -> Button:
+	var completed := RunState.is_phase_completed(day_number, phase)
+	var unlocked := day_number == RunState.day and RunState.is_phase_unlocked(phase)
 	var marker := "✓" if completed else ("▶" if unlocked else "—")
 	var suffix := "complete" if completed else ("tap to enter" if unlocked else "locked")
 	var text := "%s  %s\n     %s · %s" % [
 		marker,
-		RunState.phase_title(phase).to_upper(),
-		RunState.phase_type(phase),
+		RunState.phase_title_for(day_number, phase).to_upper(),
+		RunState.phase_type_for(day_number, phase),
 		suffix,
 	]
 	var button := Ui.card_button(text, 66)
@@ -129,15 +133,15 @@ func _phase_button(phase: String) -> Button:
 		button.pressed.connect(_on_phase_pressed.bind(phase))
 	return button
 
-func _completion_panel() -> PanelContainer:
+func _completion_panel(p_day: int) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", Ui.panel_style(Palette.BG_RAISED, Palette.BELL))
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 5)
 	panel.add_child(box)
-	box.add_child(Ui.overline("DAY %d COMPLETE" % RunState.day))
+	box.add_child(Ui.overline("DAY %d COMPLETE" % p_day))
 	box.add_child(Ui.label("The Bell has not rung. What you kept is still yours.", 13, Palette.PAPER, true))
-	box.add_child(Ui.label("The vertical slice ends here. Day 2 is not authored yet.", 11, Palette.MUTED, true))
+	box.add_child(Ui.label("This build ends after Day 2. Day 3 is not authored yet.", 11, Palette.MUTED, true))
 	var reset := Ui.button("Begin a new cycle", 48)
 	reset.add_theme_color_override("font_color", Palette.MUTED)
 	reset.pressed.connect(_on_new_cycle)

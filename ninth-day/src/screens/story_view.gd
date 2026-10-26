@@ -20,7 +20,7 @@ var _map_button: Button
 
 func _ready() -> void:
 	phase = RunState.pending_phase if RunState.pending_phase != "" else "morning"
-	story_id = "day_01_" + phase
+	story_id = "day_%02d_%s" % [RunState.day, phase]
 	Ui.add_backdrop(self, _phase_tint())
 	var margin := Ui.screen_margin(self, 26, 22)
 	var root := VBoxContainer.new()
@@ -164,7 +164,8 @@ func _on_choice_pressed(index: int) -> void:
 	service.choose(index)
 
 func _leave_story() -> void:
-	if phase == "night":
+	var encounter := RunState.encounter_for_phase(phase)
+	if phase == "night" or encounter == &"":
 		RunState.current_screen = "bell_rest"
 		RunState.save()
 		get_tree().change_scene_to_file("res://src/screens/bell_rest.tscn")
@@ -180,6 +181,16 @@ func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if RunState.day == 2:
+		match phase:
+			"morning":
+				return "The Watch checkpoint opens its gate. Somewhere behind the barrier, a Hound has your scent."
+			"afternoon":
+				return "The Hound corners you in the ash. There is no way past it but through."
+			"night":
+				return "Elias is alive. The Watch will want him back before dawn. What you keep now will survive the reset."
+			_:
+				return "The Bell waits."
 	match phase:
 		"morning":
 			return "The Choir's note slides through the wall. Mara lifts her hammer. The first battle of the ninth day begins."
@@ -191,7 +202,7 @@ func _closing_text() -> String:
 			return "The Bell waits."
 
 func _closing_button_text() -> String:
-	if phase == "night":
+	if phase == "night" or RunState.encounter_for_phase(phase) == &"":
 		return "BELL REST  ›"
 	return "ENTER BATTLE  ›"
 
@@ -235,9 +246,11 @@ func _speaker_glyph(speaker: String) -> String:
 func _background_caption(bg_id: String) -> String:
 	match bg_id:
 		"spire":
-			return "THE SPIRE · MORNING"
+			return "THE SPIRE · " + phase.to_upper()
 		"ember_row":
-			return "EMBER ROW · AFTERNOON"
+			return "EMBER ROW · " + phase.to_upper()
+		"checkpoint":
+			return "THE WATCH CHECKPOINT · " + phase.to_upper()
 		"foundry":
 			return "THE FOUNDRY"
 		"spire_night":

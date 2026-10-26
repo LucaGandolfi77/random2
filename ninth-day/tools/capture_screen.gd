@@ -19,10 +19,15 @@ func _ready() -> void:
 			scene = load("res://src/screens/title.tscn").instantiate()
 		"map":
 			scene = load("res://src/screens/bell_map.tscn").instantiate()
-		"complete":
-			for phase in RunState.PHASES:
-				RunState.completed[RunState.phase_key(1, phase)] = true
-			RunState.day_complete = true
+		"map_day2":
+			_complete_day(1)
+			RunState.day = 2
+			RunState.save()
+			scene = load("res://src/screens/bell_map.tscn").instantiate()
+		"complete_day2":
+			_complete_day(1)
+			_complete_day(2)
+			RunState.day = 3
 			RunState.save()
 			scene = load("res://src/screens/bell_map.tscn").instantiate()
 		"story":
@@ -34,11 +39,23 @@ func _ready() -> void:
 		"story_night":
 			RunState.pending_phase = "night"
 			scene = load("res://src/screens/story_view.tscn").instantiate()
+		"story_day2":
+			RunState.day = 2
+			RunState.pending_phase = "morning"
+			scene = load("res://src/screens/story_view.tscn").instantiate()
 		"choices":
+			RunState.pending_phase = "morning"
+			scene = load("res://src/screens/story_view.tscn").instantiate()
+		"choices_day2":
+			RunState.day = 2
 			RunState.pending_phase = "morning"
 			scene = load("res://src/screens/story_view.tscn").instantiate()
 		"rest":
 			RunState.pending_phase = "morning"
+			scene = load("res://src/screens/bell_rest.tscn").instantiate()
+		"rest_day2":
+			RunState.day = 2
+			RunState.pending_phase = "afternoon"
 			scene = load("res://src/screens/bell_rest.tscn").instantiate()
 		_:
 			scene = load("res://src/screens/title.tscn").instantiate()
@@ -46,20 +63,22 @@ func _ready() -> void:
 	add_child(scene)
 	scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	if screen in ["story", "story_afternoon", "story_night", "choices"]:
+	if screen in ["story", "story_afternoon", "story_night", "story_day2", "choices", "choices_day2"]:
 		for i in 60:
 			await get_tree().process_frame
 			if not scene.service.current_line().is_empty():
 				break
-	if screen == "choices":
+	if screen in ["choices", "choices_day2"]:
 		var steps := 0
 		while scene._mode != "choices" and steps < 60:
 			steps += 1
 			scene.service.advance()
 			await get_tree().process_frame
-	if screen == "rest":
+	if screen in ["rest", "rest_day2"]:
 		await get_tree().process_frame
-		scene._on_card_selected("burnt_sugar")
+		var offers := InheritanceDB.offers(scene.phase, RunState.day)
+		if not offers.is_empty():
+			scene._on_card_selected(offers[0])
 
 	await get_tree().create_timer(0.4).timeout
 	await RenderingServer.frame_post_draw
@@ -71,3 +90,7 @@ func _ready() -> void:
 	else:
 		printerr("Failed to save screenshot: ", error)
 	get_tree().quit(0 if error == OK else 1)
+
+func _complete_day(p_day: int) -> void:
+	for phase in RunState.PHASES:
+		RunState.completed[RunState.phase_key(p_day, phase)] = true
