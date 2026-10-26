@@ -181,6 +181,16 @@ func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if RunState.day == 5:
+		match phase:
+			"morning":
+				return "The Hollow Bellkeeper is already at the door. It has your face."
+			"afternoon":
+				return "The papers settle. The first Bellkeeper is still alive, and she is the Quiet."
+			"night":
+				return "The truth is out. What you keep now will survive the reset."
+			_:
+				return "The Bell waits."
 	if RunState.day == 4:
 		match phase:
 			"morning":
@@ -249,6 +259,8 @@ func _speaker_color(speaker: String) -> Color:
 			return Palette.PAPER
 		"Wren":
 			return Palette.BRASS
+		"Toma":
+			return Palette.PAPER
 		_:
 			return Palette.BRASS
 
@@ -264,6 +276,8 @@ func _speaker_glyph(speaker: String) -> String:
 			return "O"
 		"Wren":
 			return "W"
+		"Toma":
+			return "T"
 		_:
 			return "◉"
 
@@ -285,12 +299,22 @@ func _background_caption(bg_id: String) -> String:
 			return "THE CLOCKWORK SAINT"
 		"roof":
 			return "THE SPIRE ROOF · NIGHT"
+		"wren_house":
+			return "WREN'S HOUSE"
+		"quiet":
+			return "THE QUIET"
 		"spire_night":
 			return "THE SPIRE · NIGHT"
 		_:
 			return "AUREL"
 
 func _default_bg() -> String:
+	if RunState.day == 5:
+		match phase:
+			"night":
+				return "quiet"
+			_:
+				return "wren_house"
 	if RunState.day == 4:
 		match phase:
 			"morning":

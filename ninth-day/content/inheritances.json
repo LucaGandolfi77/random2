@@ -19,6 +19,11 @@
 			"morning": ["memory_rose", "oria_blessing", "garden_hush"],
 			"afternoon": ["saint_gear", "wren_song", "name_kept"],
 			"night": ["clockwork_heart", "procession_step", "first_wren"]
+		},
+		"5": {
+			"morning": ["wren_chalk", "house_key", "first_crack"],
+			"afternoon": ["toma_laugh", "hollow_mirror", "ninth_memory"],
+			"night": ["quiet_step", "bellkeeper_oath", "empty_house"]
 		}
 	},
 	"cards": {
@@ -273,6 +278,69 @@
 			"description": "A girl on a roof, counting bells. She gets to nine before you do.",
 			"effect": "+6 max HP to the party.",
 			"modifiers": {"max_hp": 6}
+		},
+		"wren_chalk": {
+			"name": "Wren's Chalk",
+			"type": "Bond",
+			"description": "Nine names on a slate, rewritten every morning.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"house_key": {
+			"name": "The House Key",
+			"type": "Bond",
+			"description": "A small iron key. Wren does not explain who else has one.",
+			"effect": "+5 max HP to the party.",
+			"modifiers": {"max_hp": 5}
+		},
+		"first_crack": {
+			"name": "The First Crack",
+			"type": "Skill",
+			"description": "You know where the Bell is weakest. You aim there.",
+			"effect": "+1 attack to the party.",
+			"modifiers": {"attack": 1}
+		},
+		"toma_laugh": {
+			"name": "Toma's Laugh",
+			"type": "Bond",
+			"description": "It arrives at the worst possible moment and makes the room survivable.",
+			"effect": "+1 speed to the party.",
+			"modifiers": {"speed": 1}
+		},
+		"hollow_mirror": {
+			"name": "The Hollow Mirror",
+			"type": "Skill",
+			"description": "You have fought yourself. You know which half flinches.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"ninth_memory": {
+			"name": "The Ninth Memory",
+			"type": "Bond",
+			"description": "Something the Bell has tried eight times to take.",
+			"effect": "+5 max HP and +1 max Resolve to the party.",
+			"modifiers": {"max_hp": 5, "max_resolve": 1}
+		},
+		"quiet_step": {
+			"name": "A Step in the Quiet",
+			"type": "Skill",
+			"description": "The Quiet is loud. You learn to move between its words.",
+			"effect": "+1 defense and +1 speed to the party.",
+			"modifiers": {"defense": 1, "speed": 1}
+		},
+		"bellkeeper_oath": {
+			"name": "The Bellkeeper's Oath",
+			"type": "Skill",
+			"description": "Not to keep the Bell. To keep the people under it.",
+			"effect": "+2 attack to the party.",
+			"modifiers": {"attack": 2}
+		},
+		"empty_house": {
+			"name": "The Empty House",
+			"type": "Bond",
+			"description": "A door left unlocked for whoever remembers to come back.",
+			"effect": "+1 attack and +5 max HP to the party.",
+			"modifiers": {"attack": 1, "max_hp": 5}
 		}
 	}
 }

@@ -192,7 +192,8 @@ func enemy_act() -> Array[String]:
 
 	# Capture a player record before the enemy action pushes a new one.
 	var echo_record: ActionRecord = null
-	if enemy_echo_available and rng.randf() < 0.35:
+	var echo_chance := 1.0 if actor.id == &"hollow_bellkeeper" else 0.35
+	if enemy_echo_available and rng.randf() < echo_chance:
 		echo_record = _first_replayable_player_record()
 
 	var action: BattleAction = null
@@ -822,6 +823,8 @@ func _encounter_intro() -> String:
 			return "The counterweights scream overhead. The Ashwright is waiting at the bottom, and the Choir is singing."
 		&"clockwork_saint":
 			return "The garden guardian wakes. Brass hands fold. Somewhere inside it, a small bell begins to ring."
+		&"hollow_bellkeeper":
+			return "The Hollow Bellkeeper wears your face. It rings a bell that is not there."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -870,6 +873,17 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 		BattleAction.new(&"censure", "Censure", BattleTypes.Tone.HUSH, 24, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 1, false, "A verdict delivered in brass."),
 	])
 
+	var hollow := BattleActor.new(&"hollow_bellkeeper", "The Hollow Bellkeeper", BattleTypes.Side.ENEMY, BattleTypes.Tone.BELL, 220, 21, 13, 15)
+	hollow.is_boss = true
+	hollow.max_resolve = 99
+	hollow.resolve = 99
+	hollow.actions = _actions([
+		BattleAction.new(&"iron_rod", "Iron Rod", BattleTypes.Tone.BELL, 16, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"", 0, true, "Your own first strike, returned."),
+		BattleAction.new(&"cinder_lance", "Cinder Lance", BattleTypes.Tone.EMBER, 20, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, true, "The fire you remember."),
+		BattleAction.new(&"hush_step", "Hush Step", BattleTypes.Tone.HUSH, 16, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"slowed", 2, true, "A step that arrives before you take it."),
+		BattleAction.new(&"ninth_toll", "The Ninth Toll", BattleTypes.Tone.BELL, 34, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 1, false, "The Chord, without a hand to guide it."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -893,6 +907,8 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			return [ashwright, choir]
 		&"clockwork_saint":
 			return [saint]
+		&"hollow_bellkeeper":
+			return [hollow]
 		_:
 			return out
 

@@ -26,6 +26,9 @@ const TITLES := {
 	"day_04_morning": "Saint Orra",
 	"day_04_afternoon": "The Clockwork Saint",
 	"day_04_night": "The First Wren",
+	"day_05_morning": "Wren's House",
+	"day_05_afternoon": "The Hollow Bellkeeper",
+	"day_05_night": "The First Crack",
 }
 
 var story_id: String = ""
@@ -189,4 +192,6 @@ func _ink_path_for(p_story_id: String) -> String:
 		return "res://content/ink/day_03.ink.json"
 	if p_story_id.begins_with("day_04_"):
 		return "res://content/ink/day_04.ink.json"
+	if p_story_id.begins_with("day_05_"):
+		return "res://content/ink/day_05.ink.json"
 	return INK_JSON

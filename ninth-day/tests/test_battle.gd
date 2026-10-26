@@ -21,6 +21,7 @@ func _initialize() -> void:
 	_test_preview_replay()
 	_test_track_capacity_and_steal()
 	_test_intents()
+	_test_hollow_echo()
 	_test_save_resume()
 	_test_store()
 	_test_encounters()
@@ -188,6 +189,25 @@ func _test_intents() -> void:
 	var acting_id := actor.id
 	sim.enemy_act()
 	_assert(_find_actor(sim, acting_id).intent_action == &"", "an intent is cleared after it resolves")
+
+func _test_hollow_echo() -> void:
+	var sim := _new_sim(808)
+	sim.start(808, &"hollow_bellkeeper")
+	_assert(sim.enemies.size() == 1, "the Hollow Bellkeeper fights alone")
+	_assert(sim.enemies[0].id == &"hollow_bellkeeper", "the Hollow Bellkeeper is the enemy")
+	_assert(sim.enemies[0].max_hp == 220, "the Hollow Bellkeeper is a late boss")
+	sim.use_action(&"ratchet_shot", &"hollow_bellkeeper")
+	while sim.is_player_turn():
+		sim.use_guard()
+	_assert(sim.is_enemy_turn(), "the party hands over to the Hollow Bellkeeper")
+	sim.enemy_act()
+	_assert(not sim.enemy_echo_available, "the Hollow Bellkeeper always echoes once")
+	var echoed := false
+	for line in sim.log_lines:
+		if line.contains("echoes your"):
+			echoed = true
+			break
+	_assert(echoed, "the Hollow Bellkeeper mirrors a party action")
 
 func _test_save_resume() -> void:
 	var sim := _new_sim(909)

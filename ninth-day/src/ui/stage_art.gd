@@ -16,8 +16,10 @@ func set_mode(bg_id: String) -> void:
 	match mode:
 		"ember_row", "foundry", "checkpoint", "bellows", "garden":
 			tint = Palette.EMBER
-		"spire_night", "clockwork", "roof":
+		"spire_night", "clockwork", "roof", "quiet":
 			tint = Palette.HUSH
+		"wren_house":
+			tint = Palette.BRASS
 		_:
 			tint = Palette.BRASS
 	queue_redraw()
@@ -47,6 +49,10 @@ func _draw() -> void:
 			_draw_clockwork()
 		"roof":
 			_draw_roof()
+		"wren_house":
+			_draw_wren_house()
+		"quiet":
+			_draw_quiet()
 		"spire_night":
 			_draw_night_spire()
 		_:
@@ -191,6 +197,37 @@ func _draw_roof() -> void:
 	draw_line(Vector2(0, base), Vector2(size.x, base), Color(tint.r, tint.g, tint.b, 0.16), 1.0)
 	draw_circle(Vector2(size.x * 0.68, base - 8), 5.0, Color(tint.r, tint.g, tint.b, 0.32))
 	draw_line(Vector2(size.x * 0.68, base - 8), Vector2(size.x * 0.68, base - 20), Color(tint.r, tint.g, tint.b, 0.26), 1.5)
+
+func _draw_wren_house() -> void:
+	var base := size.y * 0.86
+	draw_rect(Rect2(Vector2(size.x * 0.16, size.y * 0.2), Vector2(size.x * 0.3, size.y * 0.28)), Color(tint.r, tint.g, tint.b, 0.06))
+	draw_rect(Rect2(Vector2(size.x * 0.16, size.y * 0.2), Vector2(size.x * 0.3, size.y * 0.28)), Color(tint.r, tint.g, tint.b, 0.2), false, 1.0)
+	draw_line(Vector2(size.x * 0.31, size.y * 0.2), Vector2(size.x * 0.31, size.y * 0.48), Color(tint.r, tint.g, tint.b, 0.16), 1.0)
+	draw_line(Vector2(size.x * 0.16, size.y * 0.34), Vector2(size.x * 0.46, size.y * 0.34), Color(tint.r, tint.g, tint.b, 0.16), 1.0)
+	draw_line(Vector2(size.x * 0.08, base), Vector2(size.x * 0.92, base), Color(tint.r, tint.g, tint.b, 0.24), 2.0)
+	for i in 4:
+		var x := size.x * (0.54 + i * 0.09)
+		draw_line(Vector2(x, size.y * 0.22), Vector2(x, size.y * 0.5), Color(tint.r, tint.g, tint.b, 0.12), 1.0)
+		draw_rect(Rect2(Vector2(x - 7, size.y * 0.3), Vector2(14, 22)), Color(tint.r, tint.g, tint.b, 0.06))
+	draw_rect(Rect2(Vector2(size.x * 0.2, base - 50), Vector2(size.x * 0.38, 8)), Color(tint.r, tint.g, tint.b, 0.16))
+	draw_line(Vector2(size.x * 0.24, base - 50), Vector2(size.x * 0.24, base), Color(tint.r, tint.g, tint.b, 0.12), 1.0)
+	draw_line(Vector2(size.x * 0.54, base - 50), Vector2(size.x * 0.54, base), Color(tint.r, tint.g, tint.b, 0.12), 1.0)
+
+func _draw_quiet() -> void:
+	var cx := size.x * 0.5
+	draw_circle(Vector2(cx, size.y * 0.52), 70.0, Color(0.01, 0.01, 0.02, 0.6))
+	var crack := PackedVector2Array([
+		Vector2(cx - 8, size.y * 0.16),
+		Vector2(cx + 6, size.y * 0.34),
+		Vector2(cx - 10, size.y * 0.46),
+		Vector2(cx + 12, size.y * 0.62),
+		Vector2(cx - 4, size.y * 0.82),
+	])
+	draw_polyline(crack, Color(0.92, 0.88, 0.78, 0.3), 2.0, true)
+	for i in 5:
+		var y := size.y * (0.24 + i * 0.12)
+		draw_line(Vector2(cx - 90 - i * 8, y), Vector2(cx - 24, y + 8), Color(tint.r, tint.g, tint.b, 0.06), 1.0)
+		draw_line(Vector2(cx + 24, y + 8), Vector2(cx + 90 + i * 8, y), Color(tint.r, tint.g, tint.b, 0.06), 1.0)
 
 func _draw_night_spire() -> void:
 	var cx := size.x * 0.5

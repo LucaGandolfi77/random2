@@ -353,8 +353,79 @@ func _run() -> void:
 		return _finish()
 	_assert(RunState.is_phase_completed(4, "night"), "Day 4 night is complete")
 	_assert(RunState.day == 5, "the cycle advances to Day 5")
-	_assert(RunState.next_phase() == "", "Day 5 has no authored phases yet")
-	_assert(RunState.inheritances.size() >= 12, "twelve memories are archived")
+	_assert(RunState.next_phase() == "morning", "Day 5 starts at morning")
+
+	# Day 5 morning: Wren's house and the first crack.
+	map = get_tree().current_scene
+	map._on_phase_pressed("morning")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "Wren's House", "Day 5 opens at Wren's house")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("morning", 5)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("afternoon"), "Day 5 afternoon unlocks")
+
+	# Day 5 afternoon: the Hollow Bellkeeper mirrors the party.
+	map = get_tree().current_scene
+	map._on_phase_pressed("afternoon")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Hollow Bellkeeper", "Day 5 afternoon names the Hollow Bellkeeper")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BattleView"):
+		return _finish()
+	battle = get_tree().current_scene
+	_assert(battle.sim.encounter_id == &"hollow_bellkeeper", "Day 5 starts the Hollow Bellkeeper")
+	battle.sim.enemies[0].hp = 1
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	battle._refresh()
+	_assert(battle.sim.phase == "victory", "the Hollow Bellkeeper can be defeated")
+	battle._on_result_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("afternoon", 5)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("night"), "Day 5 night unlocks")
+
+	# Day 5 night: the truth of the first crack.
+	map = get_tree().current_scene
+	map._on_phase_pressed("night")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The First Crack", "Day 5 night reveals the first crack")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("night", 5)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_completed(5, "night"), "Day 5 night is complete")
+	_assert(RunState.day == 6, "the cycle advances to Day 6")
+	_assert(RunState.next_phase() == "", "Day 6 has no authored phases yet")
+	_assert(RunState.inheritances.size() >= 15, "fifteen memories are archived")
 	_assert(RunState.equipped.size() == 6, "the loadout caps at six memories")
 	_finish()
 
