@@ -181,6 +181,8 @@ func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if RunState.day == 7:
+		return "Vey closes the inner door. Whatever you chose, the sanctuary remembers it."
 	if RunState.day == 6:
 		return "The street is quiet in the wrong way. One of your friends is still standing at the edge of it."
 	if RunState.day == 5:
@@ -265,6 +267,8 @@ func _speaker_color(speaker: String) -> Color:
 			return Palette.PAPER
 		"Sera":
 			return Palette.EMBER
+		"Vey":
+			return Palette.HUSH
 		_:
 			return Palette.BRASS
 
@@ -284,6 +288,8 @@ func _speaker_glyph(speaker: String) -> String:
 			return "T"
 		"Sera":
 			return "S"
+		"Vey":
+			return "V"
 		_:
 			return "◉"
 
@@ -309,12 +315,24 @@ func _background_caption(bg_id: String) -> String:
 			return "WREN'S HOUSE"
 		"quiet":
 			return "THE QUIET"
+		"sanctuary":
+			return "VEY'S SANCTUARY"
+		"ash":
+			return "THE ASH FIELD"
 		"spire_night":
 			return "THE SPIRE · NIGHT"
 		_:
 			return "AUREL"
 
 func _default_bg() -> String:
+	if RunState.day == 7:
+		match phase:
+			"morning":
+				return "sanctuary"
+			"afternoon":
+				return "ash"
+			"night":
+				return "quiet"
 	if RunState.day == 6:
 		match phase:
 			"morning":

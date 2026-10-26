@@ -501,8 +501,78 @@ func _run() -> void:
 		return _finish()
 	_assert(RunState.is_phase_completed(6, "night"), "Day 6 night is complete")
 	_assert(RunState.day == 7, "the cycle advances to Day 7")
-	_assert(RunState.next_phase() == "", "Day 7 has no authored phases yet")
-	_assert(RunState.inheritances.size() >= 18, "eighteen memories are archived")
+	_assert(RunState.next_phase() == "morning", "Day 7 starts at morning")
+
+	# Day 7 morning: Vey's sanctuary.
+	map = get_tree().current_scene
+	map._on_phase_pressed("morning")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "Vey's Sanctuary", "Day 7 opens in Vey's sanctuary")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("morning", 7)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("afternoon"), "Day 7 afternoon unlocks")
+
+	# Day 7 afternoon: accept the mercy, which removes the battle entirely.
+	map = get_tree().current_scene
+	map._on_phase_pressed("afternoon")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Offer", "Day 7 afternoon presents Vey's offer")
+	if not await _drive_story(story):
+		return _finish()
+	_assert(bool(RunState.get_flag("accepted_mercy")), "the mercy choice is recorded")
+	_assert(RunState.encounter_for_phase("afternoon") == &"", "mercy removes the Day 7 battle")
+	var mercy_flag = RunState.flags.get("accepted_mercy", false)
+	RunState.flags.erase("accepted_mercy")
+	_assert(RunState.encounter_for_phase("afternoon") == &"saint_of_ash", "refusing mercy starts the Saint of Ash")
+	RunState.flags["accepted_mercy"] = mercy_flag
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	_assert(get_tree().current_scene.name == "BellRest", "the no-combat route skips the battle")
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("afternoon", 7)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("night"), "Day 7 night unlocks")
+
+	# Day 7 night: the mercy branch remembers the quiet day.
+	map = get_tree().current_scene
+	map._on_phase_pressed("night")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "What Mercy Costs", "Day 7 night closes the offer")
+	if not await _drive_story(story):
+		return _finish()
+	_assert(bool(RunState.get_flag("kept_quiet_day")), "the night choice keeps the quiet day")
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("night", 7)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_completed(7, "night"), "Day 7 night is complete")
+	_assert(RunState.day == 8, "the cycle advances to Day 8")
+	_assert(RunState.next_phase() == "", "Day 8 has no authored phases yet")
+	_assert(RunState.inheritances.size() >= 21, "twenty-one memories are archived")
 	_assert(RunState.equipped.size() == 6, "the loadout caps at six memories")
 	_finish()
 

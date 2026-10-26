@@ -29,6 +29,11 @@
 			"morning": ["alliance_badge", "rebel_map", "hollow_ward"],
 			"afternoon": ["sera_sigil", "watch_pike", "choir_iron"],
 			"night": ["saved_bond", "coup_memory", "district_key"]
+		},
+		"7": {
+			"morning": ["vey_mercy", "sanctuary_key", "quiet_bell"],
+			"afternoon": ["ash_crown", "saint_pyre", "memory_ash"],
+			"night": ["mercy_kept", "pyre_oath", "no_bell_room"]
 		}
 	},
 	"cards": {
@@ -409,6 +414,69 @@
 			"description": "The Watch changed the locks. Someone changed them back.",
 			"effect": "+1 defense and +1 speed to the party.",
 			"modifiers": {"defense": 1, "speed": 1}
+		},
+		"vey_mercy": {
+			"name": "Vey's Mercy",
+			"type": "Bond",
+			"description": "One quiet day, offered without a price you could see.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"sanctuary_key": {
+			"name": "The Sanctuary Key",
+			"type": "Bond",
+			"description": "A door that does not exist on any map of Aurel.",
+			"effect": "+5 max HP to the party.",
+			"modifiers": {"max_hp": 5}
+		},
+		"quiet_bell": {
+			"name": "The Bell That Cannot Be Heard",
+			"type": "Skill",
+			"description": "You carry the shape of a silence.",
+			"effect": "+1 speed to the party.",
+			"modifiers": {"speed": 1}
+		},
+		"ash_crown": {
+			"name": "The Ash Crown",
+			"type": "Skill",
+			"description": "A Saint's authority, reduced to a handful of warm cinders.",
+			"effect": "+1 attack to the party.",
+			"modifiers": {"attack": 1}
+		},
+		"saint_pyre": {
+			"name": "The Saint's Pyre",
+			"type": "Skill",
+			"description": "A fire that remembers what it was built to burn.",
+			"effect": "+2 attack to the party.",
+			"modifiers": {"attack": 2}
+		},
+		"memory_ash": {
+			"name": "Memory Ash",
+			"type": "Stat",
+			"description": "Everything the sanctuary could not keep, pressed into a grey powder.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"mercy_kept": {
+			"name": "The Mercy You Kept",
+			"type": "Bond",
+			"description": "A day without a Bell. You remember choosing it.",
+			"effect": "+6 max HP to the party.",
+			"modifiers": {"max_hp": 6}
+		},
+		"pyre_oath": {
+			"name": "The Pyre Oath",
+			"type": "Skill",
+			"description": "If the city must burn, let it burn remembering why.",
+			"effect": "+1 attack and +5 max HP to the party.",
+			"modifiers": {"attack": 1, "max_hp": 5}
+		},
+		"no_bell_room": {
+			"name": "A Room With No Bell",
+			"type": "Bond",
+			"description": "You know where the quiet is now. You can go back.",
+			"effect": "+1 defense and +1 max Resolve to the party.",
+			"modifiers": {"defense": 1, "max_resolve": 1}
 		}
 	}
 }

@@ -7,7 +7,7 @@ extends Node
 
 const SAVE_PATH := "user://ninth_day_run.json"
 const PHASES: Array[String] = ["morning", "afternoon", "night"]
-const LAST_AUTHORED_DAY := 6
+const LAST_AUTHORED_DAY := 7
 const DAY_PHASES := {
 	1: {
 		"morning": {"title": "Morning · The Crack", "type": "story · battle · inheritance", "encounter": "tutorial"},
@@ -38,6 +38,11 @@ const DAY_PHASES := {
 		"morning": {"title": "Morning · The Coup", "type": "story · choice", "encounter": ""},
 		"afternoon": {"title": "Afternoon · The Watch Closes", "type": "story · battle · inheritance", "encounter": "iron_choir"},
 		"night": {"title": "Night · The Hollowed", "type": "story · choice", "encounter": ""},
+	},
+	7: {
+		"morning": {"title": "Morning · Vey's Sanctuary", "type": "story · choice", "encounter": ""},
+		"afternoon": {"title": "Afternoon · The Offer", "type": "story · optional battle · inheritance", "encounter": "saint_of_ash"},
+		"night": {"title": "Night · What Mercy Costs", "type": "story · choice", "encounter": ""},
 	},
 }
 
@@ -182,6 +187,8 @@ func phase_type_for(p_day: int, phase: String) -> String:
 func encounter_for_phase(phase: String) -> StringName:
 	if day == 6 and phase == "afternoon":
 		return &"sera_vane" if bool(get_flag("allied_rebels", false)) else &"iron_choir"
+	if day == 7 and phase == "afternoon":
+		return &"" if bool(get_flag("accepted_mercy", false)) else &"saint_of_ash"
 	return StringName(phase_data(day, phase).get("encounter", ""))
 
 func phase_data(p_day: int, phase: String) -> Dictionary:

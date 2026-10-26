@@ -829,6 +829,8 @@ func _encounter_intro() -> String:
 			return "The Iron Choir fills the checkpoint. Every voice is a locked gate."
 		&"sera_vane":
 			return "Sera Vane steps out of the Watch keep with a pike in her hand. She does not ask you to surrender."
+		&"saint_of_ash":
+			return "The Saint of Ash unfolds from the sanctuary floor. It is made of every memory Vey has taken."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -910,6 +912,17 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 		BattleAction.new(&"no_quarter", "No Quarter", BattleTypes.Tone.EMBER, 30, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 1, false, "The Watch does not leave survivors."),
 	])
 
+	var ash_saint := BattleActor.new(&"saint_of_ash", "The Saint of Ash", BattleTypes.Side.ENEMY, BattleTypes.Tone.EMBER, 250, 23, 15, 14)
+	ash_saint.is_boss = true
+	ash_saint.max_resolve = 99
+	ash_saint.resolve = 99
+	ash_saint.actions = _actions([
+		BattleAction.new(&"ashfall", "Ashfall", BattleTypes.Tone.EMBER, 20, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"burning", 1, true, "Every memory Vey took, falling at once."),
+		BattleAction.new(&"ember_crown", "Ember Crown", BattleTypes.Tone.EMBER, 24, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"marked", 2, true, "A crown that burns the one who wears it."),
+		BattleAction.new(&"communion", "Communion", BattleTypes.Tone.EMBER, 0, 0, BattleTypes.TargetRule.SELF, 30, &"", 0, true, "The Saint takes back what it gave."),
+		BattleAction.new(&"pyre", "Pyre", BattleTypes.Tone.EMBER, 34, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, false, "A mercy that leaves only ash."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -939,6 +952,8 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			return [iron_choir]
 		&"sera_vane":
 			return [sera]
+		&"saint_of_ash":
+			return [ash_saint]
 		_:
 			return out
 

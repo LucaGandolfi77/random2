@@ -39,6 +39,11 @@ func _ready() -> void:
 		RunState.pending_phase = "afternoon"
 		RunState.flags["allied_rebels"] = true
 		RunState.save()
+	elif "--ash" in args:
+		RunState.day = 7
+		RunState.pending_phase = "afternoon"
+		RunState.flags.erase("accepted_mercy")
+		RunState.save()
 	var battle := preload("res://src/battle/battle_view.tscn").instantiate()
 	add_child(battle)
 	battle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
