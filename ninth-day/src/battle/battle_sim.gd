@@ -512,10 +512,16 @@ func _resolve_action(
 			var damage := _calculate_damage(action.power, actor.attack, t.defense, tone_bp, guard_bp, variance)
 			var applied := t.take_damage(damage)
 			_event(events, "%s %s %s on %s for %d." % [actor.display_name, verb, action.display_name, t.display_name, applied])
-			if t.is_boss and t.id == &"clockwork_unbound" and not boss_enraged and t.hp <= t.max_hp / 2:
+			if t.is_boss and not boss_enraged and t.id in [&"clockwork_unbound", &"the_quiet"] and t.hp <= t.max_hp / 2:
 				boss_enraged = true
-				t.attack += 4
-				_event(events, "The Unbound Saint sheds its clockwork skin. Its strikes quicken.")
+				if t.id == &"the_quiet":
+					t.attack += 3
+					for member in living_party():
+						member.resolve = maxi(0, member.resolve - 1)
+					_event(events, "The Quiet takes the ninth day from your hands. Resolve drains from the party.")
+				else:
+					t.attack += 4
+					_event(events, "The Unbound Saint sheds its clockwork skin. Its strikes quicken.")
 			if not t.is_alive():
 				_event(events, "%s falls." % t.display_name)
 		if action.status_id != &"" and t.is_alive():
@@ -849,6 +855,8 @@ func _encounter_intro() -> String:
 			return "The Saint of Ash unfolds from the sanctuary floor. It is made of every memory Vey has taken."
 		&"clockwork_unbound":
 			return "The Unbound Saint descends the Spire stair. Its clockwork skin is open, and the Bell is inside."
+		&"the_quiet":
+			return "The Quiet stands where the Bell should be. It has been waiting for you since the first morning."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -952,6 +960,17 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 		BattleAction.new(&"ninth_toll", "The Ninth Toll", BattleTypes.Tone.BELL, 36, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"slowed", 1, false, "The Chord with no hand to guide it."),
 	])
 
+	var quiet := BattleActor.new(&"the_quiet", "The Quiet", BattleTypes.Side.ENEMY, BattleTypes.Tone.HUSH, 360, 25, 17, 18)
+	quiet.is_boss = true
+	quiet.max_resolve = 99
+	quiet.resolve = 99
+	quiet.actions = _actions([
+		BattleAction.new(&"unmaking", "Unmaking", BattleTypes.Tone.HUSH, 24, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 2, true, "The shape of a name, erased slowly."),
+		BattleAction.new(&"hollow_name", "Hollow Name", BattleTypes.Tone.HUSH, 30, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"marked", 2, true, "It calls you something you almost remember."),
+		BattleAction.new(&"stillness", "Stillness", BattleTypes.Tone.HUSH, 0, 0, BattleTypes.TargetRule.SELF, 40, &"", 0, true, "The Quiet takes its own hurt away."),
+		BattleAction.new(&"ninth_silence", "Ninth Silence", BattleTypes.Tone.HUSH, 40, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"slowed", 1, false, "The last day, ending early."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -985,6 +1004,8 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			return [ash_saint]
 		&"clockwork_unbound":
 			return [unbound]
+		&"the_quiet":
+			return [quiet]
 		_:
 			return out
 

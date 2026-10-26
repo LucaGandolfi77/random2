@@ -75,6 +75,18 @@ func _ready() -> void:
 			RunState.day = 8
 			RunState.save()
 			scene = load("res://src/screens/bell_map.tscn").instantiate()
+		"map_day9":
+			_complete_day(1)
+			_complete_day(2)
+			_complete_day(3)
+			_complete_day(4)
+			_complete_day(5)
+			_complete_day(6)
+			_complete_day(7)
+			_complete_day(8)
+			RunState.day = 9
+			RunState.save()
+			scene = load("res://src/screens/bell_map.tscn").instantiate()
 		"complete_day2":
 			_complete_day(1)
 			_complete_day(2)
@@ -138,6 +150,34 @@ func _ready() -> void:
 			RunState.day = 9
 			RunState.save()
 			scene = load("res://src/screens/bell_map.tscn").instantiate()
+		"complete_day9":
+			for d in range(1, 10):
+				_complete_day(d)
+			RunState.day = 9
+			RunState.cycle_complete = true
+			RunState.save()
+			scene = load("res://src/screens/bell_map.tscn").instantiate()
+		"ending":
+			for d in range(1, 10):
+				_complete_day(d)
+			RunState.day = 9
+			RunState.cycle_complete = true
+			RunState.flags["ending_ring"] = true
+			RunState.current_screen = "ending"
+			RunState.save()
+			scene = load("res://src/screens/ending_view.tscn").instantiate()
+		"ending_true":
+			for d in range(1, 10):
+				_complete_day(d)
+			RunState.day = 9
+			RunState.cycle_complete = true
+			RunState.flags["ending_break"] = true
+			RunState.flags["has_hidden_bell"] = true
+			for bond_id in ["mara", "iven", "wren", "oria", "toma", "vey"]:
+				RunState.bonds[bond_id] = 3
+			RunState.current_screen = "ending"
+			RunState.save()
+			scene = load("res://src/screens/ending_view.tscn").instantiate()
 		"story":
 			RunState.pending_phase = "morning"
 			scene = load("res://src/screens/story_view.tscn").instantiate()
@@ -206,6 +246,14 @@ func _ready() -> void:
 			RunState.day = 8
 			RunState.pending_phase = "morning"
 			scene = load("res://src/screens/story_view.tscn").instantiate()
+		"story_day9":
+			RunState.day = 9
+			RunState.pending_phase = "morning"
+			scene = load("res://src/screens/story_view.tscn").instantiate()
+		"choices_day9":
+			RunState.day = 9
+			RunState.pending_phase = "morning"
+			scene = load("res://src/screens/story_view.tscn").instantiate()
 		"rest":
 			RunState.pending_phase = "morning"
 			scene = load("res://src/screens/bell_rest.tscn").instantiate()
@@ -237,24 +285,28 @@ func _ready() -> void:
 			RunState.day = 8
 			RunState.pending_phase = "afternoon"
 			scene = load("res://src/screens/bell_rest.tscn").instantiate()
+		"rest_day9":
+			RunState.day = 9
+			RunState.pending_phase = "afternoon"
+			scene = load("res://src/screens/bell_rest.tscn").instantiate()
 		_:
 			scene = load("res://src/screens/title.tscn").instantiate()
 
 	add_child(scene)
 	scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	if screen in ["story", "story_afternoon", "story_night", "story_day2", "choices", "choices_day2", "story_day3", "choices_day3", "story_day4", "choices_day4", "story_day5", "choices_day5", "story_day6", "choices_day6", "story_day7", "choices_day7", "story_day8", "choices_day8"]:
+	if screen in ["story", "story_afternoon", "story_night", "story_day2", "choices", "choices_day2", "story_day3", "choices_day3", "story_day4", "choices_day4", "story_day5", "choices_day5", "story_day6", "choices_day6", "story_day7", "choices_day7", "story_day8", "choices_day8", "story_day9", "choices_day9"]:
 		for i in 60:
 			await get_tree().process_frame
 			if not scene.service.current_line().is_empty():
 				break
-	if screen in ["choices", "choices_day2", "choices_day3", "choices_day4", "choices_day5", "choices_day6", "choices_day7", "choices_day8"]:
+	if screen in ["choices", "choices_day2", "choices_day3", "choices_day4", "choices_day5", "choices_day6", "choices_day7", "choices_day8", "choices_day9"]:
 		var steps := 0
 		while scene._mode != "choices" and steps < 60:
 			steps += 1
 			scene.service.advance()
 			await get_tree().process_frame
-	if screen in ["rest", "rest_day2", "rest_day3", "rest_day4", "rest_day5", "rest_day6", "rest_day7", "rest_day8"]:
+	if screen in ["rest", "rest_day2", "rest_day3", "rest_day4", "rest_day5", "rest_day6", "rest_day7", "rest_day8", "rest_day9"]:
 		await get_tree().process_frame
 		var offers := InheritanceDB.offers(scene.phase, RunState.day)
 		if not offers.is_empty():

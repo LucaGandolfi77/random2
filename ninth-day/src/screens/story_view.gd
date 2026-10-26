@@ -164,6 +164,13 @@ func _on_choice_pressed(index: int) -> void:
 	service.choose(index)
 
 func _leave_story() -> void:
+	if RunState.day == 9 and phase == "night":
+		RunState.complete_phase("night")
+		RunState.cycle_complete = true
+		RunState.current_screen = "ending"
+		RunState.save()
+		get_tree().change_scene_to_file("res://src/screens/ending_view.tscn")
+		return
 	var encounter := RunState.encounter_for_phase(phase)
 	if phase == "night" or encounter == &"":
 		RunState.current_screen = "bell_rest"
@@ -181,6 +188,16 @@ func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if RunState.day == 9:
+		match phase:
+			"morning":
+				return "The ninth morning is ending. Below you, Aurel is waiting to find out what it becomes."
+			"afternoon":
+				return "The Quiet is not a monster. It is a woman who wanted one more day. The Bell is open."
+			"night":
+				return "The Bell is broken or ringing or gone. Either way, the loop is over."
+			_:
+				return "The Bell waits."
 	if RunState.day == 8:
 		return "The Bell chamber is open. The ninth day begins with whatever you choose here."
 	if RunState.day == 7:
@@ -238,6 +255,8 @@ func _closing_text() -> String:
 			return "The Bell waits."
 
 func _closing_button_text() -> String:
+	if RunState.day == 9 and phase == "night":
+		return "END THE CYCLE  ›"
 	if phase == "night" or RunState.encounter_for_phase(phase) == &"":
 		return "BELL REST  ›"
 	return "ENTER BATTLE  ›"
@@ -329,6 +348,14 @@ func _background_caption(bg_id: String) -> String:
 			return "AUREL"
 
 func _default_bg() -> String:
+	if RunState.day == 9:
+		match phase:
+			"morning":
+				return "spire_ascent"
+			"afternoon":
+				return "quiet"
+			"night":
+				return "spire_night"
 	if RunState.day == 8:
 		match phase:
 			"morning":

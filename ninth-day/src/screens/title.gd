@@ -33,7 +33,9 @@ func _ready() -> void:
 	if RunState.has_run():
 		var next_phase := RunState.next_phase()
 		var status := "Day %d" % RunState.day
-		if RunState.day_complete:
+		if RunState.cycle_complete:
+			status = "The loop is complete"
+		elif RunState.day_complete:
 			status += " · complete"
 		elif RunState.current_screen == "bell_rest" and RunState.pending_phase != "":
 			status += " · Bell Rest · " + RunState.pending_phase.capitalize()
@@ -68,7 +70,9 @@ func _on_begin() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _on_continue() -> void:
-	if RunState.current_screen == "bell_rest" and RunState.pending_phase != "":
+	if RunState.cycle_complete:
+		get_tree().change_scene_to_file("res://src/screens/ending_view.tscn")
+	elif RunState.current_screen == "bell_rest" and RunState.pending_phase != "":
 		get_tree().change_scene_to_file("res://src/screens/bell_rest.tscn")
 	elif BattleStore.has_save():
 		get_tree().change_scene_to_file("res://src/battle/battle_view.tscn")

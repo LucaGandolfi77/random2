@@ -7,7 +7,7 @@ extends Node
 
 const SAVE_PATH := "user://ninth_day_run.json"
 const PHASES: Array[String] = ["morning", "afternoon", "night"]
-const LAST_AUTHORED_DAY := 8
+const LAST_AUTHORED_DAY := 9
 const DAY_PHASES := {
 	1: {
 		"morning": {"title": "Morning · The Crack", "type": "story · battle · inheritance", "encounter": "tutorial"},
@@ -49,6 +49,11 @@ const DAY_PHASES := {
 		"afternoon": {"title": "Afternoon · The Unbound Saint", "type": "story · battle · inheritance", "encounter": "clockwork_unbound"},
 		"night": {"title": "Night · The Ninth Day", "type": "story · choice", "encounter": ""},
 	},
+	9: {
+		"morning": {"title": "Morning · The Last Morning", "type": "story · choice", "encounter": ""},
+		"afternoon": {"title": "Afternoon · The Quiet", "type": "story · battle · inheritance", "encounter": "the_quiet"},
+		"night": {"title": "Night · The Ninth Day", "type": "story · ending", "encounter": ""},
+	},
 }
 
 var day: int = 1
@@ -61,6 +66,7 @@ var equipped: Array[String] = []
 var pending_phase: String = ""
 var current_screen: String = "title"
 var day_complete: bool = false
+var cycle_complete: bool = false
 
 func _ready() -> void:
 	load_run()
@@ -79,6 +85,7 @@ func new_cycle() -> void:
 	pending_phase = ""
 	current_screen = "title"
 	day_complete = false
+	cycle_complete = false
 	save()
 
 func load_run() -> bool:
@@ -115,6 +122,7 @@ func to_dict() -> Dictionary:
 		"pending_phase": pending_phase,
 		"current_screen": current_screen,
 		"day_complete": day_complete,
+		"cycle_complete": cycle_complete,
 	}
 
 func from_dict(data: Dictionary) -> void:
@@ -128,6 +136,7 @@ func from_dict(data: Dictionary) -> void:
 	pending_phase = String(data.get("pending_phase", ""))
 	current_screen = String(data.get("current_screen", "title"))
 	day_complete = bool(data.get("day_complete", false))
+	cycle_complete = bool(data.get("cycle_complete", false))
 
 func phase_key(p_day: int, phase: String) -> String:
 	return "%d:%s" % [p_day, phase]

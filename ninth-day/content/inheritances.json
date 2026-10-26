@@ -39,6 +39,11 @@
 			"morning": ["spire_step", "ninth_key", "district_memory"],
 			"afternoon": ["unbound_gear", "clockwork_skin", "ascent_breath"],
 			"night": ["final_bell", "last_quarter", "day_eight"]
+		},
+		"9": {
+			"morning": ["last_bell", "ninth_morning", "quiet_name"],
+			"afternoon": ["city_memory", "final_choice", "hidden_bell"],
+			"night": ["all_bonds", "last_night", "ninth_day"]
 		}
 	},
 	"cards": {
@@ -545,6 +550,69 @@
 			"description": "Almost. The word has never been so heavy.",
 			"effect": "+1 attack and +1 speed to the party.",
 			"modifiers": {"attack": 1, "speed": 1}
+		},
+		"last_bell": {
+			"name": "The Last Bell",
+			"type": "Skill",
+			"description": "One strike left in the wrist. Make it count.",
+			"effect": "+2 attack to the party.",
+			"modifiers": {"attack": 2}
+		},
+		"ninth_morning": {
+			"name": "The Ninth Morning",
+			"type": "Bond",
+			"description": "A morning without a Bell. You were there for it.",
+			"effect": "+6 max HP to the party.",
+			"modifiers": {"max_hp": 6}
+		},
+		"quiet_name": {
+			"name": "A Name for the Quiet",
+			"type": "Bond",
+			"description": "Not a monster. A woman who wanted one more day.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"city_memory": {
+			"name": "The City's Memory",
+			"type": "Bond",
+			"description": "Every street, every name, every ordinary Tuesday.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"final_choice": {
+			"name": "The Final Choice",
+			"type": "Skill",
+			"description": "Whatever happens next, you choose it.",
+			"effect": "+1 attack and +1 speed to the party.",
+			"modifiers": {"attack": 1, "speed": 1}
+		},
+		"hidden_bell": {
+			"name": "The Hidden Bell",
+			"type": "Bond",
+			"description": "Small enough to hold. It remembers the city before the loop.",
+			"effect": "+5 max HP and +1 max Resolve to the party.",
+			"modifiers": {"max_hp": 5, "max_resolve": 1}
+		},
+		"all_bonds": {
+			"name": "Six Hands",
+			"type": "Bond",
+			"description": "Everyone who stayed. Everyone who came back.",
+			"effect": "+1 defense and +1 max Resolve to the party.",
+			"modifiers": {"defense": 1, "max_resolve": 1}
+		},
+		"last_night": {
+			"name": "The Last Night",
+			"type": "Bond",
+			"description": "The dark before the ninth day, shared.",
+			"effect": "+1 attack and +5 max HP to the party.",
+			"modifiers": {"attack": 1, "max_hp": 5}
+		},
+		"ninth_day": {
+			"name": "The Ninth Day",
+			"type": "Bond",
+			"description": "The day after the loop. The one you made.",
+			"effect": "+2 attack to the party.",
+			"modifiers": {"attack": 2}
 		}
 	}
 }

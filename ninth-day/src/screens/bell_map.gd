@@ -141,7 +141,10 @@ func _completion_panel(p_day: int) -> PanelContainer:
 	panel.add_child(box)
 	box.add_child(Ui.overline("DAY %d COMPLETE" % p_day))
 	box.add_child(Ui.label("The Bell has not rung. What you kept is still yours.", 13, Palette.PAPER, true))
-	box.add_child(Ui.label("This build ends after Day %d. Day %d is not authored yet." % [RunState.LAST_AUTHORED_DAY, RunState.LAST_AUTHORED_DAY + 1], 11, Palette.MUTED, true))
+	if RunState.LAST_AUTHORED_DAY >= 9:
+		box.add_child(Ui.label("The nine-day cycle is complete.", 11, Palette.MUTED, true))
+	else:
+		box.add_child(Ui.label("This build ends after Day %d. Day %d is not authored yet." % [RunState.LAST_AUTHORED_DAY, RunState.LAST_AUTHORED_DAY + 1], 11, Palette.MUTED, true))
 	var reset := Ui.button("Begin a new cycle", 48)
 	reset.add_theme_color_override("font_color", Palette.MUTED)
 	reset.pressed.connect(_on_new_cycle)

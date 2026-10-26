@@ -38,11 +38,15 @@ const TITLES := {
 	"day_08_morning": "The Ascent",
 	"day_08_afternoon": "The Unbound Saint",
 	"day_08_night": "The Ninth Day",
+	"day_09_morning": "The Last Morning",
+	"day_09_afternoon": "The Quiet",
+	"day_09_night": "The Ninth Day",
 }
 const INK_STATE_VARS := {
 	"day_06_": ["allied_watch", "allied_rebels", "refused_all"],
 	"day_07_": ["accepted_sanctuary", "questioned_vey", "refused_sanctuary", "accepted_mercy"],
 	"day_08_": ["carried_ember", "carried_orra", "carried_watch"],
+	"day_09_": ["ending_ring", "ending_break", "ending_become", "has_hidden_bell"],
 }
 
 var story_id: String = ""
@@ -219,4 +223,6 @@ func _ink_path_for(p_story_id: String) -> String:
 		return "res://content/ink/day_07.ink.json"
 	if p_story_id.begins_with("day_08_"):
 		return "res://content/ink/day_08.ink.json"
+	if p_story_id.begins_with("day_09_"):
+		return "res://content/ink/day_09.ink.json"
 	return INK_JSON

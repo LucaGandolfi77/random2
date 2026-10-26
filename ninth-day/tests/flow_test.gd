@@ -647,9 +647,85 @@ func _run() -> void:
 		return _finish()
 	_assert(RunState.is_phase_completed(8, "night"), "Day 8 night is complete")
 	_assert(RunState.day == 9, "the cycle reaches the ninth day")
-	_assert(RunState.next_phase() == "", "Day 9 has no authored phases yet")
-	_assert(RunState.inheritances.size() >= 24, "twenty-four memories are archived")
-	_assert(RunState.equipped.size() == 6, "the loadout caps at six memories")
+	_assert(RunState.next_phase() == "morning", "Day 9 starts at morning")
+
+	# Day 9 morning: the hidden bell.
+	map = get_tree().current_scene
+	map._on_phase_pressed("morning")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Last Morning", "Day 9 opens on the last morning")
+	if not await _drive_story(story):
+		return _finish()
+	_assert(bool(RunState.get_flag("has_hidden_bell")), "Wren's hidden bell is found")
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("morning", 9)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("afternoon"), "Day 9 afternoon unlocks")
+
+	# Day 9 afternoon: the Quiet, with its Resolve-draining phase change.
+	map = get_tree().current_scene
+	map._on_phase_pressed("afternoon")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Quiet", "Day 9 afternoon names the Quiet")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BattleView"):
+		return _finish()
+	battle = get_tree().current_scene
+	_assert(battle.sim.encounter_id == &"the_quiet", "Day 9 starts the final boss")
+	battle.sim.enemies[0].hp = 181
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	_assert(battle.sim.boss_enraged, "the Quiet changes phase below half HP")
+	battle.sim.enemies[0].hp = 1
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	battle._refresh()
+	_assert(battle.sim.phase == "victory", "the Quiet can be defeated")
+	battle._on_result_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("afternoon", 9)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("night"), "Day 9 night unlocks")
+
+	# Day 9 night: the ending posture resolves the cycle.
+	map = get_tree().current_scene
+	map._on_phase_pressed("night")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Ninth Day", "Day 9 night opens the ending")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("EndingView"):
+		return _finish()
+	var ending := get_tree().current_scene
+	_assert(RunState.cycle_complete, "finishing the night completes the cycle")
+	_assert(RunState.is_phase_completed(9, "night"), "Day 9 night is complete")
+	_assert(String(ending._ending_data()["title"]) == "RING THE BELL", "the chosen ending resolves correctly")
+	_assert(RunState.inheritances.size() >= 26, "the archive holds the cycle's memories")
+
+	ending._on_new_cycle()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.day == 1, "a new cycle returns to Day 1")
+	_assert(not RunState.cycle_complete, "a new cycle clears the completion flag")
+	_assert(RunState.inheritances.is_empty(), "a new cycle clears the archive")
 	_finish()
 
 func _drive_story(story: Node) -> bool:

@@ -25,6 +25,7 @@ func _initialize() -> void:
 	_test_save_resume()
 	_test_modifier_save()
 	_test_unbound_enrage()
+	_test_quiet_phase()
 	_test_store()
 	_test_encounters()
 	_test_modifiers()
@@ -297,6 +298,10 @@ func _test_encounters() -> void:
 	unbound.start(1, &"clockwork_unbound")
 	_assert(unbound.enemies.size() == 1, "the Unbound Saint fights alone")
 	_assert(unbound.enemies[0].max_hp == 300, "the Unbound Saint is a Day 8 boss")
+	var quiet := _new_sim()
+	quiet.start(1, &"the_quiet")
+	_assert(quiet.enemies.size() == 1, "the Quiet fights alone")
+	_assert(quiet.enemies[0].max_hp == 360, "the Quiet is the final boss")
 	var saved = JSON.parse_string(JSON.stringify(tutorial.to_save()))
 	var loaded := BattleSim.new()
 	loaded.load_save(saved)
@@ -358,6 +363,25 @@ func _test_unbound_enrage() -> void:
 	restored.load_save(JSON.parse_string(JSON.stringify(sim.to_save())))
 	_assert(restored.boss_enraged, "the enrage state survives a save")
 	_assert(restored.enemies[0].attack == boss.attack, "the enraged attack survives a save")
+
+func _test_quiet_phase() -> void:
+	var sim := _new_sim(919)
+	sim.start(919, &"the_quiet")
+	var boss := sim.enemies[0]
+	_assert(boss.max_hp == 360, "the Quiet is the final boss")
+	var before_attack := boss.attack
+	var before_resolve := _find_actor(sim, &"cael").resolve
+	boss.hp = 181
+	sim.use_action(&"strike", boss.id)
+	_assert(sim.boss_enraged, "the Quiet changes phase at half HP")
+	_assert(boss.attack == before_attack + 3, "the Quiet hits harder after the phase change")
+	_assert(_find_actor(sim, &"cael").resolve == before_resolve - 1, "the Quiet drains party Resolve")
+	var found := false
+	for line in sim.log_lines:
+		if line.contains("takes the ninth day"):
+			found = true
+			break
+	_assert(found, "the Quiet phase change is telegraphed")
 
 func _test_determinism() -> void:
 	var a := _new_sim(777)

@@ -48,6 +48,10 @@ func _ready() -> void:
 		RunState.day = 8
 		RunState.pending_phase = "afternoon"
 		RunState.save()
+	elif "--quiet" in args:
+		RunState.day = 9
+		RunState.pending_phase = "afternoon"
+		RunState.save()
 	var battle := preload("res://src/battle/battle_view.tscn").instantiate()
 	add_child(battle)
 	battle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
