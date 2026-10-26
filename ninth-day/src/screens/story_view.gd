@@ -181,6 +181,8 @@ func _on_map_pressed() -> void:
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if RunState.day == 6:
+		return "The street is quiet in the wrong way. One of your friends is still standing at the edge of it."
 	if RunState.day == 5:
 		match phase:
 			"morning":
@@ -261,6 +263,8 @@ func _speaker_color(speaker: String) -> Color:
 			return Palette.BRASS
 		"Toma":
 			return Palette.PAPER
+		"Sera":
+			return Palette.EMBER
 		_:
 			return Palette.BRASS
 
@@ -278,6 +282,8 @@ func _speaker_glyph(speaker: String) -> String:
 			return "W"
 		"Toma":
 			return "T"
+		"Sera":
+			return "S"
 		_:
 			return "◉"
 
@@ -309,6 +315,14 @@ func _background_caption(bg_id: String) -> String:
 			return "AUREL"
 
 func _default_bg() -> String:
+	if RunState.day == 6:
+		match phase:
+			"morning":
+				return "checkpoint"
+			"afternoon":
+				return "ember_row"
+			"night":
+				return "quiet"
 	if RunState.day == 5:
 		match phase:
 			"night":

@@ -825,6 +825,10 @@ func _encounter_intro() -> String:
 			return "The garden guardian wakes. Brass hands fold. Somewhere inside it, a small bell begins to ring."
 		&"hollow_bellkeeper":
 			return "The Hollow Bellkeeper wears your face. It rings a bell that is not there."
+		&"iron_choir":
+			return "The Iron Choir fills the checkpoint. Every voice is a locked gate."
+		&"sera_vane":
+			return "Sera Vane steps out of the Watch keep with a pike in her hand. She does not ask you to surrender."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -884,6 +888,28 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 		BattleAction.new(&"ninth_toll", "The Ninth Toll", BattleTypes.Tone.BELL, 34, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 1, false, "The Chord, without a hand to guide it."),
 	])
 
+	var iron_choir := BattleActor.new(&"iron_choir", "The Iron Choir", BattleTypes.Side.ENEMY, BattleTypes.Tone.HUSH, 240, 20, 14, 11)
+	iron_choir.is_boss = true
+	iron_choir.max_resolve = 99
+	iron_choir.resolve = 99
+	iron_choir.actions = _actions([
+		BattleAction.new(&"iron_hymn", "Iron Hymn", BattleTypes.Tone.HUSH, 18, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 1, true, "A hymn with the weight of a gate."),
+		BattleAction.new(&"censure", "Censure", BattleTypes.Tone.HUSH, 24, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"marked", 2, true, "The Watch's verdict, sung in unison."),
+		BattleAction.new(&"refrain", "Refrain", BattleTypes.Tone.HUSH, 0, 0, BattleTypes.TargetRule.SELF, 25, &"", 0, true, "The Choir breathes together."),
+		BattleAction.new(&"bellbreaker", "Bellbreaker", BattleTypes.Tone.EMBER, 22, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, false, "A note designed to crack brass."),
+	])
+
+	var sera := BattleActor.new(&"sera_vane", "Sera Vane", BattleTypes.Side.ENEMY, BattleTypes.Tone.EMBER, 230, 22, 15, 13)
+	sera.is_boss = true
+	sera.max_resolve = 99
+	sera.resolve = 99
+	sera.actions = _actions([
+		BattleAction.new(&"pike_line", "Pike Line", BattleTypes.Tone.EMBER, 18, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"", 0, true, "The Watch advances in one motion."),
+		BattleAction.new(&"command", "Command", BattleTypes.Tone.BELL, 20, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"marked", 2, true, "One word, and the street turns against you."),
+		BattleAction.new(&"countermand", "Countermand", BattleTypes.Tone.BELL, 0, 0, BattleTypes.TargetRule.SELF, 18, &"", 0, true, "She takes the order back out of the air."),
+		BattleAction.new(&"no_quarter", "No Quarter", BattleTypes.Tone.EMBER, 30, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 1, false, "The Watch does not leave survivors."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -909,6 +935,10 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			return [saint]
 		&"hollow_bellkeeper":
 			return [hollow]
+		&"iron_choir":
+			return [iron_choir]
+		&"sera_vane":
+			return [sera]
 		_:
 			return out
 

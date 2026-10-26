@@ -24,6 +24,11 @@
 			"morning": ["wren_chalk", "house_key", "first_crack"],
 			"afternoon": ["toma_laugh", "hollow_mirror", "ninth_memory"],
 			"night": ["quiet_step", "bellkeeper_oath", "empty_house"]
+		},
+		"6": {
+			"morning": ["alliance_badge", "rebel_map", "hollow_ward"],
+			"afternoon": ["sera_sigil", "watch_pike", "choir_iron"],
+			"night": ["saved_bond", "coup_memory", "district_key"]
 		}
 	},
 	"cards": {
@@ -341,6 +346,69 @@
 			"description": "A door left unlocked for whoever remembers to come back.",
 			"effect": "+1 attack and +5 max HP to the party.",
 			"modifiers": {"attack": 1, "max_hp": 5}
+		},
+		"alliance_badge": {
+			"name": "A Watch Alliance Badge",
+			"type": "Bond",
+			"description": "Sera's sigil, still warm from her hand. It buys one gate.",
+			"effect": "+1 defense to the party.",
+			"modifiers": {"defense": 1}
+		},
+		"rebel_map": {
+			"name": "The Rebel Map",
+			"type": "Bond",
+			"description": "Every locked gate in Aurel, with the ones that are not locked circled twice.",
+			"effect": "+1 speed to the party.",
+			"modifiers": {"speed": 1}
+		},
+		"hollow_ward": {
+			"name": "A Hollow Ward",
+			"type": "Skill",
+			"description": "A chalk mark over the heart. The Quiet has to look twice.",
+			"effect": "+1 max Resolve to the party.",
+			"modifiers": {"max_resolve": 1}
+		},
+		"sera_sigil": {
+			"name": "Sera's Sigil",
+			"type": "Skill",
+			"description": "One order, written in her hand. You have not decided how to use it.",
+			"effect": "+1 attack to the party.",
+			"modifiers": {"attack": 1}
+		},
+		"watch_pike": {
+			"name": "The Watch Pike",
+			"type": "Skill",
+			"description": "Long, plain, and honest about its purpose.",
+			"effect": "+2 attack to the party.",
+			"modifiers": {"attack": 2}
+		},
+		"choir_iron": {
+			"name": "Iron in the Throat",
+			"type": "Stat",
+			"description": "The Iron Choir's note, still lodged where you swallowed it.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"saved_bond": {
+			"name": "The Hand You Reached",
+			"type": "Bond",
+			"description": "One friend, pulled back from the Quiet. The other still waiting.",
+			"effect": "+6 max HP to the party.",
+			"modifiers": {"max_hp": 6}
+		},
+		"coup_memory": {
+			"name": "The Day the Gates Closed",
+			"type": "Bond",
+			"description": "You remember which side of the barricade you chose.",
+			"effect": "+5 max HP and +1 max Resolve to the party.",
+			"modifiers": {"max_hp": 5, "max_resolve": 1}
+		},
+		"district_key": {
+			"name": "A District Key",
+			"type": "Skill",
+			"description": "The Watch changed the locks. Someone changed them back.",
+			"effect": "+1 defense and +1 speed to the party.",
+			"modifiers": {"defense": 1, "speed": 1}
 		}
 	}
 }

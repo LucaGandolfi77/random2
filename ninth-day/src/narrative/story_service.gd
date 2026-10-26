@@ -29,7 +29,11 @@ const TITLES := {
 	"day_05_morning": "Wren's House",
 	"day_05_afternoon": "The Hollow Bellkeeper",
 	"day_05_night": "The First Crack",
+	"day_06_morning": "The Coup",
+	"day_06_afternoon": "The Watch Closes",
+	"day_06_night": "The Hollowed",
 }
+const INK_STATE_VARS := ["allied_watch", "allied_rebels", "refused_all"]
 
 var story_id: String = ""
 var state: Node = null
@@ -102,6 +106,9 @@ func _on_loaded(successfully: bool, p_story_id: String) -> void:
 		_emit_end()
 		return
 	_loaded = true
+	if state != null and p_story_id.begins_with("day_06_"):
+		for variable_name in INK_STATE_VARS:
+			_player.set_variable(variable_name, bool(state.get_flag(variable_name, false)))
 	_player.choose_path(p_story_id)
 	_pump()
 
@@ -194,4 +201,6 @@ func _ink_path_for(p_story_id: String) -> String:
 		return "res://content/ink/day_04.ink.json"
 	if p_story_id.begins_with("day_05_"):
 		return "res://content/ink/day_05.ink.json"
+	if p_story_id.begins_with("day_06_"):
+		return "res://content/ink/day_06.ink.json"
 	return INK_JSON

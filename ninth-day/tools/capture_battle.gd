@@ -29,6 +29,16 @@ func _ready() -> void:
 		RunState.day = 5
 		RunState.pending_phase = "afternoon"
 		RunState.save()
+	elif "--iron" in args:
+		RunState.day = 6
+		RunState.pending_phase = "afternoon"
+		RunState.flags["allied_watch"] = true
+		RunState.save()
+	elif "--sera" in args:
+		RunState.day = 6
+		RunState.pending_phase = "afternoon"
+		RunState.flags["allied_rebels"] = true
+		RunState.save()
 	var battle := preload("res://src/battle/battle_view.tscn").instantiate()
 	add_child(battle)
 	battle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

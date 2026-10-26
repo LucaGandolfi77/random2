@@ -424,8 +424,85 @@ func _run() -> void:
 		return _finish()
 	_assert(RunState.is_phase_completed(5, "night"), "Day 5 night is complete")
 	_assert(RunState.day == 6, "the cycle advances to Day 6")
-	_assert(RunState.next_phase() == "", "Day 6 has no authored phases yet")
-	_assert(RunState.inheritances.size() >= 15, "fifteen memories are archived")
+	_assert(RunState.next_phase() == "morning", "Day 6 starts at morning")
+
+	# Day 6 morning: choose the Watch alliance, which selects the Iron Choir.
+	map = get_tree().current_scene
+	map._on_phase_pressed("morning")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Coup", "Day 6 opens with Sera's coup")
+	if not await _drive_story(story):
+		return _finish()
+	_assert(bool(RunState.get_flag("allied_watch")), "the Watch alliance is recorded")
+	_assert(RunState.encounter_for_phase("afternoon") == &"iron_choir", "the Watch alliance faces the Iron Choir")
+	RunState.set_flag("allied_rebels", true)
+	_assert(RunState.encounter_for_phase("afternoon") == &"sera_vane", "the rebel alliance faces Sera Vane")
+	RunState.flags.erase("allied_rebels")
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("morning", 6)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("afternoon"), "Day 6 afternoon unlocks")
+
+	# Day 6 afternoon: the alliance commits us to the Iron Choir.
+	map = get_tree().current_scene
+	map._on_phase_pressed("afternoon")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Watch Closes", "Day 6 afternoon closes the gates")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BattleView"):
+		return _finish()
+	battle = get_tree().current_scene
+	_assert(battle.sim.encounter_id == &"iron_choir", "the Watch alliance starts the Iron Choir fight")
+	battle.sim.enemies[0].hp = 1
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	battle._refresh()
+	_assert(battle.sim.phase == "victory", "the Iron Choir can be broken")
+	battle._on_result_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("afternoon", 6)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_unlocked("night"), "Day 6 night unlocks")
+
+	# Day 6 night: reach one friend before the Bell rings.
+	map = get_tree().current_scene
+	map._on_phase_pressed("night")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Hollowed", "Day 6 night names the Hollowed")
+	if not await _drive_story(story):
+		return _finish()
+	_assert(bool(RunState.get_flag("saved_mara")), "the night choice saves Mara")
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellRest"):
+		return _finish()
+	rest = get_tree().current_scene
+	offer = InheritanceDB.offers("night", 6)[0]
+	rest._on_card_selected(offer)
+	rest._on_confirm()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_phase_completed(6, "night"), "Day 6 night is complete")
+	_assert(RunState.day == 7, "the cycle advances to Day 7")
+	_assert(RunState.next_phase() == "", "Day 7 has no authored phases yet")
+	_assert(RunState.inheritances.size() >= 18, "eighteen memories are archived")
 	_assert(RunState.equipped.size() == 6, "the loadout caps at six memories")
 	_finish()
 

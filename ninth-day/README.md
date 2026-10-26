@@ -2,7 +2,7 @@
 
 A dark, elegant time-loop JRPG built for one thumb.
 
-This repository contains a **playable Day 1–5 vertical slice** in Godot 4, plus the full design and technical documents. It is portrait-first and Android-first.
+This repository contains a **playable Day 1–6 vertical slice** in Godot 4, plus the full design and technical documents. It is portrait-first and Android-first.
 
 ## Play the vertical slice
 
@@ -25,7 +25,9 @@ The slice runs:
 
 **Day 4: Morning (Saint Orra) → Bell Rest → Afternoon (Clockwork Saint retreat battle) → Bell Rest → Night (the first Wren) → Bell Rest → Day 5**
 
-**Day 5: Morning (Wren's house) → Bell Rest → Afternoon (Hollow Bellkeeper mirror fight) → Bell Rest → Night (the first crack) → Bell Rest → Day 6 preview**
+**Day 5: Morning (Wren's house) → Bell Rest → Afternoon (Hollow Bellkeeper mirror fight) → Bell Rest → Night (the first crack) → Bell Rest → Day 6**
+
+**Day 6: Morning (Sera's coup) → Bell Rest → Afternoon (Iron Choir or Sera Vane, depending on your alliance) → Bell Rest → Night (the Hollowed) → Bell Rest → Day 7 preview**
 
 - The story is authored in **Ink** and runs on the vendored **inkgd** runtime.
 - Branching choices set flags and raise bonds.
@@ -53,7 +55,7 @@ The current debug build is **55 MB** because it includes both `arm64-v8a` and `x
 
 ## Authoring Ink
 
-Day 1 through Day 5 live in [`content/ink/`](content/ink). Lines carry presentation tags:
+Day 1 through Day 6 live in [`content/ink/`](content/ink). Lines carry presentation tags:
 
 ```ink
 The Bell is cracking. # id:d1m_005 # speaker:Mara # bg:spire
@@ -84,7 +86,7 @@ GODOT_BIN=/path/to/godot ./ninth-day/tools/run_tests.sh
 Two suites run headlessly:
 
 1. **Battle suite** — deterministic simulation, Echo rules, tones, Resonance, Chord, encounters, previews, save/restore, and inheritances.
-2. **Flow suite** — boots the real screens and drives `title → map → Ink story → battle → Bell Rest → map` across all fifteen authored Day 1–5 phases, including tag parsing, choice flags, day advancement, the Watch Hound, the Bellows duo, the Clockwork Saint's scripted retreat, and the Hollow Bellkeeper's mirror.
+2. **Flow suite** — boots the real screens and drives `title → map → Ink story → battle → Bell Rest → map` across all eighteen authored Day 1–6 phases, including tag parsing, choice flags, day advancement, the Watch Hound, the Bellows duo, the Clockwork Saint's scripted retreat, the Hollow Bellkeeper's mirror, and the Day 6 alliance-dependent boss.
 
 ## Controls
 
@@ -124,6 +126,8 @@ ninth-day/
     ink/day_04.ink.json          # compiled Ink consumed at runtime
     ink/day_05.ink               # Day 5 story source
     ink/day_05.ink.json          # compiled Ink consumed at runtime
+    ink/day_06.ink               # Day 6 story source
+    ink/day_06.ink.json          # compiled Ink consumed at runtime
     inheritances.json            # Bell Rest cards and modifiers
   docs/
     GDD.md
@@ -186,7 +190,7 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 
 ## Known limitations
 
-- Day 6–9 content is not authored yet.
+- Day 7–9 content is not authored yet.
 - Ink state is not saved mid-scene; quitting during a story phase returns to the Bell Map.
 - Art is typographic greybox: no portraits, backgrounds, music, SFX, or haptics yet.
 - The turn model is party-phase then enemy-phase, not the final speed timeline.
@@ -197,7 +201,7 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 
 ## Next
 
-1. Author Day 6 and the Bell Map's bond/knowledge unlocks.
+1. Author Day 7 and the Bell Map's bond/knowledge unlocks.
 2. Add party swap, items, and the speed timeline.
 3. Persist mid-scene Ink state and add skip-read support.
 4. Art pass: portraits, paper/brass UI, tone VFX, sound, haptics.
@@ -208,6 +212,6 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 ## Third-party notices
 
 - **inkgd** — MIT, © 2018–2023 Paul Joannon, © 2019–2023 Frédéric Maquin. Vendored from the `godot4` branch at commit `fea9098`.
-- **Ink** — MIT, © inkle Ltd. Day 1 through Day 5 are compiled with `inklecate`.
+- **Ink** — MIT, © inkle Ltd. Day 1 through Day 6 are compiled with `inklecate`.
 
 Add a project license before distributing builds.
