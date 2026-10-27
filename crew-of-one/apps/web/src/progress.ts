@@ -14,6 +14,7 @@ export type SaveData = {
 };
 
 const STORAGE_KEY = 'crew-of-one:progress:v1';
+const INTRO_KEY = 'crew-of-one:seen-intro';
 
 const emptySave = (): SaveData => ({ version: 1, vaults: {} });
 
@@ -104,6 +105,22 @@ export const recordAttempt = (data: SaveData, vaultId: string): void => {
     ? { ...previous, attempts }
     : { completed: false, bestTimeMs: 0, bestEchoes: 0, bestRank: 'C', attempts };
   persist(data);
+};
+
+export const hasSeenIntro = (): boolean => {
+  try {
+    return localStorage.getItem(INTRO_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+export const markIntroSeen = (): void => {
+  try {
+    localStorage.setItem(INTRO_KEY, '1');
+  } catch {
+    // The intro can show again if storage is unavailable.
+  }
 };
 
 export const resetProgress = (): SaveData => {

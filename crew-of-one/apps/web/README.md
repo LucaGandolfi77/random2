@@ -16,7 +16,13 @@ pnpm --filter @crew-of-one/web dev
 - `P` or ▶ CREW to preview the recorded crew at 2×.
 - `Backspace` or the top-right RESET label to reset the heist.
 - `1`–`0` load vaults 1–10 directly for debugging.
+- **LEFT-HANDED** in the menu footer mirrors the action bar and persists across sessions.
 - `Esc` opens the heist menu.
+- `♪` in the top bar toggles placeholder sound.
+
+## Offline / install
+
+The generated service worker precaches the app shell. Load once, then test offline in browser devtools. Chromium shows **INSTALL APP** in the menu footer; iOS Safari shows **ADD TO HOME** instructions. The first launch opens **HOW TO PLAY**; it stays available in the menu footer. The daily leaderboard falls back to a saved local best when the Worker is unreachable.
 
 ## Current state
 

@@ -46,10 +46,16 @@ type Callbacks = {
   onMenu: () => void;
   onToggleMenu: () => void;
   onTogglePreview: () => void;
+  onToggleSound: () => void;
   onOpenLeaderboard: () => void;
   onRefreshLeaderboard: () => void;
   onCloseLeaderboard: () => void;
   onSaveNickname: (nickname: string) => void;
+  onInstall: () => void;
+  onShare: () => void;
+  onOpenHowTo: () => void;
+  onCloseHowTo: () => void;
+  onToggleHandedness: () => void;
   onResetProgress: () => void;
 };
 
@@ -78,6 +84,7 @@ export class MetaUI {
   private readonly nextButton: HTMLButtonElement;
   private readonly hint: HTMLElement;
   private readonly leaderboard: HTMLElement;
+  private readonly howto: HTMLElement;
   private readonly leaderboardDate: HTMLElement;
   private readonly leaderboardNote: HTMLElement;
   private readonly leaderboardList: HTMLElement;
@@ -85,6 +92,9 @@ export class MetaUI {
   private readonly topbar: HTMLElement;
   private readonly menuButton: HTMLButtonElement;
   private readonly previewButton: HTMLButtonElement;
+  private readonly installButton: HTMLButtonElement;
+  private readonly handednessButton: HTMLButtonElement;
+  private readonly soundButton: HTMLButtonElement;
   private previewAvailable = false;
   private previewActive = false;
   private hintTimer: number | null = null;
@@ -118,6 +128,15 @@ export class MetaUI {
     });
     this.topbar.appendChild(this.previewButton);
 
+    this.soundButton = el('button', 'ui-chip-button ui-chip-button--sound', '♪ ON');
+    this.soundButton.type = 'button';
+    this.soundButton.setAttribute('aria-label', 'Toggle sound');
+    this.soundButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.callbacks.onToggleSound();
+    });
+    this.topbar.appendChild(this.soundButton);
+
     this.menu = el('div', 'screen screen--menu');
     this.menu.hidden = true;
     const menuInner = el('div', 'screen__inner');
@@ -139,13 +158,27 @@ export class MetaUI {
     menuInner.appendChild(this.grid);
 
     const foot = el('div', 'menu-foot');
+    const footActions = el('div', 'menu-foot__actions');
+    const howtoButton = el('button', 'link-button link-button--howto', 'HOW TO PLAY');
+    howtoButton.type = 'button';
+    howtoButton.addEventListener('click', () => this.callbacks.onOpenHowTo());
+    footActions.appendChild(howtoButton);
+    this.handednessButton = el('button', 'link-button link-button--handed', 'LEFT-HANDED');
+    this.handednessButton.type = 'button';
+    this.handednessButton.addEventListener('click', () => this.callbacks.onToggleHandedness());
+    footActions.appendChild(this.handednessButton);
+    this.installButton = el('button', 'link-button link-button--install', 'INSTALL APP');
+    this.installButton.type = 'button';
+    this.installButton.hidden = true;
+    this.installButton.addEventListener('click', () => this.callbacks.onInstall());
     const resetButton = el('button', 'link-button', 'RESET PROGRESS');
     resetButton.type = 'button';
     resetButton.addEventListener('click', () => {
       this.callbacks.onResetProgress();
     });
+    footActions.append(this.installButton, resetButton);
     foot.appendChild(el('span', 'menu-foot__hint', 'Select a heist. Record a run. Rewind.'));
-    foot.appendChild(resetButton);
+    foot.appendChild(footActions);
     menuInner.appendChild(foot);
 
     this.result = el('div', 'screen screen--result');
@@ -173,10 +206,13 @@ export class MetaUI {
     const replayButton = el('button', 'action-button', 'RUN AGAIN');
     replayButton.type = 'button';
     replayButton.addEventListener('click', () => this.callbacks.onReplay());
+    const shareButton = el('button', 'action-button action-button--quiet', 'SHARE RUN');
+    shareButton.type = 'button';
+    shareButton.addEventListener('click', () => this.callbacks.onShare());
     const menuButton = el('button', 'action-button action-button--quiet', 'LEVEL SELECT');
     menuButton.type = 'button';
     menuButton.addEventListener('click', () => this.callbacks.onMenu());
-    actions.append(this.nextButton, replayButton, menuButton);
+    actions.append(this.nextButton, replayButton, shareButton, menuButton);
     resultCard.appendChild(actions);
 
     this.hint = el('div', 'hint-toast');
@@ -233,11 +269,63 @@ export class MetaUI {
     boardFoot.appendChild(el('span', 'leaderboard__foot-note', 'VERIFIED TAPES ONLY'));
     boardFoot.appendChild(refreshButton);
     boardInner.appendChild(boardFoot);
+
+    this.howto = el('div', 'screen screen--howto');
+    this.howto.hidden = true;
+    const howtoInner = el('div', 'screen__inner howto');
+    this.howto.appendChild(howtoInner);
+    layer.appendChild(this.howto);
+
+    const howtoBrand = el('div', 'brand');
+    howtoBrand.appendChild(el('span', 'brand__title', 'HOW TO PLAY'));
+    howtoBrand.appendChild(el('span', 'brand__tagline', 'The crew is you.'));
+    howtoInner.appendChild(howtoBrand);
+
+    const steps = el('ol', 'howto__steps');
+    const step = (title: string, body: string) => {
+      const item = el('li', 'howto__step');
+      item.appendChild(el('strong', 'howto__step-title', title));
+      item.appendChild(el('span', 'howto__step-body', body));
+      steps.appendChild(item);
+    };
+    step('MOVE', 'Drag anywhere on the board. One thumb is enough.');
+    step('REWIND', 'Tap REWIND before the alarm. Your run becomes an echo that repeats everything you did.');
+    step('BUILD A CREW', 'Echoes can hold plates, pull levers, carry the gem, and distract guards. They never block you.');
+    step('ESCAPE', 'Open the vault door, take the gem if there is one, and reach the exit before the loop ends.');
+    howtoInner.appendChild(steps);
+
+    const howtoNote = el(
+      'div',
+      'howto__note',
+      'P / ▶ CREW previews the recorded crew. The daily heist changes every UTC day.',
+    );
+    howtoInner.appendChild(howtoNote);
+
+    const howtoClose = el('button', 'action-button action-button--gold', 'GOT IT');
+    howtoClose.type = 'button';
+    howtoClose.addEventListener('click', () => this.callbacks.onCloseHowTo());
+    howtoInner.appendChild(howtoClose);
   }
 
   setMenuButtonVisible(visible: boolean): void {
     this.menuButton.hidden = !visible;
+    this.soundButton.hidden = !visible;
     if (!visible) this.previewButton.hidden = true;
+  }
+
+  setSoundMuted(muted: boolean): void {
+    this.soundButton.textContent = muted ? '♪ OFF' : '♪ ON';
+    this.soundButton.classList.toggle('ui-chip-button--active', !muted);
+  }
+
+  setInstallAvailable(mode: 'native' | 'ios' | 'none'): void {
+    this.installButton.hidden = mode === 'none';
+    this.installButton.textContent = mode === 'ios' ? 'ADD TO HOME' : 'INSTALL APP';
+  }
+
+  setHandedness(left: boolean): void {
+    this.handednessButton.textContent = left ? 'LEFT-HANDED: ON' : 'LEFT-HANDED';
+    this.handednessButton.classList.toggle('link-button--active', left);
   }
 
   setPreviewState(available: boolean, active: boolean): void {
@@ -255,6 +343,7 @@ export class MetaUI {
     this.result.hidden = true;
     this.menuButton.hidden = true;
     this.previewButton.hidden = true;
+    this.soundButton.hidden = true;
     this.renderDaily(daily);
     this.renderGrid(vaults, progress);
   }
@@ -263,6 +352,7 @@ export class MetaUI {
     this.menuOpen = false;
     this.menu.hidden = true;
     this.menuButton.hidden = false;
+    this.soundButton.hidden = false;
     this.previewButton.hidden = !this.previewAvailable && !this.previewActive;
   }
 
@@ -274,6 +364,7 @@ export class MetaUI {
     this.result.hidden = false;
     this.menuButton.hidden = true;
     this.previewButton.hidden = true;
+    this.soundButton.hidden = true;
     this.resultRank.textContent = payload.rank;
     this.resultRank.className = `result-rank result-rank--${rankClass}`;
     this.resultName.textContent = payload.vault.name;
@@ -311,6 +402,14 @@ export class MetaUI {
     node.appendChild(el('span', 'stat__label', label));
     node.appendChild(el('strong', 'stat__value', value));
     return node;
+  }
+
+  showHowTo(): void {
+    this.howto.hidden = false;
+  }
+
+  hideHowTo(): void {
+    this.howto.hidden = true;
   }
 
   private renderDaily(daily?: DailySummary): void {
