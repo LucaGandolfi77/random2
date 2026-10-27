@@ -62,6 +62,11 @@ func _ready() -> void:
 	title_button.add_theme_color_override("font_color", Palette.MUTED)
 	title_button.pressed.connect(_on_title)
 	footer.add_child(title_button)
+	var journal_button := Ui.button("Journal", 48)
+	journal_button.custom_minimum_size = Vector2(88, 48)
+	journal_button.autowrap_mode = TextServer.AUTOWRAP_OFF
+	journal_button.pressed.connect(_on_journal_pressed)
+	footer.add_child(journal_button)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(spacer)
@@ -217,3 +222,7 @@ func _on_new_cycle() -> void:
 
 func _on_title() -> void:
 	get_tree().change_scene_to_file("res://src/screens/title.tscn")
+
+func _on_journal_pressed() -> void:
+	RunState.open_journal("map")
+	get_tree().change_scene_to_file("res://src/screens/journal_view.tscn")

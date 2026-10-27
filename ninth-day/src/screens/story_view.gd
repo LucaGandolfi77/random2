@@ -15,10 +15,14 @@ var _speaker_label: Label
 var _dialogue_label: Label
 var _prompt_label: Label
 var _continue_button: Button
+var _skip_button: Button
 var _choice_box: VBoxContainer
 var _map_button: Button
+var _seen_at_start: Dictionary = {}
+var _skipping: bool = false
 
 func _ready() -> void:
+	_seen_at_start = RunState.seen_lines.duplicate()
 	var side_id := RunState.pending_story
 	if side_id != "":
 		phase = "side"
@@ -44,6 +48,14 @@ func _ready() -> void:
 	header_box.add_child(_title_label)
 	if RunState.cycle_number > 1:
 		header_box.add_child(Ui.label("ECHO · YOU HAVE BEEN HERE BEFORE", 9, Palette.BELL))
+	_skip_button = Ui.button("Skip read", 48)
+	_skip_button.custom_minimum_size = Vector2(92, 48)
+	_skip_button.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_skip_button.add_theme_font_size_override("font_size", 11)
+	_skip_button.add_theme_color_override("font_color", Palette.MUTED)
+	_skip_button.disabled = _seen_at_start.is_empty()
+	_skip_button.pressed.connect(_on_skip_pressed)
+	header.add_child(_skip_button)
 	_map_button = Ui.button("Map", 48)
 	_map_button.add_theme_color_override("font_color", Palette.MUTED)
 	_map_button.custom_minimum_size = Vector2(80, 48)
@@ -127,9 +139,12 @@ func _on_line_ready(line: Dictionary) -> void:
 	_stage_art.set_mode(String(line.get("bg", "")))
 	_dialogue_label.text = String(line.get("text", ""))
 	_dialogue_label.add_theme_color_override("font_color", Palette.PAPER_DIM if speaker == "Narration" else Palette.PAPER)
+	if not _skipping and _skip_button != null:
+		_skip_button.disabled = _seen_at_start.is_empty()
 
 func _on_choices_ready(prompt: String, choices: Array) -> void:
 	_mode = "choices"
+	_reset_skip_button()
 	_continue_button.visible = false
 	_clear_choices()
 	_prompt_label.text = prompt
@@ -143,6 +158,7 @@ func _on_choices_ready(prompt: String, choices: Array) -> void:
 
 func _on_story_ended(_story_id: String) -> void:
 	_mode = "ended"
+	_reset_skip_button()
 	_clear_choices()
 	_prompt_label.visible = false
 	_speaker_label.text = "THE BELL WAITS"
@@ -169,6 +185,35 @@ func _on_choice_pressed(index: int) -> void:
 	_prompt_label.visible = false
 	_mode = "line"
 	service.choose(index)
+
+func _on_skip_pressed() -> void:
+	if _mode != "line" or _seen_at_start.is_empty():
+		return
+	_skipping = true
+	_skip_button.text = "SKIPPING…"
+	_skip_button.disabled = true
+	call_deferred("_skip_seen_lines")
+
+## Skips only lines that were already seen before this scene started. New
+## Echo lines, choices, and the closing card always stop the skip.
+func _skip_seen_lines() -> void:
+	if not _skipping:
+		return
+	var guard := 0
+	while _mode == "line" and guard < 300:
+		var line_id := String(_current_line.get("id", ""))
+		if line_id == "" or not _seen_at_start.has(line_id):
+			break
+		guard += 1
+		service.advance()
+	_reset_skip_button()
+
+func _reset_skip_button() -> void:
+	_skipping = false
+	if _skip_button == null:
+		return
+	_skip_button.text = "Skip read"
+	_skip_button.disabled = _seen_at_start.is_empty() or _mode != "line"
 
 func _leave_story() -> void:
 	if RunState.pending_thread != "":

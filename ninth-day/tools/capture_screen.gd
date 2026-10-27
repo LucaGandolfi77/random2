@@ -17,6 +17,14 @@ func _ready() -> void:
 	match screen:
 		"title":
 			scene = load("res://src/screens/title.tscn").instantiate()
+		"title_cycle2":
+			_complete_day(1)
+			RunState.day = 2
+			RunState.cycle_number = 2
+			RunState.add_bond("mara", 2)
+			RunState.add_bond("iven", 1)
+			RunState.save()
+			scene = load("res://src/screens/title.tscn").instantiate()
 		"map":
 			scene = load("res://src/screens/bell_map.tscn").instantiate()
 		"map_day2":
@@ -195,6 +203,18 @@ func _ready() -> void:
 			RunState.current_screen = "ending"
 			RunState.save()
 			scene = load("res://src/screens/ending_view.tscn").instantiate()
+		"journal_recap":
+			_prepare_journal()
+			scene = load("res://src/screens/journal_view.tscn").instantiate()
+		"journal_bonds":
+			_prepare_journal()
+			scene = load("res://src/screens/journal_view.tscn").instantiate()
+		"journal_lore":
+			_prepare_journal()
+			scene = load("res://src/screens/journal_view.tscn").instantiate()
+		"journal_memories":
+			_prepare_journal()
+			scene = load("res://src/screens/journal_view.tscn").instantiate()
 		"story":
 			RunState.pending_phase = "morning"
 			scene = load("res://src/screens/story_view.tscn").instantiate()
@@ -340,6 +360,9 @@ func _ready() -> void:
 		await get_tree().process_frame
 		for node in scene.find_children("*", "ScrollContainer", true, false):
 			node.scroll_vertical = 10000
+	if screen.begins_with("journal_"):
+		await get_tree().process_frame
+		scene._on_tab_pressed(screen.trim_prefix("journal_"))
 
 	await get_tree().create_timer(0.4).timeout
 	await RenderingServer.frame_post_draw
@@ -355,3 +378,19 @@ func _ready() -> void:
 func _complete_day(p_day: int) -> void:
 	for phase in RunState.PHASES:
 		RunState.completed[RunState.phase_key(p_day, phase)] = true
+
+func _prepare_journal() -> void:
+	for d in range(1, 10):
+		_complete_day(d)
+	RunState.day = 9
+	RunState.cycle_number = 2
+	RunState.add_bond("mara", 3)
+	RunState.add_bond("iven", 2)
+	RunState.add_bond("wren", 2)
+	RunState.add_bond("oria", 1)
+	RunState.side_threads["mara"] = true
+	RunState.add_inheritance("second_batch")
+	RunState.add_inheritance("small_debts")
+	RunState.add_inheritance("hidden_bell")
+	RunState.flags["has_hidden_bell"] = true
+	RunState.save()

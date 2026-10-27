@@ -47,10 +47,18 @@ func _ready() -> void:
 			status += " · the Bell is waiting"
 		if RunState.cycle_number > 1:
 			root.add_child(Ui.label("ECHO · YOU HAVE BEEN HERE BEFORE", 10, Palette.BELL))
+		var recap := JournalDB.recap_line()
+		if recap != "":
+			root.add_child(Ui.label("PREVIOUSLY · " + recap.replace("\n", " · "), 10, Palette.PAPER_DIM, true))
 		var continue_button := Ui.button("CONTINUE\n" + status, 76, Palette.BELL)
 		continue_button.add_theme_font_size_override("font_size", 16)
 		continue_button.pressed.connect(_on_continue)
 		root.add_child(continue_button)
+
+		var journal_button := Ui.button("Open the Journal", 46)
+		journal_button.add_theme_color_override("font_color", Palette.MUTED)
+		journal_button.pressed.connect(_on_journal)
+		root.add_child(journal_button)
 
 		var new_button := Ui.button("Begin the next cycle", 48)
 		new_button.add_theme_color_override("font_color", Palette.MUTED)
@@ -91,6 +99,10 @@ func _on_continue() -> void:
 		get_tree().change_scene_to_file("res://src/screens/bell_rest.tscn")
 	else:
 		get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
+
+func _on_journal() -> void:
+	RunState.open_journal("title")
+	get_tree().change_scene_to_file("res://src/screens/journal_view.tscn")
 
 func _on_new_cycle() -> void:
 	RunState.begin_next_cycle()

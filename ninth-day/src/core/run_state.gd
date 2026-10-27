@@ -131,6 +131,7 @@ var pending_story: String = ""
 var pending_thread: String = ""
 var pending_encounter: String = ""
 var current_screen: String = "title"
+var journal_return: String = "map"
 var day_complete: bool = false
 var cycle_complete: bool = false
 var true_ending_seen: bool = false
@@ -168,6 +169,7 @@ func _reset_run() -> void:
 	pending_thread = ""
 	pending_encounter = ""
 	current_screen = "title"
+	journal_return = "map"
 	day_complete = false
 	cycle_complete = false
 
@@ -209,6 +211,7 @@ func to_dict() -> Dictionary:
 		"pending_thread": pending_thread,
 		"pending_encounter": pending_encounter,
 		"current_screen": current_screen,
+		"journal_return": journal_return,
 		"day_complete": day_complete,
 		"cycle_complete": cycle_complete,
 		"true_ending_seen": true_ending_seen,
@@ -229,6 +232,7 @@ func from_dict(data: Dictionary) -> void:
 	pending_thread = String(data.get("pending_thread", ""))
 	pending_encounter = String(data.get("pending_encounter", ""))
 	current_screen = String(data.get("current_screen", "title"))
+	journal_return = String(data.get("journal_return", "map"))
 	day_complete = bool(data.get("day_complete", false))
 	cycle_complete = bool(data.get("cycle_complete", false))
 	true_ending_seen = bool(data.get("true_ending_seen", false))
@@ -372,6 +376,11 @@ func clear_pending_story() -> void:
 	pending_story = ""
 	pending_thread = ""
 	pending_encounter = ""
+
+func open_journal(from_screen: String) -> void:
+	journal_return = from_screen
+	current_screen = "journal"
+	save()
 
 func true_ending_ready() -> bool:
 	return bool(get_flag("ending_break", false)) \
