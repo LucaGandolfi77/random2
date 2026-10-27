@@ -21,7 +21,7 @@ pnpm --filter @crew-of-one/web dev
 
 ## Offline / install
 
-The generated service worker precaches the app shell. Load once, then test offline in browser devtools. Chromium shows **INSTALL APP** in the menu footer; iOS Safari shows **ADD TO HOME** instructions. The daily leaderboard falls back to a saved local best when the Worker is unreachable.
+The generated service worker precaches the app shell. Load once, then test offline in browser devtools. Chromium shows **INSTALL APP** in the menu footer; iOS Safari shows **ADD TO HOME** instructions. The first launch opens **HOW TO PLAY**; it stays available in the menu footer. The daily leaderboard falls back to a saved local best when the Worker is unreachable.
 
 ## Current state
 

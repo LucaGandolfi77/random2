@@ -3,7 +3,9 @@ import { dailyPlan, utcDate, vaultById, vaults, type DailyPlan } from '@crew-of-
 import { applyModifier, HeistSim, modifierById } from '@crew-of-one/sim';
 import type { CameraState, GhostState, GuardState, LaserState, LeverState, ModifierId, SimInput, VaultDef } from '@crew-of-one/sim';
 import {
+  hasSeenIntro,
   loadProgress,
+  markIntroSeen,
   recordAttempt,
   recordResult,
   resetProgress,
@@ -111,6 +113,7 @@ class PrototypeScene extends Phaser.Scene {
   private lastLevers: Record<string, boolean> = {};
   private lastGemHolder = 'world';
   private lastShare: string | null = null;
+  private reduceMotion = false;
 
   constructor() {
     super('prototype');
@@ -204,6 +207,9 @@ class PrototypeScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(COLORS.ink);
 
+    this.reduceMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.progress = loadProgress();
     this.playerId = getPlayerId();
     this.nickname = getNickname();
@@ -232,6 +238,11 @@ class PrototypeScene extends Phaser.Scene {
       onSaveNickname: (nickname) => void this.updateNickname(nickname),
       onInstall: () => void this.handleInstall(),
       onShare: () => void this.handleShare(),
+      onOpenHowTo: () => this.ui.showHowTo(),
+      onCloseHowTo: () => {
+        this.ui.hideHowTo();
+        markIntroSeen();
+      },
       onResetProgress: () => this.handleResetProgress(),
     });
 
@@ -240,6 +251,7 @@ class PrototypeScene extends Phaser.Scene {
     keyboard.on('keydown', () => this.audio.unlock());
     this.openMenu();
     this.render();
+    if (!hasSeenIntro()) this.ui.showHowTo();
     void this.syncDailyFromApi();
   }
 
@@ -345,7 +357,7 @@ class PrototypeScene extends Phaser.Scene {
     this.previewEndsAtMs = this.sim.getPreviewLengthMs();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
-    this.cameras.main.flash(140, 91, 192, 235);
+    if (!this.reduceMotion) this.cameras.main.flash(140, 91, 192, 235);
     this.audio.preview();
   }
 
@@ -354,7 +366,7 @@ class PrototypeScene extends Phaser.Scene {
     this.accumulator = 0;
     this.lastStatus = 'playing';
     this.wonHandled = false;
-    this.cameras.main.flash(120, 233, 196, 106);
+    if (!this.reduceMotion) this.cameras.main.flash(120, 233, 196, 106);
     this.audio.previewStop();
   }
 
@@ -438,14 +450,16 @@ class PrototypeScene extends Phaser.Scene {
       if (result.reason === 'max-echoes') {
         this.noteFailure('max-echoes');
         this.sim.reset();
-        this.cameras.main.flash(140, 230, 57, 70);
+        if (!this.reduceMotion) this.cameras.main.flash(140, 230, 57, 70);
         this.lastStatus = 'playing';
         this.wonHandled = false;
       }
       return;
     }
-    this.cameras.main.flash(120, 91, 192, 235);
-    this.cameras.main.shake(90, 0.003);
+    if (!this.reduceMotion) {
+      this.cameras.main.flash(120, 91, 192, 235);
+      this.cameras.main.shake(90, 0.003);
+    }
     this.audio.rewind();
     this.accumulator = 0;
     this.lastStatus = 'playing';

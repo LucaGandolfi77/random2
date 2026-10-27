@@ -15,6 +15,7 @@
 - Echo timeline: each recorded echo is a colored segment proportional to its tape length, with a moving playhead for the current run.
 - Ghost preview: P or the ▶ CREW button replays the recorded echoes at 2× without the player. The run state is snapshotted and restored exactly when preview stops.
 - Leaderboard: the daily card opens today's top 100, highlights the local player, supports a saved nickname, and falls back to an offline message when the Worker is unavailable.
+- Onboarding: a first-run How to Play overlay with four steps (move, rewind, build a crew, escape), reopenable from the menu. Camera flashes and shakes are skipped when the OS requests reduced motion.
 - PWA shell: install prompt via `beforeinstallprompt` on Chromium and Share → Add to Home Screen instructions on iOS, plus a share action using the Web Share API with a clipboard fallback. The generated service worker precaches the app shell.
 - Placeholder feedback: WebAudio synth sketches for rewind, undo, plates, doors, levers, gems, dash, alarms, wins, and preview, plus haptics on rewind, plates, gems, alarms, and wins. The sound toggle persists; haptics respect `prefers-reduced-motion`. These are sketches, not the final commissioned audio.
 - PWA manifest/service worker via `vite-plugin-pwa`, with an install button and a text share card.
@@ -50,3 +51,4 @@ The guard sandbox and “The Night Watch” prove the second: a guard who sees a
 2. Commission the final SFX/music pass and replace the synth sketches.
 3. Add the in-game store + entitlement flow.
 4. Add a generated share image and a Lighthouse offline/PWA audit.
+5. Add left/right-handed controls and a larger-text option.

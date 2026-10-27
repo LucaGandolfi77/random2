@@ -53,6 +53,8 @@ type Callbacks = {
   onSaveNickname: (nickname: string) => void;
   onInstall: () => void;
   onShare: () => void;
+  onOpenHowTo: () => void;
+  onCloseHowTo: () => void;
   onResetProgress: () => void;
 };
 
@@ -81,6 +83,7 @@ export class MetaUI {
   private readonly nextButton: HTMLButtonElement;
   private readonly hint: HTMLElement;
   private readonly leaderboard: HTMLElement;
+  private readonly howto: HTMLElement;
   private readonly leaderboardDate: HTMLElement;
   private readonly leaderboardNote: HTMLElement;
   private readonly leaderboardList: HTMLElement;
@@ -154,6 +157,10 @@ export class MetaUI {
 
     const foot = el('div', 'menu-foot');
     const footActions = el('div', 'menu-foot__actions');
+    const howtoButton = el('button', 'link-button link-button--howto', 'HOW TO PLAY');
+    howtoButton.type = 'button';
+    howtoButton.addEventListener('click', () => this.callbacks.onOpenHowTo());
+    footActions.appendChild(howtoButton);
     this.installButton = el('button', 'link-button link-button--install', 'INSTALL APP');
     this.installButton.type = 'button';
     this.installButton.hidden = true;
@@ -256,6 +263,42 @@ export class MetaUI {
     boardFoot.appendChild(el('span', 'leaderboard__foot-note', 'VERIFIED TAPES ONLY'));
     boardFoot.appendChild(refreshButton);
     boardInner.appendChild(boardFoot);
+
+    this.howto = el('div', 'screen screen--howto');
+    this.howto.hidden = true;
+    const howtoInner = el('div', 'screen__inner howto');
+    this.howto.appendChild(howtoInner);
+    layer.appendChild(this.howto);
+
+    const howtoBrand = el('div', 'brand');
+    howtoBrand.appendChild(el('span', 'brand__title', 'HOW TO PLAY'));
+    howtoBrand.appendChild(el('span', 'brand__tagline', 'The crew is you.'));
+    howtoInner.appendChild(howtoBrand);
+
+    const steps = el('ol', 'howto__steps');
+    const step = (title: string, body: string) => {
+      const item = el('li', 'howto__step');
+      item.appendChild(el('strong', 'howto__step-title', title));
+      item.appendChild(el('span', 'howto__step-body', body));
+      steps.appendChild(item);
+    };
+    step('MOVE', 'Drag anywhere on the board. One thumb is enough.');
+    step('REWIND', 'Tap REWIND before the alarm. Your run becomes an echo that repeats everything you did.');
+    step('BUILD A CREW', 'Echoes can hold plates, pull levers, carry the gem, and distract guards. They never block you.');
+    step('ESCAPE', 'Open the vault door, take the gem if there is one, and reach the exit before the loop ends.');
+    howtoInner.appendChild(steps);
+
+    const howtoNote = el(
+      'div',
+      'howto__note',
+      'P / ▶ CREW previews the recorded crew. The daily heist changes every UTC day.',
+    );
+    howtoInner.appendChild(howtoNote);
+
+    const howtoClose = el('button', 'action-button action-button--gold', 'GOT IT');
+    howtoClose.type = 'button';
+    howtoClose.addEventListener('click', () => this.callbacks.onCloseHowTo());
+    howtoInner.appendChild(howtoClose);
   }
 
   setMenuButtonVisible(visible: boolean): void {
@@ -348,6 +391,14 @@ export class MetaUI {
     node.appendChild(el('span', 'stat__label', label));
     node.appendChild(el('strong', 'stat__value', value));
     return node;
+  }
+
+  showHowTo(): void {
+    this.howto.hidden = false;
+  }
+
+  hideHowTo(): void {
+    this.howto.hidden = true;
   }
 
   private renderDaily(daily?: DailySummary): void {
