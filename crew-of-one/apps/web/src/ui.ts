@@ -1,5 +1,6 @@
 import type { VaultDef } from '@crew-of-one/sim';
 import type { LeaderboardEntry } from '@crew-of-one/shared';
+import type { HistoryCell } from './progress';
 import {
   formatTime,
   type VaultProgress,
@@ -17,6 +18,7 @@ export type DailySummary = {
   bestTimeMs: number;
   bestRank: string;
   streak: number;
+  history: HistoryCell[];
 };
 
 export type LeaderboardView = {
@@ -451,6 +453,17 @@ export class MetaUI {
     modifier.appendChild(el('strong', 'daily-card__modifier-name', daily.modifierName.toUpperCase()));
     modifier.appendChild(el('span', 'daily-card__modifier-text', daily.modifierDescription));
 
+    const history = el('span', 'daily-card__history');
+    for (const cell of daily.history) {
+      const mark = el(
+        'span',
+        `daily-card__day${cell.cleared ? ' daily-card__day--cleared' : ''}${cell.isToday ? ' daily-card__day--today' : ''}`,
+      );
+      mark.title = cell.date;
+      mark.setAttribute('aria-label', `${cell.date}${cell.cleared ? ' cleared' : ''}`);
+      history.appendChild(mark);
+    }
+
     const best = el('span', 'daily-card__best');
     if (daily.completed) {
       best.appendChild(el('span', `rank rank--${daily.bestRank}`, daily.bestRank));
@@ -459,7 +472,7 @@ export class MetaUI {
       best.appendChild(el('span', 'daily-card__new', 'UNPLAYED'));
     }
 
-    card.append(kicker, name, modifier, best);
+    card.append(kicker, name, modifier, history, best);
     card.addEventListener('click', () => this.callbacks.onStartDaily());
 
     const boardLink = el('button', 'link-button leaderboard-link', "TODAY'S LEADERBOARD");

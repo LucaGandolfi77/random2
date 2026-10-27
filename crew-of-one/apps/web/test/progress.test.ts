@@ -4,6 +4,7 @@ import {
   formatTime,
   isVaultUnlocked,
   rankFor,
+  recentDailyHistory,
   recordDailyClear,
   recordResult,
   type SaveData,
@@ -95,5 +96,32 @@ describe('daily streak', () => {
     expect(currentDailyStreak(data, '2026-10-28')).toBe(2);
     expect(currentDailyStreak(data, '2026-10-29')).toBe(2);
     expect(currentDailyStreak(data, '2026-10-30')).toBe(0);
+  });
+});
+
+
+describe('daily history', () => {
+  it('returns seven ordered cells ending today', () => {
+    const data = empty();
+    recordDailyClear(data, '2026-10-27');
+    recordDailyClear(data, '2026-10-28');
+    const cells = recentDailyHistory(data, '2026-10-29');
+    expect(cells).toHaveLength(7);
+    expect(cells.at(-1)?.date).toBe('2026-10-29');
+    expect(cells.at(-1)?.isToday).toBe(true);
+    expect(cells.find((cell) => cell.date === '2026-10-27')?.cleared).toBe(true);
+    expect(cells.find((cell) => cell.date === '2026-10-28')?.cleared).toBe(true);
+    expect(cells.find((cell) => cell.date === '2026-10-29')?.cleared).toBe(false);
+  });
+
+  it('caps stored history at 60 days', () => {
+    const data = empty();
+    for (let index = 0; index < 70; index += 1) {
+      const date = new Date(Date.parse('2026-01-01T00:00:00.000Z') + index * 86_400_000)
+        .toISOString()
+        .slice(0, 10);
+      recordDailyClear(data, date);
+    }
+    expect(data.dailyHistory).toHaveLength(60);
   });
 });

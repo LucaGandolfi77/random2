@@ -10,7 +10,7 @@
 - Vault content: “The Gallery” (plate/door), “The Night Watch” (guard/echo decoy), “Two Hands” (two plates, two echoes), “The Whistle” (echo whistles to pull a guard off his post), “The Archive” (camera + hold lever), “Red Lines” (dash through timed lasers), “The Long Way” (one-way gate), “The Handoff” (gem carry with two plate echoes), “Double Watch” (two guards, two baits), and “The Vault Door” (two plates + camera lever finale).
 - Phaser rectangle prototype: drag to move, E/ACT, Shift or Space/DASH, R/REWIND, U/UNDO, P/PREVIEW, Backspace/RESET, 1–0 for the vaults.
 - Meta shell: level select with chapter cards, sequential unlock, localStorage best time/rank, results screen, hint toast after failed loops, and an in-HUD echo timeline.
-- Daily streak: consecutive UTC daily clears increment a streak; the card shows the live streak until the day expires. Streaks reset after a missed day.
+- Daily streak: consecutive UTC daily clears increment a streak; the card shows the live streak until the day expires, plus a seven-day cleared/missed strip. Streaks reset after a missed day.
 - Daily heist: a deterministic UTC plan drawn from the vault list, four safe modifiers (Blackout, Short Fuse, No Sprint, Solo Loop), a daily card in the menu, and a saved best per date. A content test replays every modifier/vault pair against an existing solution tape so the daily is always solvable. The web client tries `GET /api/daily` first and falls back to the local plan offline; daily wins are posted to `POST /api/run`, and the results screen shows the verified server rank or a local-only note.
 - Rank rule: S at par echoes, A at par + 1, B at par + 2, C beyond. Best run is the fastest time, then the fewest echoes.
 - Echo timeline: each recorded echo is a colored segment proportional to its tape length, with a moving playhead for the current run.
@@ -54,4 +54,4 @@ The guard sandbox and “The Night Watch” prove the second: a guard who sees a
 2. Commission the final SFX/music pass and replace the synth sketches.
 3. Add the in-game store + entitlement flow.
 4. Run a Lighthouse offline/PWA audit on a real device.
-5. Add an in-game daily streak history view.
+5. Add a full monthly streak calendar in the leaderboard screen.

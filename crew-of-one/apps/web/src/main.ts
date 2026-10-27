@@ -5,6 +5,7 @@ import type { CameraState, GhostState, GuardState, LaserState, LeverState, Modif
 import {
   currentDailyStreak,
   hasSeenIntro,
+  recentDailyHistory,
   recordDailyClear,
   loadProgress,
   markIntroSeen,
@@ -574,6 +575,7 @@ class PrototypeScene extends Phaser.Scene {
       bestTimeMs: record?.bestTimeMs ?? 0,
       bestRank: record?.bestRank ?? 'C',
       streak: currentDailyStreak(this.progress, plan.date),
+      history: recentDailyHistory(this.progress, plan.date),
     };
   }
 

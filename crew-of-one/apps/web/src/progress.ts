@@ -17,6 +17,7 @@ export type SaveData = {
   version: 1;
   vaults: Record<string, VaultProgress>;
   daily?: DailyStreak;
+  dailyHistory?: string[];
 };
 
 const STORAGE_KEY = 'crew-of-one:progress:v1';
@@ -64,7 +65,10 @@ export const loadProgress = (): SaveData => {
       if (isVaultProgress(value)) vaults[id] = value;
     }
     const daily = isDailyStreak(parsed.daily) ? parsed.daily : undefined;
-    return { version: 1, vaults, daily };
+    const dailyHistory = Array.isArray(parsed.dailyHistory)
+      ? parsed.dailyHistory.filter((date): date is string => typeof date === 'string').slice(-60)
+      : undefined;
+    return { version: 1, vaults, daily, dailyHistory };
   } catch {
     return emptySave();
   }
@@ -156,8 +160,33 @@ export const recordDailyClear = (
   const consecutive = data.daily?.lastDate === previousUtcDate(date);
   const count = consecutive ? (data.daily?.count ?? 0) + 1 : 1;
   data.daily = { count, lastDate: date };
+  const history = new Set(data.dailyHistory ?? []);
+  history.add(date);
+  data.dailyHistory = [...history].sort().slice(-60);
   persist(data);
   return { streak: count, isNew: true };
+};
+
+export type HistoryCell = {
+  date: string;
+  cleared: boolean;
+  isToday: boolean;
+};
+
+export const recentDailyHistory = (
+  data: SaveData,
+  today: string,
+  days = 7,
+): HistoryCell[] => {
+  const cleared = new Set(data.dailyHistory ?? []);
+  const cells: HistoryCell[] = [];
+  for (let offset = days - 1; offset >= 0; offset -= 1) {
+    const date = new Date(Date.parse(`${today}T00:00:00.000Z`) - offset * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    cells.push({ date, cleared: cleared.has(date), isToday: offset === 0 });
+  }
+  return cells;
 };
 
 export const resetProgress = (): SaveData => {
