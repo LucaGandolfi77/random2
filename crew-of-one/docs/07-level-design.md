@@ -90,8 +90,8 @@ A vault without a passing tape is not shippable.
 ## Daily heist
 
 - Curated vault + modifier, same for everyone.
-- Modifiers: faster guards, shorter loop, no dash, invisible cones, one echo.
-- Do not procedurally generate layouts for the daily until the validator is very strong.
+- Modifiers: Blackout (hidden guard cones), Short Fuse (20s loop), No Sprint (dash offline), Solo Loop (one echo). Double Time (faster guards) is implemented but held for later until every vault is replay-verified with it.
+- Do not procedurally generate layouts for the daily until the validator is very strong. The current daily picks from authored vaults and safe modifiers; a content test replays every generated pair against an existing solution tape.
 - UTC reset; config published a week ahead.
 
 ## Level review checklist
