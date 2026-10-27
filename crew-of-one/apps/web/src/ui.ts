@@ -46,6 +46,7 @@ type Callbacks = {
   onMenu: () => void;
   onToggleMenu: () => void;
   onTogglePreview: () => void;
+  onToggleSound: () => void;
   onOpenLeaderboard: () => void;
   onRefreshLeaderboard: () => void;
   onCloseLeaderboard: () => void;
@@ -85,6 +86,7 @@ export class MetaUI {
   private readonly topbar: HTMLElement;
   private readonly menuButton: HTMLButtonElement;
   private readonly previewButton: HTMLButtonElement;
+  private readonly soundButton: HTMLButtonElement;
   private previewAvailable = false;
   private previewActive = false;
   private hintTimer: number | null = null;
@@ -117,6 +119,15 @@ export class MetaUI {
       this.callbacks.onTogglePreview();
     });
     this.topbar.appendChild(this.previewButton);
+
+    this.soundButton = el('button', 'ui-chip-button ui-chip-button--sound', '♪ ON');
+    this.soundButton.type = 'button';
+    this.soundButton.setAttribute('aria-label', 'Toggle sound');
+    this.soundButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.callbacks.onToggleSound();
+    });
+    this.topbar.appendChild(this.soundButton);
 
     this.menu = el('div', 'screen screen--menu');
     this.menu.hidden = true;
@@ -237,7 +248,13 @@ export class MetaUI {
 
   setMenuButtonVisible(visible: boolean): void {
     this.menuButton.hidden = !visible;
+    this.soundButton.hidden = !visible;
     if (!visible) this.previewButton.hidden = true;
+  }
+
+  setSoundMuted(muted: boolean): void {
+    this.soundButton.textContent = muted ? '♪ OFF' : '♪ ON';
+    this.soundButton.classList.toggle('ui-chip-button--active', !muted);
   }
 
   setPreviewState(available: boolean, active: boolean): void {
@@ -255,6 +272,7 @@ export class MetaUI {
     this.result.hidden = true;
     this.menuButton.hidden = true;
     this.previewButton.hidden = true;
+    this.soundButton.hidden = true;
     this.renderDaily(daily);
     this.renderGrid(vaults, progress);
   }
@@ -263,6 +281,7 @@ export class MetaUI {
     this.menuOpen = false;
     this.menu.hidden = true;
     this.menuButton.hidden = false;
+    this.soundButton.hidden = false;
     this.previewButton.hidden = !this.previewAvailable && !this.previewActive;
   }
 
@@ -274,6 +293,7 @@ export class MetaUI {
     this.result.hidden = false;
     this.menuButton.hidden = true;
     this.previewButton.hidden = true;
+    this.soundButton.hidden = true;
     this.resultRank.textContent = payload.rank;
     this.resultRank.className = `result-rank result-rank--${rankClass}`;
     this.resultName.textContent = payload.vault.name;

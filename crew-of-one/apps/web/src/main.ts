@@ -9,6 +9,7 @@ import {
   resetProgress,
   type SaveData,
 } from './progress';
+import { PrototypeAudio } from './audio';
 import {
   fetchDailyConfig,
   fetchLeaderboard,
@@ -103,6 +104,11 @@ class PrototypeScene extends Phaser.Scene {
   private alarmCount = 0;
   private resultToken = 0;
   private nickname = '';
+  private audio = new PrototypeAudio();
+  private lastPlates: Record<string, boolean> = {};
+  private lastDoors: Record<string, boolean> = {};
+  private lastLevers: Record<string, boolean> = {};
+  private lastGemHolder = 'world';
 
   constructor() {
     super('prototype');
@@ -217,6 +223,7 @@ class PrototypeScene extends Phaser.Scene {
         else this.openMenu();
       },
       onTogglePreview: () => this.togglePreview(),
+      onToggleSound: () => this.ui.setSoundMuted(this.audio.toggleMuted()),
       onOpenLeaderboard: () => this.openLeaderboard(),
       onRefreshLeaderboard: () => void this.loadLeaderboard(),
       onCloseLeaderboard: () => this.ui.hideLeaderboard(),
@@ -224,6 +231,8 @@ class PrototypeScene extends Phaser.Scene {
       onResetProgress: () => this.handleResetProgress(),
     });
 
+    this.ui.setSoundMuted(this.audio.isMuted());
+    keyboard.on('keydown', () => this.audio.unlock());
     this.openMenu();
     this.render();
     void this.syncDailyFromApi();
@@ -273,6 +282,7 @@ class PrototypeScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.whistleRequested = true;
     if (Phaser.Input.Keyboard.JustDown(this.keyShift) || Phaser.Input.Keyboard.JustDown(this.keySpace)) {
       this.dashRequested = true;
+      this.audio.dash();
     }
     if (Phaser.Input.Keyboard.JustDown(this.keyU)) this.doUndo();
     if (Phaser.Input.Keyboard.JustDown(this.keyOne)) this.loadVault(0);
@@ -331,6 +341,7 @@ class PrototypeScene extends Phaser.Scene {
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
     this.cameras.main.flash(140, 91, 192, 235);
+    this.audio.preview();
   }
 
   private stopPreview(): void {
@@ -339,6 +350,7 @@ class PrototypeScene extends Phaser.Scene {
     this.lastStatus = 'playing';
     this.wonHandled = false;
     this.cameras.main.flash(120, 233, 196, 106);
+    this.audio.previewStop();
   }
 
   private readInput(): SimInput {
@@ -363,6 +375,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private onPointerDown(pointer: Phaser.Input.Pointer): void {
+    this.audio.unlock();
     if (this.inRect(pointer, REWIND)) {
       this.doRewind();
       return;
@@ -373,6 +386,7 @@ class PrototypeScene extends Phaser.Scene {
     }
     if (this.inRect(pointer, DASH)) {
       this.dashRequested = true;
+      this.audio.dash();
       return;
     }
     if (this.inRect(pointer, UNDO)) {
@@ -427,6 +441,7 @@ class PrototypeScene extends Phaser.Scene {
     }
     this.cameras.main.flash(120, 91, 192, 235);
     this.cameras.main.shake(90, 0.003);
+    this.audio.rewind();
     this.accumulator = 0;
     this.lastStatus = 'playing';
     this.wonHandled = false;
@@ -452,6 +467,10 @@ class PrototypeScene extends Phaser.Scene {
     this.failureStreak = 0;
     this.previewEndsAtMs = 0;
     this.alarmCount = 0;
+    this.lastPlates = {};
+    this.lastDoors = {};
+    this.lastLevers = {};
+    this.lastGemHolder = 'world';
   }
 
   private startDaily(): void {
@@ -571,6 +590,7 @@ class PrototypeScene extends Phaser.Scene {
   private checkRunEnd(status: string): void {
     if (status === 'alarm' && this.lastStatus !== 'alarm') {
       this.noteFailure('alarm');
+      this.audio.alarm();
     }
     if (status === 'won' && !this.wonHandled) {
       this.wonHandled = true;
@@ -580,6 +600,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private handleWin(): void {
+    this.audio.win();
     const resultToken = ++this.resultToken;
     const timeMs = this.sim.state.timeMs;
     const echoes = this.sim.state.tracks.length;
@@ -645,7 +666,7 @@ class PrototypeScene extends Phaser.Scene {
       this.stopPreview();
       return;
     }
-    this.sim.undoEcho();
+    if (this.sim.undoEcho()) this.audio.undo();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
     this.lastStatus = 'playing';
@@ -654,6 +675,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private doReset(): void {
     if (this.sim.isPreviewing()) this.stopPreview();
+    this.audio.reset();
     this.sim.reset();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
@@ -676,9 +698,34 @@ class PrototypeScene extends Phaser.Scene {
     );
   }
 
+  private playStateFeedback(): void {
+    if (this.sim.isPreviewing()) return;
+    const state = this.sim.state;
+
+    for (const plate of state.plates) {
+      if (plate.pressed && !this.lastPlates[plate.id]) this.audio.plate();
+      this.lastPlates[plate.id] = plate.pressed;
+    }
+    for (const door of state.doors) {
+      if (door.open && !this.lastDoors[door.id]) this.audio.door();
+      this.lastDoors[door.id] = door.open;
+    }
+    for (const lever of state.levers) {
+      if (lever.pressed && !this.lastLevers[lever.id]) this.audio.lever();
+      this.lastLevers[lever.id] = lever.pressed;
+    }
+
+    const holder = state.gem?.holder ?? 'world';
+    if (holder !== this.lastGemHolder) {
+      if (holder !== 'world') this.audio.gem();
+      this.lastGemHolder = holder;
+    }
+  }
+
   private render(): void {
     const g = this.graphics;
     const state = this.sim.state;
+    this.playStateFeedback();
     g.clear();
 
     g.fillStyle(COLORS.deep, 1);

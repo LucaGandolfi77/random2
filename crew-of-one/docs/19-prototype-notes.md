@@ -15,6 +15,7 @@
 - Echo timeline: each recorded echo is a colored segment proportional to its tape length, with a moving playhead for the current run.
 - Ghost preview: P or the ▶ CREW button replays the recorded echoes at 2× without the player. The run state is snapshotted and restored exactly when preview stops.
 - Leaderboard: the daily card opens today's top 100, highlights the local player, supports a saved nickname, and falls back to an offline message when the Worker is unavailable.
+- Placeholder feedback: WebAudio synth sketches for rewind, undo, plates, doors, levers, gems, dash, alarms, wins, and preview, plus haptics on rewind, plates, gems, alarms, and wins. The sound toggle persists; haptics respect `prefers-reduced-motion`. These are sketches, not the final commissioned audio.
 - PWA manifest/service worker via `vite-plugin-pwa`.
 - Cloudflare Worker: daily config from the shared plan, modifier-aware run replay, leaderboard, player nickname, unlock, Lemon Squeezy webhook. The web client submits daily runs and shows the verified rank.
 - D1 schema.
@@ -45,6 +46,6 @@ The guard sandbox and “The Night Watch” prove the second: a guard who sees a
 ## Next implementation tasks
 
 1. Replace rectangle rendering with the pixel-art kit for one vault (vertical slice).
-2. Add sound and haptics for rewind, plates, alarms, and preview.
+2. Commission the final SFX/music pass and replace the synth sketches.
 3. Add the in-game store + entitlement flow.
 4. Add PWA install prompt, offline test, and share card.
