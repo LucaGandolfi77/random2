@@ -1,7 +1,7 @@
 extends Control
 class_name StageArt
 
-## Procedural stage illustrations for the vertical slice. These are deliberately
+## Procedural stage illustrations for the game. These are deliberately
 ## abstract: ink silhouettes and brass hairlines, not final art.
 
 var mode: String = "spire"

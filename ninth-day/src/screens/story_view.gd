@@ -19,8 +19,13 @@ var _choice_box: VBoxContainer
 var _map_button: Button
 
 func _ready() -> void:
-	phase = RunState.pending_phase if RunState.pending_phase != "" else "morning"
-	story_id = "day_%02d_%s" % [RunState.day, phase]
+	var side_id := RunState.pending_story
+	if side_id != "":
+		phase = "side"
+		story_id = side_id
+	else:
+		phase = RunState.pending_phase if RunState.pending_phase != "" else "morning"
+		story_id = "day_%02d_%s" % [RunState.day, phase]
 	Ui.add_backdrop(self, _phase_tint())
 	var margin := Ui.screen_margin(self, 26, 22)
 	var root := VBoxContainer.new()
@@ -33,10 +38,12 @@ func _ready() -> void:
 	header_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_box.add_theme_constant_override("separation", 2)
 	header.add_child(header_box)
-	_phase_label = Ui.overline("DAY %d · %s" % [RunState.day, phase.to_upper()])
+	_phase_label = Ui.overline(_header_overline())
 	header_box.add_child(_phase_label)
 	_title_label = Ui.heading("The Crack")
 	header_box.add_child(_title_label)
+	if RunState.cycle_number > 1:
+		header_box.add_child(Ui.label("ECHO · YOU HAVE BEEN HERE BEFORE", 9, Palette.BELL))
 	_map_button = Ui.button("Map", 48)
 	_map_button.add_theme_color_override("font_color", Palette.MUTED)
 	_map_button.custom_minimum_size = Vector2(80, 48)
@@ -164,6 +171,9 @@ func _on_choice_pressed(index: int) -> void:
 	service.choose(index)
 
 func _leave_story() -> void:
+	if RunState.pending_thread != "":
+		_leave_side_thread()
+		return
 	if RunState.day == 9 and phase == "night":
 		RunState.complete_phase("night")
 		RunState.cycle_complete = true
@@ -182,12 +192,34 @@ func _leave_story() -> void:
 		BattleStore.delete()
 		get_tree().change_scene_to_file("res://src/battle/battle_view.tscn")
 
+func _leave_side_thread() -> void:
+	var thread_id := RunState.pending_thread
+	var data := RunState.side_thread_data(thread_id)
+	var encounter := String(data.get("battle", ""))
+	if encounter != "":
+		RunState.pending_encounter = encounter
+		RunState.current_screen = "side_battle"
+		RunState.save()
+		BattleStore.delete()
+		get_tree().change_scene_to_file("res://src/battle/battle_view.tscn")
+	else:
+		RunState.complete_side_thread(thread_id)
+		get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
+
+func _header_overline() -> String:
+	if phase == "side":
+		return "AUREL · CYCLE %d · A QUIET THREAD" % RunState.cycle_number
+	return "DAY %d · %s" % [RunState.day, phase.to_upper()]
+
 func _on_map_pressed() -> void:
+	RunState.clear_pending_story()
 	RunState.current_screen = "map"
 	RunState.save()
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _closing_text() -> String:
+	if phase == "side":
+		return String(RunState.side_thread_data(RunState.pending_thread).get("closing", "The thread closes. Something small has changed."))
 	if RunState.day == 9:
 		match phase:
 			"morning":
@@ -255,6 +287,9 @@ func _closing_text() -> String:
 			return "The Bell waits."
 
 func _closing_button_text() -> String:
+	if phase == "side":
+		var encounter := String(RunState.side_thread_data(RunState.pending_thread).get("battle", ""))
+		return "FACE THE ECHO  ›" if encounter != "" else "RETURN TO THE BELL MAP  ›"
 	if RunState.day == 9 and phase == "night":
 		return "END THE CYCLE  ›"
 	if phase == "night" or RunState.encounter_for_phase(phase) == &"":
@@ -269,6 +304,8 @@ func _phase_tint() -> Color:
 			return Palette.EMBER
 		"night":
 			return Palette.HUSH
+		"side":
+			return Palette.BRASS
 		_:
 			return Palette.BRASS
 
@@ -315,13 +352,14 @@ func _speaker_glyph(speaker: String) -> String:
 			return "◉"
 
 func _background_caption(bg_id: String) -> String:
+	var phase_caption := "QUIET THREAD" if phase == "side" else phase.to_upper()
 	match bg_id:
 		"spire":
-			return "THE SPIRE · " + phase.to_upper()
+			return "THE SPIRE · " + phase_caption
 		"ember_row":
-			return "EMBER ROW · " + phase.to_upper()
+			return "EMBER ROW · " + phase_caption
 		"checkpoint":
-			return "THE WATCH CHECKPOINT · " + phase.to_upper()
+			return "THE WATCH CHECKPOINT · " + phase_caption
 		"foundry":
 			return "THE FOUNDRY"
 		"bellows":
@@ -348,6 +386,8 @@ func _background_caption(bg_id: String) -> String:
 			return "AUREL"
 
 func _default_bg() -> String:
+	if phase == "side":
+		return String(RunState.side_thread_data(RunState.pending_thread).get("bg", "spire"))
 	if RunState.day == 9:
 		match phase:
 			"morning":

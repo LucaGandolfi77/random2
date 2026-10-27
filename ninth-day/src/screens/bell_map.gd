@@ -26,7 +26,7 @@ func _ready() -> void:
 	title_box.add_theme_constant_override("separation", 2)
 	title_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title_box)
-	title_box.add_child(Ui.overline("AUREL · THE BELL MAP"))
+	title_box.add_child(Ui.overline("AUREL · THE BELL MAP · CYCLE %d" % RunState.cycle_number))
 	title_box.add_child(Ui.heading("Day %d of Nine" % RunState.day))
 	header.add_child(Ui.label("THE CITY IS WAITING", 9, Palette.MUTED))
 
@@ -50,6 +50,8 @@ func _ready() -> void:
 
 	for day_number in range(1, 10):
 		list.add_child(_day_block(day_number))
+
+	list.add_child(_threads_panel())
 
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 8)
@@ -145,11 +147,62 @@ func _completion_panel(p_day: int) -> PanelContainer:
 		box.add_child(Ui.label("The nine-day cycle is complete.", 11, Palette.MUTED, true))
 	else:
 		box.add_child(Ui.label("This build ends after Day %d. Day %d is not authored yet." % [RunState.LAST_AUTHORED_DAY, RunState.LAST_AUTHORED_DAY + 1], 11, Palette.MUTED, true))
-	var reset := Ui.button("Begin a new cycle", 48)
+	var reset := Ui.button("Begin the next cycle", 48)
 	reset.add_theme_color_override("font_color", Palette.MUTED)
-	reset.pressed.connect(_on_new_cycle)
+	reset.pressed.connect(_on_next_cycle)
 	box.add_child(reset)
+	var fresh := Ui.button("Start fresh", 44)
+	fresh.add_theme_color_override("font_color", Palette.MUTED)
+	fresh.pressed.connect(_on_new_cycle)
+	box.add_child(fresh)
 	return panel
+
+func _threads_panel() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", Ui.panel_style(Palette.PANEL, Palette.LINE))
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 7)
+	panel.add_child(box)
+	box.add_child(Ui.overline("QUIET THREADS · CYCLE %d" % RunState.cycle_number))
+	box.add_child(Ui.label("Optional scenes between the phases. Each one deepens a bond and leaves a memory behind. They persist across cycles.", 12, Palette.PAPER_DIM, true))
+
+	for thread_id in RunState.side_thread_ids():
+		var data := RunState.side_thread_data(thread_id)
+		var display_name := "%s · %s" % [thread_id.capitalize(), String(data.get("name", "Quiet thread"))]
+		if RunState.is_side_thread_complete(thread_id):
+			box.add_child(Ui.label("✓  %s   ·   bond kept" % display_name, 12, Palette.BELL))
+		elif RunState.side_thread_available(thread_id):
+			var battle := String(data.get("battle", ""))
+			var suffix := "  ·  elite battle" if battle != "" else ""
+			var button := Ui.card_button("▶  %s\n     after Day %d%s" % [display_name, int(data.get("after_day", 0)), suffix], 58)
+			button.add_theme_font_size_override("font_size", 12)
+			button.add_theme_color_override("font_color", Palette.PAPER)
+			button.pressed.connect(_on_thread_pressed.bind(thread_id))
+			box.add_child(button)
+		else:
+			box.add_child(Ui.label("—  %s   ·   finish Day %d" % [display_name, int(data.get("after_day", 0))], 12, Palette.MUTED))
+
+	box.add_child(Ui.rule(Palette.LINE))
+	var bonds: Array[String] = []
+	for bond_id in RunState.BOND_IDS:
+		bonds.append("%s %d" % [bond_id.capitalize(), RunState.bond_rank(bond_id)])
+	box.add_child(Ui.label("Bonds · " + " · ".join(bonds), 11, Palette.PAPER_DIM))
+	if RunState.true_ending_ready():
+		box.add_child(Ui.label("TRUE ENDING READY · break the Bell, carry the hidden bell, keep all six bonds.", 10, Palette.BELL, true))
+	elif RunState.true_ending_seen:
+		box.add_child(Ui.label("TRUE ENDING FOUND · the city remembers.", 10, Palette.BELL, true))
+	else:
+		box.add_child(Ui.label("True ending · break the Bell + the hidden bell + all six bonds at rank 3.", 10, Palette.MUTED, true))
+	return panel
+
+func _on_thread_pressed(thread_id: String) -> void:
+	RunState.open_side_thread(thread_id)
+	get_tree().change_scene_to_file("res://src/screens/story_view.tscn")
+
+func _on_next_cycle() -> void:
+	RunState.begin_next_cycle()
+	BattleStore.delete()
+	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _on_phase_pressed(phase: String) -> void:
 	RunState.pending_phase = phase

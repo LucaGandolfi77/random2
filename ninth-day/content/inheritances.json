@@ -613,6 +613,48 @@
 			"description": "The day after the loop. The one you made.",
 			"effect": "+2 attack to the party.",
 			"modifiers": {"attack": 2}
+		},
+		"second_batch": {
+			"name": "The Second Batch",
+			"type": "Bond",
+			"description": "Mara burns the first loaf on purpose now. The second one is for you.",
+			"effect": "+8 max HP to the party.",
+			"modifiers": {"max_hp": 8}
+		},
+		"small_debts": {
+			"name": "The Small Debts",
+			"type": "Bond",
+			"description": "Every name Iven ever let go, written down at last.",
+			"effect": "+2 defense to the party.",
+			"modifiers": {"defense": 2}
+		},
+		"living_count": {
+			"name": "Counting the Living",
+			"type": "Skill",
+			"description": "Wren counts people now. She always reaches a higher number.",
+			"effect": "+1 speed and +1 max Resolve to the party.",
+			"modifiers": {"speed": 1, "max_resolve": 1}
+		},
+		"rose_kept": {
+			"name": "The Rose That Kept",
+			"type": "Bond",
+			"description": "Oria's garden remembers the living before it remembers the dead.",
+			"effect": "+4 max HP and +1 max Resolve to the party.",
+			"modifiers": {"max_hp": 4, "max_resolve": 1}
+		},
+		"page_after": {
+			"name": "The Page After",
+			"type": "Bond",
+			"description": "Toma wrote tomorrow. Nothing crossed it out.",
+			"effect": "+1 attack and +1 speed to the party.",
+			"modifiers": {"attack": 1, "speed": 1}
+		},
+		"door_open": {
+			"name": "The Door Left Open",
+			"type": "Bond",
+			"description": "Vey stopped guarding a room that no longer needed guarding.",
+			"effect": "+1 attack and +2 defense to the party.",
+			"modifiers": {"attack": 1, "defense": 2}
 		}
 	}
 }
