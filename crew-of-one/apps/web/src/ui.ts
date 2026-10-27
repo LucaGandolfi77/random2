@@ -55,6 +55,7 @@ type Callbacks = {
   onShare: () => void;
   onOpenHowTo: () => void;
   onCloseHowTo: () => void;
+  onToggleHandedness: () => void;
   onResetProgress: () => void;
 };
 
@@ -92,6 +93,7 @@ export class MetaUI {
   private readonly menuButton: HTMLButtonElement;
   private readonly previewButton: HTMLButtonElement;
   private readonly installButton: HTMLButtonElement;
+  private readonly handednessButton: HTMLButtonElement;
   private readonly soundButton: HTMLButtonElement;
   private previewAvailable = false;
   private previewActive = false;
@@ -161,6 +163,10 @@ export class MetaUI {
     howtoButton.type = 'button';
     howtoButton.addEventListener('click', () => this.callbacks.onOpenHowTo());
     footActions.appendChild(howtoButton);
+    this.handednessButton = el('button', 'link-button link-button--handed', 'LEFT-HANDED');
+    this.handednessButton.type = 'button';
+    this.handednessButton.addEventListener('click', () => this.callbacks.onToggleHandedness());
+    footActions.appendChild(this.handednessButton);
     this.installButton = el('button', 'link-button link-button--install', 'INSTALL APP');
     this.installButton.type = 'button';
     this.installButton.hidden = true;
@@ -315,6 +321,11 @@ export class MetaUI {
   setInstallAvailable(mode: 'native' | 'ios' | 'none'): void {
     this.installButton.hidden = mode === 'none';
     this.installButton.textContent = mode === 'ios' ? 'ADD TO HOME' : 'INSTALL APP';
+  }
+
+  setHandedness(left: boolean): void {
+    this.handednessButton.textContent = left ? 'LEFT-HANDED: ON' : 'LEFT-HANDED';
+    this.handednessButton.classList.toggle('link-button--active', left);
   }
 
   setPreviewState(available: boolean, active: boolean): void {

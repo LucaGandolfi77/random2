@@ -12,6 +12,13 @@ import {
   type SaveData,
 } from './progress';
 import { PrototypeAudio } from './audio';
+import {
+  CONTROL_LAYOUTS,
+  loadHandedness,
+  saveHandedness,
+  type ControlLayout,
+  type Handedness,
+} from './controls';
 import { initInstallPrompt, promptInstall, shareText } from './pwa';
 import {
   fetchDailyConfig,
@@ -30,10 +37,6 @@ const BOARD_X = 20;
 const BOARD_Y = 64;
 const BOARD_W = 320;
 const BOARD_H = 512;
-const REWIND = { x: 156, y: 588, w: 96, h: 34 };
-const WHISTLE = { x: 14, y: 588, w: 72, h: 34 };
-const DASH = { x: 92, y: 588, w: 58, h: 34 };
-const UNDO = { x: 258, y: 588, w: 88, h: 34 };
 
 const COLORS = {
   ink: 0x0b132b,
@@ -113,6 +116,8 @@ class PrototypeScene extends Phaser.Scene {
   private lastLevers: Record<string, boolean> = {};
   private lastGemHolder = 'world';
   private lastShare: string | null = null;
+  private handedness: Handedness = 'right';
+  private controls: ControlLayout = CONTROL_LAYOUTS.right;
   private reduceMotion = false;
 
   constructor() {
@@ -120,6 +125,8 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.handedness = loadHandedness();
+    this.controls = CONTROL_LAYOUTS[this.handedness];
     const baseVault = vaults[0];
     if (!baseVault) throw new Error('No vault content found.');
     this.playableVaults = [...vaults];
@@ -147,22 +154,22 @@ class PrototypeScene extends Phaser.Scene {
       fontSize: '10px',
       color: '#3A506B',
     }).setOrigin(0.5, 0);
-    this.rewindText = this.add.text(REWIND.x + REWIND.w / 2, REWIND.y + REWIND.h / 2, 'REWIND', {
+    this.rewindText = this.add.text(this.controls.rewind.x + this.controls.rewind.w / 2, this.controls.rewind.y + this.controls.rewind.h / 2, 'REWIND', {
       fontFamily: 'monospace',
       fontSize: '12px',
       color: '#F4F1DE',
     }).setOrigin(0.5);
-    this.whistleText = this.add.text(WHISTLE.x + WHISTLE.w / 2, WHISTLE.y + WHISTLE.h / 2, 'ACT', {
+    this.whistleText = this.add.text(this.controls.act.x + this.controls.act.w / 2, this.controls.act.y + this.controls.act.h / 2, 'ACT', {
       fontFamily: 'monospace',
       fontSize: '11px',
       color: '#F4F1DE',
     }).setOrigin(0.5);
-    this.dashText = this.add.text(DASH.x + DASH.w / 2, DASH.y + DASH.h / 2, 'DASH', {
+    this.dashText = this.add.text(this.controls.dash.x + this.controls.dash.w / 2, this.controls.dash.y + this.controls.dash.h / 2, 'DASH', {
       fontFamily: 'monospace',
       fontSize: '10px',
       color: '#F4F1DE',
     }).setOrigin(0.5);
-    this.undoText = this.add.text(UNDO.x + UNDO.w / 2, UNDO.y + UNDO.h / 2, 'UNDO', {
+    this.undoText = this.add.text(this.controls.undo.x + this.controls.undo.w / 2, this.controls.undo.y + this.controls.undo.h / 2, 'UNDO', {
       fontFamily: 'monospace',
       fontSize: '12px',
       color: '#F4F1DE',
@@ -243,10 +250,12 @@ class PrototypeScene extends Phaser.Scene {
         this.ui.hideHowTo();
         markIntroSeen();
       },
+      onToggleHandedness: () => this.toggleHandedness(),
       onResetProgress: () => this.handleResetProgress(),
     });
 
     this.ui.setSoundMuted(this.audio.isMuted());
+    this.ui.setHandedness(this.handedness === 'left');
     initInstallPrompt((mode) => this.ui.setInstallAvailable(mode));
     keyboard.on('keydown', () => this.audio.unlock());
     this.openMenu();
@@ -393,20 +402,20 @@ class PrototypeScene extends Phaser.Scene {
 
   private onPointerDown(pointer: Phaser.Input.Pointer): void {
     this.audio.unlock();
-    if (this.inRect(pointer, REWIND)) {
+    if (this.inRect(pointer, this.controls.rewind)) {
       this.doRewind();
       return;
     }
-    if (this.inRect(pointer, WHISTLE)) {
+    if (this.inRect(pointer, this.controls.act)) {
       this.whistleRequested = true;
       return;
     }
-    if (this.inRect(pointer, DASH)) {
+    if (this.inRect(pointer, this.controls.dash)) {
       this.dashRequested = true;
       this.audio.dash();
       return;
     }
-    if (this.inRect(pointer, UNDO)) {
+    if (this.inRect(pointer, this.controls.undo)) {
       this.doUndo();
       return;
     }
@@ -464,6 +473,22 @@ class PrototypeScene extends Phaser.Scene {
     this.accumulator = 0;
     this.lastStatus = 'playing';
     this.wonHandled = false;
+  }
+
+  private layoutControls(): void {
+    const c = this.controls;
+    this.rewindText.setPosition(c.rewind.x + c.rewind.w / 2, c.rewind.y + c.rewind.h / 2);
+    this.whistleText.setPosition(c.act.x + c.act.w / 2, c.act.y + c.act.h / 2);
+    this.dashText.setPosition(c.dash.x + c.dash.w / 2, c.dash.y + c.dash.h / 2);
+    this.undoText.setPosition(c.undo.x + c.undo.w / 2, c.undo.y + c.undo.h / 2);
+  }
+
+  private toggleHandedness(): void {
+    this.handedness = this.handedness === 'right' ? 'left' : 'right';
+    this.controls = CONTROL_LAYOUTS[this.handedness];
+    saveHandedness(this.handedness);
+    this.layoutControls();
+    this.ui.setHandedness(this.handedness === 'left');
   }
 
   private loadVault(index: number): void {
@@ -906,28 +931,28 @@ class PrototypeScene extends Phaser.Scene {
     this.drawEchoTimeline(g);
 
     g.fillStyle(COLORS.ink, 1);
-    g.fillRoundedRect(REWIND.x, REWIND.y, REWIND.w, REWIND.h, 8);
+    g.fillRoundedRect(this.controls.rewind.x, this.controls.rewind.y, this.controls.rewind.w, this.controls.rewind.h, 8);
     g.lineStyle(1, COLORS.ghost, 0.8);
-    g.strokeRoundedRect(REWIND.x + 0.5, REWIND.y + 0.5, REWIND.w - 1, REWIND.h - 1, 8);
+    g.strokeRoundedRect(this.controls.rewind.x + 0.5, this.controls.rewind.y + 0.5, this.controls.rewind.w - 1, this.controls.rewind.h - 1, 8);
     g.fillStyle(COLORS.ghost, 0.9);
-    g.fillCircle(REWIND.x + 16, REWIND.y + REWIND.h / 2, 5);
+    g.fillCircle(this.controls.rewind.x + 16, this.controls.rewind.y + this.controls.rewind.h / 2, 5);
     g.fillStyle(COLORS.ink, 1);
-    g.fillCircle(REWIND.x + 16, REWIND.y + REWIND.h / 2, 2);
+    g.fillCircle(this.controls.rewind.x + 16, this.controls.rewind.y + this.controls.rewind.h / 2, 2);
 
     g.fillStyle(COLORS.ink, 1);
-    g.fillRoundedRect(WHISTLE.x, WHISTLE.y, WHISTLE.w, WHISTLE.h, 8);
+    g.fillRoundedRect(this.controls.act.x, this.controls.act.y, this.controls.act.w, this.controls.act.h, 8);
     g.lineStyle(1, COLORS.gold, 0.7);
-    g.strokeRoundedRect(WHISTLE.x + 0.5, WHISTLE.y + 0.5, WHISTLE.w - 1, WHISTLE.h - 1, 8);
+    g.strokeRoundedRect(this.controls.act.x + 0.5, this.controls.act.y + 0.5, this.controls.act.w - 1, this.controls.act.h - 1, 8);
 
     g.fillStyle(COLORS.ink, 1);
-    g.fillRoundedRect(DASH.x, DASH.y, DASH.w, DASH.h, 8);
+    g.fillRoundedRect(this.controls.dash.x, this.controls.dash.y, this.controls.dash.w, this.controls.dash.h, 8);
     g.lineStyle(1, COLORS.gold, 0.7);
-    g.strokeRoundedRect(DASH.x + 0.5, DASH.y + 0.5, DASH.w - 1, DASH.h - 1, 8);
+    g.strokeRoundedRect(this.controls.dash.x + 0.5, this.controls.dash.y + 0.5, this.controls.dash.w - 1, this.controls.dash.h - 1, 8);
 
     g.fillStyle(COLORS.ink, 1);
-    g.fillRoundedRect(UNDO.x, UNDO.y, UNDO.w, UNDO.h, 8);
+    g.fillRoundedRect(this.controls.undo.x, this.controls.undo.y, this.controls.undo.w, this.controls.undo.h, 8);
     g.lineStyle(1, COLORS.alarm, 0.6);
-    g.strokeRoundedRect(UNDO.x + 0.5, UNDO.y + 0.5, UNDO.w - 1, UNDO.h - 1, 8);
+    g.strokeRoundedRect(this.controls.undo.x + 0.5, this.controls.undo.y + 0.5, this.controls.undo.w - 1, this.controls.undo.h - 1, 8);
 
     const remaining = Math.max(0, state.loopMs - state.timeMs) / 1000;
     this.hudText.setText(`${remaining.toFixed(1)}s   ${state.status.toUpperCase()}`);
