@@ -29,7 +29,9 @@ wrangler d1 execute crew-of-one --file=schema.sql
 Publish a daily config:
 
 ```bash
-wrangler kv key put --binding=DAILY daily:current '{"dailyId":"2026-10-26","vaultId":"vault-01","modifier":"standard","loopSeconds":30,"maxEchoes":3,"startsAt":0,"endsAt":0}'
+wrangler kv key put --binding=DAILY daily:current '{"dailyId":"2026-10-27","vaultId":"vault-07","modifier":"short-loop","loopSeconds":20,"maxEchoes":3,"startsAt":0,"endsAt":0}'
+
+`modifier` is one of `fog`, `short-loop`, `no-dash`, `one-echo`. If the KV key is missing or points at a different UTC date, the Worker falls back to the deterministic plan from `@crew-of-one/content`. The Worker applies the modifier before replay validation, so the tape must win under the exact daily rules.
 ```
 
 ## Endpoints

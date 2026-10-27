@@ -1,6 +1,6 @@
-import { vaultById } from '@crew-of-one/content';
-import { replayTracks, validateTracks } from '@crew-of-one/sim';
-import type { GhostTrack } from '@crew-of-one/sim';
+import { dailyPlan, vaultById, vaults } from '@crew-of-one/content';
+import { applyModifier, DAILY_MODIFIER_IDS, replayTracks, validateTracks } from '@crew-of-one/sim';
+import type { GhostTrack, ModifierId } from '@crew-of-one/sim';
 import type { DailyConfig, Entitlement } from '@crew-of-one/shared';
 
 type Env = {
@@ -40,13 +40,27 @@ const json = (data: unknown, status = 200): Response =>
 
 const todayUtc = (): string => new Date().toISOString().slice(0, 10);
 
-const defaultDaily = (): DailyConfig => {
-  const dailyId = todayUtc();
+export const isModifierId = (value: string): value is ModifierId =>
+  (DAILY_MODIFIER_IDS as string[]).includes(value);
+
+export const defaultDaily = (dailyId = todayUtc()): DailyConfig => {
   const startsAt = Date.parse(`${dailyId}T00:00:00.000Z`);
+  const plan = dailyPlan(dailyId, vaults);
+  if (plan) {
+    return {
+      dailyId,
+      vaultId: plan.baseVault.id,
+      modifier: plan.modifier.id,
+      loopSeconds: plan.vault.loopSeconds,
+      maxEchoes: plan.vault.maxEchoes,
+      startsAt,
+      endsAt: startsAt + 86_400_000,
+    };
+  }
   return {
     dailyId,
     vaultId: 'vault-01',
-    modifier: 'standard',
+    modifier: 'fog',
     loopSeconds: 30,
     maxEchoes: 3,
     startsAt,
@@ -58,7 +72,11 @@ const getDaily = async (env: Env): Promise<DailyConfig> => {
   const cached = await env.DAILY.get(DAILY_KEY);
   if (!cached) return defaultDaily();
   try {
-    return JSON.parse(cached) as DailyConfig;
+    const parsed = JSON.parse(cached) as DailyConfig;
+    if (parsed.dailyId !== todayUtc() || !isModifierId(parsed.modifier)) {
+      return defaultDaily();
+    }
+    return parsed;
   } catch {
     return defaultDaily();
   }
@@ -117,17 +135,27 @@ const handleRun = async (request: Request, env: Env): Promise<Response> => {
   const daily = await getDaily(env);
   if (body.dailyId !== daily.dailyId) return json({ error: 'stale-daily' }, 409);
 
+  if (body.vaultId !== daily.vaultId) return json({ error: 'wrong-vault' }, 409);
+
   const vault = vaultById(body.vaultId);
   if (!vault) return json({ error: 'unknown-vault' }, 404);
 
-  const issues = validateTracks(vault, body.tracks);
+  const effectiveVault = isModifierId(daily.modifier)
+    ? applyModifier(vault, daily.modifier)
+    : vault;
+
+  const issues = validateTracks(effectiveVault, body.tracks);
   if (issues.length > 0) return json({ error: 'invalid-tape', issues }, 400);
 
-  const replay = replayTracks(vault, body.tracks);
+  const replay = replayTracks(effectiveVault, body.tracks);
   if (!replay.won) return json({ error: 'run-not-verified', issues: replay.issues }, 400);
 
   if (body.echoes !== body.tracks.length - 1) {
     return json({ error: 'echo-count-mismatch' }, 400);
+  }
+
+  if (body.echoes > daily.maxEchoes) {
+    return json({ error: 'too-many-echoes' }, 400);
   }
 
   const now = Date.now();

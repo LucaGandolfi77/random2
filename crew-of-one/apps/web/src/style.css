@@ -486,6 +486,18 @@ body {
   color: #f4f1de;
 }
 
+.result-note {
+  margin: -6px 0 12px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #5bc0eb;
+  min-height: 12px;
+}
+
+.result-note[hidden] {
+  display: none;
+}
+
 .result-actions {
   display: flex;
   flex-direction: column;

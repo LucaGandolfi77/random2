@@ -60,6 +60,7 @@ export class MetaUI {
   private readonly resultRank: HTMLElement;
   private readonly resultName: HTMLElement;
   private readonly resultStats: HTMLElement;
+  private readonly resultNote: HTMLElement;
   private readonly nextButton: HTMLButtonElement;
   private readonly hint: HTMLElement;
   private readonly topbar: HTMLElement;
@@ -142,6 +143,10 @@ export class MetaUI {
     this.resultStats = el('div', 'result-stats');
     resultCard.appendChild(this.resultStats);
 
+    this.resultNote = el('div', 'result-note');
+    this.resultNote.hidden = true;
+    resultCard.appendChild(this.resultNote);
+
     const actions = el('div', 'result-actions');
     this.nextButton = el('button', 'action-button action-button--gold', 'NEXT HEIST');
     this.nextButton.type = 'button';
@@ -209,6 +214,12 @@ export class MetaUI {
     );
     this.nextButton.disabled = !payload.hasNext;
     this.nextButton.textContent = payload.hasNext ? 'NEXT HEIST' : 'LAST HEIST';
+    this.setResultNote('');
+  }
+
+  setResultNote(text: string): void {
+    this.resultNote.textContent = text;
+    this.resultNote.hidden = text.length === 0;
   }
 
   hideResult(): void {

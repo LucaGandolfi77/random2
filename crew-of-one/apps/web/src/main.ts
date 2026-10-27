@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import { dailyPlan, utcDate, vaults, type DailyPlan } from '@crew-of-one/content';
-import { HeistSim } from '@crew-of-one/sim';
-import type { CameraState, GhostState, GuardState, LaserState, LeverState, SimInput, VaultDef } from '@crew-of-one/sim';
+import { dailyPlan, utcDate, vaultById, vaults, type DailyPlan } from '@crew-of-one/content';
+import { applyModifier, HeistSim, modifierById } from '@crew-of-one/sim';
+import type { CameraState, GhostState, GuardState, LaserState, LeverState, ModifierId, SimInput, VaultDef } from '@crew-of-one/sim';
 import {
   loadProgress,
   recordAttempt,
@@ -9,6 +9,7 @@ import {
   resetProgress,
   type SaveData,
 } from './progress';
+import { fetchDailyConfig, getPlayerId, submitRun } from './api';
 import { MetaUI, type DailySummary } from './ui';
 import './style.css';
 
@@ -91,6 +92,9 @@ class PrototypeScene extends Phaser.Scene {
   private lastStatus: string = 'playing';
   private failureStreak = 0;
   private previewEndsAtMs = 0;
+  private playerId = '';
+  private alarmCount = 0;
+  private resultToken = 0;
 
   constructor() {
     super('prototype');
@@ -185,6 +189,7 @@ class PrototypeScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(COLORS.ink);
 
     this.progress = loadProgress();
+    this.playerId = getPlayerId();
     this.dailyDate = utcDate();
     this.daily = dailyPlan(this.dailyDate, this.playableVaults);
     this.ui = new MetaUI({
@@ -208,6 +213,29 @@ class PrototypeScene extends Phaser.Scene {
 
     this.openMenu();
     this.render();
+    void this.syncDailyFromApi();
+  }
+
+  private async syncDailyFromApi(): Promise<void> {
+    const remote = await fetchDailyConfig();
+    if (!remote || remote.dailyId !== utcDate()) return;
+    const base = vaultById(remote.vaultId);
+    if (!base) return;
+    const modifier = modifierById(remote.modifier as ModifierId);
+    if (!modifier) return;
+
+    const vault = applyModifier(base, modifier.id);
+    vault.id = `daily-${remote.dailyId}`;
+    vault.name = `Daily · ${base.name}`;
+    vault.hints = [
+      `${modifier.name}: ${modifier.description}`,
+      base.hints[0] ?? 'You know the vault. Now do it under pressure.',
+    ];
+    this.daily = { date: remote.dailyId, modifier, baseVault: base, vault };
+    this.dailyDate = remote.dailyId;
+    if (this.ui.isMenuOpen()) {
+      this.ui.showMenu(this.playableVaults, this.progress, this.dailySummary());
+    }
   }
 
   override update(_time: number, delta: number): void {
@@ -410,6 +438,7 @@ class PrototypeScene extends Phaser.Scene {
     this.wonHandled = false;
     this.failureStreak = 0;
     this.previewEndsAtMs = 0;
+    this.alarmCount = 0;
   }
 
   private startDaily(): void {
@@ -477,7 +506,8 @@ class PrototypeScene extends Phaser.Scene {
     this.ui.showMenu(this.playableVaults, this.progress, this.dailySummary());
   }
 
-  private noteFailure(_reason: 'alarm' | 'timeout' | 'max-echoes'): void {
+  private noteFailure(reason: 'alarm' | 'timeout' | 'max-echoes'): void {
+    if (reason === 'alarm') this.alarmCount += 1;
     this.failureStreak += 1;
     if (this.failureStreak === 2 && this.vault.hints[0]) {
       this.ui.showHint(this.vault.hints[0]);
@@ -498,6 +528,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private handleWin(): void {
+    const resultToken = ++this.resultToken;
     const timeMs = this.sim.state.timeMs;
     const echoes = this.sim.state.tracks.length;
     const record = recordResult(
@@ -522,7 +553,39 @@ class PrototypeScene extends Phaser.Scene {
     };
     this.time.delayedCall(550, () => {
       this.ui.showResult(payload, record.rank.toLowerCase());
+      this.ui.setResultNote(
+        this.isDaily ? 'VERIFYING DAILY RUN…' : 'BEST SAVED LOCALLY',
+      );
     });
+
+    if (this.isDaily) void this.submitDailyRun(resultToken);
+  }
+
+  private async submitDailyRun(resultToken: number): Promise<void> {
+    if (!this.daily) return;
+    const submission = this.sim.getSubmission();
+    const response = await submitRun({
+      dailyId: this.daily.date,
+      playerId: this.playerId,
+      vaultId: this.daily.baseVault.id,
+      echoes: submission.echoes,
+      timeMs: submission.timeMs,
+      alarms: this.alarmCount,
+      tracks: submission.tracks,
+    });
+
+    if (resultToken !== this.resultToken) return;
+    if (response?.ok) {
+      this.ui.setResultNote(
+        `VERIFIED · RANK #${response.rank ?? '—'} OF TODAY'S CREW`,
+      );
+      return;
+    }
+    if (response && !response.ok) {
+      this.ui.setResultNote(`NOT RANKED · ${response.error.replace(/-/g, ' ').toUpperCase()}`);
+      return;
+    }
+    this.ui.setResultNote('OFFLINE · BEST SAVED LOCALLY');
   }
 
   private doUndo(): void {
@@ -545,6 +608,7 @@ class PrototypeScene extends Phaser.Scene {
     this.lastStatus = 'playing';
     this.wonHandled = false;
     this.failureStreak = 0;
+    this.alarmCount = 0;
     this.resultOpen = false;
     this.paused = false;
     this.ui.hideResult();
