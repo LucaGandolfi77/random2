@@ -1,4 +1,5 @@
 import type { VaultDef } from '@crew-of-one/sim';
+import type { LeaderboardEntry } from '@crew-of-one/shared';
 import {
   formatTime,
   type VaultProgress,
@@ -15,6 +16,15 @@ export type DailySummary = {
   completed: boolean;
   bestTimeMs: number;
   bestRank: string;
+};
+
+export type LeaderboardView = {
+  date: string;
+  playerId: string;
+  nickname: string;
+  entries: LeaderboardEntry[];
+  playerRank: number | null;
+  status: 'loading' | 'ready' | 'offline';
 };
 
 export type ResultPayload = {
@@ -36,6 +46,10 @@ type Callbacks = {
   onMenu: () => void;
   onToggleMenu: () => void;
   onTogglePreview: () => void;
+  onOpenLeaderboard: () => void;
+  onRefreshLeaderboard: () => void;
+  onCloseLeaderboard: () => void;
+  onSaveNickname: (nickname: string) => void;
   onResetProgress: () => void;
 };
 
@@ -63,6 +77,11 @@ export class MetaUI {
   private readonly resultNote: HTMLElement;
   private readonly nextButton: HTMLButtonElement;
   private readonly hint: HTMLElement;
+  private readonly leaderboard: HTMLElement;
+  private readonly leaderboardDate: HTMLElement;
+  private readonly leaderboardNote: HTMLElement;
+  private readonly leaderboardList: HTMLElement;
+  private readonly nicknameInput: HTMLInputElement;
   private readonly topbar: HTMLElement;
   private readonly menuButton: HTMLButtonElement;
   private readonly previewButton: HTMLButtonElement;
@@ -163,6 +182,57 @@ export class MetaUI {
     this.hint = el('div', 'hint-toast');
     this.hint.hidden = true;
     layer.appendChild(this.hint);
+
+    this.leaderboard = el('div', 'screen screen--leaderboard');
+    this.leaderboard.hidden = true;
+    const boardInner = el('div', 'screen__inner leaderboard');
+    this.leaderboard.appendChild(boardInner);
+    layer.appendChild(this.leaderboard);
+
+    const boardHead = el('div', 'leaderboard__head');
+    const boardTitle = el('div', 'leaderboard__title');
+    boardTitle.appendChild(el('span', 'leaderboard__kicker', 'DAILY LEADERBOARD'));
+    this.leaderboardDate = el('span', 'leaderboard__date', '');
+    boardTitle.appendChild(this.leaderboardDate);
+    const closeButton = el('button', 'link-button leaderboard__close', 'CLOSE');
+    closeButton.type = 'button';
+    closeButton.addEventListener('click', () => this.callbacks.onCloseLeaderboard());
+    boardHead.append(boardTitle, closeButton);
+    boardInner.appendChild(boardHead);
+
+    const nickRow = el('form', 'nickname-row');
+    this.nicknameInput = el('input', 'nickname-input');
+    this.nicknameInput.type = 'text';
+    this.nicknameInput.maxLength = 16;
+    this.nicknameInput.placeholder = 'YOUR CREW NAME';
+    this.nicknameInput.setAttribute('autocomplete', 'nickname');
+    const saveButton = el('button', 'action-button nickname-save', 'SAVE');
+    saveButton.type = 'submit';
+    nickRow.append(this.nicknameInput, saveButton);
+    nickRow.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const nickname = this.nicknameInput.value.trim();
+      if (nickname.length > 0 && nickname.length < 3) {
+        this.setLeaderboardNote('Nickname needs at least 3 characters.');
+        return;
+      }
+      this.callbacks.onSaveNickname(nickname);
+    });
+    boardInner.appendChild(nickRow);
+
+    this.leaderboardNote = el('div', 'leaderboard__note', '');
+    boardInner.appendChild(this.leaderboardNote);
+
+    this.leaderboardList = el('div', 'leaderboard__list');
+    boardInner.appendChild(this.leaderboardList);
+
+    const boardFoot = el('div', 'leaderboard__foot');
+    const refreshButton = el('button', 'link-button', 'REFRESH');
+    refreshButton.type = 'button';
+    refreshButton.addEventListener('click', () => this.callbacks.onRefreshLeaderboard());
+    boardFoot.appendChild(el('span', 'leaderboard__foot-note', 'VERIFIED TAPES ONLY'));
+    boardFoot.appendChild(refreshButton);
+    boardInner.appendChild(boardFoot);
   }
 
   setMenuButtonVisible(visible: boolean): void {
@@ -275,7 +345,68 @@ export class MetaUI {
 
     card.append(kicker, name, modifier, best);
     card.addEventListener('click', () => this.callbacks.onStartDaily());
-    this.dailySlot.replaceChildren(card);
+
+    const boardLink = el('button', 'link-button leaderboard-link', "TODAY'S LEADERBOARD");
+    boardLink.type = 'button';
+    boardLink.addEventListener('click', () => this.callbacks.onOpenLeaderboard());
+    this.dailySlot.replaceChildren(card, boardLink);
+  }
+
+  showLeaderboard(view: LeaderboardView): void {
+    this.leaderboard.hidden = false;
+    this.leaderboardDate.textContent = view.date;
+    if (document.activeElement !== this.nicknameInput) {
+      this.nicknameInput.value = view.nickname;
+    }
+
+    if (view.status === 'loading') {
+      this.setLeaderboardNote('Loading today’s crew…');
+      this.leaderboardList.replaceChildren(el('div', 'leaderboard__empty', 'LOADING…'));
+      return;
+    }
+
+    if (view.status === 'offline') {
+      this.setLeaderboardNote('Offline · your best is saved on this device.');
+      this.leaderboardList.replaceChildren(
+        el('div', 'leaderboard__empty', 'LEADERBOARD UNAVAILABLE'),
+      );
+      return;
+    }
+
+    this.setLeaderboardNote(
+      view.playerRank !== null
+        ? `Your rank: #${view.playerRank}`
+        : 'Finish the daily to claim a rank.',
+    );
+
+    if (view.entries.length === 0) {
+      this.leaderboardList.replaceChildren(
+        el('div', 'leaderboard__empty', 'NO VERIFIED RUNS YET — BE THE FIRST'),
+      );
+      return;
+    }
+
+    this.leaderboardList.replaceChildren(
+      ...view.entries.map((entry) => {
+        const row = el(
+          'div',
+          `leaderboard__row${entry.playerId === view.playerId ? ' leaderboard__row--you' : ''}`,
+        );
+        row.appendChild(el('span', 'leaderboard__rank', `#${entry.rank}`));
+        row.appendChild(el('span', 'leaderboard__name', entry.nickname));
+        row.appendChild(el('span', 'leaderboard__echoes', `${entry.echoes}E`));
+        row.appendChild(el('span', 'leaderboard__time', formatTime(entry.timeMs)));
+        return row;
+      }),
+    );
+  }
+
+  hideLeaderboard(): void {
+    this.leaderboard.hidden = true;
+  }
+
+  setLeaderboardNote(text: string): void {
+    this.leaderboardNote.textContent = text;
   }
 
   private renderGrid(vaults: VaultDef[], progress: SaveData): void {

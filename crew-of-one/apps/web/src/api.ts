@@ -1,8 +1,9 @@
 import type { GhostTrack } from '@crew-of-one/sim';
-import type { DailyConfig } from '@crew-of-one/shared';
+import type { DailyConfig, LeaderboardEntry } from '@crew-of-one/shared';
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
 const PLAYER_KEY = 'crew-of-one:player-id';
+const NICKNAME_KEY = 'crew-of-one:nickname';
 
 const canUseStorage = (): boolean => {
   try {
@@ -17,6 +18,24 @@ const createPlayerId = (): string => {
     return `p-${crypto.randomUUID()}`;
   }
   return `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+export const getNickname = (): string => {
+  if (!canUseStorage()) return '';
+  try {
+    return (localStorage.getItem(NICKNAME_KEY) ?? '').slice(0, 16);
+  } catch {
+    return '';
+  }
+};
+
+export const rememberNickname = (nickname: string): void => {
+  if (!canUseStorage()) return;
+  try {
+    localStorage.setItem(NICKNAME_KEY, nickname.slice(0, 16));
+  } catch {
+    // Keep the in-memory nickname.
+  }
 };
 
 export const getPlayerId = (): string => {
@@ -90,5 +109,48 @@ export const submitRun = async (body: RunSubmission): Promise<RunResponse | null
     return { ok: false, error: `http-${response.status}` };
   } catch {
     return null;
+  }
+};
+
+
+export type LeaderboardResponse = {
+  dailyId: string;
+  entries: LeaderboardEntry[];
+  playerRank: number | null;
+};
+
+export const fetchLeaderboard = async (
+  dailyId: string,
+  playerId: string,
+): Promise<LeaderboardResponse | null> => {
+  try {
+    const params = new URLSearchParams({ daily: dailyId, player: playerId });
+    const response = await fetch(`${API_BASE}/api/leaderboard?${params.toString()}`, {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+      signal: timeoutSignal(4000),
+    });
+    if (!response.ok) return null;
+    return await parseJson<LeaderboardResponse>(response);
+  } catch {
+    return null;
+  }
+};
+
+export const saveNickname = async (
+  playerId: string,
+  nickname: string,
+): Promise<boolean> => {
+  rememberNickname(nickname);
+  try {
+    const response = await fetch(`${API_BASE}/api/player`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId, nickname }),
+      signal: timeoutSignal(4000),
+    });
+    return response.ok;
+  } catch {
+    return false;
   }
 };

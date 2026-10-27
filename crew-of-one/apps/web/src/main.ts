@@ -9,7 +9,14 @@ import {
   resetProgress,
   type SaveData,
 } from './progress';
-import { fetchDailyConfig, getPlayerId, submitRun } from './api';
+import {
+  fetchDailyConfig,
+  fetchLeaderboard,
+  getNickname,
+  getPlayerId,
+  saveNickname,
+  submitRun,
+} from './api';
 import { MetaUI, type DailySummary } from './ui';
 import './style.css';
 
@@ -95,6 +102,7 @@ class PrototypeScene extends Phaser.Scene {
   private playerId = '';
   private alarmCount = 0;
   private resultToken = 0;
+  private nickname = '';
 
   constructor() {
     super('prototype');
@@ -190,6 +198,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.progress = loadProgress();
     this.playerId = getPlayerId();
+    this.nickname = getNickname();
     this.dailyDate = utcDate();
     this.daily = dailyPlan(this.dailyDate, this.playableVaults);
     this.ui = new MetaUI({
@@ -208,6 +217,10 @@ class PrototypeScene extends Phaser.Scene {
         else this.openMenu();
       },
       onTogglePreview: () => this.togglePreview(),
+      onOpenLeaderboard: () => this.openLeaderboard(),
+      onRefreshLeaderboard: () => void this.loadLeaderboard(),
+      onCloseLeaderboard: () => this.ui.hideLeaderboard(),
+      onSaveNickname: (nickname) => void this.updateNickname(nickname),
       onResetProgress: () => this.handleResetProgress(),
     });
 
@@ -449,6 +462,7 @@ class PrototypeScene extends Phaser.Scene {
     this.paused = false;
     this.ui.hideMenu();
     this.ui.hideResult();
+    this.ui.hideLeaderboard();
     this.ui.setMenuButtonVisible(true);
   }
 
@@ -467,6 +481,42 @@ class PrototypeScene extends Phaser.Scene {
     };
   }
 
+  private openLeaderboard(): void {
+    if (!this.daily) return;
+    this.ui.showLeaderboard({
+      date: this.daily.date,
+      playerId: this.playerId,
+      nickname: this.nickname,
+      entries: [],
+      playerRank: null,
+      status: 'loading',
+    });
+    void this.loadLeaderboard();
+  }
+
+  private async loadLeaderboard(): Promise<void> {
+    if (!this.daily) return;
+    const response = await fetchLeaderboard(this.daily.date, this.playerId);
+    this.ui.showLeaderboard({
+      date: this.daily.date,
+      playerId: this.playerId,
+      nickname: this.nickname,
+      entries: response?.entries ?? [],
+      playerRank: response?.playerRank ?? null,
+      status: response ? 'ready' : 'offline',
+    });
+  }
+
+  private async updateNickname(nickname: string): Promise<void> {
+    this.nickname = nickname;
+    const saved = await saveNickname(this.playerId, nickname);
+    if (!saved) {
+      this.ui.setLeaderboardNote('Saved on this device · leaderboard offline.');
+      return;
+    }
+    await this.loadLeaderboard();
+  }
+
   private startVault(index: number): void {
     const vault = this.playableVaults[index];
     if (!vault) return;
@@ -476,6 +526,7 @@ class PrototypeScene extends Phaser.Scene {
     this.paused = false;
     this.ui.hideMenu();
     this.ui.hideResult();
+    this.ui.hideLeaderboard();
     this.ui.setMenuButtonVisible(true);
   }
 
@@ -487,6 +538,7 @@ class PrototypeScene extends Phaser.Scene {
     }
     this.paused = true;
     this.resultOpen = false;
+    this.ui.hideLeaderboard();
     this.ui.hideResult();
     this.ui.showMenu(this.playableVaults, this.progress, this.dailySummary());
   }
