@@ -13,8 +13,8 @@ export const MODIFIERS: ModifierDef[] = [
   {
     id: 'fog',
     name: 'Blackout',
-    description: 'The guards’ vision cones are hidden. You have to read their bodies.',
-    eligible: () => true,
+    description: 'Vision cones are hidden. Read the guards and cameras by their bodies.',
+    eligible: (vault) => vault.guards.length > 0 || vault.cameras.length > 0,
   },
   {
     id: 'short-loop',

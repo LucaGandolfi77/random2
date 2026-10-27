@@ -3,7 +3,6 @@ import { dailyPlan, utcDate, vaults, type DailyPlan } from '@crew-of-one/content
 import { HeistSim } from '@crew-of-one/sim';
 import type { CameraState, GhostState, GuardState, LaserState, LeverState, SimInput, VaultDef } from '@crew-of-one/sim';
 import {
-  formatTime,
   loadProgress,
   recordAttempt,
   recordResult,
@@ -754,18 +753,20 @@ class PrototypeScene extends Phaser.Scene {
     const half = (camera.fovDeg * Math.PI) / 360;
     const color = camera.disabled ? COLORS.slate : COLORS.alarm;
 
-    g.fillStyle(color, camera.disabled ? 0.03 : 0.08);
-    g.fillTriangle(
-      x,
-      y,
-      x + Math.cos(camera.angle - half) * camera.range,
-      y + Math.sin(camera.angle - half) * camera.range,
-      x + Math.cos(camera.angle + half) * camera.range,
-      y + Math.sin(camera.angle + half) * camera.range,
-    );
-    g.lineStyle(1, color, camera.disabled ? 0.15 : 0.35);
-    g.lineBetween(x, y, x + Math.cos(camera.angle - half) * camera.range, y + Math.sin(camera.angle - half) * camera.range);
-    g.lineBetween(x, y, x + Math.cos(camera.angle + half) * camera.range, y + Math.sin(camera.angle + half) * camera.range);
+    if (!this.vault.fog) {
+      g.fillStyle(color, camera.disabled ? 0.03 : 0.08);
+      g.fillTriangle(
+        x,
+        y,
+        x + Math.cos(camera.angle - half) * camera.range,
+        y + Math.sin(camera.angle - half) * camera.range,
+        x + Math.cos(camera.angle + half) * camera.range,
+        y + Math.sin(camera.angle + half) * camera.range,
+      );
+      g.lineStyle(1, color, camera.disabled ? 0.15 : 0.35);
+      g.lineBetween(x, y, x + Math.cos(camera.angle - half) * camera.range, y + Math.sin(camera.angle - half) * camera.range);
+      g.lineBetween(x, y, x + Math.cos(camera.angle + half) * camera.range, y + Math.sin(camera.angle + half) * camera.range);
+    }
 
     g.fillStyle(color, 0.9);
     g.fillRect(x - 8, y - 8, 16, 16);
