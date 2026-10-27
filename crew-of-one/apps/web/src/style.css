@@ -31,25 +31,43 @@ body {
   pointer-events: none;
 }
 
-.ui-menu-button {
+.ui-topbar {
   position: absolute;
   top: max(6px, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.ui-chip-button {
   pointer-events: auto;
   border: 1px solid rgba(244, 241, 222, 0.28);
-  background: rgba(11, 19, 43, 0.72);
+  background: rgba(11, 19, 43, 0.78);
   color: #a8e0f0;
   font: inherit;
   font-size: 10px;
   letter-spacing: 0.14em;
-  padding: 4px 10px;
+  padding: 4px 9px;
   border-radius: 4px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
-.ui-menu-button[hidden] {
+.ui-chip-button[hidden] {
   display: none;
+}
+
+.ui-chip-button--preview {
+  border-color: rgba(91, 192, 235, 0.5);
+  color: #5bc0eb;
+}
+
+.ui-chip-button--active {
+  background: rgba(91, 192, 235, 0.18);
+  border-color: #5bc0eb;
+  color: #f4f1de;
 }
 
 .screen {

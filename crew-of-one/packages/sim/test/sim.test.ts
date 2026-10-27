@@ -356,3 +356,32 @@ describe('Replay guard validation', () => {
     expect(result.issues.some((issue) => issue.code === 'seen-by-guard')).toBe(true);
   });
 });
+
+describe('Echo preview', () => {
+  it('replays the crew without recording or moving the player', () => {
+    const sim = new HeistSim(vault);
+    step(sim, { ...idle, moveX: 1 }, 30);
+    expect(sim.rewind().ok).toBe(true);
+
+    const playerX = sim.state.player.x;
+    const currentFrames = sim.state.currentTrack.length;
+    expect(sim.startPreview()).toBe(true);
+    expect(sim.isPreviewing()).toBe(true);
+
+    step(sim, { ...idle, moveX: -1, dash: true }, 30);
+    expect(sim.state.player.x).toBe(playerX);
+    expect(sim.state.tracks).toHaveLength(1);
+    expect(sim.state.currentTrack).toHaveLength(currentFrames);
+    expect(sim.state.timeMs).toBeGreaterThan(0);
+
+    expect(sim.stopPreview()).toBe(true);
+    expect(sim.isPreviewing()).toBe(false);
+    expect(sim.state.timeMs).toBe(0);
+    expect(sim.state.currentTrack).toHaveLength(currentFrames);
+  });
+
+  it('refuses to preview with no echoes', () => {
+    const sim = new HeistSim(vault);
+    expect(sim.startPreview()).toBe(false);
+  });
+});

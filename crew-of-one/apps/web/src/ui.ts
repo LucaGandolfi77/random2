@@ -35,6 +35,7 @@ type Callbacks = {
   onNext: () => void;
   onMenu: () => void;
   onToggleMenu: () => void;
+  onTogglePreview: () => void;
   onResetProgress: () => void;
 };
 
@@ -61,7 +62,11 @@ export class MetaUI {
   private readonly resultStats: HTMLElement;
   private readonly nextButton: HTMLButtonElement;
   private readonly hint: HTMLElement;
+  private readonly topbar: HTMLElement;
   private readonly menuButton: HTMLButtonElement;
+  private readonly previewButton: HTMLButtonElement;
+  private previewAvailable = false;
+  private previewActive = false;
   private hintTimer: number | null = null;
   private menuOpen = false;
 
@@ -71,14 +76,27 @@ export class MetaUI {
     const layer = el('div', 'ui-layer');
     document.body.appendChild(layer);
 
-    this.menuButton = el('button', 'ui-menu-button', 'MENU');
+    this.topbar = el('div', 'ui-topbar');
+    layer.appendChild(this.topbar);
+
+    this.menuButton = el('button', 'ui-chip-button', 'MENU');
     this.menuButton.type = 'button';
     this.menuButton.setAttribute('aria-label', 'Open the heist menu');
     this.menuButton.addEventListener('click', (event) => {
       event.stopPropagation();
       this.callbacks.onToggleMenu();
     });
-    layer.appendChild(this.menuButton);
+    this.topbar.appendChild(this.menuButton);
+
+    this.previewButton = el('button', 'ui-chip-button ui-chip-button--preview', '▶ CREW');
+    this.previewButton.type = 'button';
+    this.previewButton.hidden = true;
+    this.previewButton.setAttribute('aria-label', 'Preview the recorded crew');
+    this.previewButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      this.callbacks.onTogglePreview();
+    });
+    this.topbar.appendChild(this.previewButton);
 
     this.menu = el('div', 'screen screen--menu');
     this.menu.hidden = true;
@@ -144,6 +162,16 @@ export class MetaUI {
 
   setMenuButtonVisible(visible: boolean): void {
     this.menuButton.hidden = !visible;
+    if (!visible) this.previewButton.hidden = true;
+  }
+
+  setPreviewState(available: boolean, active: boolean): void {
+    if (available === this.previewAvailable && active === this.previewActive) return;
+    this.previewAvailable = available;
+    this.previewActive = active;
+    this.previewButton.hidden = !available && !active;
+    this.previewButton.textContent = active ? '■ STOP' : '▶ CREW';
+    this.previewButton.classList.toggle('ui-chip-button--active', active);
   }
 
   showMenu(vaults: VaultDef[], progress: SaveData, daily?: DailySummary): void {
@@ -151,6 +179,7 @@ export class MetaUI {
     this.menu.hidden = false;
     this.result.hidden = true;
     this.menuButton.hidden = true;
+    this.previewButton.hidden = true;
     this.renderDaily(daily);
     this.renderGrid(vaults, progress);
   }
@@ -159,6 +188,7 @@ export class MetaUI {
     this.menuOpen = false;
     this.menu.hidden = true;
     this.menuButton.hidden = false;
+    this.previewButton.hidden = !this.previewAvailable && !this.previewActive;
   }
 
   isMenuOpen(): boolean {
@@ -168,6 +198,7 @@ export class MetaUI {
   showResult(payload: ResultPayload, rankClass: string): void {
     this.result.hidden = false;
     this.menuButton.hidden = true;
+    this.previewButton.hidden = true;
     this.resultRank.textContent = payload.rank;
     this.resultRank.className = `result-rank result-rank--${rankClass}`;
     this.resultName.textContent = payload.vault.name;

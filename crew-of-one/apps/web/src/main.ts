@@ -71,6 +71,7 @@ class PrototypeScene extends Phaser.Scene {
   private keySpace!: Phaser.Input.Keyboard.Key;
   private keyBackspace!: Phaser.Input.Keyboard.Key;
   private keyEscape!: Phaser.Input.Keyboard.Key;
+  private keyP!: Phaser.Input.Keyboard.Key;
   private accumulator = 0;
   private joystickPointerId: number | null = null;
   private joystickOrigin = { x: 0, y: 0 };
@@ -89,6 +90,7 @@ class PrototypeScene extends Phaser.Scene {
   private wonHandled = false;
   private lastStatus: string = 'playing';
   private failureStreak = 0;
+  private previewEndsAtMs = 0;
 
   constructor() {
     super('prototype');
@@ -172,6 +174,7 @@ class PrototypeScene extends Phaser.Scene {
     this.keySpace = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.keyBackspace = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE);
     this.keyEscape = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.keyP = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
 
     this.input.addPointer(2);
     this.input.on('pointerdown', this.onPointerDown, this);
@@ -199,6 +202,7 @@ class PrototypeScene extends Phaser.Scene {
         if (this.ui.isMenuOpen()) this.closeMenu();
         else this.openMenu();
       },
+      onTogglePreview: () => this.togglePreview(),
       onResetProgress: () => this.handleResetProgress(),
     });
 
@@ -215,6 +219,11 @@ class PrototypeScene extends Phaser.Scene {
 
     if (this.paused || this.resultOpen) {
       this.render();
+      return;
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyP)) {
+      this.togglePreview();
       return;
     }
 
@@ -245,9 +254,13 @@ class PrototypeScene extends Phaser.Scene {
 
     this.accumulator += Math.min(delta, 100);
     const stepMs = 1000 / 60;
+    const previewSpeed = this.sim.isPreviewing() ? 2 : 1;
     let steps = 0;
-    while (this.accumulator >= stepMs && steps < 5) {
-      this.sim.tick(this.readInput());
+    const input = this.readInput();
+    while (this.accumulator >= stepMs && steps < 5 * previewSpeed) {
+      for (let step = 0; step < previewSpeed; step += 1) {
+        this.sim.tick(input);
+      }
       this.accumulator -= stepMs;
       steps += 1;
 
@@ -258,8 +271,33 @@ class PrototypeScene extends Phaser.Scene {
       }
     }
 
+    if (this.sim.isPreviewing() && this.sim.state.timeMs >= this.previewEndsAtMs) {
+      this.stopPreview();
+    }
+
     this.checkRunEnd(this.sim.state.status);
     this.render();
+  }
+
+  private togglePreview(): void {
+    if (this.sim.isPreviewing()) {
+      this.stopPreview();
+      return;
+    }
+    if (this.sim.state.status !== 'playing' || this.paused || this.resultOpen) return;
+    if (!this.sim.startPreview()) return;
+    this.previewEndsAtMs = this.sim.getPreviewLengthMs();
+    this.accumulator = 0;
+    this.joystickVector = { x: 0, y: 0 };
+    this.cameras.main.flash(140, 91, 192, 235);
+  }
+
+  private stopPreview(): void {
+    if (!this.sim.stopPreview()) return;
+    this.accumulator = 0;
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
+    this.cameras.main.flash(120, 233, 196, 106);
   }
 
   private readInput(): SimInput {
@@ -331,6 +369,10 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private doRewind(): void {
+    if (this.sim.isPreviewing()) {
+      this.stopPreview();
+      return;
+    }
     const result = this.sim.rewind();
     if (!result.ok) {
       if (result.reason === 'max-echoes') {
@@ -367,6 +409,7 @@ class PrototypeScene extends Phaser.Scene {
     this.lastStatus = 'playing';
     this.wonHandled = false;
     this.failureStreak = 0;
+    this.previewEndsAtMs = 0;
   }
 
   private startDaily(): void {
@@ -483,6 +526,10 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private doUndo(): void {
+    if (this.sim.isPreviewing()) {
+      this.stopPreview();
+      return;
+    }
     this.sim.undoEcho();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
@@ -491,6 +538,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private doReset(): void {
+    if (this.sim.isPreviewing()) this.stopPreview();
     this.sim.reset();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
@@ -620,15 +668,18 @@ class PrototypeScene extends Phaser.Scene {
       this.drawGhost(g, ghost);
     }
 
+    const previewing = this.sim.isPreviewing();
     const player = state.player;
-    g.fillStyle(COLORS.ghost, 0.22);
-    g.fillCircle(BOARD_X + player.x, BOARD_Y + player.y, 15);
-    g.fillStyle(COLORS.bone, 1);
-    g.fillCircle(BOARD_X + player.x, BOARD_Y + player.y, 10);
-    g.lineStyle(2, COLORS.ghost, 1);
-    g.strokeCircle(BOARD_X + player.x, BOARD_Y + player.y, 10);
-    if (player.carryingGem) {
-      this.drawGemShape(g, BOARD_X + player.x, BOARD_Y + player.y - 18, 8);
+    if (!previewing) {
+      g.fillStyle(COLORS.ghost, 0.22);
+      g.fillCircle(BOARD_X + player.x, BOARD_Y + player.y, 15);
+      g.fillStyle(COLORS.bone, 1);
+      g.fillCircle(BOARD_X + player.x, BOARD_Y + player.y, 10);
+      g.lineStyle(2, COLORS.ghost, 1);
+      g.strokeCircle(BOARD_X + player.x, BOARD_Y + player.y, 10);
+      if (player.carryingGem) {
+        this.drawGemShape(g, BOARD_X + player.x, BOARD_Y + player.y - 18, 8);
+      }
     }
 
     if (this.joystickPointerId !== null) {
@@ -677,23 +728,40 @@ class PrototypeScene extends Phaser.Scene {
       `ECHOES ${state.tracks.length}/${state.maxEchoes}   PAR ${this.vault.parEchoes}   ${this.vault.name.toUpperCase()}${tapeSummary ? `   ${tapeSummary}` : ''}`,
     );
     this.statusText.setText(
-      state.status === 'won'
-        ? 'HEIST COMPLETE · BACKSPACE TO RESET'
-        : state.status === 'alarm'
-          ? 'CAUGHT · R TO REWIND'
-          : state.status === 'timeout'
-            ? 'REWINDING...'
-            : '',
+      previewing
+        ? 'PREVIEW 2x · P TO STOP'
+        : state.status === 'won'
+          ? 'HEIST COMPLETE · BACKSPACE TO RESET'
+          : state.status === 'alarm'
+            ? 'CAUGHT · R TO REWIND'
+            : state.status === 'timeout'
+              ? 'REWINDING...'
+              : '',
     );
     this.helpText.setText(
-      state.status === 'won'
-        ? 'THE CREW WAS YOU'
-        : 'DRAG · ACT · DASH · REWIND · UNDO · 1-0',
+      previewing
+        ? 'THE CREW, WITHOUT YOU'
+        : state.status === 'won'
+          ? 'THE CREW WAS YOU'
+          : 'DRAG · ACT · DASH · REWIND · P PREVIEW · 1-0',
     );
-    this.rewindText.setColor(state.status === 'won' ? '#3A506B' : '#F4F1DE');
-    this.whistleText.setColor(state.status === 'won' || state.status === 'alarm' ? '#3A506B' : '#F4F1DE');
-    this.dashText.setColor(state.status === 'won' || state.status === 'alarm' ? '#3A506B' : '#F4F1DE');
-    this.undoText.setColor(state.tracks.length === 0 ? '#3A506B' : '#F4F1DE');
+    this.rewindText.setColor(state.status === 'won' || previewing ? '#3A506B' : '#F4F1DE');
+    this.whistleText.setColor(
+      state.status === 'won' || state.status === 'alarm' || previewing ? '#3A506B' : '#F4F1DE',
+    );
+    this.dashText.setColor(
+      state.status === 'won' || state.status === 'alarm' || previewing ? '#3A506B' : '#F4F1DE',
+    );
+    this.undoText.setColor(
+      state.tracks.length === 0 || previewing ? '#3A506B' : '#F4F1DE',
+    );
+    this.ui.setPreviewState(
+      state.tracks.length > 0 &&
+        state.status === 'playing' &&
+        !this.paused &&
+        !this.resultOpen,
+      previewing,
+    );
   }
 
   private drawEchoTimeline(g: Phaser.GameObjects.Graphics): void {
