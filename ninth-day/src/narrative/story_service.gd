@@ -1,7 +1,7 @@
 extends Node
 class_name StoryService
 
-## Ink-backed dialogue service for the vertical slice.
+## Ink-backed dialogue service for the game.
 ## The runtime is inkgd; this adapter turns Ink lines and tags into the small
 ## presentation objects StoryView understands, and mirrors choice flags into
 ## RunState.
@@ -41,6 +41,12 @@ const TITLES := {
 	"day_09_morning": "The Last Morning",
 	"day_09_afternoon": "The Quiet",
 	"day_09_night": "The Ninth Day",
+	"side_mara": "The Second Batch",
+	"side_iven": "The Small Debts",
+	"side_wren": "Counting the Living",
+	"side_oria": "What the Roses Keep",
+	"side_toma": "The Page After",
+	"side_vey": "The Door Left Open",
 }
 const INK_STATE_VARS := {
 	"day_06_": ["allied_watch", "allied_rebels", "refused_all"],
@@ -125,6 +131,8 @@ func _on_loaded(successfully: bool, p_story_id: String) -> void:
 			if p_story_id.begins_with(prefix):
 				for variable_name in INK_STATE_VARS[prefix]:
 					_player.set_variable(variable_name, bool(state.get_flag(variable_name, false)))
+		if p_story_id.begins_with("day_01_") or p_story_id.begins_with("day_09_"):
+			_player.set_variable("loop_count", RunState.cycle_number)
 	_player.choose_path(p_story_id)
 	_pump()
 
@@ -209,6 +217,8 @@ func _emit_end() -> void:
 	story_ended.emit(story_id)
 
 func _ink_path_for(p_story_id: String) -> String:
+	if p_story_id.begins_with("side_"):
+		return "res://content/ink/side_threads.ink.json"
 	if p_story_id.begins_with("day_02_"):
 		return "res://content/ink/day_02.ink.json"
 	if p_story_id.begins_with("day_03_"):

@@ -208,6 +208,8 @@ func _run() -> void:
 	_assert(RunState.is_phase_completed(2, "night"), "Day 2 night is complete")
 	_assert(RunState.day == 3, "the cycle advances to Day 3")
 	_assert(RunState.next_phase() == "morning", "Day 3 starts at morning")
+	_assert(RunState.side_thread_available("mara"), "Mara's thread unlocks the day after Day 2")
+	_assert(not RunState.side_thread_available("wren"), "later threads stay locked until their anchor day")
 
 	# Day 3 morning: the descent.
 	map = get_tree().current_scene
@@ -702,6 +704,47 @@ func _run() -> void:
 		return _finish()
 	_assert(RunState.is_phase_unlocked("night"), "Day 9 night unlocks")
 
+	# Quiet threads: a story-only bond and an elite-battle bond.
+	_assert(RunState.side_thread_available("mara"), "Mara's quiet thread is available")
+	_assert(RunState.side_thread_available("vey"), "Vey's quiet thread is available")
+	map = get_tree().current_scene
+	map._on_thread_pressed("mara")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Second Batch", "the thread opens its own story")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_side_thread_complete("mara"), "a story thread completes on return")
+	_assert(RunState.has_inheritance("second_batch"), "a quiet thread leaves a memory")
+	_assert(not RunState.side_thread_available("mara"), "a completed thread closes")
+
+	map = get_tree().current_scene
+	map._on_thread_pressed("vey")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Door Left Open", "Vey's thread opens")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BattleView"):
+		return _finish()
+	battle = get_tree().current_scene
+	_assert(battle.sim.encounter_id == &"sera_remnant", "the thread leads to its elite battle")
+	battle.sim.enemies[0].hp = 1
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	battle._refresh()
+	_assert(battle.sim.phase == "victory", "the elite battle can be won")
+	battle._on_result_pressed()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_side_thread_complete("vey"), "winning the elite completes the thread")
+	_assert(RunState.has_inheritance("door_open"), "the elite thread leaves a memory")
+
 	# Day 9 night: the ending posture resolves the cycle.
 	map = get_tree().current_scene
 	map._on_phase_pressed("night")
@@ -724,8 +767,54 @@ func _run() -> void:
 	if not await _wait_for_scene("BellMap"):
 		return _finish()
 	_assert(RunState.day == 1, "a new cycle returns to Day 1")
+	_assert(RunState.cycle_number == 2, "the next cycle increments the loop count")
 	_assert(not RunState.cycle_complete, "a new cycle clears the completion flag")
-	_assert(RunState.inheritances.is_empty(), "a new cycle clears the archive")
+	_assert(not RunState.inheritances.is_empty(), "the next cycle carries the archive forward")
+	_assert(RunState.is_side_thread_complete("mara"), "quiet threads persist across cycles")
+	_assert(RunState.bond_rank("mara") >= 1, "bonds persist across cycles")
+	_assert(not bool(RunState.get_flag("has_hidden_bell", false)), "day choices reset for the next loop")
+
+	# New cycle fields survive a save round-trip.
+	var snapshot := RunState.to_dict()
+	RunState.new_cycle()
+	RunState.from_dict(snapshot)
+	_assert(RunState.cycle_number == 2, "the cycle number survives serialization")
+	_assert(RunState.is_side_thread_complete("mara"), "thread completion survives serialization")
+	_assert(not RunState.inheritances.is_empty(), "memories survive serialization")
+
+	# The true ending is checkable directly once its three conditions align.
+	for bond_id in RunState.BOND_IDS:
+		RunState.bonds[bond_id] = RunState.BOND_MAX
+	RunState.flags["ending_break"] = true
+	RunState.flags["has_hidden_bell"] = true
+	RunState.cycle_complete = true
+	RunState.save()
+	get_tree().change_scene_to_file("res://src/screens/ending_view.tscn")
+	if not await _wait_for_scene("EndingView"):
+		return _finish()
+	var true_ending := get_tree().current_scene
+	_assert(bool(true_ending._ending_data()["true"]), "the hidden bell and six bonds unlock the true ending")
+	_assert(RunState.true_ending_seen, "the true ending is recorded in the save")
+
+	true_ending._on_start_fresh()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.cycle_number == 1, "starting fresh resets the loop count")
+	_assert(RunState.inheritances.is_empty(), "starting fresh clears the archive")
+	_assert(RunState.bonds.is_empty(), "starting fresh clears the bonds")
+
+	# Echo dialogue appears on the first scene of a later loop.
+	RunState.cycle_number = 2
+	RunState.day = 1
+	RunState.pending_phase = "morning"
+	get_tree().change_scene_to_file("res://src/screens/story_view.tscn")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	if not await _wait_for_story_ready(story):
+		return _finish()
+	_assert(String(story.service.current_line().get("id", "")) == "d1m_000", "a later loop opens with Echo narration")
+	_assert(String(story.service.current_line().get("bg", "")) == "spire", "Echo narration keeps its background tag")
 	_finish()
 
 func _drive_story(story: Node) -> bool:

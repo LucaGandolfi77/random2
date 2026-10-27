@@ -1,6 +1,6 @@
 # Mobile checklist
 
-Ninth Day ships portrait-first on Android, then iOS. This is the device checklist for the current vertical slice.
+Ninth Day ships portrait-first on Android, then iOS. This is the device checklist for the current build.
 
 ## Project settings
 
@@ -41,6 +41,7 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 | Enemy target rows | 50–62 |
 | Bell Rest cards | 132 |
 | Bell Rest confirm / skip | 48–54 |
+| Quiet-thread rows | 58 |
 
 ## Save behaviour to test
 
@@ -48,15 +49,18 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 2. Start a battle, quit mid-turn, relaunch: **Continue** resumes the battle at the last player decision.
 3. Win a battle, quit on the victory screen, relaunch: **Continue** goes to Bell Rest.
 4. Quit at Bell Rest, relaunch: **Continue** goes back to the same Bell Rest.
-5. Finish Day 1, relaunch: title shows **Day 2 · Morning**.
-6. Finish Day 2, relaunch: title shows **Day 3 · Morning**.
-7. Finish Day 3, relaunch: title shows **Day 4 · Morning**.
-8. Finish Day 4, relaunch: title shows **Day 5 · Morning**.
-9. Finish Day 5, relaunch: title shows **Day 6 · Morning**.
-10. Finish Day 6, relaunch: title shows **Day 7 · Morning**.
-11. Finish Day 7, relaunch: title shows **Day 8 · Morning**.
-12. Finish Day 8, relaunch: title shows **Day 9 · Morning**.
-13. Finish Day 9, relaunch: **Continue** opens the ending screen; starting a new cycle returns to Day 1.
+5. Finish Day 1, relaunch: title shows **Cycle 1 · Day 2 · Morning**.
+6. Finish Day 2, relaunch: title shows **Cycle 1 · Day 3 · Morning**.
+7. Finish Day 3, relaunch: title shows **Cycle 1 · Day 4 · Morning**.
+8. Finish Day 4, relaunch: title shows **Cycle 1 · Day 5 · Morning**.
+9. Finish Day 5, relaunch: title shows **Cycle 1 · Day 6 · Morning**.
+10. Finish Day 6, relaunch: title shows **Cycle 1 · Day 7 · Morning**.
+11. Finish Day 7, relaunch: title shows **Cycle 1 · Day 8 · Morning**.
+12. Finish Day 8, relaunch: title shows **Cycle 1 · Day 9 · Morning**.
+13. Finish Day 9, relaunch: **Continue** opens the ending screen.
+14. Start the next cycle: bonds, memories, quiet threads, and the **Cycle 2** label survive; Day choices reset.
+15. Start fresh: the archive, bonds, and thread completion clear and the title returns to **Cycle 1**.
+16. Quit during a quiet thread: **Continue** returns to that thread; quit during its elite battle: **Continue** resumes the battle.
 
 ## Android export
 
@@ -83,7 +87,7 @@ Before exporting:
    - Target SDK: current Play requirement.
    - Architecture: `arm64-v8a` for release, add `armeabi-v7a` only if needed.
    - Version code/name from the release checklist.
-   - Permissions: none required for the offline slice. Add `INTERNET` only when cloud/shop layers land.
+   - Permissions: none required for the offline game. Add `INTERNET` only when cloud/shop layers land.
 5. Export a debug APK and run the save/safe-area checks above on device.
 6. Export an AAB with a release keystore for internal testing. Never commit the keystore.
 
@@ -105,7 +109,7 @@ iOS export requires macOS with Xcode. The project is portrait-only and has no pl
 - no reliance on mouse hover;
 - App Store privacy declarations (offline build collects nothing).
 
-## Accessibility pass for the slice
+## Accessibility pass for the game
 
 - Text sizes are design-space 11–24; the final build needs a text-scale setting.
 - Color is never the only signal: enemies show tone names, statuses show words, Echo cards show `[stolen]` / `[unechoable]`.

@@ -15,7 +15,7 @@ godot --path ninth-day
 
 Or open `ninth-day/project.godot` in the Godot editor and press **F5**.
 
-The slice runs:
+The game runs:
 
 **Title → Bell Map → Day 1 Morning (story + Hollow Choir tutorial) → Bell Rest → Afternoon (story + Ashwright) → Bell Rest → Night (story + choice) → Bell Rest → Day 2**
 
@@ -40,6 +40,19 @@ The slice runs:
 - Each battle is a full Echo Track encounter with previews and a confirm step.
 - Bell Rest offers three Inheritance cards per phase and equips the one you take.
 - Progress, choices, and equipped memories autosave and resume.
+- **Quiet threads** add six optional bond scenes, two elite battles, and six more Inheritances. They unlock the day after their anchor day and persist across loops.
+- **Cycles carry forward.** Starting the next cycle keeps bonds, memories, the loadout, quiet threads, and seen lines. Day choices and ending postures reset. **Start fresh** wipes everything.
+- **Echo dialogue** adds second-loop variants to Day 1 and the Day 9 ending, plus an Echo banner in later cycles.
+- The Bell Map shows bond ranks, thread status, and the true-ending conditions.
+
+### Endings
+
+Day 9 resolves the posture chosen on Day 8:
+
+- **Ring the Bell** — the city survives and forgets.
+- **Break the Bell** — time moves forward, at a cost.
+- **Become the Bell** — Cael holds Aurel together.
+- **The Ninth Day (true ending)** — break the Bell, carry the hidden bell, and reach rank 3 with all six bonds. The ending screen tracks whether it has been found.
 
 ## Build the Android debug APK
 
@@ -61,7 +74,7 @@ The current debug build is **55 MB** because it includes both `arm64-v8a` and `x
 
 ## Authoring Ink
 
-Day 1 through Day 9 live in [`content/ink/`](content/ink). Lines carry presentation tags:
+Day 1 through Day 9 live in [`content/ink/`](content/ink), and the optional quiet threads live in [`content/ink/side_threads.ink`](content/ink/side_threads.ink). Lines carry presentation tags:
 
 ```ink
 The Bell is cracking. # id:d1m_005 # speaker:Mara # bg:spire
@@ -92,7 +105,7 @@ GODOT_BIN=/path/to/godot ./ninth-day/tools/run_tests.sh
 Two suites run headlessly:
 
 1. **Battle suite** — deterministic simulation, Echo rules, tones, Resonance, Chord, encounters, previews, save/restore, and inheritances.
-2. **Flow suite** — boots the real screens and drives the entire `title → map → Ink story → battle → Bell Rest → ending → new cycle` loop across all twenty-seven authored phases, including tag parsing, choice flags, day advancement, scripted retreats, the Day 6 alliance-dependent boss, the Day 7 no-combat mercy route, both boss phase changes, and the ending resolver.
+2. **Flow suite** — boots the real screens and drives the entire `title → map → Ink story → battle → Bell Rest → quiet thread → ending → next cycle` loop across all twenty-seven main phases, six optional threads, and four endings, including tag parsing, choice flags, day advancement, scripted retreats, the Day 6 alliance-dependent boss, the Day 7 no-combat mercy route, both boss phase changes, cycle carryover, Echo dialogue, and the true-ending resolver.
 
 ## Controls
 
@@ -105,14 +118,15 @@ Two suites run headlessly:
 - **Resolve enemy turn** resolves the enemy phase. Enemy intents are visible on their rows.
 - On victory, **Bell Rest** appears. On defeat, restart or return to the map.
 
-## What the slice demonstrates
+## What the game demonstrates
 
 1. **The Echo Track is readable.** The last three/four actions are cards. Replaying uses the current actor, current target, and recorded effect — it is a rules hack, not a frozen turn.
 2. **Enemies answer in kind.** Enemies can Echo your actions, and the Ashwright steals and locks one of your cards at half HP.
 3. **Tone matching builds Resonance.** Hitting the counter-tone deals +25%; matching the tone builds +1 Resonance.
 4. **Commitment matters.** Every action has a preview and a confirm step, including Echo replays.
 5. **The loop remembers.** Choices, bonds, completed phases, and Inheritances persist across app restarts.
-6. **Combat is deterministic.** Integer math and a serialized RNG state mean the same seed and commands produce the same result.
+6. **The loop changes.** Later cycles carry bonds and memories forward, replay key scenes with Echo narration, and make the true ending reachable.
+7. **Combat is deterministic.** Integer math and a serialized RNG state mean the same seed and commands produce the same result.
 
 ## Project layout
 
@@ -140,6 +154,8 @@ ninth-day/
     ink/day_08.ink.json          # compiled Ink consumed at runtime
     ink/day_09.ink               # Day 9 story source
     ink/day_09.ink.json          # compiled Ink consumed at runtime
+    ink/side_threads.ink         # six optional quiet-thread scenes
+    ink/side_threads.ink.json    # compiled optional scenes
     inheritances.json            # Bell Rest cards and modifiers
   docs/
     GDD.md
@@ -186,10 +202,10 @@ ninth-day/
 
 Runtime saves are stored in Godot's `user://` directory:
 
-- `ninth_day_run.json` — cycle state: day, completed phases, flags, bonds, Inheritances.
+- `ninth_day_run.json` — cycle state: cycle number, day, completed phases, flags, bonds, quiet threads, Inheritances, seen lines.
 - `ninth_day_battle.json` — in-progress battle, including RNG state and Echo locks.
 
-The battle autosaves at each player decision. Finishing a battle deletes its save. The title screen's **Continue** resumes an in-progress battle first, then the Bell Map.
+The battle autosaves at each player decision. Finishing a battle deletes its save. The title screen's **Continue** resumes an in-progress battle first, then a quiet thread, then the Bell Map.
 
 ## Design rules enforced in code
 
@@ -203,9 +219,10 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 
 ## Known limitations
 
-- The nine-day main story is complete, but the optional phases, bond scenes, and knowledge-gated variants from the GDD are not authored.
-- The true ending is checkable only by carrying the hidden bell and reaching rank 3 with all six bonds; there is no in-game hints screen for it yet.
-- Ink state is not saved mid-scene; quitting during a story phase returns to the Bell Map.
+- The nine-day main story and six quiet threads are complete; the remaining optional phases and knowledge-gated variants from the GDD are not authored.
+- The Bell Map now shows bond ranks and true-ending conditions, but there is no dedicated journal or hint scene yet.
+- Echo dialogue currently covers Day 1 and the Day 9 ending only.
+- Ink state is not saved mid-scene; quitting during a story phase returns to the Bell Map (quiet threads likewise restart).
 - Art is typographic greybox: no portraits, backgrounds, music, SFX, or haptics yet.
 - The turn model is party-phase then enemy-phase, not the final speed timeline.
 - Statuses are minimal: Burning, Marked, Slowed. Slowed is displayed but does not yet alter order.
@@ -215,17 +232,18 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 
 ## Next
 
-1. Add optional phases, bond scenes, and the knowledge-gated Bell Map variants.
+1. Add the remaining optional phases and knowledge-gated Bell Map variants.
 2. Add party swap, items, and the speed timeline.
 3. Persist mid-scene Ink state and add skip-read support.
-4. Art pass: portraits, paper/brass UI, tone VFX, sound, haptics.
-5. Run the debug APK on physical Android hardware and complete the safe-area/touch audit.
-6. iOS export and store integrations.
-7. Cosmetic archive and the free-story monetization boundary.
+4. Extend Echo variants to more scenes and let seen lines skip.
+5. Art pass: portraits, paper/brass UI, tone VFX, sound, haptics.
+6. Run the debug APK on physical Android hardware and complete the safe-area/touch audit.
+7. iOS export and store integrations.
+8. Cosmetic archive and the free-story monetization boundary.
 
 ## Third-party notices
 
 - **inkgd** — MIT, © 2018–2023 Paul Joannon, © 2019–2023 Frédéric Maquin. Vendored from the `godot4` branch at commit `fea9098`.
-- **Ink** — MIT, © inkle Ltd. Day 1 through Day 9 are compiled with `inklecate`.
+- **Ink** — MIT, © inkle Ltd. Day 1 through Day 9 and the quiet threads are compiled with `inklecate`.
 
 Add a project license before distributing builds.

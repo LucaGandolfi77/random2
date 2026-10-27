@@ -10,7 +10,10 @@ func _ready() -> void:
 	margin.add_child(outer)
 
 	var data := _ending_data()
-	outer.add_child(Ui.overline("AUREL · THE NINTH DAY"))
+	if bool(data.get("true", false)):
+		RunState.true_ending_seen = true
+		RunState.save()
+	outer.add_child(Ui.overline("AUREL · THE NINTH DAY · CYCLE %d" % RunState.cycle_number))
 	var title := Ui.label(String(data["title"]), 34, Palette.BRASS)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	outer.add_child(title)
@@ -40,11 +43,15 @@ func _ready() -> void:
 		var true_label := Ui.label("TRUE ENDING · ALL SIX BONDS AT RANK 3 · THE HIDDEN BELL", 11, Palette.BELL, true)
 		body_box.add_child(true_label)
 
-	var new_cycle := Ui.button("BEGIN A NEW CYCLE", 54, Palette.BELL)
+	var new_cycle := Ui.button("BEGIN THE NEXT CYCLE", 54, Palette.BELL)
 	new_cycle.add_theme_font_size_override("font_size", 16)
 	new_cycle.pressed.connect(_on_new_cycle)
 	outer.add_child(new_cycle)
-	var title_button := Ui.button("Return to title", 46)
+	var fresh := Ui.button("Start fresh — erase memories and bonds", 44)
+	fresh.add_theme_color_override("font_color", Palette.MUTED)
+	fresh.pressed.connect(_on_start_fresh)
+	outer.add_child(fresh)
+	var title_button := Ui.button("Return to title", 42)
 	title_button.add_theme_color_override("font_color", Palette.MUTED)
 	title_button.pressed.connect(_on_title)
 	outer.add_child(title_button)
@@ -53,8 +60,7 @@ func _ending_data() -> Dictionary:
 	var ring: bool = bool(RunState.get_flag("ending_ring", false))
 	var break_bell: bool = bool(RunState.get_flag("ending_break", false))
 	var become: bool = bool(RunState.get_flag("ending_become", false))
-	var hidden_bell: bool = bool(RunState.get_flag("has_hidden_bell", false))
-	if break_bell and hidden_bell and _all_bonds_maxed():
+	if RunState.true_ending_ready():
 		return {
 			"title": "THE NINTH DAY",
 			"subtitle": "TRUE ENDING",
@@ -90,13 +96,11 @@ func _ending_data() -> Dictionary:
 	}
 
 func _all_bonds_maxed() -> bool:
-	for bond_id in BOND_IDS:
-		if RunState.bond_rank(bond_id) < 3:
-			return false
-	return true
+	return RunState.all_bonds_maxed()
 
 func _summary_text() -> String:
-	return "Cycle: Day %d · %d phases completed · %d memories kept · %d equipped" % [
+	return "Cycle %d · Day %d · %d phases completed · %d memories kept · %d equipped" % [
+		RunState.cycle_number,
 		RunState.day,
 		RunState.completed.size(),
 		RunState.inheritances.size(),
@@ -110,7 +114,7 @@ func _bonds_text() -> String:
 	return "Bonds · " + " · ".join(parts)
 
 func _ending_tint() -> Color:
-	if RunState.get_flag("ending_break", false) and RunState.get_flag("has_hidden_bell", false) and _all_bonds_maxed():
+	if RunState.true_ending_ready():
 		return Palette.BELL
 	if RunState.get_flag("ending_become", false):
 		return Palette.HUSH
@@ -119,6 +123,11 @@ func _ending_tint() -> Color:
 	return Palette.BRASS
 
 func _on_new_cycle() -> void:
+	RunState.begin_next_cycle()
+	BattleStore.delete()
+	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
+
+func _on_start_fresh() -> void:
 	RunState.new_cycle()
 	BattleStore.delete()
 	get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")

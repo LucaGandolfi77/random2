@@ -1,9 +1,15 @@
 // NINTH DAY — Day 1
 // Every line carries an id and presentation tags. Flags and bonds live on choices.
 
+VAR loop_count = 0
+
 -> day_01_morning
 
 === day_01_morning ===
+{ loop_count > 1:
+# bg:spire
+You have stood in this room before. The dust has not moved. You have. # id:d1m_000 # speaker:Narration
+}
 # bg:spire
 You wake to the sound of a bell that should not be ringing. # id:d1m_001 # speaker:Narration
 The Spire room is cold. Dust hangs in the light. On the sill, a cup of tea has gone entirely still. # id:d1m_002 # speaker:Narration

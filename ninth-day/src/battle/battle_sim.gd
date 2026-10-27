@@ -857,6 +857,10 @@ func _encounter_intro() -> String:
 			return "The Unbound Saint descends the Spire stair. Its clockwork skin is open, and the Bell is inside."
 		&"the_quiet":
 			return "The Quiet stands where the Bell should be. It has been waiting for you since the first morning."
+		&"hollow_choir_reborn":
+			return "The Choir reforms around Iven's ledger. Every name it lost, it sings back louder."
+		&"sera_remnant":
+			return "Sera Vane steps out of Vey's open door. She has no rank left, only the last order she gave herself."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -971,6 +975,28 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 		BattleAction.new(&"ninth_silence", "Ninth Silence", BattleTypes.Tone.HUSH, 40, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"slowed", 1, false, "The last day, ending early."),
 	])
 
+	var choir_reborn := BattleActor.new(&"hollow_choir_reborn", "The Hollow Choir, Reborn", BattleTypes.Side.ENEMY, BattleTypes.Tone.HUSH, 210, 20, 12, 12)
+	choir_reborn.is_boss = true
+	choir_reborn.max_resolve = 99
+	choir_reborn.resolve = 99
+	choir_reborn.actions = _actions([
+		BattleAction.new(&"name_hymn", "Name Hymn", BattleTypes.Tone.HUSH, 16, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 2, true, "Every name Iven let go, sung at once."),
+		BattleAction.new(&"hollow_echo", "Hollow Echo", BattleTypes.Tone.HUSH, 22, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"marked", 2, true, "The Choir answers in your own voice."),
+		BattleAction.new(&"refrain", "Refrain", BattleTypes.Tone.HUSH, 0, 0, BattleTypes.TargetRule.SELF, 24, &"", 0, true, "The Choir breathes together."),
+		BattleAction.new(&"silence_ledger", "Silence the Ledger", BattleTypes.Tone.BELL, 28, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"slowed", 1, false, "A note that tries to close the book."),
+	])
+
+	var sera_remnant := BattleActor.new(&"sera_remnant", "Sera's Remnant", BattleTypes.Side.ENEMY, BattleTypes.Tone.EMBER, 220, 21, 13, 15)
+	sera_remnant.is_boss = true
+	sera_remnant.max_resolve = 99
+	sera_remnant.resolve = 99
+	sera_remnant.actions = _actions([
+		BattleAction.new(&"pike_line", "Pike Line", BattleTypes.Tone.EMBER, 18, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"", 0, true, "The last line she held."),
+		BattleAction.new(&"counterstance", "Counterstance", BattleTypes.Tone.BELL, 0, 0, BattleTypes.TargetRule.SELF, 18, &"", 0, true, "She gives the order to stand, and the air obeys."),
+		BattleAction.new(&"command", "Command", BattleTypes.Tone.BELL, 20, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"marked", 2, true, "One word, and the dark turns against you."),
+		BattleAction.new(&"last_order", "Last Order", BattleTypes.Tone.EMBER, 30, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, false, "Survive it. That was the order."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -1006,6 +1032,10 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			return [unbound]
 		&"the_quiet":
 			return [quiet]
+		&"hollow_choir_reborn":
+			return [choir_reborn]
+		&"sera_remnant":
+			return [sera_remnant]
 		_:
 			return out
 

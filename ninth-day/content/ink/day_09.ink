@@ -5,6 +5,7 @@ VAR ending_ring = false
 VAR ending_break = false
 VAR ending_become = false
 VAR has_hidden_bell = false
+VAR loop_count = 0
 
 -> day_09_morning
 
@@ -79,6 +80,10 @@ You have had eight, Iven says. That is not a day. That is a habit. # id:d9a_013 
 -> END
 
 === day_09_night ===
+{ loop_count > 1:
+# bg:spire_night
+The Bell recognizes your hands. It has been waiting for this version of you. # id:d9n_000 # speaker:Narration
+}
 # bg:spire_night
 The Quiet falls. The Bell is open. The ninth day is yours to end. # id:d9n_001 # speaker:Narration
 Mara is on your left. Iven is on your right. Wren is holding the small bell. # id:d9n_002 # speaker:Narration

@@ -87,6 +87,23 @@ func _ready() -> void:
 			RunState.day = 9
 			RunState.save()
 			scene = load("res://src/screens/bell_map.tscn").instantiate()
+		"map_threads":
+			_complete_day(1)
+			_complete_day(2)
+			_complete_day(3)
+			_complete_day(4)
+			_complete_day(5)
+			_complete_day(6)
+			_complete_day(7)
+			_complete_day(8)
+			RunState.day = 9
+			RunState.cycle_number = 2
+			RunState.add_bond("mara", 3)
+			RunState.add_bond("iven", 2)
+			RunState.add_bond("wren", 1)
+			RunState.side_threads["mara"] = true
+			RunState.save()
+			scene = load("res://src/screens/bell_map.tscn").instantiate()
 		"complete_day2":
 			_complete_day(1)
 			_complete_day(2)
@@ -254,6 +271,14 @@ func _ready() -> void:
 			RunState.day = 9
 			RunState.pending_phase = "morning"
 			scene = load("res://src/screens/story_view.tscn").instantiate()
+		"thread_story":
+			RunState.day = 9
+			RunState.open_side_thread("mara")
+			scene = load("res://src/screens/story_view.tscn").instantiate()
+		"thread_choices":
+			RunState.day = 9
+			RunState.open_side_thread("mara")
+			scene = load("res://src/screens/story_view.tscn").instantiate()
 		"rest":
 			RunState.pending_phase = "morning"
 			scene = load("res://src/screens/bell_rest.tscn").instantiate()
@@ -295,12 +320,12 @@ func _ready() -> void:
 	add_child(scene)
 	scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	if screen in ["story", "story_afternoon", "story_night", "story_day2", "choices", "choices_day2", "story_day3", "choices_day3", "story_day4", "choices_day4", "story_day5", "choices_day5", "story_day6", "choices_day6", "story_day7", "choices_day7", "story_day8", "choices_day8", "story_day9", "choices_day9"]:
+	if screen in ["story", "story_afternoon", "story_night", "story_day2", "choices", "choices_day2", "story_day3", "choices_day3", "story_day4", "choices_day4", "story_day5", "choices_day5", "story_day6", "choices_day6", "story_day7", "choices_day7", "story_day8", "choices_day8", "story_day9", "choices_day9", "thread_story", "thread_choices"]:
 		for i in 60:
 			await get_tree().process_frame
 			if not scene.service.current_line().is_empty():
 				break
-	if screen in ["choices", "choices_day2", "choices_day3", "choices_day4", "choices_day5", "choices_day6", "choices_day7", "choices_day8", "choices_day9"]:
+	if screen in ["choices", "choices_day2", "choices_day3", "choices_day4", "choices_day5", "choices_day6", "choices_day7", "choices_day8", "choices_day9", "thread_choices"]:
 		var steps := 0
 		while scene._mode != "choices" and steps < 60:
 			steps += 1
@@ -311,6 +336,10 @@ func _ready() -> void:
 		var offers := InheritanceDB.offers(scene.phase, RunState.day)
 		if not offers.is_empty():
 			scene._on_card_selected(offers[0])
+	if screen == "map_threads":
+		await get_tree().process_frame
+		for node in scene.find_children("*", "ScrollContainer", true, false):
+			node.scroll_vertical = 10000
 
 	await get_tree().create_timer(0.4).timeout
 	await RenderingServer.frame_post_draw

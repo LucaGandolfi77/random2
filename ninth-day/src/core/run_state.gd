@@ -8,6 +8,67 @@ extends Node
 const SAVE_PATH := "user://ninth_day_run.json"
 const PHASES: Array[String] = ["morning", "afternoon", "night"]
 const LAST_AUTHORED_DAY := 9
+const BOND_IDS: Array[String] = ["mara", "iven", "wren", "oria", "toma", "vey"]
+const BOND_MAX := 3
+
+## Optional bond threads. Each one unlocks the day after its anchor day and
+## grants a memory of its own. Two of them end in an elite battle.
+const SIDE_THREADS := {
+	"mara": {
+		"name": "The Second Batch",
+		"after_day": 2,
+		"story_id": "side_mara",
+		"inheritance": "second_batch",
+		"battle": "",
+		"bg": "ember_row",
+		"closing": "Mara leaves the oven door open. The row smells like something beginning.",
+	},
+	"iven": {
+		"name": "The Small Debts",
+		"after_day": 3,
+		"story_id": "side_iven",
+		"inheritance": "small_debts",
+		"battle": "hollow_choir_reborn",
+		"bg": "checkpoint",
+		"closing": "The Choir sings for the Watch. Iven does not look away.",
+	},
+	"wren": {
+		"name": "Counting the Living",
+		"after_day": 5,
+		"story_id": "side_wren",
+		"inheritance": "living_count",
+		"battle": "",
+		"bg": "roof",
+		"closing": "Wren counts the windows twice. The second count is larger.",
+	},
+	"oria": {
+		"name": "What the Roses Keep",
+		"after_day": 6,
+		"story_id": "side_oria",
+		"inheritance": "rose_kept",
+		"battle": "",
+		"bg": "garden",
+		"closing": "Oria cuts one rose and gives it to you. It does not wilt on the way down.",
+	},
+	"toma": {
+		"name": "The Page After",
+		"after_day": 7,
+		"story_id": "side_toma",
+		"inheritance": "page_after",
+		"battle": "",
+		"bg": "wren_house",
+		"closing": "Toma writes the date, then the day after it. The ink holds.",
+	},
+	"vey": {
+		"name": "The Door Left Open",
+		"after_day": 8,
+		"story_id": "side_vey",
+		"inheritance": "door_open",
+		"battle": "sera_remnant",
+		"bg": "sanctuary",
+		"closing": "Vey leaves the inner door open. Something in the dark decides not to follow.",
+	},
+}
 const DAY_PHASES := {
 	1: {
 		"morning": {"title": "Morning · The Crack", "type": "story · battle · inheritance", "encounter": "tutorial"},
@@ -57,16 +118,22 @@ const DAY_PHASES := {
 }
 
 var day: int = 1
+var cycle_number: int = 1
 var completed: Dictionary = {}
 var flags: Dictionary = {}
 var seen_lines: Dictionary = {}
 var bonds: Dictionary = {}
+var side_threads: Dictionary = {}
 var inheritances: Array[String] = []
 var equipped: Array[String] = []
 var pending_phase: String = ""
+var pending_story: String = ""
+var pending_thread: String = ""
+var pending_encounter: String = ""
 var current_screen: String = "title"
 var day_complete: bool = false
 var cycle_complete: bool = false
+var true_ending_seen: bool = false
 
 func _ready() -> void:
 	load_run()
@@ -75,18 +142,34 @@ func has_run() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
 
 func new_cycle() -> void:
-	day = 1
-	completed.clear()
-	flags.clear()
-	seen_lines.clear()
+	_reset_run()
+	cycle_number = 1
+	side_threads.clear()
 	bonds.clear()
 	inheritances.clear()
 	equipped.clear()
+	seen_lines.clear()
+	true_ending_seen = false
+	save()
+
+## Carries memories and bonds into the next loop. Choices, phase completion,
+## and ending postures reset; knowledge of the city does not.
+func begin_next_cycle() -> void:
+	cycle_number += 1
+	_reset_run()
+	save()
+
+func _reset_run() -> void:
+	day = 1
+	completed.clear()
+	flags.clear()
 	pending_phase = ""
+	pending_story = ""
+	pending_thread = ""
+	pending_encounter = ""
 	current_screen = "title"
 	day_complete = false
 	cycle_complete = false
-	save()
 
 func load_run() -> bool:
 	if not FileAccess.file_exists(SAVE_PATH):
@@ -111,32 +194,44 @@ func save() -> void:
 
 func to_dict() -> Dictionary:
 	return {
-		"version": 1,
+		"version": 2,
 		"day": day,
+		"cycle_number": cycle_number,
 		"completed": completed.duplicate(),
 		"flags": flags.duplicate(),
 		"seen_lines": seen_lines.duplicate(),
 		"bonds": bonds.duplicate(),
+		"side_threads": side_threads.duplicate(),
 		"inheritances": inheritances.duplicate(),
 		"equipped": equipped.duplicate(),
 		"pending_phase": pending_phase,
+		"pending_story": pending_story,
+		"pending_thread": pending_thread,
+		"pending_encounter": pending_encounter,
 		"current_screen": current_screen,
 		"day_complete": day_complete,
 		"cycle_complete": cycle_complete,
+		"true_ending_seen": true_ending_seen,
 	}
 
 func from_dict(data: Dictionary) -> void:
 	day = int(data.get("day", 1))
+	cycle_number = maxi(1, int(data.get("cycle_number", 1)))
 	completed = _string_key_dict(data.get("completed", {}))
 	flags = _string_key_dict(data.get("flags", {}))
 	seen_lines = _string_key_dict(data.get("seen_lines", {}))
 	bonds = _string_key_dict(data.get("bonds", {}))
+	side_threads = _string_key_dict(data.get("side_threads", {}))
 	inheritances = _string_array(data.get("inheritances", []))
 	equipped = _string_array(data.get("equipped", []))
 	pending_phase = String(data.get("pending_phase", ""))
+	pending_story = String(data.get("pending_story", ""))
+	pending_thread = String(data.get("pending_thread", ""))
+	pending_encounter = String(data.get("pending_encounter", ""))
 	current_screen = String(data.get("current_screen", "title"))
 	day_complete = bool(data.get("day_complete", false))
 	cycle_complete = bool(data.get("cycle_complete", false))
+	true_ending_seen = bool(data.get("true_ending_seen", false))
 
 func phase_key(p_day: int, phase: String) -> String:
 	return "%d:%s" % [p_day, phase]
@@ -219,11 +314,69 @@ func mark_seen(line_id: String) -> void:
 	seen_lines[line_id] = true
 
 func add_bond(bond_id: String, amount: int = 1) -> void:
-	bonds[bond_id] = int(bonds.get(bond_id, 0)) + amount
+	bonds[bond_id] = mini(BOND_MAX, int(bonds.get(bond_id, 0)) + amount)
 	save()
 
 func bond_rank(bond_id: String) -> int:
 	return int(bonds.get(bond_id, 0))
+
+func all_bonds_maxed() -> bool:
+	for bond_id in BOND_IDS:
+		if bond_rank(bond_id) < BOND_MAX:
+			return false
+	return true
+
+func side_thread_ids() -> Array[String]:
+	var out: Array[String] = []
+	for thread_id in SIDE_THREADS.keys():
+		out.append(String(thread_id))
+	return out
+
+func side_thread_data(thread_id: String) -> Dictionary:
+	return SIDE_THREADS.get(thread_id, {})
+
+func is_side_thread_complete(thread_id: String) -> bool:
+	return bool(side_threads.get(thread_id, false))
+
+func side_thread_available(thread_id: String) -> bool:
+	if is_side_thread_complete(thread_id):
+		return false
+	var data := side_thread_data(thread_id)
+	if data.is_empty():
+		return false
+	return is_phase_completed(int(data.get("after_day", 0)), "night")
+
+func open_side_thread(thread_id: String) -> void:
+	pending_story = String(side_thread_data(thread_id).get("story_id", ""))
+	pending_thread = thread_id
+	pending_phase = ""
+	pending_encounter = ""
+	current_screen = "side_story"
+	save()
+
+func complete_side_thread(thread_id: String) -> void:
+	var data := side_thread_data(thread_id)
+	if data.is_empty():
+		return
+	side_threads[thread_id] = true
+	var card_id := String(data.get("inheritance", ""))
+	if card_id != "":
+		add_inheritance(card_id)
+	pending_story = ""
+	pending_thread = ""
+	pending_encounter = ""
+	current_screen = "map"
+	save()
+
+func clear_pending_story() -> void:
+	pending_story = ""
+	pending_thread = ""
+	pending_encounter = ""
+
+func true_ending_ready() -> bool:
+	return bool(get_flag("ending_break", false)) \
+		and bool(get_flag("has_hidden_bell", false)) \
+		and all_bonds_maxed()
 
 func add_inheritance(inheritance_id: String) -> void:
 	if inheritance_id == "":

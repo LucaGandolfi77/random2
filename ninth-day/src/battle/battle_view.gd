@@ -48,7 +48,9 @@ func _ready() -> void:
 		_resumed = BattleStore.load_into(sim)
 	if not _resumed:
 		_encounter = &"full"
-		if RunState.pending_phase != "":
+		if RunState.pending_encounter != "":
+			_encounter = StringName(RunState.pending_encounter)
+		elif RunState.pending_phase != "":
 			_encounter = RunState.encounter_for_phase(RunState.pending_phase)
 		sim.start(424242, _encounter)
 		sim.apply_modifiers(RunState.battle_modifiers())
@@ -85,6 +87,10 @@ func _build_ui() -> void:
 
 	if RunState.pending_phase != "":
 		_context_label = _label("DAY %d · %s" % [RunState.day, RunState.pending_phase.to_upper()], 10, BRASS)
+		root.add_child(_context_label)
+	elif RunState.pending_thread != "":
+		var thread_name := String(RunState.side_thread_data(RunState.pending_thread).get("name", "Side thread"))
+		_context_label = _label("QUIET THREAD · " + thread_name.to_upper(), 10, BRASS)
 		root.add_child(_context_label)
 
 	root.add_child(_separator())
@@ -231,7 +237,10 @@ func _refresh() -> void:
 		else:
 			_result_label.text = "VICTORY — the song breaks."
 		_result_label.add_theme_color_override("font_color", BELL)
-		_result_button.text = "BELL REST  ›"
+		if RunState.pending_thread != "":
+			_result_button.text = "RETURN TO THE BELL MAP  ›"
+		else:
+			_result_button.text = "BELL REST  ›"
 	elif sim.phase == "defeat":
 		_result_label.text = "DEFEAT — the Bell catches you."
 		_result_label.add_theme_color_override("font_color", DANGER)
@@ -240,7 +249,10 @@ func _refresh() -> void:
 	if _persist:
 		if sim.is_finished():
 			BattleStore.delete()
-			RunState.current_screen = "bell_rest" if sim.phase == "victory" else "map"
+			if sim.phase == "victory" and RunState.pending_thread != "":
+				RunState.current_screen = "map"
+			else:
+				RunState.current_screen = "bell_rest" if sim.phase == "victory" else "map"
 			RunState.save()
 		elif sim.is_player_turn():
 			BattleStore.save(sim)
@@ -484,9 +496,15 @@ func _on_restart_pressed() -> void:
 
 func _on_result_pressed() -> void:
 	if sim.phase == "victory":
+		if RunState.pending_thread != "":
+			RunState.complete_side_thread(RunState.pending_thread)
+			get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
+			return
 		RunState.save()
 		get_tree().change_scene_to_file("res://src/screens/bell_rest.tscn")
 	else:
+		RunState.clear_pending_story()
+		RunState.save()
 		get_tree().change_scene_to_file("res://src/screens/bell_map.tscn")
 
 func _find_enemy(enemy_id: StringName) -> BattleActor:
