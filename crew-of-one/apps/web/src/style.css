@@ -394,6 +394,18 @@ body {
   letter-spacing: 0.04em;
 }
 
+.menu-foot__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.link-button--install {
+  color: #8ac926;
+}
+
 .link-button {
   background: none;
   border: none;

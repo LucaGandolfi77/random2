@@ -10,6 +10,7 @@ import {
   type SaveData,
 } from './progress';
 import { PrototypeAudio } from './audio';
+import { initInstallPrompt, promptInstall, shareText } from './pwa';
 import {
   fetchDailyConfig,
   fetchLeaderboard,
@@ -109,6 +110,7 @@ class PrototypeScene extends Phaser.Scene {
   private lastDoors: Record<string, boolean> = {};
   private lastLevers: Record<string, boolean> = {};
   private lastGemHolder = 'world';
+  private lastShare: string | null = null;
 
   constructor() {
     super('prototype');
@@ -228,10 +230,13 @@ class PrototypeScene extends Phaser.Scene {
       onRefreshLeaderboard: () => void this.loadLeaderboard(),
       onCloseLeaderboard: () => this.ui.hideLeaderboard(),
       onSaveNickname: (nickname) => void this.updateNickname(nickname),
+      onInstall: () => void this.handleInstall(),
+      onShare: () => void this.handleShare(),
       onResetProgress: () => this.handleResetProgress(),
     });
 
     this.ui.setSoundMuted(this.audio.isMuted());
+    initInstallPrompt((mode) => this.ui.setInstallAvailable(mode));
     keyboard.on('keydown', () => this.audio.unlock());
     this.openMenu();
     this.render();
@@ -471,6 +476,7 @@ class PrototypeScene extends Phaser.Scene {
     this.lastDoors = {};
     this.lastLevers = {};
     this.lastGemHolder = 'world';
+    this.lastShare = null;
   }
 
   private startDaily(): void {
@@ -534,6 +540,25 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
     await this.loadLeaderboard();
+  }
+
+  private async handleInstall(): Promise<void> {
+    const result = await promptInstall();
+    if (result === 'unavailable') {
+      this.ui.showHint('Use your browser menu to install Crew of One.');
+    }
+  }
+
+  private async handleShare(): Promise<void> {
+    const text =
+      this.lastShare ??
+      'The crew is you. Ten vaults, one time loop, and a daily heist.';
+    const outcome = await shareText(text, window.location.href);
+    if (outcome === 'copied') {
+      this.ui.showHint('Run copied to the clipboard.');
+    } else if (outcome === 'unavailable') {
+      this.ui.showHint('Sharing is unavailable in this browser.');
+    }
   }
 
   private startVault(index: number): void {
@@ -604,6 +629,11 @@ class PrototypeScene extends Phaser.Scene {
     const resultToken = ++this.resultToken;
     const timeMs = this.sim.state.timeMs;
     const echoes = this.sim.state.tracks.length;
+    const shareTime = (timeMs / 1000).toFixed(2);
+    this.lastShare =
+      this.isDaily && this.daily
+        ? `I cleared today's ${this.daily.baseVault.name} daily (${this.daily.modifier.name}) in ${shareTime}s with ${echoes} echoes.`
+        : `I cleared ${this.vault.name} in ${shareTime}s with ${echoes} echoes. The crew was me.`;
     const record = recordResult(
       this.progress,
       this.vault.id,
@@ -649,6 +679,9 @@ class PrototypeScene extends Phaser.Scene {
 
     if (resultToken !== this.resultToken) return;
     if (response?.ok) {
+      if (this.lastShare) {
+        this.lastShare += ` Rank #${response.rank ?? '—'} on today's board.`;
+      }
       this.ui.setResultNote(
         `VERIFIED · RANK #${response.rank ?? '—'} OF TODAY'S CREW`,
       );

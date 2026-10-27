@@ -51,6 +51,8 @@ type Callbacks = {
   onRefreshLeaderboard: () => void;
   onCloseLeaderboard: () => void;
   onSaveNickname: (nickname: string) => void;
+  onInstall: () => void;
+  onShare: () => void;
   onResetProgress: () => void;
 };
 
@@ -86,6 +88,7 @@ export class MetaUI {
   private readonly topbar: HTMLElement;
   private readonly menuButton: HTMLButtonElement;
   private readonly previewButton: HTMLButtonElement;
+  private readonly installButton: HTMLButtonElement;
   private readonly soundButton: HTMLButtonElement;
   private previewAvailable = false;
   private previewActive = false;
@@ -150,13 +153,19 @@ export class MetaUI {
     menuInner.appendChild(this.grid);
 
     const foot = el('div', 'menu-foot');
+    const footActions = el('div', 'menu-foot__actions');
+    this.installButton = el('button', 'link-button link-button--install', 'INSTALL APP');
+    this.installButton.type = 'button';
+    this.installButton.hidden = true;
+    this.installButton.addEventListener('click', () => this.callbacks.onInstall());
     const resetButton = el('button', 'link-button', 'RESET PROGRESS');
     resetButton.type = 'button';
     resetButton.addEventListener('click', () => {
       this.callbacks.onResetProgress();
     });
+    footActions.append(this.installButton, resetButton);
     foot.appendChild(el('span', 'menu-foot__hint', 'Select a heist. Record a run. Rewind.'));
-    foot.appendChild(resetButton);
+    foot.appendChild(footActions);
     menuInner.appendChild(foot);
 
     this.result = el('div', 'screen screen--result');
@@ -184,10 +193,13 @@ export class MetaUI {
     const replayButton = el('button', 'action-button', 'RUN AGAIN');
     replayButton.type = 'button';
     replayButton.addEventListener('click', () => this.callbacks.onReplay());
+    const shareButton = el('button', 'action-button action-button--quiet', 'SHARE RUN');
+    shareButton.type = 'button';
+    shareButton.addEventListener('click', () => this.callbacks.onShare());
     const menuButton = el('button', 'action-button action-button--quiet', 'LEVEL SELECT');
     menuButton.type = 'button';
     menuButton.addEventListener('click', () => this.callbacks.onMenu());
-    actions.append(this.nextButton, replayButton, menuButton);
+    actions.append(this.nextButton, replayButton, shareButton, menuButton);
     resultCard.appendChild(actions);
 
     this.hint = el('div', 'hint-toast');
@@ -255,6 +267,11 @@ export class MetaUI {
   setSoundMuted(muted: boolean): void {
     this.soundButton.textContent = muted ? '♪ OFF' : '♪ ON';
     this.soundButton.classList.toggle('ui-chip-button--active', !muted);
+  }
+
+  setInstallAvailable(mode: 'native' | 'ios' | 'none'): void {
+    this.installButton.hidden = mode === 'none';
+    this.installButton.textContent = mode === 'ios' ? 'ADD TO HOME' : 'INSTALL APP';
   }
 
   setPreviewState(available: boolean, active: boolean): void {
