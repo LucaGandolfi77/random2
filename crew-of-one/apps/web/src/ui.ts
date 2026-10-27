@@ -159,7 +159,7 @@ export class MetaUI {
     this.dailySlot = el('div', 'daily-slot');
     menuInner.appendChild(this.dailySlot);
 
-    this.grid = el('div', 'vault-grid');
+    this.grid = el('div', 'vault-sections');
     menuInner.appendChild(this.grid);
 
     const foot = el('div', 'menu-foot');
@@ -552,52 +552,80 @@ export class MetaUI {
       el('span', 'menu-summary__stat', `${ids.length} VAULTS`),
     );
 
-    const cards = vaults.map((vault, index) => {
-      const unlocked = isVaultUnlocked(index, ids, progress);
-      const record = progress.vaults[vault.id];
-      const button = el('button', `vault-card${unlocked ? '' : ' vault-card--locked'}`);
-      button.type = 'button';
-      button.disabled = !unlocked;
-      button.setAttribute(
-        'aria-label',
-        unlocked
-          ? `Start ${vault.name}, par ${vault.parEchoes} echoes`
-          : `${vault.name} is locked`,
-      );
+    const chapterNames: Record<number, string> = {
+      1: 'THE PROLOGUE',
+      2: 'THE CREW',
+      3: 'AFTER YOU',
+    };
+    const groups = new Map<number, VaultDef[]>();
+    for (const vault of vaults) {
+      const group = groups.get(vault.chapter) ?? [];
+      group.push(vault);
+      groups.set(vault.chapter, group);
+    }
 
-      const number = el('span', 'vault-card__num', String(index + 1).padStart(2, '0'));
-      const info = el('span', 'vault-card__info');
-      info.appendChild(el('span', 'vault-card__name', vault.name));
-      info.appendChild(
+    const sections = [...groups.entries()].map(([chapter, group]) => {
+      const section = el('section', 'vault-chapter');
+      section.appendChild(
         el(
-          'span',
-          'vault-card__sub',
-          unlocked
-            ? `CHAPTER ${vault.chapter} · PAR ${vault.parEchoes} ECHO${vault.parEchoes === 1 ? '' : 'ES'}`
-            : 'LOCKED · CLEAR THE PREVIOUS HEIST',
+          'div',
+          'vault-chapter__title',
+          `CHAPTER ${chapter} · ${chapterNames[chapter] ?? 'VAULTS'}`,
         ),
       );
+      const grid = el('div', 'vault-grid');
 
-      const best = el('span', 'vault-card__best');
-      if (!unlocked) {
-        best.appendChild(el('span', 'vault-card__lock', '🔒'));
-      } else if (record?.completed) {
-        best.appendChild(
-          el('span', `rank rank--${record.bestRank}`, record.bestRank),
+      for (const vault of group) {
+        const index = vaults.indexOf(vault);
+        const unlocked = isVaultUnlocked(index, ids, progress);
+        const record = progress.vaults[vault.id];
+        const button = el('button', `vault-card${unlocked ? '' : ' vault-card--locked'}`);
+        button.type = 'button';
+        button.disabled = !unlocked;
+        button.setAttribute(
+          'aria-label',
+          unlocked
+            ? `Start ${vault.name}, par ${vault.parEchoes} echoes`
+            : `${vault.name} is locked`,
         );
-        best.appendChild(el('span', 'vault-card__time', formatTime(record.bestTimeMs)));
-      } else {
-        best.appendChild(el('span', 'vault-card__new', 'NEW'));
+
+        const number = el('span', 'vault-card__num', String(index + 1).padStart(2, '0'));
+        const info = el('span', 'vault-card__info');
+        info.appendChild(el('span', 'vault-card__name', vault.name));
+        info.appendChild(
+          el(
+            'span',
+            'vault-card__sub',
+            unlocked
+              ? `CHAPTER ${vault.chapter} · PAR ${vault.parEchoes} ECHO${vault.parEchoes === 1 ? '' : 'ES'}`
+              : 'LOCKED · CLEAR THE PREVIOUS HEIST',
+          ),
+        );
+
+        const best = el('span', 'vault-card__best');
+        if (!unlocked) {
+          best.appendChild(el('span', 'vault-card__lock', '🔒'));
+        } else if (record?.completed) {
+          best.appendChild(
+            el('span', `rank rank--${record.bestRank}`, record.bestRank),
+          );
+          best.appendChild(el('span', 'vault-card__time', formatTime(record.bestTimeMs)));
+        } else {
+          best.appendChild(el('span', 'vault-card__new', 'NEW'));
+        }
+
+        button.append(number, info, best);
+        button.addEventListener('click', () => {
+          if (!unlocked) return;
+          this.callbacks.onStart(index);
+        });
+        grid.appendChild(button);
       }
 
-      button.append(number, info, best);
-      button.addEventListener('click', () => {
-        if (!unlocked) return;
-        this.callbacks.onStart(index);
-      });
-      return button;
+      section.appendChild(grid);
+      return section;
     });
 
-    this.grid.replaceChildren(...cards);
+    this.grid.replaceChildren(...sections);
   }
 }
