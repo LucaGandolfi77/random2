@@ -1,0 +1,131 @@
+export type Rank = 'S' | 'A' | 'B' | 'C';
+
+export type VaultProgress = {
+  completed: boolean;
+  bestTimeMs: number;
+  bestEchoes: number;
+  bestRank: Rank;
+  attempts: number;
+};
+
+export type SaveData = {
+  version: 1;
+  vaults: Record<string, VaultProgress>;
+};
+
+const STORAGE_KEY = 'crew-of-one:progress:v1';
+
+const emptySave = (): SaveData => ({ version: 1, vaults: {} });
+
+export const rankFor = (echoes: number, parEchoes: number): Rank => {
+  if (echoes <= parEchoes) return 'S';
+  if (echoes <= parEchoes + 1) return 'A';
+  if (echoes <= parEchoes + 2) return 'B';
+  return 'C';
+};
+
+const rankValue = (rank: Rank): number => ({ S: 0, A: 1, B: 2, C: 3 })[rank];
+
+const isVaultProgress = (value: unknown): value is VaultProgress => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<VaultProgress>;
+  return (
+    typeof candidate.completed === 'boolean' &&
+    typeof candidate.bestTimeMs === 'number' &&
+    typeof candidate.bestEchoes === 'number' &&
+    typeof candidate.bestRank === 'string' &&
+    typeof candidate.attempts === 'number'
+  );
+};
+
+export const loadProgress = (): SaveData => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return emptySave();
+    const parsed = JSON.parse(raw) as Partial<SaveData>;
+    if (parsed.version !== 1 || !parsed.vaults || typeof parsed.vaults !== 'object') {
+      return emptySave();
+    }
+    const vaults: Record<string, VaultProgress> = {};
+    for (const [id, value] of Object.entries(parsed.vaults)) {
+      if (isVaultProgress(value)) vaults[id] = value;
+    }
+    return { version: 1, vaults };
+  } catch {
+    return emptySave();
+  }
+};
+
+const persist = (data: SaveData): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // Storage can be unavailable in private mode; progress just stays in memory.
+  }
+};
+
+export type ResultRecord = {
+  rank: Rank;
+  isBest: boolean;
+  best: VaultProgress;
+};
+
+export const recordResult = (
+  data: SaveData,
+  vaultId: string,
+  timeMs: number,
+  echoes: number,
+  parEchoes: number,
+): ResultRecord => {
+  const rank = rankFor(echoes, parEchoes);
+  const previous = data.vaults[vaultId];
+  const isBetter =
+    !previous ||
+    !previous.completed ||
+    timeMs < previous.bestTimeMs ||
+    (timeMs === previous.bestTimeMs && echoes < previous.bestEchoes) ||
+    (timeMs === previous.bestTimeMs &&
+      echoes === previous.bestEchoes &&
+      rankValue(rank) < rankValue(previous.bestRank));
+
+  const best: VaultProgress = isBetter
+    ? { completed: true, bestTimeMs: timeMs, bestEchoes: echoes, bestRank: rank, attempts: (previous?.attempts ?? 0) + 1 }
+    : { ...previous, attempts: previous.attempts + 1 };
+
+  data.vaults[vaultId] = best;
+  persist(data);
+  return { rank, isBest: isBetter, best };
+};
+
+export const recordAttempt = (data: SaveData, vaultId: string): void => {
+  const previous = data.vaults[vaultId];
+  const attempts = (previous?.attempts ?? 0) + 1;
+  data.vaults[vaultId] = previous
+    ? { ...previous, attempts }
+    : { completed: false, bestTimeMs: 0, bestEchoes: 0, bestRank: 'C', attempts };
+  persist(data);
+};
+
+export const resetProgress = (): SaveData => {
+  const data = emptySave();
+  persist(data);
+  return data;
+};
+
+export const isVaultUnlocked = (
+  index: number,
+  vaultIds: string[],
+  data: SaveData,
+): boolean => {
+  if (index <= 0) return true;
+  const previousId = vaultIds[index - 1];
+  if (!previousId) return false;
+  return data.vaults[previousId]?.completed === true;
+};
+
+export const formatTime = (ms: number): string => {
+  if (!Number.isFinite(ms) || ms <= 0) return '--';
+  return `${(ms / 1000).toFixed(2)}s`;
+};
+
+export const formatRank = (rank: Rank): string => rank;

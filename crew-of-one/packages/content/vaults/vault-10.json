@@ -1,0 +1,75 @@
+{
+  "id": "vault-10",
+  "name": "The Vault Door",
+  "chapter": 2,
+  "loopSeconds": 30,
+  "maxEchoes": 4,
+  "parEchoes": 3,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 160, "y": 448 },
+  "exit": { "x": 160, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 96, "y": 160, "w": 32, "h": 256 },
+    { "x": 192, "y": 160, "w": 32, "h": 256 },
+    { "x": 32, "y": 128, "w": 96, "h": 32 },
+    { "x": 192, "y": 128, "w": 96, "h": 32 }
+  ],
+  "plates": [
+    {
+      "id": "plate-left",
+      "x": 64,
+      "y": 256,
+      "radius": 24,
+      "mode": "hold",
+      "targets": ["door-vault"]
+    },
+    {
+      "id": "plate-right",
+      "x": 256,
+      "y": 256,
+      "radius": 24,
+      "mode": "hold",
+      "targets": ["door-vault"]
+    }
+  ],
+  "doors": [
+    { "id": "door-vault", "x": 128, "y": 128, "w": 64, "h": 32, "mode": "plate" }
+  ],
+  "guards": [],
+  "cameras": [
+    {
+      "id": "camera-vault",
+      "x": 160,
+      "y": 232,
+      "facing": 2,
+      "fovDeg": 80,
+      "range": 170,
+      "sweepDeg": 50,
+      "sweepMs": 2400,
+      "phaseMs": 0
+    }
+  ],
+  "levers": [
+    {
+      "id": "lever-camera",
+      "x": 64,
+      "y": 400,
+      "radius": 22,
+      "mode": "hold",
+      "targetIds": ["camera-vault"]
+    }
+  ],
+  "lasers": [],
+  "gem": { "x": 160, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "The vault door needs both plates. The camera needs the lever.",
+    "Three bodies, three jobs. Then the middle corridor is yours."
+  ]
+}

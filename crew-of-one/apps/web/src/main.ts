@@ -2,6 +2,15 @@ import Phaser from 'phaser';
 import { vaults } from '@crew-of-one/content';
 import { HeistSim } from '@crew-of-one/sim';
 import type { CameraState, GhostState, GuardState, LaserState, LeverState, SimInput, VaultDef } from '@crew-of-one/sim';
+import {
+  formatTime,
+  loadProgress,
+  recordAttempt,
+  recordResult,
+  resetProgress,
+  type SaveData,
+} from './progress';
+import { MetaUI } from './ui';
 import './style.css';
 
 const DESIGN_WIDTH = 360;
@@ -57,9 +66,12 @@ class PrototypeScene extends Phaser.Scene {
   private keySix!: Phaser.Input.Keyboard.Key;
   private keySeven!: Phaser.Input.Keyboard.Key;
   private keyEight!: Phaser.Input.Keyboard.Key;
+  private keyNine!: Phaser.Input.Keyboard.Key;
+  private keyZero!: Phaser.Input.Keyboard.Key;
   private keyShift!: Phaser.Input.Keyboard.Key;
   private keySpace!: Phaser.Input.Keyboard.Key;
   private keyBackspace!: Phaser.Input.Keyboard.Key;
+  private keyEscape!: Phaser.Input.Keyboard.Key;
   private accumulator = 0;
   private joystickPointerId: number | null = null;
   private joystickOrigin = { x: 0, y: 0 };
@@ -67,6 +79,14 @@ class PrototypeScene extends Phaser.Scene {
   private whistleRequested = false;
   private dashRequested = false;
   private playableVaults: VaultDef[] = [];
+  private progress: SaveData = { version: 1, vaults: {} };
+  private ui!: MetaUI;
+  private currentIndex = 0;
+  private paused = true;
+  private resultOpen = false;
+  private wonHandled = false;
+  private lastStatus: string = 'playing';
+  private failureStreak = 0;
 
   constructor() {
     super('prototype');
@@ -144,9 +164,12 @@ class PrototypeScene extends Phaser.Scene {
     this.keySix = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX);
     this.keySeven = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SEVEN);
     this.keyEight = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.EIGHT);
+    this.keyNine = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NINE);
+    this.keyZero = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ZERO);
     this.keyShift = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
     this.keySpace = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.keyBackspace = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE);
+    this.keyEscape = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
     this.input.addPointer(2);
     this.input.on('pointerdown', this.onPointerDown, this);
@@ -155,10 +178,36 @@ class PrototypeScene extends Phaser.Scene {
     this.input.on('pointerupoutside', this.onPointerUp, this);
 
     this.cameras.main.setBackgroundColor(COLORS.ink);
+
+    this.progress = loadProgress();
+    this.ui = new MetaUI({
+      onStart: (index) => this.startVault(index),
+      onReplay: () => this.startVault(this.currentIndex),
+      onNext: () => this.startVault(this.currentIndex + 1),
+      onMenu: () => this.openMenu(),
+      onToggleMenu: () => {
+        if (this.ui.isMenuOpen()) this.closeMenu();
+        else this.openMenu();
+      },
+      onResetProgress: () => this.handleResetProgress(),
+    });
+
+    this.openMenu();
     this.render();
   }
 
   override update(_time: number, delta: number): void {
+    if (Phaser.Input.Keyboard.JustDown(this.keyEscape)) {
+      if (this.ui.isMenuOpen()) this.closeMenu();
+      else this.openMenu();
+      return;
+    }
+
+    if (this.paused || this.resultOpen) {
+      this.render();
+      return;
+    }
+
     if (Phaser.Input.Keyboard.JustDown(this.keyR)) this.doRewind();
     if (Phaser.Input.Keyboard.JustDown(this.keyBackspace)) this.doReset();
     if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.whistleRequested = true;
@@ -174,9 +223,12 @@ class PrototypeScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.keySix)) this.loadVault(5);
     if (Phaser.Input.Keyboard.JustDown(this.keySeven)) this.loadVault(6);
     if (Phaser.Input.Keyboard.JustDown(this.keyEight)) this.loadVault(7);
+    if (Phaser.Input.Keyboard.JustDown(this.keyNine)) this.loadVault(8);
+    if (Phaser.Input.Keyboard.JustDown(this.keyZero)) this.loadVault(9);
 
     const status = this.sim.state.status;
     if (status === 'won' || status === 'alarm') {
+      this.checkRunEnd(status);
       this.render();
       return;
     }
@@ -190,11 +242,13 @@ class PrototypeScene extends Phaser.Scene {
       steps += 1;
 
       if (this.sim.state.status === 'timeout') {
+        this.noteFailure('timeout');
         this.doRewind();
         break;
       }
     }
 
+    this.checkRunEnd(this.sim.state.status);
     this.render();
   }
 
@@ -270,37 +324,137 @@ class PrototypeScene extends Phaser.Scene {
     const result = this.sim.rewind();
     if (!result.ok) {
       if (result.reason === 'max-echoes') {
+        this.noteFailure('max-echoes');
         this.sim.reset();
         this.cameras.main.flash(140, 230, 57, 70);
+        this.lastStatus = 'playing';
+        this.wonHandled = false;
       }
       return;
     }
     this.cameras.main.flash(120, 91, 192, 235);
     this.cameras.main.shake(90, 0.003);
     this.accumulator = 0;
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
   }
 
   private loadVault(index: number): void {
     const vault = this.playableVaults[index] ?? this.playableVaults[0];
     if (!vault) return;
+    this.currentIndex = this.playableVaults.indexOf(vault);
     this.vault = vault;
     this.sim = new HeistSim(vault);
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
     this.whistleRequested = false;
     this.dashRequested = false;
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
+    this.failureStreak = 0;
+  }
+
+  private startVault(index: number): void {
+    const vault = this.playableVaults[index];
+    if (!vault) return;
+    this.loadVault(index);
+    recordAttempt(this.progress, vault.id);
+    this.resultOpen = false;
+    this.paused = false;
+    this.ui.hideMenu();
+    this.ui.hideResult();
+    this.ui.setMenuButtonVisible(true);
+  }
+
+  private openMenu(): void {
+    this.paused = true;
+    this.resultOpen = false;
+    this.ui.hideResult();
+    this.ui.showMenu(this.playableVaults, this.progress);
+  }
+
+  private closeMenu(): void {
+    this.ui.hideMenu();
+    this.ui.setMenuButtonVisible(true);
+    this.paused = this.sim.state.status === 'won';
+    if (this.sim.state.status === 'won') {
+      this.openMenu();
+    }
+  }
+
+  private handleResetProgress(): void {
+    if (!window.confirm('Erase all best times and ranks?')) return;
+    this.progress = resetProgress();
+    this.ui.showMenu(this.playableVaults, this.progress);
+  }
+
+  private noteFailure(_reason: 'alarm' | 'timeout' | 'max-echoes'): void {
+    this.failureStreak += 1;
+    if (this.failureStreak === 2 && this.vault.hints[0]) {
+      this.ui.showHint(this.vault.hints[0]);
+    } else if (this.failureStreak === 4 && this.vault.hints[1]) {
+      this.ui.showHint(this.vault.hints[1]);
+    }
+  }
+
+  private checkRunEnd(status: string): void {
+    if (status === 'alarm' && this.lastStatus !== 'alarm') {
+      this.noteFailure('alarm');
+    }
+    if (status === 'won' && !this.wonHandled) {
+      this.wonHandled = true;
+      this.handleWin();
+    }
+    this.lastStatus = status;
+  }
+
+  private handleWin(): void {
+    const timeMs = this.sim.state.timeMs;
+    const echoes = this.sim.state.tracks.length;
+    const record = recordResult(
+      this.progress,
+      this.vault.id,
+      timeMs,
+      echoes,
+      this.vault.parEchoes,
+    );
+    this.resultOpen = true;
+    this.paused = true;
+    this.ui.setMenuButtonVisible(false);
+    const payload = {
+      vault: this.vault,
+      index: this.currentIndex,
+      timeMs,
+      echoes,
+      rank: record.rank,
+      isBest: record.isBest,
+      best: record.best,
+      hasNext: this.currentIndex < this.playableVaults.length - 1,
+    };
+    this.time.delayedCall(550, () => {
+      this.ui.showResult(payload, record.rank.toLowerCase());
+    });
   }
 
   private doUndo(): void {
     this.sim.undoEcho();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
   }
 
   private doReset(): void {
     this.sim.reset();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
+    this.failureStreak = 0;
+    this.resultOpen = false;
+    this.paused = false;
+    this.ui.hideResult();
+    this.ui.setMenuButtonVisible(true);
   }
 
   private inRect(pointer: Phaser.Input.Pointer, rect: { x: number; y: number; w: number; h: number }): boolean {
@@ -442,6 +596,8 @@ class PrototypeScene extends Phaser.Scene {
       );
     }
 
+    this.drawEchoTimeline(g);
+
     g.fillStyle(COLORS.ink, 1);
     g.fillRoundedRect(REWIND.x, REWIND.y, REWIND.w, REWIND.h, 8);
     g.lineStyle(1, COLORS.ghost, 0.8);
@@ -468,8 +624,11 @@ class PrototypeScene extends Phaser.Scene {
 
     const remaining = Math.max(0, state.loopMs - state.timeMs) / 1000;
     this.hudText.setText(`${remaining.toFixed(1)}s   ${state.status.toUpperCase()}`);
+    const tapeSummary = state.tracks
+      .map((track) => `${(track.durationMs / 1000).toFixed(1)}s`)
+      .join(' + ');
     this.echoText.setText(
-      `ECHOES ${state.tracks.length}/${state.maxEchoes}   PAR ${this.vault.parEchoes}   ${this.vault.name.toUpperCase()}`,
+      `ECHOES ${state.tracks.length}/${state.maxEchoes}   PAR ${this.vault.parEchoes}   ${this.vault.name.toUpperCase()}${tapeSummary ? `   ${tapeSummary}` : ''}`,
     );
     this.statusText.setText(
       state.status === 'won'
@@ -483,12 +642,38 @@ class PrototypeScene extends Phaser.Scene {
     this.helpText.setText(
       state.status === 'won'
         ? 'THE CREW WAS YOU'
-        : 'DRAG · ACT · DASH · REWIND · UNDO · 1-8',
+        : 'DRAG · ACT · DASH · REWIND · UNDO · 1-0',
     );
     this.rewindText.setColor(state.status === 'won' ? '#3A506B' : '#F4F1DE');
     this.whistleText.setColor(state.status === 'won' || state.status === 'alarm' ? '#3A506B' : '#F4F1DE');
     this.dashText.setColor(state.status === 'won' || state.status === 'alarm' ? '#3A506B' : '#F4F1DE');
     this.undoText.setColor(state.tracks.length === 0 ? '#3A506B' : '#F4F1DE');
+  }
+
+  private drawEchoTimeline(g: Phaser.GameObjects.Graphics): void {
+    const state = this.sim.state;
+    const x = 24;
+    const y = 54;
+    const width = 312;
+
+    g.fillStyle(COLORS.slate, 0.35);
+    g.fillRect(x, y, width, 4);
+    g.lineStyle(1, COLORS.slate, 0.25);
+    g.strokeRect(x - 0.5, y - 0.5, width + 1, 5);
+
+    if (state.loopMs <= 0) return;
+    let cursor = 0;
+    for (const track of state.tracks) {
+      const segment = Math.max(2, (track.durationMs / state.loopMs) * width);
+      g.fillStyle(track.color, 0.9);
+      g.fillRect(x + cursor, y, Math.min(segment, width - cursor), 4);
+      cursor += segment;
+      if (cursor >= width) break;
+    }
+
+    const progress = Math.min(1, state.timeMs / state.loopMs);
+    g.fillStyle(COLORS.bone, 0.85);
+    g.fillRect(x + progress * width - 1, y - 3, 2, 10);
   }
 
   private drawGemShape(g: Phaser.GameObjects.Graphics, x: number, y: number, size: number): void {

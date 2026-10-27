@@ -6,9 +6,12 @@
 - Guard AI: patrol paths, vision cones with line-of-sight, suspicion, alarms, noise investigation, echo following, and confused pauses.
 - Whistle/noise events recorded into echo tapes and replayed by ghosts.
 - Headless replay validator (`replayTracks`) used by tests and the Worker.
-- Solution-tape pipeline: `vault-01` through `vault-08` ship with verified tapes, checked by CI and `pnpm validate:vaults`.
-- Vault content: “The Gallery” (plate/door), “The Night Watch” (guard/echo decoy), “Two Hands” (two plates, two echoes), “The Whistle” (echo whistles to pull a guard off his post), “The Archive” (camera + hold lever), “Red Lines” (dash through timed lasers), “The Long Way” (one-way gate), and “The Handoff” (gem carry with two plate echoes).
-- Phaser rectangle prototype: drag to move, E/WHISTLE, R/REWIND, U/UNDO, Backspace/RESET, 1–8 for the vaults.
+- Solution-tape pipeline: `vault-01` through `vault-10` ship with verified tapes, checked by CI and `pnpm validate:vaults`.
+- Vault content: “The Gallery” (plate/door), “The Night Watch” (guard/echo decoy), “Two Hands” (two plates, two echoes), “The Whistle” (echo whistles to pull a guard off his post), “The Archive” (camera + hold lever), “Red Lines” (dash through timed lasers), “The Long Way” (one-way gate), “The Handoff” (gem carry with two plate echoes), “Double Watch” (two guards, two baits), and “The Vault Door” (two plates + camera lever finale).
+- Phaser rectangle prototype: drag to move, E/ACT, Shift or Space/DASH, R/REWIND, U/UNDO, Backspace/RESET, 1–0 for the vaults.
+- Meta shell: level select with chapter cards, sequential unlock, localStorage best time/rank, results screen, hint toast after failed loops, and an in-HUD echo timeline.
+- Rank rule: S at par echoes, A at par + 1, B at par + 2, C beyond. Best run is the fastest time, then the fewest echoes.
+- Echo timeline: each recorded echo is a colored segment proportional to its tape length, with a moving playhead for the current run.
 - PWA manifest/service worker via `vite-plugin-pwa`.
 - Cloudflare Worker scaffold: daily, run submission, leaderboard, player nickname, unlock, Lemon Squeezy webhook.
 - D1 schema.
@@ -32,14 +35,16 @@ The guard sandbox and “The Night Watch” prove the second: a guard who sees a
 
 “The Handoff” proves the eighth: two echoes hold two plates, and the player carries the gem through both doors to the exit. Gem pickup/drop and gem-aware replay validation are in.
 
+“Double Watch” proves the ninth: two guards watch the same corridor from different posts. Two echoes pull them away, then the player follows the gap. The recording shows that an echo tape is also a distraction timer.
+
+“The Vault Door” proves the tenth: two plates open a vault door while a third echo holds the camera lever. It is the first three-job finale and the end of chapter 2.
+
 ## Next implementation tasks
 
-1. Add a real echo timeline and a “ghost preview” playback.
-2. Add dash and laser mechanics.
-3. Author vault 9 (“Double Watch”) with two guards.
-4. Author vault 10 (“The Vault Door”) as a chapter finale.
-5. Add the echo timeline / ghost preview.
-6. Replace rectangle rendering with the pixel-art kit once the fun gate passes.
-7. Wire the web app to the Worker for daily/leaderboard.
-8. Add the in-game store + entitlement flow.
-9. Add PWA install prompt, offline test, and share card.
+1. Add guard simulation to `replayTracks` so guard-critical vaults (2, 4, 9) are validated server-side.
+2. Add a ghost-preview playback: play the whole crew choreography at 2× without the player.
+3. Replace rectangle rendering with the pixel-art kit for one vault (vertical slice).
+4. Wire the web app to the Worker for daily/leaderboard.
+5. Add challenge modifiers to the daily heist.
+6. Add the in-game store + entitlement flow.
+7. Add PWA install prompt, offline test, and share card.
