@@ -41,9 +41,11 @@ The game runs:
 - Bell Rest offers three Inheritance cards per phase and equips the one you take.
 - Progress, choices, and equipped memories autosave and resume.
 - **Quiet threads** add six optional bond scenes, two elite battles, and six more Inheritances. They unlock the day after their anchor day and persist across loops.
+- **The Journal** records a line for every phase and quiet thread, tracks bond ranks, lists carried memories, and unlocks lore entries as Cael learns the city's history. It is reachable from the title and the Bell Map.
+- **Skip-read** fast-forwards only prose already seen before the current scene, stopping for new Echo lines, choices, and closing cards.
 - **Cycles carry forward.** Starting the next cycle keeps bonds, memories, the loadout, quiet threads, and seen lines. Day choices and ending postures reset. **Start fresh** wipes everything.
 - **Echo dialogue** adds second-loop variants to Day 1 and the Day 9 ending, plus an Echo banner in later cycles.
-- The Bell Map shows bond ranks, thread status, and the true-ending conditions.
+- The Bell Map shows bond ranks, thread status, and the true-ending conditions; the title shows a **Previously** recap.
 
 ### Endings
 
@@ -105,7 +107,7 @@ GODOT_BIN=/path/to/godot ./ninth-day/tools/run_tests.sh
 Two suites run headlessly:
 
 1. **Battle suite** — deterministic simulation, Echo rules, tones, Resonance, Chord, encounters, previews, save/restore, and inheritances.
-2. **Flow suite** — boots the real screens and drives the entire `title → map → Ink story → battle → Bell Rest → quiet thread → ending → next cycle` loop across all twenty-seven main phases, six optional threads, and four endings, including tag parsing, choice flags, day advancement, scripted retreats, the Day 6 alliance-dependent boss, the Day 7 no-combat mercy route, both boss phase changes, cycle carryover, Echo dialogue, and the true-ending resolver.
+2. **Flow suite** — boots the real screens and drives the entire `title → map → Ink story → battle → Bell Rest → quiet thread → Journal → ending → next cycle` loop across all twenty-seven main phases, six optional threads, and four endings, including tag parsing, choice flags, day advancement, scripted retreats, the Day 6 alliance-dependent boss, the Day 7 no-combat mercy route, both boss phase changes, cycle carryover, Echo dialogue, skip-read, Journal unlocks, and the true-ending resolver.
 
 ## Controls
 
@@ -157,6 +159,7 @@ ninth-day/
     ink/side_threads.ink         # six optional quiet-thread scenes
     ink/side_threads.ink.json    # compiled optional scenes
     inheritances.json            # Bell Rest cards and modifiers
+    journal.json                 # recap lines, thread entries, and lore
   docs/
     GDD.md
     TECH_SPEC.md
@@ -165,6 +168,7 @@ ninth-day/
     core/run_state.gd            # meta save: day, phases, flags, bonds, cards
     narrative/story_service.gd   # InkPlayer adapter and tag/flag bridge
     progression/inheritance_db.gd
+    progression/journal_db.gd    # recap, thread, and lore content
     battle/
       battle_types.gd            # enums and tone rules
       battle_actor.gd            # actor state
@@ -178,6 +182,7 @@ ninth-day/
       title.gd/.tscn
       bell_map.gd/.tscn
       story_view.gd/.tscn
+      journal_view.gd/.tscn
       bell_rest.gd/.tscn
       ending_view.gd/.tscn
     ui/
@@ -219,8 +224,8 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 
 ## Known limitations
 
-- The nine-day main story and six quiet threads are complete; the remaining optional phases and knowledge-gated variants from the GDD are not authored.
-- The Bell Map now shows bond ranks and true-ending conditions, but there is no dedicated journal or hint scene yet.
+- The nine-day main story and six quiet threads are complete; the remaining optional phases and knowledge-gated Bell Map variants from the GDD are not authored.
+- The Journal is a one-screen recap, not yet a searchable archive with per-line history.
 - Echo dialogue currently covers Day 1 and the Day 9 ending only.
 - Ink state is not saved mid-scene; quitting during a story phase returns to the Bell Map (quiet threads likewise restart).
 - Art is typographic greybox: no portraits, backgrounds, music, SFX, or haptics yet.
@@ -234,8 +239,8 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 
 1. Add the remaining optional phases and knowledge-gated Bell Map variants.
 2. Add party swap, items, and the speed timeline.
-3. Persist mid-scene Ink state and add skip-read support.
-4. Extend Echo variants to more scenes and let seen lines skip.
+3. Persist mid-scene Ink state and add per-line journal history/search.
+4. Extend Echo variants to more scenes and add replay modifiers.
 5. Art pass: portraits, paper/brass UI, tone VFX, sound, haptics.
 6. Run the debug APK on physical Android hardware and complete the safe-area/touch audit.
 7. iOS export and store integrations.

@@ -1,0 +1,239 @@
+{
+	"phases": {
+		"1:morning": {
+			"title": "The Crack",
+			"line": "Mara took my hand. The Bell cracked at noon anyway.",
+			"detail": "The Hollow Choir came to finish the crack. I put it down with an iron rod and a memory I did not have yet."
+		},
+		"1:afternoon": {
+			"title": "Ember Row",
+			"line": "The Ashwright fell. Ember Row smells of burnt sugar and iron.",
+			"detail": "The foundry heat did not stop us. Mara fought like the day had already happened."
+		},
+		"1:night": {
+			"title": "What the Bell Keeps",
+			"line": "I kept the warmth of the room. It will not survive the reset. I will.",
+			"detail": "Inheritances are the only things the Bell cannot take back."
+		},
+		"2:morning": {
+			"title": "The Checkpoint",
+			"line": "The Watch let us through on a lie and a ledger.",
+			"detail": "Iven knows the gate better than the people guarding it."
+		},
+		"2:afternoon": {
+			"title": "The Watch Hound",
+			"line": "The Hound is dead. Iven did not look away.",
+			"detail": "The Watch trains its dogs to remember a scent across loops. It did not help it."
+		},
+		"2:night": {
+			"title": "A Debt Paid",
+			"line": "Elias is alive. The Watch will come for him before dawn.",
+			"detail": "A ledger can be a life. I decided whose."
+		},
+		"3:morning": {
+			"title": "Descent",
+			"line": "The counterweight hall is open. Iven trusts me with a lock.",
+			"detail": "Below the city, the Bellows are still moving. Nothing in Aurel ever fully stops."
+		},
+		"3:afternoon": {
+			"title": "The Counterweights",
+			"line": "The Bellows fell. The Ashwright was waiting at the bottom.",
+			"detail": "The Choir sang the chains loose. We cut what was left."
+		},
+		"3:night": {
+			"title": "The Choir's Offer",
+			"line": "The Choir offered to take the memory. I said no.",
+			"detail": "Some things must be carried, even when carrying them is the wound."
+		},
+		"4:morning": {
+			"title": "Saint Orra",
+			"line": "Oria blessed me in the garden. The roses were already fading.",
+			"detail": "The garden remembers the dead first. Oria has learned to work around it."
+		},
+		"4:afternoon": {
+			"title": "The Clockwork Saint",
+			"line": "The Clockwork Saint withdrew. Its bell heart was still ringing.",
+			"detail": "It was not trying to kill us. It was trying to finish a procession older than the Watch."
+		},
+		"4:night": {
+			"title": "The First Wren",
+			"line": "Wren is counting on the roof. She remembers more than she says.",
+			"detail": "There was a Wren before this one. The name is older than the woman."
+		},
+		"5:morning": {
+			"title": "Wren's House",
+			"line": "Wren's house. Toma drew a door that was not there.",
+			"detail": "He draws what he is afraid to say. The door looked like the one under the Spire."
+		},
+		"5:afternoon": {
+			"title": "The Hollow Bellkeeper",
+			"line": "The Hollow Bellkeeper wore my face. I broke it.",
+			"detail": "It rang a bell that was not there. I still heard it."
+		},
+		"5:night": {
+			"title": "The First Crack",
+			"line": "The first Bellkeeper is alive. Her name is Orra Vane.",
+			"detail": "She has been in the Quiet since before the Watch had a name for it."
+		},
+		"6:morning": {
+			"title": "The Coup",
+			"line": "Sera moved against the Watch. I chose a side.",
+			"detail": "The city did not become safer. It became honest about who was holding the gate."
+		},
+		"6:afternoon": {
+			"title": "The Watch Closes",
+			"line": "The street chose its side. So did I.",
+			"detail": "Whoever held the checkpoint, the cost was paid by the same people."
+		},
+		"6:night": {
+			"title": "The Hollowed",
+			"line": "One of us was hollowed. We brought them back.",
+			"detail": "The Choir takes the shape of a person and leaves the rest. We did not let it keep anyone."
+		},
+		"7:morning": {
+			"title": "Vey's Sanctuary",
+			"line": "Vey's sanctuary. The Quiet is closer than the Watch admits.",
+			"detail": "Vey has been keeping the door shut from the inside for longer than anyone knows."
+		},
+		"7:afternoon": {
+			"title": "The Offer",
+			"line": "Vey offered mercy. The Saint of Ash offered a fight. I chose.",
+			"detail": "The Saint is made of every memory Vey took. Mercy is not the same as forgetting."
+		},
+		"7:night": {
+			"title": "What Mercy Costs",
+			"line": "Mercy cost more than the fight.",
+			"detail": "The Quiet does not go away because someone forgives it. It only stops being fed."
+		},
+		"8:morning": {
+			"title": "The Ascent",
+			"line": "The Spire stair. I carried a district with me.",
+			"detail": "Every district remembers a different Bell. I chose which one would climb."
+		},
+		"8:afternoon": {
+			"title": "The Unbound Saint",
+			"line": "The Unbound Saint opened. The Bell was inside.",
+			"detail": "It was not guarding the Bell. It was trying to become it."
+		},
+		"8:night": {
+			"title": "The Ninth Day",
+			"line": "I chose what to do with the Bell. The ninth day will decide whether I meant it.",
+			"detail": "Ring it. Break it. Become it. Every choice is a different kind of grief."
+		},
+		"9:morning": {
+			"title": "The Last Morning",
+			"line": "The last morning. Wren gave me the hidden bell.",
+			"detail": "It is small enough to hold. It remembers the city before the loop."
+		},
+		"9:afternoon": {
+			"title": "The Quiet",
+			"line": "The Quiet was Orra Vane. She wanted one more day.",
+			"detail": "The first Bellkeeper did not fall. She stayed."
+		},
+		"9:night": {
+			"title": "The Ninth Day",
+			"line": "The cycle ended. Aurel will remember or it will not.",
+			"detail": "Either way, the Bell is quiet now."
+		}
+	},
+	"threads": {
+		"mara": {
+			"title": "The Second Batch",
+			"line": "Mara burned the first loaf on purpose. The second one was for me."
+		},
+		"iven": {
+			"title": "The Small Debts",
+			"line": "I read the names Iven let go. The Choir answered every one."
+		},
+		"wren": {
+			"title": "Counting the Living",
+			"line": "Wren counts lit windows now. The number keeps going up."
+		},
+		"oria": {
+			"title": "What the Roses Keep",
+			"line": "Oria cut a living rose and gave it to me. It did not wilt."
+		},
+		"toma": {
+			"title": "The Page After",
+			"line": "Toma wrote tomorrow and did not cross it out."
+		},
+		"vey": {
+			"title": "The Door Left Open",
+			"line": "Vey left the inner door open. The dark did not follow."
+		}
+	},
+	"glossary": [
+		{
+			"id": "bell",
+			"title": "The Bell",
+			"body": "The brass instrument at the top of the Spire. It rings at noon. When it rings, the day begins again. It is not a god. It is a machine that Aurel built around its own grief.",
+			"always": true
+		},
+		{
+			"id": "inheritances",
+			"title": "Inheritances",
+			"body": "Memories that survive the Bell. Stat, skill, or bond. Six can be carried at once. The rest wait in the archive.",
+			"requires": {"completed": "1:night"}
+		},
+		{
+			"id": "hollow_choir",
+			"title": "The Hollow Choir",
+			"body": "A hymn with no congregation. It takes the shape of a person and sings the rest away. It is not evil. It is hungry.",
+			"requires": {"completed": "1:morning"}
+		},
+		{
+			"id": "ashwright",
+			"title": "The Ashwright",
+			"body": "The foundry's keeper. It reforges what the city throws away, including people. Its hammer is still warm on Ember Row.",
+			"requires": {"completed": "1:afternoon"}
+		},
+		{
+			"id": "watch",
+			"title": "The Watch",
+			"body": "The city's gatekeepers. They believe order is the only thing standing between Aurel and the Quiet. They are not entirely wrong.",
+			"requires": {"completed": "2:morning"}
+		},
+		{
+			"id": "first_bellkeeper",
+			"title": "The First Bellkeeper",
+			"body": "Orra Vane. She rang the Bell first and has been paying for it since. Wren's mother. Sera's aunt. The Quiet.",
+			"requires": {"completed": "5:night"}
+		},
+		{
+			"id": "sera_vane",
+			"title": "Sera Vane",
+			"body": "Watch commander, then rebel, then whatever the city needs next. She does not ask to be forgiven.",
+			"requires": {"completed": "6:morning"}
+		},
+		{
+			"id": "vey",
+			"title": "Vey",
+			"body": "Keeper of the sanctuary. She takes memories the city cannot carry and keeps the door shut. Mercy is her oldest argument.",
+			"requires": {"completed": "7:morning"}
+		},
+		{
+			"id": "the_quiet",
+			"title": "The Quiet",
+			"body": "The silence between rings. It is made of every day the city refused to let go. It wears the first Bellkeeper's hands.",
+			"requires": {"any_completed": ["5:night", "7:morning", "9:afternoon"]}
+		},
+		{
+			"id": "hidden_bell",
+			"title": "The Hidden Bell",
+			"body": "Wren's small bell. It remembers Aurel before the loop. It is the only thing in the city that can answer the true ending.",
+			"requires": {"flag": "has_hidden_bell"}
+		},
+		{
+			"id": "echoes",
+			"title": "Echoes",
+			"body": "What a later loop remembers about an earlier one. The Bell cannot take the shape of your knowledge, only the day.",
+			"requires": {"cycle_after": 1}
+		},
+		{
+			"id": "true_ending",
+			"title": "The Ninth Day",
+			"body": "Break the Bell, carry the hidden bell, and keep all six bonds. Aurel remembers every loop at once, then chooses what to carry.",
+			"requires": {"true_ending": true}
+		}
+	]
+}

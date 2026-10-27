@@ -42,6 +42,7 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 | Bell Rest cards | 132 |
 | Bell Rest confirm / skip | 48–54 |
 | Quiet-thread rows | 58 |
+| Journal tabs / back | 42–48 |
 
 ## Save behaviour to test
 
@@ -61,6 +62,8 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 14. Start the next cycle: bonds, memories, quiet threads, and the **Cycle 2** label survive; Day choices reset.
 15. Start fresh: the archive, bonds, and thread completion clear and the title returns to **Cycle 1**.
 16. Quit during a quiet thread: **Continue** returns to that thread; quit during its elite battle: **Continue** resumes the battle.
+17. Open the Journal from the title and the Bell Map: the recap, bonds, memories, and lore tabs all return to the correct screen.
+18. Replay a seen story scene: **Skip read** stops at new Echo lines and choices, never at prose seen in an earlier loop.
 
 ## Android export
 

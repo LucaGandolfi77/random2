@@ -79,6 +79,9 @@ func _run() -> void:
 	_assert(RunState.has_inheritance(offer), "the chosen memory enters the archive")
 	_assert(RunState.equipped.size() == 1, "the first memory is equipped automatically")
 	_assert(FileAccess.file_exists(RunState.SAVE_PATH), "the run state is persisted")
+	_assert(not JournalDB.phase_entry(1, "morning").is_empty(), "the Journal writes a line after a phase")
+	_assert(String(JournalDB.last_entry().get("title", "")) == "The Crack", "the Journal recap points at the last phase")
+	_assert(JournalDB.glossary().size() >= 2, "the first lore entries unlock from play")
 
 	# Afternoon: story, the Ashwright, and the inheritance bonus in battle.
 	map = get_tree().current_scene
@@ -745,6 +748,26 @@ func _run() -> void:
 	_assert(RunState.is_side_thread_complete("vey"), "winning the elite completes the thread")
 	_assert(RunState.has_inheritance("door_open"), "the elite thread leaves a memory")
 
+	# The Journal reads the run without changing it.
+	map = get_tree().current_scene
+	map._on_journal_pressed()
+	if not await _wait_for_scene("JournalView"):
+		return _finish()
+	var journal := get_tree().current_scene
+	_assert(journal.tab == "recap", "the Journal opens on the recap")
+	_assert(String(JournalDB.last_entry().get("title", "")) == "The Quiet", "the recap follows the latest phase")
+	journal._on_tab_pressed("bonds")
+	_assert(journal.tab == "bonds", "the Journal switches to bonds")
+	journal._on_tab_pressed("memories")
+	_assert(journal.tab == "memories", "the Journal switches to memories")
+	journal._on_tab_pressed("lore")
+	_assert(journal.tab == "lore", "the Journal switches to lore")
+	_assert(JournalDB.glossary().size() >= 8, "lore unlocks across the cycle")
+	journal._on_close_pressed()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.journal_return == "map", "the Journal returns to where it was opened")
+
 	# Day 9 night: the ending posture resolves the cycle.
 	map = get_tree().current_scene
 	map._on_phase_pressed("night")
@@ -782,6 +805,30 @@ func _run() -> void:
 	_assert(RunState.is_side_thread_complete("mara"), "thread completion survives serialization")
 	_assert(not RunState.inheritances.is_empty(), "memories survive serialization")
 
+	# Echo dialogue and skip-read on the first scene of a later loop.
+	RunState.cycle_number = 2
+	RunState.day = 1
+	RunState.pending_phase = "morning"
+	get_tree().change_scene_to_file("res://src/screens/story_view.tscn")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	if not await _wait_for_story_ready(story):
+		return _finish()
+	_assert(String(story.service.current_line().get("id", "")) == "d1m_000", "a later loop opens with Echo narration")
+	_assert(String(story.service.current_line().get("bg", "")) == "spire", "Echo narration keeps its background tag")
+	_assert(not story._skip_button.disabled, "skip-read is available when the scene has seen lines")
+	story._on_skip_pressed()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_assert(String(story.service.current_line().get("id", "")) == "d1m_000", "skip-read stops at new Echo narration")
+	story.service.advance()
+	await get_tree().process_frame
+	story._on_skip_pressed()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_assert(story._mode == "choices", "skip-read advances through seen prose to the choice")
+
 	# The true ending is checkable directly once its three conditions align.
 	for bond_id in RunState.BOND_IDS:
 		RunState.bonds[bond_id] = RunState.BOND_MAX
@@ -802,19 +849,6 @@ func _run() -> void:
 	_assert(RunState.cycle_number == 1, "starting fresh resets the loop count")
 	_assert(RunState.inheritances.is_empty(), "starting fresh clears the archive")
 	_assert(RunState.bonds.is_empty(), "starting fresh clears the bonds")
-
-	# Echo dialogue appears on the first scene of a later loop.
-	RunState.cycle_number = 2
-	RunState.day = 1
-	RunState.pending_phase = "morning"
-	get_tree().change_scene_to_file("res://src/screens/story_view.tscn")
-	if not await _wait_for_scene("StoryView"):
-		return _finish()
-	story = get_tree().current_scene
-	if not await _wait_for_story_ready(story):
-		return _finish()
-	_assert(String(story.service.current_line().get("id", "")) == "d1m_000", "a later loop opens with Echo narration")
-	_assert(String(story.service.current_line().get("bg", "")) == "spire", "Echo narration keeps its background tag")
 	_finish()
 
 func _drive_story(story: Node) -> bool:
