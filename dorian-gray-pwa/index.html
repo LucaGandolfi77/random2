@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>The Picture of Dorian Gray — Act II · The Library</title>
-<meta name="description" content="The Confession of Basil — Dorian Gray continues: the sheet comes off the portrait, and a painter asks to pray over his own work. Bilingual visual novel scene.">
+<title>The Picture of Dorian Gray — Interactive Visual Novel · The Library</title>
+<meta name="description" content="Oscar Wilde's The Picture of Dorian Gray in three acts: Sibyl Vane & The First Cruel Line, The Confession of Basil Hallward, and The Knife & The Canvas. Bilingual EN/IT.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">The Picture of Dorian Gray — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">The Picture of Dorian Gray · Oscar Wilde</h1>
+  <p class="ls-sub">Three acts of aesthetic beauty, the hidden ledger of conscience, and the knife in the locked schoolroom. In English and Italian.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -32,31 +33,82 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 var N = { en: "Narrator", it: "Narratore" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "The Confession of Basil", it: "La confessione di Basil" },
-  place: { en: "The locked schoolroom, years later", it: "La scuola chiusa a chiave, anni dopo" },
+  bookId: "dorian_gray",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "Thirty-eight years old, and the mirrors still flatter a boy of twenty. Upstairs, under the sheet, something has grown old for two.", it: "Trentotto anni, e gli specchi adulano ancora un ragazzo di vent'anni. Al piano di sopra, sotto il lenzuolo, qualcosa è invecchiato per due." } },
-    { s: "Basil", t: { en: "Before I leave for Paris, Dorian, show me the picture. I ask as the man who made you twice — once of paint, once of fear.", it: "Prima di partire per Parigi, Dorian, mostrami il quadro. Te lo chiedo come l'uomo che ti ha fatto due volte — una volta di vernice, una volta di paura." } },
-    { s: "Dorian", t: { en: "You would not recognize it. Some nights I do not. There is a smile on it I never wore; there are hands on it I never washed.", it: "Non lo riconosceresti. Qualche notte non lo riconosco nemmeno io. C'è un sorriso che non ho mai portato; ci sono mani che non ho mai lavato." } },
-    { s: "Basil", t: { en: "Then it is worse than a portrait. It is a ledger. Show me, and let me pray over it — over you.", it: "Allora è peggio di un ritratto. È un registro contabile. Mostramelo, e lasciami pregare su di esso — su di te." } },
-    { s: N, t: { en: "The sheet comes off. Basil, who painted every saint with the same calm light, steps back as if the room had tilted.", it: "Il lenzuolo cade. Basil, che ha dipinto ogni santo con la stessa luce calma, fa un passo indietro come se la stanza si fosse inclinata." } },
-    { s: "Basil", t: { en: "Christ, what a face! It has your eyes and a stranger's crimes. Dorian — if this is true, then prayer can still reach you. 'Though your sins be as scarlet…'", it: "Cristo, che volto! Ha i tuoi occhi e i delitti di un estraneo. Dorian — se questo è vero, allora la preghiera può ancora raggiungerti. «Anche se i vostri peccati fossero come scarlatto…»" } },
-    { s: "Dorian", t: { en: "Do not quote the ivory book at me, Basil. You see the ledger; he taught me the interest. It was you who painted a wish into a soul.", it: "Non citarmi il libro d'avorio, Basil. Tu vedi il registro; lui mi ha insegnato gli interessi. Sei stato tu a dipingere un desiderio dentro un'anima." } },
-    { s: "Basil", t: { en: "Then let me paint it back. One more canvas, on my knees, and we hang this one where only God audits it.", it: "Allora lasciami dipingerlo indietro. Un'altra tela, in ginocchio, e quest'ultima la appendiamo dove la controlla solo Dio." } }
-  ],
-  choices: [
-    { text: { en: "Let Basil pray over the portrait — one night.", it: "Lascia che Basil preghi sul ritratto — una notte." }, lines: [
-      { s: N, t: { en: "They kneel together in the schoolroom, the young face and the old one lit by the same candle. Nothing visibly changes. But Dorian sleeps, and the smile on the canvas is, by one line, less cruel. Ledgers can be softened; few know they can.", it: "Inginoocchiati insieme nella scuola, il volto giovane e il vecchio accesi dalla stessa candela. Nulla cambia visibilmente. Però Dorian dorme, e il sorriso sulla tela è, di una linea, meno crudele. I registri si possono addolcire; in pochi lo sanno." } }
-    ] },
-    { text: { en: "Show him the door — the knife stays where it is, for now.", it: "Mostragli la porta — il coltello resta dov'è, per ora." }, lines: [
-      { s: N, t: { en: "Basil leaves with his prayer refused and his paints packed. In Paris he will be safe; in this house the sheet goes back over the canvas, and the house grows one room darker. The knife stays in the drawer — an omen with a handle.", it: "Basil se ne va con la preghiera rifiutata e le tempere imballate. A Parigi sarà al sicuro; in questa casa il lenzuolo torna sulla tela, e la casa diventa più buia di una stanza. Il coltello resta nel cassetto — un presagio con il manico." } }
-    ] }
-  ],
-  outro: { en: "Every portrait is an unfinished argument with its sitter.", it: "Ogni ritratto è una lite incompiuta col proprio modello." }
+  statInit: { mem: 4, mel: 7, art: 10 },
+  acts: [
+    {
+      tab: { en: "Act I · Sibyl Vane", it: "Atto I · Sibyl Vane" },
+      title: { en: "Act I · The First Cruel Line", it: "Atto I · La prima piega crudele" },
+      place: { en: "The green-room of the Holborn theatre & Dorian's library", it: "Il camerino del teatro di Holborn e la biblioteca di Dorian" },
+      theme: "portrait",
+      lines: [
+        { s: N, t: { en: "Night after night she had been Juliet, Rosalind, Imogen. Tonight, because she loved Dorian Gray in reality, Sibyl Vane acted like a wooden doll.", it: "Sera dopo sera era stata Giulietta, Rosalinda, Imogene. Stasera, poiché amava Dorian Gray nella realtà, Sibyl Vane ha recitato come una bambola di legno." } },
+        { s: "Sibyl Vane", t: { en: "Dorian, before I knew you, acting was the only reality of my life! You taught me what real love is — how could I pretend with paint and shadows anymore?", it: "Dorian, prima di conoscerti, recitare era l'unica realtà della mia vita! Tu mi hai insegnato cos'è il vero amore — come potevo più fingere col belletto e con le ombre?" } },
+        { s: "Dorian", t: { en: "You have killed my love! I loved you because you were marvellous, because you realized the dreams of great poets. Without your art, you are nothing to me!", it: "Hai ucciso il mio amore! Ti amavo perché eri meravigliosa, perché davi corpo ai sogni dei grandi poeti. Senza la tua arte, non sei nulla per me!" } },
+        { s: N, t: { en: "At dawn he returns home. As he passes the portrait Basil Hallward painted of him, he stops in the pale light of the tall windows.", it: "All'alba rientra a casa. Passando davanti al ritratto che Basil Hallward ha dipinto di lui, si ferma nella luce pallida delle alte finestre." } },
+        { s: "Dorian", t: { en: "A touch of cruelty in the mouth! I have not touched the canvas — and yet the painted lips have curved into a sneer I wore an hour ago.", it: "Un tocco di crudeltà intorno alla bocca! Non ho sfiorato la tela — eppure le labbra dipinte si sono piegate nella smorfia che avevo un'ora fa." } },
+        { s: "Lord Henry", t: { en: "My dear Dorian, do not grieve. Sibyl Vane swallowed prussic acid in the dressing-room. She has played her last tragedy splendidly.", it: "Mio caro Dorian, non affliggerti. Sibyl Vane ha ingoiato acido prussico in camerino. Ha recitato splendidamente la sua ultima tragedia." } }
+      ],
+      choices: [
+        { text: { en: "Carry the portrait up to the locked schoolroom under the eaves.", it: "Fai portare il ritratto nella vecchia aula chiusa a chiave sotto il tetto." }, effect: { mem: 2, mel: 3, art: 2 }, lines: [
+          { s: N, t: { en: "Wrapped in a purple-and-gold Spanish pall, the canvas ascends the stairs to bear the burden of his passions while his face stays twenty forever.", it: "Avvolta in un drappo spagnolo porpora e oro, la tela sale le scale per portare il fardello delle sue passioni mentre il suo volto resta ventenne per sempre." } }
+        ] },
+        { text: { en: "Write a letter of remorse to Sibyl before opening Lord Henry's yellow book.", it: "Scrivi una lettera di rimorso a Sibyl prima di aprire il libro giallo di Lord Henry." }, effect: { mem: 3, mel: 2, art: 1 }, lines: [
+          { s: N, t: { en: "Repentance arrives an hour after the poison. By evening, he is sitting in a box at the Opera, listening to Lord Henry turn grief into epigrams.", it: "Il pentimento arriva un'ora dopo il veleno. A sera, siede già in un palco all'Opera, ascoltando Lord Henry trasformare il rimpianto in epigrammi." } }
+        ] }
+      ],
+      outro: { en: "The portrait would be to him the most magical of mirrors.", it: "Il ritratto sarebbe stato per lui il più magico degli specchi." }
+    },
+    {
+      tab: { en: "Act II · Basil", it: "Atto II · Basil" },
+      title: { en: "Act II · The Confession of Basil Hallward", it: "Atto II · La confessione di Basil Hallward" },
+      place: { en: "The locked schoolroom, eighteen years later", it: "La scuola chiusa a chiave, diciotto anni dopo" },
+      theme: "candles",
+      lines: [
+        { s: N, t: { en: "Thirty-eight years old, and the mirrors still flatter a boy of twenty. Upstairs, under the dust-sheet, something has grown old for two.", it: "Trentotto anni, e gli specchi adulano ancora un ragazzo di vent'anni. Al piano di sopra, sotto il telo impolverato, qualcosa è invecchiato per due." } },
+        { s: "Basil", t: { en: "Before I catch the midnight train for Paris, Dorian, tell me the dreadful stories I hear in London are lies! To know you truly, I would have to see your soul.", it: "Prima che io prenda il treno di mezzanotte per Parigi, Dorian, dimmi che le storie orribili che sento a Londra sono calunnie! Per conoscerti davvero, dovrei vedere la tua anima." } },
+        { s: "Dorian", t: { en: "You shall see it yourself, tonight! Come upstairs, Basil — bring the lamp. You are the only man in the world who has the right to know.", it: "La vedrai tu stesso, stanotte! Sali con me, Basil — porta la lampada. Sei l'unico uomo al mondo che abbia il diritto di sapere." } },
+        { s: N, t: { en: "The sheet comes off. From the frame leers a foul, leprous old man with a hypocrite's mouth — and in the left corner, in red letters, Basil's own signature.", it: "Il lenzuolo cade. Dalla cornice ghigna un vecchio immondo e lebbroso dalla bocca ipocrita — e nell'angolo sinistro, in lettere rosse, la firma stessa di Basil." } },
+        { s: "Basil", t: { en: "Good God, Dorian! What a lesson! What a horrible lesson! Pray, Dorian, pray! 'Though your sins be as scarlet, they shall be as white as snow.'", it: "Buon Dio, Dorian! Che lezione! Che lezione orribile! Prega, Dorian, prega! «Anche se i vostri peccati fossero come scarlatto, diventeranno bianchi come la neve»." } },
+        { s: "Dorian", t: { en: "It is too late, Basil. Those words mean nothing to me now. And look at the hands on the canvas — why do I hate you so suddenly?", it: "È troppo tardi, Basil. Quelle parole non significano più nulla per me. E guarda le mani sulla tela — perché ti odio così, d'improvviso?" } }
+      ],
+      choices: [
+        { text: { en: "Kneel beside Basil and try to utter a prayer you forgot in childhood.", it: "Inginocchiati accanto a Basil e prova a pronunciare una preghiera dimenticata nell'infanzia." }, effect: { mem: 3, mel: 1, art: 2 }, lines: [
+          { s: N, t: { en: "For one heartbeat the candle steadies; then pride hardens his throat, and the red stain creeps onto the painted fingers.", it: "Per un battito la candela si ferma; poi l'orgoglio gli stringe la gola, e la macchia rossa scivola sulle dita dipinte." } }
+        ] },
+        { text: { en: "Look at the knife gleaming on the chest of drawers.", it: "Guarda il coltello che luccica sul cassettone." }, effect: { mem: 1, mel: 4, art: 1 }, lines: [
+          { s: N, t: { en: "When Dorian locks the schoolroom door behind him, the painted hand on the canvas drips as if dipped in scarlet.", it: "Quando Dorian richiude a chiave la porta della scuola dietro di sé, la mano dipinta sulla tela gocciola come immersa nello scarlatto." } }
+        ] }
+      ],
+      outro: { en: "Each of us has Heaven and Hell in him, Basil.", it: "Ciascuno di noi porta in sé il Cielo e l'Inferno, Basil." }
+    },
+    {
+      tab: { en: "Act III · The Knife", it: "Atto III · Il Coltello" },
+      title: { en: "Act III · The Mirror and the Blade", it: "Atto III · Lo specchio e la lama" },
+      place: { en: "The locked schoolroom, midnight", it: "La scuola chiusa a chiave, mezzanotte" },
+      theme: "portrait",
+      lines: [
+        { s: N, t: { en: "He crushes the little oval mirror Lord Henry gave him under his heel. He has spared a country girl's innocence; surely the portrait will reward his first good deed.", it: "Frantuma sotto il tacco il piccolo specchio ovale donatogli da Lord Henry. Ha risparmiato l'innocenza d'una fanciulla di campagna; di certo il ritratto premierà la sua prima buona azione." } },
+        { s: "Dorian", t: { en: "No change? It is worse! In the eyes there is a look of cunning, and on the mouth the curved wrinkle of the hypocrite!", it: "Nessun mutamento? È peggio! Negli occhi c'è un'espressione d'astuzia, e sulla bocca la piega obliqua dell'ipocrita!" } },
+        { s: "Dorian", t: { en: "Was my goodness only vanity then — curiosity, the desire for a new sensation? This painting is my conscience. I will destroy it!", it: "La mia bontà non era dunque che vanità — curiosità, brama di una sensazione nuova? Questo quadro è la mia coscienza. Lo distruggerò!" } },
+        { s: N, t: { en: "He seizes the knife that killed Basil Hallward and stabs the painted canvas. A cry rings through the sleeping house and wakes the policemen in the square.", it: "Afferra il coltello che uccise Basil Hallward e pugnala la tela dipinta. Un grido squarcia la casa addormentata e sveglia gli agenti nella piazza." } },
+        { s: N, t: { en: "When the servants break in through the roof, they find hanging upon the wall a splendid portrait of their master in all the wonder of his exquisite youth and beauty.", it: "Quando i domestici entrano dal tetto, trovano appeso alla parete uno splendido ritratto del loro padrone in tutto lo splendore della sua squisita giovinezza e bellezza." } },
+        { s: N, t: { en: "Lying on the floor, with a knife in his heart, is a withered, wrinkled, and loathsome old man — recognizable only by the rings upon his fingers.", it: "Steso sul pavimento, con un coltello nel cuore, giace un vecchio avvizzito, rugoso e ripugnante — riconoscibile soltanto dagli anelli che porta alle dita." } }
+      ],
+      choices: [
+        { text: { en: "Gaze upon the restored canvas where art outlives its subject.", it: "Contempla la tela restituita dove l'arte sopravvive al suo modello." }, effect: { mem: 2, mel: 2, art: 4 }, lines: [
+          { s: N, t: { en: "The painting smiles with the innocent morning light of Basil's studio, untouched by time or sin.", it: "Il dipinto sorride nella luce innocente del mattino dello studio di Basil, intatto dal tempo e dal peccato." } }
+        ] },
+        { text: { en: "Examine the rings on the dead man's hand.", it: "Osserva gli anelli sulla mano del morto." }, effect: { mem: 3, mel: 3, art: 1 }, lines: [
+          { s: N, t: { en: "The ledger and the debtor have finally become one.", it: "Il registro e il debitore sono finalmente diventati una cosa sola." } }
+        ] }
+      ],
+      outro: { en: "It was not until they had examined the rings that they recognized who it was.", it: "Solo quando ebbero esaminato gli anelli riconobbero chi fosse." }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

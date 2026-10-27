@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Divina Commedia — Act II · The Library</title>
-<meta name="description" content="Acheron — the Divine Comedy continues: the gate of Hell, the neutral angels, and the crossing with Charon. Bilingual visual novel scene.">
+<title>Divina Commedia — Interactive Visual Novel · The Library</title>
+<meta name="description" content="Dante's Divine Comedy across all three cantiche: Inferno (Acheron & Francesca), Purgatorio (The Mountain & Virgil's Farewell), and Paradiso (Beatrice & The White Rose). Bilingual EN/IT.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">Divina Commedia — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">Divina Commedia · Dante Alighieri</h1>
+  <p class="ls-sub">Three cantiche of the soul: Inferno, Purgatorio, and Paradiso — from the dark shore of Acheron to the Love that moves the sun and the other stars. EN / IT.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -32,31 +33,83 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 var N = { en: "Narrator", it: "Narratore" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "Acheron", it: "Acheronte" },
-  place: { en: "The gate of Hell", it: "La porta dell'Inferno" },
+  bookId: "divine_comedy",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "The gate reads itself aloud: THROUGH ME YOU PASS INTO THE CITY OF WOE. Above it, the neutral angels who chose neither rebellion nor fidelity, stung by flies, at the banks of a river that is not a river.", it: "La porta si legge da sola: PER ME SI VA NELLA CITTÀ DOLENTE. Sopra, gli angeli neutri che non scelsero né ribellione né fedeltà, punto dalle mosche, alle rive di un fiume che fiume non è." } },
-    { s: "Virgil", t: { en: "Do not ask about these wretches, Dante. The darkest places of hell are reserved for those who, in moral crisis, kept their neutrality.", it: "Non domandare di questi miseri, Dante. I luoghi più cupi dell'inferno sono riservati a coloro che, nella crisi morale, tesero alla neutralità." } },
-    { s: "Dante", t: { en: "And the old man in the boat — his hair is white, his eyes are coals.", it: "E il vecchio nella barca — i capelli bianchi, gli occhi carbone." } },
-    { s: "Virgil", t: { en: "Charon. Souls, not bodies, cross here. He will object to a living passenger; heaven permits it, and heaven outranks him.", it: "Caronte. Qui passano le anime, non i corpi. Opporrà resistenza a un passeggero vivo; il cielo lo permette, e il cielo gli sta sopra." } },
-    { s: { en: "Charon", it: "Caronte" }, t: { en: "You who live, stand back from those who are dead! Your road is not mine. Shall I ferry a warm heart among my cold cargo?", it: "O tu che sei vivo, statti da parte da questi che son morti! La tua via non è la mia. Devo trasportare un cuore caldo tra il mio carico gelato?" } },
-    { s: "Dante", t: { en: "I tremble, and the trembling is honest. Guide, the ground is dark and I would kneel.", it: "Tremo, e il tremare è onesto. Guida, il suolo è cupo e vorrei inginocchiarmi." } },
-    { s: "Virgil", t: { en: "Sleep will come at the crossing. It is not a mercy; it is a custom — the living arrive at the farther shore carried, like children.", it: "Il sonno verrà nella traversata. Non è una pietà; è un costume — i vivi arrivano all'altra riva portati, come bambini." } },
-    { s: N, t: { en: "A wind rises from the tears of the virtuous unbaptized, the sighing First Circle. Far below, something answers the thunder with thunder.", it: "Si leva un vento dalle lacrime dei virtuosi non battezzati, il Primo Cerchio che sospira. Molto sotto, qualcosa risponde al tuono con il tuono." } }
-  ],
-  choices: [
-    { text: { en: "Board, and sleep the crossing.", it: "Sali a bordo, e dormi la traversata." }, lines: [
-      { s: "Virgil", t: { en: "Sleep, then. When you wake, the air will not scream yet — we have six circles of quiet before the city of Dis. Learn the order of the map: even pain is architecture.", it: "Dormi, allora. Al risveglio l'aria non urlerà ancora — abbiamo sei cerchi di silenzio prima della città di Dite. Impara l'ordine della mappa: perfino il dolore è architettura." } }
-    ] },
-    { text: { en: "Ask who the sighing ones were.", it: "Chieda chi erano quelli che sospirano." }, lines: [
-      { s: "Virgil", t: { en: "The virtuous pagans — Homer, your Aristotle, the unbaptized babies. They committed no fault, and for that alone they are denied the sight of God. You will feel it as longing, not flame. Sometimes hell is simply an absence, properly lit.", it: "I virtuosi pagani — Omero, il tuo Aristotele, i bambini non battezzati. Non commisero colpa, e per quello solo è negata loro la vista di Dio. Lo sentirai come desiderio, non come fiamma. A volte l'inferno è semplicemente un'assenza, illuminata a dovere." } }
-    ] }
-  ],
-  outro: { en: "The map of the deep is also a map of the choices you already made.", it: "La mappa dell'abisso è anche la mappa delle scelte che hai già fatto." }
+  statInit: { mem: 7, mel: 5, art: 8 },
+  acts: [
+    {
+      tab: { en: "I · Inferno", it: "I · Inferno" },
+      title: { en: "Cantica I · Acheron & The Whirlwind", it: "Cantica I · Acheronte e la Bufera" },
+      place: { en: "The Gate of Hell & The Second Circle", it: "La Porta dell'Inferno e il Secondo Cerchio" },
+      theme: "inferno",
+      lines: [
+        { s: N, t: { en: "The gate reads itself aloud in dark stone: THROUGH ME YOU PASS INTO THE CITY OF WOE. Beyond it, the river Acheron and the endless storm that never rests.", it: "La porta si legge da sola nella pietra scura: PER ME SI VA NELLA CITTÀ DOLENTE. Oltre, il fiume Acheronte e la bufera infernal che mai non resta." } },
+        { s: { en: "Charon", it: "Caronte" }, t: { en: "You who live, stand back from those who are dead! Shall I ferry a warm heart among my cold cargo?", it: "O tu che se' costì, anima viva, pàrtiti da cotesti che son morti! Devo traghettare un cuore caldo tra il mio carico gelato?" } },
+        { s: "Virgil", t: { en: "Do not rage, Charon: it is so willed where power and will are one. Ask no more.", it: "Caron, non ti crucciare: vuolsi così colà dove si puote ciò che si vuole, e più non dimandare." } },
+        { s: N, t: { en: "In the Second Circle, two spirits fly together like doves called by desire through the black air: Paolo and Francesca.", it: "Nel Secondo Cerchio, due spiriti volano insieme come colombe dal disio chiamate per l'aere maligno: Paolo e Francesca." } },
+        { s: "Francesca", t: { en: "Love, which absolves no loved one from loving, seized me so strongly for this man that, as you see, it does not leave me even here.", it: "Amor, ch'a nullo amato amar perdona, mi prese del costui piacer sì forte, che, come vedi, ancor non m'abbandona." } },
+        { s: "Dante", t: { en: "Francesca, your torments make me weep with grief and pity. But tell me: in the time of sweet sighs, how did Love grant that you should know your dubious desires?", it: "Francesca, i tuoi martìri a lagrimar mi fanno tristo e pio. Ma dimmi: al tempo d'i dolci sospiri, a che e come concedette Amore che conosceste i dubbiosi disiri?" } },
+        { s: "Francesca", t: { en: "There is no greater sorrow than to remember happy times in misery. One day we read for delight of Lancelot… That day we read no further.", it: "Nessun maggior dolore che ricordarsi del tempo felice ne la miseria. Noi leggiavamo un giorno per diletto di Lancialotto… Quel giorno più non vi leggemmo avante." } }
+      ],
+      choices: [
+        { text: { en: "Faint with pity as a dead body falls, and descend toward the ice of Cocytus.", it: "Cadi per la pietà come corpo morto cade, e scendi verso il ghiaccio di Cocito." }, effect: { mem: 2, mel: 3, art: 2 }, lines: [
+          { s: N, t: { en: "Through fire, mud, and the frozen lake at the center of gravity, the poets climb down Lucifer's flanks and step out to see the stars again.", it: "Attraverso fuoco, fango e il lago gelato al centro di gravità, i poeti scendono lungo i fianchi di Lucifero ed escono a riveder le stelle." } }
+        ] },
+        { text: { en: "Ask Virgil why a book can both save a soul and damn it.", it: "Chiedi a Virgilio perché un libro possa insieme salvare e dannare un'anima." }, effect: { mem: 3, mel: 1, art: 3 }, lines: [
+          { s: "Virgil", t: { en: "Art is a mirror, my son: if you love the image more than the light that cast it, the mirror becomes your prison.", it: "L'arte è uno specchio, figlio mio: se ami l'immagine più della luce che l'ha creata, lo specchio diventa la tua prigione." } }
+        ] }
+      ],
+      outro: { en: "And thence we came forth to see again the stars.", it: "E quindi uscimmo a riveder le stelle." }
+    },
+    {
+      tab: { en: "II · Purgatorio", it: "II · Purgatorio" },
+      title: { en: "Cantica II · The Mountain & Virgil's Farewell", it: "Cantica II · La Montagna e l'addio di Virgilio" },
+      place: { en: "The Earthly Paradise at the summit of Purgatory", it: "Il Paradiso Terrestre in cima al Purgatorio" },
+      theme: "purgatorio",
+      lines: [
+        { s: N, t: { en: "Seven terraces of music and penitence climbed beneath the southern stars. Unlike Hell, here time moves: dawn and dusk measure hope.", it: "Sette cornici di musica e penitenza scalate sotto le stelle australi. A differenza dell'Inferno, qui il tempo scorre: l'alba e il tramonto misurano la speranza." } },
+        { s: "Dante", t: { en: "Every P carved on my forehead by the angel's sword has vanished at the beating of wings. My steps feel lighter than wind.", it: "Ogni P incisa sulla mia fronte dalla spada dell'angelo è svanita al battito d'ali. I miei passi sembrano più lievi del vento." } },
+        { s: "Virgil", t: { en: "We have passed the temporal fire and the eternal, my son, and have come to a place where I, of myself, discern no further.", it: "Il temporal foco e l'etterno veduto hai, figlio; e se' venuto in parte dov'io per me più oltre non discerno." } },
+        { s: "Virgil", t: { en: "Expect no word or sign from me anymore. Your will is free, upright, and whole — therefore I crown and mitre you over yourself.", it: "Non aspettar mio dir più né mio cenno. Libero, dritto e sano è tuo arbitrio — per ch'io te sovra te corono e mitrio." } },
+        { s: N, t: { en: "Across the stream of Lethe, veiled in white and olive, crowned with flame-colored robes, a woman speaks Dante's name.", it: "Oltre il ruscello del Lete, velata di bianco e d'ulivo, vestita di color di fiamma viva, una donna pronuncia il nome di Dante." } },
+        { s: "Dante", t: { en: "I turn to the left with the trust of a child running to his mother — to say to Virgil: 'Not a drop of blood is left in me that does not tremble: I recognize the signs of the ancient flame!'", it: "Mi volgo a sinistra col김affetto d'un fantolin che corre alla mamma — per dire a Virgilio: «Men che dramma di sangue m'è rimaso che non tremi: conosco i segni de l'antica fiamma!»" } },
+        { s: N, t: { en: "But Virgil has left them bereft of himself — Virgil, sweetest father.", it: "Ma Virgilio ne avea lasciati scemi di sé — Virgilio, dolcissimo patre." } }
+      ],
+      choices: [
+        { text: { en: "Weep for Virgil before drinking from the waters of Lethe.", it: "Piangi per Virgilio prima di bere alle acque del Lete." }, effect: { mem: 3, mel: 2, art: 2 }, lines: [
+          { s: "Beatrice", t: { en: "Dante, do not weep yet because Virgil is gone; you must weep for another sword — look at me well! Truly I am, truly I am Beatrice.", it: "Dante, perché Virgilio se ne vada, non pianger anco; ché pianger ti conven per altra spada — guardaci ben! Ben son, ben son Beatrice." } }
+        ] },
+        { text: { en: "Confess your wandering years and drink from Eunoë to restore every good memory.", it: "Confessa i tuoi anni smarriti e bevi all'Eunoè per ravvivare ogni buon ricordo." }, effect: { mem: 4, mel: -1, art: 2 }, lines: [
+          { s: N, t: { en: "From that holiest wave he returns remade, like new plants renewed with new leaves — pure and disposed to mount unto the stars.", it: "Io ritornai da la santissima onda rifatto sì come piante novelle rinnovellate di novella fronda — puro e disposto a salire a le stelle." } }
+        ] }
+      ],
+      outro: { en: "Pure and disposed to mount unto the stars.", it: "Puro e disposto a salire a le stelle." }
+    },
+    {
+      tab: { en: "III · Paradiso", it: "III · Paradiso" },
+      title: { en: "Cantica III · The White Rose & The Last Light", it: "Cantica III · La Candida Rosa e l'Ultima Luce" },
+      place: { en: "The Empyrean, beyond space and time", it: "L'Empireo, oltre lo spazio e il tempo" },
+      theme: "paradiso",
+      lines: [
+        { s: N, t: { en: "From sphere to sphere — Moon, Mercury, Venus, the Sun, Mars, Jupiter, Saturn, the Fixed Stars — Beatrice's smile grows brighter until language itself breaks.", it: "Di cielo in cielo — Luna, Mercurio, Venere, Sole, Marte, Giove, Saturno, Stelle Fisse — il sorriso di Beatrice si fa più ardente finché la lingua stessa si spezza." } },
+        { s: "Beatrice", t: { en: "We have issued forth from the greatest body into the heaven that is pure light: light intellectual, full of love; love of true good, full of joy.", it: "Noi siamo usciti fore del maggior corpo al ciel ch'è pura luce: luce intellettüal, piena d'amore; amor di vero ben, pien di letizia." } },
+        { s: "Dante", t: { en: "In the form then of a white rose the saintly host was shown to me, and Bernard bids me lift my eyes into the Eternal Ray.", it: "In forma dunque di candida rosa mi si mostrava la milizia santa, e Bernardo m'invita ad alzare gli occhi nel Raggio Eterno." } },
+        { s: "Dante", t: { en: "Within its depth I saw ingathered, bound by love in one single volume, that which is dispersed in leaves throughout the universe.", it: "Nel suo profondo vidi che s'interna, legato con amore in un volume, ciò che per l'universo si squaderna." } },
+        { s: N, t: { en: "Three circles of three colors and one dimension — and the second seemed painted with our own human effigy.", it: "Tre giri di tre colori e d'una contenenza — e il secondo parea pinta de la nostra effige." } }
+      ],
+      choices: [
+        { text: { en: "Let high fantasy fail, and let Love turn your desire and will.", it: "Lascia che l'alta fantasia manchi, e che l'Amore volga il tuo disio e il velle." }, effect: { mem: 4, mel: -2, art: 4 }, lines: [
+          { s: N, t: { en: "Here power failed the high imagination; but already my desire and my will were turned — like a wheel moved evenly — by the Love that moves the sun and the other stars.", it: "A l'alta fantasia qui mancò possa; ma già volgeva il mio disio e 'l velle, sì come rota ch'igualmente è mossa, l'amor che move il sole e l'altre stelle." } }
+        ] },
+        { text: { en: "Carry a single spark of that light back into mortal verse.", it: "Riporta una sola favilla di quella luce nel verso mortale." }, effect: { mem: 3, mel: 1, art: 4 }, lines: [
+          { s: "Dante", t: { en: "O Supreme Light, grant to my tongue one spark only of Your glory, so that those to come may conceive a shadow of the blessed kingdom.", it: "O somma luce, presta alla mia lingua una favilla sol della tua gloria, perché chi verrà possa concepire un'ombra del beato regno." } }
+        ] }
+      ],
+      outro: { en: "The Love that moves the sun and the other stars.", it: "L'amor che move il sole e l'altre stelle." }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

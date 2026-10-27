@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Anna Karenina — Act II · The Library</title>
-<meta name="description" content="The Race — Anna Karenina continues: the Moscow racecourse, the fall of Gladiator, and the word irregular. Bilingual visual novel scene.">
+<title>Anna Karenina — Interactive Visual Novel · The Library</title>
+<meta name="description" content="Leo Tolstoy's Anna Karenina in three acts: The Racecourse, Seryozha's Birthday at Dawn, and The Station & Levin's Sky. Bilingual EN/IT visual novel.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">Anna Karenina — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">Anna Karenina · Leo Tolstoy</h1>
+  <p class="ls-sub">Three acts of passion, maternal longing, and the search for grace — The Racecourse, Seryozha's Room, and the Evening Train. In English and Italian.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -32,31 +33,81 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 var N = { en: "Narrator", it: "Narratore" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "The Race", it: "La corsa" },
-  place: { en: "The Moscow racecourse", it: "L'ippodromo di Mosca" },
+  bookId: "anna_karenina",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "The officers' race at the Moscow course. Vronsky rides Gladiator — one stride behind, one heartbeat ahead of himself.", it: "La corsa degli ufficiali all'ippodromo di Mosca. Vronskij monta Gladiator — un passo dietro, un battito davanti a se stesso." } },
-    { s: "Anna", t: { en: "I should not have come. I am visible; the opera glasses of a whole society are aimed at my face.", it: "Non dovevo venire. Sono visibile; i binocoli da opera di un'intera società sono puntati sul mio volto." } },
-    { s: "Karenin", t: { en: "You are pale. Your eyes follow the rider who is not your husband, and every lorgnette in the stand follows you.", it: "Sei pallida. I tuoi occhi seguono il fantino che non è tuo marito, e ogni lorgnette del palco segue te." } },
-    { s: "Anna", t: { en: "Then let them look. For one hour today, Alexei Alexandrovich, I am not a wife, not a mother, not a name on a visiting card. I am only a heartbeat in a crowd.", it: "E allora guardino. Per un'ora, oggi, Aleksej Aleksandrovic, non sono una moglie, non sono una madre, non sono un nome su un biglietto da visita. Sono soltanto un battito in mezzo alla folla." } },
-    { s: N, t: { en: "The third hurdle: Gladiator's back breaks like a branch under snow. The horse falls; the rider is — up, limping, alive. The stands exhale. One woman cannot.", it: "Il terzo ostacolo: la schiena di Gladiator si spezza come un ramo sotto la neve. Il cavallo cade; il fantino è — in piedi, zoppicando, vivo. La tribuna riprende fiato. Una donna no." } },
-    { s: "Anna", t: { en: "He lives. God, what a terrible thing to be glad of — I was glad the fall was not his end, and ashamed that the fall was his.", it: "Vive. Dio, che cosa terribile da esser lieti — ero lieta che la caduta non fosse la sua fine, e in vergogna che la caduta fosse sua." } },
-    { s: "Karenin", t: { en: "Compose yourself. People are looking. This display of feeling is — irregular.", it: "Componiti. La gente guarda. Questa esposizione di sentimenti è — irregolare." } },
-    { s: "Anna", t: { en: "Irregular. Yes. That word is my whole life, Alexei Alexandrovich, and I begin to prefer it to yours.", it: "Irregolare. Sì. Quella parola è tutta la mia vita, Aleksej Aleksandrovic, e comincio a preferirla alla tua." } }
-  ],
-  choices: [
-    { text: { en: "Tell Karenin the truth tonight, in the carriage.", it: "Dì la verità a Karenin stanotte, in carrozza." }, lines: [
-      { s: N, t: { en: "The carriage lamps cut two small cones of light. She says the word 'love' and he hears 'scandal'. He answers with a memorandum of society's rules and asks for seven days' silence. The sentence of the family court is drafted in that silence, unsigned.", it: "I fanali della carrozza tagliano due piccoli coni di luce. Lei dice la parola «amore» e lui sente «scandalo». Risponde con un memoriale delle regole della società e chiede sette giorni di silenzio. La sentenza del tribunale di famiglia viene redatta in quel silenzio, senza firma." } }
-    ] },
-    { text: { en: "Keep the wall standing a season longer.", it: "Tieni in piedi il muro ancora una stagione." }, lines: [
-      { s: N, t: { en: "The wall holds, and each of them stations a sentry on it — she of glances, he of principle. The child inside her will be born into a war he did not choose, and the race will run again every season, faster.", it: "Il muro tiene, e ciascuno dei due vi posta una sentinella — lei di sguardi, lui di principio. Il figlio che porta in grembo nascerà in una guerra che non ha scelto, e la corsa correrà ancora ogni stagione, più veloce." } }
-    ] }
-  ],
-  outro: { en: "A society watches the race and pretends not to see the woman.", it: "La società guarda la corsa e finge di non vedere la donna." }
+  statInit: { mem: 5, mel: 9, art: 5 },
+  acts: [
+    {
+      tab: { en: "Act I · The Race", it: "Atto I · La Corsa" },
+      title: { en: "Act I · The Fall of Frou-Frou", it: "Atto I · La caduta alla corsa" },
+      place: { en: "The Krasnoye Selo racecourse", it: "L'ippodromo di Krasnoe Selo" },
+      theme: "train",
+      lines: [
+        { s: N, t: { en: "The officers' steeplechase. Vronsky rides his mare — one stride behind, one heartbeat ahead of himself — while Anna watches through her opera glasses.", it: "La corsa a ostacoli degli ufficiali. Vronskij monta la sua giumenta — un passo dietro, un battito davanti a se stesso — mentre Anna guarda col binocolo da teatro." } },
+        { s: "Karenin", t: { en: "You are pale, Anna. Your eyes follow the rider who is not your husband, and every lorgnette in the pavilion follows you.", it: "Sei pallida, Anna. I tuoi occhi seguono il fantino che non è tuo marito, e ogni lorgnette del padiglione segue te." } },
+        { s: "Anna", t: { en: "For one hour today, Alexei Alexandrovich, I am not a name on a visiting card. I am only a heartbeat in a crowd.", it: "Per un'ora, oggi, Aleksej Aleksandrovič, non sono un nome su un biglietto da visita. Sono soltanto un battito in mezzo alla folla." } },
+        { s: N, t: { en: "At the last ditch, Vronsky drops into the saddle a fraction too soon. The mare's back breaks like a dry branch. The stands gasp. Anna cries out aloud.", it: "All'ultimo fosso, Vronskij ricade in sella una frazione troppo presto. La schiena della giumenta si spezza come un ramo secco. La tribuna trattiene il fiato. Anna grida ad alta voce." } },
+        { s: "Karenin", t: { en: "Compose yourself immediately. I must ask you to behave with propriety. This display of feeling is irregular.", it: "Componiti immediatamente. Devo pregarti di mantenere il decoro. Questa esposizione di sentimenti è irregolare." } },
+        { s: "Anna", t: { en: "Do you hear me? I love him! I am his mistress! I cannot bear you, I am afraid of you, I hate you! Do whatever you like with me!", it: "Mi senti? Io lo amo! Sono la sua amante! Non ti sopporto, ho paura di te, ti odio! Fa' di me quello che vuoi!" } }
+      ],
+      choices: [
+        { text: { en: "Confess everything in the carriage and refuse the hypocrisy of society.", it: "Confessa tutto in carrozza e rifiuta l'ipocrisia della società." }, effect: { mem: 2, mel: 3, art: 2 }, lines: [
+          { s: N, t: { en: "The truth is spoken, and the gilded doors of Petersburg begin to close one by one, leaving only two lovers in a narrowing room.", it: "La verità è detta, e le porte dorate di Pietroburgo cominciano a chiudersi una a una, lasciando solo due amanti in una stanza che si restringe." } }
+        ] },
+        { text: { en: "Think first of little Seryozha sleeping at home.", it: "Pensa prima al piccolo Serëža che dorme a casa." }, effect: { mem: 4, mel: 2, art: 0 }, lines: [
+          { s: N, t: { en: "Between the lover and the husband stands a child who understands nothing of law or scandal — only the warmth of his mother's hands.", it: "Tra l'amante e il marito sta un bambino che non capisce nulla di legge o di scandalo — solo il calore delle mani di sua madre." } }
+        ] }
+      ],
+      outro: { en: "A society watches the race and pretends not to see the woman.", it: "La società guarda la corsa e finge di non vedere la donna." }
+    },
+    {
+      tab: { en: "Act II · Seryozha", it: "Atto II · Serëža" },
+      title: { en: "Act II · The Birthday at Dawn", it: "Atto II · Il compleanno all'alba" },
+      place: { en: "The nursery in Karenin's house, morning", it: "La stanza dei bambini in casa Karenin, mattino" },
+      theme: "candles",
+      lines: [
+        { s: N, t: { en: "They told the boy his mother was dead. He never believed them. On the morning of his ninth birthday, a veiled woman slips past the footmen up the nursery stairs.", it: "Avevano detto al bambino che sua madre era morta. Lui non ci ha mai creduto. La mattina del suo nono compleanno, una donna velata scivola oltre i lacchè su per le scale." } },
+        { s: "Seryozha", t: { en: "Mama! I knew you would come today! I knew you were alive!", it: "Mamma! Sapevo che saresti venuta oggi! Sapevo che eri viva!" } },
+        { s: "Anna", t: { en: "Seryozha, my darling, my boy… how big you have grown! Don't cry, don't cry — I came only to see you, to hold your warm sleep-tousled head.", it: "Serëža, tesoro mio, bambino mio… come sei diventato grande! Non piangere, non piangere — sono venuta solo per vederti, per stringere la tua testolina calda di sonno." } },
+        { s: "Seryozha", t: { en: "You won't leave me again, will you? He is dressing downstairs — stay before he comes!", it: "Non mi lascerai più, vero? Lui si sta vestendo di sotto — resta prima che arrivi!" } },
+        { s: "Anna", t: { en: "My darling, love him — he is better and kinder than I am, and I have wronged him. When you grow up, you will judge.", it: "Tesoro mio, vogliagli bene — lui è migliore e più buono di me, e io sono colpevole verso di lui. Quando sarai grande, giudicherai." } },
+        { s: N, t: { en: "Heavy footsteps sound in the corridor. Anna tears her hands from her son's grasp and flees down the stairs into the cold Petersburg morning.", it: "Passi pesanti risuonano nel corridoio. Anna strappa le mani dalla stretta del figlio e fugge giù per le scale nel freddo mattino di Pietroburgo." } }
+      ],
+      choices: [
+        { text: { en: "Look back once from the doorway at his outstretched arms.", it: "Voltati un'ultima volta sulla soglia verso le sue braccia tese." }, effect: { mem: 4, mel: 3, art: 1 }, lines: [
+          { s: N, t: { en: "That single glance remains burned behind her eyelids for the rest of her days — the price of a freedom that could not carry a child.", it: "Quell'unico sguardo le resta impresso dietro le palpebre per il resto dei suoi giorni — il prezzo di una libertà che non poteva portare con sé un figlio." } }
+        ] },
+        { text: { en: "Pull the black veil down and return to Vronsky's hotel.", it: "Abbassa il velo nero e ritorna all'albergo di Vronskij." }, effect: { mem: 1, mel: 4, art: 1 }, lines: [
+          { s: N, t: { en: "At the hotel, Vronsky asks why she is weeping. Because he must ask, the distance between them has already begun.", it: "All'albergo, Vronskij le chiede perché piange. Proprio perché deve chiederlo, la distanza tra loro è già cominciata." } }
+        ] }
+      ],
+      outro: { en: "All happy families are alike; each unhappy family is unhappy in its own way.", it: "Tutte le famiglie felici si somigliano; ogni famiglia infelice è infelice a modo suo." }
+    },
+    {
+      tab: { en: "Act III · Candle & Sky", it: "Atto III · Candela e Cielo" },
+      title: { en: "Act III · The Candle and the Starry Sky", it: "Atto III · La candela e il cielo stellato" },
+      place: { en: "Obiralovka Station & Levin's country estate", it: "La stazione di Obiralovka e la tenuta di Levin" },
+      theme: "train",
+      lines: [
+        { s: N, t: { en: "Two trains run through the end of the novel: one carries Anna into the dark of Obiralovka station; the other carries Levin home to the country fields.", it: "Due treni attraversano la fine del romanzo: uno porta Anna nel buio della stazione di Obiralovka; l'altro riporta Levin verso i campi della sua tenuta." } },
+        { s: "Anna", t: { en: "Why have we lit the candle at all, when there is nothing left to read but falsehood, deceit, and evil? Why not blow it out?", it: "Perché abbiamo acceso la candela, quando non resta più nulla da leggere se non menzogna, inganno e male? Perché non spegnerla?" } },
+        { s: N, t: { en: "And the candle by which she had been reading the book filled with anxieties, deceits, sorrow, and evil flared up with a brighter light than ever, illuminated everything that had been in darkness, flickered, grew dim, and went out forever.", it: "E la candela alla cui luce aveva letto il libro colmo di inquietudini, di inganni, di dolore e di male divampò con una luce più viva che mai, illuminò tutto ciò che prima era nel buio, crepitò, cominciò a offuscarsi e si spense per sempre." } },
+        { s: N, t: { en: "Hundreds of miles away, Konstantin Levin lies on his back in the summer grass after a peasant tells him: 'One man lives only for his belly; another remembers God and lives for his soul.'", it: "A centinaia di verste di distanza, Konstantin Levin giace supino sull'erba d'estate dopo che un contadino gli ha detto: «Un uomo vive solo per la pancia; un altro si ricorda di Dio e vive per l'anima»." } },
+        { s: "Levin", t: { en: "Reason never taught me to love, and yet I live by it. My life now, every minute of it, is no longer meaningless as it was before — it has the unquestionable meaning of the goodness which I have the power to put into it!", it: "La ragione non mi ha mai insegnato ad amare, eppure vivo di questo. La mia vita ora, ogni suo minuto, non è più priva di senso come prima — ha il senso indubitabile del bene che io ho il potere di mettervi dentro!" } }
+      ],
+      choices: [
+        { text: { en: "Look up with Levin at the high summer stars over the woods.", it: "Alza gli occhi con Levin verso le alte stelle d'estate sopra il bosco." }, effect: { mem: 3, mel: -2, art: 3 }, lines: [
+          { s: N, t: { en: "The Milky Way arches silent and clear over the oak trees. Nothing in his life has changed outwardly, and yet everything within is at peace.", it: "La Via Lattea s'inarca silenziosa e limpida sopra le querce. Nulla nella sua vita è mutato all'esterno, eppure dentro tutto è in pace." } }
+        ] },
+        { text: { en: "Remember the flickering candle at the station platform.", it: "Ricorda la candela tremolante sulla banchina della stazione." }, effect: { mem: 3, mel: 3, art: 2 }, lines: [
+          { s: N, t: { en: "Compassion, not judgment, is the last word Tolstoy leaves over the tracks.", it: "La compassione, non il giudizio, è l'ultima parola che Tolstoj lascia sopra i binari." } }
+        ] }
+      ],
+      outro: { en: "My life has the unquestionable meaning of the goodness I have the power to put into it.", it: "La mia vita ha il senso indubitabile del bene che ho il potere di mettervi dentro." }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

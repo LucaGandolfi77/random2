@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Notes from Underground — Act II · The Library</title>
-<meta name="description" content="Liza — Notes from Underground continues: the visit, the banknote on the table, and the one stair that goes up. Bilingual visual novel scene.">
+<title>Notes from Underground — Interactive Visual Novel · The Library</title>
+<meta name="description" content="Fyodor Dostoevsky's Notes from Underground in three acts: The Crystal Palace & Two Times Two, Liza in the Corner Room, and The Wet Snow. Bilingual EN/IT.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">Notes from Underground — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">Notes from Underground · Dostoevsky</h1>
+  <p class="ls-sub">Three acts from the mouse-hole: The Crystal Palace, Liza's Visit, and Apropos of the Wet Snow. In English and Italian.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -33,31 +34,79 @@ var N = { en: "Narrator", it: "Narratore" };
 var U = { en: "Underground Man", it: "L'uomo del sottosuolo" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "Liza", it: "Liza" },
-  place: { en: "A corner room, two weeks later", it: "Una stanza d'angolo, due settimane dopo" },
+  bookId: "underground",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "Two weeks after the billiard hall, she comes. A prostitute with a green shawl and eyes that have decided something. He had bet money she would not.", it: "Due settimane dopo il biliardo, lei viene. Una prostituta con uno scialle verde e occhi che hanno deciso qualcosa. Lui aveva scommesso dei soldi che non sarebbe venuta." } },
-    { s: U, t: { en: "I was certain she would not come. When the bell rang I stood behind the door like a debtor — or like a man who has already lost and does not know the words for it.", it: "Ero certo che non sarebbe venuta. Quando la campanella suonò restai dietro la porta come un debitore — o come un uomo che ha già perso e non conosce le parole per dirlo." } },
-    { s: "Liza", t: { en: "You gave me money. I brought it back. Not for the money — I want to know if what you said was spite, or the truth.", it: "Mi ha dato dei soldi. Li riporto indietro. Non per i soldi — voglio sapere se quello che ha detto era cattiveria, o la verità." } },
-    { s: U, t: { en: "It was both, which is the worst of combinations. I said you should leave that house, marry, live. I said it like a man throwing stones at his own window.", it: "Era tutte e due le cose, che è la peggiore delle combinazioni. Le ho detto di lasciare quella casa, di sposarsi, di vivere. L'ho detto come un uomo che lancia sassi contro la propria finestra." } },
-    { s: "Liza", t: { en: "Then say it once more, plainly. I will do it. I will leave the house. You could ask me anything tonight, and I would try to be a person again.", it: "Allora lo dica ancora una volta, semplicemente. Lo farò. Lascerò la casa. Potrebbe chiedermi qualsiasi cosa stasera, e proverei di nuovo a essere una persona." } },
-    { s: N, t: { en: "And here — the record is accurate, God help us — he tells her about the burying of the coffin in the rain, about his own humiliation, everything, and it is almost tenderness.", it: "E qui — la registrazione è accurata, ci mancherebbe — le racconta della sepoltura della bara sotto la pioggia, della propria umiliazione, di tutto, ed è quasi tenerezza." } },
-    { s: U, t: { en: "For one hour I was almost a man. Then I remembered I was the underground, and tenderness felt like debt, and debt like humiliation. I gave her money again. My last. And hated her.", it: "Per un'ora sono stato quasi un uomo. Poi mi sono ricordato di essere il sottosuolo, e la tenerezza è sembrata un debito, e il debito un'umiliazione. Le ho dato di nuovo dei soldi. I miei ultimi. E l'ho odiata." } },
-    { s: N, t: { en: "She understood everything — that is the horror. She pressed the banknote into the table and went out without a word, and the underground kept its tenant.", it: "Lei ha capito tutto — ed è questo l'orrore. Ha conficcato la banconota nel tavolo ed è uscita senza una parola, e il sottosuolo ha mantenuto il suo inquilino." } }
-  ],
-  choices: [
-    { text: { en: "Run after her — now, into the snow.", it: "Corri dietro di lei — adesso, nella neve." }, lines: [
-      { s: U, t: { en: "I run — four flights, half a street, slippers in the snow. Whether I find her or not, I have come up. The underground is behind me, shouting terms; the wind up here answers nothing, it only blows. Note: this footnote is true. Cross out 'note'.", it: "Corro — quattro rampe di scale, mezza strada, pantofole nella neve. Che io la trovi o no, sono salito. Il sottosuolo è alle mie spalle che grida condizioni; il vento, quassù, non risponde a niente, soffia soltanto. Nota: questa nota è vera. Cancelli la parola «nota»." } }
-    ] },
-    { text: { en: "Stay: write it all down instead.", it: "Resta: scrivi tutto, invece." }, lines: [
-      { s: N, t: { en: "He stays. He writes these notes. Somewhere a reader puts the page down, feeling seen by a man who has been dead for decades. That, too, is running after her — slower, and colder, and it is the only running he ever finished.", it: "Lui resta. Scrive questi appunti. Da qualche parte un lettore posa la pagina, sentendosi visto da un uomo morto da decenni. Anche questo è correre dietro di lei — più piano, e più freddo, ed è l'unica corsa che abbia mai finito." } }
-    ] }
-  ],
-  outro: { en: "The underground has one stair, and it goes up.", it: "Il sottosuolo ha una sola scala, e va su." }
+  statInit: { mem: 4, mel: 12, art: 4 },
+  acts: [
+    {
+      tab: { en: "Act I · The Crystal Palace", it: "Atto I · Il Palazzo di Cristallo" },
+      title: { en: "Act I · Two Times Two Makes Four", it: "Atto I · Due per due fa quattro" },
+      place: { en: "A wretched corner room in St. Petersburg", it: "Una misera stanza d'angolo a San Pietroburgo" },
+      theme: "underground",
+      lines: [
+        { s: U, t: { en: "I am a sick man… I am a spiteful man. I am an unattractive man. I think my liver is diseased. However, I don't know beans about my disease, and I am not sure what is bothering me.", it: "Sono un uomo malato… Sono un uomo cattivo. Sono un uomo spiacevole. Credo che mi faccia male il fegato. Del resto, della mia malattia non capisco un bel niente e non so di preciso che cosa mi faccia male." } },
+        { s: U, t: { en: "Gentlemen, you want to build a Crystal Palace where every human desire is calculated by logarithms and the timetable, so that man can never err again.", it: "Signori, voi volete innalzare un Palazzo di Cristallo dove ogni desiderio umano sia calcolato coi logaritmi e con l'orario ferroviario, così che l'uomo non possa mai più sbagliare." } },
+        { s: U, t: { en: "And what if a gentleman with an ignoble, retrogressive face steps forward right in the middle of that future reason and says: 'Well, gentlemen, what if we kick all this rationality to dust just so we can live according to our own foolish will?'", it: "E se in mezzo a tutta quella futura ragionevolezza si facesse avanti un signore dalla fisionomia ignobile e retrograda e dicesse: «Ebbene, signori, che ne dite di mandare all'aria tutta questa saggezza con un calcio, solo per vivere secondo la nostra stupida volontà?»" } },
+        { s: U, t: { en: "Two times two makes four is no longer life, gentlemen, it is the beginning of death. Two times two makes five is sometimes a very charming little thing too!", it: "Due per due quattro non è più vita, signori, ma è il principio della morte. Due per due cinque è talvolta una cosina davvero incantevole!" } },
+        { s: N, t: { en: "Outside his window, the wet yellow snow of St. Petersburg begins to fall, reminding him of something that happened sixteen years ago.", it: "Fuori dalla finestra comincia a cadere la neve bagnata e gialla di Pietroburgo, ricordandogli qualcosa accaduto sedici anni prima." } }
+      ],
+      choices: [
+        { text: { en: "Recall the officer on Nevsky Prospekt whom you spent two years preparing to bump into.", it: "Ricorda l'ufficiale sulla Prospettiva Nevskij contro cui ti preparasti a urtare per due anni." }, effect: { mem: 3, mel: 2, art: 1 }, lines: [
+          { s: U, t: { en: "I bought a beaver collar on credit just to stand my ground on the pavement! We collided shoulder to shoulder — and he did not even notice me!", it: "Comprai un bavero di castoro a credito solo per non cedergli il passo sul marciapiede! Ci scontrammo spalla contro spalla — e lui non si accorse nemmeno di me!" } }
+        ] },
+        { text: { en: "Recall the dinner at the Hôtel de Paris where you paced the floor for three hours in silence.", it: "Ricorda la cena all'Hôtel de Paris dove camminasti su e giù per tre ore in silenzio." }, effect: { mem: 2, mel: 3, art: 1 }, lines: [
+          { s: U, t: { en: "Zverkov and the others laughed at my yellow trousers while I paced from the stove to the door, hating them and begging them to forgive me in the same breath.", it: "Zverkov e gli altri ridevano dei miei pantaloni macchiati mentre camminavo dalla stufa alla porta, odiandoli e supplicandoli di perdonarmi nello stesso respiro." } }
+        ] }
+      ],
+      outro: { en: "Consciousness is a disease — a real, thoroughgoing disease.", it: "La coscienza è una malattia — una vera, autentica malattia." }
+    },
+    {
+      tab: { en: "Act II · Liza", it: "Atto II · Liza" },
+      title: { en: "Act II · Liza in the Corner Room", it: "Atto II · Liza nella stanza d'angolo" },
+      place: { en: "Four days after the night in the snow", it: "Quattro giorni dopo la notte nella neve" },
+      theme: "candles",
+      lines: [
+        { s: N, t: { en: "In the brothel he had preached to her like a book, reducing her to tears and giving her his address out of vanity. Now the doorbell rings, and she is standing in his doorway in his ragged dressing-gown.", it: "Nel postribolo le aveva parlato come un libro stampato, facendola piangere e dandole il proprio indirizzo per vanità. Ora suona il campanello, e lei è sulla soglia davanti alla sua vestaglia stracciata." } },
+        { s: "Liza", t: { en: "I have left that house. You told me I was a human being and that you would save me. Why are you trembling and shouting at your servant?", it: "Ho lasciato quella casa. Mi avete detto che ero una creatura umana e che mi avreste salvata. Perché tremate e gridate contro il vostro servo?" } },
+        { s: U, t: { en: "Save you? Why did you come? To catch me in this patched robe and poverty? Listen to the truth, Liza: that night I was only avenging my own humiliation on you! I wanted power over your tears!", it: "Salvarti? Perché sei venuta? Per sorprendermi in questa vestaglia rattoppata e nella mia miseria? Ascolta la verità, Liza: quella notte mi vendicavo soltanto su di te della mia umiliazione! Volevo avere potere sulle tue lacrime!" } },
+        { s: N, t: { en: "He pours out all his spite, expecting her to hate him. Instead, Liza sees that he himself is the most unhappy creature on earth — and throws her arms around his neck, weeping for him.", it: "Riversa tutto il suo veleno, aspettandosi che lei lo odi. Invece Liza comprende che è lui stesso la creatura più infelice della terra — e gli getta le braccia al collo, piangendo per lui." } },
+        { s: U, t: { en: "They won't let me… I cannot be good! And ten minutes later, ashamed that she had pitied me, I thrust a crumpled five-ruble note into her hand before she walked out the door.", it: "Non me lo permettono… Io non posso essere buono! E dieci minuti dopo, vergognandomi che avesse avuto pietà di me, le cacciai in mano un biglietto stropicciato da cinque rubli prima che uscisse." } }
+      ],
+      choices: [
+        { text: { en: "Look at the table where she silently laid the five-ruble note before leaving.", it: "Guarda il tavolo dove lei ha posato in silenzio il biglietto da cinque rubli prima di uscire." }, effect: { mem: 4, mel: 3, art: 2 }, lines: [
+          { s: N, t: { en: "There on the green cloth lies the crumpled blue banknote: the proof that her soul was nobler than all his books.", it: "Là sul panno verde giace il biglietto azzurro sgualcito: la prova che l'anima di lei era più nobile di tutti i suoi libri." } }
+        ] },
+        { text: { en: "Run out into the snow calling her name.", it: "Corri fuori nella neve chiamando il suo nome." }, effect: { mem: 3, mel: 2, art: 1 }, lines: [
+          { s: U, t: { en: "Liza! Liza! Two hundred paces to the crossroads, the snow falling thick and vertical — and not a single footstep in sight.", it: "Liza! Liza! Duecento passi fino al crocevia, la neve che cade fitta e verticale — e nemmeno un'orma in vista." } }
+        ] }
+      ],
+      outro: { en: "She understood that a woman who loves will forgive everything — except an insult to her love.", it: "Aveva capito che una donna che ama perdona tutto — tranne l'oltraggio al proprio amore." }
+    },
+    {
+      tab: { en: "Act III · Wet Snow", it: "Atto III · Neve Bagnata" },
+      title: { en: "Act III · Apropos of the Wet Snow", it: "Atto III · A proposito della neve bagnata" },
+      place: { en: "At the writing desk, sixteen years later", it: "Alla scrivania, sedici anni dopo" },
+      theme: "snow",
+      lines: [
+        { s: U, t: { en: "As I stood in the snow at the crossroads, I asked myself: what if I turn the corner, find her, fall on my knees, and she forgives me? Won't I hate her tomorrow precisely because I kissed her feet today?", it: "Fermo nella neve al crocevia, mi chiesi: e se adesso svolto l'angolo, la trovo, cado in ginocchio e lei mi perdona? Non la odierò domani proprio perché oggi le ho baciato i piedi?" } },
+        { s: U, t: { en: "Is it not better that she should carry the insult with her forever? Insult — why, it is purification; it is the most corrosive and painful consciousness!", it: "Non è meglio che porti con sé l'offesa per sempre? L'offesa — ma è una purificazione; è la coscienza più corrosiva e dolorosa!" } },
+        { s: U, t: { en: "Wait — even now, sixteen years later, that literary phrase turns my stomach. Why have I written all this down, if I swear I will never have a single reader?", it: "Aspettate — perfino adesso, sedici anni dopo, quella frase letteraria mi dà il voltastomaco. Perché ho scritto tutto questo, se giuro che non avrò mai un solo lettore?" } },
+        { s: U, t: { en: "We have all grown so unused to 'living life' that we feel a sort of loathing for it, and cannot bear to be reminded of it. Soon we shall contrive to be born somehow from an idea.", it: "Ci siamo tutti così disabituati alla «vita viva» che ne proviamo quasi ribrezzo, e non sopportiamo che ce la si ricordi. Presto inventeremo il modo di nascere da un'idea." } },
+        { s: N, t: { en: "The notes of this paradoxalist do not end here, however. He could not resist and went on writing. But it also seems to us that we may stop right here.", it: "Gli appunti di questo paradossalista, però, non finiscono qui. Egli non seppe trattenersi e continuò a scrivere. Ma a noi sembra che ci si possa anche fermare qui." } }
+      ],
+      choices: [
+        { text: { en: "Drop the pen and listen to the wet snow against the windowpane.", it: "Posa la penna e ascolta la neve bagnata contro il vetro." }, effect: { mem: 3, mel: 1, art: 3 }, lines: [
+          { s: N, t: { en: "Outside, the snow covers the street where Liza walked away into real life, leaving the author alone with his paper.", it: "Fuori, la neve copre la strada per cui Liza se ne andò nella vita vera, lasciando l'autore solo con la sua carta." } }
+        ] },
+        { text: { en: "Write one more page in the underground.", it: "Scrivi ancora una pagina nel sottosuolo." }, effect: { mem: 2, mel: 3, art: 2 }, lines: [
+          { s: U, t: { en: "I will write no more 'Notes from Underground'… though of course I am lying again.", it: "Non scriverò più «Appunti dal sottosuolo»… anche se naturalmente sto mentendo di nuovo." } }
+        ] }
+      ],
+      outro: { en: "We are stillborn, and for a long time we have been born not from living fathers.", it: "Siamo nati morti, e da un pezzo non nasciamo più da padri vivi." }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

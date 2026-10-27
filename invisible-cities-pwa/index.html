@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Invisible Cities — Act II · The Library</title>
-<meta name="description" content="Euphemia — Invisible Cities continues: the trading city where goods and words are sold at the same stalls. Bilingual visual novel scene.">
+<title>Invisible Cities — Interactive Visual Novel · The Library</title>
+<meta name="description" content="Italo Calvino's Invisible Cities in three acts: Euphemia & Zaira, Ersilia & Baucis (Threads and Stilts), and The Atlas of the Great Khan. Bilingual EN/IT.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">Invisible Cities — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">Invisible Cities · Le Città Invisibili · Italo Calvino</h1>
+  <p class="ls-sub">Three acts between Marco Polo and Kublai Khan: Cities & Memory, Thin Cities of Threads and Stilts, and the Great Khan's Atlas. In English and Italian.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -32,31 +33,80 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 var N = { en: "Narrator", it: "Narratore" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "Euphemia", it: "Eufemia" },
-  place: { en: "A trading city on the winter route", it: "Una città di scambi sulla rotta d'inverno" },
+  bookId: "invisible_cities",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "A trading city on the winter caravan route: seven days' camel ride in any direction, and water so scarce it is remembered rather than drunk.", it: "Una città di scambi sulla rotta invernale delle carovane: sette giorni di cammello in tutte le direzioni, e acqua così scarsa che viene ricordata più che bevuta." } },
-    { s: "Marco Polo", t: { en: "In Euphemia, goods and words are traded at the same stalls. The caravans arrive, and for seven days the city inventories not only salt and fish, but everything that happened between one moon and the next.", it: "A Eufemia le merci e le parole si scambiano negli stessi banchi. Le carovane arrivano, e per sette giorni la città fa l'inventario non solo del sale e del pesce, ma di tutto ciò che è accaduto tra una luna e l'altra." } },
-    { s: "Kublai Khan", t: { en: "And when the caravans leave?", it: "E quando le carovane partono?" } },
-    { s: "Marco Polo", t: { en: "The city keeps only what can be said again. Its memory is the memory of a market: crowded, competitive, wrong in detail, indispensable.", it: "La città conserva soltanto ciò che si può dire di nuovo. La sua memoria è la memoria di un mercato: affollata, competitiva, sbagliata nei dettagli, indispensabile." } },
-    { s: N, t: { en: "By evening, strangers who met at dawn are bargaining over a wolf-pack's strategy, a marriage in a far oasis, the price of a rumor about a river that moved.", it: "Sera: sconosciuti incontrati all'alba contrattano la strategia di un branco di lupi, un matrimonio in un'oasi lontana, il prezzo di una voce su un fiume che si è spostato." } },
-    { s: "Marco Polo", t: { en: "Some stories are traded so often they lose their owner. In Euphemia there are tales with no author left, walking the alleys like stray dogs, fed by everyone.", it: "Alcune storie sono scambiate così spesso che perdono il proprietario. A Eufemia ci sono racconti rimasti senza autore, che camminano per i vicoli come cani randagi, nutriti da tutti." } },
-    { s: "Kublai Khan", t: { en: "And what of the traveler who has nothing to tell?", it: "E il viaggiatore che non ha niente da raccontare?" } },
-    { s: "Marco Polo", t: { en: "He pays with listening. The city mints a coin for silence too; it is the rarest currency on the route.", it: "Paga con l'ascolto. La città conia una moneta anche per il silenzio; è la valuta più rara della rotta." } }
-  ],
-  choices: [
-    { text: { en: "Trade the story of your own city.", it: "Scambia la storia della tua città." }, lines: [
-      { s: "Marco Polo", t: { en: "I gave them Venice — the canals, the ferryman's oaths, the city that is afraid of drowning in beauty. They paid in a storm on the Chinese sea and a grandmother's recipe. We were richer than at dawn, and no ledger would show it.", it: "Ho dato loro Venezia — i canali, gli improperi del traghettatore, la città che teme di annegare nella bellezza. Hanno pagato con una tempesta sul mar Cinese e la ricetta di una nonna. Eravamo più ricchi che all'alba, e nessun registro lo mostrerebbe." } }
-    ] },
-    { text: { en: "Pay with listening, all seven days.", it: "Paga con l'ascolto, per tutti e sette i giorni." }, lines: [
-      { s: N, t: { en: "He says nothing for a week. On the eighth day he knows the route better than any map — every waterhole is a sentence, every pass a punctuation. The Khan receives a report that is mostly silence, and understands it completely.", it: "Non dice niente per una settimana. L'ottavo giorno conosce la rotta meglio di qualsiasi mappa — ogni pozza d'acqua è una frase, ogni valico una punteggiatura. Il Khan riceve un rapporto fatto soprattutto di silenzio, e lo comprende del tutto." } }
-    ] }
-  ],
-  outro: { en: "Trade is the oldest way of remembering out loud.", it: "Il commercio è il modo più antico di ricordare ad alta voce." }
+  statInit: { mem: 10, mel: 4, art: 10 },
+  acts: [
+    {
+      tab: { en: "Act I · Euphemia", it: "Atto I · Eufemia" },
+      title: { en: "Act I · Euphemia & The Market of Memory", it: "Atto I · Eufemia e il mercato della memoria" },
+      place: { en: "A trading city at the confluence of seven rivers", it: "Una città di scambi alla confluenza di sette fiumi" },
+      theme: "cities",
+      lines: [
+        { s: N, t: { en: "At every solstice and equinox, merchants of seven nations gather on the boat-docks of Euphemia.", it: "A ogni solstizio ed equinozio, i mercanti di sette nazioni convergono sui moli di Eufemia." } },
+        { s: "Marco Polo", t: { en: "You do not come to Euphemia only to buy and sell ginger and cotton, Sire, but because at night, by the fires around the market, at every word someone says — such as 'wolf', 'sister', 'hidden treasure', 'battle' — each person tells his own tale of wolves, sisters, treasures.", it: "Non solo per comprare e vendere zenzero e cotone si viene a Eufemia, Sire, ma perché la notte accanto ai fuochi tutt'intorno al mercato, a ogni parola che uno dice — come «lupo», «sorella», «tesoro nascosto», «battaglia» — ciascuno racconta la sua storia di lupi, di sorelle, di tesori." } },
+        { s: "Kublai Khan", t: { en: "And when the camels are loaded at dawn and you ride back across the desert?", it: "E quando all'alba si caricano i cammelli e si riparte attraverso il deserto?" } },
+        { s: "Marco Polo", t: { en: "You know that in the long journey ahead, when you start to think of your memories to stay awake on the swaying saddle, your wolf will have become another wolf, your sister a different sister.", it: "Tu sai che nel lungo viaggio che ti attende, quando per restare sveglio al dondolio del cammello comincerai a ripensare tutti i tuoi ricordi, il tuo lupo sarà diventato un altro lupo, tua sorella una sorella diversa." } },
+        { s: "Kublai Khan", t: { en: "Every time I ask you about the provinces, Venetian, you speak of memory. Why do you never speak of Venice?", it: "Ogni volta che ti interrogo sulle province, Veneziano, mi parli della memoria. Perché non mi parli mai di Venezia?" } },
+        { s: "Marco Polo", t: { en: "Every time I describe a city I am saying something about Venice. To distinguish the other cities' qualities I must start from a first city that remains implicit. For me it is Venice.", it: "Ogni volta che descrivo una città dico qualcosa di Venezia. Per distinguere le qualità delle altre, devo partire da una prima città che resta implicita. Per me è Venezia." } }
+      ],
+      choices: [
+        { text: { en: "Confess why you fear speaking Venice's name aloud.", it: "Confessa perché temi di pronunciare ad alta voce il nome di Venezia." }, effect: { mem: 4, mel: 2, art: 2 }, lines: [
+          { s: "Marco Polo", t: { en: "Memory's images, once they are fixed in words, are erased. Perhaps I am afraid of losing Venice all at once, if I speak of it. Or perhaps, speaking of other cities, I have already lost it, little by little.", it: "Le immagini della memoria, una volta fissate con le parole, si cancellano. Forse ho paura di perdere Venezia tutta in una volta, se ne parlo. O forse, parlando d'altre città, l'ho già perduta a poco a poco." } }
+        ] },
+        { text: { en: "Trade your silence at the campfire of Euphemia.", it: "Scambia il tuo silenzio accanto ai fuochi di Eufemia." }, effect: { mem: 2, mel: 1, art: 3 }, lines: [
+          { s: N, t: { en: "The city mints a coin for listening too; the traveler returns across the dunes carrying strangers' memories in place of his own.", it: "La città conia una moneta anche per l'ascolto; il viaggiatore torna tra le dune portando i ricordi degli sconosciuti al posto dei propri." } }
+        ] }
+      ],
+      outro: { en: "Memory's images, once they are fixed in words, are erased.", it: "Le immagini della memoria, una volta fissate con le parole, si cancellano." }
+    },
+    {
+      tab: { en: "Act II · Thin Cities", it: "Atto II · Città Sottili" },
+      title: { en: "Act II · Ersilia and Baucis", it: "Atto II · Ersilia e Bauci" },
+      place: { en: "Above the clouds & across the plain of threads", it: "Sopra le nuvole e nella pianura dei fili" },
+      theme: "paradiso",
+      lines: [
+        { s: "Marco Polo", t: { en: "In Ersilia, to establish the relationships that sustain the city's life, the inhabitants stretch strings from the corners of the houses, white or black or grey or black-and-white according to whether they mark a relationship of blood, trade, authority, or agency.", it: "A Ersilia, per stabilire i rapporti che reggono la vita della città, gli abitanti tendono dei fili tra gli spigoli delle case, bianchi o neri o grigi o bianco-e-neri a seconda che segnino rapporti di parentela, scambio, autorità, rappresentanza." } },
+        { s: "Kublai Khan", t: { en: "And when the strings become too numerous to pass among them?", it: "E quando i fili diventano così fitti che non ci si può più passare in mezzo?" } },
+        { s: "Marco Polo", t: { en: "The inhabitants pack up and leave. They dismantle the houses; only the strings and their supports remain. From a mountainside, you see the labyrinth of taut strings standing in the plain — the spider-webs of intricate relationships seeking a form.", it: "Gli abitanti fanno fagotto e se ne vanno: smontano le case; restano solo i fili e i sostegni dei fili. Dal fianco d'un monte vedi nella pianura il labirinto delle corde tese — ragnatele di rapporti intricati che cercano una forma." } },
+        { s: "Kublai Khan", t: { en: "And Baucis? The city raised on stilts above the clouds?", it: "E Bauci? La città innalzata su trampoli sopra le nuvole?" } },
+        { s: "Marco Polo", t: { en: "The inhabitants of Baucis never touch the earth. With spyglasses and telescopes aimed downward, they contemplate leaf by leaf, stone by stone, ant by ant, fascinated by their own absence.", it: "Gli abitanti di Bauci non toccano mai terra. Con cannocchiali e telescopi puntati in giù, contemplano foglia a foglia, sasso a sasso, formica per formica, affascinati dalla propria assenza." } }
+      ],
+      choices: [
+        { text: { en: "Look through the spyglass of Baucis at the earth without us.", it: "Guarda nel cannocchiale di Bauci la terra senza di noi." }, effect: { mem: 2, mel: 2, art: 3 }, lines: [
+          { s: N, t: { en: "Do they hate the earth, or do they love it so much that they fear to soil it with a single footprint?", it: "Odiano la terra, o la amano al punto da temere di sporcarla con una sola impronta?" } }
+        ] },
+        { text: { en: "Walk through the abandoned web of threads in Ersilia.", it: "Cammina nella ragnatela abbandonata dei fili di Ersilia." }, effect: { mem: 3, mel: 1, art: 3 }, lines: [
+          { s: N, t: { en: "Every city disappears before the relationships that invented it.", it: "Ogni città scompare prima dei legami che l'hanno inventata." } }
+        ] }
+      ],
+      outro: { en: "A city is a web of relationships seeking a form.", it: "Una città è una ragnatela di rapporti che cercano una forma." }
+    },
+    {
+      tab: { en: "Act III · The Atlas", it: "Atto III · L'Atlante" },
+      title: { en: "Act III · The Great Khan's Atlas", it: "Atto III · L'Atlante del Gran Khan" },
+      place: { en: "The imperial pavilion at night", it: "Il padiglione imperiale, di notte" },
+      theme: "cities",
+      lines: [
+        { s: N, t: { en: "The Great Khan owns an atlas whose drawings depict the terrestrial globe all at once, and also the cities that do not yet exist: New Amsterdam, Tokyo, San Francisco, and the nightmares of Enoch and Brave New World.", it: "Il Gran Khan possiede un atlante i cui disegni figurano l'orbe terracqueo tutt'insieme, e anche le città che ancora non esistono: Nuova Amsterdam, Tokyo, San Francisco, e gli incubi di Enoch e del Mondo Nuovo." } },
+        { s: "Kublai Khan", t: { en: "It is all useless, if the last landing place can only be the infernal city, and it is there that, in ever-narrowing circles, the current is drawing us.", it: "Tutto è inutile, se l'ultimo approdo non può essere che la città infernale, ed è là che, in una spirale sempre più stretta, ci risucchia la corrente." } },
+        { s: "Marco Polo", t: { en: "The inferno of the living is not something that will be; if there is one, it is what is already here, the inferno where we live every day, that we form by being together.", it: "L'inferno dei viventi non è qualcosa che sarà; se ce n'è uno, è quello che esiste già qui, l'inferno che abitiamo tutti i giorni, che formiamo stando insieme." } },
+        { s: "Marco Polo", t: { en: "There are two ways to escape suffering it. The first is easy for many: accept the inferno and become such a part of it that you can no longer see it.", it: "Due modi ci sono per non soffrirne. Il primo riesce facile a molti: accettare l'inferno e diventarne parte fino al punto di non vederlo più." } },
+        { s: "Marco Polo", t: { en: "The second is risky and demands constant vigilance and apprehension: seek and learn to recognize who and what, in the midst of the inferno, are not inferno, then make them endure, give them space.", it: "Il secondo èante-rischioso ed esige attenzione e apprendimento continui: cercare e saper riconoscere chi e cosa, in mezzo all'inferno, non è inferno, e farlo durare, e dargli spazio." } }
+      ],
+      choices: [
+        { text: { en: "Close the atlas and seek what is not inferno.", it: "Chiudi l'atlante e cerca ciò che non è inferno." }, effect: { mem: 4, mel: -1, art: 4 }, lines: [
+          { s: N, t: { en: "In the dark garden, the Emperor and the Venetian listen to the nightingale: a small space that endures.", it: "Nel giardino buio, l'Imperatore e il Veneziano ascoltano l'usignolo: un piccolo spazio che dura." } }
+        ] },
+        { text: { en: "Turn one more page of the unwritten cities.", it: "Sfoglia ancora una pagina delle città non ancora scritte." }, effect: { mem: 3, mel: 1, art: 3 }, lines: [
+          { s: N, t: { en: "The catalogue of forms is endless: until every shape has found its city, new cities will continue to be born.", it: "Il catalogo delle forme è sterminato: finché ogni forma non avrà trovato la sua città, nuove città continueranno a nascere." } }
+        ] }
+      ],
+      outro: { en: "Seek and learn to recognize who and what, in the midst of the inferno, are not inferno, then make them endure, give them space.", it: "Cercare e saper riconoscere chi e cosa, in mezzo all'inferno, non è inferno, e farlo durare, e dargli spazio." }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

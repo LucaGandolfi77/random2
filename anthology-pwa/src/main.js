@@ -1,31 +1,65 @@
 import CONFIG from './config.js';
 import { loadState, saveState, addNote, markVisited, isVisited } from './storage.js';
-import { initRender, clearScreen } from './render.js';
+import { initRender, clearScreen, setReaderVisual } from './render.js';
 import { initAudio, playMemory } from './audio.js';
 import { SCENES } from './scenes.js';
 
-/* ───────────────────────────────────────────────────────────────────────────
-   The Library · scene reader
-   Every work in the anthology has a bilingual dialogue scene. openVN(id)
-   opens the scene inside the reader: lines → a branching choice → reply
-   lines → outro. Choices move the work's mem/mel/art stats. Works with a
-   `path` offer a link to their full standalone PWA at the end.
-   ─────────────────────────────────────────────────────────────────────────── */
-
 const LABELS = {
-  en: { mem: 'Memory', mel: 'Melancholy', art: 'Art', hint: '▸ tap to continue',
-        back: '← Return to the Library', again: '↻ Read the scene again',
-        full: 'Open the full story ▸', chose: 'Choice: ' },
-  it: { mem: 'Memoria', mel: 'Malinconia', art: 'Arte', hint: '▸ tocca per continuare',
-        back: '← Ritorna alla Biblioteca', again: '↻ Rileggi la scena',
-        full: 'Apri il racconto completo ▸', chose: 'Scelta: ' }
+  en: {
+    mem: 'Memory', mel: 'Melancholy', art: 'Art', hint: '▸ tap or press Space to continue',
+    back: '← Return to the Library', again: '↻ Read the scene again',
+    full: 'Open the full multi-act book ▸', chose: 'Choice: ',
+    heading: 'The Library',
+    subheading: 'A Collection of Melancholic Visual Novels',
+    fltAll: 'All Works (26)',
+    fltClassic: 'Classics · Full Books (12)',
+    fltMulti: 'Multiverso · Sci-Fi Reimaginings (14)',
+    prologueBtn: 'Prologue — Read Scene',
+    readBtn: 'Read Scene',
+    fullBookCard: 'Open Full Book ▸',
+    worksLabel: 'Works: <strong>26</strong>',
+    langsLabel: 'Languages: <strong>English / Italiano</strong>',
+    formatLabel: 'Format: <strong>Visual Novel PWA</strong>',
+    langSwitch: 'Lingua: Italiano'
+  },
+  it: {
+    mem: 'Memoria', mel: 'Malinconia', art: 'Arte', hint: '▸ tocca o premi Spazio per continuare',
+    back: '← Ritorna alla Biblioteca', again: '↻ Rileggi la scena',
+    full: 'Apri il libro interattivo completo ▸', chose: 'Scelta: ',
+    heading: 'La Biblioteca',
+    subheading: 'Una Collezione di Visual Novel Malinconiche',
+    fltAll: 'Tutte le Opere (26)',
+    fltClassic: 'I Classici · Libri Completi (12)',
+    fltMulti: 'Multiverso · Riscritture Sci-Fi (14)',
+    prologueBtn: 'Prologo — Leggi Scena',
+    readBtn: 'Leggi Scena',
+    fullBookCard: 'Apri Libro Completo ▸',
+    worksLabel: 'Opere: <strong>26</strong>',
+    langsLabel: 'Lingue: <strong>Italiano / English</strong>',
+    formatLabel: 'Formato: <strong>Visual Novel PWA</strong>',
+    langSwitch: 'Language: English'
+  }
+};
+
+const TAG_IT = {
+  French: 'Francese', Russian: 'Russo', Italian: 'Italiano', German: 'Tedesco', Irish: 'Irlandese',
+  Redemption: 'Redenzione', Justice: 'Giustizia', Psychology: 'Psicologia', Guilt: 'Colpa',
+  Memory: 'Memoria', Contemplation: 'Contemplazione', Philosophy: 'Filosofia', Faith: 'Fede',
+  Transcendence: 'Trascendenza', Absurd: 'Assurdo', Melancholy: 'Malinconia', Love: 'Amore',
+  Fate: 'Destino', Tragedy: 'Tragedia', Mortality: 'Mortalità', Beauty: 'Bellezza', Art: 'Arte',
+  Isolation: 'Isolamento', Scripture: 'Scrittura', Bilingual: 'Bilingue',
+  Multiverse: 'Multiverso', Archive: 'Archivio', Loop: 'Ciclo', Mirror: 'Specchio',
+  Simulation: 'Simulazione', Reality: 'Realtà', AI: 'IA', Network: 'Rete', Urban: 'Urbano',
+  Digital: 'Digitale', Legacy: 'Eredità', Identity: 'Identità', Cyberpunk: 'Cyberpunk',
+  Ethics: 'Etica', Cosmic: 'Cosmico'
 };
 
 let R = { story: null, scene: null, idx: 0, phase: 'lines', branch: null, stats: { mem: 0, mel: 0, art: 0 } };
+let currentFilter = 'all';
 
 function $(id) { return document.getElementById(id); }
 function L(k) { return LABELS[CONFIG.language === 'it' ? 'it' : 'en'][k]; }
-function txt(t) { if (t == null) return ''; return CONFIG.language === 'it' ? (t.it || t.en) : (t.en || t.it); }
+function txt(t) { if (t == null) return ''; if (typeof t === 'string') return t; return CONFIG.language === 'it' ? (t.it || t.en) : (t.en || t.it); }
 function spk(s) { if (!s) return ''; return typeof s === 'string' ? s : txt(s); }
 
 function currentLines() {
@@ -59,6 +93,44 @@ function fmtEffect(e) {
     if (v !== 0) parts.push((v > 0 ? '+' : '−') + Math.abs(v) + ' ' + names[k]);
   });
   return parts.join(' · ');
+}
+
+function localizeLibraryDOM() {
+  const isIt = CONFIG.language === 'it';
+  if ($('lib-heading')) $('lib-heading').textContent = L('heading');
+  if ($('lib-subheading')) $('lib-subheading').textContent = L('subheading');
+  if ($('flt-all')) $('flt-all').textContent = L('fltAll');
+  if ($('flt-classic')) $('flt-classic').textContent = L('fltClassic');
+  if ($('flt-multiverse')) $('flt-multiverse').textContent = L('fltMulti');
+  if ($('stat-works')) $('stat-works').innerHTML = L('worksLabel');
+  if ($('stat-langs')) $('stat-langs').innerHTML = L('langsLabel');
+  if ($('stat-format')) $('stat-format').innerHTML = L('formatLabel');
+  if ($('lang-toggle-btn')) $('lang-toggle-btn').textContent = L('langSwitch');
+
+  const cards = document.querySelectorAll('.book-card');
+  cards.forEach(card => {
+    const id = card.getAttribute('data-id') || ((card.getAttribute('onclick') || '').match(/openVN\('([a-z_]+)'\)/) || [])[1];
+    if (!id) return;
+    const item = CONFIG.library.find(s => s.id === id);
+    if (!item) return;
+
+    const h3 = card.querySelector('h3');
+    if (h3) h3.textContent = txt(item.title);
+    const auth = card.querySelector('.author');
+    if (auth) auth.textContent = txt(item.author);
+    const p = card.querySelector('p');
+    if (p && item.desc) p.textContent = txt(item.desc);
+
+    const tagRow = card.querySelector('.tag-row');
+    if (tagRow && Array.isArray(item.tags)) {
+      tagRow.innerHTML = item.tags.map(t => `<span class="tag">${isIt ? (TAG_IT[t] || t) : t}</span>`).join('');
+    }
+
+    const playLink = card.querySelector('.play-link');
+    if (playLink) playLink.textContent = item.path ? L('prologueBtn') : L('readBtn');
+    const fullLink = card.querySelector('.full-book-link');
+    if (fullLink) fullLink.textContent = L('fullBookCard');
+  });
 }
 
 function renderLine() {
@@ -124,8 +196,6 @@ function renderEnd() {
   markLibraryCards();
 }
 
-/* Library progress: badge the cards of scenes already finished and update
-   the "scenes read" counter in the stats strip. */
 function markLibraryCards() {
   const cards = document.querySelectorAll('.book-card');
   let read = 0;
@@ -186,17 +256,32 @@ export function initMain() {
   const saved = loadState();
   if (saved && saved.language) { CONFIG.language = saved.language; }
   else { CONFIG.language = 'en'; }
+  localizeLibraryDOM();
   renderLibrary();
   playMemory(165, 2);
   const menu = document.getElementById('start-menu');
   const about = document.getElementById('about-menu');
 
+  window.filterLibrary = (flt) => {
+    currentFilter = flt || 'all';
+    document.querySelectorAll('.filter-pill').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-filter') === currentFilter);
+    });
+    document.querySelectorAll('.book-card').forEach(card => {
+      const k = card.getAttribute('data-kind') || 'classic';
+      card.classList.toggle('hidden-card', currentFilter !== 'all' && k !== currentFilter);
+    });
+  };
+
   window.switchLang = () => {
     CONFIG.language = CONFIG.language === 'en' ? 'it' : 'en';
     const s = loadState(); s.language = CONFIG.language; saveState(s);
+    localizeLibraryDOM();
     renderLibrary();
     markLibraryCards();
     if (R.scene) {
+      $('reader-title').textContent = txt(R.story.title);
+      $('reader-place').textContent = R.scene.place ? txt(R.scene.place) : '';
       showStats();
       if (R.phase === 'end') renderEnd();
       else if (R.phase === 'choices') renderChoices();
@@ -223,6 +308,7 @@ export function initMain() {
     $('reader-stage').classList.remove('hidden');
     showStats();
     $('reader').classList.remove('hidden');
+    setReaderVisual(story.visual || 'candles');
     playMemory(196, 2);
     renderLine();
   };
@@ -250,8 +336,7 @@ export function initMain() {
 
   if (menu) menu.classList.remove('hidden');
 }
+
 function renderLibrary() { clearScreen(); }
 
-/* Entry point: this file is loaded as a module, so nothing runs until we
-   call it explicitly. Module scripts are deferred, so the DOM is ready. */
 initMain();

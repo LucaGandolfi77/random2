@@ -1263,6 +1263,21 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="arcade sport action baseball" data-playable="baseball-pwa/" style="--c1:#22c55e; --c2:#fbbf24; --tile-glow:rgba(34,197,94,.55); --shimmer-delay:2.32s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#15803d,#0b2239)">&#9918;</div>
+            <h2>DIAMOND POLY '99</h2>
+          </div>
+          <p class="tagline">3D low-poly stadium baseball: drag to aim the sweet-spot reticle, release to swing the bat, then sprint the baseline, round the bases and swipe down to slide under the tag.</p>
+          <div class="chips"><span class="chip">BASEBALL</span><span class="chip">3D LOW-POLY</span><span class="chip">DERBY</span><span class="chip">PWA</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="baseball-pwa/">&#9654;&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/baseball-pwa" aria-label="DIAMOND POLY '99 source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="arcade action survival" data-playable="gulper-pwa/" style="--c1:#7fd6c2; --c2:#04131f; --tile-glow:rgba(127,214,194,.5); --shimmer-delay:2.35s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#0b3b4a,#04131f)">&#128025;</div>
@@ -2114,6 +2129,104 @@
         }
       },
 
+      /* DIAMOND POLY '99: a low-poly baseball diamond with a batter's swing
+         and a flying ball arcing over the fence. */
+      diamond: function (g, w, h, t, u) {
+        var period = u.period || 3.2;
+        var p = (t % period) / period;
+
+        /* Low-poly emerald diamond viewed from behind home plate */
+        var cx = w * 0.5, cy = h * 0.72;
+        var inners = 10;
+        for (var i = inners - 1; i >= 0; i--) {
+          var r0 = (i / inners) * w * 0.5;
+          var r1 = ((i + 1) / inners) * w * 0.5;
+          var shade = i % 2 === 0 ? rgba(P1, 0.28) : rgba(P2, 0.42);
+          g.fillStyle = shade;
+          g.beginPath();
+          g.moveTo(cx, cy - r1);
+          g.lineTo(cx + r1, cy);
+          g.lineTo(cx, cy + r1 * 0.55);
+          g.lineTo(cx - r1, cy);
+          g.closePath();
+          g.fill();
+        }
+
+        /* Bases: 1B, 2B, 3B, Home */
+        g.fillStyle = "rgba(255,255,255,0.9)";
+        [[w * 0.5, cy - w * 0.48], [w * 0.94, cy], [w * 0.06, cy], [w * 0.5, cy + w * 0.26]].forEach(function (b) {
+          g.save();
+          g.translate(b[0], b[1]);
+          g.rotate(Math.PI / 4);
+          g.fillRect(-2.6, -2.6, 5.2, 5.2);
+          g.restore();
+        });
+
+        /* Batter silhouette, pivoting through a swing */
+        var swing = Math.sin(p * Math.PI * 2);
+        var bx = w * 0.16, by = cy + h * 0.08;
+        g.strokeStyle = rgba(P1, 1);
+        g.lineWidth = 2.6;
+        g.lineCap = "round";
+        /* legs */
+        g.beginPath();
+        g.moveTo(bx, by - 6);
+        g.lineTo(bx - 3.4, by + 9);
+        g.moveTo(bx, by - 6);
+        g.lineTo(bx + 3.4, by + 9);
+        g.stroke();
+        /* torso */
+        g.beginPath();
+        g.moveTo(bx, by - 6);
+        g.lineTo(bx, by - 17);
+        g.stroke();
+        /* head + helmet */
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath();
+        g.arc(bx, by - 21.5, 3.1, 0, TAU);
+        g.fill();
+        /* the bat, sweeping around the shoulders */
+        var batA = swing * 2.2 - 0.5;
+        g.save();
+        g.translate(bx, by - 14);
+        g.rotate(batA);
+        g.strokeStyle = rgba(P2, 1);
+        g.lineWidth = 3.4;
+        g.beginPath();
+        g.moveTo(0, 0);
+        g.lineTo(15, 0);
+        g.stroke();
+        g.restore();
+
+        /* Hit ball arcing away toward the fence */
+        var flight = Math.max(0, Math.min(1, (p - 0.18) / 0.72));
+        if (flight > 0) {
+          var fx2 = w * 0.22 + flight * w * 0.62;
+          var fy2 = cy - h * 0.06 - Math.sin(flight * Math.PI) * h * 0.44;
+          g.strokeStyle = rgba(P2, 0.55);
+          g.lineWidth = 1.4;
+          g.setLineDash([2, 3]);
+          g.beginPath();
+          g.moveTo(w * 0.22, cy - h * 0.08);
+          g.lineTo(fx2, fy2);
+          g.stroke();
+          g.setLineDash([]);
+          g.fillStyle = "rgba(255,255,255,0.95)";
+          g.beginPath();
+          g.arc(fx2, fy2, 3.1, 0, TAU);
+          g.fill();
+        }
+
+        /* Floodlight halo at dusk */
+        var glow = 0.5 + 0.5 * Math.sin(t * 1.4);
+        var lg = g.createRadialGradient(w * 0.5, h * 0.10, 1, w * 0.5, h * 0.10, w * 0.42);
+        lg.addColorStop(0, rgba(P2, 0.28 * glow));
+        lg.addColorStop(1, rgba(P2, 0));
+        g.fillStyle = lg;
+        g.fillRect(0, 0, w, h * 0.5);
+        g.lineCap = "butt";
+      },
+
       /* STATIC: TV snow, a sweeping scanline, CRT raster lines. */
       noise: function (g, w, h, t) {
         for (var i = 0; i < 120; i++) {
@@ -2549,7 +2662,8 @@
       "pixel-cup-pwa":   ["arc",     { period: 2.4 }],
       "gulper-pwa":      ["vortex",  { period: 5.2 }],
       "core9-pwa":       ["reactor", { period: 5.6 }],
-      "dottor-gelo-pwa": ["grid", { period: 4.8 }]
+      "dottor-gelo-pwa": ["grid", { period: 4.8 }],
+      "baseball-pwa":    ["diamond", { period: 3.2 }]
     };
 
     function tilePalette(card) {

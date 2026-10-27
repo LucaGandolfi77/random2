@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>The Brothers Karamazov — Act II · The Library</title>
-<meta name="description" content="The Cana of Galilee — The Brothers Karamazov continues: the elder's death, the whisper, and Alyosha's night of joy. Bilingual visual novel scene.">
+<title>The Brothers Karamazov — Interactive Visual Novel · The Library</title>
+<meta name="description" content="The Brothers Karamazov in three acts: The Grand Inquisitor, The Cana of Galilee, and The Stone by Ilusha's Grave. Bilingual visual novel.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">The Brothers Karamazov — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">The Brothers Karamazov · Dostoevsky</h1>
+  <p class="ls-sub">Three acts of rebellion, miracle, and active love — Ivan's poem, Alyosha's vigil, and the vow at the stone. In English and Italian.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -32,32 +33,83 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 var N = { en: "Narrator", it: "Narratore" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "The Cana of Galilee", it: "Le nozze di Cana" },
-  place: { en: "The monastery, the night after the elder's death", it: "Il monastero, la notte dopo la morte dell'anziano" },
+  bookId: "brothers_karamazov",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "Father Zosima has been dead three days, and the monastery whispers: the body of a righteous man should smell of sanctity. It smells of ordinary death.", it: "Padre Zosima è morto da tre giorni, e il monastero mormora: il corpo di un giusto dovrebbe odorare di santità. Odora di morte comune." } },
-    { s: { en: "Voices", it: "Le Voci" }, t: { en: "He fasted, he prayed — and look at him. Perhaps he was not righteous after all.", it: "Ha digiunato, ha pregato — e guardate. Forse non era affatto un giusto." } },
-    { s: "Alyosha", t: { en: "Ivan is smiling. My brother the logician heard the whisper, and smiled.", it: "Ivan sorride. Mio fratello il logico ha sentito il mormorio, e sorride." } },
-    { s: "Ivan", t: { en: "One miracle is worth a thousand arguments, Alyosha. And one odour is worth a thousand miracles. Good night, little brother.", it: "Un miracolo vale mille argomenti, Alëša. E un odore vale mille miracoli. Buonanotte, fratellino." } },
-    { s: N, t: { en: "Alyosha keeps vigil alone, the Gospel open, the candle down to its last hour. 'And there was a marriage in Cana of Galilee…'", it: "Alëša veglia da solo, il Vangelo aperto, la candela ridotta alla sua ultima ora. «E si fecero le nozze in Cana di Galilea…»" } },
-    { s: "Alyosha", t: { en: "He was at the marriage. He was at the feast. Why am I not weeping — why do I want to dance?", it: "Lui era alle nozze. Era al banchetto. Perché non sto piangendo — perché mi viene da ballare?" } },
-    { s: N, t: { en: "The dream comes like warm water: the feast of Cana, and the old elder among the poor guests, laughing, calling him: 'Why have you gone away, Alyosha?'", it: "Il sogno arriva come acqua tiepida: il banchetto di Cana, e il vecchio anziano tra gli ospiti poveri, che ride e lo chiama: «Perché te ne sei andato, Alëša?»" } },
-    { s: { en: "Father Zosima", it: "Padre Zosima" }, t: { en: "We are not separated, my quiet boy. Run out and rejoice — do not fear life. Life is greater than the meaning of it.", it: "Non siamo separati, mio ragazzo silenzioso. Corri fuori e rallegrati — non temere la vita. La vita è più grande del suo significato." } },
-    { s: N, t: { en: "Alyosha wakes, goes out, falls to the earth, kisses it, weeps and laughs at once. A soldier-boy runs up to ask for alms and receives the whole night's joy.", it: "Alëša si sveglia, esce, cade a terra, la bacia, piange e ride insieme. Un giovanotto soldato gli corre incontro a chiedere l'elemosina e riceve tutta la gioia della notte." } }
-  ],
-  choices: [
-    { text: { en: "Carry the joy back to the brothers tomorrow.", it: "Riporta la gioia ai fratelli, domani." }, lines: [
-      { s: N, t: { en: "In the morning he will make peace at the funeral, feed the boys, and hold the monastery and the town together with a thread of quiet gladness. Grief kept company becomes bread.", it: "La mattina farà pace ai funerali, sfamerà i ragazzi, e terrà insieme monastero e città con un filo di letizia tranquilla. Il dolore in compagnia diventa pane." } }
-    ] },
-    { text: { en: "Go at once to Ivan — joy is strongest shared with the doubter.", it: "Vai subito da Ivan — la gioia è più forte se condivisa col dubitante." }, lines: [
-      { s: N, t: { en: "He finds Ivan asleep over Lermontov, notes on theodicy in the margins. Alyosha lays a blanket over him and prays for the argument he cannot yet win. The joy keeps; the argument will keep longer.", it: "Lo trova addormentato sopra Lermontov, appunti sulla teodicea a margine. Alëša gli stende una coperta e prega per l'argomento che non può ancora vincere. La gioia si conserva; l'argomento si conserva di più." } }
-    ] }
-  ],
-  outro: { en: "Do not fear life. That is the whole gospel, read at a funeral.", it: "Non temere la vita. È tutto il vangelo, letto a un funerale." }
+  statInit: { mem: 6, mel: 7, art: 5 },
+  acts: [
+    {
+      tab: { en: "Act I · The Inquisitor", it: "Atto I · L'Inquisitore" },
+      title: { en: "Act I · The Grand Inquisitor", it: "Atto I · Il Grande Inquisitore" },
+      place: { en: "The Metropolis Tavern, afternoon", it: "La trattoria «La Capitale», pomeriggio" },
+      theme: "candles",
+      lines: [
+        { s: N, t: { en: "Across a sticky tavern table, over fish soup and cherry jam, Ivan Karamazov opens his soul to his younger brother Alyosha.", it: "Attraverso il tavolo appiccicoso di una trattoria, davanti a una zuppa di pesce e confettura di ciliegie, Ivan Karamazov apre l'anima al fratello minore Alëša." } },
+        { s: "Ivan", t: { en: "If the eternal harmony requires the unavenged tears of even one tortured child, Alyosha, then it is worth too much. I respectfully return the ticket.", it: "Se l'armonia eterna richiede le lacrime invendicate anche di un solo bambino torturato, Alëša, allora costa troppo cara. Io restituisco rispettosamente il biglietto." } },
+        { s: "Alyosha", t: { en: "That is rebellion, Ivan. And yet you say you wrote a poem about the One who took every sin upon Himself.", it: "Questa è ribellione, Ivan. Eppure dici di aver composto un poema su Colui che prese ogni peccato sopra di Sé." } },
+        { s: "Ivan", t: { en: "Yes. Sixteen-century Seville, the day after a hundred heretics were burned. He walks silently through the square. The crowd weeps. And the ninety-year-old Cardinal arrests Him.", it: "Sì. Siviglia, sedicesimo secolo, il giorno dopo il rogo di cento eretici. Lui cammina in silenzio per la piazza. La folla piange. E il Cardinale di novant'anni Lo fa arrestare." } },
+        { s: { en: "The Inquisitor", it: "L'Inquisitore" }, t: { en: "Why have You come to hinder us? You offered men freedom, and nothing has ever been more insupportable to man than freedom! We have corrected Your work: we gave them miracle, mystery, and authority.", it: "Perché sei venuto a disturbarci? Hai offerto agli uomini la libertà, e nulla è mai stato più insopportabile per l'uomo della libertà! Noi abbiamo corretto la Tua opera: abbiamo dato loro il miracolo, il mistero e l'autorità." } },
+        { s: "Alyosha", t: { en: "And the Prisoner says nothing? Not a single word to the old man?", it: "E il Prigioniero non dice nulla? Neppure una parola al vecchio?" } },
+        { s: "Ivan", t: { en: "He listens to the end. Then He approaches the old man in silence and softly kisses him on his bloodless ninety-year-old lips. That is the whole answer.", it: "Ascolta fino alla fine. Poi si avvicina in silenzio al vecchio e lo bacia piano sulle labbra esangui di novant'anni. È tutta qui la risposta." } }
+      ],
+      choices: [
+        { text: { en: "Stand up and kiss Ivan silently on the lips, just as in his poem.", it: "Alzati e bacia Ivan in silenzio sulle labbra, proprio come nel suo poema." }, effect: { mem: 3, mel: -1, art: 3 }, lines: [
+          { s: "Ivan", t: { en: "Literary theft, Alyosha! You stole that from my poem! …Thank you, though. Even if I cannot believe, I will remember that you kissed me.", it: "Plagio letterario, Alëša! L'hai rubato dal mio poema! …Grazie, però. Anche se non riesco a credere, mi ricorderò che mi hai baciato." } }
+        ] },
+        { text: { en: "Ask Ivan what will happen to Dmitri and their father tonight.", it: "Chiedi a Ivan che cosa accadrà stanotte a Dmitri e al padre." }, effect: { mem: 2, mel: 3, art: 0 }, lines: [
+          { s: "Ivan", t: { en: "Am I my brother's keeper? Let the reptiles devour each other… Why do you look at me as if I had already consented to murder?", it: "Sono forse il custode di mio fratello? Che i rettili si divorino tra loro… Perché mi guardi come se avessi già acconsentito all'omicidio?" } }
+        ] }
+      ],
+      outro: { en: "The kiss burns in the old man's heart, though he sticks to his idea.", it: "Il bacio brucia nel cuore del vecchio, benché egli rimanga fedele alla sua idea." }
+    },
+    {
+      tab: { en: "Act II · Cana", it: "Atto II · Cana" },
+      title: { en: "Act II · The Cana of Galilee", it: "Atto II · Le nozze di Cana" },
+      place: { en: "The monastery, the night after the elder's death", it: "Il monastero, la notte dopo la morte dell'anziano" },
+      theme: "paradiso",
+      lines: [
+        { s: N, t: { en: "Father Zosima has been dead three days, and the monastery whispers: the body of a righteous man should smell of sanctity. It smells of ordinary death.", it: "Padre Zosima è morto da tre giorni, e il monastero mormora: il corpo di un giusto dovrebbe odorare di santità. Odora di morte comune." } },
+        { s: { en: "Voices", it: "Le Voci" }, t: { en: "He fasted, he prayed — and look at him. Perhaps he was not righteous after all.", it: "Ha digiunato, ha pregato — e guardate. Forse non era affatto un giusto." } },
+        { s: "Alyosha", t: { en: "Why did God permit this disgrace upon the holiest man I knew? I am not rebelling against God — I simply do not accept His world.", it: "Perché Dio ha permesso questo disonore sull'uomo più santo che conoscessi? Non mi ribello a Dio — semplicemente non accetto il Suo mondo." } },
+        { s: N, t: { en: "Alyosha keeps vigil alone by the coffin while Father Paissy reads the Gospel: 'And the third day there was a marriage in Cana of Galilee…'", it: "Alëša veglia da solo accanto alla bara mentre padre Paisij legge il Vangelo: «Il terzo giorno vi furono nozze in Cana di Galilea…»" } },
+        { s: "Alyosha", t: { en: "He loved joy, not the sour terror of fanatics. Why am I weeping in bitterness when the water is turning into wine?", it: "Lui amava la gioia, non il cupo terrore dei fanatici. Perché piango d'amarezza mentre l'acqua si muta in vino?" } },
+        { s: { en: "Father Zosima", it: "Padre Zosima" }, t: { en: "I gave an onion once, my quiet boy, and therefore I am here at the feast. Begin your work, dear one. Do not fear life!", it: "Ho donato una cipolla una volta, mio ragazzo silenzioso, e perciò sono qui al banchetto. Comincia l'opera tua, caro. Non temere la vita!" } },
+        { s: N, t: { en: "Alyosha walks out under the vault of autumn stars, falls to the earth, embraces it, and weeps with rapture.", it: "Alëša esce sotto la volta delle stelle d'autunno, cade a terra, l'abbraccia e piange d'estasi." } }
+      ],
+      choices: [
+        { text: { en: "Water the earth with tears and leave the monastery for the world.", it: "Bagna la terra di lacrime ed esci dal monastero verso il mondo." }, effect: { mem: 3, mel: -2, art: 2 }, lines: [
+          { s: N, t: { en: "He falls to the ground a weak youth, and rises a resolute fighter for his whole life. Three days later, he leaves the cloister just as Zosima commanded.", it: "Cade a terra giovinetto debole, e si rialza lottatore saldo per tutta la vita. Tre giorni dopo lascia il chiostro, proprio come Zosima aveva comandato." } }
+        ] },
+        { text: { en: "Go straight to his brothers before the storm breaks over their father's house.", it: "Corri subito dai fratelli prima che la tempesta si abbatta sulla casa paterna." }, effect: { mem: 2, mel: 2, art: 1 }, lines: [
+          { s: N, t: { en: "The stars shine over a town where blood has already been spilled in the garden. Faith will be tested not in cells, but in courtrooms.", it: "Le stelle brillano sopra una città dove il sangue è già stato versato in giardino. La fede sarà provata non nelle celle, ma nei tribunali." } }
+        ] }
+      ],
+      outro: { en: "Someone visited my soul in that hour.", it: "Qualcuno ha visitato la mia anima in quell'ora." }
+    },
+    {
+      tab: { en: "Act III · The Stone", it: "Atto III · La Pietra" },
+      title: { en: "Act III · Speech at the Stone", it: "Atto III · Il discorso presso la pietra" },
+      place: { en: "By Ilusha's grave, in the snow", it: "Presso la tomba di Iljuša, nella neve" },
+      theme: "snow",
+      lines: [
+        { s: N, t: { en: "Dmitri is condemned to Siberia for a murder Smerdyakov committed. Ivan lies in brain fever. And in the snow by the great stone, twelve schoolboys bury little Ilusha.", it: "Dmitri è condannato alla Siberia per un delitto commesso da Smerdjakov. Ivan giace nel delirio. E nella neve presso la grande pietra, dodici scolari seppelliscono il piccolo Iljuša." } },
+        { s: "Kolya", t: { en: "Karamazov, is it true what religion says — that we shall all rise from the dead and see one another again, even Ilusha?", it: "Karamazov, è vero quel che dice la religione — che risorgeremo tutti dai morti e ci rivedremo ancora, anche con Iljuša?" } },
+        { s: "Alyosha", t: { en: "Remember this stone, boys. Nothing is higher, or stronger, or more wholesome for future life than one good memory carried from childhood.", it: "Ricordate questa pietra, ragazzi. Nulla è più alto, più forte, più salutare per la vita futura di un buon ricordo portato dall'infanzia." } },
+        { s: "Alyosha", t: { en: "Even if only one good memory remains in our hearts, that alone may someday save us from great evil.", it: "Anche se nel nostro cuore restasse un solo buon ricordo, quello solo potrebbe un giorno salvarci da un grande male." } },
+        { s: "Alyosha", t: { en: "Certainly we shall rise, certainly we shall see each other and gladly, joyfully tell each other everything that has happened!", it: "Certo che risorgeremo, certo che ci rivedremo e ci racconteremo con letizia e gioia tutto quel che è stato!" } }
+      ],
+      choices: [
+        { text: { en: "Take the boys' hands: 'Hurrah for Karamazov!'", it: "Prendi per mano i ragazzi: «Urrà per Karamazov!»" }, effect: { mem: 4, mel: -1, art: 2 }, lines: [
+          { s: N, t: { en: "Hand in hand they walk toward the funeral pancakes, laughing through tears, carrying the dead boy's memory into the long Russian winter.", it: "Mano nella mano camminano verso il banchetto funebre, ridendo tra le lacrime, portando la memoria del bimbo morto nel lungo inverno russo." } }
+        ] },
+        { text: { en: "Look back once at the prison road where Dmitri awaits his convoy.", it: "Guarda indietro un'ultima volta verso la strada del carcere dove Dmitri attende il convoglio." }, effect: { mem: 2, mel: 2, art: 2 }, lines: [
+          { s: N, t: { en: "Each of us is guilty before all and for all; and where guilt is shared, no prisoner walks to Siberia entirely alone.", it: "Ognuno di noi è colpevole davanti a tutti e per tutto; e dove la colpa è condivisa, nessun prigioniero cammina verso la Siberia del tutto solo." } }
+        ] }
+      ],
+      outro: { en: "Do not fear life. That is the whole gospel, read at a funeral.", it: "Non temere la vita. È tutto il vangelo, letto a un funerale." }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

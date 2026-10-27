@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>The Trial — Act II · The Library</title>
-<meta name="description" content="The Attic Offices — The Trial continues: the first hearing, Titorelli, and the three ways out. Bilingual visual novel scene.">
+<title>The Trial — Interactive Visual Novel · The Library</title>
+<meta name="description" content="Franz Kafka's The Trial in three acts: The Attic Offices & Titorelli, In the Cathedral (Before the Law), and The Quarry at Nightfall. Bilingual EN/IT visual novel.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">The Trial — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">The Trial · Il Processo · Franz Kafka</h1>
+  <p class="ls-sub">Three acts inside the invisible Court: the Attic Offices, the Parable in the Cathedral, and the Quarry on Josef K.'s thirty-first birthday. EN / IT.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -32,31 +33,85 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 var N = { en: "Narrator", it: "Narratore" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "The Attic Offices", it: "Gli uffici sotto il tetto" },
-  place: { en: "Somewhere in the city, upstairs", it: "Da qualche parte in città, al piano di sopra" },
+  bookId: "the_trial",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "The Court, it turns out, has offices everywhere: in attics, in laundries, behind a courtyard where children play between the queues.", it: "La Corte, a quanto pare, ha uffici ovunque: nei sottotetti, nei lavatoi, dietro un cortile dove i bambini giocano tra le file che aspettano." } },
-    { s: "Josef K.", t: { en: "This is not a court of law. There are no benches, no bar, no witness box — only a stuffy room and a crowd of men waiting for the floor to creak.", it: "Questo non è un tribunale. Non ci sono banchi, né barriera, né banco dei testimoni — solo una stanza afosa e una folla di uomini che aspettano che il pavimento scricchioli." } },
-    { s: { en: "Usher", it: "L'Uschiere" }, t: { en: "The preliminary hearing is a formality. The Court prefers to examine the accused before officials who have not been promoted for years, so their bitterness stays fresh.", it: "Il primo esame è una formalità. La Corte preferisce esaminare l'imputato davanti a funzionari che non vengono promossi da anni, così la loro amarezza resta fresca." } },
-    { s: "Josef K.", t: { en: "Then I will speak. A man who is innocent must say so loudly, or the silence becomes a confession.", it: "Allora parlerò. Un uomo innocente deve dirlo ad alta voce, o il silenzio diventa una confessione." } },
-    { s: N, t: { en: "He stands on a chair and names the Court: corrupt, secretive, absurd. The clerks nod gravely and write down that he spoke.", it: "Si mette in piedi su una sedia e dà un nome alla Corte: corrotta, segreta, assurda. Gli impiegati annuiscono con gravità e annotano che ha parlato." } },
-    { s: { en: "The Painter", it: "Il Pittore" }, t: { en: "You look like a man who has been told he is innocent. Sit. I paint judges; I know the type. There are three ways out: actual acquittal, apparent acquittal, and indefinite postponement. I have never met the first.", it: "Lei sembra un uomo al quale hanno detto che è innocente. Si sieda. Io ritraggo giudici; conosco la razza. Ci sono tre vie d'uscita: assoluzione vera, assoluzione apparente, e rinvio indefinito. La prima non l'ho mai vista." } },
-    { s: "Josef K.", t: { en: "Apparent acquittal?", it: "Assoluzione apparente?" } },
-    { s: { en: "The Painter", it: "Il Pittore" }, t: { en: "You are acquitted — until some official looks at the file again on a bad morning. The file never dies; it only sleeps in a drawer that breathes.", it: "Lei viene assolto — finché qualche funzionario non riapre il fascicolo in una brutta mattina. Il fascicolo non muore mai; dorme soltanto in un cassetto che respira." } }
-  ],
-  choices: [
-    { text: { en: "Take the long game: indefinite postponement.", it: "Scegli il gioco lungo: il rinvio indefinito." }, lines: [
-      { s: { en: "The Painter", it: "Il Pittore" }, t: { en: "Prudent. The file never advances, and neither do you — but it cannot condemn what it cannot finish. You will carry it like a stone in your coat, and learn to walk straighter than most free men.", it: "Prudente. Il fascicolo non avanza, e lei nemmeno — ma non può condannare ciò che non riesce a finire. Lo porterà come un sasso nel cappotto, e imparerà a camminare più dritto della maggior parte degli uomini liberi." } }
-    ] },
-    { text: { en: "Reject all three doors and keep struggling publicly.", it: "Rifiuta tutte e tre le porte e continua a lottare in pubblico." }, lines: [
-      { s: { en: "The Painter", it: "Il Pittore" }, t: { en: "Struggle is a fourth door that is painted on the wall. But open it anyway — every trial needs its example, and the Court learns from men like you. So do I; I will paint you with the light coming from the wrong side.", it: "La lotta è una quarta porta dipinta sul muro. Ma la apra lo stesso — ogni processo ha bisogno del suo esempio, e la Corte impara dagli uomini come lei. Anch'io; la ritrarrò con la luce che arriva dal lato sbagliato." } }
-    ] }
-  ],
-  outro: { en: "In the attic, even the windows face other attics.", it: "Nel sottotetto, perfino le finestre danno su altri sottotetti." }
+  statInit: { mem: 4, mel: 10, art: 4 },
+  acts: [
+    {
+      tab: { en: "Act I · The Attic", it: "Atto I · Il Sottotetto" },
+      title: { en: "Act I · The Attic Offices & Titorelli", it: "Atto I · Gli uffici sotto il tetto e Titorelli" },
+      place: { en: "Somewhere in the tenements, upstairs", it: "Da qualche parte nei casamenti, al piano di sopra" },
+      theme: "attic",
+      lines: [
+        { s: N, t: { en: "The Court has offices everywhere: in attics, in laundries, behind tenement courtyards where children play between the queues.", it: "La Corte ha uffici ovunque: nei sottotetti, nei lavatoi, dietro i cortili popolari dove i bambini giocano tra le file che aspettano." } },
+        { s: "Josef K.", t: { en: "This is not a court of law. The air here is unbreathable — how can you defendants sit so quietly waiting for your names?", it: "Questo non è un tribunale. L'aria qui è irrespirabile — come potete voi imputati star seduti così docili ad aspettare il vostro nome?" } },
+        { s: { en: "Titorelli the Painter", it: "Il pittore Titorelli" }, t: { en: "You look like a man who has been told he is innocent. Sit on the bed. I paint the minor judges as great presidents on thrones. There are three possibilities: actual acquittal, apparent acquittal, and indefinite postponement.", it: "Lei sembra un uomo al quale hanno detto che è innocente. Si sieda sul letto. Io ritraggo i piccoli giudici come grandi presidenti in trono. Ci sono tre possibilità: assoluzione effettiva, assoluzione apparente, e rinvio illimitato." } },
+        { s: "Josef K.", t: { en: "Then tell me how to obtain actual acquittal!", it: "Allora mi dica come ottenere l'assoluzione effettiva!" } },
+        { s: { en: "Titorelli", it: "Titorelli" }, t: { en: "I have never encountered a single case of actual acquittal. Only legends speak of them — and one cannot cite legends before the Chancellery.", it: "Non ho mai incontrato un solo caso di assoluzione effettiva. Ne parlano solo le leggende — e non si possono citare le leggende davanti alla Cancelleria." } },
+        { s: "Josef K.", t: { en: "And apparent acquittal?", it: "E l'assoluzione apparente?" } },
+        { s: { en: "Titorelli", it: "Titorelli" }, t: { en: "The file circulates in the higher courts and returns to the table where it started. You may be arrested again the moment you reach your front door.", it: "Il fascicolo circola nei gradi superiori e ritorna sul tavolo da cui è partito. Può essere arrestato di nuovo appena tocca il portone di casa." } }
+      ],
+      choices: [
+        { text: { en: "Buy three identical heath landscapes and take the secret door into the Court.", it: "Compra tre paesaggi di brughiera identici ed esci dalla porta segreta verso la Corte." }, effect: { mem: 2, mel: 2, art: 2 }, lines: [
+          { s: N, t: { en: "Behind the painter's bed, the door opens directly into yet another row of Court offices. Every room in the city backs onto the Chancellery.", it: "Dietro il letto del pittore, la porta si apre direttamente su un'altra fila di uffici della Corte. Ogni stanza della città confina con la Cancelleria." } }
+        ] },
+        { text: { en: "Dismiss your lawyer Huld and take command of your own defense.", it: "Licenzia l'avvocato Huld e assumi tu stesso la tua difesa." }, effect: { mem: 3, mel: 1, art: 0 }, lines: [
+          { s: N, t: { en: "In Huld's bedroom, the merchant Block kneels like a dog over a five-year-old petition. K. walks out into the winter rain alone.", it: "Nella camera di Huld, il commerciante Block si inginocchia come un cane sopra una memoria vecchia di cinque anni. K. esce da solo nella pioggia d'inverno." } }
+        ] }
+      ],
+      outro: { en: "In the attic, even the windows face other attics.", it: "Nel sottotetto, perfino le finestre danno su altri sottotetti." }
+    },
+    {
+      tab: { en: "Act II · Before the Law", it: "Atto II · Davanti alla Legge" },
+      title: { en: "Act II · In the Cathedral", it: "Atto II · Nel Duomo" },
+      place: { en: "The dark nave, a rainy morning", it: "La navata buia, una mattina di pioggia" },
+      theme: "candles",
+      lines: [
+        { s: N, t: { en: "Midday looks like midnight inside the empty cathedral. From a small side pulpit, a voice calls out down the stone pillars: 'Josef K.!'", it: "Mezzogiorno sembra mezzanotte dentro il duomo deserto. Da un piccolo pulpito laterale, una voce chiama tra i pilastri di pietra: «Josef K.!»" } },
+        { s: { en: "Prison Chaplain", it: "Il Cappellano delle carceri" }, t: { en: "You are Josef K. Your trial is going badly. You seek too much help from strangers, especially women. Do not deceive yourself.", it: "Tu sei Josef K. Il tuo processo va male. Cerchi troppo aiuto dagli estranei, specialmente dalle donne. Non ingannarti." } },
+        { s: { en: "Prison Chaplain", it: "Il Cappellano" }, t: { en: "Listen to what is written in the introductory scriptures to the Law: Before the Law stands a doorkeeper. To this doorkeeper comes a man from the country and begs for admittance.", it: "Ascolta ciò che è scritto nelle scritture introduttive alla Legge: Davanti alla Legge sta un guardiano. Da questo guardiano viene un uomo di campagna e chiede di entrare." } },
+        { s: { en: "Prison Chaplain", it: "Il Cappellano" }, t: { en: "The doorkeeper says that he cannot admit him at the moment. The gate stands open as always, and the man sits on a stool beside the door for days and years.", it: "Il guardiano dice che per il momento non può lasciarlo entrare. La porta è aperta come sempre, e l'uomo siede su uno sgabello accanto alla porta per giorni e anni." } },
+        { s: "Josef K.", t: { en: "And he never walks in? Even as he grows old and blind?", it: "E non entra mai? Nemmeno quando diventa vecchio e cieco?" } },
+        { s: { en: "Prison Chaplain", it: "Il Cappellano" }, t: { en: "In the darkness before death, he perceives a radiance streaming inextinguishably from the door of the Law. He asks: 'Everyone strives after the Law — how is it that in all these years no one but me has asked to enter?'", it: "Nel buio prima della morte, scorge uno splendore inestinguibile uscire dalla porta della Legge. Chiede: «Tutti tendono alla Legge — com'è che in tanti anni nessuno all'infuori di me ha chiesto di entrare?»" } },
+        { s: { en: "Prison Chaplain", it: "Il Cappellano" }, t: { en: "The doorkeeper roars in his failing ear: 'No one else could ever be admitted here, since this gate was made only for you. I am now going to shut it.'", it: "Il guardiano gli grida nell'orecchio quasi sordo: «Nessun altro poteva entrare qui, perché questo ingresso era destinato soltanto a te. Ora vado a chiuderlo»." } }
+      ],
+      choices: [
+        { text: { en: "Argue that the doorkeeper deceived the man.", it: "Sostieni che il guardiano ha ingannato l'uomo." }, effect: { mem: 3, mel: 1, art: 1 }, lines: [
+          { s: { en: "Prison Chaplain", it: { en: "Prison Chaplain", it: "Il Cappellano" }.it }, t: { en: "Do not misunderstand: one does not have to accept everything as true, one only has to accept it as necessary.", it: "Non fraintendere: non è necessario ritenere tutto vero, basta ritenerlo necessario." } },
+          { s: "Josef K.", t: { en: "A melancholy conclusion. It turns lying into a universal principle.", it: "Una conclusione malinconica. Della menzogna si fa l'ordine del mondo." } }
+        ] },
+        { text: { en: "Walk away from the pulpit before the lamp goes out.", it: "Allontanati dal pulpito prima che la lampada si spenga." }, effect: { mem: 1, mel: 3, art: 1 }, lines: [
+          { s: { en: "Prison Chaplain", it: "Il Cappellano" }, t: { en: "The Court wants nothing from you. It receives you when you come and dismisses you when you go.", it: "Il Tribunale non vuole nulla da te. Ti accoglie quando vieni e ti lascia andare quando vai." } }
+        ] }
+      ],
+      outro: { en: "This gate was made only for you. I am now going to shut it.", it: "Questo ingresso era destinato soltanto a te. Ora vado a chiuderlo." }
+    },
+    {
+      tab: { en: "Act III · The Quarry", it: "Atto III · La Cava" },
+      title: { en: "Act III · The Eve of His Thirty-First Birthday", it: "Atto III · La vigilia del trentunesimo compleanno" },
+      place: { en: "A stone quarry outside the town, by moonlight", it: "Una cava di pietra fuori città, al chiaro di luna" },
+      theme: "snow",
+      lines: [
+        { s: N, t: { en: "On the eve of his thirty-first birthday, two pale gentlemen in frock coats and top hats arrive at K.'s apartment. He is already dressed in black, waiting.", it: "Alla vigilia del suo trentunesimo compleanno, due signori pallidi in redingote e cilindro arrivano all'appartamento di K. Lui è già vestito di nero, in attesa." } },
+        { s: "Josef K.", t: { en: "So they send tenth-rate old actors for me. You want to finish me off cheaply.", it: "Dunque mandano per me vecchi attori di decimo ordine. Vogliono liquidarmi a buon mercato." } },
+        { s: N, t: { en: "They walk through the moonlit streets linked arm in arm. At the edge of the city lies a deserted quarry beside a single house.", it: "Camminano per le strade illuminate dalla luna tenendosi a braccetto. Ai margini della città si apre una cava abbandonata accanto a una casa isolata." } },
+        { s: N, t: { en: "They pass the butcher's knife politely back and forth across K., waiting for him to take it and spare them the final duty. He does not move his hand.", it: "Si passano con garbo il coltello da macellaio sopra il corpo di K., aspettando che lo prenda lui e risparmi loro l'ultimo compito. Lui non muove la mano." } },
+        { s: "Josef K.", t: { en: "Look there — in the top story of that house beside the quarry, a window has just flown open! A human figure is leaning far out and stretching both arms toward me!", it: "Guardate là — all'ultimo piano di quella casa accanto alla cava, una finestra si è appena spalancata! Una figura umana si sporge lontano e tende entrambe le braccia verso di me!" } },
+        { s: "Josef K.", t: { en: "Who was it? A friend? A good person? Someone who sympathized? Someone who wanted to help? Where was the Judge whom he had never seen?", it: "Chi era? Un amico? Una brava persona? Qualcuno che partecipava? Qualcuno che voleva aiutare? Dov'era il Giudice che non aveva mai visto?" } }
+      ],
+      choices: [
+        { text: { en: "Keep your eyes fixed on the figure in the lit window.", it: "Tieni gli occhi fissi sulla figura nella finestra illuminata." }, effect: { mem: 3, mel: 2, art: 2 }, lines: [
+          { s: N, t: { en: "His gaze falls on the top story of the house even as the steel touches his throat: the question remains open, raised like two hands against the night.", it: "Il suo sguardo cade sull'ultimo piano della casa mentre l'acciaio gli tocca la gola: la domanda resta aperta, alzata come due mani contro la notte." } }
+        ] },
+        { text: { en: "Whisper the final indictment of the absurd: 'Like a dog!'", it: "Sussurra l'ultimo atto d'accusa dell'assurdo: «Come un cane!»" }, effect: { mem: 2, mel: 4, art: 1 }, lines: [
+          { s: "Josef K.", t: { en: "'Like a dog!' he said; it was as if the shame of it must outlive him.", it: "«Come un cane!» disse; era come se la vergogna gli dovesse sopravvivere." } }
+        ] }
+      ],
+      outro: { en: "Where was the High Court, to which he had never penetrated?", it: "Dov'era l'Alta Corte, fino alla quale non era mai giunto?" }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

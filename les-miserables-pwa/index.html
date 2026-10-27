@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Les Misérables — Act II · The Library</title>
-<meta name="description" content="The Factory Door — Les Misérables continues: Fantine, Javert, and the promise made at Montfermeil. Bilingual visual novel scene.">
+<title>Les Misérables — Interactive Visual Novel · The Library</title>
+<meta name="description" content="Les Misérables in three acts: Fantine and the Factory, Cosette in the Dark Wood of Montfermeil, and the Barricade of Saint-Merry. Bilingual EN/IT visual novel.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">Les Misérables — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">Les Misérables · Victor Hugo</h1>
+  <p class="ls-sub" id="page-sub">Three acts of mercy, law, and the debt of a soul — from Montreuil-sur-Mer to the Paris barricades. In English and Italian.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -32,33 +33,88 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 var N = { en: "Narrator", it: "Narratore" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "The Factory Door", it: "La porta della fabbrica" },
-  place: { en: "Montreuil-sur-Mer, 1823", it: "Montreuil-sur-Mer, 1823" },
+  bookId: "les_miserables",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "Montreuil-sur-Mer, 1823. The town owes its black pearl industry — and its whole fortune — to a silent grey-haired manufacturer whom everyone calls Father Madeleine.", it: "Montreuil-sur-Mer, 1823. La città deve la sua industria delle perle nere — e tutta la sua fortuna — a un silenzioso fabbricante dai capelli grigi che tutti chiamano padre Madeleine." } },
-    { s: "Madeleine", t: { en: "I have one law in my factory: the workshop door is open to anyone who works. The past stays outside.", it: "Ho una sola legge nella mia fabbrica: la porta dell'officina è aperta a chiunque lavori. Il passato resta fuori." } },
-    { s: { en: "Foreman", it: "Il Caporeparto" }, t: { en: "Father Madeleine, a woman was dismissed for having a child out of wedlock. The forewomen demanded it. Her name is Fantine.", it: "Padre Madeleine, una donna è stata licenziata per avere una figlia nata fuori dal matrimonio. Le capo-operaie l'hanno voluto. Si chiama Fantine." } },
-    { s: N, t: { en: "Ten years of a town's prosperity, weighed against one dismissal slip. Javert watches from the corner of the yard, hat low, memory longer.", it: "Dieci anni di prosperità di una città, messi sul piatto contro un foglio di congedo. Javert osserva dall'angolo del cortile, col cappello basso e la memoria più lunga." } },
-    { s: "Javert", t: { en: "Monsieur le Maire, I know a man who broke his parole. Chain, yellow passport, the toll of the law. Men like that do not change. They only wait.", it: "Monsieur le Maire, io conosco un uomo che ha rotto la libertà condizionale. La catena, il passaporto giallo, il pedaggio della legge. Gli uomini così non cambiano. Aspettano soltanto." } },
-    { s: "Madeleine", t: { en: "And what does the law say about a woman who sold her hair, her teeth, and then herself, for one child's winter?", it: "E che cosa dice la legge di una donna che ha venduto i capelli, i denti, e poi se stessa, per un inverno di una sola bambina?" } },
-    { s: "Javert", t: { en: "The law says she is a prostitute. The law is always perfectly clear, Monsieur le Maire. That is why I serve it.", it: "La legge dice che è una prostituta. La legge è sempre perfettamente chiara, Monsieur le Maire. È per questo che la servo." } },
-    { s: N, t: { en: "In the infirmary, Fantine coughs white on grey. Her last sentence is not a curse: it is a name — Cosette — repeated like a prayer with nobody listening.", it: "Nell'infirmeria, Fantine tossisce bianco sul grigio. La sua ultima frase non è una bestemmia: è un nome — Cosette — ripetuto come una preghiera che nessuno ascolta." } },
-    { s: "Madeleine", t: { en: "Then I will go to Montfermeil myself. There is a child out there with a redoubtable faith in a future that has given her nothing.", it: "Allora andrò io stesso a Montfermeil. Là fuori c'è una bambina con una fede tenace in un futuro che non le ha dato niente." } }
-  ],
-  choices: [
-    { text: { en: "Face Javert: tell him who you are — not yet, but soon.", it: "Affronta Javert: digli chi sei — non ancora, ma presto." }, lines: [
-      { s: "Javert", t: { en: "When you are ready to confess, Monsieur le Maire, I will be waiting. I have waited eight years; I can wait eight more.", it: "Quando sarà pronto a confessare, Monsieur le Maire, io aspetterò. Aspetto da otto anni; posso aspettarne altri otto." } },
-      { s: N, t: { en: "The bishop's debt takes on a second interest rate: a life owed to Fantine, a truth owed to the law.", it: "Il debito verso il vescovo matura un secondo interesse: una vita dovuta a Fantine, una verità dovuta alla legge." } }
-    ] },
-    { text: { en: "Go to Montfermeil now, tonight, for the child.", it: "Vai a Montfermeil adesso, stanotte, per la bambina." }, lines: [
-      { s: N, t: { en: "The road is long and dark, and in the dark of Montfermeil a little girl is sent out at night to fetch water for tavern strangers. Somewhere on that road, a heavy man makes a promise he will keep with his whole remaining life.", it: "La strada è lunga e buia, e nel buio di Montfermeil una bambina viene mandata di notte a prendere l'acqua per gli ospiti dell'osteria. Da qualche parte su quella strada, un uomo pesante fa una promessa che terrà con tutta la vita che gli resta." } }
-    ] }
-  ],
-  outro: { en: "A promise made to the dying is the only contract the law cannot draft.", it: "Una promessa fatta a un morente è l'unico contratto che la legge non sa scrivere." }
+  statInit: { mem: 5, mel: 8, art: 4 },
+  acts: [
+    {
+      tab: { en: "Act I · Fantine", it: "Atto I · Fantine" },
+      title: { en: "Act I · The Factory Door", it: "Atto I · La porta della fabbrica" },
+      place: { en: "Montreuil-sur-Mer, 1823", it: "Montreuil-sur-Mer, 1823" },
+      theme: "snow",
+      lines: [
+        { s: N, t: { en: "Montreuil-sur-Mer, 1823. The town owes its black glass industry — and its whole fortune — to a silent grey-haired manufacturer whom everyone calls Father Madeleine.", it: "Montreuil-sur-Mer, 1823. La città deve la sua industria dei vetri neri — e tutta la sua fortuna — a un silenzioso fabbricante dai capelli grigi che tutti chiamano padre Madeleine." } },
+        { s: "Madeleine", t: { en: "I have one law in my factory: the workshop door is open to anyone who works. The past stays outside.", it: "Ho una sola legge nella mia fabbrica: la porta dell'officina è aperta a chiunque lavori. Il passato resta fuori." } },
+        { s: { en: "Foreman", it: "Il Caporeparto" }, t: { en: "Father Madeleine, a woman was dismissed for having a child hidden at Montfermeil. The forewomen demanded it. Her name is Fantine.", it: "Padre Madeleine, una donna è stata licenziata per avere una figlia nascosta a Montfermeil. Le sorveglianti l'hanno voluto. Si chiama Fantine." } },
+        { s: N, t: { en: "Ten years of a town's prosperity weighed against one dismissal slip. Javert watches from the snow of the courtyard, hat low, memory longer.", it: "Dieci anni di prosperità di una città messi sul piatto contro un foglio di congedo. Javert osserva dalla neve del cortile, col cappello basso e la memoria più lunga." } },
+        { s: "Javert", t: { en: "Monsieur le Maire, they have arrested an old peasant named Champmathieu at Arras. They say he is Jean Valjean, the galley convict. I am going to testify.", it: "Monsieur le Maire, hanno arrestato un vecchio contadino di nome Champmathieu ad Arras. Dicono che sia Jean Valjean, il forzato. Vado a testimoniare." } },
+        { s: "Madeleine", t: { en: "And what does the law say about a woman who sold her hair, her two front teeth, and then herself, for one child's winter?", it: "E che cosa dice la legge di una donna che ha venduto i capelli, i denti davanti, e poi se stessa, per un inverno di una sola bambina?" } },
+        { s: "Javert", t: { en: "The law says she struck a bourgeois in the street. The law is always perfectly clear, Monsieur le Maire. That is why I serve it.", it: "La legge dice che ha colpito un borghese per strada. La legge è sempre perfettamente chiara, Monsieur le Maire. È per questo che la servo." } },
+        { s: N, t: { en: "In the infirmary, Fantine coughs white on grey. Her last word is not a curse: it is a name — Cosette — repeated like a prayer with nobody listening.", it: "Nell'infermeria, Fantine tossisce bianco sul grigio. La sua ultima parola non è una maledizione: è un nome — Cosette — ripetuto come una preghiera che nessuno ascolta." } },
+        { s: "Madeleine", t: { en: "Tonight I ride to Arras to save an innocent man from my chain — and then to Montfermeil, to keep a dead mother's word.", it: "Stanotte corro ad Arras per salvare un innocente dalla mia catena — e poi a Montfermeil, per mantenere la parola data a una madre morta." } }
+      ],
+      choices: [
+        { text: { en: "Stand before the court at Arras and bare your chest: 'I am Jean Valjean.'", it: "Presentati alla corte di Arras e scopri il petto: «Io sono Jean Valjean»." }, effect: { mem: 3, mel: 2, art: 1 }, lines: [
+          { s: N, t: { en: "The courtroom freezes. Mayor Madeleine unbuttons his coat in the silence of the judges, and the Bishop's silver candlesticks burn brighter in his memory than the sun.", it: "L'aula si gela. Il sindaco Madeleine si sbottona il soprabito nel silenzio dei giudici, e i candelabri d'argento del Vescovo bruciano nella sua memoria più forte del sole." } }
+        ] },
+        { text: { en: "Whisper the vow at Fantine's bedside before Javert arrives.", it: "Sussurra il giuramento al capezzale di Fantine prima che arrivi Javert." }, effect: { mem: 2, mel: 3, art: 0 }, lines: [
+          { s: "Madeleine", t: { en: "Sleep in peace, poor mother. Your daughter has a father now, even if he must cross hell in irons to reach her.", it: "Dormi in pace, povera madre. Tua figlia ora ha un padre, anche se dovesse attraversare l'inferno in catene per raggiungerla." } }
+        ] }
+      ],
+      outro: { en: "A promise made to the dying is the only contract the law cannot draft.", it: "Una promessa fatta a chi muore è l'unico contratto che la legge non sa scrivere." }
+    },
+    {
+      tab: { en: "Act II · Cosette", it: "Atto II · Cosette" },
+      title: { en: "Act II · The Bucket in the Dark Wood", it: "Atto II · Il secchio nel bosco buio" },
+      place: { en: "Montfermeil, Christmas Eve 1823", it: "Montfermeil, Vigilia di Natale 1823" },
+      theme: "candles",
+      lines: [
+        { s: N, t: { en: "Christmas Eve at Montfermeil. Beyond the last lantern of the village, an eight-year-old girl in rags carries an iron bucket heavier than herself.", it: "Vigilia di Natale a Montfermeil. Oltre l'ultima lanterna del villaggio, una bambina di otto anni in stracci porta un secchio di ferro più pesante di lei." } },
+        { s: "Cosette", t: { en: "If I spill the water, Madame Thénardier will beat me. If I stop in the dark, the trees will catch me.", it: "Se rovescio l'acqua, la signora Thénardier mi picchierà. Se mi fermo al buio, gli alberi mi prenderanno." } },
+        { s: N, t: { en: "Suddenly the weight vanishes. A large warm hand has closed over the iron handle beside hers.", it: "All'improvviso il peso svanisce. Una grande mano calda si è chiusa sul manico di ferro accanto alla sua." } },
+        { s: "Jean Valjean", t: { en: "Give it to me, little one. This bucket is made for a convict's shoulder, not a child's.", it: "Dallo a me, piccina. Questo secchio è fatto per la spalla di un forzato, non per una bambina." } },
+        { s: "Cosette", t: { en: "Who are you, monsieur? Are you a peddler? Why are you not afraid of the dark?", it: "Chi siete, signore? Siete un merciaiolo? Perché non avete paura del buio?" } },
+        { s: "Jean Valjean", t: { en: "Because I have lived in it for a very long time, Cosette. And I came all this way to bring you a coat, a doll, and the morning.", it: "Perché ci ho vissuto dentro per lunghissimo tempo, Cosette. E sono venuto fin qui per portarti un cappotto, una bambola, e il mattino." } },
+        { s: { en: "Thénardier", it: "Thénardier" }, t: { en: "Fifteen hundred francs! The girl is our comfort, monsieur — we cannot part with her for a sou less.", it: "Millecinquecento franchi! La piccola è la nostra consolazione, signore — non possiamo separarcene per un soldo di meno." } },
+        { s: "Jean Valjean", t: { en: "Here is the money. Take your hand off her shoulder. She belongs to no one now except love.", it: "Ecco il denaro. Togliete la mano dalla sua spalla. Ora non appartiene più a nessuno, fuorché all'amore." } }
+      ],
+      choices: [
+        { text: { en: "Place the great porcelain doll from the shop window into her arms.", it: "Mettile tra le braccia la grande bambola di porcellana della vetrina." }, effect: { mem: 3, mel: -1, art: 2 }, lines: [
+          { s: N, t: { en: "Cosette stares at the doll in disbelief, as if someone had handed her a star out of the winter sky. For the first time in her life, she weeps without fear.", it: "Cosette fissa la bambola incredula, come se qualcuno le avesse messo in mano una stella tolta dal cielo d'inverno. Per la prima volta nella vita, piange senza paura." } }
+        ] },
+        { text: { en: "Take her hand and walk into the Paris fog before dawn.", it: "Prendile la mano e cammina nella nebbia di Parigi prima dell'alba." }, effect: { mem: 2, mel: 2, art: 1 }, lines: [
+          { s: N, t: { en: "Two exiles enter Paris at daybreak: an old man learning how to love, and a child learning that the world is not entirely an inn of thieves.", it: "Due esuli entrano a Parigi sul far del giorno: un vecchio che impara ad amare, e una bambina che impara che il mondo non è interamente una locanda di ladri." } }
+        ] }
+      ],
+      outro: { en: "To love another person is to see the face of God.", it: "Amare un'altra creatura è vedere il volto di Dio." }
+    },
+    {
+      tab: { en: "Act III · The Barricade", it: "Atto III · La Barricata" },
+      title: { en: "Act III · The Barricade and the Sewers", it: "Atto III · La barricata e le fogne" },
+      place: { en: "Rue de la Chanvrerie, Paris, June 1832", it: "Rue de la Chanvrerie, Parigi, giugno 1832" },
+      theme: "inferno",
+      lines: [
+        { s: N, t: { en: "June 1832. Gunpowder smoke hangs over the Rue de la Chanvrerie. Behind the paving stones, Enjolras and the students sing as the cannon aims.", it: "Giugno 1832. Il fumo della polvere da sparo grava su Rue de la Chanvrerie. Dietro i selciati, Enjolras e gli studenti cantano mentre il cannone prende la mira." } },
+        { s: "Jean Valjean", t: { en: "Cosette loves this boy Marius. He would take my whole life from me — so I have come to the barricade to die in his place.", it: "Cosette ama questo giovane Marius. Mi porterebbe via tutta la mia vita — perciò sono venuto sulla barricata a morire al posto suo." } },
+        { s: N, t: { en: "Tied to a post in the wine-shop is the spy Javert. Enjolras hands Valjean a pistol: 'You asked for him. He is yours.'", it: "Legato a un palo nell'osteria c'è la spia Javert. Enjolras porge a Valjean una pistola: «Lo avete chiesto voi. È vostro»." } },
+        { s: "Javert", t: { en: "Shoot quickly, Jean Valjean. The galley convict finally has the inspector at his mercy. Take your revenge.", it: "Spara in fretta, Jean Valjean. Il forzato ha finalmente l'ispettore alla sua mercé. Prenditi la tua vendetta." } },
+        { s: "Jean Valjean", t: { en: "Wait here? No. My knife cuts the rope, Javert. My pistol fires into the air. Go — you are free. And if you need me tomorrow, my name is Fauchelevent, Rue de l'Homme-Armé.", it: "Aspettare qui? No. Il mio coltello taglia la corda, Javert. La mia pistola spara in aria. Va' — sei libero. E se domani mi cercherai, mi chiamo Fauchelevent, Rue de l'Homme-Armé." } },
+        { s: "Javert", t: { en: "You annoy me! Kill me rather than forgive me! How can a convict stand above the law?", it: "Mi dai fastidio! Uccidimi piuttosto che perdonarmi! Come può un forzato stare più in alto della legge?" } },
+        { s: N, t: { en: "The barricade falls. Lifting the wounded Marius onto his back, Valjean descends into the black labyrinth of the Paris sewers — and at the river grate, Javert waits one last time.", it: "La barricata cade. Caricatosi sulle spalle Marius ferito, Valjean scende nel nero labirinto delle fogne di Parigi — e alla grata del fiume, Javert lo attende un'ultima volta." } }
+      ],
+      choices: [
+        { text: { en: "Carry Marius home to his grandfather first, then surrender to Javert.", it: "Porta prima Marius a casa del nonno, poi consegnati a Javert." }, effect: { mem: 3, mel: 2, art: 2 }, lines: [
+          { s: N, t: { en: "When Valjean steps down into the street to be handcuffed, the square is empty. On the bridge above the Seine, Javert has chosen the river over a world where mercy outranks the code.", it: "Quando Valjean scende in strada per farsi ammanettare, la piazza è vuota. Sul ponte sopra la Senna, Javert ha scelto il fiume piuttosto che un mondo dove la misericordia supera il codice." } }
+        ] },
+        { text: { en: "Light the Bishop's two silver candlesticks one last time for Cosette and Marius.", it: "Accendi un'ultima volta i due candelabri d'argento del Vescovo per Cosette e Marius." }, effect: { mem: 4, mel: 1, art: 3 }, lines: [
+          { s: "Jean Valjean", t: { en: "Children, love each other always. There is scarcely anything else in the world but that: to love one another.", it: "Figli miei, amatevi sempre. Non c'è quasi altro al mondo che questo: volersi bene." } }
+        ] }
+      ],
+      outro: { en: "He sleeps. Although his fate was very strange, he lived. He died when he no longer had his angel.", it: "Egli dorme. Benchè il destino gli fosse assai strano, visse. Morì quando non ebbe più il suo angelo." }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

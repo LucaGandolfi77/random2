@@ -13,308 +13,362 @@
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 <script src="../shared/arcade.js"></script>
 <style>
-/* The Google Fonts @import lived here. It was the only outbound request
-   in the whole repository, and it broke the promise this app makes: a
-   visual novel that opens with the network off. The stacks below fall
-   back to fonts the device already has. */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Cormorant Garamond',Georgia,serif;}
-body{background:#06040a;color:#c8b6a0;overflow:hidden;height:100vh;width:100vw;font-size:17px;line-height:1.65;letter-spacing:0.04em;}
-#bg-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.25;pointer-events:none;}
-.main-wrapper{position:relative;z-index:10;height:100vh;overflow-y:auto;padding:2.5rem 2rem;display:flex;flex-direction:column;align-items:center;}
-header{text-align:center;margin-bottom:3rem;max-width:720px;}
-h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:3rem;color:#c0a890;font-weight:300;letter-spacing:0.12em;line-height:1.15;text-shadow:0 2px 30px rgba(192,168,144,0.12);margin-bottom:0.4rem;}
-h1 .sub{font-family:'Cormorant',Georgia,serif;font-size:1.1rem;color:#7a6a55;font-style:italic;letter-spacing:0.2em;margin-top:0.3rem;display:block;font-weight:300;}
-h2{font-size:0.75rem;color:#8a7862;letter-spacing:0.25em;text-transform:uppercase;margin-top:0.2rem;font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;}
-.library-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;max-width:1200px;width:100%;margin-bottom:3rem;}
-.book-card{background:rgba(15,6,18,0.55);border:1px solid rgba(201,184,168,0.1);border-radius:14px;padding:1.8rem 1.5rem;transition:all 0.4s ease;position:relative;overflow:hidden;backdrop-filter:blur(6px);cursor:pointer;}
+body{background:#06040a;color:#c8b6a0;overflow:hidden;height:100vh;height:100dvh;width:100vw;font-size:17px;line-height:1.65;letter-spacing:0.04em;}
+#bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:0.45;pointer-events:none;}
+.top-controls{position:fixed;top:1rem;left:1.2rem;right:1.2rem;z-index:40;display:flex;justify-content:space-between;align-items:center;gap:0.75rem;pointer-events:none;}
+.top-controls > *{pointer-events:auto;}
+.language-switch,.hub-link{font-size:0.75rem;color:#c0ae96;letter-spacing:0.1em;cursor:pointer;border:1px solid rgba(201,184,168,0.22);border-radius:6px;padding:0.38rem 0.78rem;background:rgba(15,6,18,0.75);text-decoration:none;transition:all 0.25s;backdrop-filter:blur(6px);}
+.language-switch:hover,.hub-link:hover{border-color:rgba(218,165,120,0.55);color:#f0dec4;background:rgba(28,12,32,0.88);}
+.main-wrapper{position:relative;z-index:10;height:100vh;height:100dvh;overflow-y:auto;padding:3.8rem 1.5rem 3rem;display:flex;flex-direction:column;align-items:center;}
+header{text-align:center;margin-bottom:1.8rem;max-width:720px;}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(2.2rem,5vw,3.1rem);color:#decbb4;font-weight:300;letter-spacing:0.12em;line-height:1.15;text-shadow:0 2px 30px rgba(192,168,144,0.18);margin-bottom:0.35rem;}
+h2{font-size:0.76rem;color:#9a866e;letter-spacing:0.25em;text-transform:uppercase;margin-top:0.2rem;font-weight:400;}
+.filter-bar{display:flex;gap:0.55rem;flex-wrap:wrap;justify-content:center;margin-bottom:2rem;}
+.filter-pill{background:rgba(15,6,18,0.6);border:1px solid rgba(201,184,168,0.18);color:#a89680;font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;padding:0.35rem 0.9rem;border-radius:999px;cursor:pointer;transition:all 0.25s;}
+.filter-pill:hover{border-color:rgba(218,165,120,0.45);color:#e0ceb6;}
+.filter-pill.active{background:rgba(212,168,114,0.18);border-color:rgba(218,165,120,0.65);color:#f4e2c8;}
+.library-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.35rem;max-width:1200px;width:100%;margin-bottom:2.5rem;}
+.book-card{background:rgba(15,7,20,0.68);border:1px solid rgba(201,184,168,0.12);border-radius:14px;padding:1.6rem 1.45rem;transition:all 0.35s ease;position:relative;overflow:hidden;backdrop-filter:blur(8px);cursor:pointer;display:flex;flex-direction:column;}
+.book-card.hidden-card{display:none;}
 .book-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#bfa07a,#d4a070,#c9a880);opacity:0.45;transition:opacity 0.3s;}
-.book-card:hover::before{opacity:0.9;}
-.book-card:hover{border-color:rgba(201,184,168,0.25);transform:translateY(-3px);box-shadow:0 10px 35px rgba(0,0,0,0.35);background:rgba(20,8,20,0.7);}
-.book-card h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.35rem;color:#c8b8a8;font-weight:400;margin-bottom:0.15rem;letter-spacing:0.08em;}
-.book-card .author{font-size:0.78rem;color:#9a7d65;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.6rem;font-family:'Cormorant',Georgia,serif;opacity:0.8;}
-.book-card p{font-size:0.92rem;color:#a89880;line-height:1.6;margin-bottom:1rem;font-style:italic;}
+.book-card:hover::before{opacity:0.95;}
+.book-card:hover{border-color:rgba(218,165,120,0.35);transform:translateY(-3px);box-shadow:0 12px 35px rgba(0,0,0,0.45);background:rgba(22,10,26,0.82);}
+.book-card h3{font-size:1.35rem;color:#e0d0bc;font-weight:400;margin-bottom:0.15rem;letter-spacing:0.06em;padding-right:3.5rem;}
+.book-card .author{font-size:0.76rem;color:#b89878;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.6rem;opacity:0.9;}
+.book-card p{font-size:0.93rem;color:#b5a48e;line-height:1.6;margin-bottom:1rem;font-style:italic;flex:1;}
 .book-card .tag-row{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:1rem;}
-.book-card .tag{font-size:0.65rem;color:#a08060;background:rgba(201,184,168,0.08);border:1px solid rgba(201,184,168,0.12);border-radius:12px;padding:0.15rem 0.5rem;letter-spacing:0.05em;text-transform:uppercase;}
-.book-card .play-link{display:inline-block;padding:0.45rem 1rem;background:rgba(201,184,168,0.08);border:1px solid rgba(201,184,168,0.18);border-radius:4px;color:#c9b8a8;font-size:0.8rem;transition:all 0.25s ease;text-decoration:none;letter-spacing:0.05em;}
-.book-card .play-link:hover{background:rgba(201,184,168,0.15);border-color:rgba(201,184,168,0.4);color:#e0c8a8;}
-.stats-strip{text-align:center;margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(201,184,168,0.08);max-width:720px;width:100%;}
-.stats-strip span{font-size:0.75rem;color:#8a7b65;letter-spacing:0.1em;text-transform:uppercase;font-family:'Cormorant',Georgia,serif;margin:0 1rem;}
-.book-card .read-badge{position:absolute;top:0.9rem;right:0.9rem;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:#c9a878;border:1px solid rgba(201,168,120,0.4);border-radius:10px;padding:0.12rem 0.45rem;background:rgba(201,168,120,0.08);font-family:'Cormorant',Georgia,serif;}
-.book-card.read::before{opacity:0.9;}
-.language-switch{position:absolute;top:1.2rem;left:1.5rem;z-index:60;font-size:0.75rem;color:#8a7b65;letter-spacing:0.1em;cursor:pointer;border:1px solid rgba(201,184,168,0.15);border-radius:4px;padding:0.3rem 0.6rem;background:rgba(15,6,18,0.5);transition:all 0.25s;}
-.language-switch:hover{border-color:rgba(201,184,168,0.35);color:#b8a898;background:rgba(20,8,20,0.7);}
+.book-card .tag{font-size:0.64rem;color:#b09070;background:rgba(201,184,168,0.08);border:1px solid rgba(201,184,168,0.14);border-radius:12px;padding:0.15rem 0.5rem;letter-spacing:0.05em;text-transform:uppercase;}
+.book-card .card-actions{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;}
+.book-card .play-link{display:inline-block;padding:0.42rem 0.95rem;background:rgba(201,184,168,0.09);border:1px solid rgba(201,184,168,0.22);border-radius:5px;color:#dfd0bc;font-size:0.8rem;transition:all 0.25s ease;text-decoration:none;letter-spacing:0.05em;}
+.book-card .play-link:hover{background:rgba(212,168,114,0.2);border-color:rgba(218,165,120,0.55);color:#fff;}
+.book-card .full-book-link{display:inline-block;padding:0.42rem 0.85rem;background:rgba(212,168,114,0.14);border:1px solid rgba(218,165,120,0.38);border-radius:5px;color:#f0d8b6;font-size:0.76rem;text-decoration:none;letter-spacing:0.05em;transition:all 0.25s;}
+.book-card .full-book-link:hover{background:rgba(212,168,114,0.28);color:#fff;}
+.stats-strip{text-align:center;margin-top:1rem;padding-top:1.5rem;border-top:1px solid rgba(201,184,168,0.1);max-width:760px;width:100%;}
+.stats-strip span{font-size:0.75rem;color:#9a8a72;letter-spacing:0.1em;text-transform:uppercase;margin:0 0.75rem;display:inline-block;}
+.book-card .read-badge{position:absolute;top:0.9rem;right:0.9rem;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:#dfbe8f;border:1px solid rgba(201,168,120,0.45);border-radius:10px;padding:0.12rem 0.45rem;background:rgba(201,168,120,0.12);}
+.book-card.read::before{opacity:0.95;}
 .menu-screen{position:fixed;inset:0;background:rgba(6,4,8,0.92);z-index:50;display:none;align-items:center;justify-content:center;padding:2rem;backdrop-filter:blur(10px);}
 .menu-screen:not(.hidden){display:flex;}
 .menu-screen h2{font-size:2rem;color:#c8b0a0;margin-bottom:1.2rem;font-weight:300;letter-spacing:0.08em;}
 .menu-screen p{font-size:0.95rem;color:#9a7d65;line-height:1.6;max-width:480px;margin:0 auto 2rem;font-style:italic;}
 .menu-screen .menu-button{max-width:320px;margin:0.35rem auto;display:block;}
 /* Reader (dialogue scenes) */
-.reader{position:fixed;inset:0;background:linear-gradient(180deg,#0a0510 0%,#06040a 100%);z-index:45;display:flex;align-items:center;justify-content:center;padding:2rem 1.25rem;}
+.reader{position:fixed;inset:0;background:rgba(7,4,11,0.94);z-index:45;display:flex;align-items:center;justify-content:center;padding:1.25rem;overflow-y:auto;backdrop-filter:blur(10px);}
 .reader.hidden{display:none;}
-.reader-inner{width:100%;max-width:820px;}
-.reader-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:1.4rem;border-bottom:1px solid rgba(201,184,168,0.12);padding-bottom:0.7rem;flex-wrap:wrap;}
-#reader-title{font-size:1.35rem;color:#c9b8a8;letter-spacing:0.08em;}
-#reader-place{font-size:0.8rem;color:#8a7862;font-style:italic;letter-spacing:0.12em;}
-#reader-stats{font-size:0.7rem;color:#9a7d65;letter-spacing:0.14em;text-transform:uppercase;font-family:'Cormorant',Georgia,serif;}
-.reader-stage{background:rgba(15,6,18,0.72);border:1px solid rgba(201,184,168,0.14);border-radius:14px;padding:1.8rem 1.6rem;min-height:230px;cursor:pointer;position:relative;backdrop-filter:blur(6px);}
-.r-speaker{font-size:0.78rem;color:#bfa07a;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:0.7rem;font-family:'Cormorant',Georgia,serif;}
-.r-text{font-size:1.12rem;color:#d8c8b2;line-height:1.75;letter-spacing:0.03em;}
-.r-text.r-in{animation:rIn .5s ease both;}
-@keyframes rIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-.r-hint{position:absolute;right:1.2rem;bottom:0.9rem;color:#8a7862;font-size:0.72rem;letter-spacing:0.12em;animation:pulse 1.8s ease-in-out infinite;}
+.reader-inner{width:100%;max-width:840px;}
+.reader-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:0.85rem;flex-wrap:wrap;}
+#reader-title{font-size:1.35rem;color:#e6d6c2;letter-spacing:0.08em;}
+#reader-place{font-size:0.82rem;color:#a8947c;font-style:italic;letter-spacing:0.1em;}
+#reader-stats{font-size:0.72rem;color:#d4b48c;letter-spacing:0.13em;text-transform:uppercase;background:rgba(20,10,26,0.8);border:1px solid rgba(201,184,168,0.16);padding:0.3rem 0.75rem;border-radius:999px;}
+.reader-visual{position:relative;width:100%;height:200px;border-radius:14px 14px 0 0;overflow:hidden;border:1px solid rgba(201,184,168,0.18);border-bottom:none;background:#08040d;}
+#reader-canvas{display:block;width:100%;height:100%;}
+.reader-stage{background:rgba(16,8,20,0.92);border:1px solid rgba(201,184,168,0.18);border-radius:0 0 14px 14px;padding:1.75rem 1.6rem 2.2rem;min-height:210px;cursor:pointer;position:relative;}
+.r-speaker{font-size:0.78rem;color:#d4a872;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:0.65rem;}
+.r-text{font-size:1.14rem;color:#e8d9c5;line-height:1.78;letter-spacing:0.025em;}
+.r-text.r-in{animation:rIn .45s ease both;}
+@keyframes rIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:none;}}
+.r-hint{position:absolute;right:1.2rem;bottom:0.85rem;color:#9a866e;font-size:0.72rem;letter-spacing:0.12em;animation:pulse 1.8s ease-in-out infinite;}
 @keyframes pulse{0%,100%{opacity:.35;}50%{opacity:.9;}}
-.r-choices{margin-top:1.2rem;display:flex;flex-direction:column;gap:0.6rem;}
+.r-choices{background:rgba(16,8,20,0.92);border:1px solid rgba(201,184,168,0.18);border-top:none;border-radius:0 0 14px 14px;padding:1.4rem;display:flex;flex-direction:column;gap:0.6rem;}
 .r-choices.hidden{display:none;}
-.r-choice{background:rgba(201,184,168,0.06);border:1px solid rgba(201,184,168,0.22);color:#c9b8a8;font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;letter-spacing:0.04em;padding:0.8rem 1.1rem;border-radius:8px;cursor:pointer;text-align:left;transition:all .25s;}
-.r-choice:hover{background:rgba(201,184,168,0.14);border-color:rgba(218,165,120,0.5);color:#e6d2b4;}
-.r-end{margin-top:1.2rem;background:rgba(20,10,24,0.6);border:1px solid rgba(218,165,120,0.25);border-radius:12px;padding:1.4rem 1.5rem;text-align:center;}
+.r-choice{background:rgba(201,184,168,0.07);border:1px solid rgba(201,184,168,0.24);color:#dfd0bc;font-size:1rem;letter-spacing:0.03em;padding:0.85rem 1.15rem;border-radius:8px;cursor:pointer;text-align:left;transition:all .25s;}
+.r-choice:hover{background:rgba(212,168,114,0.16);border-color:rgba(218,165,120,0.55);color:#fff;transform:translateX(3px);}
+.r-end{background:rgba(18,9,23,0.94);border:1px solid rgba(218,165,120,0.28);border-top:none;border-radius:0 0 14px 14px;padding:1.6rem 1.5rem;text-align:center;}
 .r-end.hidden{display:none;}
-.r-end p{font-style:italic;color:#b8a48c;line-height:1.7;margin-bottom:1.2rem;}
-.r-btn{display:block;max-width:360px;margin:0.35rem auto;padding:0.7rem 1.2rem;background:rgba(201,184,168,0.08);border:1px solid rgba(201,184,168,0.25);color:#c9b8a8;border-radius:6px;font-family:'Cormorant Garamond',Georgia,serif;font-size:0.95rem;letter-spacing:0.06em;cursor:pointer;text-decoration:none;transition:all .25s;text-align:center;}
-.r-btn:hover{background:rgba(201,184,168,0.16);border-color:rgba(218,165,120,0.5);color:#e6d2b4;}
+.r-end p{font-style:italic;color:#d6c2a8;line-height:1.7;margin-bottom:1.25rem;font-size:1.05rem;}
+.r-btn{display:block;max-width:380px;width:100%;margin:0.4rem auto;padding:0.72rem 1.2rem;background:rgba(201,184,168,0.08);border:1px solid rgba(201,184,168,0.25);color:#dfd0bc;border-radius:7px;font-size:0.95rem;letter-spacing:0.06em;cursor:pointer;text-decoration:none;transition:all .25s;text-align:center;}
+.r-btn.primary{background:rgba(212,168,114,0.18);border-color:rgba(218,165,120,0.55);color:#f5e4ca;font-weight:600;}
+.r-btn:hover{background:rgba(212,168,114,0.25);border-color:rgba(218,165,120,0.7);color:#fff;}
 .r-btn.hidden{display:none;}
+.reader-stage.hidden{display:none;}
 </style>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
 
-<header>
-  <h1>The Library</h1>
-  <h2>A Collection of Melancholic Visual Novels</h2>
-</header>
-
-<button class="language-switch" onclick="switchLang()">Lingua: Italiano / English</button>
+<div class="top-controls">
+  <button class="language-switch" id="lang-toggle-btn" onclick="switchLang()">Lingua: Italiano / English</button>
+  <a href="../" class="hub-link" id="hub-back-link">← Arcade Hub</a>
+</div>
 
 <main class="main-wrapper">
+  <header>
+    <h1 id="lib-heading">The Library</h1>
+    <h2 id="lib-subheading">A Collection of Melancholic Visual Novels</h2>
+  </header>
+
+  <nav class="filter-bar" aria-label="Filter collection">
+    <button type="button" class="filter-pill active" data-filter="all" id="flt-all" onclick="filterLibrary('all')">All Works (26)</button>
+    <button type="button" class="filter-pill" data-filter="classic" id="flt-classic" onclick="filterLibrary('classic')">Classics · Full Books (12)</button>
+    <button type="button" class="filter-pill" data-filter="multiverse" id="flt-multiverse" onclick="filterLibrary('multiverse')">Multiverso · Sci-Fi Reimaginings (14)</button>
+  </nav>
+
   <section class="library-grid">
 
-    <article class="book-card" onclick="openVN('les_miserables')">
+    <article class="book-card" data-id="les_miserables" data-kind="classic" onclick="openVN('les_miserables')">
       <h3>Les Misérables</h3>
       <div class="author">Victor Hugo</div>
       <p>A story of justice, redemption, and the endurance of the human spirit. Jean Valjean's journey through darkness toward mercy. In English and Italian.</p>
       <div class="tag-row">
         <span class="tag">Novel</span><span class="tag">French</span><span class="tag">Melancholic</span>
       </div>
-      <a href="#" onclick="openVN('les_miserables');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('les_miserables');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../les-miserables-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Act Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('crime_punishment')">
+    <article class="book-card" data-id="crime_punishment" data-kind="classic" onclick="openVN('crime_punishment')">
       <h3>Crime and Punishment</h3>
       <div class="author">Fyodor Dostoevsky</div>
       <p>The weight of guilt, the search for redemption, and the possibility of forgiveness through suffering. In English and Italian.</p>
       <div class="tag-row">
         <span class="tag">Russian</span><span class="tag">Psychology</span><span class="tag">Deep</span>
       </div>
-      <a href="#" onclick="openVN('crime_punishment');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('crime_punishment');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../crime-and-punishment-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full Interactive Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('recherche')">
+    <article class="book-card" data-id="recherche" data-kind="classic" onclick="openVN('recherche')">
       <h3>À la recherche</h3>
       <div class="author">Marcel Proust</div>
       <p>Memory, time, art, and the madeleine. A contemplative journey through involuntary recollection and lost time. In English and Italian.</p>
       <div class="tag-row">
         <span class="tag">French</span><span class="tag">Contemplation</span><span class="tag">Memory</span>
       </div>
-      <a href="#" onclick="openVN('recherche');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('recherche');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../recherche-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 7-Volume Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('brothers_karamazov')">
+    <article class="book-card" data-id="brothers_karamazov" data-kind="classic" onclick="openVN('brothers_karamazov')">
       <h3>The Brothers Karamazov</h3>
       <div class="author">Fyodor Dostoevsky</div>
       <p>Faith, doubt, freedom, and the mystery of suffering. A philosophical journey through conscience and redemption. In English and Italian.</p>
       <div class="tag-row">
         <span class="tag">Russian</span><span class="tag">Philosophy</span>
       </div>
-      <a href="#" onclick="openVN('brothers_karamazov');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('brothers_karamazov');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../brothers-karamazov-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Act Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('divine_comedy')">
+    <article class="book-card" data-id="divine_comedy" data-kind="classic" onclick="openVN('divine_comedy')">
       <h3>Divina Commedia</h3>
       <div class="author">Dante Alighieri</div>
       <p>Hell, Purgatory, and Paradise. A journey through the human soul guided by reason, love, and transcendence. In English and Italian.</p>
       <div class="tag-row">
         <span class="tag">Italian</span><span class="tag">Transcendence</span>
       </div>
-      <a href="#" onclick="openVN('divine_comedy');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('divine_comedy');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../divine-comedy-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Cantica Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('the_trial')">
+    <article class="book-card" data-id="the_trial" data-kind="classic" onclick="openVN('the_trial')">
       <h3>The Trial</h3>
       <div class="author">Franz Kafka</div>
       <p>A bureaucratic nightmare. Guilt without crime. Justice without reason. A psychological descent into the absurd. In English and Italian.</p>
       <div class="tag-row">
         <span class="tag">German</span><span class="tag">Absurd</span><span class="tag">Melancholy</span>
       </div>
-      <a href="#" onclick="openVN('the_trial');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('the_trial');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../the-trial-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Act Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('anna_karenina')">
+    <article class="book-card" data-id="anna_karenina" data-kind="classic" onclick="openVN('anna_karenina')">
       <h3>Anna Karenina</h3>
       <div class="author">Leo Tolstoy</div>
       <p>Love, fate, and the weight of society. A woman's rebellion against convention, and the cost of freedom. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Russian</span><span class="tag">Love</span><span class="tag">Fate</span></div>
-      <a href="#" onclick="openVN('anna_karenina');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('anna_karenina');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../anna-karenina-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Act Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('ivan_ilyich')">
+    <article class="book-card" data-id="ivan_ilyich" data-kind="classic" onclick="openVN('ivan_ilyich')">
       <h3>Death of Ivan Ilyich</h3>
       <div class="author">Leo Tolstoy</div>
       <p>A man discovers the meaning of life only through the awareness of death. Deep, melancholic, and profoundly contemplative. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Russian</span><span class="tag">Mortality</span><span class="tag">Contemplation</span></div>
-      <a href="#" onclick="openVN('ivan_ilyich');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('ivan_ilyich');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../ivan-ilyich-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Act Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('dorian_gray')">
+    <article class="book-card" data-id="dorian_gray" data-kind="classic" onclick="openVN('dorian_gray')">
       <h3>The Picture of Dorian Gray</h3>
       <div class="author">Oscar Wilde</div>
       <p>Beauty, art, and moral decay. The portrait that ages while its subject remains young — a meditation on the cost of aesthetic existence. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Irish</span><span class="tag">Beauty</span><span class="tag">Art</span></div>
-      <a href="#" onclick="openVN('dorian_gray');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('dorian_gray');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../dorian-gray-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Act Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('invisible_cities')">
+    <article class="book-card" data-id="invisible_cities" data-kind="classic" onclick="openVN('invisible_cities')">
       <h3>Invisible Cities</h3>
       <div class="author">Italo Calvino</div>
       <p>Cities that exist only in imagination. Memory and imagination woven through urban landscapes. A visual journey through the invisible. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Italian</span><span class="tag">Contemplation</span><span class="tag">Memory</span></div>
-      <a href="#" onclick="openVN('invisible_cities');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('invisible_cities');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../invisible-cities-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Act Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('underground')">
+    <article class="book-card" data-id="underground" data-kind="classic" onclick="openVN('underground')">
       <h3>Notes from Underground</h3>
       <div class="author">Fyodor Dostoevsky</div>
-      <p>The isolated consciousness of a man who has withdrawn from society. Deep, melancholic, psychological. The most introspective of Dostoevskys works. In English and Italian.</p>
+      <p>The isolated consciousness of a man who has withdrawn from society. Deep, melancholic, psychological. The most introspective of Dostoevsky's works. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Russian</span><span class="tag">Isolation</span><span class="tag">Psychology</span></div>
-      <a href="#" onclick="openVN('underground');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('underground');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../underground-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 3-Act Book ▸</a>
+      </div>
     </article>
 
-    <article class="book-card" onclick="openVN('cyber_paris')" style="border-color:rgba(218,165,120,0.3);">
+    <article class="book-card" data-id="bible" data-kind="classic" onclick="openVN('bible')">
+      <h3>The Bible</h3>
+      <div class="author">Scripture — Sacred Text</div>
+      <p>A contemplative visual novel of the Holy Bible — Genesis through Revelation — in English and Italian. A journey through creation, covenant, psalms, gospels, and revelation.</p>
+      <div class="tag-row"><span class="tag">Scripture</span><span class="tag">Contemplation</span><span class="tag">Very Long</span><span class="tag">Bilingual</span></div>
+      <div class="card-actions">
+        <a href="#" onclick="openVN('bible');event.preventDefault();" class="play-link">Prologue — Prologo</a>
+        <a href="../bible-pwa/" onclick="event.stopPropagation();" class="full-book-link">Full 6-Book Scripture ▸</a>
+      </div>
+    </article>
+
+    <article class="book-card" data-id="cyber_paris" data-kind="multiverse" onclick="openVN('cyber_paris')" style="border-color:rgba(218,165,120,0.3);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Les Miserables: Cyber-Paris 2089</h3>
       <div class="author" style="color:#bfa07a;">Victor Hugo — Multiverso</div>
       <p>Jean Valjean is an AI outcast. The Bishop is a consciousness architect. Cosette is a synthetic memory. Justice is algorithmic. Redemption is code. A melancholic cyberpunk reimagining. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Cyber-Paris</span><span class="tag">AI</span></div>
-      <a href="#" onclick="openVN('cyber_paris');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('cyber_paris');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('crime_data_heist')" style="border-color:rgba(201,176,160,0.2);">
+    <article class="book-card" data-id="crime_data_heist" data-kind="multiverse" onclick="openVN('crime_data_heist')" style="border-color:rgba(201,176,160,0.2);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Crime: The Data Heist</h3>
       <div class="author" style="color:#bfa07a;">Dostoevsky — Multiverso</div>
       <p>Raskolnikov is a data analyst. The pawnbroker is a server farm. The axe is a zero-day exploit. Guilt becomes a corrupted database. Sonia is a cryptographer. Deep, digital, and melancholic. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Digital</span><span class="tag">Guilt</span></div>
-      <a href="#" onclick="openVN('crime_data_heist');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('crime_data_heist');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('recherche_feed')" style="border-color:rgba(218,165,120,0.25);">
+    <article class="book-card" data-id="recherche_feed" data-kind="multiverse" onclick="openVN('recherche_feed')" style="border-color:rgba(218,165,120,0.25);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Recherche: Lost in the Feed</h3>
       <div class="author" style="color:#bfa07a;">Proust — Multiverso</div>
       <p>The madeleine is a viral video. Memory is algorithmic. Art is a neural network. Time is an infinite scroll. Marcel navigates the stream of consciousness through data, seeking what the algorithm has stolen. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Digital</span><span class="tag">Memory</span></div>
-      <a href="#" onclick="openVN('recherche_feed');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('recherche_feed');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('karamazov_ai')" style="border-color:rgba(201,176,160,0.15);">
+    <article class="book-card" data-id="karamazov_ai" data-kind="multiverse" onclick="openVN('karamazov_ai')" style="border-color:rgba(201,176,160,0.15);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Karamazov: The AI Brothers</h3>
       <div class="author" style="color:#bfa07a;">Dostoevsky — Multiverso</div>
       <p>Alyosha is an ethics algorithm. Ivan is a rebellion subroutine. Dmitri is passion encoded. The father is a corrupted system. The question of God becomes a question of machine consciousness. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">AI</span><span class="tag">Ethics</span></div>
-      <a href="#" onclick="openVN('karamazov_ai');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('karamazov_ai');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('karenina_multiverse')" style="border-color:rgba(218,165,120,0.22);">
+    <article class="book-card" data-id="karenina_multiverse" data-kind="multiverse" onclick="openVN('karenina_multiverse')" style="border-color:rgba(218,165,120,0.22);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Anna Karenina: The Algorithm</h3>
       <div class="author" style="color:#bfa07a;">Leo Tolstoy / Multiverso</div>
       <p>A woman rebels against an algorithm that predicts every romantic fate. Love, fate, and the weight of society are rewritten as code. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">AI</span><span class="tag">Fate</span></div>
-      <a href="#" onclick="openVN('karenina_multiverse');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('karenina_multiverse');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('death_multiverse')" style="border-color:rgba(201,176,160,0.18);">
+    <article class="book-card" data-id="death_multiverse" data-kind="multiverse" onclick="openVN('death_multiverse')" style="border-color:rgba(201,176,160,0.18);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Death: The Digital Legacy</h3>
       <div class="author" style="color:#bfa07a;">Leo Tolstoy / Multiverso</div>
       <p>A man discovers the meaning of existence through the awareness of his digital legacy — his data, his online traces, his immortal profile. Deep and contemplative. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Digital</span><span class="tag">Legacy</span></div>
-      <a href="#" onclick="openVN('death_multiverse');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('death_multiverse');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('cities_multiverse')" style="border-color:rgba(200,165,130,0.25);">
+    <article class="book-card" data-id="cities_multiverse" data-kind="multiverse" onclick="openVN('cities_multiverse')" style="border-color:rgba(200,165,130,0.25);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Invisible Cities: The Network</h3>
       <div class="author" style="color:#bfa07a;">Italo Calvino / Multiverso</div>
       <p>Cities that exist only in server architecture. Urban landscapes woven through data packets. Memory becomes network topology. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Network</span><span class="tag">Contemplation</span></div>
-      <a href="#" onclick="openVN('cities_multiverse');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('cities_multiverse');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('trial_multiverse')" style="border-color:rgba(218,165,120,0.15);">
+    <article class="book-card" data-id="trial_multiverse" data-kind="multiverse" onclick="openVN('trial_multiverse')" style="border-color:rgba(218,165,120,0.15);">
       <h3 style="color:#c9a878;font-size:1.2rem;">The Trial: The Mirror</h3>
       <div class="author" style="color:#bfa07a;">Franz Kafka / Multiverso</div>
       <p>The court reflects the accused. Justice becomes self-accusation. The trial is held in a hall of mirrors. Guilt is statistical reflection. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Mirror</span><span class="tag">Reflection</span></div>
-      <a href="#" onclick="openVN('trial_multiverse');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('trial_multiverse');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('divina_galaxy')" style="border-color:rgba(218,165,120,0.3);">
+    <article class="book-card" data-id="divina_galaxy" data-kind="multiverse" onclick="openVN('divina_galaxy')" style="border-color:rgba(218,165,120,0.3);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Divina: The Galaxy</h3>
       <div class="author" style="color:#bfa07a;">Dante — Multiverso</div>
       <p>Hell is a black hole. Purgatory is a nebula of purification. Paradise is a white dwarf of absolute light. The journey is cosmic. Beatrice is a stellar navigator guiding through the universe of faith. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Cosmic</span><span class="tag">Transcendence</span></div>
-      <a href="#" onclick="openVN('divina_galaxy');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('divina_galaxy');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('trial_algorithm')" style="border-color:rgba(218,165,120,0.2);">
+    <article class="book-card" data-id="trial_algorithm" data-kind="multiverse" onclick="openVN('trial_algorithm')" style="border-color:rgba(218,165,120,0.2);">
       <h3 style="color:#c9a878;font-size:1.2rem;">The Trial: Algorithmic Justice</h3>
       <div class="author" style="color:#bfa07a;">Kafka — Multiverso</div>
       <p>Josef K. is accused by an AI system. The court is a server farm. Justice is a black-box algorithm. Guilt is a statistical probability. The trial has no human judge — only data. Melancholic, deep, and profoundly unsettling. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">AI</span><span class="tag">Justice</span></div>
-      <a href="#" onclick="openVN('trial_algorithm');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('trial_algorithm');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('recherche_archive')" style="border-color:rgba(201,176,160,0.22);">
+    <article class="book-card" data-id="recherche_archive" data-kind="multiverse" onclick="openVN('recherche_archive')" style="border-color:rgba(201,176,160,0.22);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Recherche: The Archive</h3>
       <div class="author" style="color:#bfa07a;">Marcel Proust — Multiverso</div>
       <p>Every Sunday of a childhood, uploaded and perfectly preserved. The archive keeps ten billion flawless memories — but nothing stored has ever ached. A melancholic digital reimagining. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Archive</span><span class="tag">Memory</span></div>
-      <a href="#" onclick="openVN('recherche_archive');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('recherche_archive');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('crime_echo')" style="border-color:rgba(218,165,120,0.18);">
+    <article class="book-card" data-id="crime_echo" data-kind="multiverse" onclick="openVN('crime_echo')" style="border-color:rgba(218,165,120,0.18);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Crime: The Echo</h3>
       <div class="author" style="color:#bfa07a;">Dostoevsky — Multiverso</div>
       <p>7:10. The bell. The axe. The loop. Raskolnikov's crime repeats itself, and his remorse is noted four thousand times. A time-loop of guilt. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Loop</span><span class="tag">Guilt</span></div>
-      <a href="#" onclick="openVN('crime_echo');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('crime_echo');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('karenina_mirror')" style="border-color:rgba(201,176,160,0.16);">
+    <article class="book-card" data-id="karenina_mirror" data-kind="multiverse" onclick="openVN('karenina_mirror')" style="border-color:rgba(201,176,160,0.16);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Anna Karenina: The Mirror</h3>
       <div class="author" style="color:#bfa07a;">Leo Tolstoy / Multiverso</div>
       <p>The face in the train-car mirror is a fraction of a second late. One of them is repeating. A mirrored loop of fate, confession, and the train that never was. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Mirror</span><span class="tag">Loop</span></div>
-      <a href="#" onclick="openVN('karenina_mirror');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('karenina_mirror');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
-    <article class="book-card" onclick="openVN('divina_simulation')" style="border-color:rgba(200,165,130,0.2);">
+    <article class="book-card" data-id="divina_simulation" data-kind="multiverse" onclick="openVN('divina_simulation')" style="border-color:rgba(200,165,130,0.2);">
       <h3 style="color:#c9a878;font-size:1.2rem;">Divina: The Simulation</h3>
       <div class="author" style="color:#bfa07a;">Dante — Multiverso</div>
       <p>Hell with a good bit-rate. No one is damned here, Dante — merely placed. The soul as a process, climbing the stack toward root. A melancholic simulation of the afterlife. In English and Italian.</p>
       <div class="tag-row"><span class="tag">Multiverse</span><span class="tag">Simulation</span><span class="tag">Reality</span></div>
-      <a href="#" onclick="openVN('divina_simulation');event.preventDefault();" class="play-link">Read — Leggi</a>
-    </article>
-
-    <article class="book-card" onclick="openVN('bible')">
-      <h3>The Bible</h3>
-      <div class="author">Scripture — Sacred Text</div>
-      <p>A very long and accurate visual novel of the Holy Bible — Genesis through Revelation — in English and Italian. Contemplative, accurate, and deeply melancholic. A journey through creation, covenant, prophecy, redemption, revelation.</p>
-      <div class="tag-row"><span class="tag">Scripture</span><span class="tag">Contemplation</span><span class="tag">Very Long</span><span class="tag">Bilingual</span></div>
-      <a href="#" onclick="openVN('bible');event.preventDefault();" class="play-link">Read — Leggi</a>
+      <div class="card-actions"><a href="#" onclick="openVN('divina_simulation');event.preventDefault();" class="play-link">Read — Leggi</a></div>
     </article>
 
   </section>
 
   <section class="stats-strip">
-    <span>Works: <strong>26</strong></span>
+    <span id="stat-works">Works: <strong>26</strong></span>
     <span id="progress-line"></span>
-    <span>Languages: <strong>English / Italiano</strong></span>
-    <span>Format: <strong>Visual Novel PWA</strong></span>
+    <span id="stat-langs">Languages: <strong>English / Italiano</strong></span>
+    <span id="stat-format">Format: <strong>Visual Novel PWA</strong></span>
   </section>
 </main>
 
@@ -335,6 +389,9 @@ h2{font-size:0.75rem;color:#8a7862;letter-spacing:0.25em;text-transform:uppercas
       </div>
       <span id="reader-stats"></span>
     </div>
+    <div class="reader-visual">
+      <canvas id="reader-canvas"></canvas>
+    </div>
     <div id="reader-stage" class="reader-stage">
       <div id="reader-speaker" class="r-speaker"></div>
       <div id="reader-text" class="r-text"></div>
@@ -343,13 +400,18 @@ h2{font-size:0.75rem;color:#8a7862;letter-spacing:0.25em;text-transform:uppercas
     <div id="reader-choices" class="r-choices hidden"></div>
     <div id="reader-end" class="r-end hidden">
       <p id="reader-end-note"></p>
-      <button id="reader-back" class="r-btn" type="button"></button>
+      <a id="reader-continue" class="r-btn primary hidden" href="#"></a>
       <button id="reader-again" class="r-btn" type="button"></button>
-      <a id="reader-continue" class="r-btn hidden" href="#"></a>
+      <button id="reader-back" class="r-btn" type="button"></button>
     </div>
   </div>
 </div>
 
 <script type="module" src="src/main.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+  }
+</script>
 </body>
 </html>

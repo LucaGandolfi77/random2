@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b2239"/>
+      <stop offset="100%" stop-color="#06101c"/>
+    </linearGradient>
+    <linearGradient id="turf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#bg)"/>
+  <!-- Low-poly emerald baseball diamond -->
+  <polygon points="96,26 164,96 96,166 28,96" fill="url(#turf)" stroke="#fbbf24" stroke-width="4"/>
+  <polygon points="96,52 138,96 96,140 54,96" fill="#d97706" opacity="0.88"/>
+  <polygon points="96,66 124,96 96,126 68,96" fill="#22c55e"/>
+  <!-- Bases -->
+  <rect x="91" y="46" width="10" height="10" fill="#ffffff" transform="rotate(45 96 51)"/>
+  <rect x="133" y="91" width="10" height="10" fill="#ffffff" transform="rotate(45 138 96)"/>
+  <rect x="49" y="91" width="10" height="10" fill="#ffffff" transform="rotate(45 54 96)"/>
+  <!-- Crossed Bat -->
+  <line x1="40" y1="150" x2="148" y2="42" stroke="#fde68a" stroke-width="11" stroke-linecap="round"/>
+  <!-- Baseball with red seams -->
+  <circle cx="96" cy="96" r="22" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M82,82 Q92,96 82,110" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+  <path d="M110,82 Q100,96 110,110" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+</svg>

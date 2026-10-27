@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Death of Ivan Ilyich — Act II · The Library</title>
-<meta name="description" content="The Black Sack — Death of Ivan Ilyich continues: the final weeks, Gerasim's hands, and the last argument held in silence. Bilingual visual novel scene.">
+<title>The Death of Ivan Ilyich — Interactive Visual Novel · The Library</title>
+<meta name="description" content="Leo Tolstoy's Death of Ivan Ilyich in three acts: The Curtain and the Verdict, Gerasim and the Black Sack, and The Three Days' Scream & The Light. Bilingual EN/IT.">
 <meta name="theme-color" content="#0a060e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <style>
 body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,122,0.08),transparent 60%),#0d0912;color:#c9b8a8;font-family:Georgia,'Cormorant Garamond',serif;min-height:100vh;line-height:1.7;letter-spacing:0.02em;}
-.ls-wrap{max-width:860px;margin:0 auto;padding:2.5rem 1.25rem 4rem;}
-.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.5rem;}
-.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.4rem;}
-.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 2.2rem;max-width:560px;}
-.ls-foot{text-align:center;margin-top:3rem;}
+.ls-wrap{max-width:860px;margin:0 auto;padding:2.2rem 1.25rem 4rem;}
+.ls-eyebrow{font-size:0.68rem;letter-spacing:0.28em;text-transform:uppercase;color:#8a7862;text-align:center;margin:0 0 0.4rem;}
+.ls-heading{font-size:2rem;font-weight:400;color:#c9b0a0;text-align:center;letter-spacing:0.08em;margin:0 0 0.35rem;}
+.ls-sub{text-align:center;color:#9a8876;font-style:italic;font-size:0.95rem;margin:0 auto 1.8rem;max-width:580px;}
+.ls-foot{text-align:center;margin-top:2.5rem;}
 .ls-foot a{display:inline-block;padding:0.6rem 1.4rem;background:rgba(201,176,140,0.08);border:1px solid rgba(201,176,140,0.22);border-radius:6px;color:#c9b8a8;font-size:0.85rem;text-decoration:none;letter-spacing:0.06em;transition:all .3s;}
 .ls-foot a:hover{background:rgba(201,176,140,0.15);color:#e0c8a8;}
 </style>
@@ -22,8 +23,8 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 <body>
 <div class="ls-wrap">
   <p class="ls-eyebrow">From the Library · Dalla Biblioteca</p>
-  <h1 class="ls-heading">Death of Ivan Ilyich — Act II</h1>
-  <p class="ls-sub">The story continues from the scene that begins in the anthology. In English and Italian.</p>
+  <h1 class="ls-heading">The Death of Ivan Ilyich · Leo Tolstoy</h1>
+  <p class="ls-sub">Three acts on mortality, falsity, and the light at the bottom of the black sack. In English and Italian.</p>
   <div id="scene"></div>
   <div class="ls-foot"><a href="../anthology-pwa/">← The Library — La Biblioteca</a></div>
 </div>
@@ -32,31 +33,82 @@ body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,rgba(191,160,1
 var N = { en: "Narrator", it: "Narratore" };
 LibraryScene.open({
   mount: document.getElementById("scene"),
-  title: { en: "The Black Sack", it: "Il sacco nero" },
-  place: { en: "The study, the final weeks", it: "Lo studio, le ultime settimane" },
+  bookId: "ivan_ilyich",
   backHref: "../anthology-pwa/",
-  lines: [
-    { s: N, t: { en: "The doctors now speak of months in the plural, which is a mercy and a sentence. The pain has become a roommate with opinions.", it: "I medici ormai parlano di mesi al plurale, il che è una pietà e una condanna. Il dolore è diventato un coinquilino con opinioni." } },
-    { s: "Ivan Ilyich", t: { en: "Everyone will die. I am not special — and yet this sack closes on me alone, personally, as if I were its only appointment.", it: "Tutti devono morire. Non sono un caso speciale — eppure questo sacco si stringe su di me solo, personalmente, come se fossi io il suo unico appuntamento." } },
-    { s: "Gerasim", t: { en: "Ivan Ilyich, I hold your legs like this. You sleep better when someone shares the weight. It is nothing; I will be old too.", it: "Ivan Ilyič, io le tengo le gambe così. Dorme meglio quando qualcuno divide il peso. Non è niente; anch'io sarò vecchio." } },
-    { s: "Ivan Ilyich", t: { en: "When he says 'we all must die someday' it does not frighten me. When the doctors say 'case' I want to strike them. Why is the peasant gentle and the professor cruel?", it: "Quando lui dice «tutti devono morire» non mi spaventa. Quando i medici dicono «caso» vorrei colpirli. Perché il contadino è dolce e il professore crudele?" } },
-    { s: { en: "His wife", it: "Sua moglie" }, t: { en: "Praskovya, the upholsterer sent samples — you cannot lie on the old chaise. Ivan, do you hear me? Ivan, the samples.", it: "Praskovja, il tappezziere ha mandato i campioni — sulla vecchia chaise longue non ci si può sdraiare. Ivan, mi senti? Ivan, i campioni." } },
-    { s: "Ivan Ilyich", t: { en: "She is arguing about fabric at the edge of my grave. Perhaps that is her way of holding my hand. Perhaps there is no way, and the sack is alone.", it: "Sta discutendo di stoffe al limitare della mia fossa. Forse è il suo modo di tenermi la mano. Forse non c'è modo, e il sacco è solo." } },
-    { s: N, t: { en: "At three in the morning the last argument of his life takes place in silence: not against death, but against the wrong life he perfected. The sack waits, patient as furniture.", it: "Alle tre del mattino l'ultima lite della sua vita si svolge in silenzio: non contro la morte, ma contro la vita sbagliata che ha perfezionato. Il sacco aspetta, paziente come un mobile." } },
-    { s: "Ivan Ilyich", t: { en: "So that is it. What if — at the end — I could still say: forgive me, and mean all of it?", it: "Ecco cos'è. E se — alla fine — potessi ancora dire: perdonatemi, e intenderlo fino in fondo?" } }
-  ],
-  choices: [
-    { text: { en: "Say the forgiveness out loud, to them.", it: "Dì il perdono ad alta voce, a loro." }, lines: [
-      { s: N, t: { en: "He says it to his son's wet eyes, to his wife's fabric arguments, to Gerasim's rough hands. The sack does not vanish. It stops closing. Light has no walls; he steps through as through a door left open on purpose.", it: "Lo dice agli occhi bagnati del figlio, alle discussioni di stoffe della moglie, alle mani rozze di Gerasim. Il sacco non svanisce. Smette di stringersi. La luce non ha pareti; passa attraverso come attraverso una porta lasciata aperta apposta." } }
-    ] },
-    { text: { en: "Hold on: point at the doctors, the committee, the injustice.", it: "Resisti: indica i medici, il comitato, l'ingiustizia." }, lines: [
-      { s: N, t: { en: "He holds out for nine more days, winning every argument and losing the only case. At the end his face says: it is finished — and it is not the gospel sentence; it is an inventory.", it: "Resiste altri nove giorni, vincendo ogni discussione e perdendo l'unica causa. Alla fine il suo volto dice: è compiuto — e non è la frase del vangelo; è un inventario." } }
-    ] }
-  ],
-  outro: { en: "The sack was never Death. It was everything he called living.", it: "Il sacco non è mai stata la Morte. Era tutto ciò che lui chiamava vivere." }
+  statInit: { mem: 8, mel: 10, art: 4 },
+  acts: [
+    {
+      tab: { en: "Act I · The Verdict", it: "Atto I · La Sentenza" },
+      title: { en: "Act I · The Curtain and the Syllogism", it: "Atto I · Il tendaggio e il sillogismo" },
+      place: { en: "St. Petersburg, the new drawing-room", it: "San Pietroburgo, il salotto nuovo" },
+      theme: "attic",
+      lines: [
+        { s: N, t: { en: "Ivan Ilyich's life had been most simple and most ordinary, and therefore most terrible. Judge, whist player, husband of a demanding wife, he climbed a ladder to hang a curtain — and slipped.", it: "La vita di Ivan Il'ič era stata semplicissima e comunissima, e perciò terribilissima. Giudice, giocatore di whist, marito d'una moglie esigente, salì su una scaletta per drappeggiare una tenda — e scivolò." } },
+        { s: "Ivan Ilyich", t: { en: "A mere bruise against the window knob. Nothing at all. Why then does this strange taste remain in my mouth, and this dull weight in my left side?", it: "Una semplice ammaccatura contro il pomolo della finestra. Niente di che. Perché allora mi resta questo sapore strano in bocca, e questo peso sordo nel fianco sinistro?" } },
+        { s: { en: "The Famous Doctor", it: "Il Celebre Medico" }, t: { en: "A floating kidney, or perhaps the blind gut. Observe how I tap and listen, exactly as you judges interrogate a prisoner in court.", it: "Un rene mobile, o forse l'intestino cieco. Osservi come percuoto e ausculto, esattamente come voi giudici interrogate un imputato in tribunale." } },
+        { s: "Ivan Ilyich", t: { en: "Doctor, leave the Latin aside and answer the only question that exists: is my condition dangerous, or not?", it: "Dottore, lasci stare il latino e risponda all'unica domanda che esiste: il mio stato è pericoloso, oppure no?" } },
+        { s: N, t: { en: "In the textbook of Kiesewetter's Logic he had learned in childhood: 'Caius is a man, men are mortal, therefore Caius is mortal.' That had always applied only to Caius, not to him.", it: "Nel manuale di logica di Kiesewetter aveva imparato da ragazzo: «Caio è un uomo, gli uomini sono mortali, dunque Caio è mortale». Quello era sempre valso solo per Caio, non per lui." } },
+        { s: "Ivan Ilyich", t: { en: "Caius is a man in the abstract. Optimize that all you like — I was little Vanya, who smelled the leather of my father's striped ball and kissed my mother's hand! Can it really be that I too must die?", it: "Caio è un uomo in astratto. Ragionate pure — io ero il piccolo Vanja, che odorava il cuoio della palla a strisce di mio padre e baciava la mano di mia madre! Possibile che anch'io debba morire?" } }
+      ],
+      choices: [
+        { text: { en: "Turn your face to the wall in the study and refuse the lie.", it: "Volta la faccia verso il muro nello studio e rifiuta la menzogna." }, effect: { mem: 3, mel: 2, art: 1 }, lines: [
+          { s: N, t: { en: "What torments him most is the lie — the polite conspiracy of his family pretending he is merely ill and not dying, reducing the solemn act of his death to an unpleasantness at a reception.", it: "Ciò che più lo tormenta è la menzogna — la cortese congiura della famiglia che finge ch'egli sia solo malato e non morente, riducendo l'atto solenne della sua morte a una sconvenienza da salotto." } }
+        ] },
+        { text: { en: "Try to play one more hand of bridge with your colleagues.", it: "Prova a giocare ancora una mano di bridge con i colleghi." }, effect: { mem: 1, mel: 3, art: 0 }, lines: [
+          { s: N, t: { en: "He bids a grand slam and suddenly sees that the cards, the candles, and the bronze candlesticks are thinner than paper over an abyss.", it: "Chiama un grande slam e vede d'un tratto che le carte, le candele e i candelabri di bronzo sono più sottili della carta sopra un abisso." } }
+        ] }
+      ],
+      outro: { en: "Caius is mortal, and it is right for him to die; Move on — what has that to do with me?", it: "Caio è mortale, ed è giusto che muoia; ma per me, per il piccolo Vanja, è tutt'altra cosa." }
+    },
+    {
+      tab: { en: "Act II · Gerasim", it: "Atto II · Gerasim" },
+      title: { en: "Act II · Gerasim and the Black Sack", it: "Atto II · Gerasim e il sacco nero" },
+      place: { en: "The study, the final weeks", it: "Lo studio, le ultime settimane" },
+      theme: "candles",
+      lines: [
+        { s: N, t: { en: "Only one person in the house does not lie: the peasant pantry-boy Gerasim, who smells of winter air and boot-tar.", it: "Una sola persona in tutta la casa non mente: il giovane contadino Gerasim, che odora d'aria d'inverno e di catrame." } },
+        { s: "Gerasim", t: { en: "Ivan Ilyich, rest your feet here on my shoulders. It is no trouble at all. We shall all of us die someday, so why shouldn't I take a little trouble now?", it: "Ivan Il'ič, appoggi i piedi qui sulle mie spalle. Non è nessun disturbo. Tutti dobbiamo morire un giorno, perché non dovrei darmi un po' di pena adesso?" } },
+        { s: "Ivan Ilyich", t: { en: "When everyone else looks at me, their eyes say: 'You will die and we will stay.' Only Gerasim's hands say: 'We are mortals together.'", it: "Quando gli altri mi guardano, i loro occhi dicono: «Tu morirai e noi resteremo». Solo le mani di Gerasim dicono: «Siamo mortali insieme»." } },
+        { s: N, t: { en: "At night he dreams that they are shoving him into a narrow, deep black sack, and he is both helping them and resisting because of the unbearable pain.", it: "Di notte sogna che lo spingano dentro un sacco nero, stretto e profondo, ed egli insieme li aiuta e resiste per il dolore insopportabile." } },
+        { s: { en: "Voice of the Soul", it: "La Voce dell'Anima" }, t: { en: "What do you want?", it: "Che cosa vuoi?" } },
+        { s: "Ivan Ilyich", t: { en: "To live! To live as I lived before — pleasantly, properly! Wait… What if my whole correct, decorous life was really not the right thing?", it: "Vivere! Vivere come vivevo prima — bene, piacevolmente! Aspetta… E se tutta la mia vita corretta e decorosa fosse stata in realtà «non la cosa giusta»?" } }
+      ],
+      choices: [
+        { text: { en: "Admit the truth: everything since childhood was a polite falsehood.", it: "Ammetti la verità: tutto, dopo l'infanzia, è stato una educata falsità." }, effect: { mem: 4, mel: 1, art: 2 }, lines: [
+          { s: N, t: { en: "Every time he had felt a real human impulse — pity for a prisoner, tenderness for his wife or child — he had crushed it in the name of official correctness.", it: "Ogni volta che aveva provato un vero moto umano — pietà per un imputato, tenerezza per la moglie o il figlio — l'aveva soffocato in nome della correttezza ufficiale." } }
+        ] },
+        { text: { en: "Send Gerasim away at dawn so the boy can sleep.", it: "Manda Gerasim a dormire all'alba perché il ragazzo riposi." }, effect: { mem: 2, mel: 2, art: 1 }, lines: [
+          { s: N, t: { en: "Alone in the dark room, the black sack presses closer, waiting for the one admission that can tear it open.", it: "Solo nella stanza buia, il sacco nero si stringe più forte, aspettando l'unica confessione capace di squarciarlo." } }
+        ] }
+      ],
+      outro: { en: "The sack was never Death. It was everything he called living.", it: "Il sacco non è mai stata la Morte. Era tutto ciò che lui chiamava vivere." }
+    },
+    {
+      tab: { en: "Act III · The Light", it: "Atto III · La Luce" },
+      title: { en: "Act III · The Three Days' Scream and the Light", it: "Atto III · I tre giorni d'urlo e la Luce" },
+      place: { en: "The threshold of death", it: "Sulla soglia della morte" },
+      theme: "paradiso",
+      lines: [
+        { s: N, t: { en: "For three days, during which time did not exist for him, he struggled in that black sack into which an invisible, irresistible force was pushing him.", it: "Per tre giorni, durante i quali il tempo per lui non esistette, si dibatté in quel sacco nero in cui una forza invisibile e irresistibile lo cacciava." } },
+        { s: N, t: { en: "Suddenly some force struck him in the chest and side. He fell through the hole — and there, at the bottom of the sack, something caught his hand.", it: "All'improvviso una forza lo colpì al petto e al fianco. Cadde attraverso il foro — e là, in fondo al sacco, qualcosa gli afferrò la mano." } },
+        { s: N, t: { en: "He opened his eyes. His twelve-year-old schoolboy son Vasya had crept up to his bed, caught his falling hand, pressed it to his lips, and burst into tears.", it: "Aprì gli occhi. Suo figlio Vasja, lo scolaretto di dodici anni, s'era avvicinato al letto, gli aveva preso la mano cadente, se l'era premuta sulle labbra ed era scoppiato a piangere." } },
+        { s: "Ivan Ilyich", t: { en: "At the very moment I fell through, I saw that my life had not been what it ought, but that it could still be rectified. I feel so sorry for him… and for my wife too.", it: "Nel momento stesso in cui sono caduto giù, ho visto che la mia vita non era stata quella che doveva, ma che si poteva ancora rimediare. Mi fa tanta pena il bambino… e anche mia moglie." } },
+        { s: "Ivan Ilyich", t: { en: "I wanted to say 'Forgive me' — and by a slip of the tongue I said 'Forego' — and waved my hand, knowing that He whose understanding mattered would understand.", it: "Volevo dire «Perdona» — e con la lingua impacciata ho detto «Lascia passare» — e ho fatto un cenno con la mano, sapendo che Colui che doveva capire avrebbe capito." } },
+        { s: "Ivan Ilyich", t: { en: "Where is pain? Where are you, Death? There is no fear because there is no death. Instead of death, there was light!", it: "Dov'è il dolore? Dove sei, Morte? Non c'è paura perché la morte non c'è. In luogo della morte, c'era la luce!" } }
+      ],
+      choices: [
+        { text: { en: "Step into the light: 'Death is finished. It is no more.'", it: "Entra nella luce: «È finita la morte. Non c'è più»." }, effect: { mem: 4, mel: -3, art: 3 }, lines: [
+          { s: N, t: { en: "To those around the bed his agony lasted two hours more. In his own breast, that instant of light stood still and never changed.", it: "Per coloro che stavano intorno al letto la sua agonia durò ancora due ore. Nel suo petto, quell'istante di luce rimase immobile e non mutò mai più." } }
+        ] },
+        { text: { en: "Press little Vasya's hand one last time.", it: "Stringi un'ultima volta la mano del piccolo Vasja." }, effect: { mem: 4, mel: -1, art: 2 }, lines: [
+          { s: N, t: { en: "Pity for another human being dissolved the wall that sixty years of respectability had built.", it: "La pietà per un'altra creatura umana sciolse il muro che sessant'anni di rispettabilità avevano innalzato." } }
+        ] }
+      ],
+      outro: { en: "Death is finished, he said to himself. It is no more.", it: "È finita la morte, disse a se stesso. Non c'è più." }
+    }
+  ]
 });
 </script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});

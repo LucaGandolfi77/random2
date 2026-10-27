@@ -3,35 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Crime and Punishment — A Melancholic Visual Novel</title>
-    <meta name="description" content="A melancholic visual novel exploring guilt, conscience, and redemption through Dostoevskys Crime and Punishment. Fully offline-capable once installed.">
+    <title>Crime and Punishment — Interactive Visual Novel · The Library</title>
+    <meta name="description" content="A melancholic visual novel exploring guilt, conscience, and redemption through Dostoevsky's Crime and Punishment. Bilingual English and Italian, offline-capable.">
     <meta name="theme-color" content="#0f0c15">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
     <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg">
     <link rel="apple-touch-icon" href="icons/icon-192.svg">
     <script src="../shared/arcade.js"></script>
 </head>
 <body>
     <canvas id="game-canvas"></canvas>
-    <div id="dialogue-overlay" class="dialogue-area">
-        <div class="speaker-name" id="speaker">Raskolnikov</div>
-        <div class="dialogue-text" id="dialogue-text">The heat in the room was stifling... A room like this... for a crime.</div>
-        <div class="choices" id="choices"></div>
-    </div>
-    <div id="stats-bar" class="stats-bar">
-        <span>Conscience:</span> <span id="conscience-val">12</span>
-        <span>Guilt:</span> <span id="guilt-val">85</span>
-        <span>Hope:</span> <span id="hope-val">8</span>
-    </div>
+
+    <header class="top-hud">
+        <div class="nav-left">
+            <a href="../anthology-pwa/" class="hud-btn" id="back-lib-btn">← The Library</a>
+            <button type="button" class="hud-btn" id="lang-btn" onclick="switchLang()">Lingua: Italiano</button>
+            <button type="button" class="hud-btn" id="restart-btn" onclick="restartStory()">↻ Restart</button>
+        </div>
+        <div id="stats-bar" class="stats-bar">
+            <span><em id="lbl-conscience">Conscience</em>: <strong id="conscience-val">12</strong></span>
+            <span><em id="lbl-guilt">Guilt</em>: <strong id="guilt-val">85</strong></span>
+            <span><em id="lbl-hope">Hope</em>: <strong id="hope-val">8</strong></span>
+        </div>
+    </header>
+
     <div id="save-indicator" class="save-indicator hidden">💾 Saved</div>
 
+    <main id="dialogue-overlay" class="dialogue-area">
+        <div class="scene-header">
+            <span class="scene-chapter" id="scene-chapter">Act I · St. Petersburg, July</span>
+            <span class="speaker-name" id="speaker">Raskolnikov</span>
+        </div>
+        <div class="reaction-banner hidden" id="reaction-banner"></div>
+        <div class="dialogue-text" id="dialogue-text">The heat in the room was stifling... A room like a cupboard under the roof.</div>
+        <div class="choices" id="choices"></div>
+    </main>
+
     <script type="module" src="src/main.js"></script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./service-worker.js").catch(function () {});
-  }
-</script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+      }
+    </script>
 </body>
 </html>

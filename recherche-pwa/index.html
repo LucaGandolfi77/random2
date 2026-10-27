@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>À la recherche du temps perdu — A Proustian Visual Novel</title>
-<meta name="description" content="Enter the world of Marcel Proust. Memory, time, art, and the madeleine. A visual novel in English and Italian.">
+<meta name="description" content="Enter the world of Marcel Proust. Memory, time, art, Vinteuil's sonata, Balbec, and the madeleine. A visual novel in English and Italian.">
 <meta name="theme-color" content="#1a1528">
 <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.json">
@@ -13,72 +13,89 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
-/* The Google Fonts @import lived here. It was the only outbound request
-   in the whole repository, and it broke the promise this app makes: a
-   visual novel that opens with the network off. The stacks below fall
-   back to fonts the device already has. */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Cormorant Garamond',Georgia,serif;}
-body{background:#0d0912;color:#c9b8a8;overflow:hidden;height:100vh;width:100vw;font-size:17px;line-height:1.7;letter-spacing:0.03em;}
-#game-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:0.18;pointer-events:none;z-index:0;}
-.dialogue-wrapper{position:absolute;bottom:0;left:0;right:0;z-index:10;padding:3rem 2.5rem 5rem;background:linear-gradient(to top,rgba(13,9,18,0.96),rgba(13,9,18,0.88) 50%,transparent);border-top:1px solid rgba(201,184,168,0.1);}
-.memory-indicator{position:absolute;top:1.2rem;right:1.5rem;background:rgba(201,184,168,0.08);border:1px solid rgba(201,184,168,0.15);border-radius:20px;padding:0.35rem 0.9rem;font-size:0.7rem;color:#b8a898;letter-spacing:0.15em;text-transform:uppercase;font-family:'Cormorant',Georgia,serif;z-index:20;transition:opacity 0.3s;}
-.memory-indicator.active{background:rgba(218,165,120,0.15);border-color:rgba(218,165,120,0.35);color:#e0c8a8;opacity:1;}
-.speaker-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:0.95rem;color:#bfa07a;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.3rem;font-weight:400;opacity:0.9;}
-.dialogue-text{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.15rem;color:#d4c4a8;max-width:680px;line-height:1.85;text-shadow:0 1px 6px rgba(0,0,0,0.5);font-style:italic;}
-.dialogue-text:not(.italic-text){font-style:normal;}
-.choices{display:flex;flex-direction:column;gap:0.6rem;margin-top:1.2rem;max-width:580px;}
-.choices button{background:rgba(201,184,168,0.04);border:1px solid rgba(201,184,168,0.14);color:#c9b8a8;border-radius:4px;padding:0.75rem 1.2rem;font-size:0.95rem;font-family:'Cormorant Garamond',Georgia,serif;cursor:pointer;transition:all 0.3s ease;text-align:center;letter-spacing:0.03em;}
-.choices button:hover{background:rgba(201,184,168,0.1);border-color:rgba(201,184,168,0.3);color:#e0c8a8;box-shadow:0 2px 15px rgba(0,0,0,0.25);}
-.menu-screen{position:absolute;inset:0;background:#0d0912;z-index:30;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2.5rem;}
-.menu-panel{text-align:center;padding:2.5rem 2rem;max-width:480px;width:92%;}
-.menu-panel h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:2.8rem;color:#c9b0a0;letter-spacing:0.1em;margin-bottom:0.4rem;font-weight:300;line-height:1.2;text-shadow:0 2px 20px rgba(201,176,160,0.15);}
-.menu-panel .subtitle{font-style:italic;font-size:1.05rem;color:#9a8876;margin-bottom:2rem;letter-spacing:0.04em;opacity:0.85;line-height:1.5;}
-.menu-button{display:block;width:100%;padding:0.8rem 1.5rem;margin:0.35rem 0;background:rgba(201,184,168,0.05);border:1px solid rgba(201,184,168,0.18);border-radius:6px;color:#c9b8a8;font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;cursor:pointer;transition:all 0.3s ease;letter-spacing:0.03em;text-align:center;}
-.menu-button:hover{background:rgba(201,184,168,0.1);border-color:rgba(201,184,168,0.35);color:#e0c8a8;box-shadow:0 4px 18px rgba(0,0,0,0.3);}
-.menu-button.sm{font-size:0.85rem;padding:0.5rem 1rem;}
-.stats-row{position:absolute;bottom:1rem;left:1.5rem;z-index:20;font-size:0.7rem;color:#8a7b65;display:flex;gap:1.2rem;letter-spacing:0.08em;text-transform:uppercase;font-family:'Cormorant Garamond',Georgia,serif;opacity:0.8;}
+body{background:#0d0912;color:#d8c8b4;overflow:hidden;height:100vh;height:100dvh;width:100vw;font-size:17px;line-height:1.75;letter-spacing:0.025em;position:relative;}
+#game-canvas{position:fixed;inset:0;width:100%;height:100%;opacity:0.9;pointer-events:none;z-index:0;}
+.top-bar{position:fixed;top:0;left:0;right:0;z-index:22;display:flex;justify-content:space-between;align-items:center;padding:0.9rem 1.4rem;gap:0.75rem;flex-wrap:wrap;background:linear-gradient(to bottom,rgba(10,7,16,0.86),transparent);}
+.top-actions{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;}
+.hud-btn{background:rgba(20,13,28,0.75);border:1px solid rgba(201,184,168,0.22);color:#c9b8a8;padding:0.35rem 0.75rem;border-radius:6px;font-size:0.76rem;letter-spacing:0.08em;text-decoration:none;cursor:pointer;transition:all 0.25s;}
+.hud-btn:hover{background:rgba(218,165,120,0.18);border-color:rgba(218,165,120,0.55);color:#f3e3cb;}
+.memory-indicator{background:rgba(201,184,168,0.1);border:1px solid rgba(201,184,168,0.2);border-radius:20px;padding:0.32rem 0.85rem;font-size:0.7rem;color:#c8b6a0;letter-spacing:0.14em;text-transform:uppercase;transition:all 0.3s;}
+.memory-indicator.active{background:rgba(218,165,120,0.18);border-color:rgba(218,165,120,0.45);color:#f0d8b8;}
+.dialogue-wrapper{position:fixed;bottom:0;left:0;right:0;max-height:78dvh;overflow-y:auto;z-index:10;padding:2.8rem 1.8rem 3.4rem;background:linear-gradient(to top,rgba(11,8,16,0.98) 0%,rgba(13,9,18,0.92) 70%,transparent);border-top:1px solid rgba(201,184,168,0.14);backdrop-filter:blur(6px);}
+.dialogue-inner{max-width:740px;margin:0 auto;}
+.speaker-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.45rem;border-bottom:1px solid rgba(201,184,168,0.12);padding-bottom:0.4rem;}
+.speaker-name{font-size:0.95rem;color:#d8b07e;text-transform:uppercase;letter-spacing:0.16em;font-weight:600;}
+.volume-label{font-size:0.78rem;color:#9a8874;font-style:italic;letter-spacing:0.1em;}
+.dialogue-text{font-size:1.18rem;color:#ece0ce;line-height:1.85;text-shadow:0 1px 6px rgba(0,0,0,0.65);font-style:italic;animation:fadeIn 0.45s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.choices{display:flex;flex-direction:column;gap:0.6rem;margin-top:1.3rem;}
+.choices button{background:rgba(201,184,168,0.06);border:1px solid rgba(201,184,168,0.22);color:#dfd0bc;border-radius:7px;padding:0.8rem 1.2rem;font-size:0.98rem;cursor:pointer;transition:all 0.25s ease;text-align:left;letter-spacing:0.03em;display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+.choices button:hover{background:rgba(218,165,120,0.16);border-color:rgba(218,165,120,0.55);color:#fff;transform:translateX(3px);}
+.choices button .eff-pill{font-size:0.68rem;color:#bfa07a;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;}
+.stats-row{position:fixed;bottom:0.75rem;left:1.8rem;right:1.8rem;z-index:20;font-size:0.72rem;color:#9a8a74;display:flex;justify-content:center;gap:1.5rem;letter-spacing:0.12em;text-transform:uppercase;}
+.stats-row strong{color:#e6c89c;}
+.menu-screen{position:fixed;inset:0;background:radial-gradient(900px 500px at 50% 20%,rgba(218,165,120,0.12),transparent 70%),rgba(11,8,16,0.96);z-index:30;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:2rem;backdrop-filter:blur(10px);}
+.menu-panel{text-align:center;padding:2.4rem 2rem;max-width:520px;width:94%;background:rgba(18,12,26,0.85);border:1px solid rgba(201,184,168,0.18);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,0.6);}
+.menu-panel h1{font-size:2.6rem;color:#dfd0bc;letter-spacing:0.1em;margin-bottom:0.4rem;font-weight:300;line-height:1.2;}
+.menu-panel .subtitle{font-style:italic;font-size:1.02rem;color:#a89682;margin-bottom:1.8rem;line-height:1.55;}
+.menu-button{display:block;width:100%;padding:0.8rem 1.4rem;margin:0.4rem 0;background:rgba(201,184,168,0.07);border:1px solid rgba(201,184,168,0.22);border-radius:7px;color:#dfd0bc;font-size:1rem;cursor:pointer;transition:all 0.25s ease;letter-spacing:0.04em;text-align:center;text-decoration:none;}
+.menu-button:hover{background:rgba(218,165,120,0.16);border-color:rgba(218,165,120,0.5);color:#fff;}
+.menu-button.sm{font-size:0.88rem;padding:0.58rem 1rem;}
 .hidden{display:none!important;opacity:0!important;}
 </style>
 </head>
 <body>
 <canvas id="game-canvas"></canvas>
 
-<div class="dialogue-wrapper">
-  <div class="speaker-name" id="speaker">Marcel</div>
-  <div class="dialogue-text" id="dialogue-text">The madeleine... the taste of it brought back everything. Not like a photograph — something deeper, something that lived inside me, waiting.</div>
-  <div class="choices" id="choices"></div>
-</div>
+<header class="top-bar">
+  <div class="top-actions">
+    <a href="../anthology-pwa/" class="hud-btn" id="lib-back-link">← The Library</a>
+    <button type="button" class="hud-btn" onclick="switchLanguage()" id="hud-lang-btn">Lingua: Italiano</button>
+    <button type="button" class="hud-btn" onclick="openMenuModal()" id="hud-menu-btn">☰ Volumes</button>
+  </div>
+  <div class="memory-indicator active" id="memory-indicator">Involuntary Memory</div>
+</header>
 
-<div class="memory-indicator" id="memory-indicator">Involuntary Memory</div>
+<main class="dialogue-wrapper">
+  <div class="dialogue-inner">
+    <div class="speaker-row">
+      <div class="speaker-name" id="speaker">Marcel</div>
+      <div class="volume-label" id="volume-label">Du côté de chez Swann · Combray</div>
+    </div>
+    <div class="dialogue-text" id="dialogue-text">The madeleine... the taste of it brought back everything.</div>
+    <div class="choices" id="choices"></div>
+  </div>
+</main>
 
 <div class="stats-row">
-  <span>Memory: <span id="mem">0</span></span>
-  <span>Melancholy: <span id="mel">0</span></span>
-  <span>Art: <span id="art">0</span></span>
+  <span><em id="lbl-mem" style="font-style:normal">Memory</em>: <strong id="mem">0</strong></span>
+  <span><em id="lbl-mel" style="font-style:normal">Melancholy</em>: <strong id="mel">0</strong></span>
+  <span><em id="lbl-art" style="font-style:normal">Art</em>: <strong id="art">0</strong></span>
 </div>
 
-<div id="start-menu" class="menu-screen">
+<div id="start-menu" class="menu-screen hidden">
   <div class="menu-panel">
     <h1>À la recherche</h1>
-    <p class="subtitle">A Proustian meditation on memory, time, and the art of recollection.</p>
-    <button class="menu-button" onclick="startVN()">Begin — Enter Memory</button>
-    <button class="menu-button sm" onclick="switchLanguage()">Lingua: Italiano</button>
-    <button class="menu-button sm" onclick="loadSlot()">Continue — Load Memory</button>
-    <button class="menu-button sm" onclick="showAbout()">About — The Work</button>
+    <p class="subtitle" id="menu-subtitle">A Proustian meditation on involuntary memory, lost time, and the vocation of art across all seven volumes.</p>
+    <button class="menu-button" onclick="startVN()" id="btn-begin">Begin — Enter Combray</button>
+    <button class="menu-button sm" onclick="switchLanguage()" id="btn-lang-menu">Lingua: Italiano / English</button>
+    <button class="menu-button sm" onclick="restartVN()" id="btn-restart">↻ Restart from the Madeleine</button>
+    <button class="menu-button sm" onclick="showAbout()" id="btn-about">About — The Work</button>
+    <a class="menu-button sm" href="../anthology-pwa/" id="btn-back-lib">← Return to The Library</a>
   </div>
 </div>
 
 <div id="about-menu" class="menu-screen hidden">
   <div class="menu-panel">
-    <h1>About</h1>
-    <p class="subtitle" style="font-style:normal;font-size:0.95rem;line-height:1.6;color:#b8a898;">This interactive experience draws from Marcel Proust's À la recherche du temps perdu. Memory, involuntary recollection, art, music, love, and the passage of time are explored through choice and contemplation. Available in English and Italian.</p>
-    <button class="menu-button" onclick="backToMenu()">Return to Memory</button>
+    <h1>À la recherche du temps perdu</h1>
+    <p class="subtitle" style="font-style:normal;font-size:0.95rem;line-height:1.65;color:#cbb8a0;">This interactive visual novel journeys through Marcel Proust's masterpiece: the madeleine in Combray, the church steeple and hawthorn path, Swann's love and Vinteuil's little phrase, the sea at Balbec, the Guermantes salons, the captivity of Albertine, and Time Regained. Fully bilingual in English and Italian.</p>
+    <button class="menu-button" onclick="backToMenu()">Return</button>
   </div>
 </div>
 
 <script src="../shared/arcade.js"></script>
 <script type="module" src="src/main.js"></script>
-<!-- Offline: one service worker, one cache, for this app alone. -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./service-worker.js").catch(function () {});
