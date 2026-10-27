@@ -1443,6 +1443,36 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="sim idle tycoon builder strategy crew" data-playable="core9-pwa/" style="--c1:#4dd8c0; --c2:#07131b; --tile-glow:rgba(77,216,192,.55); --shimmer-delay:3.15s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#0e4340,#07131b)">☢️</div>
+            <h2>CORE 9: NETWORK</h2>
+          </div>
+          <p class="tagline">Build a three-site nuclear network: balance heat, waste and batteries, hire a crew of operators, resolve choice events and prestige each plant. Low-poly and offline.</p>
+          <div class="chips"><span class="chip">IDLE</span><span class="chip">TYCOON</span><span class="chip">CREW</span><span class="chip">LOW-POLY</span><span class="chip">PWA</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="core9-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/core9-pwa" aria-label="CORE 9 source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
+        <article class="card reveal" data-tags="sim idle tycoon builder story 3d" data-playable="dottor-gelo-pwa/" style="--c1:#7eece0; --c2:#f1a5c5; --tile-glow:rgba(126,236,224,.55); --shimmer-delay:3.25s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#0b2228,#3b1f2b)">🤖</div>
+            <h2>Dottor Gelo</h2>
+          </div>
+          <p class="tagline">Costruisci androidi, addestra cyborg e affronta i Buoni in un idle tycoon 3D low-poly. Una storia malinconica sul lutto e sul lasciar andare.</p>
+          <div class="chips"><span class="chip">IDLE</span><span class="chip">TYCOON</span><span class="chip">3D LOW-POLY</span><span class="chip">STORIA</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="dottor-gelo-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/dottor-gelo-pwa" aria-label="Dottor Gelo source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="tool app agent pwa" data-playable="pocketcode-pwa/" style="--c1:#22d3ee; --c2:#a78bfa; --tile-glow:rgba(34,211,238,.5); --shimmer-delay:1.7s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#0b1220,#4c1d95)">📱</div>
@@ -2397,6 +2427,58 @@
         g.beginPath(); g.arc(cx, h * 0.16, 4.5, 0, TAU); g.fill();
       },
 
+      /* CORE 9: two cooling towers, a dome and a little atom. */
+      reactor: function (g, w, h, t, u) {
+        var period = u.period || 5.6;
+        var base = h * 0.84;
+        g.strokeStyle = rgba(P2, 0.22);
+        g.lineWidth = 1;
+        g.beginPath(); g.moveTo(w * 0.10, base); g.lineTo(w * 0.90, base); g.stroke();
+        function tower(x, s) {
+          g.fillStyle = rgba(P1, 0.92);
+          g.beginPath();
+          g.moveTo(x - 15 * s, base);
+          g.lineTo(x - 9 * s, base - 22 * s);
+          g.lineTo(x - 7 * s, base - 44 * s);
+          g.lineTo(x - 9 * s, base - 56 * s);
+          g.lineTo(x + 9 * s, base - 56 * s);
+          g.lineTo(x + 7 * s, base - 44 * s);
+          g.lineTo(x + 9 * s, base - 22 * s);
+          g.lineTo(x + 15 * s, base);
+          g.closePath(); g.fill();
+          g.fillStyle = rgba([7, 19, 27], 0.75);
+          g.beginPath(); g.ellipse(x, base - 56 * s, 9 * s, 2.6 * s, 0, 0, TAU); g.fill();
+        }
+        tower(w * 0.34, 0.82);
+        tower(w * 0.68, 1.0);
+        for (var k = 0; k < 7; k++) {
+          var q = (t * 0.16 + k * 0.15) % 1;
+          var y = base - 58 + q * h * 0.34;
+          var x = (k % 2 ? w * 0.68 : w * 0.34) + Math.sin(t * 1.4 + k) * (5 + q * 12);
+          g.fillStyle = rgba([230, 248, 242], (1 - q) * 0.28);
+          g.beginPath(); g.arc(x, base - h * 0.36 - q * h * 0.24, 3 + q * 7, 0, TAU); g.fill();
+        }
+        g.fillStyle = rgba(P2, 0.18);
+        g.beginPath(); g.arc(w * 0.5, base - 8, 16, Math.PI, TAU); g.fill();
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath(); g.arc(w * 0.5, base - 8, 13, Math.PI, TAU); g.fill();
+        var cx = w * 0.5, cy = h * 0.26;
+        for (var i = 0; i < 3; i++) {
+          g.strokeStyle = rgba(P2, 0.7);
+          g.lineWidth = 1.2;
+          g.save();
+          g.translate(cx, cy);
+          g.rotate((i / 3) * Math.PI + t * 0.18);
+          g.scale(1, 0.34);
+          g.beginPath(); g.arc(0, 0, w * 0.26, 0, TAU); g.stroke();
+          g.restore();
+        }
+        g.fillStyle = rgba(P1, 1);
+        g.beginPath(); g.arc(cx, cy, 4.2, 0, TAU); g.fill();
+        g.fillStyle = rgba([255, 248, 223], 1);
+        g.beginPath(); g.arc(cx - 1.2, cy - 1.2, 1.4, 0, TAU); g.fill();
+      },
+
       /* INNER CIRCLE: three round friends bob and briefly merge. */
       faces: function (g, w, h, t, u) {
         var period = u.period || 4.4, p = (t % period) / period;
@@ -2465,7 +2547,9 @@
       "pulse-pwa":       ["pulse",   { period: 3.8 }],
       "sartoria-pwa":    ["runway",  { period: 6.5 }],
       "pixel-cup-pwa":   ["arc",     { period: 2.4 }],
-      "gulper-pwa":      ["vortex",  { period: 5.2 }]
+      "gulper-pwa":      ["vortex",  { period: 5.2 }],
+      "core9-pwa":       ["reactor", { period: 5.6 }],
+      "dottor-gelo-pwa": ["grid", { period: 4.8 }]
     };
 
     function tilePalette(card) {
@@ -2918,6 +3002,8 @@
       { slug: "pulse-pwa/",      name: "PULSE",       emoji: "🎵", key: "pulse-pwa" },
       { slug: "pixel-cup-pwa/",  name: "PIXEL CUP",   emoji: "⚽", key: "pixel-cup-pwa" },
       { slug: "gulper-pwa/",     name: "GULPER",      emoji: "🐙", key: "gulper-pwa" },
+      { slug: "core9-pwa/",      name: "CORE 9",      emoji: "☢️", key: "core9-pwa" },
+      { slug: "dottor-gelo-pwa/", name: "Dottor Gelo", emoji: "🤖", key: "dottor-gelo-pwa" },
     ];
     function readJSON(key) { return R2.loadJSON(key, null); }
     function timeAgo(ts) {

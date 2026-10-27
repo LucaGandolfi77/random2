@@ -154,6 +154,13 @@ jobs:
           # PURR PLAYER: filename/format helpers, plus the manifest, icon set,
           # service-worker precache list and the no-remote-resources rule.
           node --test purr-player-pwa/tests/*.test.mjs
+          # CORE 9: the heat chain, content tables, every low-poly mesh,
+          # a balance bot that must reach prestige, and the PWA asset contract.
+          node --test core9-pwa/tests/*.test.mjs
+          # DOTTOR GELO: the pure economy, the power grid, offline returns,
+          # cyborg training/incubation, campaign progression, story flags,
+          # prestige and save sanitising.
+          node --test dottor-gelo-pwa/tests/*.test.js
 
       - name: Analysis tooling tests
         run: |

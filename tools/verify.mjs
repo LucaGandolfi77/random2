@@ -87,7 +87,7 @@ function projects() {
  * service worker in the output rather than in the source tree. They are
  * named here because the claim "every project is an installable PWA" is only
  * true if the generated ones are counted. */
-const GENERATED_PWA = ["bucio", "new-star-soccer"];
+const GENERATED_PWA = ["bucio", "new-star-soccer", "dottor-gelo-pwa"];
 
 function manifestOf(dir) {
   if (files().includes(`${dir}/manifest.json`)) return `${dir}/manifest.json`;
@@ -171,8 +171,8 @@ const CLAIMS = [
     labelIt: "Progetti pubblicati",
     where: "the first stat tile, and the CV",
     whereIt: "la prima cifra, e il CV",
-    expect: "56",
-    expectElsewhere: { "portfolio/cv.html": "56" },
+    expect: "58",
+    expectElsewhere: { "portfolio/cv.html": "58" },
     how: "for d in */; do d=${d%/}; [ -f \"$d/index.html\" ] && echo \"$d\"; done | grep -v '^portfolio$' | wc -l",
     compute: () => projects().length,
   },
@@ -182,8 +182,8 @@ const CLAIMS = [
     labelIt: "Progetti senza dipendenze runtime",
     where: "the second stat tile, and the CV",
     whereIt: "la seconda cifra, e il CV",
-    expect: "54/56",
-    expectElsewhere: { "portfolio/cv.html": "54/56" },
+    expect: "55/58",
+    expectElsewhere: { "portfolio/cv.html": "55/58" },
     how: "deps=$(for d in */; do d=${d%/}; [ -f \"$d/index.html\" ] || continue; \
 c=$(python3 -c \"import json;print(len(json.load(open('$d/package.json')).get('dependencies',{})))\" 2>/dev/null || echo 0); \
 if [ \"$c\" != 0 ] || [ -d \"$d/vendor\" ]; then echo \"$d\"; fi; done | wc -l); \
@@ -496,7 +496,7 @@ if [ -f \"$d/service-worker.js\" ] || [ -f \"$d/sw.js\" ] || [ -f \"$d/public/se
     labelIt: "THE SHARED ENGINE — progetti che lo caricano",
     where: "case 08, the consumers chip",
     whereIt: "case 08, il chip dei consumatori",
-    expect: "42",
+    expect: "44",
     how: "git ls-files | grep -E '\\.(html|js|mjs)$' | xargs grep -l -E '(src|import|from)[[:space:]]*=?[[:space:]]*[\"'\\''][^\"'\\'']*shared/(arcade|chart|scene-reader)\\.js' | cut -d/ -f1 | sort -u | grep -vE '^(index\\.html|sw\\.js|shared|portfolio)$' | wc -l",
     compute: () => {
       const rx = /(?:src|import|from)\s*=?\s*["']([^"']*shared\/(?:arcade|chart|scene-reader)\.js)/;

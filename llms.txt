@@ -97,6 +97,10 @@ is playable in about 450 ms with nothing downloaded. `src/song.js` and `src/char
 are DOM-free and deterministic, which is what lets the generator be tested over 500
 seeds in Node.
 
+`core9-pwa/` is a low-poly nuclear idle tycoon rendered by a small software renderer: 3D facet meshes projected isometrically and flat-shaded in Canvas 2D, with no WebGL and no textures. It now has three sites (River Valley, Desert Basin, Arctic Shelf), twelve plots and twenty-five levels per site, eight visual stages, a shared battery yard, fifteen crew characters with passives and active abilities, choice events, and a heat → cooling → turbine → grid chain where every bottleneck is visible on the map. The static plant is cached to an offscreen canvas, so an idle screen costs a blit plus a few particles rather than thousands of polygons. The DOM-free economy is unit-tested and a balance bot plays a network headlessly; the renderer has a per-building draw budget. Offline PWA, zero runtime dependencies, English UI.
+
+`dottor-gelo-pwa/` is a true Three.js idle tycoon: an orthographic isometric diorama of Dr. Gero’s laboratory, ten rooms with five visual stages, procedural android models and animations, an energy grid that throttles overbuilt rooms, cyborg training and assignment, auto-battles, expeditions, a twelve-chapter story with three endings, a prestige memory tree, and a 2D minimap drawn from the same room table. The UI is Italian; the simulation (`src/sim.js`) is DOM-free and Three-free and runs in the Node test suite. Procedural geometry only — no GLTF, textures or audio files. Built with Vite + `vite-plugin-pwa`, deployed from `dist/`.
+
 `pixel-cup-pwa/` is a low-poly arcade football game whose picture is neither
 WebGL nor images: the pitch, the players, the ball, the goal and the crowd are
 triangles drawn by hand into a 320x180 byte buffer that the browser scales up
@@ -132,6 +136,7 @@ python3 tools/balance/test.py  # balance report
 python3 tools/corpora/test.py  # corpus statistics
 node pulse-pwa/sim.test.mjs    # PULSE generator + chart
 node stats-pwa/smoke.mjs       # in-browser (skips if no playwright)
+node --test core9-pwa/tests/*.test.mjs  # CORE 9 economy, content, render, balance, PWA
 node census-pwa/smoke.mjs      # in-browser (skips if no playwright)
 node pulse-pwa/smoke.mjs       # in-browser (skips if no playwright)
 node pixel-cup-pwa/sim.test.mjs  # PIXEL CUP '96 model

@@ -29,6 +29,7 @@ jobs:
           cache-dependency-path: |
             bucio/package-lock.json
             new-star-soccer/package-lock.json
+            dottor-gelo-pwa/package-lock.json
 
       - name: Build BUCIO (Vite + PWA)
         working-directory: bucio
@@ -42,16 +43,23 @@ jobs:
           npm ci
           npm run build
 
+      - name: Build DOTTOR GELO (Vite + PWA)
+        working-directory: dottor-gelo-pwa
+        run: |
+          npm ci
+          npm run build
+
       - name: Assemble site
         run: |
           mkdir -p _site
           # Everything except git metadata, CI config, analysis tooling and
           # the build-tool sources. `tools/` is dev-only (Python/Node) and has
           # no business being published to Pages.
-          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' ./ _site/
+          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' ./ _site/
           # Deploy the built app output under their own paths
           cp -R bucio/dist/ _site/bucio/
           cp -R new-star-soccer/dist/ _site/new-star-soccer/
+          cp -R dottor-gelo-pwa/dist/ _site/dottor-gelo-pwa/
           touch _site/.nojekyll
 
       - name: Setup Pages

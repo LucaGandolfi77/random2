@@ -46,6 +46,8 @@
   - [PIXEL CUP '96](#pixel-cup-96)
   - [CENSUS](#census)
   - [GULPER](#gulper)
+  - [CORE 9](#core-9)
+  - [Dottor Gelo](#dottor-gelo)
   - [Purr Player](#purr-player)
 - [The tools](#the-tools)
   - [PocketCode](#pocketcode)
@@ -112,6 +114,8 @@
 | 43 | **Pixel Ants** | Photo-to-pixel erosion puzzle | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/pixel-ants-pwa/) |
 | 44 | **Inner Circle** | Photo-sticker friendship merge game | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/inner-circle-pwa/) |
 | 45 | **Purr Player** | MP3 and video player, cat background, persistent library | Vanilla JS + IndexedDB + Media Session | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/purr-player-pwa/) |
+| 46 | **CORE 9: NETWORK** | Three-site low-poly nuclear idle tycoon with crew and choice events | Canvas 2D (software renderer) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/core9-pwa/) |
+| 47 | **Dottor Gelo** | 3D low-poly idle tycoon: build androids, train cyborgs, a sad story | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/dottor-gelo-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -1181,6 +1185,97 @@ python3 -m http.server 8080
 [source](https://github.com/LucaGandolfi77/random2/tree/main/gulper-pwa) ·
 [README](gulper-pwa/README.md)
 
+### CORE 9
+
+*The reactor still works. The fence still has a hole in it.* ☢️
+
+An idle tycoon about putting a decommissioned nuclear plant back on the grid —
+then building a network of them. You do not buy a list of abstract upgrades:
+you build the heat chain. The reactor makes heat, the cooling towers reject it,
+the turbine hall turns it into megawatts, and the switchyard sells it. Every
+bottleneck is visible on the map, and every site has a different one.
+
+- **Three sites, twelve plots each, twenty-five levels, eight silhouettes.**
+  River Valley, Desert Basin and Arctic Shelf have different terrain, cooling
+  modifiers, grid prices, starting credits, prestige thresholds and one unique
+  auxiliary: pump station, solar field or geothermal well. The shared battery
+  yard stores surplus and discharges into a peak.
+- **A crew that actually manages the plant.** Fifteen named operators with a
+  passive, an active ability, five levels and a preferred plot; hire them through
+  milestones and assign them on the map. No gacha.
+- **Choice events, not just multipliers.** Thirty-plus grid, safety, staff,
+  research, environment and site events with two or three responses, a decision
+  timer, character-specific options and a log. Crises, opportunities, strikes,
+  inspections, sandstorms, blizzards and more.
+- **Heat, waste, batteries and the grid are one loop.** Overbuild the reactor
+  and output throttles; fill the waste vault and it throttles again; discharge
+  the battery into a demand spike. There is no game over, but there is a very
+  expensive red HUD.
+- **Global progression across local plants.** Credits, banks and waste belong to
+  a site; research, data, isotopes, missions, crew, achievements and the Director
+  level are global. Inactive sites keep producing at 25%.
+- **Twenty-four research upgrades, sixty chained goals, thirty achievements**,
+  and a **per-site New Generation** reset that keeps the network and compounds
+  output.
+- **A software low-poly renderer.** Low-poly meshes are projected isometrically
+  and flat-shaded per face in Canvas 2D — no WebGL, no textures, no art files.
+  The static plant is cached to an offscreen canvas, so an idle screen costs a
+  blit and a few steam puffs rather than thousands of polygons.
+- **Proven balance.** A headless director plays the same rules in Node: it must
+  reach the first prestige threshold, unlock Solaris, build its chain, and keep
+  the economy finite for an hour before CI passes. See
+  [`core9-pwa/README.md`](core9-pwa/README.md).
+
+```bash
+python3 -m http.server 8080
+# open http://localhost:8080/core9-pwa/
+```
+
+[▶ Play](https://lucagandolfi77.github.io/random2/core9-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/core9-pwa) ·
+[README](core9-pwa/README.md)
+
+### Dottor Gelo
+
+*Build the perfect son. Learn to let him go.* ❄️
+
+A 3D low-poly idle tycoon set in Dr. Gero’s underground laboratory. Ten
+procedural rooms, an energy grid that punishes overbuilding, cyborgs that can
+be created, trained, assigned and asked to forget, and a twelve-chapter story
+about grief, paternity and the things that cannot be rebuilt.
+
+- **A real 3D diorama.** Orthographic isometric camera, cutaway rooms, faceted
+  models built from Three.js primitives, procedural animations and a minimap
+  drawn from the same room table as the world. No GLTF, no textures, no
+  external audio.
+- **Idle with a visible constraint.** The reactor produces MW; every room
+  consumes it. Put a room on standby or upgrade the reactor. Offline production
+  is capped, reported and affected by the memory tree.
+- **Cyborgs with a cost.** Blueprint units and procedural prototypes, four
+  stats, five ranks, training programmes, affection, supervisors and the
+  **Protocollo Silenzio** — wipe a mind for combat power and live with the
+  narrative consequence.
+- **Campaign and expeditions.** Auto-battles against the “good guys” of Dragon
+  Ball, a one-shot Overclock, 15-minute/1-hour/4-hour expeditions, and a final
+  turn where the real enemy is the perfect son Gero built instead of saying
+  goodbye.
+- **Twelve chapters, three endings.** The choices persist across prestige. The
+  first cycle is not the whole story.
+- **Installable and offline.** Vite + `vite-plugin-pwa`, one cache, no ads,
+  no in-app purchases, no trackers, no server.
+
+```bash
+cd dottor-gelo-pwa
+npm install
+npm run dev      # http://localhost:5173
+npm test
+npm run build    # -> dist/
+```
+
+[▶ Play](https://lucagandolfi77.github.io/random2/dottor-gelo-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/dottor-gelo-pwa) ·
+[README](dottor-gelo-pwa/README.md)
+
 ### Purr Player
 
 *Your music and films, with the cat behind the glass.* 🐱
@@ -1484,14 +1579,21 @@ random2/
 │   ├── public/             #   icons & screenshots
 │   └── vite.config.js
 │
+├── dottor-gelo-pwa/        # three.js 3D idle tycoon, Vite project → dist/
+│   ├── src/                #   core, data, sim, world, ui
+│   ├── public/             #   generated icons
+│   └── vite.config.js
+│
 └── EADS/                   # Python/Flask desktop tool + pytest suite
 ```
 
 Design rules that keep the repo boring (in a good way):
 
-- **No frameworks** for the games: each is vanilla JS on a 2D canvas, with a
-  tiny shared shape — `init / gameLoop / update / draw / localStorage` — so any
-  one of them can be read top-to-bottom in one sitting.
+- **No frameworks** for the static games: each is vanilla JS on a 2D canvas,
+  with a tiny shared shape — `init / gameLoop / update / draw / localStorage`
+  — so any one of them can be read top-to-bottom in one sitting. The three
+  Vite projects (BUCIO, New Star Soccer, Dottor Gelo) are the deliberate
+  exceptions, and each one ships its own built `dist/`.
 - **`shared/arcade.js`** is the one file games may share: sound, particles,
   storage, settings, haptics, play-time tracking, daily seed + seeded RNG and
   the iOS install-coaching overlay. It is a plain script (no modules)
@@ -1509,11 +1611,13 @@ Design rules that keep the repo boring (in a good way):
 Pushes to `main` trigger [`.github/workflows/pages.yml`](.github/workflows/pages.yml):
 
 1. **Checkout** the repo.
-2. **Build BUCIO**: `npm ci && npm run build` inside `bucio/` (Node 20, npm
-   cache keyed on `bucio/package-lock.json`).
+2. **Build the Vite projects**: `npm ci && npm run build` inside `bucio/`,
+   `new-star-soccer/` and `dottor-gelo-pwa/` (Node 20, npm cache keyed on
+   their lockfiles).
 3. **Assemble the site**: rsync everything except `.git`, `.github` and the
-   BUCIO *sources* into `_site/`, then copy `bucio/dist/` → `_site/bucio/`
-   and `touch _site/.nojekyll` (so GitHub serves paths starting with `_`).
+   Vite *sources* into `_site/`, then copy each `dist/` to its public path
+   (`bucio/`, `new-star-soccer/`, `dottor-gelo-pwa/`) and `touch
+   _site/.nojekyll` (so GitHub serves paths starting with `_`).
 4. **Upload + deploy** the artifact with `actions/upload-pages-artifact` and
    `actions/deploy-pages`.
 
@@ -1528,6 +1632,9 @@ races — the newest deploy wins. The published URL is
 | Hub + all static games | `python3 -m http.server 8080` (repo root) | <http://localhost:8080> |
 | BUCIO (dev) | `cd bucio && npm install && npm run dev` | Vite dev server |
 | BUCIO (prod build) | `cd bucio && npm run build` | serves `bucio/dist/` |
+| Dottor Gelo (dev) | `cd dottor-gelo-pwa && npm install && npm run dev` | Vite dev server |
+| Dottor Gelo (test) | `cd dottor-gelo-pwa && npm test` | Node test runner |
+| Dottor Gelo (prod) | `cd dottor-gelo-pwa && npm run build` | serves `dottor-gelo-pwa/dist/` |
 | EADS | `cd EADS && pip install -r requirements*.txt && python app.py` | Flask UI |
 
 Notes:

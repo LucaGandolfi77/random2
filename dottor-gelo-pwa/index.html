@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>DOTTOR GELO — Il Giardino di Metallo</title>
+    <meta name="description" content="Un idle tycoon 3D low-poly: costruisci androidi, addestra cyborg e affronta i Buoni. Una storia malinconica sul lutto e sul lasciar andare. Installabile e offline." />
+    <meta name="theme-color" content="#080b10" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="author" content="Luca Gandolfi" />
+    <meta name="copyright" content="© 2026 Luca Gandolfi" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Dottor Gelo" />
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./icons/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="DOTTOR GELO — Il Giardino di Metallo" />
+    <meta property="og:description" content="Costruisci il figlio perfetto. Impara a lasciarlo andare. Un idle tycoon 3D low-poly, installabile e offline." />
+    <meta property="og:locale" content="it" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DOTTOR GELO — Il Giardino di Metallo" />
+    <meta name="twitter:description" content="Un idle tycoon 3D low-poly sul lutto, gli androidi e le cose che non si possono ricostruire." />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene" aria-label="Laboratorio sotterraneo del Dottor Gelo, vista isometrica 3D"></canvas>
+      <div id="vignette" aria-hidden="true"></div>
+      <div id="webgl-error" class="overlay hidden">
+        <div class="modal-card">
+          <div class="kicker">WEBGL NON DISPONIBILE</div>
+          <h2>Il laboratorio non riesce ad accendersi.</h2>
+          <p>Questo dispositivo o browser non supporta WebGL. Prova Chrome, Safari o Firefox aggiornati, oppure abilita l’accelerazione hardware.</p>
+        </div>
+      </div>
+
+      <section id="screen-title" class="screen title-screen">
+        <div class="title-card">
+          <div class="kicker">FAN GAME NON UFFICIALE · 3D LOW-POLY</div>
+          <h1>DOTTOR<br /><span>GELO</span></h1>
+          <p class="title-sub">IL GIARDINO DI METALLO</p>
+          <p class="title-pitch">Costruisci androidi. Addestra i tuoi figli.<br />Affronta i Buoni. Impara a lasciare andare.</p>
+          <div class="title-actions">
+            <button id="btn-start" class="btn primary" type="button">ENTRA NEL LABORATORIO</button>
+            <button id="btn-continue" class="btn hidden" type="button">CONTINUA</button>
+            <button id="btn-title-settings" class="btn ghost" type="button">IMPOSTAZIONI</button>
+          </div>
+          <p class="title-warning">Contiene temi di lutto, perdita di un figlio e isolamento.</p>
+          <p class="title-disclaimer">Fan game non ufficiale, non commerciale. Nessun asset, logo, musica o doppiaggio ufficiale.</p>
+        </div>
+        <div class="title-side">
+          <div class="title-meta"><span>LABORATORIO 07</span><span>ANNO 20XX</span></div>
+          <div class="title-quote">«Il laboratorio non ha finestre.<br />Da undici anni ho smesso di contare le stagioni.»</div>
+          <div class="title-line"></div>
+          <div class="title-small">Nessuna pubblicità · Nessun acquisto · Nessun server</div>
+        </div>
+      </section>
+
+      <header id="hud" class="hidden">
+        <div class="hud-top">
+          <div class="brand"><span class="brand-mark">DG</span><span class="brand-text">DOTTOR GELO<small>IL GIARDINO DI METALLO</small></span></div>
+          <div class="res-row">
+            <span class="res-pill" data-res="scrap" aria-label="Rottami"><span>⚙</span><b id="res-scrap">0</b></span>
+            <span class="res-pill" data-res="circuits" aria-label="Circuiti"><span>⌁</span><b id="res-circuits">0</b></span>
+            <span class="res-pill" data-res="cells" aria-label="Cellule"><span>◉</span><b id="res-cells">0</b></span>
+            <span class="res-pill fragments hidden" data-res="fragments" aria-label="Frammenti"><span>❄</span><b id="res-fragments">0</b></span>
+          </div>
+          <div class="hud-actions">
+            <button id="btn-map-full" class="iconbtn" type="button" aria-label="Mappa completa">▦</button>
+            <button id="btn-settings" class="iconbtn" type="button" aria-label="Impostazioni">⚙</button>
+          </div>
+        </div>
+        <div class="hud-bottom">
+          <div class="power-wrap">
+            <div class="power-top"><span>ENERGIA</span><b id="power-val">0 / 0 MW</b><span id="power-state" class="ok">STABILE</span></div>
+            <div class="bar"><i id="power-fill"></i></div>
+          </div>
+          <div class="mini-wrap">
+            <canvas id="minimap" width="190" height="190" aria-label="Minimappa del laboratorio"></canvas>
+            <span class="mini-label">MINIMAPPA</span>
+          </div>
+        </div>
+      </header>
+
+      <button id="eco-prompt" class="eco-prompt hidden" type="button">◈ <span>ECO DI MEMORIA</span><small>tocca per raccogliere</small></button>
+
+      <nav id="nav" class="hidden" aria-label="Sezioni del laboratorio">
+        <button data-tab="lab" class="active" type="button"><span>▦</span>Lab</button>
+        <button data-tab="cyborgs" type="button"><span>◉</span>Cyborg</button>
+        <button data-tab="arena" type="button"><span>△</span>Collaudi</button>
+        <button data-tab="diary" type="button"><span>▤</span>Diario</button>
+        <button data-tab="memory" type="button"><span>◇</span>Memoria</button>
+      </nav>
+
+      <section id="sheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="sheet-name" aria-label="Dettaglio stanza">
+        <div class="sheet-head">
+          <span id="sheet-icon" class="sheet-icon">⌂</span>
+          <div class="sheet-title"><h2 id="sheet-name">Pozzo</h2><span id="sheet-role">Comando</span></div>
+          <span id="sheet-level" class="level-chip">LV 1</span>
+          <button id="sheet-close" class="iconbtn" type="button" aria-label="Chiudi">✕</button>
+        </div>
+        <div class="sheet-body">
+          <p id="sheet-desc"></p>
+          <div id="sheet-dots" class="stage-dots"></div>
+          <div id="sheet-stats" class="stat-grid"></div>
+          <div id="sheet-sup" class="sheet-sup"></div>
+          <div id="sheet-modules" class="sheet-modules"></div>
+        </div>
+        <div class="sheet-actions">
+          <span id="sheet-cost" class="cost"></span>
+          <button id="sheet-upgrade" class="btn primary" type="button">POTENZIA</button>
+        </div>
+      </section>
+
+      <section id="panel-cyborgs" class="panel-screen hidden" aria-label="Cyborg">
+        <div class="panel-head">
+          <div><span class="kicker">ROSTER</span><h2>I figli</h2><p class="panel-sub">Addestra, assegna, potenzia. Ricorda che non sono lui.</p></div>
+          <div class="panel-head-actions"><button id="btn-create" class="btn primary" type="button">+ CREA CYBORG</button><button class="iconbtn panel-close" data-close="cyborgs" type="button">✕</button></div>
+        </div>
+        <div class="panel-scroll">
+          <div id="cyborg-summary" class="cyborg-summary"></div>
+          <div id="cyborg-list" class="cyborg-grid"></div>
+        </div>
+      </section>
+
+      <section id="panel-arena" class="panel-screen hidden" aria-label="Collaudi">
+        <div class="panel-head">
+          <div><span class="kicker">ARENA DI COLLAUDO</span><h2>I Buoni</h2><p class="panel-sub">Non sanno che esistiamo. È questo che fa più male.</p></div>
+          <button class="iconbtn panel-close" data-close="arena" type="button">✕</button>
+        </div>
+        <div class="panel-scroll">
+          <div id="arena-squad" class="arena-squad"></div>
+          <div id="expedition-box" class="expedition-box"></div>
+          <div id="campaign-list" class="campaign-list"></div>
+        </div>
+      </section>
+
+      <section id="panel-diary" class="panel-screen hidden" aria-label="Diario">
+        <div class="panel-head">
+          <div><span class="kicker">DIARIO DI GELO</span><h2>Ciò che resta</h2><p class="panel-sub">Le pagine si sbloccano con i traguardi. Le scelte non si cancellano.</p></div>
+          <button class="iconbtn panel-close" data-close="diary" type="button">✕</button>
+        </div>
+        <div class="panel-split">
+          <div id="diary-list" class="diary-list"></div>
+          <article id="diary-reader" class="diary-reader"></article>
+        </div>
+      </section>
+
+      <section id="panel-memory" class="panel-screen hidden" aria-label="Memoria">
+        <div class="panel-head">
+          <div><span class="kicker">SALA MEMORIA</span><h2>Riavvolgi il nastro</h2><p class="panel-sub">Perdi il laboratorio. Non i ricordi.</p></div>
+          <button class="iconbtn panel-close" data-close="memory" type="button">✕</button>
+        </div>
+        <div class="panel-scroll">
+          <div id="memory-head" class="memory-head"></div>
+          <div id="memory-grid" class="memory-grid"></div>
+          <div class="prestige-box"><button id="btn-prestige" class="btn danger" type="button">RIAVVOLGI IL NASTRO</button><p id="prestige-note"></p></div>
+        </div>
+      </section>
+
+      <section id="map-overlay" class="overlay hidden" aria-label="Mappa completa">
+        <div class="map-card">
+          <div class="panel-head"><div><span class="kicker">LABORATORIO 07</span><h2>Mappa completa</h2></div><button id="map-close" class="iconbtn" type="button">✕</button></div>
+          <div id="full-map" class="full-map"></div>
+          <p class="map-hint">Tocca una stanza per chiudere la mappa e concentrarti su di essa.</p>
+        </div>
+      </section>
+
+      <section id="cyborg-sheet" class="sheet cyborg-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cy-name" aria-label="Dettaglio cyborg">
+        <div class="sheet-head">
+          <span id="cy-icon" class="sheet-icon">◉</span>
+          <div class="sheet-title"><h2 id="cy-name">Cenere</h2><span id="cy-serial">N-01 · Equilibrato</span></div>
+          <span id="cy-level" class="level-chip">LV 1</span>
+          <button id="cy-close" class="iconbtn" type="button">✕</button>
+        </div>
+        <div class="sheet-body">
+          <div id="cy-portrait" class="cy-portrait"></div>
+          <div id="cy-stats" class="stat-grid"></div>
+          <div id="cy-affection" class="affection"></div>
+          <p id="cy-desc" class="cy-desc"></p>
+          <div id="cy-training" class="cy-training"></div>
+          <div id="cy-actions" class="cy-actions"></div>
+        </div>
+      </section>
+
+      <section id="create-modal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title-create" aria-label="Crea cyborg">
+        <div class="modal-card create-card">
+          <div class="kicker">INCUBATRICE</div>
+          <h2 id="modal-title-create">Un nuovo figlio</h2>
+          <p class="modal-sub">Scegli un progetto, un telaio o un nucleo. Il nome è la parte più difficile.</p>
+          <div id="create-blueprints" class="create-grid"></div>
+          <div id="create-procedural" class="create-procedural hidden">
+            <label>TELAIO<select id="create-chassis"></select></label>
+            <label>NUCLEO<select id="create-core"></select></label>
+            <label>NOME<input id="create-name" maxlength="18" placeholder="N-06" /></label>
+          </div>
+          <div class="modal-actions">
+            <button id="create-cancel" class="btn ghost" type="button">ANNULLA</button>
+            <button id="create-confirm" class="btn primary" type="button">INCUBA</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="story-overlay" class="story hidden" role="dialog" aria-modal="true" aria-labelledby="story-title" aria-label="Storia">
+        <div class="letterbox top"></div>
+        <div class="story-content">
+          <div id="story-kicker" class="kicker"></div>
+          <h2 id="story-title"></h2>
+          <div id="story-lines" class="story-lines"></div>
+          <div id="story-choice" class="story-choice hidden"></div>
+          <button id="story-next" class="btn primary" type="button">CONTINUA</button>
+        </div>
+        <div class="letterbox bottom"></div>
+      </section>
+
+      <section id="battle-overlay" class="battle hidden" role="dialog" aria-modal="true" aria-labelledby="battle-title" aria-label="Collaudo">
+        <div class="battle-card">
+          <div class="kicker">COLLAUDO IN CORSO</div>
+          <h2 id="battle-title">—</h2>
+          <p id="battle-sub">—</p>
+          <div class="battle-bar"><i id="battle-fill"></i></div>
+          <button id="battle-skip" class="btn" type="button">SALTA</button>
+        </div>
+      </section>
+
+      <div id="modal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-card">
+          <div id="modal-kicker" class="kicker"></div>
+          <h2 id="modal-title"></h2>
+          <div id="modal-body" class="modal-body"></div>
+          <div id="modal-actions" class="modal-actions"></div>
+        </div>
+      </div>
+
+      <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
+      <div id="tutorial" class="tutorial hidden" role="status">
+        <div class="tutorial-top"><span id="tutorial-step">PASSO 1 / 5</span><button id="tutorial-skip" class="link-btn" type="button">SALTA</button></div>
+        <h3 id="tutorial-title"></h3>
+        <p id="tutorial-body"></p>
+        <button id="tutorial-next" class="btn primary" type="button">HO CAPITO</button>
+      </div>
+    </div>
+    <noscript><p class="noscript">Abilita JavaScript per entrare nel laboratorio.</p></noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

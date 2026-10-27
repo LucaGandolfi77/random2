@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>CORE 9: NETWORK — Nuclear Idle Tycoon</title>
+  <meta name="description" content="Build a three-site nuclear network: balance heat, waste and batteries, hire a crew, resolve choice events and prestige each plant. A low-poly idle tycoon that plays offline.">
+  <meta name="theme-color" content="#07131b">
+  <meta name="color-scheme" content="dark">
+  <meta name="author" content="Luca Gandolfi">
+  <meta name="copyright" content="© 2026 Luca Gandolfi">
+  <link rel="canonical" href="https://lucagandolfi77.github.io/random2/core9-pwa/">
+  <link rel="license" href="https://github.com/LucaGandolfi77/random2/blob/main/LICENSE">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CORE 9">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CORE 9: NETWORK — Nuclear Idle Tycoon">
+  <meta property="og:description" content="Build a three-site nuclear network. Balance heat, waste and the grid, hire a crew and resolve choice events. A low-poly idle tycoon, installable and offline.">
+  <meta property="og:url" content="https://lucagandolfi77.github.io/random2/core9-pwa/">
+  <meta property="og:locale" content="en">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <canvas id="game" aria-label="Isometric map of the CORE 9 nuclear plant"></canvas>
+
+    <header id="hud">
+      <div class="hud-top">
+        <div class="brand" aria-label="CORE 9">
+          <span class="brand-mark">C9</span>
+          <span class="brand-name">CORE<b>9</b></span>
+        </div>
+        <div class="res-row">
+          <button id="credits-btn" class="res-pill credits" aria-label="Collect credits">
+            <span class="res-ico">€</span><b id="res-credits">0</b>
+          </button>
+          <span class="res-pill mw" aria-label="Plant output">
+            <span class="res-ico">⚡</span><b id="res-mw">0</b><small id="res-mw-unit">MW</small>
+          </span>
+          <button id="data-btn" class="res-pill data" aria-label="Open research">
+            <span class="res-ico">⌬</span><b id="res-data">0</b>
+          </button>
+        </div>
+        <button id="rotate-btn" class="iconbtn" aria-label="Rotate camera" title="Rotate camera">⟳</button>
+        <button id="settings-btn" class="iconbtn" aria-label="Settings" title="Settings">⚙</button>
+      </div>
+
+      <div class="meters">
+        <div class="meter" id="heat-meter">
+          <div class="meter-top"><span>HEAT</span><b id="heat-val">0 / 0</b></div>
+          <div class="bar"><i id="heat-fill"></i></div>
+        </div>
+        <div class="meter" id="waste-meter">
+          <div class="meter-top"><span>WASTE</span><b id="waste-val">0%</b></div>
+          <div class="bar"><i id="waste-fill"></i></div>
+        </div>
+        <div class="meter grid-meter" id="grid-meter">
+          <div class="meter-top"><span>GRID</span><b id="grid-val">€0.0/s</b></div>
+          <div class="status offline" id="status-label">OFFLINE</div>
+        </div>
+      </div>
+
+      <div class="hud-sub">
+        <button id="site-chip" class="hud-chip" aria-label="Open world map"><span id="site-name">RIVER VALLEY</span></button>
+        <button id="director-chip" class="hud-chip dir" aria-label="Director progress"><span>DIR</span><b id="res-level">1</b><i class="xp"><em id="xp-fill"></em></i></button>
+        <button id="battery-chip" class="hud-chip battery hidden" aria-label="Battery status"><span>BAT</span><b id="battery-pct">0%</b></button>
+      </div>
+    </header>
+
+    <div id="tutorial" class="coach hidden" role="status">
+      <div class="coach-top"><span id="tutorial-step">STEP 1 / 4</span><button id="tutorial-skip" class="link-btn">Skip tips</button></div>
+      <h3 id="tutorial-title"></h3>
+      <p id="tutorial-body"></p>
+    </div>
+
+    <div id="event-card" class="event-card hidden" role="dialog" aria-modal="false" aria-labelledby="event-name">
+      <div class="event-card-top">
+        <span id="event-cat" class="event-cat">GRID</span>
+        <b id="event-name">Event</b>
+        <span id="event-time">0s</span>
+      </div>
+      <p id="event-body"></p>
+      <div id="event-choices" class="event-choices"></div>
+    </div>
+
+    <div id="dock">
+      <div class="action-row">
+        <button id="collect-btn" class="action collect">
+          <span>COLLECT</span><b id="collect-amount">€0</b>
+        </button>
+        <button id="boost-btn" class="action boost">
+          <span>OVERCLOCK</span><b id="boost-state">READY</b>
+        </button>
+      </div>
+      <nav id="nav" aria-label="Game sections">
+        <button data-nav="map" class="active"><span>▦</span>Map</button>
+        <button data-nav="plants"><span>▤</span>Plant</button>
+        <button data-nav="crew"><span>♟</span>Crew</button>
+        <button data-nav="research"><span>⌬</span>Research</button>
+        <button data-nav="world"><span>◎</span>World</button>
+      </nav>
+    </div>
+
+    <section id="sheet" class="sheet hidden" aria-label="Zone details">
+      <div class="sheet-head">
+        <span id="sheet-icon" class="sheet-icon">☢</span>
+        <div class="sheet-title"><h2 id="sheet-name">Reactor</h2><span id="sheet-role">Thermal output</span></div>
+        <span id="sheet-level" class="level-chip">LV 1</span>
+        <button id="sheet-close" class="iconbtn" aria-label="Close zone details">✕</button>
+      </div>
+      <div class="sheet-body">
+        <p id="sheet-desc"></p>
+        <div id="sheet-dots" class="stage-block"></div>
+        <div id="sheet-stats" class="stat-grid"></div>
+        <p id="sheet-next" class="next-line"></p>
+      </div>
+      <div class="sheet-actions">
+        <span id="sheet-cost" class="cost"></span>
+        <button id="sheet-action2" class="btn ghost hidden">Discharge</button>
+        <button id="sheet-upgrade" class="btn primary">Build</button>
+      </div>
+    </section>
+
+    <section id="crew-sheet" class="sheet hidden" aria-label="Crew member details">
+      <div class="sheet-head">
+        <div id="crew-portrait" class="crew-portrait"></div>
+        <div class="sheet-title"><h2 id="crew-name">Mara Voss</h2><span id="crew-role">Reactor Engineer</span></div>
+        <span id="crew-level" class="level-chip">LV 1</span>
+        <button id="crew-close" class="iconbtn" aria-label="Close crew details">✕</button>
+      </div>
+      <div class="sheet-body">
+        <p id="crew-bio"></p>
+        <div id="crew-xp" class="stat-grid"></div>
+        <div id="crew-stats" class="stat-grid"></div>
+        <div class="crew-assign">
+          <label for="crew-zone" class="crew-label">Assign to plot</label>
+          <select id="crew-zone"></select>
+        </div>
+        <p id="crew-quote" class="crew-quote"></p>
+      </div>
+      <div class="sheet-actions">
+        <span id="crew-assigned" class="cost"></span>
+        <button id="crew-ability" class="btn primary">Ability</button>
+      </div>
+    </section>
+
+    <section id="panel" class="panel hidden" aria-label="Information panel">
+      <div class="panel-head">
+        <h2 id="panel-title">Plant</h2>
+        <button id="panel-close" class="iconbtn" aria-label="Close panel">✕</button>
+      </div>
+      <div id="panel-body" class="panel-body"></div>
+    </section>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <div id="intro" class="overlay intro">
+      <div class="intro-card">
+        <div id="intro-kicker" class="intro-kicker">CORE 9 · GRID NETWORK</div>
+        <h1 id="intro-title" class="intro-title">CORE<span>9</span></h1>
+        <p id="intro-title-text" class="intro-subtitle">Nuclear Idle Tycoon · Network</p>
+        <p id="intro-tag" class="intro-tag"></p>
+        <p id="intro-body" class="intro-body"></p>
+        <button id="intro-start" class="btn primary big">Enter the control room</button>
+        <p id="intro-note" class="intro-note"></p>
+        <p id="intro-meta" class="intro-meta"></p>
+      </div>
+    </div>
+
+    <div id="modal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal">
+        <h2 id="modal-title"></h2>
+        <div id="modal-body" class="modal-body"></div>
+        <div class="modal-actions">
+          <button id="modal-cancel" class="btn ghost">Cancel</button>
+          <button id="modal-ok" class="btn primary">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <input id="import-file" type="file" accept="application/json,.json" aria-label="Import save file" hidden>
+  </div>
+
+  <script src="../shared/arcade.js"></script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

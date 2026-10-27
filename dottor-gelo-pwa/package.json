@@ -1,0 +1,22 @@
+{
+  "name": "dottor-gelo-pwa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "DOTTOR GELO — Il Giardino di Metallo. Un idle tycoon 3D low-poly sul lutto, gli androidi e le cose che non si possono ricostruire.",
+  "scripts": {
+    "dev": "vite",
+    "icons": "node scripts/gen-icons.mjs",
+    "build": "npm run icons && vite build",
+    "preview": "vite preview --port 4174",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5",
+    "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}
