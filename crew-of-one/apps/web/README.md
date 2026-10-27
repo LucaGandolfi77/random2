@@ -17,6 +17,7 @@ pnpm --filter @crew-of-one/web dev
 - `Backspace` or the top-right RESET label to reset the heist.
 - `1`–`0` load vaults 1–10 directly for debugging.
 - **LEFT-HANDED** in the menu footer mirrors the action bar and persists across sessions.
+- **LARGE TEXT** in the menu footer scales the HUD and menus and persists across sessions.
 - `Esc` opens the heist menu.
 - `♪` in the top bar toggles placeholder sound.
 

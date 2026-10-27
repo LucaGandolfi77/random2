@@ -3,7 +3,9 @@ import { dailyPlan, utcDate, vaultById, vaults, type DailyPlan } from '@crew-of-
 import { applyModifier, HeistSim, modifierById } from '@crew-of-one/sim';
 import type { CameraState, GhostState, GuardState, LaserState, LeverState, ModifierId, SimInput, VaultDef } from '@crew-of-one/sim';
 import {
+  currentDailyStreak,
   hasSeenIntro,
+  recordDailyClear,
   loadProgress,
   markIntroSeen,
   recordAttempt,
@@ -11,6 +13,7 @@ import {
   resetProgress,
   type SaveData,
 } from './progress';
+import { loadTextSize, saveTextSize, textScale, type TextSize } from './accessibility';
 import { PrototypeAudio } from './audio';
 import {
   CONTROL_LAYOUTS,
@@ -118,6 +121,7 @@ class PrototypeScene extends Phaser.Scene {
   private lastShare: string | null = null;
   private handedness: Handedness = 'right';
   private controls: ControlLayout = CONTROL_LAYOUTS.right;
+  private textSize: TextSize = 'normal';
   private reduceMotion = false;
 
   constructor() {
@@ -127,6 +131,7 @@ class PrototypeScene extends Phaser.Scene {
   create(): void {
     this.handedness = loadHandedness();
     this.controls = CONTROL_LAYOUTS[this.handedness];
+    this.textSize = loadTextSize();
     const baseVault = vaults[0];
     if (!baseVault) throw new Error('No vault content found.');
     this.playableVaults = [...vaults];
@@ -213,6 +218,7 @@ class PrototypeScene extends Phaser.Scene {
     this.input.on('pointerupoutside', this.onPointerUp, this);
 
     this.cameras.main.setBackgroundColor(COLORS.ink);
+    this.applyTextSize();
 
     this.reduceMotion =
       typeof window.matchMedia === 'function' &&
@@ -251,11 +257,13 @@ class PrototypeScene extends Phaser.Scene {
         markIntroSeen();
       },
       onToggleHandedness: () => this.toggleHandedness(),
+      onToggleTextSize: () => this.toggleTextSize(),
       onResetProgress: () => this.handleResetProgress(),
     });
 
     this.ui.setSoundMuted(this.audio.isMuted());
     this.ui.setHandedness(this.handedness === 'left');
+    this.ui.setLargeText(this.textSize === 'large');
     initInstallPrompt((mode) => this.ui.setInstallAvailable(mode));
     keyboard.on('keydown', () => this.audio.unlock());
     this.openMenu();
@@ -489,6 +497,27 @@ class PrototypeScene extends Phaser.Scene {
     saveHandedness(this.handedness);
     this.layoutControls();
     this.ui.setHandedness(this.handedness === 'left');
+    this.ui.setLargeText(this.textSize === 'large');
+  }
+
+  private applyTextSize(): void {
+    const scale = textScale(this.textSize);
+    this.hudText.setFontSize(Math.round(14 * scale));
+    this.echoText.setFontSize(Math.round(12 * scale));
+    this.statusText.setFontSize(Math.round(13 * scale));
+    this.helpText.setFontSize(Math.round(10 * scale));
+    this.rewindText.setFontSize(Math.round(12 * scale));
+    this.whistleText.setFontSize(Math.round(11 * scale));
+    this.dashText.setFontSize(Math.round(10 * scale));
+    this.undoText.setFontSize(Math.round(12 * scale));
+    document.body.classList.toggle('text-large', this.textSize === 'large');
+  }
+
+  private toggleTextSize(): void {
+    this.textSize = this.textSize === 'large' ? 'normal' : 'large';
+    saveTextSize(this.textSize);
+    this.applyTextSize();
+    this.ui.setLargeText(this.textSize === 'large');
   }
 
   private loadVault(index: number): void {
@@ -542,6 +571,7 @@ class PrototypeScene extends Phaser.Scene {
       completed: record?.completed ?? false,
       bestTimeMs: record?.bestTimeMs ?? 0,
       bestRank: record?.bestRank ?? 'C',
+      streak: currentDailyStreak(this.progress, plan.date),
     };
   }
 
@@ -680,6 +710,10 @@ class PrototypeScene extends Phaser.Scene {
       echoes,
       this.vault.parEchoes,
     );
+    const dailyClear =
+      this.isDaily && this.daily
+        ? recordDailyClear(this.progress, this.daily.date)
+        : null;
     this.resultOpen = true;
     this.paused = true;
     this.ui.setMenuButtonVisible(false);
@@ -696,7 +730,11 @@ class PrototypeScene extends Phaser.Scene {
     this.time.delayedCall(550, () => {
       this.ui.showResult(payload, record.rank.toLowerCase());
       this.ui.setResultNote(
-        this.isDaily ? 'VERIFYING DAILY RUN…' : 'BEST SAVED LOCALLY',
+        this.isDaily
+          ? dailyClear && dailyClear.streak > 1
+            ? `${dailyClear.streak}-DAY STREAK · VERIFYING RUN…`
+            : 'VERIFYING DAILY RUN…'
+          : 'BEST SAVED LOCALLY',
       );
     });
 
@@ -845,22 +883,37 @@ class PrototypeScene extends Phaser.Scene {
         g.fillRect(dx, dy, door.w, door.h);
         g.lineStyle(1, COLORS.green, 0.7);
         g.strokeRect(dx + 0.5, dy + 0.5, door.w - 1, door.h - 1);
+        g.lineStyle(2, COLORS.green, 0.9);
+        g.lineBetween(dx + 4, dy + door.h / 2, dx + 10, dy + door.h / 2);
+        g.lineBetween(dx + door.w - 10, dy + door.h / 2, dx + door.w - 4, dy + door.h / 2);
       } else {
         g.fillStyle(COLORS.alarm, 1);
         g.fillRect(dx, dy, door.w, door.h);
         g.lineStyle(2, COLORS.bone, 0.35);
         g.strokeRect(dx + 1, dy + 1, door.w - 2, door.h - 2);
+        g.lineStyle(2, COLORS.bone, 0.55);
+        g.lineBetween(dx + 5, dy + 5, dx + door.w - 5, dy + door.h - 5);
+        g.lineBetween(dx + door.w - 5, dy + 5, dx + 5, dy + door.h - 5);
       }
     }
 
     for (const plate of state.plates) {
       const color = plate.pressed ? COLORS.gold : COLORS.slate;
+      const px = BOARD_X + plate.x;
+      const py = BOARD_Y + plate.y;
       g.fillStyle(color, 0.28);
-      g.fillCircle(BOARD_X + plate.x, BOARD_Y + plate.y, plate.radius);
+      g.fillCircle(px, py, plate.radius);
       g.lineStyle(2, color, 1);
-      g.strokeCircle(BOARD_X + plate.x, BOARD_Y + plate.y, plate.radius);
-      g.fillStyle(color, 1);
-      g.fillCircle(BOARD_X + plate.x, BOARD_Y + plate.y, 4);
+      g.strokeCircle(px, py, plate.radius);
+      if (plate.pressed) {
+        g.fillStyle(color, 1);
+        g.fillCircle(px, py, 5);
+        g.fillStyle(COLORS.ink, 0.9);
+        g.fillRect(px - 4, py - 1, 8, 2);
+      } else {
+        g.lineStyle(1, color, 0.8);
+        g.strokeCircle(px, py, 6);
+      }
     }
 
     const exit = this.vault.exit;
@@ -1036,14 +1089,45 @@ class PrototypeScene extends Phaser.Scene {
     g.lineBetween(x - size, y, x + size, y);
   }
 
+  private drawDottedLine(
+    g: Phaser.GameObjects.Graphics,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+  ): void {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const length = Math.hypot(dx, dy);
+    if (length < 1) return;
+    const ux = dx / length;
+    const uy = dy / length;
+    g.lineStyle(1, COLORS.slate, 0.35);
+    const dash = 5;
+    const gap = 5;
+    for (let distance = 0; distance < length; distance += dash + gap) {
+      const end = Math.min(distance + dash, length);
+      g.lineBetween(
+        x1 + ux * distance,
+        y1 + uy * distance,
+        x1 + ux * end,
+        y1 + uy * end,
+      );
+    }
+  }
+
   private drawLaser(g: Phaser.GameObjects.Graphics, laser: LaserState): void {
     const x1 = BOARD_X + laser.x1;
     const y1 = BOARD_Y + laser.y1;
     const x2 = BOARD_X + laser.x2;
     const y2 = BOARD_Y + laser.y2;
 
-    g.lineStyle(laser.active ? 3 : 1, laser.active ? COLORS.alarm : COLORS.slate, laser.active ? 0.9 : 0.25);
-    g.lineBetween(x1, y1, x2, y2);
+    if (laser.active) {
+      g.lineStyle(3, COLORS.alarm, 0.9);
+      g.lineBetween(x1, y1, x2, y2);
+    } else {
+      this.drawDottedLine(g, x1, y1, x2, y2);
+    }
 
     g.fillStyle(laser.active ? COLORS.alarm : COLORS.slate, laser.active ? 1 : 0.5);
     g.fillRect(x1 - 4, y1 - 4, 8, 8);
@@ -1078,6 +1162,12 @@ class PrototypeScene extends Phaser.Scene {
     g.fillStyle(COLORS.ink, 0.9);
     g.fillCircle(x, y, 4);
 
+    if (camera.disabled) {
+      g.lineStyle(2, COLORS.bone, 0.75);
+      g.lineBetween(x - 7, y - 7, x + 7, y + 7);
+      g.lineBetween(x + 7, y - 7, x - 7, y + 7);
+    }
+
     if (!camera.disabled && camera.suspicion > 0.01) {
       const width = 28;
       const height = 4;
@@ -1099,9 +1189,15 @@ class PrototypeScene extends Phaser.Scene {
     g.lineStyle(2, color, lever.pressed ? 1 : 0.55);
     g.strokeCircle(x, y, lever.radius);
     g.lineStyle(4, color, 1);
-    g.lineBetween(x, y + 8, x, y - 12);
-    g.fillStyle(color, 1);
-    g.fillCircle(x, y - 14, 5);
+    if (lever.pressed) {
+      g.lineBetween(x, y + 8, x, y - 12);
+      g.fillStyle(color, 1);
+      g.fillCircle(x, y - 15, 5);
+    } else {
+      g.lineBetween(x, y - 8, x, y + 10);
+      g.fillStyle(color, 1);
+      g.fillCircle(x, y + 13, 5);
+    }
   }
 
   private drawGuard(g: Phaser.GameObjects.Graphics, guard: GuardState): void {

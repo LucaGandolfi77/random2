@@ -16,6 +16,7 @@ export type DailySummary = {
   completed: boolean;
   bestTimeMs: number;
   bestRank: string;
+  streak: number;
 };
 
 export type LeaderboardView = {
@@ -56,6 +57,7 @@ type Callbacks = {
   onOpenHowTo: () => void;
   onCloseHowTo: () => void;
   onToggleHandedness: () => void;
+  onToggleTextSize: () => void;
   onResetProgress: () => void;
 };
 
@@ -94,6 +96,7 @@ export class MetaUI {
   private readonly previewButton: HTMLButtonElement;
   private readonly installButton: HTMLButtonElement;
   private readonly handednessButton: HTMLButtonElement;
+  private readonly textSizeButton: HTMLButtonElement;
   private readonly soundButton: HTMLButtonElement;
   private previewAvailable = false;
   private previewActive = false;
@@ -167,6 +170,10 @@ export class MetaUI {
     this.handednessButton.type = 'button';
     this.handednessButton.addEventListener('click', () => this.callbacks.onToggleHandedness());
     footActions.appendChild(this.handednessButton);
+    this.textSizeButton = el('button', 'link-button link-button--text', 'LARGE TEXT');
+    this.textSizeButton.type = 'button';
+    this.textSizeButton.addEventListener('click', () => this.callbacks.onToggleTextSize());
+    footActions.appendChild(this.textSizeButton);
     this.installButton = el('button', 'link-button link-button--install', 'INSTALL APP');
     this.installButton.type = 'button';
     this.installButton.hidden = true;
@@ -328,6 +335,11 @@ export class MetaUI {
     this.handednessButton.classList.toggle('link-button--active', left);
   }
 
+  setLargeText(large: boolean): void {
+    this.textSizeButton.textContent = large ? 'LARGE TEXT: ON' : 'LARGE TEXT';
+    this.textSizeButton.classList.toggle('link-button--active', large);
+  }
+
   setPreviewState(available: boolean, active: boolean): void {
     if (available === this.previewAvailable && active === this.previewActive) return;
     this.previewAvailable = available;
@@ -428,6 +440,11 @@ export class MetaUI {
     const kicker = el('span', 'daily-card__kicker');
     kicker.appendChild(el('span', 'daily-card__label', 'DAILY HEIST'));
     kicker.appendChild(el('span', 'daily-card__date', daily.date));
+    if (daily.streak > 0) {
+      kicker.appendChild(
+        el('span', 'daily-card__streak', `${daily.streak}-DAY STREAK`),
+      );
+    }
 
     const name = el('span', 'daily-card__name', daily.vaultName);
     const modifier = el('span', 'daily-card__modifier');

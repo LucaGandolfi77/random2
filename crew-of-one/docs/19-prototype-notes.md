@@ -10,12 +10,14 @@
 - Vault content: “The Gallery” (plate/door), “The Night Watch” (guard/echo decoy), “Two Hands” (two plates, two echoes), “The Whistle” (echo whistles to pull a guard off his post), “The Archive” (camera + hold lever), “Red Lines” (dash through timed lasers), “The Long Way” (one-way gate), “The Handoff” (gem carry with two plate echoes), “Double Watch” (two guards, two baits), and “The Vault Door” (two plates + camera lever finale).
 - Phaser rectangle prototype: drag to move, E/ACT, Shift or Space/DASH, R/REWIND, U/UNDO, P/PREVIEW, Backspace/RESET, 1–0 for the vaults.
 - Meta shell: level select with chapter cards, sequential unlock, localStorage best time/rank, results screen, hint toast after failed loops, and an in-HUD echo timeline.
+- Daily streak: consecutive UTC daily clears increment a streak; the card shows the live streak until the day expires. Streaks reset after a missed day.
 - Daily heist: a deterministic UTC plan drawn from the vault list, four safe modifiers (Blackout, Short Fuse, No Sprint, Solo Loop), a daily card in the menu, and a saved best per date. A content test replays every modifier/vault pair against an existing solution tape so the daily is always solvable. The web client tries `GET /api/daily` first and falls back to the local plan offline; daily wins are posted to `POST /api/run`, and the results screen shows the verified server rank or a local-only note.
 - Rank rule: S at par echoes, A at par + 1, B at par + 2, C beyond. Best run is the fastest time, then the fewest echoes.
 - Echo timeline: each recorded echo is a colored segment proportional to its tape length, with a moving playhead for the current run.
 - Ghost preview: P or the ▶ CREW button replays the recorded echoes at 2× without the player. The run state is snapshotted and restored exactly when preview stops.
 - Leaderboard: the daily card opens today's top 100, highlights the local player, supports a saved nickname, and falls back to an offline message when the Worker is unavailable.
-- Controls: a persisted left-handed layout mirrors the bottom action bar for one-thumb play.
+- Controls: a persisted left-handed layout mirrors the bottom action bar for one-thumb play. A persisted large-text option scales the Phaser HUD and the DOM menus.
+- Colorblind cues: plates switch between a hollow ring and a solid bar, closed doors carry an X, open doors show side ticks, disabled cameras show an X, inactive lasers are dotted, and lever handles change direction.
 - Onboarding: a first-run How to Play overlay with four steps (move, rewind, build a crew, escape), reopenable from the menu. Camera flashes and shakes are skipped when the OS requests reduced motion.
 - PWA shell: install prompt via `beforeinstallprompt` on Chromium and Share → Add to Home Screen instructions on iOS, plus a share action using the Web Share API with a clipboard fallback. The generated service worker precaches the app shell.
 - Placeholder feedback: WebAudio synth sketches for rewind, undo, plates, doors, levers, gems, dash, alarms, wins, and preview, plus haptics on rewind, plates, gems, alarms, and wins. The sound toggle persists; haptics respect `prefers-reduced-motion`. These are sketches, not the final commissioned audio.
@@ -52,4 +54,4 @@ The guard sandbox and “The Night Watch” prove the second: a guard who sees a
 2. Commission the final SFX/music pass and replace the synth sketches.
 3. Add the in-game store + entitlement flow.
 4. Add a generated share image and a Lighthouse offline/PWA audit.
-5. Add a larger-text option and a colorblind pattern pass.
+5. Add an in-game daily streak history view.

@@ -8,9 +8,15 @@ export type VaultProgress = {
   attempts: number;
 };
 
+export type DailyStreak = {
+  count: number;
+  lastDate: string;
+};
+
 export type SaveData = {
   version: 1;
   vaults: Record<string, VaultProgress>;
+  daily?: DailyStreak;
 };
 
 const STORAGE_KEY = 'crew-of-one:progress:v1';
@@ -26,6 +32,12 @@ export const rankFor = (echoes: number, parEchoes: number): Rank => {
 };
 
 const rankValue = (rank: Rank): number => ({ S: 0, A: 1, B: 2, C: 3 })[rank];
+
+const isDailyStreak = (value: unknown): value is DailyStreak => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<DailyStreak>;
+  return typeof candidate.count === 'number' && typeof candidate.lastDate === 'string';
+};
 
 const isVaultProgress = (value: unknown): value is VaultProgress => {
   if (!value || typeof value !== 'object') return false;
@@ -51,7 +63,8 @@ export const loadProgress = (): SaveData => {
     for (const [id, value] of Object.entries(parsed.vaults)) {
       if (isVaultProgress(value)) vaults[id] = value;
     }
-    return { version: 1, vaults };
+    const daily = isDailyStreak(parsed.daily) ? parsed.daily : undefined;
+    return { version: 1, vaults, daily };
   } catch {
     return emptySave();
   }
@@ -121,6 +134,30 @@ export const markIntroSeen = (): void => {
   } catch {
     // The intro can show again if storage is unavailable.
   }
+};
+
+const previousUtcDate = (date: string): string =>
+  new Date(Date.parse(`${date}T00:00:00.000Z`) - 86_400_000).toISOString().slice(0, 10);
+
+export const currentDailyStreak = (data: SaveData, today: string): number => {
+  if (!data.daily) return 0;
+  if (data.daily.lastDate === today) return data.daily.count;
+  if (data.daily.lastDate === previousUtcDate(today)) return data.daily.count;
+  return 0;
+};
+
+export const recordDailyClear = (
+  data: SaveData,
+  date: string,
+): { streak: number; isNew: boolean } => {
+  if (data.daily?.lastDate === date) {
+    return { streak: data.daily.count, isNew: false };
+  }
+  const consecutive = data.daily?.lastDate === previousUtcDate(date);
+  const count = consecutive ? (data.daily?.count ?? 0) + 1 : 1;
+  data.daily = { count, lastDate: date };
+  persist(data);
+  return { streak: count, isNew: true };
 };
 
 export const resetProgress = (): SaveData => {
