@@ -1,0 +1,53 @@
+{
+  "id": "vault-11",
+  "name": "The Power Cut",
+  "chapter": 3,
+  "loopSeconds": 30,
+  "maxEchoes": 3,
+  "parEchoes": 1,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 96, "y": 448 },
+  "exit": { "x": 160, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 32, "y": 384, "w": 96, "h": 32 },
+    { "x": 192, "y": 384, "w": 96, "h": 32 }
+  ],
+  "plates": [],
+  "doors": [],
+  "guards": [
+    {
+      "id": "guard-watch",
+      "path": [{ "x": 160, "y": 300 }],
+      "facing": 2,
+      "waitMs": 0,
+      "speed": 44,
+      "visionRange": 220,
+      "visionAngleDeg": 90,
+      "hearingRadius": 120
+    }
+  ],
+  "cameras": [],
+  "levers": [
+    {
+      "id": "lever-power",
+      "x": 48,
+      "y": 432,
+      "radius": 22,
+      "mode": "hold",
+      "targetIds": ["guard-watch"]
+    }
+  ],
+  "lasers": [],
+  "gem": { "x": 160, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "The watch sees through the gap. Kill the lights and his cone shrinks.",
+    "Leave an echo on the power lever, then cross while the guard is half-blind."
+  ]
+}

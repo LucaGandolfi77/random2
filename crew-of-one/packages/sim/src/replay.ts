@@ -72,6 +72,7 @@ type ReplayGuard = {
   waitMs: number;
   speed: number;
   visionRange: number;
+  baseVisionRange: number;
   visionAngleDeg: number;
   hearingRadius: number;
   suspicion: number;
@@ -175,6 +176,7 @@ export const replayTracks = (vault: VaultDef, tracks: GhostTrack[]): ReplayResul
       waitMs: guard.waitMs,
       speed: guard.speed,
       visionRange: guard.visionRange,
+      baseVisionRange: guard.visionRange,
       visionAngleDeg: guard.visionAngleDeg,
       hearingRadius: guard.hearingRadius,
       suspicion: 0,
@@ -370,9 +372,14 @@ export const replayTracks = (vault: VaultDef, tracks: GhostTrack[]): ReplayResul
         continue;
       }
 
-      const targeting = plates.filter((plate) => plate.targets.includes(door.id));
-      const open = targeting.length > 0 && targeting.every((plate) => plate.pressed);
-      if (open) continue;
+      const plateTargets = plates.filter((plate) => plate.targets.includes(door.id));
+      const plateOpen = plateTargets.length > 0 && plateTargets.every((plate) => plate.pressed);
+      const leverTargets = levers.filter((lever) => lever.targetIds.includes(door.id));
+      const leverOpen =
+        door.mode === 'lever' &&
+        leverTargets.length > 0 &&
+        leverTargets.every((lever) => lever.pressed);
+      if (plateOpen || leverOpen) continue;
       if (circleRectOverlap(player.x, player.y, 8, door)) {
         return {
           won: false,
@@ -448,13 +455,24 @@ export const replayTracks = (vault: VaultDef, tracks: GhostTrack[]): ReplayResul
     const doorWalls = vault.doors
       .filter((door) => {
         if (door.mode === 'oneway') return true;
-        const targeting = plates.filter((plate) => plate.targets.includes(door.id));
-        return !(targeting.length > 0 && targeting.every((plate) => plate.pressed));
+        const plateTargets = plates.filter((plate) => plate.targets.includes(door.id));
+        const plateOpen = plateTargets.length > 0 && plateTargets.every((plate) => plate.pressed);
+        const leverTargets = levers.filter((lever) => lever.targetIds.includes(door.id));
+        const leverOpen =
+          door.mode === 'lever' &&
+          leverTargets.length > 0 &&
+          leverTargets.every((lever) => lever.pressed);
+        return !(plateOpen || leverOpen);
       })
       .map((door) => ({ x: door.x, y: door.y, w: door.w, h: door.h }));
     const guardWalls = [...vault.walls, ...doorWalls];
 
     for (const guard of guards) {
+      const blackedOut = levers.some(
+        (lever) => lever.pressed && lever.targetIds.includes(guard.id),
+      );
+      guard.visionRange = blackedOut ? guard.baseVisionRange * 0.35 : guard.baseVisionRange;
+
       if (guard.mode === 'confused') {
         guard.confusedMs -= stepMs;
         guard.suspicion = Math.max(0, guard.suspicion - stepMs / 1000);

@@ -212,6 +212,7 @@ export type GuardState = {
   waitMs: number;
   speed: number;
   visionRange: number;
+  baseVisionRange: number;
   visionAngleDeg: number;
   hearingRadius: number;
   suspicion: number;

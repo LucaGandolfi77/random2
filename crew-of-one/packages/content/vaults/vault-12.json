@@ -1,0 +1,56 @@
+{
+  "id": "vault-12",
+  "name": "The Relay",
+  "chapter": 3,
+  "loopSeconds": 30,
+  "maxEchoes": 3,
+  "parEchoes": 2,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 160, "y": 448 },
+  "exit": { "x": 160, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 96, "y": 160, "w": 32, "h": 256 },
+    { "x": 192, "y": 160, "w": 32, "h": 256 },
+    { "x": 32, "y": 128, "w": 96, "h": 32 },
+    { "x": 192, "y": 128, "w": 96, "h": 32 }
+  ],
+  "plates": [],
+  "doors": [
+    { "id": "door-relay", "x": 128, "y": 128, "w": 64, "h": 32, "mode": "lever" }
+  ],
+  "guards": [],
+  "cameras": [],
+  "levers": [
+    {
+      "id": "lever-left",
+      "x": 64,
+      "y": 320,
+      "radius": 22,
+      "mode": "toggle",
+      "targetIds": ["door-relay"],
+      "disableMs": 8000
+    },
+    {
+      "id": "lever-right",
+      "x": 256,
+      "y": 320,
+      "radius": 22,
+      "mode": "toggle",
+      "targetIds": ["door-relay"],
+      "disableMs": 8000
+    }
+  ],
+  "lasers": [],
+  "gem": { "x": 160, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "The vault door needs both relays live at the same time.",
+    "Toggle each relay with a different echo, then run while the window overlaps."
+  ]
+}

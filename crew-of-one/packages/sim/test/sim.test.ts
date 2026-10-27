@@ -385,3 +385,75 @@ describe('Echo preview', () => {
     expect(sim.startPreview()).toBe(false);
   });
 });
+
+describe('Lever doors and blackout levers', () => {
+  const leverVault: VaultDef = {
+    ...vault,
+    id: 'lever-vault',
+    plates: [],
+    doors: [{ id: 'door-a', x: 192, y: 128, w: 32, h: 96, mode: 'lever' }],
+    guards: [],
+    cameras: [],
+    levers: [
+      { id: 'lever-a', x: 56, y: 448, radius: 22, mode: 'hold', targetIds: ['door-a'] },
+    ],
+    lasers: [],
+    requiresGem: false,
+  };
+
+  it('opens a lever door while the lever is held, and closes it after', () => {
+    const sim = new HeistSim(leverVault);
+    sim.tick(idle);
+    expect(sim.state.levers[0]?.pressed).toBe(true);
+    expect(sim.state.doors[0]?.open).toBe(true);
+
+    step(sim, { ...idle, moveX: 1 }, 80);
+    expect(sim.state.levers[0]?.pressed).toBe(false);
+    expect(sim.state.doors[0]?.open).toBe(false);
+  });
+
+  const blackoutVault = (targets: string[]): VaultDef => ({
+    ...vault,
+    id: 'blackout-vault',
+    walls: [
+      { x: 0, y: 0, w: 320, h: 32 },
+      { x: 0, y: 480, w: 320, h: 32 },
+      { x: 0, y: 0, w: 32, h: 512 },
+      { x: 288, y: 0, w: 32, h: 512 },
+    ],
+    plates: [],
+    doors: [],
+    guards: [
+      {
+        id: 'guard-a',
+        path: [{ x: 160, y: 160 }],
+        facing: 2,
+        waitMs: 0,
+        speed: 1,
+        visionRange: 300,
+        visionAngleDeg: 120,
+        hearingRadius: 0,
+      },
+    ],
+    cameras: [],
+    levers: [
+      { id: 'lever-blackout', x: 160, y: 448, radius: 26, mode: 'hold', targetIds: targets },
+    ],
+    lasers: [],
+    playerStart: { x: 160, y: 448 },
+    requiresGem: false,
+  });
+
+  it('shrinks a guard cone while a blackout lever is held', () => {
+    const sim = new HeistSim(blackoutVault(['guard-a']));
+    step(sim, idle, 100);
+    expect(sim.state.status).toBe('playing');
+    expect(sim.state.guards[0]?.visionRange).toBeCloseTo(105, 5);
+  });
+
+  it('still catches the player without the blackout target', () => {
+    const sim = new HeistSim(blackoutVault([]));
+    step(sim, idle, 100);
+    expect(sim.state.status).toBe('alarm');
+  });
+});

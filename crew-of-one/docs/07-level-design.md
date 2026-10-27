@@ -33,6 +33,13 @@ Every vault fits on **one screen**: 10 × 16 tiles at 32px. No scrolling, no hid
 | 14 | The False Gem | Decoy triggers alarm | 4 |
 | 15 | After You | Finale, all mechanics | 5 |
 
+All fifteen are implemented with solution tapes. Chapter 3 added two shared rules:
+
+- **Blackout levers:** a held lever whose `targetIds` include a guard id shrinks that guard's vision to 35% while it is pressed. The cone renders at the reduced size.
+- **Lever doors:** a door with `mode: "lever"` opens while every lever whose `targetIds` include the door is live. Toggle levers use `disableMs` as their window, which makes relay timing possible.
+
+" The Power Cut uses a blackout lever. "The Relay" uses two toggle levers on one lever door. "The Safe Room" combines a one-way vent, two plates, a camera lever, and gem carrying. "The Long Count" pairs a disabled beam with a timed beam and a dash. "After You" combines plates, camera and blackout levers, a guard, a beam, a one-way vent, and the gem.
+
 ## Vault format
 
 Vaults are JSON validated by Zod. Use Tiled for layout, export object layers, and merge with metadata.

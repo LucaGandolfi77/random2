@@ -6,8 +6,8 @@
 - Guard AI: patrol paths, vision cones with line-of-sight, suspicion, alarms, noise investigation, echo following, and confused pauses.
 - Whistle/noise events recorded into echo tapes and replayed by ghosts.
 - Headless replay validator (`replayTracks`) used by tests and the Worker. It now simulates guards, cameras, levers, doors, plates, lasers, gems, walls, and the exit.
-- Solution-tape pipeline: `vault-01` through `vault-10` ship with verified tapes, checked by CI and `pnpm validate:vaults`.
-- Vault content: “The Gallery” (plate/door), “The Night Watch” (guard/echo decoy), “Two Hands” (two plates, two echoes), “The Whistle” (echo whistles to pull a guard off his post), “The Archive” (camera + hold lever), “Red Lines” (dash through timed lasers), “The Long Way” (one-way gate), “The Handoff” (gem carry with two plate echoes), “Double Watch” (two guards, two baits), and “The Vault Door” (two plates + camera lever finale).
+- Solution-tape pipeline: `vault-01` through `vault-15` ship with verified tapes, checked by CI and `pnpm validate:vaults`.
+- Vault content: “The Gallery” (plate/door), “The Night Watch” (guard/echo decoy), “Two Hands” (two plates, two echoes), “The Whistle” (echo whistles to pull a guard off his post), “The Archive” (camera + hold lever), “Red Lines” (dash through timed lasers), “The Long Way” (one-way gate), “The Handoff” (gem carry with two plate echoes), “Double Watch” (two guards, two baits), “The Vault Door” (two plates + camera lever), “The Power Cut” (blackout lever), “The Relay” (two toggle levers on one door), “The Safe Room” (one-way vent + gem + camera), “The Long Count” (disabled beam + timed beam), and “After You” (full-mechanic finale).
 - Phaser rectangle prototype: drag to move, E/ACT, Shift or Space/DASH, R/REWIND, U/UNDO, P/PREVIEW, Backspace/RESET, 1–0 for the vaults.
 - Meta shell: level select with chapter cards, sequential unlock, localStorage best time/rank, results screen, hint toast after failed loops, and an in-HUD echo timeline.
 - Daily streak: consecutive UTC daily clears increment a streak; the card shows the live streak until the day expires, plus a seven-day cleared/missed strip. Streaks reset after a missed day.
@@ -48,10 +48,12 @@ The guard sandbox and “The Night Watch” prove the second: a guard who sees a
 
 “The Vault Door” proves the tenth: two plates open a vault door while a third echo holds the camera lever. It is the first three-job finale and the end of chapter 2.
 
+Chapter 3 proves the last five. “The Power Cut” adds blackout levers that shrink a guard's cone. “The Relay” adds lever-controlled doors that need overlapping live windows. “The Safe Room” combines the one-way vent with gem carrying and camera suppression. “The Long Count” is a pure timing test with one disabled beam and one counted beam. “After You” combines two plates, the camera lever, the blackout lever, a guard, a beam, a one-way vent, and the gem. All fifteen tapes pass guard-aware replay validation.
+
 ## Next implementation tasks
 
 1. Replace rectangle rendering with the pixel-art kit for one vault (vertical slice).
 2. Commission the final SFX/music pass and replace the synth sketches.
-3. Add the in-game store + entitlement flow.
+3. Add the in-game store + entitlement flow, then gate chapters 2–3.
 4. Run a Lighthouse offline/PWA audit on a real device.
 5. Add a full monthly streak calendar in the leaderboard screen.
