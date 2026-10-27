@@ -47,6 +47,9 @@ const TITLES := {
 	"side_oria": "What the Roses Keep",
 	"side_toma": "The Page After",
 	"side_vey": "The Door Left Open",
+	"side_ledger": "The Better Ledger",
+	"side_ninth_name": "The Ninth Name",
+	"side_remnant": "The Watch Remnant",
 }
 const INK_STATE_VARS := {
 	"day_06_": ["allied_watch", "allied_rebels", "refused_all"],

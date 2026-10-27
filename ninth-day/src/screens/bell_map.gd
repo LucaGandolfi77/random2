@@ -168,24 +168,28 @@ func _threads_panel() -> PanelContainer:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 7)
 	panel.add_child(box)
-	box.add_child(Ui.overline("QUIET THREADS · CYCLE %d" % RunState.cycle_number))
-	box.add_child(Ui.label("Optional scenes between the phases. Each one deepens a bond and leaves a memory behind. They persist across cycles.", 12, Palette.PAPER_DIM, true))
+	box.add_child(Ui.overline("QUIET THREADS & INTERLUDES · CYCLE %d" % RunState.cycle_number))
+	box.add_child(Ui.label("Optional scenes between the phases. Some open only through what you already know. Each one leaves a memory behind and persists across cycles.", 12, Palette.PAPER_DIM, true))
 
 	for thread_id in RunState.side_thread_ids():
 		var data := RunState.side_thread_data(thread_id)
-		var display_name := "%s · %s" % [thread_id.capitalize(), String(data.get("name", "Quiet thread"))]
+		var kind := "INTERLUDE" if String(data.get("kind", "")) == "interlude" else "THREAD"
+		var display_name := "%s · %s · %s" % [kind, thread_id.capitalize(), String(data.get("name", "Quiet thread"))]
 		if RunState.is_side_thread_complete(thread_id):
-			box.add_child(Ui.label("✓  %s   ·   bond kept" % display_name, 12, Palette.BELL))
+			box.add_child(Ui.label("✓  %s   ·   memory kept" % display_name, 11, Palette.BELL))
 		elif RunState.side_thread_available(thread_id):
 			var battle := String(data.get("battle", ""))
 			var suffix := "  ·  elite battle" if battle != "" else ""
-			var button := Ui.card_button("▶  %s\n     after Day %d%s" % [display_name, int(data.get("after_day", 0)), suffix], 58)
-			button.add_theme_font_size_override("font_size", 12)
+			var button := Ui.card_button("▶  %s\n     after Day %d%s" % [display_name, int(data.get("after_day", 0)), suffix], 62)
+			button.add_theme_font_size_override("font_size", 11)
 			button.add_theme_color_override("font_color", Palette.PAPER)
 			button.pressed.connect(_on_thread_pressed.bind(thread_id))
 			box.add_child(button)
 		else:
-			box.add_child(Ui.label("—  %s   ·   finish Day %d" % [display_name, int(data.get("after_day", 0))], 12, Palette.MUTED))
+			var locked_text := "finish Day %d" % int(data.get("after_day", 0))
+			if RunState.is_phase_completed(int(data.get("after_day", 0)), "night"):
+				locked_text = String(data.get("requirement_hint", "knowledge required"))
+			box.add_child(Ui.label("—  %s   ·   %s" % [display_name, locked_text], 11, Palette.MUTED))
 
 	box.add_child(Ui.rule(Palette.LINE))
 	var bonds: Array[String] = []

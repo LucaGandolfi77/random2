@@ -655,6 +655,27 @@
 			"description": "Vey stopped guarding a room that no longer needed guarding.",
 			"effect": "+1 attack and +2 defense to the party.",
 			"modifiers": {"attack": 1, "defense": 2}
+		},
+		"better_ledger": {
+			"name": "The Better Ledger",
+			"type": "Bond",
+			"description": "Every debt in Ember Row, and one line that cancels the rest.",
+			"effect": "+1 defense and +1 max Resolve to the party.",
+			"modifiers": {"defense": 1, "max_resolve": 1}
+		},
+		"ninth_name": {
+			"name": "The Ninth Name",
+			"type": "Bond",
+			"description": "Orra Vane. A root under the city, said aloud.",
+			"effect": "+1 attack and +1 speed to the party.",
+			"modifiers": {"attack": 1, "speed": 1}
+		},
+		"watch_remnant": {
+			"name": "The Watch Remnant",
+			"type": "Skill",
+			"description": "An order no one is left to rescind. You outlasted it.",
+			"effect": "+2 attack and +1 defense to the party.",
+			"modifiers": {"attack": 2, "defense": 1}
 		}
 	}
 }

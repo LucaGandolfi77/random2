@@ -41,7 +41,7 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 | Enemy target rows | 50–62 |
 | Bell Rest cards | 132 |
 | Bell Rest confirm / skip | 48–54 |
-| Quiet-thread rows | 58 |
+| Quiet-thread / interlude rows | 62 |
 | Journal tabs / back | 42–48 |
 
 ## Save behaviour to test
@@ -64,6 +64,7 @@ Every interactive control is at least **48 design units** high. At the 540 × 96
 16. Quit during a quiet thread: **Continue** returns to that thread; quit during its elite battle: **Continue** resumes the battle.
 17. Open the Journal from the title and the Bell Map: the recap, bonds, memories, and lore tabs all return to the correct screen.
 18. Replay a seen story scene: **Skip read** stops at new Echo lines and choices, never at prose seen in an earlier loop.
+19. Knowledge-gated interludes stay locked with a readable requirement until the matching choice or thread is held.
 
 ## Android export
 

@@ -68,6 +68,42 @@ const SIDE_THREADS := {
 		"bg": "sanctuary",
 		"closing": "Vey leaves the inner door open. Something in the dark decides not to follow.",
 	},
+	"ledger": {
+		"name": "The Better Ledger",
+		"after_day": 2,
+		"kind": "interlude",
+		"requires": {"flag": "elias_free"},
+		"requirement_hint": "Elias must keep his ledger",
+		"story_id": "side_ledger",
+		"inheritance": "better_ledger",
+		"battle": "",
+		"bg": "ember_row",
+		"closing": "Elias writes a new page. This time, no one is crossed out.",
+	},
+	"ninth_name": {
+		"name": "The Ninth Name",
+		"after_day": 5,
+		"kind": "interlude",
+		"requires": {"flag": "wren_truth"},
+		"requirement_hint": "Wren must tell you who rang the Bell",
+		"story_id": "side_ninth_name",
+		"inheritance": "ninth_name",
+		"battle": "",
+		"bg": "garden",
+		"closing": "Wren says the name once. The garden holds it without blooming.",
+	},
+	"remnant": {
+		"name": "The Watch Remnant",
+		"after_day": 6,
+		"kind": "interlude",
+		"requires": {"any_flags": ["allied_watch", "allied_rebels"]},
+		"requirement_hint": "You must have chosen a side on Day 6",
+		"story_id": "side_remnant",
+		"inheritance": "watch_remnant",
+		"battle": "watch_remnant",
+		"bg": "checkpoint",
+		"closing": "The checkpoint is quiet. The Watch is not gone; it is only waiting.",
+	},
 }
 const DAY_PHASES := {
 	1: {
@@ -348,7 +384,26 @@ func side_thread_available(thread_id: String) -> bool:
 	var data := side_thread_data(thread_id)
 	if data.is_empty():
 		return false
+	if not _requirement_met(data.get("requires", {})):
+		return false
 	return is_phase_completed(int(data.get("after_day", 0)), "night")
+
+func _requirement_met(requires: Variant) -> bool:
+	if not requires is Dictionary or requires.is_empty():
+		return true
+	if requires.has("flag") and not bool(get_flag(String(requires["flag"]), false)):
+		return false
+	if requires.has("any_flags"):
+		var any_met := false
+		for flag_id in requires["any_flags"]:
+			if bool(get_flag(String(flag_id), false)):
+				any_met = true
+				break
+		if not any_met:
+			return false
+	if requires.has("thread") and not is_side_thread_complete(String(requires["thread"])):
+		return false
+	return true
 
 func open_side_thread(thread_id: String) -> void:
 	pending_story = String(side_thread_data(thread_id).get("story_id", ""))

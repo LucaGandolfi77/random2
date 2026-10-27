@@ -861,6 +861,8 @@ func _encounter_intro() -> String:
 			return "The Choir reforms around Iven's ledger. Every name it lost, it sings back louder."
 		&"sera_remnant":
 			return "Sera Vane steps out of Vey's open door. She has no rank left, only the last order she gave herself."
+		&"watch_remnant":
+			return "The Watch Remnant holds the checkpoint alone. Its uniform is still perfect. Its orders are not."
 		_:
 			return "The Bell cracks. The Ashwright and the Hollow Choir answer."
 
@@ -997,6 +999,17 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 		BattleAction.new(&"last_order", "Last Order", BattleTypes.Tone.EMBER, 30, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, false, "Survive it. That was the order."),
 	])
 
+	var watch_remnant := BattleActor.new(&"watch_remnant", "The Watch Remnant", BattleTypes.Side.ENEMY, BattleTypes.Tone.BELL, 240, 22, 15, 12)
+	watch_remnant.is_boss = true
+	watch_remnant.max_resolve = 99
+	watch_remnant.resolve = 99
+	watch_remnant.actions = _actions([
+		BattleAction.new(&"iron_hymn", "Iron Hymn", BattleTypes.Tone.HUSH, 18, 0, BattleTypes.TargetRule.ALL_ENEMIES, 0, &"slowed", 1, true, "A hymn the Choir left in the gate."),
+		BattleAction.new(&"censure", "Censure", BattleTypes.Tone.HUSH, 24, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"marked", 2, true, "The Watch's verdict, still standing."),
+		BattleAction.new(&"fall_in", "Fall In", BattleTypes.Tone.BELL, 0, 0, BattleTypes.TargetRule.SELF, 22, &"", 0, true, "The remnant remembers formation."),
+		BattleAction.new(&"last_order", "Last Order", BattleTypes.Tone.EMBER, 30, 0, BattleTypes.TargetRule.SINGLE_ENEMY, 0, &"burning", 2, false, "An order no one is left to rescind."),
+	])
+
 	match encounter:
 		&"tutorial":
 			choir.max_hp = 60
@@ -1036,6 +1049,8 @@ func _build_enemies(encounter: StringName = &"full") -> Array[BattleActor]:
 			return [choir_reborn]
 		&"sera_remnant":
 			return [sera_remnant]
+		&"watch_remnant":
+			return [watch_remnant]
 		_:
 			return out
 

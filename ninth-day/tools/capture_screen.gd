@@ -299,6 +299,16 @@ func _ready() -> void:
 			RunState.day = 9
 			RunState.open_side_thread("mara")
 			scene = load("res://src/screens/story_view.tscn").instantiate()
+		"thread_ledger":
+			RunState.day = 9
+			RunState.flags["elias_free"] = true
+			RunState.open_side_thread("ledger")
+			scene = load("res://src/screens/story_view.tscn").instantiate()
+		"thread_remnant":
+			RunState.day = 9
+			RunState.flags["allied_watch"] = true
+			RunState.open_side_thread("remnant")
+			scene = load("res://src/screens/story_view.tscn").instantiate()
 		"rest":
 			RunState.pending_phase = "morning"
 			scene = load("res://src/screens/bell_rest.tscn").instantiate()
@@ -340,7 +350,7 @@ func _ready() -> void:
 	add_child(scene)
 	scene.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
-	if screen in ["story", "story_afternoon", "story_night", "story_day2", "choices", "choices_day2", "story_day3", "choices_day3", "story_day4", "choices_day4", "story_day5", "choices_day5", "story_day6", "choices_day6", "story_day7", "choices_day7", "story_day8", "choices_day8", "story_day9", "choices_day9", "thread_story", "thread_choices"]:
+	if screen in ["story", "story_afternoon", "story_night", "story_day2", "choices", "choices_day2", "story_day3", "choices_day3", "story_day4", "choices_day4", "story_day5", "choices_day5", "story_day6", "choices_day6", "story_day7", "choices_day7", "story_day8", "choices_day8", "story_day9", "choices_day9", "thread_story", "thread_choices", "thread_ledger", "thread_remnant"]:
 		for i in 60:
 			await get_tree().process_frame
 			if not scene.service.current_line().is_empty():
