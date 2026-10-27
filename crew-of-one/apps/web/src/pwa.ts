@@ -85,3 +85,25 @@ export const shareText = async (text: string, url: string): Promise<ShareOutcome
   }
   return 'unavailable';
 };
+
+
+type FileShareNavigator = Navigator & {
+  canShare?: (data?: ShareData) => boolean;
+};
+
+export const shareFile = async (
+  file: File,
+  text: string,
+  url: string,
+): Promise<ShareOutcome> => {
+  const nav = navigator as FileShareNavigator;
+  if (typeof nav.share === 'function' && nav.canShare?.({ files: [file] })) {
+    try {
+      await nav.share({ files: [file], text, url, title: 'Crew of One' });
+      return 'shared';
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') return 'cancelled';
+    }
+  }
+  return shareText(text, url);
+};

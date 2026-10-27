@@ -20,6 +20,7 @@ pnpm --filter @crew-of-one/web dev
 - **LARGE TEXT** in the menu footer scales the HUD and menus and persists across sessions.
 - `Esc` opens the heist menu.
 - `♪` in the top bar toggles placeholder sound.
+- **SHARE RUN** on the results screen generates a 1080×1080 PNG card when the browser supports file sharing.
 
 ## Offline / install
 

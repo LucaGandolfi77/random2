@@ -22,7 +22,8 @@ import {
   type ControlLayout,
   type Handedness,
 } from './controls';
-import { initInstallPrompt, promptInstall, shareText } from './pwa';
+import { initInstallPrompt, promptInstall, shareFile, shareText } from './pwa';
+import { renderShareCard, type ShareCardOptions } from './shareCard';
 import {
   fetchDailyConfig,
   fetchLeaderboard,
@@ -119,6 +120,7 @@ class PrototypeScene extends Phaser.Scene {
   private lastLevers: Record<string, boolean> = {};
   private lastGemHolder = 'world';
   private lastShare: string | null = null;
+  private lastShareCard: ShareCardOptions | null = null;
   private handedness: Handedness = 'right';
   private controls: ControlLayout = CONTROL_LAYOUTS.right;
   private textSize: TextSize = 'normal';
@@ -622,7 +624,21 @@ class PrototypeScene extends Phaser.Scene {
     const text =
       this.lastShare ??
       'The crew is you. Ten vaults, one time loop, and a daily heist.';
-    const outcome = await shareText(text, window.location.href);
+    const url = window.location.origin;
+
+    if (this.lastShareCard) {
+      const blob = await renderShareCard({ ...this.lastShareCard, url });
+      if (blob) {
+        const file = new File([blob], 'crew-of-one.png', { type: 'image/png' });
+        const outcome = await shareFile(file, text, url);
+        if (outcome === 'copied') this.ui.showHint('Share text copied to the clipboard.');
+        if (outcome === 'unavailable') this.ui.showHint('Image sharing is unavailable here.');
+        if (outcome === 'cancelled') return;
+        if (outcome !== 'unavailable') return;
+      }
+    }
+
+    const outcome = await shareText(text, url);
     if (outcome === 'copied') {
       this.ui.showHint('Run copied to the clipboard.');
     } else if (outcome === 'unavailable') {
@@ -714,6 +730,17 @@ class PrototypeScene extends Phaser.Scene {
       this.isDaily && this.daily
         ? recordDailyClear(this.progress, this.daily.date)
         : null;
+    this.lastShareCard = {
+      vaultName: this.isDaily && this.daily ? this.daily.baseVault.name : this.vault.name,
+      timeMs,
+      echoes,
+      parEchoes: this.vault.parEchoes,
+      rank: record.rank,
+      daily:
+        this.isDaily && this.daily
+          ? { date: this.daily.date, modifier: this.daily.modifier.name }
+          : undefined,
+    };
     this.resultOpen = true;
     this.paused = true;
     this.ui.setMenuButtonVisible(false);
