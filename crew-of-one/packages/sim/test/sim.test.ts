@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HeistSim, replayTracks, validateTracks } from '../src';
+import { applyModifier, HeistSim, replayTracks, validateTracks } from '../src';
 import type { GhostTrack, SimInput, VaultDef } from '../src';
 
 const vault: VaultDef = {
@@ -309,5 +309,79 @@ describe('Gem carrying', () => {
 
     step(sim, { ...idle, moveY: -1 }, 140);
     expect(sim.state.status).toBe('won');
+  });
+});
+
+describe('Modifiers', () => {
+  it('disables the dash when the vault forbids it', () => {
+    const noDash = applyModifier(vault, 'no-dash');
+    const walk = new HeistSim(noDash);
+    const dash = new HeistSim(noDash);
+    step(walk, { ...idle, moveY: -1 }, 10);
+    step(dash, { ...idle, moveY: -1, dash: true }, 10);
+    expect(dash.state.player.y).toBeCloseTo(walk.state.player.y, 5);
+  });
+
+  it('shortens the loop and caps echoes', () => {
+    const short = applyModifier(vault, 'short-loop');
+    expect(short.loopSeconds).toBe(Math.max(15, vault.loopSeconds - 10));
+    const solo = applyModifier(vault, 'one-echo');
+    expect(solo.maxEchoes).toBeLessThanOrEqual(1);
+    expect(solo.parEchoes).toBeLessThanOrEqual(1);
+  });
+
+  it('does not mutate the source vault', () => {
+    const source = { ...vault, dashEnabled: true };
+    const modified = applyModifier(source, 'no-dash');
+    expect(source.dashEnabled).toBe(true);
+    expect(modified.dashEnabled).toBe(false);
+  });
+});
+
+describe('Replay guard validation', () => {
+  it('rejects a run where a guard sees the player', () => {
+    const track: GhostTrack = {
+      id: 'player',
+      symbol: 'circle',
+      color: 0x5bc0eb,
+      durationMs: 2000,
+      frames: [
+        { t: 0, x: 160, y: 300, dir: 0, anim: 'idle' },
+        { t: 2000, x: 160, y: 300, dir: 0, anim: 'idle' },
+      ],
+    };
+
+    const result = replayTracks(guardVault, [track]);
+    expect(result.won).toBe(false);
+    expect(result.issues.some((issue) => issue.code === 'seen-by-guard')).toBe(true);
+  });
+});
+
+describe('Echo preview', () => {
+  it('replays the crew without recording or moving the player', () => {
+    const sim = new HeistSim(vault);
+    step(sim, { ...idle, moveX: 1 }, 30);
+    expect(sim.rewind().ok).toBe(true);
+
+    const playerX = sim.state.player.x;
+    const currentFrames = sim.state.currentTrack.length;
+    expect(sim.startPreview()).toBe(true);
+    expect(sim.isPreviewing()).toBe(true);
+
+    step(sim, { ...idle, moveX: -1, dash: true }, 30);
+    expect(sim.state.player.x).toBe(playerX);
+    expect(sim.state.tracks).toHaveLength(1);
+    expect(sim.state.currentTrack).toHaveLength(currentFrames);
+    expect(sim.state.timeMs).toBeGreaterThan(0);
+
+    expect(sim.stopPreview()).toBe(true);
+    expect(sim.isPreviewing()).toBe(false);
+    expect(sim.state.timeMs).toBe(0);
+    expect(sim.state.currentTrack).toHaveLength(currentFrames);
+  });
+
+  it('refuses to preview with no echoes', () => {
+    const sim = new HeistSim(vault);
+    expect(sim.startPreview()).toBe(false);
   });
 });

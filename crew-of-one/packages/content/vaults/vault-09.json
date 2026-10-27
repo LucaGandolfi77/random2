@@ -1,0 +1,56 @@
+{
+  "id": "vault-09",
+  "name": "Double Watch",
+  "chapter": 2,
+  "loopSeconds": 30,
+  "maxEchoes": 4,
+  "parEchoes": 3,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 48, "y": 448 },
+  "exit": { "x": 160, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 32, "y": 384, "w": 96, "h": 32 },
+    { "x": 192, "y": 384, "w": 96, "h": 32 },
+    { "x": 32, "y": 224, "w": 96, "h": 32 },
+    { "x": 192, "y": 224, "w": 96, "h": 32 }
+  ],
+  "plates": [],
+  "doors": [],
+  "guards": [
+    {
+      "id": "guard-lower",
+      "path": [{ "x": 160, "y": 368 }],
+      "facing": 2,
+      "waitMs": 0,
+      "speed": 52,
+      "visionRange": 180,
+      "visionAngleDeg": 80,
+      "hearingRadius": 120
+    },
+    {
+      "id": "guard-upper",
+      "path": [{ "x": 160, "y": 208 }],
+      "facing": 2,
+      "waitMs": 0,
+      "speed": 52,
+      "visionRange": 180,
+      "visionAngleDeg": 80,
+      "hearingRadius": 120
+    }
+  ],
+  "cameras": [],
+  "levers": [],
+  "lasers": [],
+  "gem": { "x": 160, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "Two watches, one corridor. Neither guard can catch an echo.",
+    "Send a different echo past each watch, then follow the gap they leave."
+  ]
+}

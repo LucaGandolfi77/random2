@@ -9,10 +9,15 @@ pnpm --filter @crew-of-one/web dev
 ## Controls
 
 - Drag anywhere on the board to move.
-- `R` or the on-screen REWIND button to rewind.
+- `R` or the on-screen REWIND button to rewind and leave an echo.
+- `E` or ACT to whistle / use a lever / grab the gem.
+- `Shift`, `Space`, or DASH to dash.
+- `U` or UNDO to remove the newest echo.
+- `P` or ▶ CREW to preview the recorded crew at 2×.
 - `Backspace` or the top-right RESET label to reset the heist.
-- Keyboard: WASD/arrows to move, `R` to rewind.
+- `1`–`0` load vaults 1–10 directly for debugging.
+- `Esc` opens the heist menu.
 
 ## Current state
 
-Rectangle prototype. The sim is real; the art is placeholder. The next step is the guard/vision pass and a pixel-art kit for the vertical slice.
+The full ten-vault rectangle slice runs on the real deterministic sim. The web shell includes level select, saved bests and ranks, a daily heist, server-verified daily submissions with an offline fallback, a leaderboard with nicknames, and a 2× ghost preview. Art and audio are still placeholders; the next step is a pixel-art vertical slice.

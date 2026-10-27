@@ -94,6 +94,8 @@ export const vaultSchema = z.object({
     .default([]),
   gem: z.object({ x: z.number(), y: z.number(), radius: z.number().positive() }).optional(),
   requiresGem: z.boolean(),
+  dashEnabled: z.boolean().optional(),
+  fog: z.boolean().optional(),
   hints: z.array(z.string()).default([]),
 });
 

@@ -1,5 +1,5 @@
 import { distance, directionToVector } from './math';
-import { circleRectOverlap, distanceToSegment, segmentIntersectsRect } from './collision';
+import { circleRectOverlap, distanceToSegment, moveCircle, segmentIntersectsRect } from './collision';
 import { validateTracks } from './validation';
 import type { GhostFrame, GhostTrack, ValidationIssue, VaultDef } from './types';
 
@@ -59,11 +59,80 @@ const cameraSees = (
   );
 };
 
+
+type ReplayGuard = {
+  id: string;
+  x: number;
+  y: number;
+  facing: 0 | 1 | 2 | 3;
+  mode: 'patrol' | 'investigate' | 'follow' | 'confused';
+  path: Array<{ x: number; y: number }>;
+  waypointIndex: number;
+  waitRemainingMs: number;
+  waitMs: number;
+  speed: number;
+  visionRange: number;
+  visionAngleDeg: number;
+  hearingRadius: number;
+  suspicion: number;
+  targetGhostId: string | null;
+  investigateX: number;
+  investigateY: number;
+  confusedMs: number;
+};
+
+const guardSees = (
+  guard: ReplayGuard,
+  target: { x: number; y: number },
+  walls: VaultDef['walls'],
+): boolean => {
+  const dx = target.x - guard.x;
+  const dy = target.y - guard.y;
+  const range = Math.hypot(dx, dy);
+  if (range > guard.visionRange || range < 0.001) return false;
+
+  const forward = directionToVector(guard.facing);
+  const forwardAngle = Math.atan2(forward.y, forward.x);
+  const targetAngle = Math.atan2(dy, dx);
+  const delta = Math.abs(
+    Math.atan2(Math.sin(targetAngle - forwardAngle), Math.cos(targetAngle - forwardAngle)),
+  );
+  if (delta > (guard.visionAngleDeg * Math.PI) / 360) return false;
+
+  return !walls.some((wall) =>
+    segmentIntersectsRect(guard.x, guard.y, target.x, target.y, wall),
+  );
+};
+
+const moveReplayGuard = (
+  guard: ReplayGuard,
+  targetX: number,
+  targetY: number,
+  speed: number,
+  dtMs: number,
+  walls: VaultDef['walls'],
+): boolean => {
+  const dx = targetX - guard.x;
+  const dy = targetY - guard.y;
+  const remaining = Math.hypot(dx, dy);
+  if (remaining <= 3) return true;
+
+  const step = Math.min(remaining, (speed * dtMs) / 1000);
+  const dirX = dx / remaining;
+  const dirY = dy / remaining;
+  const next = moveCircle(guard.x, guard.y, 9, dirX * step, dirY * step, walls);
+  guard.x = next.x;
+  guard.y = next.y;
+  guard.facing =
+    Math.abs(dirX) > Math.abs(dirY) ? (dirX > 0 ? 1 : 3) : dy > 0 ? 2 : 0;
+  return Math.hypot(targetX - guard.x, targetY - guard.y) <= 3;
+};
+
 /**
  * Headless replay for leaderboard validation and solution-tape tests.
  * All tracks are treated as actors; the last track is the player's final run.
- * Guards are not simulated yet; cameras, levers, doors, plates, walls, and the
- * exit are. This is the contract the Worker uses for now.
+ * Guards, cameras, levers, doors, plates, walls, lasers, gems, and the exit are
+ * simulated. This is the contract the Worker uses for run validation.
  */
 export const replayTracks = (vault: VaultDef, tracks: GhostTrack[]): ReplayResult => {
   const issues = validateTracks(vault, tracks);
@@ -91,6 +160,44 @@ export const replayTracks = (vault: VaultDef, tracks: GhostTrack[]): ReplayResul
   const gem = vault.gem
     ? { x: vault.gem.x, y: vault.gem.y, radius: vault.gem.radius, holder: 'world' as string }
     : null;
+
+  const guards: ReplayGuard[] = vault.guards.map((guard) => {
+    const start = guard.path[0] ?? { x: 0, y: 0 };
+    return {
+      id: guard.id,
+      x: start.x,
+      y: start.y,
+      facing: guard.facing ?? 2,
+      mode: 'patrol',
+      path: guard.path.map((point) => ({ ...point })),
+      waypointIndex: guard.path.length > 1 ? 1 : 0,
+      waitRemainingMs: guard.waitMs,
+      waitMs: guard.waitMs,
+      speed: guard.speed,
+      visionRange: guard.visionRange,
+      visionAngleDeg: guard.visionAngleDeg,
+      hearingRadius: guard.hearingRadius,
+      suspicion: 0,
+      targetGhostId: null,
+      investigateX: start.x,
+      investigateY: start.y,
+      confusedMs: 0,
+    };
+  });
+
+  const noiseSpawns: Array<{ t: number; x: number; y: number; radius: number }> = [];
+  for (const track of tracks) {
+    for (const frame of track.frames) {
+      for (const event of frame.events ?? []) {
+        if (event.type === 'noise') {
+          noiseSpawns.push({ t: frame.t, x: frame.x, y: frame.y, radius: event.radius ?? 120 });
+        }
+      }
+    }
+  }
+  noiseSpawns.sort((a, b) => a.t - b.t);
+  let noiseIndex = 0;
+  const activeNoises: Array<{ x: number; y: number; radius: number; createdAt: number }> = [];
 
   const leverEvents: Array<{ t: number; leverId: string }> = [];
   for (const ghost of ghosts) {
@@ -136,9 +243,27 @@ export const replayTracks = (vault: VaultDef, tracks: GhostTrack[]): ReplayResul
     const player = sampleTrack(playerTrack, timeMs);
     if (!player) break;
 
-    const ghostPositions = ghosts
-      .map((ghost) => sampleTrack(ghost, timeMs))
-      .filter((frame): frame is GhostFrame => frame !== null);
+    const ghostSamples = ghosts
+      .map((ghost) => ({ track: ghost, frame: sampleTrack(ghost, timeMs) }))
+      .filter((sample): sample is { track: GhostTrack; frame: GhostFrame } => sample.frame !== null);
+    const ghostPositions = ghostSamples.map((sample) => sample.frame);
+
+    while (noiseIndex < noiseSpawns.length && (noiseSpawns[noiseIndex]?.t ?? Infinity) <= timeMs) {
+      const spawn = noiseSpawns[noiseIndex];
+      noiseIndex += 1;
+      if (spawn) {
+        activeNoises.push({
+          x: spawn.x,
+          y: spawn.y,
+          radius: spawn.radius,
+          createdAt: spawn.t,
+        });
+      }
+    }
+    for (let index = activeNoises.length - 1; index >= 0; index -= 1) {
+      const noise = activeNoises[index];
+      if (noise && timeMs - noise.createdAt > 900) activeNoises.splice(index, 1);
+    }
 
     while (eventIndex < leverEvents.length && (leverEvents[eventIndex]?.t ?? Infinity) <= timeMs) {
       const event = leverEvents[eventIndex];
@@ -317,6 +442,121 @@ export const replayTracks = (vault: VaultDef, tracks: GhostTrack[]): ReplayResul
         if ((cameraSuspicion[i] ?? 0) >= 1) cameraAlarm = true;
       } else {
         cameraSuspicion[i] = Math.max(0, (cameraSuspicion[i] ?? 0) - stepMs / 900);
+      }
+    }
+
+    const doorWalls = vault.doors
+      .filter((door) => {
+        if (door.mode === 'oneway') return true;
+        const targeting = plates.filter((plate) => plate.targets.includes(door.id));
+        return !(targeting.length > 0 && targeting.every((plate) => plate.pressed));
+      })
+      .map((door) => ({ x: door.x, y: door.y, w: door.w, h: door.h }));
+    const guardWalls = [...vault.walls, ...doorWalls];
+
+    for (const guard of guards) {
+      if (guard.mode === 'confused') {
+        guard.confusedMs -= stepMs;
+        guard.suspicion = Math.max(0, guard.suspicion - stepMs / 1000);
+        if (guard.confusedMs <= 0) {
+          guard.mode = 'patrol';
+          guard.targetGhostId = null;
+          guard.waitRemainingMs = 300;
+        }
+        continue;
+      }
+
+      if (guard.mode === 'follow') {
+        const target = ghostSamples.find((sample) => sample.track.id === guard.targetGhostId);
+        if (!target) {
+          guard.mode = 'patrol';
+          guard.targetGhostId = null;
+          guard.waitRemainingMs = 300;
+        } else {
+          const reached = moveReplayGuard(
+            guard,
+            target.frame.x,
+            target.frame.y,
+            guard.speed * 1.08,
+            stepMs,
+            guardWalls,
+          );
+          if (reached) {
+            guard.mode = 'confused';
+            guard.confusedMs = 900;
+            guard.targetGhostId = null;
+          }
+          continue;
+        }
+      }
+
+      const seenGhost = ghostSamples
+        .filter((sample) => guardSees(guard, sample.frame, guardWalls))
+        .sort(
+          (a, b) =>
+            distance(guard, a.frame) - distance(guard, b.frame),
+        )[0];
+      if (seenGhost) {
+        guard.mode = 'follow';
+        guard.targetGhostId = seenGhost.track.id;
+        guard.suspicion = Math.max(0, guard.suspicion - stepMs / 1000);
+        continue;
+      }
+
+      const nearestNoise = activeNoises
+        .filter((noise) => distance(guard, noise) <= guard.hearingRadius)
+        .sort((a, b) => distance(guard, a) - distance(guard, b))[0];
+      if (nearestNoise) {
+        guard.mode = 'investigate';
+        guard.investigateX = nearestNoise.x;
+        guard.investigateY = nearestNoise.y;
+      }
+
+      if (guard.mode === 'investigate') {
+        const reached = moveReplayGuard(
+          guard,
+          guard.investigateX,
+          guard.investigateY,
+          guard.speed,
+          stepMs,
+          guardWalls,
+        );
+        if (reached) {
+          guard.mode = 'patrol';
+          guard.waitRemainingMs = 350;
+        }
+      } else if (guard.mode === 'patrol') {
+        if (guard.waitRemainingMs > 0) {
+          guard.waitRemainingMs -= stepMs;
+        } else if (guard.path.length > 0) {
+          const target = guard.path[guard.waypointIndex % guard.path.length];
+          if (target) {
+            const reached = moveReplayGuard(guard, target.x, target.y, guard.speed, stepMs, guardWalls);
+            if (reached) {
+              guard.waypointIndex = (guard.waypointIndex + 1) % guard.path.length;
+              guard.waitRemainingMs = guard.waitMs;
+            }
+          }
+        }
+      }
+
+      if (guardSees(guard, player, guardWalls)) {
+        guard.suspicion = Math.min(1, guard.suspicion + stepMs / 1200);
+        if (guard.suspicion >= 1) {
+          return {
+            won: false,
+            timeMs,
+            issues: [
+              {
+                code: 'seen-by-guard',
+                message: 'A guard caught the player.',
+                trackId: playerTrack.id,
+              },
+            ],
+          };
+        }
+      } else {
+        guard.suspicion = Math.max(0, guard.suspicion - stepMs / 900);
       }
     }
 

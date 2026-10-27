@@ -11,6 +11,8 @@ Working tools:
 - `record-vault-06-solution.ts` — records the dash/laser solution tape.
 - `record-vault-07-solution.ts` — records the one-way gate solution tape.
 - `record-vault-08-solution.ts` — records the gem-carry solution tape.
+- `record-vault-09-solution.ts` — records the two-guard bait solution tape.
+- `record-vault-10-solution.ts` — records the vault-door finale tape.
 
 Planned tools:
 
@@ -28,4 +30,6 @@ pnpm exec tsx tools/record-vault-05-solution.ts
 pnpm exec tsx tools/record-vault-06-solution.ts
 pnpm exec tsx tools/record-vault-07-solution.ts
 pnpm exec tsx tools/record-vault-08-solution.ts
+pnpm exec tsx tools/record-vault-09-solution.ts
+pnpm exec tsx tools/record-vault-10-solution.ts
 ```

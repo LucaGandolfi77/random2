@@ -27,6 +27,9 @@ const PLAYER_RADIUS = 10;
 const PLAYER_SPEED = 96;
 const DASH_MULTIPLIER = 2.4;
 
+const cloneState = (state: SimState): SimState =>
+  JSON.parse(JSON.stringify(state)) as SimState;
+
 const ECHO_SYMBOLS: EchoSymbol[] = ['circle', 'triangle', 'square', 'diamond', 'star', 'cross'];
 const ECHO_COLORS: EchoColor[] = [0x5bc0eb, 0xf6c85f, 0xe63946, 0x8ac926, 0xc77dff, 0xff8c42];
 
@@ -40,6 +43,9 @@ export class HeistSim {
   private dashCooldownMs = 0;
   private wasInteractDown = false;
   private wasDashDown = false;
+  private previewing = false;
+  private previewSnapshot: SimState | null = null;
+  private previewLengthMs = 0;
   private dashRemainingMs = 0;
   private noiseCooldownMs = 0;
   private pendingEvents: GhostEvent[] = [];
@@ -68,18 +74,25 @@ export class HeistSim {
     this.dashRemainingMs = Math.max(0, this.dashRemainingMs - SIM_DT * 1000);
     this.noiseCooldownMs = Math.max(0, this.noiseCooldownMs - SIM_DT * 1000);
 
-    const interactPressed = this.input.interact && !this.wasInteractDown;
-    this.wasInteractDown = this.input.interact;
-    const dashPressed = this.input.dash && !this.wasDashDown;
-    this.wasDashDown = this.input.dash;
-    if (dashPressed && this.dashCooldownMs <= 0 && (this.input.moveX !== 0 || this.input.moveY !== 0)) {
-      this.dashRemainingMs = 300;
-      this.dashCooldownMs = 750;
-      this.spawnNoise(this.state.player.x, this.state.player.y, 120);
-      this.pendingEvents.push({ type: 'noise', radius: 120 });
-    }
+    if (!this.previewing) {
+      const interactPressed = this.input.interact && !this.wasInteractDown;
+      this.wasInteractDown = this.input.interact;
+      const dashPressed = this.input.dash && !this.wasDashDown;
+      this.wasDashDown = this.input.dash;
+      if (
+        dashPressed &&
+        this.vault.dashEnabled !== false &&
+        this.dashCooldownMs <= 0 &&
+        (this.input.moveX !== 0 || this.input.moveY !== 0)
+      ) {
+        this.dashRemainingMs = 300;
+        this.dashCooldownMs = 750;
+        this.spawnNoise(this.state.player.x, this.state.player.y, 120);
+        this.pendingEvents.push({ type: 'noise', radius: 120 });
+      }
 
-    this.movePlayer(interactPressed, nowMs, this.dashRemainingMs > 0);
+      this.movePlayer(interactPressed, nowMs, this.dashRemainingMs > 0);
+    }
     this.updateGhosts(nowMs);
     this.updateGemPosition();
     this.updatePlatesAndDoors();
@@ -148,6 +161,35 @@ export class HeistSim {
       timeMs: this.state.timeMs,
       tracks,
     };
+  }
+
+  isPreviewing(): boolean {
+    return this.previewing;
+  }
+
+  getPreviewLengthMs(): number {
+    return this.previewLengthMs;
+  }
+
+  startPreview(): boolean {
+    if (this.previewing || this.state.status !== 'playing' || this.state.tracks.length === 0) {
+      return false;
+    }
+    this.previewSnapshot = cloneState(this.state);
+    this.previewLengthMs =
+      Math.max(...this.state.tracks.map((track) => track.durationMs)) + 500;
+    this.state = this.buildState(this.state.tracks);
+    this.state.echoesUsed = this.state.tracks.length;
+    this.previewing = true;
+    return true;
+  }
+
+  stopPreview(): boolean {
+    if (!this.previewing) return false;
+    if (this.previewSnapshot) this.state = this.previewSnapshot;
+    this.previewSnapshot = null;
+    this.previewing = false;
+    return true;
   }
 
   getSolidWalls(): Array<{ x: number; y: number; w: number; h: number }> {
@@ -504,7 +546,8 @@ export class HeistSim {
     const player = this.state.player;
 
     for (const plate of this.state.plates) {
-      const playerOnPlate = distance(player, plate) <= plate.radius + player.radius * 0.5;
+      const playerOnPlate =
+        !this.previewing && distance(player, plate) <= plate.radius + player.radius * 0.5;
       const ghostOnPlate = this.state.ghosts.some(
         (ghost) => ghost.active && distance(ghost, plate) <= plate.radius + 8,
       );
@@ -616,6 +659,11 @@ export class HeistSim {
         }
       }
 
+      if (this.previewing) {
+        guard.suspicion = Math.max(0, guard.suspicion - dtMs / 900);
+        continue;
+      }
+
       if (this.canSee(guard, this.state.player, walls)) {
         guard.suspicion = Math.min(1, guard.suspicion + dtMs / 1200);
         if (guard.suspicion >= 1) {
@@ -676,7 +724,8 @@ export class HeistSim {
     const player = this.state.player;
     for (const lever of this.state.levers) {
       if (lever.mode === 'hold') {
-        const playerOnLever = distance(player, lever) <= lever.radius + player.radius * 0.5;
+        const playerOnLever =
+          !this.previewing && distance(player, lever) <= lever.radius + player.radius * 0.5;
         const ghostOnLever = this.state.ghosts.some(
           (ghost) => ghost.active && distance(ghost, lever) <= lever.radius + 8,
         );
@@ -709,7 +758,7 @@ export class HeistSim {
         continue;
       }
 
-      if (this.cameraCanSee(camera, this.state.player, walls)) {
+      if (!this.previewing && this.cameraCanSee(camera, this.state.player, walls)) {
         camera.suspicion = Math.min(1, camera.suspicion + dtMs / 1200);
         if (camera.suspicion >= 1) {
           this.state.status = 'alarm';
@@ -757,6 +806,7 @@ export class HeistSim {
         !disabled && cycle > 0 && (nowMs + laser.phaseMs) % cycle < laser.onMs;
 
       if (
+        !this.previewing &&
         laser.active &&
         distanceToSegment(
           this.state.player.x,
@@ -774,7 +824,7 @@ export class HeistSim {
   }
 
   private checkWin(): void {
-    if (this.state.status !== 'playing') return;
+    if (this.previewing || this.state.status !== 'playing') return;
     const player = this.state.player;
     const exit = this.vault.exit;
     const atExit = distance(player, exit) <= exit.radius + 0.5;
@@ -805,14 +855,14 @@ export class HeistSim {
   }
 
   private checkTimer(nowMs: number): void {
-    if (this.state.status !== 'playing') return;
+    if (this.previewing || this.state.status !== 'playing') return;
     if (nowMs >= this.state.loopMs) {
       this.state.status = 'timeout';
     }
   }
 
   private record(nowMs: number): void {
-    if (this.state.status === 'won') return;
+    if (this.previewing || this.state.status === 'won') return;
     const frameInterval = 1000 / RECORD_HZ;
     const last = this.state.currentTrack[this.state.currentTrack.length - 1];
     if (last && nowMs - last.t < frameInterval - 0.001) return;

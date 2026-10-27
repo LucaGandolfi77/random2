@@ -1,7 +1,23 @@
 import Phaser from 'phaser';
-import { vaults } from '@crew-of-one/content';
-import { HeistSim } from '@crew-of-one/sim';
-import type { CameraState, GhostState, GuardState, LaserState, LeverState, SimInput, VaultDef } from '@crew-of-one/sim';
+import { dailyPlan, utcDate, vaultById, vaults, type DailyPlan } from '@crew-of-one/content';
+import { applyModifier, HeistSim, modifierById } from '@crew-of-one/sim';
+import type { CameraState, GhostState, GuardState, LaserState, LeverState, ModifierId, SimInput, VaultDef } from '@crew-of-one/sim';
+import {
+  loadProgress,
+  recordAttempt,
+  recordResult,
+  resetProgress,
+  type SaveData,
+} from './progress';
+import {
+  fetchDailyConfig,
+  fetchLeaderboard,
+  getNickname,
+  getPlayerId,
+  saveNickname,
+  submitRun,
+} from './api';
+import { MetaUI, type DailySummary } from './ui';
 import './style.css';
 
 const DESIGN_WIDTH = 360;
@@ -57,9 +73,13 @@ class PrototypeScene extends Phaser.Scene {
   private keySix!: Phaser.Input.Keyboard.Key;
   private keySeven!: Phaser.Input.Keyboard.Key;
   private keyEight!: Phaser.Input.Keyboard.Key;
+  private keyNine!: Phaser.Input.Keyboard.Key;
+  private keyZero!: Phaser.Input.Keyboard.Key;
   private keyShift!: Phaser.Input.Keyboard.Key;
   private keySpace!: Phaser.Input.Keyboard.Key;
   private keyBackspace!: Phaser.Input.Keyboard.Key;
+  private keyEscape!: Phaser.Input.Keyboard.Key;
+  private keyP!: Phaser.Input.Keyboard.Key;
   private accumulator = 0;
   private joystickPointerId: number | null = null;
   private joystickOrigin = { x: 0, y: 0 };
@@ -67,6 +87,22 @@ class PrototypeScene extends Phaser.Scene {
   private whistleRequested = false;
   private dashRequested = false;
   private playableVaults: VaultDef[] = [];
+  private daily: DailyPlan | null = null;
+  private dailyDate = '';
+  private isDaily = false;
+  private progress: SaveData = { version: 1, vaults: {} };
+  private ui!: MetaUI;
+  private currentIndex = 0;
+  private paused = true;
+  private resultOpen = false;
+  private wonHandled = false;
+  private lastStatus: string = 'playing';
+  private failureStreak = 0;
+  private previewEndsAtMs = 0;
+  private playerId = '';
+  private alarmCount = 0;
+  private resultToken = 0;
+  private nickname = '';
 
   constructor() {
     super('prototype');
@@ -144,9 +180,13 @@ class PrototypeScene extends Phaser.Scene {
     this.keySix = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX);
     this.keySeven = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SEVEN);
     this.keyEight = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.EIGHT);
+    this.keyNine = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NINE);
+    this.keyZero = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ZERO);
     this.keyShift = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
     this.keySpace = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.keyBackspace = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.BACKSPACE);
+    this.keyEscape = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.keyP = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
 
     this.input.addPointer(2);
     this.input.on('pointerdown', this.onPointerDown, this);
@@ -155,10 +195,79 @@ class PrototypeScene extends Phaser.Scene {
     this.input.on('pointerupoutside', this.onPointerUp, this);
 
     this.cameras.main.setBackgroundColor(COLORS.ink);
+
+    this.progress = loadProgress();
+    this.playerId = getPlayerId();
+    this.nickname = getNickname();
+    this.dailyDate = utcDate();
+    this.daily = dailyPlan(this.dailyDate, this.playableVaults);
+    this.ui = new MetaUI({
+      onStart: (index) => this.startVault(index),
+      onStartDaily: () => this.startDaily(),
+      onReplay: () => {
+        if (this.isDaily) this.startDaily();
+        else this.startVault(this.currentIndex);
+      },
+      onNext: () => {
+        if (!this.isDaily) this.startVault(this.currentIndex + 1);
+      },
+      onMenu: () => this.openMenu(),
+      onToggleMenu: () => {
+        if (this.ui.isMenuOpen()) this.closeMenu();
+        else this.openMenu();
+      },
+      onTogglePreview: () => this.togglePreview(),
+      onOpenLeaderboard: () => this.openLeaderboard(),
+      onRefreshLeaderboard: () => void this.loadLeaderboard(),
+      onCloseLeaderboard: () => this.ui.hideLeaderboard(),
+      onSaveNickname: (nickname) => void this.updateNickname(nickname),
+      onResetProgress: () => this.handleResetProgress(),
+    });
+
+    this.openMenu();
     this.render();
+    void this.syncDailyFromApi();
+  }
+
+  private async syncDailyFromApi(): Promise<void> {
+    const remote = await fetchDailyConfig();
+    if (!remote || remote.dailyId !== utcDate()) return;
+    const base = vaultById(remote.vaultId);
+    if (!base) return;
+    const modifier = modifierById(remote.modifier as ModifierId);
+    if (!modifier) return;
+
+    const vault = applyModifier(base, modifier.id);
+    vault.id = `daily-${remote.dailyId}`;
+    vault.name = `Daily · ${base.name}`;
+    vault.hints = [
+      `${modifier.name}: ${modifier.description}`,
+      base.hints[0] ?? 'You know the vault. Now do it under pressure.',
+    ];
+    this.daily = { date: remote.dailyId, modifier, baseVault: base, vault };
+    this.dailyDate = remote.dailyId;
+    if (this.ui.isMenuOpen()) {
+      this.ui.showMenu(this.playableVaults, this.progress, this.dailySummary());
+    }
   }
 
   override update(_time: number, delta: number): void {
+    if (Phaser.Input.Keyboard.JustDown(this.keyEscape)) {
+      if (this.ui.isMenuOpen()) this.closeMenu();
+      else this.openMenu();
+      return;
+    }
+
+    if (this.paused || this.resultOpen) {
+      this.render();
+      return;
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyP)) {
+      this.togglePreview();
+      return;
+    }
+
     if (Phaser.Input.Keyboard.JustDown(this.keyR)) this.doRewind();
     if (Phaser.Input.Keyboard.JustDown(this.keyBackspace)) this.doReset();
     if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.whistleRequested = true;
@@ -174,28 +283,62 @@ class PrototypeScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.keySix)) this.loadVault(5);
     if (Phaser.Input.Keyboard.JustDown(this.keySeven)) this.loadVault(6);
     if (Phaser.Input.Keyboard.JustDown(this.keyEight)) this.loadVault(7);
+    if (Phaser.Input.Keyboard.JustDown(this.keyNine)) this.loadVault(8);
+    if (Phaser.Input.Keyboard.JustDown(this.keyZero)) this.loadVault(9);
 
     const status = this.sim.state.status;
     if (status === 'won' || status === 'alarm') {
+      this.checkRunEnd(status);
       this.render();
       return;
     }
 
     this.accumulator += Math.min(delta, 100);
     const stepMs = 1000 / 60;
+    const previewSpeed = this.sim.isPreviewing() ? 2 : 1;
     let steps = 0;
-    while (this.accumulator >= stepMs && steps < 5) {
-      this.sim.tick(this.readInput());
+    const input = this.readInput();
+    while (this.accumulator >= stepMs && steps < 5 * previewSpeed) {
+      for (let step = 0; step < previewSpeed; step += 1) {
+        this.sim.tick(input);
+      }
       this.accumulator -= stepMs;
       steps += 1;
 
       if (this.sim.state.status === 'timeout') {
+        this.noteFailure('timeout');
         this.doRewind();
         break;
       }
     }
 
+    if (this.sim.isPreviewing() && this.sim.state.timeMs >= this.previewEndsAtMs) {
+      this.stopPreview();
+    }
+
+    this.checkRunEnd(this.sim.state.status);
     this.render();
+  }
+
+  private togglePreview(): void {
+    if (this.sim.isPreviewing()) {
+      this.stopPreview();
+      return;
+    }
+    if (this.sim.state.status !== 'playing' || this.paused || this.resultOpen) return;
+    if (!this.sim.startPreview()) return;
+    this.previewEndsAtMs = this.sim.getPreviewLengthMs();
+    this.accumulator = 0;
+    this.joystickVector = { x: 0, y: 0 };
+    this.cameras.main.flash(140, 91, 192, 235);
+  }
+
+  private stopPreview(): void {
+    if (!this.sim.stopPreview()) return;
+    this.accumulator = 0;
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
+    this.cameras.main.flash(120, 233, 196, 106);
   }
 
   private readInput(): SimInput {
@@ -267,40 +410,261 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private doRewind(): void {
+    if (this.sim.isPreviewing()) {
+      this.stopPreview();
+      return;
+    }
     const result = this.sim.rewind();
     if (!result.ok) {
       if (result.reason === 'max-echoes') {
+        this.noteFailure('max-echoes');
         this.sim.reset();
         this.cameras.main.flash(140, 230, 57, 70);
+        this.lastStatus = 'playing';
+        this.wonHandled = false;
       }
       return;
     }
     this.cameras.main.flash(120, 91, 192, 235);
     this.cameras.main.shake(90, 0.003);
     this.accumulator = 0;
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
   }
 
   private loadVault(index: number): void {
     const vault = this.playableVaults[index] ?? this.playableVaults[0];
     if (!vault) return;
+    this.loadVaultDef(vault, this.playableVaults.indexOf(vault), false);
+  }
+
+  private loadVaultDef(vault: VaultDef, index: number, daily: boolean): void {
+    this.currentIndex = index;
+    this.isDaily = daily;
     this.vault = vault;
     this.sim = new HeistSim(vault);
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
     this.whistleRequested = false;
     this.dashRequested = false;
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
+    this.failureStreak = 0;
+    this.previewEndsAtMs = 0;
+    this.alarmCount = 0;
+  }
+
+  private startDaily(): void {
+    if (!this.daily) return;
+    this.loadVaultDef(this.daily.vault, -1, true);
+    recordAttempt(this.progress, this.daily.vault.id);
+    this.resultOpen = false;
+    this.paused = false;
+    this.ui.hideMenu();
+    this.ui.hideResult();
+    this.ui.hideLeaderboard();
+    this.ui.setMenuButtonVisible(true);
+  }
+
+  private dailySummary(): DailySummary | undefined {
+    const plan = this.daily;
+    if (!plan) return undefined;
+    const record = this.progress.vaults[plan.vault.id];
+    return {
+      date: plan.date,
+      vaultName: plan.vault.name.replace(/^Daily · /, ''),
+      modifierName: plan.modifier.name,
+      modifierDescription: plan.modifier.description,
+      completed: record?.completed ?? false,
+      bestTimeMs: record?.bestTimeMs ?? 0,
+      bestRank: record?.bestRank ?? 'C',
+    };
+  }
+
+  private openLeaderboard(): void {
+    if (!this.daily) return;
+    this.ui.showLeaderboard({
+      date: this.daily.date,
+      playerId: this.playerId,
+      nickname: this.nickname,
+      entries: [],
+      playerRank: null,
+      status: 'loading',
+    });
+    void this.loadLeaderboard();
+  }
+
+  private async loadLeaderboard(): Promise<void> {
+    if (!this.daily) return;
+    const response = await fetchLeaderboard(this.daily.date, this.playerId);
+    this.ui.showLeaderboard({
+      date: this.daily.date,
+      playerId: this.playerId,
+      nickname: this.nickname,
+      entries: response?.entries ?? [],
+      playerRank: response?.playerRank ?? null,
+      status: response ? 'ready' : 'offline',
+    });
+  }
+
+  private async updateNickname(nickname: string): Promise<void> {
+    this.nickname = nickname;
+    const saved = await saveNickname(this.playerId, nickname);
+    if (!saved) {
+      this.ui.setLeaderboardNote('Saved on this device · leaderboard offline.');
+      return;
+    }
+    await this.loadLeaderboard();
+  }
+
+  private startVault(index: number): void {
+    const vault = this.playableVaults[index];
+    if (!vault) return;
+    this.loadVault(index);
+    recordAttempt(this.progress, vault.id);
+    this.resultOpen = false;
+    this.paused = false;
+    this.ui.hideMenu();
+    this.ui.hideResult();
+    this.ui.hideLeaderboard();
+    this.ui.setMenuButtonVisible(true);
+  }
+
+  private openMenu(): void {
+    const today = utcDate();
+    if (today !== this.dailyDate) {
+      this.dailyDate = today;
+      this.daily = dailyPlan(today, this.playableVaults);
+    }
+    this.paused = true;
+    this.resultOpen = false;
+    this.ui.hideLeaderboard();
+    this.ui.hideResult();
+    this.ui.showMenu(this.playableVaults, this.progress, this.dailySummary());
+  }
+
+  private closeMenu(): void {
+    this.ui.hideMenu();
+    this.ui.setMenuButtonVisible(true);
+    this.paused = this.sim.state.status === 'won';
+    if (this.sim.state.status === 'won') {
+      this.openMenu();
+    }
+  }
+
+  private handleResetProgress(): void {
+    if (!window.confirm('Erase all best times and ranks?')) return;
+    this.progress = resetProgress();
+    this.ui.showMenu(this.playableVaults, this.progress, this.dailySummary());
+  }
+
+  private noteFailure(reason: 'alarm' | 'timeout' | 'max-echoes'): void {
+    if (reason === 'alarm') this.alarmCount += 1;
+    this.failureStreak += 1;
+    if (this.failureStreak === 2 && this.vault.hints[0]) {
+      this.ui.showHint(this.vault.hints[0]);
+    } else if (this.failureStreak === 4 && this.vault.hints[1]) {
+      this.ui.showHint(this.vault.hints[1]);
+    }
+  }
+
+  private checkRunEnd(status: string): void {
+    if (status === 'alarm' && this.lastStatus !== 'alarm') {
+      this.noteFailure('alarm');
+    }
+    if (status === 'won' && !this.wonHandled) {
+      this.wonHandled = true;
+      this.handleWin();
+    }
+    this.lastStatus = status;
+  }
+
+  private handleWin(): void {
+    const resultToken = ++this.resultToken;
+    const timeMs = this.sim.state.timeMs;
+    const echoes = this.sim.state.tracks.length;
+    const record = recordResult(
+      this.progress,
+      this.vault.id,
+      timeMs,
+      echoes,
+      this.vault.parEchoes,
+    );
+    this.resultOpen = true;
+    this.paused = true;
+    this.ui.setMenuButtonVisible(false);
+    const payload = {
+      vault: this.vault,
+      index: this.currentIndex,
+      timeMs,
+      echoes,
+      rank: record.rank,
+      isBest: record.isBest,
+      best: record.best,
+      hasNext: !this.isDaily && this.currentIndex < this.playableVaults.length - 1,
+    };
+    this.time.delayedCall(550, () => {
+      this.ui.showResult(payload, record.rank.toLowerCase());
+      this.ui.setResultNote(
+        this.isDaily ? 'VERIFYING DAILY RUN…' : 'BEST SAVED LOCALLY',
+      );
+    });
+
+    if (this.isDaily) void this.submitDailyRun(resultToken);
+  }
+
+  private async submitDailyRun(resultToken: number): Promise<void> {
+    if (!this.daily) return;
+    const submission = this.sim.getSubmission();
+    const response = await submitRun({
+      dailyId: this.daily.date,
+      playerId: this.playerId,
+      vaultId: this.daily.baseVault.id,
+      echoes: submission.echoes,
+      timeMs: submission.timeMs,
+      alarms: this.alarmCount,
+      tracks: submission.tracks,
+    });
+
+    if (resultToken !== this.resultToken) return;
+    if (response?.ok) {
+      this.ui.setResultNote(
+        `VERIFIED · RANK #${response.rank ?? '—'} OF TODAY'S CREW`,
+      );
+      return;
+    }
+    if (response && !response.ok) {
+      this.ui.setResultNote(`NOT RANKED · ${response.error.replace(/-/g, ' ').toUpperCase()}`);
+      return;
+    }
+    this.ui.setResultNote('OFFLINE · BEST SAVED LOCALLY');
   }
 
   private doUndo(): void {
+    if (this.sim.isPreviewing()) {
+      this.stopPreview();
+      return;
+    }
     this.sim.undoEcho();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
   }
 
   private doReset(): void {
+    if (this.sim.isPreviewing()) this.stopPreview();
     this.sim.reset();
     this.accumulator = 0;
     this.joystickVector = { x: 0, y: 0 };
+    this.lastStatus = 'playing';
+    this.wonHandled = false;
+    this.failureStreak = 0;
+    this.alarmCount = 0;
+    this.resultOpen = false;
+    this.paused = false;
+    this.ui.hideResult();
+    this.ui.setMenuButtonVisible(true);
   }
 
   private inRect(pointer: Phaser.Input.Pointer, rect: { x: number; y: number; w: number; h: number }): boolean {
@@ -420,15 +784,18 @@ class PrototypeScene extends Phaser.Scene {
       this.drawGhost(g, ghost);
     }
 
+    const previewing = this.sim.isPreviewing();
     const player = state.player;
-    g.fillStyle(COLORS.ghost, 0.22);
-    g.fillCircle(BOARD_X + player.x, BOARD_Y + player.y, 15);
-    g.fillStyle(COLORS.bone, 1);
-    g.fillCircle(BOARD_X + player.x, BOARD_Y + player.y, 10);
-    g.lineStyle(2, COLORS.ghost, 1);
-    g.strokeCircle(BOARD_X + player.x, BOARD_Y + player.y, 10);
-    if (player.carryingGem) {
-      this.drawGemShape(g, BOARD_X + player.x, BOARD_Y + player.y - 18, 8);
+    if (!previewing) {
+      g.fillStyle(COLORS.ghost, 0.22);
+      g.fillCircle(BOARD_X + player.x, BOARD_Y + player.y, 15);
+      g.fillStyle(COLORS.bone, 1);
+      g.fillCircle(BOARD_X + player.x, BOARD_Y + player.y, 10);
+      g.lineStyle(2, COLORS.ghost, 1);
+      g.strokeCircle(BOARD_X + player.x, BOARD_Y + player.y, 10);
+      if (player.carryingGem) {
+        this.drawGemShape(g, BOARD_X + player.x, BOARD_Y + player.y - 18, 8);
+      }
     }
 
     if (this.joystickPointerId !== null) {
@@ -441,6 +808,8 @@ class PrototypeScene extends Phaser.Scene {
         12,
       );
     }
+
+    this.drawEchoTimeline(g);
 
     g.fillStyle(COLORS.ink, 1);
     g.fillRoundedRect(REWIND.x, REWIND.y, REWIND.w, REWIND.h, 8);
@@ -468,27 +837,73 @@ class PrototypeScene extends Phaser.Scene {
 
     const remaining = Math.max(0, state.loopMs - state.timeMs) / 1000;
     this.hudText.setText(`${remaining.toFixed(1)}s   ${state.status.toUpperCase()}`);
+    const tapeSummary = state.tracks
+      .map((track) => `${(track.durationMs / 1000).toFixed(1)}s`)
+      .join(' + ');
     this.echoText.setText(
-      `ECHOES ${state.tracks.length}/${state.maxEchoes}   PAR ${this.vault.parEchoes}   ${this.vault.name.toUpperCase()}`,
+      `ECHOES ${state.tracks.length}/${state.maxEchoes}   PAR ${this.vault.parEchoes}   ${this.vault.name.toUpperCase()}${tapeSummary ? `   ${tapeSummary}` : ''}`,
     );
     this.statusText.setText(
-      state.status === 'won'
-        ? 'HEIST COMPLETE · BACKSPACE TO RESET'
-        : state.status === 'alarm'
-          ? 'CAUGHT · R TO REWIND'
-          : state.status === 'timeout'
-            ? 'REWINDING...'
-            : '',
+      previewing
+        ? 'PREVIEW 2x · P TO STOP'
+        : state.status === 'won'
+          ? 'HEIST COMPLETE · BACKSPACE TO RESET'
+          : state.status === 'alarm'
+            ? 'CAUGHT · R TO REWIND'
+            : state.status === 'timeout'
+              ? 'REWINDING...'
+              : '',
     );
     this.helpText.setText(
-      state.status === 'won'
-        ? 'THE CREW WAS YOU'
-        : 'DRAG · ACT · DASH · REWIND · UNDO · 1-8',
+      previewing
+        ? 'THE CREW, WITHOUT YOU'
+        : state.status === 'won'
+          ? 'THE CREW WAS YOU'
+          : 'DRAG · ACT · DASH · REWIND · P PREVIEW · 1-0',
     );
-    this.rewindText.setColor(state.status === 'won' ? '#3A506B' : '#F4F1DE');
-    this.whistleText.setColor(state.status === 'won' || state.status === 'alarm' ? '#3A506B' : '#F4F1DE');
-    this.dashText.setColor(state.status === 'won' || state.status === 'alarm' ? '#3A506B' : '#F4F1DE');
-    this.undoText.setColor(state.tracks.length === 0 ? '#3A506B' : '#F4F1DE');
+    this.rewindText.setColor(state.status === 'won' || previewing ? '#3A506B' : '#F4F1DE');
+    this.whistleText.setColor(
+      state.status === 'won' || state.status === 'alarm' || previewing ? '#3A506B' : '#F4F1DE',
+    );
+    this.dashText.setColor(
+      state.status === 'won' || state.status === 'alarm' || previewing ? '#3A506B' : '#F4F1DE',
+    );
+    this.undoText.setColor(
+      state.tracks.length === 0 || previewing ? '#3A506B' : '#F4F1DE',
+    );
+    this.ui.setPreviewState(
+      state.tracks.length > 0 &&
+        state.status === 'playing' &&
+        !this.paused &&
+        !this.resultOpen,
+      previewing,
+    );
+  }
+
+  private drawEchoTimeline(g: Phaser.GameObjects.Graphics): void {
+    const state = this.sim.state;
+    const x = 24;
+    const y = 54;
+    const width = 312;
+
+    g.fillStyle(COLORS.slate, 0.35);
+    g.fillRect(x, y, width, 4);
+    g.lineStyle(1, COLORS.slate, 0.25);
+    g.strokeRect(x - 0.5, y - 0.5, width + 1, 5);
+
+    if (state.loopMs <= 0) return;
+    let cursor = 0;
+    for (const track of state.tracks) {
+      const segment = Math.max(2, (track.durationMs / state.loopMs) * width);
+      g.fillStyle(track.color, 0.9);
+      g.fillRect(x + cursor, y, Math.min(segment, width - cursor), 4);
+      cursor += segment;
+      if (cursor >= width) break;
+    }
+
+    const progress = Math.min(1, state.timeMs / state.loopMs);
+    g.fillStyle(COLORS.bone, 0.85);
+    g.fillRect(x + progress * width - 1, y - 3, 2, 10);
   }
 
   private drawGemShape(g: Phaser.GameObjects.Graphics, x: number, y: number, size: number): void {
@@ -522,18 +937,20 @@ class PrototypeScene extends Phaser.Scene {
     const half = (camera.fovDeg * Math.PI) / 360;
     const color = camera.disabled ? COLORS.slate : COLORS.alarm;
 
-    g.fillStyle(color, camera.disabled ? 0.03 : 0.08);
-    g.fillTriangle(
-      x,
-      y,
-      x + Math.cos(camera.angle - half) * camera.range,
-      y + Math.sin(camera.angle - half) * camera.range,
-      x + Math.cos(camera.angle + half) * camera.range,
-      y + Math.sin(camera.angle + half) * camera.range,
-    );
-    g.lineStyle(1, color, camera.disabled ? 0.15 : 0.35);
-    g.lineBetween(x, y, x + Math.cos(camera.angle - half) * camera.range, y + Math.sin(camera.angle - half) * camera.range);
-    g.lineBetween(x, y, x + Math.cos(camera.angle + half) * camera.range, y + Math.sin(camera.angle + half) * camera.range);
+    if (!this.vault.fog) {
+      g.fillStyle(color, camera.disabled ? 0.03 : 0.08);
+      g.fillTriangle(
+        x,
+        y,
+        x + Math.cos(camera.angle - half) * camera.range,
+        y + Math.sin(camera.angle - half) * camera.range,
+        x + Math.cos(camera.angle + half) * camera.range,
+        y + Math.sin(camera.angle + half) * camera.range,
+      );
+      g.lineStyle(1, color, camera.disabled ? 0.15 : 0.35);
+      g.lineBetween(x, y, x + Math.cos(camera.angle - half) * camera.range, y + Math.sin(camera.angle - half) * camera.range);
+      g.lineBetween(x, y, x + Math.cos(camera.angle + half) * camera.range, y + Math.sin(camera.angle + half) * camera.range);
+    }
 
     g.fillStyle(color, 0.9);
     g.fillRect(x - 8, y - 8, 16, 16);
@@ -592,18 +1009,20 @@ class PrototypeScene extends Phaser.Scene {
             ? 0xc77dff
             : COLORS.gold;
 
-    g.fillStyle(color, guard.mode === 'follow' ? 0.1 : 0.07);
-    g.fillTriangle(
-      x,
-      y,
-      x + Math.cos(angle - half) * range,
-      y + Math.sin(angle - half) * range,
-      x + Math.cos(angle + half) * range,
-      y + Math.sin(angle + half) * range,
-    );
-    g.lineStyle(1, color, 0.18);
-    g.lineBetween(x, y, x + Math.cos(angle - half) * range, y + Math.sin(angle - half) * range);
-    g.lineBetween(x, y, x + Math.cos(angle + half) * range, y + Math.sin(angle + half) * range);
+    if (!this.vault.fog) {
+      g.fillStyle(color, guard.mode === 'follow' ? 0.1 : 0.07);
+      g.fillTriangle(
+        x,
+        y,
+        x + Math.cos(angle - half) * range,
+        y + Math.sin(angle - half) * range,
+        x + Math.cos(angle + half) * range,
+        y + Math.sin(angle + half) * range,
+      );
+      g.lineStyle(1, color, 0.18);
+      g.lineBetween(x, y, x + Math.cos(angle - half) * range, y + Math.sin(angle - half) * range);
+      g.lineBetween(x, y, x + Math.cos(angle + half) * range, y + Math.sin(angle + half) * range);
+    }
 
     g.fillStyle(color, 0.9);
     g.fillCircle(x, y, 10);

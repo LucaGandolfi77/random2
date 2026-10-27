@@ -115,6 +115,8 @@ export type VaultDef = {
   lasers: LaserDef[];
   gem?: GemDef;
   requiresGem: boolean;
+  dashEnabled?: boolean;
+  fog?: boolean;
   hints: string[];
 };
 

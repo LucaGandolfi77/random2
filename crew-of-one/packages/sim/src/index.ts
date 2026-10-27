@@ -4,3 +4,4 @@ export * from './collision';
 export * from './sim';
 export * from './validation';
 export * from './replay';
+export * from './modifiers';
