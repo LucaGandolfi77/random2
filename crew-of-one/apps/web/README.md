@@ -15,10 +15,12 @@ pnpm --filter @crew-of-one/web dev
 - `U` or UNDO to remove the newest echo.
 - `P` or ▶ CREW to preview the recorded crew at 2×.
 - `Backspace` or the top-right RESET label to reset the heist.
-- `1`–`0` load vaults 1–10 directly for debugging.
+- `1`–`0` load vaults 1–10 directly for debugging; vaults 11–15 are in the level select.
 - **LEFT-HANDED** in the menu footer mirrors the action bar and persists across sessions.
+- **LARGE TEXT** in the menu footer scales the HUD and menus and persists across sessions.
 - `Esc` opens the heist menu.
 - `♪` in the top bar toggles placeholder sound.
+- **SHARE RUN** on the results screen generates a 1080×1080 PNG card when the browser supports file sharing.
 
 ## Offline / install
 

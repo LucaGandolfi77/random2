@@ -6,7 +6,7 @@
 
 ## Status
 
-**Phase 0 — prototype.** The simulation core, guard AI, solution-tape pipeline, workspace, and product documentation are in place. The current prototype is a ten-vault rectangle slice: plates, doors, guards, noise, cameras, levers, lasers, dash, one-way gates, and gem carrying, each with a verified solution tape, guard-aware headless replay validation, plus a meta shell with level select, saved best runs, ranks, an echo timeline, a 2× ghost-preview playback, and a deterministic daily heist with modifiers, server-verified daily submissions, an offline fallback, a leaderboard with nicknames, placeholder synth feedback, an install prompt, text sharing, a first-run How to Play, and a left-handed control layout.
+**Phase 0 — prototype.** The simulation core, guard AI, solution-tape pipeline, workspace, and product documentation are in place. The current prototype is a fifteen-vault rectangle slice: plates, doors, guards, noise, cameras, levers, lasers, dash, one-way gates, and gem carrying, each with a verified solution tape, guard-aware headless replay validation, plus a meta shell with level select, saved best runs, ranks, an echo timeline, a 2× ghost-preview playback, and a deterministic daily heist with modifiers, server-verified daily submissions, an offline fallback, a leaderboard with nicknames, placeholder synth feedback, an install prompt, generated share images, a first-run How to Play, and a left-handed control layout, large text, daily streaks with a seven-day strip, and stronger colorblind cues.
 
 ## What this is
 

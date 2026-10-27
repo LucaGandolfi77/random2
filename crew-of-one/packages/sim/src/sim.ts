@@ -95,8 +95,8 @@ export class HeistSim {
     }
     this.updateGhosts(nowMs);
     this.updateGemPosition();
-    this.updatePlatesAndDoors();
     this.updateLevers(nowMs);
+    this.updatePlatesAndDoors();
     this.updateLasers(nowMs);
     this.checkWin();
     this.updateGuards(nowMs);
@@ -299,6 +299,7 @@ export class HeistSim {
       waitMs: guard.waitMs,
       speed: guard.speed,
       visionRange: guard.visionRange,
+      baseVisionRange: guard.visionRange,
       visionAngleDeg: guard.visionAngleDeg,
       hearingRadius: guard.hearingRadius,
       suspicion: 0,
@@ -562,8 +563,14 @@ export class HeistSim {
     }
 
     for (const door of this.state.doors) {
-      const targeting = this.state.plates.filter((plate) => plate.targets.includes(door.id));
-      door.open = targeting.length > 0 && targeting.every((plate) => plate.pressed);
+      const plateTargets = this.state.plates.filter((plate) => plate.targets.includes(door.id));
+      const plateOpen = plateTargets.length > 0 && plateTargets.every((plate) => plate.pressed);
+      const leverTargets = this.state.levers.filter((lever) => lever.targetIds.includes(door.id));
+      const leverOpen =
+        door.mode === 'lever' &&
+        leverTargets.length > 0 &&
+        leverTargets.every((lever) => lever.pressed);
+      door.open = plateOpen || leverOpen;
     }
   }
 
@@ -579,6 +586,11 @@ export class HeistSim {
 
     for (const guard of this.state.guards) {
       if (this.state.status !== 'playing') return;
+
+      const blackedOut = this.state.levers.some(
+        (lever) => lever.pressed && lever.targetIds.includes(guard.id),
+      );
+      guard.visionRange = blackedOut ? guard.baseVisionRange * 0.35 : guard.baseVisionRange;
 
       if (guard.mode === 'confused') {
         guard.confusedMs -= dtMs;

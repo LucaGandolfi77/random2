@@ -8,9 +8,16 @@ export type VaultProgress = {
   attempts: number;
 };
 
+export type DailyStreak = {
+  count: number;
+  lastDate: string;
+};
+
 export type SaveData = {
   version: 1;
   vaults: Record<string, VaultProgress>;
+  daily?: DailyStreak;
+  dailyHistory?: string[];
 };
 
 const STORAGE_KEY = 'crew-of-one:progress:v1';
@@ -26,6 +33,12 @@ export const rankFor = (echoes: number, parEchoes: number): Rank => {
 };
 
 const rankValue = (rank: Rank): number => ({ S: 0, A: 1, B: 2, C: 3 })[rank];
+
+const isDailyStreak = (value: unknown): value is DailyStreak => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<DailyStreak>;
+  return typeof candidate.count === 'number' && typeof candidate.lastDate === 'string';
+};
 
 const isVaultProgress = (value: unknown): value is VaultProgress => {
   if (!value || typeof value !== 'object') return false;
@@ -51,7 +64,11 @@ export const loadProgress = (): SaveData => {
     for (const [id, value] of Object.entries(parsed.vaults)) {
       if (isVaultProgress(value)) vaults[id] = value;
     }
-    return { version: 1, vaults };
+    const daily = isDailyStreak(parsed.daily) ? parsed.daily : undefined;
+    const dailyHistory = Array.isArray(parsed.dailyHistory)
+      ? parsed.dailyHistory.filter((date): date is string => typeof date === 'string').slice(-60)
+      : undefined;
+    return { version: 1, vaults, daily, dailyHistory };
   } catch {
     return emptySave();
   }
@@ -121,6 +138,55 @@ export const markIntroSeen = (): void => {
   } catch {
     // The intro can show again if storage is unavailable.
   }
+};
+
+const previousUtcDate = (date: string): string =>
+  new Date(Date.parse(`${date}T00:00:00.000Z`) - 86_400_000).toISOString().slice(0, 10);
+
+export const currentDailyStreak = (data: SaveData, today: string): number => {
+  if (!data.daily) return 0;
+  if (data.daily.lastDate === today) return data.daily.count;
+  if (data.daily.lastDate === previousUtcDate(today)) return data.daily.count;
+  return 0;
+};
+
+export const recordDailyClear = (
+  data: SaveData,
+  date: string,
+): { streak: number; isNew: boolean } => {
+  if (data.daily?.lastDate === date) {
+    return { streak: data.daily.count, isNew: false };
+  }
+  const consecutive = data.daily?.lastDate === previousUtcDate(date);
+  const count = consecutive ? (data.daily?.count ?? 0) + 1 : 1;
+  data.daily = { count, lastDate: date };
+  const history = new Set(data.dailyHistory ?? []);
+  history.add(date);
+  data.dailyHistory = [...history].sort().slice(-60);
+  persist(data);
+  return { streak: count, isNew: true };
+};
+
+export type HistoryCell = {
+  date: string;
+  cleared: boolean;
+  isToday: boolean;
+};
+
+export const recentDailyHistory = (
+  data: SaveData,
+  today: string,
+  days = 7,
+): HistoryCell[] => {
+  const cleared = new Set(data.dailyHistory ?? []);
+  const cells: HistoryCell[] = [];
+  for (let offset = days - 1; offset >= 0; offset -= 1) {
+    const date = new Date(Date.parse(`${today}T00:00:00.000Z`) - offset * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
+    cells.push({ date, cleared: cleared.has(date), isToday: offset === 0 });
+  }
+  return cells;
 };
 
 export const resetProgress = (): SaveData => {

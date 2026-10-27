@@ -13,6 +13,11 @@ Working tools:
 - `record-vault-08-solution.ts` — records the gem-carry solution tape.
 - `record-vault-09-solution.ts` — records the two-guard bait solution tape.
 - `record-vault-10-solution.ts` — records the vault-door finale tape.
+- `record-vault-11-solution.ts` — records the blackout-lever tape.
+- `record-vault-12-solution.ts` — records the relay-lever tape.
+- `record-vault-13-solution.ts` — records the safe-room/vent/gem tape.
+- `record-vault-14-solution.ts` — records the timed-beam tape.
+- `record-vault-15-solution.ts` — records the full-finale tape.
 
 Planned tools:
 
@@ -32,4 +37,9 @@ pnpm exec tsx tools/record-vault-07-solution.ts
 pnpm exec tsx tools/record-vault-08-solution.ts
 pnpm exec tsx tools/record-vault-09-solution.ts
 pnpm exec tsx tools/record-vault-10-solution.ts
+pnpm exec tsx tools/record-vault-11-solution.ts
+pnpm exec tsx tools/record-vault-12-solution.ts
+pnpm exec tsx tools/record-vault-13-solution.ts
+pnpm exec tsx tools/record-vault-14-solution.ts
+pnpm exec tsx tools/record-vault-15-solution.ts
 ```

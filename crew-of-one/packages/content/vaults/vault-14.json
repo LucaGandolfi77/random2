@@ -1,0 +1,74 @@
+{
+  "id": "vault-14",
+  "name": "The Long Count",
+  "chapter": 3,
+  "loopSeconds": 30,
+  "maxEchoes": 3,
+  "parEchoes": 2,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 160, "y": 448 },
+  "exit": { "x": 160, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 32, "y": 128, "w": 96, "h": 32 },
+    { "x": 192, "y": 128, "w": 96, "h": 32 }
+  ],
+  "plates": [
+    {
+      "id": "plate-count",
+      "x": 256,
+      "y": 432,
+      "radius": 22,
+      "mode": "hold",
+      "targets": ["door-count"]
+    }
+  ],
+  "doors": [
+    { "id": "door-count", "x": 128, "y": 128, "w": 64, "h": 32, "mode": "plate" }
+  ],
+  "guards": [],
+  "cameras": [],
+  "levers": [
+    {
+      "id": "lever-lower",
+      "x": 64,
+      "y": 432,
+      "radius": 22,
+      "mode": "hold",
+      "targetIds": ["laser-lower"]
+    }
+  ],
+  "lasers": [
+    {
+      "id": "laser-lower",
+      "x1": 32,
+      "y1": 360,
+      "x2": 288,
+      "y2": 360,
+      "onMs": 900,
+      "offMs": 250,
+      "phaseMs": 0
+    },
+    {
+      "id": "laser-upper",
+      "x1": 32,
+      "y1": 300,
+      "x2": 288,
+      "y2": 300,
+      "onMs": 700,
+      "offMs": 700,
+      "phaseMs": 0
+    }
+  ],
+  "gem": { "x": 160, "y": 80, "radius": 12 },
+  "requiresGem": false,
+  "hints": [
+    "One beam can be switched off. The other has to be counted.",
+    "Hold the lower beam down with an echo, then dash through the upper window."
+  ]
+}

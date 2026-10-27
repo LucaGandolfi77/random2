@@ -1,5 +1,6 @@
 import type { VaultDef } from '@crew-of-one/sim';
 import type { LeaderboardEntry } from '@crew-of-one/shared';
+import type { HistoryCell } from './progress';
 import {
   formatTime,
   type VaultProgress,
@@ -16,6 +17,8 @@ export type DailySummary = {
   completed: boolean;
   bestTimeMs: number;
   bestRank: string;
+  streak: number;
+  history: HistoryCell[];
 };
 
 export type LeaderboardView = {
@@ -36,6 +39,7 @@ export type ResultPayload = {
   isBest: boolean;
   best: VaultProgress;
   hasNext: boolean;
+  final?: boolean;
 };
 
 type Callbacks = {
@@ -56,6 +60,7 @@ type Callbacks = {
   onOpenHowTo: () => void;
   onCloseHowTo: () => void;
   onToggleHandedness: () => void;
+  onToggleTextSize: () => void;
   onResetProgress: () => void;
 };
 
@@ -77,6 +82,8 @@ export class MetaUI {
   private readonly summary: HTMLElement;
   private readonly dailySlot: HTMLElement;
   private readonly result: HTMLElement;
+  private readonly resultCard: HTMLElement;
+  private readonly resultKicker: HTMLElement;
   private readonly resultRank: HTMLElement;
   private readonly resultName: HTMLElement;
   private readonly resultStats: HTMLElement;
@@ -94,6 +101,7 @@ export class MetaUI {
   private readonly previewButton: HTMLButtonElement;
   private readonly installButton: HTMLButtonElement;
   private readonly handednessButton: HTMLButtonElement;
+  private readonly textSizeButton: HTMLButtonElement;
   private readonly soundButton: HTMLButtonElement;
   private previewAvailable = false;
   private previewActive = false;
@@ -154,7 +162,7 @@ export class MetaUI {
     this.dailySlot = el('div', 'daily-slot');
     menuInner.appendChild(this.dailySlot);
 
-    this.grid = el('div', 'vault-grid');
+    this.grid = el('div', 'vault-sections');
     menuInner.appendChild(this.grid);
 
     const foot = el('div', 'menu-foot');
@@ -167,6 +175,10 @@ export class MetaUI {
     this.handednessButton.type = 'button';
     this.handednessButton.addEventListener('click', () => this.callbacks.onToggleHandedness());
     footActions.appendChild(this.handednessButton);
+    this.textSizeButton = el('button', 'link-button link-button--text', 'LARGE TEXT');
+    this.textSizeButton.type = 'button';
+    this.textSizeButton.addEventListener('click', () => this.callbacks.onToggleTextSize());
+    footActions.appendChild(this.textSizeButton);
     this.installButton = el('button', 'link-button link-button--install', 'INSTALL APP');
     this.installButton.type = 'button';
     this.installButton.hidden = true;
@@ -183,11 +195,13 @@ export class MetaUI {
 
     this.result = el('div', 'screen screen--result');
     this.result.hidden = true;
-    const resultCard = el('div', 'result-card');
+    this.resultCard = el('div', 'result-card');
+    const resultCard = this.resultCard;
     this.result.appendChild(resultCard);
     layer.appendChild(this.result);
 
-    resultCard.appendChild(el('div', 'result-kicker', 'HEIST COMPLETE'));
+    this.resultKicker = el('div', 'result-kicker', 'HEIST COMPLETE');
+    resultCard.appendChild(this.resultKicker);
     this.resultRank = el('div', 'result-rank');
     resultCard.appendChild(this.resultRank);
     this.resultName = el('div', 'result-name');
@@ -328,6 +342,11 @@ export class MetaUI {
     this.handednessButton.classList.toggle('link-button--active', left);
   }
 
+  setLargeText(large: boolean): void {
+    this.textSizeButton.textContent = large ? 'LARGE TEXT: ON' : 'LARGE TEXT';
+    this.textSizeButton.classList.toggle('link-button--active', large);
+  }
+
   setPreviewState(available: boolean, active: boolean): void {
     if (available === this.previewAvailable && active === this.previewActive) return;
     this.previewAvailable = available;
@@ -365,9 +384,11 @@ export class MetaUI {
     this.menuButton.hidden = true;
     this.previewButton.hidden = true;
     this.soundButton.hidden = true;
+    this.resultCard.classList.toggle('result-card--final', payload.final === true);
+    this.resultKicker.textContent = payload.final ? 'CAMPAIGN COMPLETE' : 'HEIST COMPLETE';
     this.resultRank.textContent = payload.rank;
     this.resultRank.className = `result-rank result-rank--${rankClass}`;
-    this.resultName.textContent = payload.vault.name;
+    this.resultName.textContent = payload.final ? 'After You' : payload.vault.name;
     this.resultStats.replaceChildren(
       this.stat('TIME', formatTime(payload.timeMs)),
       this.stat('ECHOES', `${payload.echoes} / par ${payload.vault.parEchoes}`),
@@ -428,11 +449,27 @@ export class MetaUI {
     const kicker = el('span', 'daily-card__kicker');
     kicker.appendChild(el('span', 'daily-card__label', 'DAILY HEIST'));
     kicker.appendChild(el('span', 'daily-card__date', daily.date));
+    if (daily.streak > 0) {
+      kicker.appendChild(
+        el('span', 'daily-card__streak', `${daily.streak}-DAY STREAK`),
+      );
+    }
 
     const name = el('span', 'daily-card__name', daily.vaultName);
     const modifier = el('span', 'daily-card__modifier');
     modifier.appendChild(el('strong', 'daily-card__modifier-name', daily.modifierName.toUpperCase()));
     modifier.appendChild(el('span', 'daily-card__modifier-text', daily.modifierDescription));
+
+    const history = el('span', 'daily-card__history');
+    for (const cell of daily.history) {
+      const mark = el(
+        'span',
+        `daily-card__day${cell.cleared ? ' daily-card__day--cleared' : ''}${cell.isToday ? ' daily-card__day--today' : ''}`,
+      );
+      mark.title = cell.date;
+      mark.setAttribute('aria-label', `${cell.date}${cell.cleared ? ' cleared' : ''}`);
+      history.appendChild(mark);
+    }
 
     const best = el('span', 'daily-card__best');
     if (daily.completed) {
@@ -442,7 +479,7 @@ export class MetaUI {
       best.appendChild(el('span', 'daily-card__new', 'UNPLAYED'));
     }
 
-    card.append(kicker, name, modifier, best);
+    card.append(kicker, name, modifier, history, best);
     card.addEventListener('click', () => this.callbacks.onStartDaily());
 
     const boardLink = el('button', 'link-button leaderboard-link', "TODAY'S LEADERBOARD");
@@ -522,52 +559,80 @@ export class MetaUI {
       el('span', 'menu-summary__stat', `${ids.length} VAULTS`),
     );
 
-    const cards = vaults.map((vault, index) => {
-      const unlocked = isVaultUnlocked(index, ids, progress);
-      const record = progress.vaults[vault.id];
-      const button = el('button', `vault-card${unlocked ? '' : ' vault-card--locked'}`);
-      button.type = 'button';
-      button.disabled = !unlocked;
-      button.setAttribute(
-        'aria-label',
-        unlocked
-          ? `Start ${vault.name}, par ${vault.parEchoes} echoes`
-          : `${vault.name} is locked`,
-      );
+    const chapterNames: Record<number, string> = {
+      1: 'THE PROLOGUE',
+      2: 'THE CREW',
+      3: 'AFTER YOU',
+    };
+    const groups = new Map<number, VaultDef[]>();
+    for (const vault of vaults) {
+      const group = groups.get(vault.chapter) ?? [];
+      group.push(vault);
+      groups.set(vault.chapter, group);
+    }
 
-      const number = el('span', 'vault-card__num', String(index + 1).padStart(2, '0'));
-      const info = el('span', 'vault-card__info');
-      info.appendChild(el('span', 'vault-card__name', vault.name));
-      info.appendChild(
+    const sections = [...groups.entries()].map(([chapter, group]) => {
+      const section = el('section', 'vault-chapter');
+      section.appendChild(
         el(
-          'span',
-          'vault-card__sub',
-          unlocked
-            ? `CHAPTER ${vault.chapter} · PAR ${vault.parEchoes} ECHO${vault.parEchoes === 1 ? '' : 'ES'}`
-            : 'LOCKED · CLEAR THE PREVIOUS HEIST',
+          'div',
+          'vault-chapter__title',
+          `CHAPTER ${chapter} · ${chapterNames[chapter] ?? 'VAULTS'}`,
         ),
       );
+      const grid = el('div', 'vault-grid');
 
-      const best = el('span', 'vault-card__best');
-      if (!unlocked) {
-        best.appendChild(el('span', 'vault-card__lock', '🔒'));
-      } else if (record?.completed) {
-        best.appendChild(
-          el('span', `rank rank--${record.bestRank}`, record.bestRank),
+      for (const vault of group) {
+        const index = vaults.indexOf(vault);
+        const unlocked = isVaultUnlocked(index, ids, progress);
+        const record = progress.vaults[vault.id];
+        const button = el('button', `vault-card${unlocked ? '' : ' vault-card--locked'}`);
+        button.type = 'button';
+        button.disabled = !unlocked;
+        button.setAttribute(
+          'aria-label',
+          unlocked
+            ? `Start ${vault.name}, par ${vault.parEchoes} echoes`
+            : `${vault.name} is locked`,
         );
-        best.appendChild(el('span', 'vault-card__time', formatTime(record.bestTimeMs)));
-      } else {
-        best.appendChild(el('span', 'vault-card__new', 'NEW'));
+
+        const number = el('span', 'vault-card__num', String(index + 1).padStart(2, '0'));
+        const info = el('span', 'vault-card__info');
+        info.appendChild(el('span', 'vault-card__name', vault.name));
+        info.appendChild(
+          el(
+            'span',
+            'vault-card__sub',
+            unlocked
+              ? `CHAPTER ${vault.chapter} · PAR ${vault.parEchoes} ECHO${vault.parEchoes === 1 ? '' : 'ES'}`
+              : 'LOCKED · CLEAR THE PREVIOUS HEIST',
+          ),
+        );
+
+        const best = el('span', 'vault-card__best');
+        if (!unlocked) {
+          best.appendChild(el('span', 'vault-card__lock', '🔒'));
+        } else if (record?.completed) {
+          best.appendChild(
+            el('span', `rank rank--${record.bestRank}`, record.bestRank),
+          );
+          best.appendChild(el('span', 'vault-card__time', formatTime(record.bestTimeMs)));
+        } else {
+          best.appendChild(el('span', 'vault-card__new', 'NEW'));
+        }
+
+        button.append(number, info, best);
+        button.addEventListener('click', () => {
+          if (!unlocked) return;
+          this.callbacks.onStart(index);
+        });
+        grid.appendChild(button);
       }
 
-      button.append(number, info, best);
-      button.addEventListener('click', () => {
-        if (!unlocked) return;
-        this.callbacks.onStart(index);
-      });
-      return button;
+      section.appendChild(grid);
+      return section;
     });
 
-    this.grid.replaceChildren(...cards);
+    this.grid.replaceChildren(...sections);
   }
 }

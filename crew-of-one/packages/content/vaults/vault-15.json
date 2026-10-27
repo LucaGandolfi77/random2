@@ -1,0 +1,107 @@
+{
+  "id": "vault-15",
+  "name": "After You",
+  "chapter": 3,
+  "loopSeconds": 45,
+  "maxEchoes": 5,
+  "parEchoes": 4,
+  "tilesX": 10,
+  "tilesY": 16,
+  "tileSize": 32,
+  "playerStart": { "x": 160, "y": 448 },
+  "exit": { "x": 160, "y": 80, "radius": 24 },
+  "walls": [
+    { "x": 0, "y": 0, "w": 320, "h": 32 },
+    { "x": 0, "y": 480, "w": 320, "h": 32 },
+    { "x": 0, "y": 0, "w": 32, "h": 512 },
+    { "x": 288, "y": 0, "w": 32, "h": 512 },
+    { "x": 32, "y": 160, "w": 96, "h": 32 },
+    { "x": 128, "y": 160, "w": 32, "h": 160 },
+    { "x": 32, "y": 320, "w": 32, "h": 32 },
+    { "x": 32, "y": 128, "w": 96, "h": 32 },
+    { "x": 192, "y": 128, "w": 96, "h": 32 }
+  ],
+  "plates": [
+    {
+      "id": "plate-safe",
+      "x": 64,
+      "y": 256,
+      "radius": 22,
+      "mode": "hold",
+      "targets": ["door-after"]
+    },
+    {
+      "id": "plate-right",
+      "x": 256,
+      "y": 240,
+      "radius": 22,
+      "mode": "hold",
+      "targets": ["door-after"]
+    }
+  ],
+  "doors": [
+    { "id": "vent", "x": 64, "y": 320, "w": 64, "h": 32, "mode": "oneway", "passDirection": 0 },
+    { "id": "door-after", "x": 128, "y": 128, "w": 64, "h": 32, "mode": "plate" }
+  ],
+  "guards": [
+    {
+      "id": "guard-last",
+      "path": [{ "x": 176, "y": 260 }],
+      "facing": 2,
+      "waitMs": 0,
+      "speed": 46,
+      "visionRange": 160,
+      "visionAngleDeg": 90,
+      "hearingRadius": 120
+    }
+  ],
+  "cameras": [
+    {
+      "id": "camera-last",
+      "x": 160,
+      "y": 240,
+      "facing": 2,
+      "fovDeg": 80,
+      "range": 190,
+      "sweepDeg": 40,
+      "sweepMs": 2600,
+      "phaseMs": 0
+    }
+  ],
+  "levers": [
+    {
+      "id": "lever-camera",
+      "x": 256,
+      "y": 432,
+      "radius": 22,
+      "mode": "hold",
+      "targetIds": ["camera-last"]
+    },
+    {
+      "id": "lever-blackout",
+      "x": 64,
+      "y": 448,
+      "radius": 22,
+      "mode": "hold",
+      "targetIds": ["guard-last"]
+    }
+  ],
+  "lasers": [
+    {
+      "id": "laser-last",
+      "x1": 32,
+      "y1": 380,
+      "x2": 288,
+      "y2": 380,
+      "onMs": 800,
+      "offMs": 400,
+      "phaseMs": 0
+    }
+  ],
+  "gem": { "x": 160, "y": 416, "radius": 14 },
+  "requiresGem": true,
+  "hints": [
+    "Everyone has a job: two plates, the camera, the lights.",
+    "Then it is just you, the gem, and one last beam. Count it."
+  ]
+}
