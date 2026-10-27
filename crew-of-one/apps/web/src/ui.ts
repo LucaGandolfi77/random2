@@ -39,6 +39,7 @@ export type ResultPayload = {
   isBest: boolean;
   best: VaultProgress;
   hasNext: boolean;
+  final?: boolean;
 };
 
 type Callbacks = {
@@ -81,6 +82,8 @@ export class MetaUI {
   private readonly summary: HTMLElement;
   private readonly dailySlot: HTMLElement;
   private readonly result: HTMLElement;
+  private readonly resultCard: HTMLElement;
+  private readonly resultKicker: HTMLElement;
   private readonly resultRank: HTMLElement;
   private readonly resultName: HTMLElement;
   private readonly resultStats: HTMLElement;
@@ -192,11 +195,13 @@ export class MetaUI {
 
     this.result = el('div', 'screen screen--result');
     this.result.hidden = true;
-    const resultCard = el('div', 'result-card');
+    this.resultCard = el('div', 'result-card');
+    const resultCard = this.resultCard;
     this.result.appendChild(resultCard);
     layer.appendChild(this.result);
 
-    resultCard.appendChild(el('div', 'result-kicker', 'HEIST COMPLETE'));
+    this.resultKicker = el('div', 'result-kicker', 'HEIST COMPLETE');
+    resultCard.appendChild(this.resultKicker);
     this.resultRank = el('div', 'result-rank');
     resultCard.appendChild(this.resultRank);
     this.resultName = el('div', 'result-name');
@@ -379,9 +384,11 @@ export class MetaUI {
     this.menuButton.hidden = true;
     this.previewButton.hidden = true;
     this.soundButton.hidden = true;
+    this.resultCard.classList.toggle('result-card--final', payload.final === true);
+    this.resultKicker.textContent = payload.final ? 'CAMPAIGN COMPLETE' : 'HEIST COMPLETE';
     this.resultRank.textContent = payload.rank;
     this.resultRank.className = `result-rank result-rank--${rankClass}`;
-    this.resultName.textContent = payload.vault.name;
+    this.resultName.textContent = payload.final ? 'After You' : payload.vault.name;
     this.resultStats.replaceChildren(
       this.stat('TIME', formatTime(payload.timeMs)),
       this.stat('ECHOES', `${payload.echoes} / par ${payload.vault.parEchoes}`),

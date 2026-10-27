@@ -628,6 +628,15 @@ body {
   place-items: center;
 }
 
+.result-card--final {
+  border-color: rgba(233, 196, 106, 0.85);
+  box-shadow: 0 0 0 1px rgba(233, 196, 106, 0.25), 0 24px 70px rgba(233, 196, 106, 0.18);
+}
+
+.result-card--final .result-kicker {
+  color: #e9c46a;
+}
+
 .result-card {
   width: min(360px, 100%);
   border: 1px solid rgba(233, 196, 106, 0.35);

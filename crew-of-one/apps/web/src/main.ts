@@ -755,6 +755,8 @@ class PrototypeScene extends Phaser.Scene {
       isBest: record.isBest,
       best: record.best,
       hasNext: !this.isDaily && this.currentIndex < this.playableVaults.length - 1,
+      final:
+        !this.isDaily && this.currentIndex === this.playableVaults.length - 1,
     };
     this.time.delayedCall(550, () => {
       this.ui.showResult(payload, record.rank.toLowerCase());
@@ -763,7 +765,9 @@ class PrototypeScene extends Phaser.Scene {
           ? dailyClear && dailyClear.streak > 1
             ? `${dailyClear.streak}-DAY STREAK · VERIFYING RUN…`
             : 'VERIFYING DAILY RUN…'
-          : 'BEST SAVED LOCALLY',
+          : payload.final
+            ? 'THE CREW WAS YOU'
+            : 'BEST SAVED LOCALLY',
       );
     });
 
