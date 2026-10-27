@@ -5,7 +5,7 @@
 - Pure TypeScript sim with fixed timestep, circle/AABB movement, plates, doors, ghosts, rewind, undo, reset.
 - Guard AI: patrol paths, vision cones with line-of-sight, suspicion, alarms, noise investigation, echo following, and confused pauses.
 - Whistle/noise events recorded into echo tapes and replayed by ghosts.
-- Headless replay validator (`replayTracks`) used by tests and the Worker.
+- Headless replay validator (`replayTracks`) used by tests and the Worker. It now simulates guards, cameras, levers, doors, plates, lasers, gems, walls, and the exit.
 - Solution-tape pipeline: `vault-01` through `vault-10` ship with verified tapes, checked by CI and `pnpm validate:vaults`.
 - Vault content: “The Gallery” (plate/door), “The Night Watch” (guard/echo decoy), “Two Hands” (two plates, two echoes), “The Whistle” (echo whistles to pull a guard off his post), “The Archive” (camera + hold lever), “Red Lines” (dash through timed lasers), “The Long Way” (one-way gate), “The Handoff” (gem carry with two plate echoes), “Double Watch” (two guards, two baits), and “The Vault Door” (two plates + camera lever finale).
 - Phaser rectangle prototype: drag to move, E/ACT, Shift or Space/DASH, R/REWIND, U/UNDO, Backspace/RESET, 1–0 for the vaults.
@@ -42,9 +42,8 @@ The guard sandbox and “The Night Watch” prove the second: a guard who sees a
 
 ## Next implementation tasks
 
-1. Add guard simulation to `replayTracks` so guard-critical vaults (2, 4, 9) are validated server-side.
-2. Add a ghost-preview playback: play the whole crew choreography at 2× without the player.
-3. Replace rectangle rendering with the pixel-art kit for one vault (vertical slice).
-4. Wire the web app to the Worker so the daily plan and leaderboard are server-owned.
-5. Add the in-game store + entitlement flow.
-6. Add PWA install prompt, offline test, and share card.
+1. Add a ghost-preview playback: play the whole crew choreography at 2× without the player.
+2. Replace rectangle rendering with the pixel-art kit for one vault (vertical slice).
+3. Wire the web app to the Worker so the daily plan and leaderboard are server-owned.
+4. Add the in-game store + entitlement flow.
+5. Add PWA install prompt, offline test, and share card.

@@ -337,3 +337,22 @@ describe('Modifiers', () => {
     expect(modified.dashEnabled).toBe(false);
   });
 });
+
+describe('Replay guard validation', () => {
+  it('rejects a run where a guard sees the player', () => {
+    const track: GhostTrack = {
+      id: 'player',
+      symbol: 'circle',
+      color: 0x5bc0eb,
+      durationMs: 2000,
+      frames: [
+        { t: 0, x: 160, y: 300, dir: 0, anim: 'idle' },
+        { t: 2000, x: 160, y: 300, dir: 0, anim: 'idle' },
+      ],
+    };
+
+    const result = replayTracks(guardVault, [track]);
+    expect(result.won).toBe(false);
+    expect(result.issues.some((issue) => issue.code === 'seen-by-guard')).toBe(true);
+  });
+});
