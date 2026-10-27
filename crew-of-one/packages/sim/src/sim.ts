@@ -72,7 +72,12 @@ export class HeistSim {
     this.wasInteractDown = this.input.interact;
     const dashPressed = this.input.dash && !this.wasDashDown;
     this.wasDashDown = this.input.dash;
-    if (dashPressed && this.dashCooldownMs <= 0 && (this.input.moveX !== 0 || this.input.moveY !== 0)) {
+    if (
+      dashPressed &&
+      this.vault.dashEnabled !== false &&
+      this.dashCooldownMs <= 0 &&
+      (this.input.moveX !== 0 || this.input.moveY !== 0)
+    ) {
       this.dashRemainingMs = 300;
       this.dashCooldownMs = 750;
       this.spawnNoise(this.state.player.x, this.state.player.y, 120);

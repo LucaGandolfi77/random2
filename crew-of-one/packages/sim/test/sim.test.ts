@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { HeistSim, replayTracks, validateTracks } from '../src';
+import { applyModifier, HeistSim, replayTracks, validateTracks } from '../src';
 import type { GhostTrack, SimInput, VaultDef } from '../src';
 
 const vault: VaultDef = {
@@ -309,5 +309,31 @@ describe('Gem carrying', () => {
 
     step(sim, { ...idle, moveY: -1 }, 140);
     expect(sim.state.status).toBe('won');
+  });
+});
+
+describe('Modifiers', () => {
+  it('disables the dash when the vault forbids it', () => {
+    const noDash = applyModifier(vault, 'no-dash');
+    const walk = new HeistSim(noDash);
+    const dash = new HeistSim(noDash);
+    step(walk, { ...idle, moveY: -1 }, 10);
+    step(dash, { ...idle, moveY: -1, dash: true }, 10);
+    expect(dash.state.player.y).toBeCloseTo(walk.state.player.y, 5);
+  });
+
+  it('shortens the loop and caps echoes', () => {
+    const short = applyModifier(vault, 'short-loop');
+    expect(short.loopSeconds).toBe(Math.max(15, vault.loopSeconds - 10));
+    const solo = applyModifier(vault, 'one-echo');
+    expect(solo.maxEchoes).toBeLessThanOrEqual(1);
+    expect(solo.parEchoes).toBeLessThanOrEqual(1);
+  });
+
+  it('does not mutate the source vault', () => {
+    const source = { ...vault, dashEnabled: true };
+    const modified = applyModifier(source, 'no-dash');
+    expect(source.dashEnabled).toBe(true);
+    expect(modified.dashEnabled).toBe(false);
   });
 });

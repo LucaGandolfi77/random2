@@ -7,6 +7,16 @@ import {
   type SaveData,
 } from './progress';
 
+export type DailySummary = {
+  date: string;
+  vaultName: string;
+  modifierName: string;
+  modifierDescription: string;
+  completed: boolean;
+  bestTimeMs: number;
+  bestRank: string;
+};
+
 export type ResultPayload = {
   vault: VaultDef;
   index: number;
@@ -20,6 +30,7 @@ export type ResultPayload = {
 
 type Callbacks = {
   onStart: (index: number) => void;
+  onStartDaily: () => void;
   onReplay: () => void;
   onNext: () => void;
   onMenu: () => void;
@@ -43,6 +54,7 @@ export class MetaUI {
   private readonly menu: HTMLElement;
   private readonly grid: HTMLElement;
   private readonly summary: HTMLElement;
+  private readonly dailySlot: HTMLElement;
   private readonly result: HTMLElement;
   private readonly resultRank: HTMLElement;
   private readonly resultName: HTMLElement;
@@ -81,6 +93,9 @@ export class MetaUI {
 
     this.summary = el('div', 'menu-summary');
     menuInner.appendChild(this.summary);
+
+    this.dailySlot = el('div', 'daily-slot');
+    menuInner.appendChild(this.dailySlot);
 
     this.grid = el('div', 'vault-grid');
     menuInner.appendChild(this.grid);
@@ -131,11 +146,12 @@ export class MetaUI {
     this.menuButton.hidden = !visible;
   }
 
-  showMenu(vaults: VaultDef[], progress: SaveData): void {
+  showMenu(vaults: VaultDef[], progress: SaveData, daily?: DailySummary): void {
     this.menuOpen = true;
     this.menu.hidden = false;
     this.result.hidden = true;
     this.menuButton.hidden = true;
+    this.renderDaily(daily);
     this.renderGrid(vaults, progress);
   }
 
@@ -183,6 +199,41 @@ export class MetaUI {
     node.appendChild(el('span', 'stat__label', label));
     node.appendChild(el('strong', 'stat__value', value));
     return node;
+  }
+
+  private renderDaily(daily?: DailySummary): void {
+    if (!daily) {
+      this.dailySlot.replaceChildren();
+      return;
+    }
+
+    const card = el('button', 'daily-card');
+    card.type = 'button';
+    card.setAttribute(
+      'aria-label',
+      `${daily.vaultName} daily heist, modifier ${daily.modifierName}`,
+    );
+
+    const kicker = el('span', 'daily-card__kicker');
+    kicker.appendChild(el('span', 'daily-card__label', 'DAILY HEIST'));
+    kicker.appendChild(el('span', 'daily-card__date', daily.date));
+
+    const name = el('span', 'daily-card__name', daily.vaultName);
+    const modifier = el('span', 'daily-card__modifier');
+    modifier.appendChild(el('strong', 'daily-card__modifier-name', daily.modifierName.toUpperCase()));
+    modifier.appendChild(el('span', 'daily-card__modifier-text', daily.modifierDescription));
+
+    const best = el('span', 'daily-card__best');
+    if (daily.completed) {
+      best.appendChild(el('span', `rank rank--${daily.bestRank}`, daily.bestRank));
+      best.appendChild(el('span', 'daily-card__time', formatTime(daily.bestTimeMs)));
+    } else {
+      best.appendChild(el('span', 'daily-card__new', 'UNPLAYED'));
+    }
+
+    card.append(kicker, name, modifier, best);
+    card.addEventListener('click', () => this.callbacks.onStartDaily());
+    this.dailySlot.replaceChildren(card);
   }
 
   private renderGrid(vaults: VaultDef[], progress: SaveData): void {

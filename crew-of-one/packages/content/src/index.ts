@@ -12,6 +12,7 @@ import vault10Json from '../vaults/vault-10.json';
 import { parseVault } from './schema';
 
 export * from './schema';
+export * from './daily';
 
 export const vaults: VaultDef[] = [parseVault(vault01Json), parseVault(vault02Json), parseVault(vault03Json), parseVault(vault04Json), parseVault(vault05Json), parseVault(vault06Json), parseVault(vault07Json), parseVault(vault08Json), parseVault(vault09Json), parseVault(vault10Json)];
 

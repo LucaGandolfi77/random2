@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { vaults } from '@crew-of-one/content';
+import { dailyPlan, utcDate, vaults, type DailyPlan } from '@crew-of-one/content';
 import { HeistSim } from '@crew-of-one/sim';
 import type { CameraState, GhostState, GuardState, LaserState, LeverState, SimInput, VaultDef } from '@crew-of-one/sim';
 import {
@@ -10,7 +10,7 @@ import {
   resetProgress,
   type SaveData,
 } from './progress';
-import { MetaUI } from './ui';
+import { MetaUI, type DailySummary } from './ui';
 import './style.css';
 
 const DESIGN_WIDTH = 360;
@@ -79,6 +79,9 @@ class PrototypeScene extends Phaser.Scene {
   private whistleRequested = false;
   private dashRequested = false;
   private playableVaults: VaultDef[] = [];
+  private daily: DailyPlan | null = null;
+  private dailyDate = '';
+  private isDaily = false;
   private progress: SaveData = { version: 1, vaults: {} };
   private ui!: MetaUI;
   private currentIndex = 0;
@@ -180,10 +183,18 @@ class PrototypeScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor(COLORS.ink);
 
     this.progress = loadProgress();
+    this.dailyDate = utcDate();
+    this.daily = dailyPlan(this.dailyDate, this.playableVaults);
     this.ui = new MetaUI({
       onStart: (index) => this.startVault(index),
-      onReplay: () => this.startVault(this.currentIndex),
-      onNext: () => this.startVault(this.currentIndex + 1),
+      onStartDaily: () => this.startDaily(),
+      onReplay: () => {
+        if (this.isDaily) this.startDaily();
+        else this.startVault(this.currentIndex);
+      },
+      onNext: () => {
+        if (!this.isDaily) this.startVault(this.currentIndex + 1);
+      },
       onMenu: () => this.openMenu(),
       onToggleMenu: () => {
         if (this.ui.isMenuOpen()) this.closeMenu();
@@ -342,7 +353,12 @@ class PrototypeScene extends Phaser.Scene {
   private loadVault(index: number): void {
     const vault = this.playableVaults[index] ?? this.playableVaults[0];
     if (!vault) return;
-    this.currentIndex = this.playableVaults.indexOf(vault);
+    this.loadVaultDef(vault, this.playableVaults.indexOf(vault), false);
+  }
+
+  private loadVaultDef(vault: VaultDef, index: number, daily: boolean): void {
+    this.currentIndex = index;
+    this.isDaily = daily;
     this.vault = vault;
     this.sim = new HeistSim(vault);
     this.accumulator = 0;
@@ -352,6 +368,32 @@ class PrototypeScene extends Phaser.Scene {
     this.lastStatus = 'playing';
     this.wonHandled = false;
     this.failureStreak = 0;
+  }
+
+  private startDaily(): void {
+    if (!this.daily) return;
+    this.loadVaultDef(this.daily.vault, -1, true);
+    recordAttempt(this.progress, this.daily.vault.id);
+    this.resultOpen = false;
+    this.paused = false;
+    this.ui.hideMenu();
+    this.ui.hideResult();
+    this.ui.setMenuButtonVisible(true);
+  }
+
+  private dailySummary(): DailySummary | undefined {
+    const plan = this.daily;
+    if (!plan) return undefined;
+    const record = this.progress.vaults[plan.vault.id];
+    return {
+      date: plan.date,
+      vaultName: plan.vault.name.replace(/^Daily · /, ''),
+      modifierName: plan.modifier.name,
+      modifierDescription: plan.modifier.description,
+      completed: record?.completed ?? false,
+      bestTimeMs: record?.bestTimeMs ?? 0,
+      bestRank: record?.bestRank ?? 'C',
+    };
   }
 
   private startVault(index: number): void {
@@ -367,10 +409,15 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private openMenu(): void {
+    const today = utcDate();
+    if (today !== this.dailyDate) {
+      this.dailyDate = today;
+      this.daily = dailyPlan(today, this.playableVaults);
+    }
     this.paused = true;
     this.resultOpen = false;
     this.ui.hideResult();
-    this.ui.showMenu(this.playableVaults, this.progress);
+    this.ui.showMenu(this.playableVaults, this.progress, this.dailySummary());
   }
 
   private closeMenu(): void {
@@ -385,7 +432,7 @@ class PrototypeScene extends Phaser.Scene {
   private handleResetProgress(): void {
     if (!window.confirm('Erase all best times and ranks?')) return;
     this.progress = resetProgress();
-    this.ui.showMenu(this.playableVaults, this.progress);
+    this.ui.showMenu(this.playableVaults, this.progress, this.dailySummary());
   }
 
   private noteFailure(_reason: 'alarm' | 'timeout' | 'max-echoes'): void {
@@ -429,7 +476,7 @@ class PrototypeScene extends Phaser.Scene {
       rank: record.rank,
       isBest: record.isBest,
       best: record.best,
-      hasNext: this.currentIndex < this.playableVaults.length - 1,
+      hasNext: !this.isDaily && this.currentIndex < this.playableVaults.length - 1,
     };
     this.time.delayedCall(550, () => {
       this.ui.showResult(payload, record.rank.toLowerCase());
@@ -777,18 +824,20 @@ class PrototypeScene extends Phaser.Scene {
             ? 0xc77dff
             : COLORS.gold;
 
-    g.fillStyle(color, guard.mode === 'follow' ? 0.1 : 0.07);
-    g.fillTriangle(
-      x,
-      y,
-      x + Math.cos(angle - half) * range,
-      y + Math.sin(angle - half) * range,
-      x + Math.cos(angle + half) * range,
-      y + Math.sin(angle + half) * range,
-    );
-    g.lineStyle(1, color, 0.18);
-    g.lineBetween(x, y, x + Math.cos(angle - half) * range, y + Math.sin(angle - half) * range);
-    g.lineBetween(x, y, x + Math.cos(angle + half) * range, y + Math.sin(angle + half) * range);
+    if (!this.vault.fog) {
+      g.fillStyle(color, guard.mode === 'follow' ? 0.1 : 0.07);
+      g.fillTriangle(
+        x,
+        y,
+        x + Math.cos(angle - half) * range,
+        y + Math.sin(angle - half) * range,
+        x + Math.cos(angle + half) * range,
+        y + Math.sin(angle + half) * range,
+      );
+      g.lineStyle(1, color, 0.18);
+      g.lineBetween(x, y, x + Math.cos(angle - half) * range, y + Math.sin(angle - half) * range);
+      g.lineBetween(x, y, x + Math.cos(angle + half) * range, y + Math.sin(angle + half) * range);
+    }
 
     g.fillStyle(color, 0.9);
     g.fillCircle(x, y, 10);

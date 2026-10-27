@@ -6,7 +6,7 @@
 
 ## Status
 
-**Phase 0 — prototype.** The simulation core, guard AI, solution-tape pipeline, workspace, and product documentation are in place. The current prototype is a ten-vault rectangle slice: plates, doors, guards, noise, cameras, levers, lasers, dash, one-way gates, and gem carrying, each with a verified solution tape, plus a meta shell with level select, saved best runs, ranks, and an echo timeline.
+**Phase 0 — prototype.** The simulation core, guard AI, solution-tape pipeline, workspace, and product documentation are in place. The current prototype is a ten-vault rectangle slice: plates, doors, guards, noise, cameras, levers, lasers, dash, one-way gates, and gem carrying, each with a verified solution tape, plus a meta shell with level select, saved best runs, ranks, an echo timeline, and a deterministic daily heist with modifiers.
 
 ## What this is
 
