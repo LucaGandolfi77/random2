@@ -40,8 +40,8 @@ The game runs:
 - Each battle is a full Echo Track encounter with previews and a confirm step.
 - Bell Rest offers three Inheritance cards per phase and equips the one you take.
 - Progress, choices, and equipped memories autosave and resume.
-- **Quiet threads** add six optional bond scenes, two elite battles, and six more Inheritances. They unlock the day after their anchor day and persist across loops.
-- **The Journal** records a line for every phase and quiet thread, tracks bond ranks, lists carried memories, and unlocks lore entries as Cael learns the city's history. It is reachable from the title and the Bell Map.
+- **Quiet threads and interludes** add nine optional scenes, three elite battles, and nine more Inheritances. Six unlock the day after their anchor day; three interludes open only through prior knowledge — freeing Elias, learning who rang the Bell, or choosing a side on Day 6. All persist across loops.
+- **The Journal** records a line for every phase and optional scene, tracks bond ranks, lists carried memories, and unlocks 15 lore entries as Cael learns the city's history. It is reachable from the title and the Bell Map.
 - **Skip-read** fast-forwards only prose already seen before the current scene, stopping for new Echo lines, choices, and closing cards.
 - **Cycles carry forward.** Starting the next cycle keeps bonds, memories, the loadout, quiet threads, and seen lines. Day choices and ending postures reset. **Start fresh** wipes everything.
 - **Echo dialogue** adds second-loop variants to Day 1 and the Day 9 ending, plus an Echo banner in later cycles.
@@ -76,7 +76,7 @@ The current debug build is **55 MB** because it includes both `arm64-v8a` and `x
 
 ## Authoring Ink
 
-Day 1 through Day 9 live in [`content/ink/`](content/ink), and the optional quiet threads live in [`content/ink/side_threads.ink`](content/ink/side_threads.ink). Lines carry presentation tags:
+Day 1 through Day 9 live in [`content/ink/`](content/ink), and the optional quiet threads and interludes live in [`content/ink/side_threads.ink`](content/ink/side_threads.ink). Lines carry presentation tags:
 
 ```ink
 The Bell is cracking. # id:d1m_005 # speaker:Mara # bg:spire
@@ -107,7 +107,7 @@ GODOT_BIN=/path/to/godot ./ninth-day/tools/run_tests.sh
 Two suites run headlessly:
 
 1. **Battle suite** — deterministic simulation, Echo rules, tones, Resonance, Chord, encounters, previews, save/restore, and inheritances.
-2. **Flow suite** — boots the real screens and drives the entire `title → map → Ink story → battle → Bell Rest → quiet thread → Journal → ending → next cycle` loop across all twenty-seven main phases, six optional threads, and four endings, including tag parsing, choice flags, day advancement, scripted retreats, the Day 6 alliance-dependent boss, the Day 7 no-combat mercy route, both boss phase changes, cycle carryover, Echo dialogue, skip-read, Journal unlocks, and the true-ending resolver.
+2. **Flow suite** — boots the real screens and drives the entire `title → map → Ink story → battle → Bell Rest → quiet thread → interlude → Journal → ending → next cycle` loop across all twenty-seven main phases, nine optional scenes, and four endings, including tag parsing, choice flags, day advancement, scripted retreats, the Day 6 alliance-dependent boss, the Day 7 no-combat mercy route, both boss phase changes, cycle carryover, Echo dialogue, skip-read, Journal unlocks, knowledge-gated interludes, and the true-ending resolver.
 
 ## Controls
 
@@ -224,7 +224,7 @@ The battle autosaves at each player decision. Finishing a battle deletes its sav
 
 ## Known limitations
 
-- The nine-day main story and six quiet threads are complete; the remaining optional phases and knowledge-gated Bell Map variants from the GDD are not authored.
+- The nine-day main story, six quiet threads, and three knowledge-gated interludes are complete; the remaining optional phases and alternate phase variants from the GDD are not authored.
 - The Journal is a one-screen recap, not yet a searchable archive with per-line history.
 - Echo dialogue currently covers Day 1 and the Day 9 ending only.
 - Ink state is not saved mid-scene; quitting during a story phase returns to the Bell Map (quiet threads likewise restart).

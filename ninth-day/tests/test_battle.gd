@@ -310,6 +310,10 @@ func _test_encounters() -> void:
 	remnant.start(1, &"sera_remnant")
 	_assert(remnant.enemies.size() == 1, "Sera's Remnant fights alone")
 	_assert(remnant.enemies[0].max_hp == 220, "Sera's Remnant is an elite")
+	var watch_remnant := _new_sim()
+	watch_remnant.start(1, &"watch_remnant")
+	_assert(watch_remnant.enemies.size() == 1, "the Watch Remnant fights alone")
+	_assert(watch_remnant.enemies[0].max_hp == 240, "the Watch Remnant is an elite")
 	var saved = JSON.parse_string(JSON.stringify(tutorial.to_save()))
 	var loaded := BattleSim.new()
 	loaded.load_save(saved)
@@ -336,6 +340,8 @@ func _test_inheritances() -> void:
 	_assert(String(card.get("name", "")) != "", "a card has a name")
 	var modifiers := InheritanceDB.modifiers([offers[0]])
 	_assert(not modifiers.is_empty(), "a card contributes modifiers")
+	for card_id in ["better_ledger", "ninth_name", "watch_remnant", "second_batch", "door_open"]:
+		_assert(not InheritanceDB.card(card_id).is_empty(), "optional-scene memory exists: " + card_id)
 
 func _test_modifier_save() -> void:
 	var sim := _new_sim(707)

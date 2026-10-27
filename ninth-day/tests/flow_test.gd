@@ -748,6 +748,47 @@ func _run() -> void:
 	_assert(RunState.is_side_thread_complete("vey"), "winning the elite completes the thread")
 	_assert(RunState.has_inheritance("door_open"), "the elite thread leaves a memory")
 
+	# Knowledge-gated interludes.
+	_assert(RunState.side_thread_available("ledger"), "freeing Elias unlocks the ledger interlude")
+	_assert(RunState.side_thread_available("ninth_name"), "Wren's truth unlocks the ninth-name interlude")
+	_assert(RunState.side_thread_available("remnant"), "choosing a side unlocks the Watch Remnant")
+	map = get_tree().current_scene
+	map._on_thread_pressed("ledger")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Better Ledger", "the ledger interlude opens")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_side_thread_complete("ledger"), "the ledger interlude completes")
+	_assert(RunState.has_inheritance("better_ledger"), "the ledger interlude leaves a memory")
+
+	map = get_tree().current_scene
+	map._on_thread_pressed("remnant")
+	if not await _wait_for_scene("StoryView"):
+		return _finish()
+	story = get_tree().current_scene
+	_assert(story.service.story_title() == "The Watch Remnant", "the remnant interlude opens")
+	if not await _drive_story(story):
+		return _finish()
+	story._on_continue_pressed()
+	if not await _wait_for_scene("BattleView"):
+		return _finish()
+	battle = get_tree().current_scene
+	_assert(battle.sim.encounter_id == &"watch_remnant", "the remnant interlude starts its elite battle")
+	battle.sim.enemies[0].hp = 1
+	battle.sim.use_action(&"strike", battle.sim.enemies[0].id)
+	battle._refresh()
+	_assert(battle.sim.phase == "victory", "the Watch Remnant can be defeated")
+	battle._on_result_pressed()
+	if not await _wait_for_scene("BellMap"):
+		return _finish()
+	_assert(RunState.is_side_thread_complete("remnant"), "the remnant interlude completes")
+	_assert(RunState.has_inheritance("watch_remnant"), "the remnant interlude leaves a memory")
+
 	# The Journal reads the run without changing it.
 	map = get_tree().current_scene
 	map._on_journal_pressed()

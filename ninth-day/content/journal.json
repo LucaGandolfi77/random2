@@ -160,6 +160,18 @@
 		"vey": {
 			"title": "The Door Left Open",
 			"line": "Vey left the inner door open. The dark did not follow."
+		},
+		"ledger": {
+			"title": "The Better Ledger",
+			"line": "Elias wrote Aurel's name on a clean page. No one was crossed out."
+		},
+		"ninth_name": {
+			"title": "The Ninth Name",
+			"line": "Wren said Orra Vane's name in the garden. Every rose turned toward the Spire."
+		},
+		"remnant": {
+			"title": "The Watch Remnant",
+			"line": "The last order held the checkpoint. We outlasted it."
 		}
 	},
 	"glossary": [
@@ -228,6 +240,24 @@
 			"title": "Echoes",
 			"body": "What a later loop remembers about an earlier one. The Bell cannot take the shape of your knowledge, only the day.",
 			"requires": {"cycle_after": 1}
+		},
+		{
+			"id": "elias_ledger",
+			"title": "Elias's Ledger",
+			"body": "Every debt in Ember Row, including the ones the Watch invented. The last page reads: Paid in full, by the living.",
+			"requires": {"thread": "ledger"}
+		},
+		{
+			"id": "ninth_name",
+			"title": "The Ninth Name",
+			"body": "Nine Bellkeepers came before Wren. Eight are in the memory garden. The ninth is Orra Vane, still walking.",
+			"requires": {"thread": "ninth_name"}
+		},
+		{
+			"id": "watch_remnant",
+			"title": "The Last Order",
+			"body": "A remnant is what remains when an order outlives the person who gave it. The Watch Remnant still holds the checkpoint.",
+			"requires": {"thread": "remnant"}
 		},
 		{
 			"id": "true_ending",

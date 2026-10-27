@@ -57,6 +57,11 @@ func _ready() -> void:
 		RunState.pending_thread = "vey"
 		RunState.pending_encounter = "sera_remnant"
 		RunState.save()
+	elif "--watchremnant" in args:
+		RunState.day = 9
+		RunState.pending_thread = "remnant"
+		RunState.pending_encounter = "watch_remnant"
+		RunState.save()
 	var battle := preload("res://src/battle/battle_view.tscn").instantiate()
 	add_child(battle)
 	battle.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

@@ -106,13 +106,13 @@ func _build_recap() -> void:
 		if RunState.side_thread_available(thread_id):
 			available.append(String(RunState.side_thread_data(thread_id).get("name", thread_id)))
 	if not available.is_empty():
-		_body_box.add_child(Ui.label("QUIET THREADS · " + " · ".join(available), 12, Palette.PAPER_DIM, true))
+		_body_box.add_child(Ui.label("OPTIONAL · " + " · ".join(available), 12, Palette.PAPER_DIM, true))
 
 	var threads_done := 0
 	for thread_id in RunState.side_thread_ids():
 		if RunState.is_side_thread_complete(thread_id):
 			threads_done += 1
-	_body_box.add_child(Ui.label("Cycle %d · %d phases written · %d quiet thread%s · %d memories · %d lore entries" % [
+	_body_box.add_child(Ui.label("Cycle %d · %d phases written · %d optional scene%s · %d memories · %d lore entries" % [
 		RunState.cycle_number,
 		RunState.completed.size(),
 		threads_done,
