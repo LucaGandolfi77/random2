@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "name": "core9-pwa",
+      "path": "/core9-pwa/",
+      "requests": 23,
+      "bytes": 362558,
+      "dcl": 750,
+      "load": 750
+    }
+  ]
+}

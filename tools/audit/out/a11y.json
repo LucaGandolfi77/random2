@@ -1,0 +1,24 @@
+{
+  "apps": [
+    {
+      "name": "core9-pwa",
+      "path": "/core9-pwa/",
+      "lang": "en",
+      "manual": 48,
+      "checked": 48,
+      "error": null,
+      "findings": {
+        "alt": [],
+        "names": [],
+        "labels": [],
+        "contrast": [],
+        "targets": [],
+        "headings": [],
+        "live": [],
+        "ids": [],
+        "focus": [],
+        "inlineLang": []
+      }
+    }
+  ]
+}

@@ -544,10 +544,16 @@
                 const version = Number(data.version) || 1;
                 if (version < STORAGE_VERSION) {
                     migrateStorage(data, version);
-                } else if (data.career) {
-                    state.career = { ...state.career, ...data.career };
-                    state.equippedAbilities = data.equippedAbilities || [];
-                    state.equippedWingmen = data.equippedWingmen || [];
+                } else {
+                    // Load challenge archives
+                    state.challengeArchives = data.challengeArchives || {};
+                    state.challengeArchivesWeekly = data.challengeArchivesWeekly || {};
+                    state.challengeArchivesGhosts = data.challengeArchivesGhosts || {};
+                    // Load career progress
+                    if (data.career) state.career = { ...state.career, ...data.career };
+                    // Load equipped abilities/wingmen
+                    if (data.equippedAbilities) state.equippedAbilities = data.equippedAbilities;
+                    if (data.equippedWingmen) state.equippedWingmen = data.equippedWingmen;
                 }
             }
         } catch (err) { /* private mode / bad JSON */ }
@@ -571,6 +577,11 @@
             };
             state.equippedAbilities = ["wingman", "autoBomb"];
             state.equippedWingmen = ["gunner", "sniper"];
+        } else if (fromVersion < 3) {
+            // Migrate from v2 to v3: add challenge archives structure
+            state.challengeArchives = state.challengeArchives || {};
+            state.challengeArchivesWeekly = state.challengeArchivesWeekly || {};
+            state.challengeArchivesGhosts = state.challengeArchivesGhosts || {};
         }
     }
 
@@ -587,6 +598,9 @@
                 career: state.career,
                 equippedAbilities: state.equippedAbilities,
                 equippedWingmen: state.equippedWingmen,
+                challengeArchives: state.challengeArchives,
+                challengeArchivesWeekly: state.challengeArchivesWeekly,
+                challengeArchivesGhosts: state.challengeArchivesGhosts,
             }));
         } catch (err) { /* ignore */ }
     }
