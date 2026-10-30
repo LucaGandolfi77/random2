@@ -1,7 +1,7 @@
 {
   "name": "Piano Fall PWA",
   "short_name": "Piano Fall",
-  "description": "A landscape piano with Synthesia-style falling notes. Play freestyle or follow five built-in songs.",
+  "description": "A landscape piano with Synthesia-style falling notes. Play freestyle, follow 15 built-in songs, or upload a MIDI file.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

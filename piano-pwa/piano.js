@@ -1,11 +1,13 @@
 /* ============================================================
    PIANO FALL — landscape Synthesia-style piano
    ------------------------------------------------------------
-   · 10 white keys + 7 black keys (C4–E5), multi-touch friendly
+   · Adjustable keyboard (17–37 keys), multi-touch friendly
    · Tiles fall down lanes synced to the keyboard layout
    · Song mode: hit tiles at the gold line → Perfect / Good /
      Miss judging, combo multiplier, accuracy, per-song bests
    · Freestyle mode: just play — every key rings
+   · MIDI import: .mid/.midi files become playable falling-note
+     songs, with octave auto-fit and a locally saved library
    · Missed notes ghost-play softly so the melody keeps flowing
    · Song clock is AudioContext time → pause = AC.suspend()
    ============================================================ */
@@ -39,7 +41,12 @@ const ui = {
     results: $('results'), resTitle: $('resTitle'), resNew: $('resNew'),
     resScore: $('resScore'), resAcc: $('resAcc'), resCombo: $('resCombo'),
     resBest: $('resBest'), btnRetry: $('btnRetry'), btnMenu: $('btnMenu'),
-    rotate: $('rotate'),
+    rotate: $('rotate'), kbdHint: $('kbdHint'),
+    btnSettings: $('btnSettings'), settings: $('settings'),
+    keySizeChoices: $('keySizeChoices'), keySizeSummary: $('keySizeSummary'),
+    btnSettingsClose: $('btnSettingsClose'),
+    btnMidi: $('btnMidi'), midiFile: $('midiFile'), midiStatus: $('midiStatus'),
+    toast: $('toast'),
 };
 
 /* ---------------- helpers ---------------- */
@@ -49,27 +56,71 @@ const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
 /* ---------------- keyboard layout (shared by keys + lanes) ---------------- */
 
-const WHITE = [60, 62, 64, 65, 67, 69, 71, 72, 74, 76];        // C4 → E5
-const BLACK = [                                                // boundary = white-key index it sits at
-    { midi: 61, b: 1 }, { midi: 63, b: 2 }, { midi: 66, b: 4 },
-    { midi: 68, b: 5 }, { midi: 70, b: 6 }, { midi: 73, b: 8 }, { midi: 75, b: 9 },
+const BASE_MIDI = 60;                                          // C4
+const WHITE_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
+const KEY_SIZES = [10, 12, 15, 17, 22];                        // white-key counts → 17/20/25/29/37 keys
+const WHITE_KEYCODES = [                                       // computer keyboard, first 17 keys unchanged
+    'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon',
+    'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'Quote', 'BracketLeft',
 ];
-const KEYMAP = {                                               // computer keyboard
-    KeyA: 60, KeyW: 61, KeyS: 62, KeyE: 63, KeyD: 64,
-    KeyF: 65, KeyT: 66, KeyG: 67, KeyY: 68, KeyH: 69,
-    KeyU: 70, KeyJ: 71, KeyK: 72, KeyO: 73, KeyL: 74, KeyP: 75, Semicolon: 76,
-};
+const BLACK_KEYCODES = [
+    'KeyW', 'KeyE', 'KeyT', 'KeyY', 'KeyU', 'KeyO', 'KeyP',
+    'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8',
+];
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function midiName(midi) {
+    return NOTE_NAMES[((midi % 12) + 12) % 12] + (Math.floor(midi / 12) - 1);
+}
+
+function makeLayout(whiteCount) {
+    const white = [];
+    for (let i = 0; i < whiteCount; i++) {
+        white.push(BASE_MIDI + Math.floor(i / 7) * 12 + WHITE_OFFSETS[i % 7]);
+    }
+    const black = [];
+    for (let i = 0; i < whiteCount - 1; i++) {
+        if (white[i + 1] - white[i] === 2) black.push({ midi: white[i] + 1, b: i + 1 });
+    }
+    return {
+        white,
+        black,
+        whiteCount: white.length,
+        total: white.length + black.length,
+        min: white[0],
+        max: white[white.length - 1],
+    };
+}
+
+const SETTINGS_KEY = 'piano-fall-settings';
+
+let settings = loadSettings();
+let layout = makeLayout(settings.whiteKeys);
+let keyMap = new Map();
+
+function syncKeyMap() {
+    keyMap = new Map();
+    layout.white.forEach((midi, i) => {
+        const code = WHITE_KEYCODES[i];
+        if (code) keyMap.set(code, midi);
+    });
+    layout.black.forEach((k, i) => {
+        const code = BLACK_KEYCODES[i];
+        if (code) keyMap.set(code, k.midi);
+    });
+}
 
 function laneX(midi, W) {
-    const wi = WHITE.indexOf(midi);
-    if (wi >= 0) return (wi + 0.5) * W / 10;
-    const bk = BLACK.find((k) => k.midi === midi);
-    return bk ? bk.b * W / 10 : W / 2;
+    const wi = layout.white.indexOf(midi);
+    if (wi >= 0) return (wi + 0.5) * W / layout.whiteCount;
+    const bk = layout.black.find((k) => k.midi === midi);
+    return bk ? bk.b * W / layout.whiteCount : W / 2;
 }
 function laneW(midi, W) {
-    return (WHITE.indexOf(midi) >= 0 ? 0.72 : 0.5) * W / 10;
+    return (layout.white.indexOf(midi) >= 0 ? 0.72 : 0.5) * W / layout.whiteCount;
 }
-function isBlack(midi) { return WHITE.indexOf(midi) < 0; }
+function isBlack(midi) { return layout.white.indexOf(midi) < 0; }
 
 /* ---------------- audio (own small synth — piano-ish) ---------------- */
 
@@ -89,6 +140,7 @@ function audio() {
 }
 
 function tone(midi, vel, when) {
+    if (!R2.getSettings().sound) return;
     const ac = audio();
     if (!ac) return;
     const f = 440 * Math.pow(2, (midi - 69) / 12);
@@ -180,6 +232,108 @@ const SONGS = [
         id: 'elise', name: 'Für Elise (theme)', bpm: 132, diff: 'hard',
         notes: seq([...ELISE_THEME, ...offset(ELISE_THEME, 32)]),
     },
+    {
+        id: 'birthday', name: 'Happy Birthday', bpm: 110, diff: 'easy',
+        notes: seq([
+            [60, 0], [60, 0.75], [62, 1.5], [60, 2.25], [65, 3], [64, 3.75],
+            [60, 5], [60, 5.75], [62, 6.5], [60, 7.25], [67, 8], [65, 8.75],
+            [60, 10], [60, 10.75], [72, 11.5], [69, 12.25], [65, 13], [64, 13.75], [62, 14.5],
+            [70, 16], [70, 16.75], [69, 17.5], [65, 18.25], [67, 19], [65, 19.75],
+        ]),
+    },
+    {
+        id: 'frere', name: 'Frère Jacques', bpm: 120, diff: 'easy',
+        notes: seq([
+            [60, 0], [62, 1], [64, 2], [60, 3],
+            [60, 4], [62, 5], [64, 6], [60, 7],
+            [64, 8], [65, 9], [67, 10],
+            [64, 12], [65, 13], [67, 14],
+            [67, 16], [69, 17], [67, 18], [65, 19], [64, 20], [60, 21],
+            [67, 22], [69, 23], [67, 24], [65, 25], [64, 26], [60, 27],
+            [60, 28], [67, 29], [60, 30],
+            [60, 32], [67, 33], [60, 34],
+        ]),
+    },
+    {
+        id: 'london', name: 'London Bridge', bpm: 112, diff: 'easy',
+        notes: seq([
+            [67, 0], [69, 1], [67, 2], [65, 3], [64, 4], [65, 5], [67, 6],
+            [62, 8], [64, 9], [65, 10],
+            [64, 12], [65, 13], [67, 14],
+            [67, 16], [69, 17], [67, 18], [65, 19], [64, 20], [65, 21], [67, 22],
+            [62, 24], [67, 25], [64, 26], [60, 27],
+        ]),
+    },
+    {
+        id: 'saints', name: 'When the Saints Go Marching In', bpm: 118, diff: 'medium',
+        notes: seq([
+            [60, 0], [64, 1], [65, 2], [67, 3],
+            [60, 4], [64, 5], [65, 6], [67, 7],
+            [60, 8], [64, 9], [65, 10], [67, 11],
+            [64, 12], [60, 13], [64, 14], [62, 15],
+            [60, 16], [64, 17], [65, 18], [67, 19],
+            [72, 20], [69, 21], [67, 22], [64, 23],
+            [60, 24], [64, 25], [65, 26], [67, 27],
+            [64, 28], [60, 29], [62, 30], [60, 31],
+        ]),
+    },
+    {
+        id: 'amazing', name: 'Amazing Grace', bpm: 84, diff: 'medium',
+        notes: seq([
+            [62, 0], [67, 1], [71, 2], [67, 3], [71, 4], [69, 5], [67, 6], [64, 7], [62, 8],
+            [62, 10], [67, 11], [71, 12], [67, 13], [71, 14], [69, 15], [67, 16], [64, 17], [62, 18],
+            [64, 20], [67, 21], [64, 22], [62, 23], [71, 24], [69, 25], [67, 26], [64, 27], [62, 28],
+            [62, 30], [67, 31], [71, 32], [67, 33], [71, 34], [69, 35], [67, 36], [64, 37], [62, 38],
+        ]),
+    },
+    {
+        id: 'greensleeves', name: 'Greensleeves', bpm: 100, diff: 'medium',
+        notes: seq([
+            [67, 0], [70, 1], [72, 2], [74, 3], [75, 4], [74, 5],
+            [72, 7], [69, 8], [65, 9], [67, 10], [69, 11], [70, 12], [67, 13],
+            [67, 15], [70, 16], [72, 17], [74, 18], [75, 19], [74, 20],
+            [72, 22], [69, 23], [65, 24], [67, 25], [65, 26], [65, 27],
+        ]),
+    },
+    {
+        id: 'canon', name: 'Canon in D (theme)', bpm: 100, diff: 'medium',
+        notes: seq([
+            [76, 0], [74, 1], [72, 2], [71, 3], [69, 4], [67, 5], [69, 6], [71, 7],
+            [72, 8], [71, 9], [69, 10], [67, 11], [65, 12], [64, 13], [65, 14], [67, 15],
+            [69, 16], [67, 17], [65, 18], [64, 19], [62, 20], [60, 21], [62, 22], [64, 23],
+            [65, 24], [64, 25], [62, 26], [60, 27],
+        ]),
+    },
+    {
+        id: 'minuet', name: 'Minuet in G', bpm: 120, diff: 'medium',
+        notes: seq([
+            [69, 0], [62, 1], [64, 2], [66, 3], [67, 4], [69, 5], [62, 6], [62, 7],
+            [71, 8], [67, 9], [69, 10], [71, 11], [73, 12], [74, 13], [62, 14], [62, 15],
+            [64, 16], [66, 17], [67, 18], [69, 19], [67, 20], [66, 21], [64, 22], [62, 23],
+            [69, 24], [71, 25], [69, 26], [62, 27],
+        ]),
+    },
+    {
+        id: 'entertainer', name: 'The Entertainer', bpm: 140, diff: 'hard',
+        notes: seq([
+            [72, 0], [74, 1], [75, 2], [76, 3], [72, 4], [76, 5], [72, 6],
+            [72, 8], [74, 9], [75, 10], [76, 11], [72, 12], [76, 13], [72, 14],
+            [74, 16], [75, 17], [76, 18], [75, 19], [74, 20], [72, 21], [74, 22], [75, 23],
+            [76, 24], [74, 25], [72, 26], [71, 27], [69, 28], [67, 29], [65, 30], [60, 31],
+        ]),
+    },
+    {
+        id: 'william-tell', name: 'William Tell Overture', bpm: 160, diff: 'hard',
+        notes: seq([
+            [64, 0], [64, 0.5], [64, 1], [64, 1.5], [64, 2], [64, 2.5],
+            [64, 3], [66, 3.5], [68, 4], [68, 4.5], [66, 5], [64, 5.5],
+            [64, 6], [66, 6.5], [64, 7], [62, 7.5], [64, 8], [64, 8.5], [64, 9], [64, 9.5],
+            [64, 10], [66, 10.5], [68, 11], [68, 11.5], [66, 12], [64, 12.5],
+            [64, 13], [66, 13.5], [64, 14], [62, 14.5], [60, 15], [62, 15.5], [64, 16], [64, 16.5],
+            [64, 17], [66, 17.5], [68, 18], [68, 18.5], [66, 19], [64, 19.5],
+            [64, 20], [66, 20.5], [64, 21], [62, 21.5], [60, 22], [62, 22.5], [64, 23], [64, 23.5],
+        ]),
+    },
 ];
 
 /* ---------------- state ---------------- */
@@ -201,12 +355,144 @@ const S = {
 
 const BESTS = R2.loadJSON(BESTS_KEY, {}) || {};
 
+const MIDI_KEY = 'piano-fall-midis-v1';
+const MAX_MIDI_SONGS = 5;
+const MAX_MIDI_STORE = 2000000;
+const MAX_MIDI_BYTES = 5 * 1024 * 1024;
+let midiSongs = loadMidiLibrary();
+
 const LEAD = 2.6;           // seconds a tile is visible before the line
 const WIN_P = 0.085;        // perfect window (s)
 const WIN_G = 0.18;         // good window (s)
 
 function songNow() {
     return AC ? AC.currentTime - S.songStart : -LEAD;
+}
+
+/* ---------------- settings + MIDI library ---------------- */
+
+function loadSettings() {
+    const raw = R2.loadJSON(SETTINGS_KEY, null);
+    const whiteKeys = raw ? Number(raw.whiteKeys) : NaN;
+    return { whiteKeys: KEY_SIZES.indexOf(whiteKeys) >= 0 ? whiteKeys : 10 };
+}
+
+function difficultyFor(notes) {
+    if (!notes.length) return 'easy';
+    const dur = Math.max(0.001, notes[notes.length - 1].t - notes[0].t);
+    const density = notes.length / dur;
+    if (density < 1.1) return 'easy';
+    if (density < 3.0) return 'medium';
+    return 'hard';
+}
+
+function loadMidiLibrary() {
+    const raw = R2.loadJSON(MIDI_KEY, []);
+    if (!Array.isArray(raw)) return [];
+    const out = [];
+    for (const item of raw) {
+        if (!item || typeof item !== 'object' || !Array.isArray(item.notes)) continue;
+        const notes = [];
+        for (const pair of item.notes) {
+            if (!Array.isArray(pair) || pair.length < 2) continue;
+            const midi = Number(pair[0]);
+            const ms = Number(pair[1]);
+            if (Number.isFinite(midi) && midi >= 0 && midi <= 127 && Number.isFinite(ms) && ms >= 0) {
+                notes.push({ midi, t: ms / 1000 });
+            }
+        }
+        if (!notes.length) continue;
+        notes.sort((a, b) => a.t - b.t);
+        out.push({
+            id: String(item.id || ('midi-' + Math.random().toString(36).slice(2))),
+            name: String(item.name || 'MIDI file').slice(0, 80),
+            bpm: Number(item.bpm) || 120,
+            savedAt: Number(item.savedAt) || 0,
+            diff: item.diff === 'easy' || item.diff === 'medium' || item.diff === 'hard'
+                ? item.diff : difficultyFor(notes),
+            isMidi: true,
+            notes,
+        });
+    }
+    out.sort((a, b) => b.savedAt - a.savedAt);
+    return out.slice(0, MAX_MIDI_SONGS);
+}
+
+function serializeMidiSong(song) {
+    return {
+        id: song.id,
+        name: song.name,
+        bpm: song.bpm,
+        savedAt: song.savedAt,
+        diff: song.diff,
+        notes: song.notes.map((n) => [n.midi, Math.round(n.t * 1000)]),
+    };
+}
+
+function saveMidiLibrary() {
+    const stored = [];
+    let total = 0;
+    for (const song of midiSongs) {
+        if (stored.length >= MAX_MIDI_SONGS) break;
+        const item = serializeMidiSong(song);
+        const size = JSON.stringify(item).length + 1;
+        if (total + size > MAX_MIDI_STORE) continue;
+        stored.push(item);
+        total += size;
+    }
+    try {
+        localStorage.setItem(MIDI_KEY, JSON.stringify(stored));
+        return stored.length === midiSongs.length;
+    } catch (e) {
+        return false;
+    }
+}
+
+function rememberMidiSong(song) {
+    const existing = midiSongs.find((s) => s.name.toLowerCase() === song.name.toLowerCase());
+    if (existing) {
+        existing.bpm = song.bpm;
+        existing.savedAt = Date.now();
+        existing.diff = song.diff;
+        existing.notes = song.notes;
+        midiSongs.sort((a, b) => b.savedAt - a.savedAt);
+        return existing;
+    }
+    midiSongs.unshift(song);
+    midiSongs.sort((a, b) => b.savedAt - a.savedAt);
+    if (midiSongs.length > MAX_MIDI_SONGS) midiSongs.length = MAX_MIDI_SONGS;
+    return song;
+}
+
+function fitMidiNotes(rawNotes) {
+    let bestShift = 0;
+    let bestCount = -1;
+    for (let oct = -4; oct <= 4; oct++) {
+        const shift = oct * 12;
+        let count = 0;
+        for (const n of rawNotes) {
+            const midi = n.midi + shift;
+            if (midi >= layout.min && midi <= layout.max) count++;
+        }
+        if (count > bestCount || (count === bestCount && Math.abs(shift) < Math.abs(bestShift))) {
+            bestCount = count;
+            bestShift = shift;
+        }
+    }
+
+    const notes = [];
+    for (const n of rawNotes) {
+        const midi = n.midi + bestShift;
+        if (midi < layout.min || midi > layout.max) continue;
+        notes.push({ midi, t: n.t });
+    }
+    notes.sort((a, b) => a.t - b.t);
+    return { notes, dropped: rawNotes.length - notes.length, shift: bestShift };
+}
+
+function formatDuration(seconds) {
+    const s = Math.max(0, Math.round(seconds));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 }
 
 /* ---------------- view / canvas ---------------- */
@@ -228,19 +514,28 @@ function resize() {
 /* ---------------- build keyboard ---------------- */
 
 function buildKeys() {
+    ui.keys.innerHTML = '';
     const frag = document.createDocumentFragment();
-    for (const midi of WHITE) {
+    for (const midi of layout.white) {
         const k = document.createElement('div');
         k.className = 'key';
         k.dataset.midi = midi;
+        if (midi % 12 === 0) {
+            const label = document.createElement('span');
+            label.className = 'key-label';
+            label.textContent = midiName(midi);
+            k.appendChild(label);
+        }
         frag.appendChild(k);
     }
-    for (const { midi, b } of BLACK) {
+    const n = layout.whiteCount;
+    const blackWidth = 58 / n;
+    for (const { midi, b } of layout.black) {
         const k = document.createElement('div');
         k.className = 'key black';
         k.dataset.midi = midi;
-        k.style.left = 'calc(' + (b * 10) + '% - 2.9%)';
-        k.style.width = '5.8%';
+        k.style.left = (b * 100 / n - blackWidth / 2) + '%';
+        k.style.width = blackWidth + '%';
         frag.appendChild(k);
     }
     ui.keys.appendChild(frag);
@@ -301,14 +596,27 @@ function updateFx(dt) {
 
 function startSong(song) {
     const ac = audio();
-    if (!ac) return;
+    if (!ac) return false;
+
+    let fit;
+    if (song.isMidi) {
+        fit = fitMidiNotes(song.notes);
+        if (!fit.notes.length) {
+            setMidiStatus('No notes fit the current keyboard — choose a larger keyboard in Settings.', 'error');
+            showToast('No notes fit the current keyboard — choose a larger keyboard in Settings.', 3800);
+            return false;
+        }
+    } else {
+        const spb = 60 / song.bpm;
+        fit = { notes: song.notes.map(([m, b]) => ({ midi: m, t: b * spb })), dropped: 0, shift: 0 };
+    }
+
     S.freestyle = false;
     S.song = song;
-    const spb = 60 / song.bpm;
-    S.notes = song.notes
-        .map(([m, b]) => ({ midi: m, t: b * spb, hit: false, missed: false }))
+    S.notes = fit.notes
+        .map((n) => ({ midi: n.midi, t: n.t, hit: false, missed: false }))
         .sort((a, b) => a.t - b.t);
-    S.lastT = S.notes[S.notes.length - 1].t;
+    S.lastT = S.notes.length ? S.notes[S.notes.length - 1].t : 0;
     S.songStart = ac.currentTime + LEAD + 0.4;
     S.score = 0; S.combo = 0; S.maxCombo = 0; S.hits = 0; S.misses = 0;
     S.mode = 'play';
@@ -316,6 +624,17 @@ function startSong(song) {
     ui.songName.textContent = song.name;
     ui.combo.classList.add('hidden');
     syncHud(true);
+
+    if (song.isMidi) {
+        if (fit.dropped > 0) {
+            const kept = Math.round((fit.notes.length / song.notes.length) * 100);
+            showToast('MIDI fit: ' + kept + '% of notes on this keyboard. Increase keys in Settings for more.', 3800);
+        } else if (fit.shift) {
+            showToast('Transposed ' + (fit.shift > 0 ? '+' : '') + (fit.shift / 12) + ' octave' +
+                (Math.abs(fit.shift) === 12 ? '' : 's') + ' to fit the keyboard.', 3000);
+        }
+    }
+    return true;
 }
 
 function startFreestyle() {
@@ -469,20 +788,21 @@ function render() {
     // lane backdrop
     ctx.fillStyle = '#0d0b14';
     ctx.fillRect(0, 0, W, H);
-    for (const midi of WHITE) {
+    for (const midi of layout.white) {
         ctx.fillStyle = 'rgba(255,255,255,0.022)';
         ctx.fillRect(laneX(midi, W) - laneW(midi, W) / 2, 0, laneW(midi, W), H);
     }
-    for (const { midi } of BLACK) {
+    for (const { midi } of layout.black) {
         ctx.fillStyle = 'rgba(0,0,0,0.30)';
         ctx.fillRect(laneX(midi, W) - laneW(midi, W) / 2, 0, laneW(midi, W), H);
     }
     ctx.strokeStyle = 'rgba(255,255,255,0.05)';
     ctx.lineWidth = 1;
-    for (let i = 0; i <= 10; i++) {
+    for (let i = 0; i <= layout.whiteCount; i++) {
+        const x = i * W / layout.whiteCount;
         ctx.beginPath();
-        ctx.moveTo(i * W / 10, 0);
-        ctx.lineTo(i * W / 10, H);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, H);
         ctx.stroke();
     }
 
@@ -606,22 +926,217 @@ function render() {
 
 function hideOverlays() {
     ui.menu.classList.add('hidden');
+    ui.settings.classList.add('hidden');
     ui.paused.classList.add('hidden');
     ui.results.classList.add('hidden');
 }
 
+let toastTimer = 0;
+
+function showToast(msg, ms) {
+    if (!ui.toast) return;
+    // Keep menu/settings feedback in their own status lines instead of
+    // floating a toast on top of the panel.
+    if (!ui.menu.classList.contains('hidden') || !ui.settings.classList.contains('hidden')) return;
+    ui.toast.textContent = msg;
+    ui.toast.classList.remove('hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => ui.toast.classList.add('hidden'), ms || 2400);
+}
+
+function setMidiStatus(text, kind) {
+    if (!ui.midiStatus) return;
+    ui.midiStatus.textContent = text || '';
+    ui.midiStatus.classList.toggle('error', kind === 'error');
+    ui.midiStatus.classList.toggle('ok', kind === 'ok');
+}
+
+function addListHead(text) {
+    const head = document.createElement('div');
+    head.className = 'list-head';
+    head.textContent = text;
+    ui.songList.appendChild(head);
+}
+
+function makeSongButton(song) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'song-btn';
+
+    const name = document.createElement('span');
+    name.className = 'name';
+    name.textContent = song.name;
+    btn.appendChild(name);
+
+    const best = BESTS[song.id] || 0;
+    if (best) {
+        const bestEl = document.createElement('span');
+        bestEl.className = 'best';
+        bestEl.textContent = best;
+        btn.appendChild(bestEl);
+    }
+
+    const diff = document.createElement('span');
+    diff.className = 'diff ' + song.diff;
+    diff.textContent = song.diff.toUpperCase();
+    btn.appendChild(diff);
+
+    btn.addEventListener('click', () => { blip(660, 0.06, 'triangle'); startSong(song); });
+    return btn;
+}
+
+const DIFF_RANK = { easy: 0, medium: 1, hard: 2 };
+
 function buildSongList() {
     ui.songList.innerHTML = '';
-    for (const song of SONGS) {
+    addListHead('Songs');
+
+    const builtins = SONGS.slice().sort((a, b) =>
+        (DIFF_RANK[a.diff] - DIFF_RANK[b.diff]) || a.name.localeCompare(b.name));
+    for (const song of builtins) ui.songList.appendChild(makeSongButton(song));
+
+    if (midiSongs.length) {
+        addListHead('Your MIDI files');
+        for (const song of midiSongs) {
+            const row = document.createElement('div');
+            row.className = 'song-row';
+            row.appendChild(makeSongButton(song));
+
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'song-del';
+            del.setAttribute('aria-label', 'Remove ' + song.name);
+            del.textContent = '✕';
+            del.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteMidiSong(song);
+            });
+            row.appendChild(del);
+            ui.songList.appendChild(row);
+        }
+    }
+}
+
+function deleteMidiSong(song) {
+    if (!window.confirm('Remove "' + song.name + '" from your MIDI files?')) return;
+    const idx = midiSongs.indexOf(song);
+    if (idx >= 0) midiSongs.splice(idx, 1);
+    if (BESTS[song.id] !== undefined) {
+        delete BESTS[song.id];
+        R2.saveJSON(BESTS_KEY, BESTS);
+    }
+    saveMidiLibrary();
+    buildSongList();
+    setMidiStatus('Removed ' + song.name + '.', '');
+}
+
+function buildSizeChoices() {
+    if (!ui.keySizeChoices) return;
+    ui.keySizeChoices.innerHTML = '';
+    for (const whiteKeys of KEY_SIZES) {
+        const l = makeLayout(whiteKeys);
         const btn = document.createElement('button');
-        btn.className = 'song-btn';
-        const best = BESTS[song.id] || 0;
-        btn.innerHTML =
-            '<span>' + song.name + '</span>' +
-            (best ? '<span class="best">' + best + '</span>' : '') +
-            '<span class="diff ' + song.diff + '">' + song.diff.toUpperCase() + '</span>';
-        btn.addEventListener('click', () => { blip(660, 0.06, 'triangle'); startSong(song); });
-        ui.songList.appendChild(btn);
+        btn.type = 'button';
+        btn.className = 'size-chip';
+        btn.dataset.white = whiteKeys;
+        btn.setAttribute('aria-label', l.total + ' keys, ' + midiName(l.min) + ' to ' + midiName(l.max));
+
+        const strong = document.createElement('b');
+        strong.textContent = l.total;
+        const unit = document.createElement('small');
+        unit.textContent = 'keys';
+        const range = document.createElement('em');
+        range.textContent = midiName(l.min) + '–' + midiName(l.max);
+
+        btn.appendChild(strong);
+        btn.appendChild(unit);
+        btn.appendChild(range);
+        btn.addEventListener('click', () => {
+            blip(660, 0.06, 'triangle');
+            applyKeyboardSize(whiteKeys, true);
+        });
+        ui.keySizeChoices.appendChild(btn);
+    }
+}
+
+function syncSettingsUI() {
+    if (!ui.keySizeChoices) return;
+    for (const btn of ui.keySizeChoices.querySelectorAll('.size-chip')) {
+        const active = Number(btn.dataset.white) === settings.whiteKeys;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+    if (ui.keySizeSummary) {
+        ui.keySizeSummary.textContent = layout.total + ' keys · ' +
+            midiName(layout.min) + '–' + midiName(layout.max);
+    }
+}
+
+function updateKbdHint() {
+    if (!ui.kbdHint) return;
+    let text = 'Keyboard: A S D F G H J K L ;  +  W E T Y U O P';
+    if (layout.whiteCount > 10) {
+        text += "  ·  extra: Z X C V B N M , . / ' [  +  1–8";
+    }
+    ui.kbdHint.textContent = text;
+}
+
+function applyKeyboardSize(whiteKeys, announce) {
+    if (KEY_SIZES.indexOf(whiteKeys) < 0) whiteKeys = 10;
+    settings.whiteKeys = whiteKeys;
+    R2.saveJSON(SETTINGS_KEY, settings);
+    layout = makeLayout(whiteKeys);
+    syncKeyMap();
+    buildKeys();
+    syncSettingsUI();
+    updateKbdHint();
+    render();
+    if (announce) {
+        showToast(layout.total + ' keys · ' + midiName(layout.min) + '–' + midiName(layout.max), 2000);
+    }
+}
+
+async function handleMidiFile(file) {
+    if (!file) return;
+    ui.midiFile.value = '';
+    audio();
+
+    if (file.size > MAX_MIDI_BYTES) {
+        setMidiStatus('That MIDI file is too large (max 5 MB).', 'error');
+        showToast('MIDI file too large (max 5 MB).', 3000);
+        return;
+    }
+
+    setMidiStatus('Reading ' + file.name + '…', '');
+    try {
+        const buffer = await file.arrayBuffer();
+        setMidiStatus('Parsing ' + file.name + '…', '');
+        await new Promise((resolve) => setTimeout(resolve, 20));
+
+        const parsed = R2.midi.parse(buffer, file.name);
+        const song = {
+            id: 'midi-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
+            name: parsed.name,
+            bpm: parsed.bpm,
+            diff: difficultyFor(parsed.notes),
+            isMidi: true,
+            savedAt: Date.now(),
+            notes: parsed.notes,
+        };
+
+        const stored = rememberMidiSong(song);
+        const persisted = saveMidiLibrary();
+        buildSongList();
+
+        const summary = 'Loaded ' + stored.name + ' · ' + stored.notes.length +
+            ' notes · ' + formatDuration(parsed.duration);
+        setMidiStatus(summary + (persisted ? '' : ' · session only'), persisted ? 'ok' : '');
+        showToast('MIDI loaded — ' + stored.notes.length + ' notes', 2200);
+        startSong(stored);
+    } catch (err) {
+        const msg = err && err.message ? err.message : 'Could not read that MIDI file.';
+        setMidiStatus(msg, 'error');
+        showToast(msg, 3600);
     }
 }
 
@@ -634,6 +1149,8 @@ function gotoMenu() {
     ui.menu.classList.remove('hidden');
     ui.songName.textContent = 'Piano Fall';
     buildSongList();
+    syncSettingsUI();
+    updateKbdHint();
     syncHud(true);
 }
 
@@ -676,18 +1193,24 @@ function setupInput() {
     window.addEventListener('keydown', (e) => {
         if (e.repeat) return;
         if (e.code === 'Escape') {
-            if (S.mode === 'play') pauseGame();
-            else if (S.mode === 'paused') resumeGame();
+            if (!ui.settings.classList.contains('hidden')) {
+                ui.settings.classList.add('hidden');
+            } else if (S.mode === 'play') {
+                pauseGame();
+            } else if (S.mode === 'paused') {
+                resumeGame();
+            }
             return;
         }
-        const midi = KEYMAP[e.code];
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const midi = keyMap.get(e.code);
         if (midi !== undefined) {
             e.preventDefault();
             pressKey(midi);
         }
     });
     window.addEventListener('keyup', (e) => {
-        const midi = KEYMAP[e.code];
+        const midi = keyMap.get(e.code);
         if (midi !== undefined) releaseKey(midi);
     });
 
@@ -698,6 +1221,23 @@ function setupInput() {
 
 function setupButtons() {
     ui.btnFreestyle.addEventListener('click', () => { blip(660, 0.06, 'triangle'); startFreestyle(); });
+    ui.btnSettings.addEventListener('click', () => {
+        blip(660, 0.06, 'triangle');
+        syncSettingsUI();
+        ui.settings.classList.remove('hidden');
+    });
+    ui.btnSettingsClose.addEventListener('click', () => {
+        blip(440, 0.05, 'sine');
+        ui.settings.classList.add('hidden');
+    });
+    ui.btnMidi.addEventListener('click', () => {
+        audio();
+        ui.midiFile.click();
+    });
+    ui.midiFile.addEventListener('change', () => {
+        const file = ui.midiFile.files && ui.midiFile.files[0];
+        handleMidiFile(file);
+    });
     ui.btnPause.addEventListener('click', () => {
         if (S.mode === 'play') pauseGame();
         else if (S.mode === 'paused') resumeGame();
@@ -746,7 +1286,11 @@ function checkOrientation() {
 }
 
 function boot() {
+    buildSizeChoices();
     buildKeys();
+    syncKeyMap();
+    syncSettingsUI();
+    updateKbdHint();
     resize();
     window.addEventListener('resize', () => { resize(); checkOrientation(); });
     window.addEventListener('orientationchange', () => setTimeout(() => { resize(); checkOrientation(); }, 250));

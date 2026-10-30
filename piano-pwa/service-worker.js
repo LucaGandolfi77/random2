@@ -1,9 +1,10 @@
 /* ===== Piano Fall PWA Service Worker ===== */
-const CACHE_NAME = "piano-fall-pwa-v1";
+const CACHE_NAME = "piano-fall-pwa-v2";
 const ASSETS = [
     "./",
     "./index.html",
     "./styles.css",
+    "./midi.js",
     "./piano.js",
     "../shared/arcade.js",
     "./manifest.json",

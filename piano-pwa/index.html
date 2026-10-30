@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Piano Fall PWA</title>
     <meta name="theme-color" content="#0d0b14">
-    <meta name="description" content="A landscape piano PWA with Synthesia-style falling notes. Play freestyle or follow five built-in songs.">
+    <meta name="description" content="A landscape piano PWA with Synthesia-style falling notes. Play freestyle, follow 15 built-in songs, or upload a MIDI file.">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -43,15 +43,32 @@
     <!-- Menu overlay -->
     <div id="menu" class="overlay">
         <div class="panel wide">
+            <button id="btnSettings" class="icon-btn menu-gear" type="button" aria-label="Settings">⚙️</button>
             <div class="crown">🎹</div>
             <h1 class="title">PIANO FALL</h1>
             <p class="subtitle">Catch the falling notes at the golden line</p>
             <div id="songList" class="song-list"></div>
+            <button id="btnMidi" class="btn midi-btn" type="button">📂&nbsp; Load MIDI file (.mid / .midi)</button>
+            <input id="midiFile" type="file" accept=".mid,.midi,audio/midi,audio/x-midi" hidden>
+            <div id="midiStatus" class="midi-status" role="status" aria-live="polite"></div>
             <button id="btnFreestyle" class="btn primary">🎵&nbsp; Freestyle — just play</button>
             <div class="howto">
                 <p>Tap the keys when tiles reach the <b>gold line</b>.</p>
-                <p class="kbd-hint">Keyboard: A S D F G H J K L ; &nbsp;+&nbsp; W E T Y U O P</p>
+                <p>Load a MIDI file to play it in the same Synthesia-style mode.</p>
+                <p id="kbdHint" class="kbd-hint">Keyboard: A S D F G H J K L ; &nbsp;+&nbsp; W E T Y U O P</p>
             </div>
+        </div>
+    </div>
+
+    <!-- Settings overlay -->
+    <div id="settings" class="overlay hidden">
+        <div class="panel">
+            <div class="crown">⚙️</div>
+            <h2 class="title small">SETTINGS</h2>
+            <p class="subtitle">Keys on the keyboard</p>
+            <div id="keySizeChoices" class="size-grid"></div>
+            <p id="keySizeSummary" class="setting-note"></p>
+            <button id="btnSettingsClose" class="btn primary" type="button">Done</button>
         </div>
     </div>
 
@@ -86,7 +103,10 @@
         <div class="rotate-inner">🔄<br>Rotate your device<br><span>Landscape gives you a full piano</span></div>
     </div>
 
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+
     <script src="../shared/arcade.js"></script>
+    <script src="midi.js"></script>
     <script src="piano.js"></script>
 </body>
 </html>

@@ -15,6 +15,16 @@ godot --path ninth-day
 
 Or open `ninth-day/project.godot` in the Godot editor and press **F5**.
 
+If the project has never been opened in the editor, build the import and
+`class_name` cache once before running from the command line:
+
+```bash
+godot --headless --path ninth-day --editor --quit
+```
+
+Skipping this step makes autoloads such as `RunState` fail with
+`Identifier "..." not declared in the current scope` parse errors.
+
 The game runs:
 
 **Title → Bell Map → Day 1 Morning (story + Hollow Choir tutorial) → Bell Rest → Afternoon (story + Ashwright) → Bell Rest → Night (story + choice) → Bell Rest → Day 2**

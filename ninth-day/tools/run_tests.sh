@@ -25,6 +25,11 @@ if [[ -z "$GODOT_BIN" ]]; then
 fi
 
 echo "Using: $GODOT_BIN"
+
+# Populate .godot so class_name globals and imported resources exist.
+# Without this, a fresh checkout fails to resolve autoloads and scripts.
+"$GODOT_BIN" --headless --path "$PROJECT_DIR" --editor --quit
+
 "$GODOT_BIN" --headless --path "$PROJECT_DIR" -s tests/test_battle.gd
 
 echo
