@@ -48,6 +48,7 @@
   - [GULPER](#gulper)
   - [CORE 9](#core-9)
   - [Dottor Gelo](#dottor-gelo)
+  - [CINDER BELT](#cinder-belt)
   - [Purr Player](#purr-player)
 - [The tools](#the-tools)
   - [PocketCode](#pocketcode)
@@ -116,6 +117,7 @@
 | 45 | **Purr Player** | MP3 and video player, cat background, persistent library | Vanilla JS + IndexedDB + Media Session | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/purr-player-pwa/) |
 | 46 | **CORE 9: NETWORK** | Three-site low-poly nuclear idle tycoon with crew and choice events | Canvas 2D (software renderer) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/core9-pwa/) |
 | 47 | **Dottor Gelo** | 3D low-poly idle tycoon: build androids, train cyborgs, a sad story | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/dottor-gelo-pwa/) |
+| 48 | **CINDER BELT** | Single-player .io salvage war: PvE/PvP zones, relays, Leviathan | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/cinder-belt-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -1275,6 +1277,44 @@ npm run build    # -> dist/
 [▶ Play](https://lucagandolfi77.github.io/random2/dottor-gelo-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/dottor-gelo-pwa) ·
 [README](dottor-gelo-pwa/README.md)
+
+### CINDER BELT
+
+*A single-player .io salvage war in a dying ring.* ☄️
+
+A 15-minute run through four concentric zones: the safe **Anchorage** bubble,
+the PvE **Verdant Drift**, the open-PvP **Scab**, and the black-hole hazard of
+**The Maw**. Mine, bank, upgrade, and break the Corsair Nexus before the ring
+collapses.
+
+- **The law is the map.** Shooting a pilot in the Drift marks you **OUTLAW**:
+  docking is denied and the Anchorage turrets answer you. The Scab is always
+  free fire, and the Maw pays triple ore for the risk.
+- **One real fork, then commitment.** Tier 1 is a Sparrow. At tier 2 you pick
+  **Lance**, **Bulwark** or **Harvester**, and each line runs straight to tier
+  6 with genuinely different hull, shield, cargo, speed and ability curves.
+- **Relays, not a kill counter.** Hold two of the three relays to drop the
+  Nexus shield. Or kill the **Leviathan**, carry its Singularity Core into the
+  Nexus, and breach it instantly.
+- **AI pilots run your economy.** The free wingmen, neutral haulers and corsair
+  raiders mine, bank, upgrade, take relays and hunt the core. VEX-9 is an ace
+  with a name and a reason to remember yours.
+- **A drydock that stops the clock.** Docking freezes the simulation, banks the
+  hold, repairs the hull and opens the upgrade tree; the match resumes when you
+  undock.
+- **No build step, no assets.** Canvas 2D procedural ships, rocks and stations,
+  synthesised WebAudio, and a PWA cache for offline play.
+- **Three headless suites** — simulation/economy, content/PWA wiring, and a
+  fake-DOM boot test that drives launch → fly → dock → upgrade → pause →
+  undock → win → retry.
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`icons/`, `src/` (15 modules), `tests/` (3 suites). See
+[`cinder-belt-pwa/README.md`](cinder-belt-pwa/README.md).
+
+[▶ Play](https://lucagandolfi77.github.io/random2/cinder-belt-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/cinder-belt-pwa) ·
+[README](cinder-belt-pwa/README.md)
 
 ### Purr Player
 

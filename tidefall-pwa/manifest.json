@@ -1,0 +1,11 @@
+{
+  "name": "TIDEFALL: Maree di Cenere",
+  "short_name": "TIDEFALL",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#071316",
+  "theme_color": "#0b2528",
+  "description": "A single-player offline naval RPG in the Ashen Meridian.",
+  "icons": [{"src":"icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

@@ -101,6 +101,8 @@ seeds in Node.
 
 `dottor-gelo-pwa/` is a true Three.js idle tycoon: an orthographic isometric diorama of Dr. Gero’s laboratory, ten rooms with five visual stages, procedural android models and animations, an energy grid that throttles overbuilt rooms, cyborg training and assignment, auto-battles, expeditions, a twelve-chapter story with three endings, a prestige memory tree, and a 2D minimap drawn from the same room table. The UI is Italian; the simulation (`src/sim.js`) is DOM-free and Three-free and runs in the Node test suite. Procedural geometry only — no GLTF, textures or audio files. Built with Vite + `vite-plugin-pwa`, deployed from `dist/`.
 
+`cinder-belt-pwa/` is a single-player .io salvage war in four concentric zones: a safe Anchorage bubble, the PvE Verdant Drift, the open-PvP Scab and the black-hole hazard of the Maw. A 15-minute run asks you to mine, bank, upgrade one of three hull doctrines, hold two of three relays to drop a Nexus shield, or kill the Leviathan and carry its Singularity Core into the Nexus. The zone law is real — firing on a pilot in the Drift marks you OUTLAW and the Anchorage turrets answer — and the AI pilots run the same mining, banking and upgrading economy you do. Canvas 2D procedural ships and rocks, synthesised WebAudio, no build step, offline PWA. Three headless suites cover the simulation, content/PWA wiring and a fake-DOM boot that drives launch to victory.
+
 `pixel-cup-pwa/` is a low-poly arcade football game whose picture is neither
 WebGL nor images: the pitch, the players, the ball, the goal and the crowd are
 triangles drawn by hand into a 320x180 byte buffer that the browser scales up
@@ -142,6 +144,9 @@ node pulse-pwa/smoke.mjs       # in-browser (skips if no playwright)
 node pixel-cup-pwa/sim.test.mjs  # PIXEL CUP '96 model
 node pixel-cup-pwa/boot.test.mjs # PIXEL CUP '96, the whole game on a fake DOM
 node pixel-cup-pwa/smoke.mjs      # in-browser (skips if no playwright)
+node cinder-belt-pwa/tests/sim.test.js     # CINDER BELT simulation/economy
+node cinder-belt-pwa/tests/content.test.js # CINDER BELT content + PWA wiring
+node cinder-belt-pwa/tests/boot.test.js    # CINDER BELT, the whole game on a fake DOM
 ```
 
 ## Layout

@@ -183,21 +183,45 @@ SNAPSHOT_SCRIPT = r"""
 
 
 def patch_game_bundle(body: bytes) -> tuple[bytes, bool]:
-    """Expose the closure-local game object before its boot call.
+    """Expose the closure-local game object to the read-only snapshot probe.
 
     The published bundle is minified and obfuscated, so the local variable name
-    changes between builds. The stable `Flow.boot()` property path is enough to
-    identify the object without depending on one generated identifier.
+    changes between builds. Two stable anchors have existed so far:
+
+    * older builds finish with a `Flow['boot']()` call, which lets the probe
+      capture the root object before the game boots;
+    * current builds never call boot from a named property, but they still
+      create the root object with `Object.create(null)` and mark it with a
+      `BUILT` property immediately afterwards.
+
+    Both forms are detected without depending on one generated identifier.
     """
 
     if b"window.__PS_BOT_G=" in body:
         return body, True
-    pattern = re.compile(rb"(?P<root>[A-Za-z_$][A-Za-z0-9_$]*)\['Flow'\]\['boot'\]\(\)")
-    match = pattern.search(body)
+
+    boot_call = re.compile(
+        rb"(?P<root>[A-Za-z_$][A-Za-z0-9_$]*)\['Flow'\]\['boot'\]\(\)"
+    )
+    match = boot_call.search(body)
+    if match:
+        root = match.group("root")
+        replacement = b"window.__PS_BOT_G=" + root + b"," + match.group(0)
+        return body[: match.start()] + replacement + body[match.end() :], True
+
+    # Current builds: `var <root> = Object['create'](null); <root>['BUILT']=...`
+    # Insert the global assignment *after* the object exists, otherwise the
+    # hoisted variable would still be undefined at that point.
+    root_object = re.compile(
+        rb"(?P<root>[A-Za-z_$][A-Za-z0-9_$]*)"
+        rb"=Object\[(['\"])create\2\]\(null\)"
+        rb"(?=;(?P=root)\[(['\"])BUILT\3\]=)"
+    )
+    match = root_object.search(body)
     if not match:
         return body, False
     root = match.group("root")
-    replacement = b"window.__PS_BOT_G=" + root + b"," + match.group(0)
+    replacement = match.group(0) + b";window.__PS_BOT_G=" + root + b";"
     return body[: match.start()] + replacement + body[match.end() :], True
 
 

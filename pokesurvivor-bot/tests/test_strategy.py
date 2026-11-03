@@ -52,6 +52,17 @@ class StrategyTests(unittest.TestCase):
         self.assertTrue(installed)
         self.assertIn(b"window.__PS_BOT_G=q7,q7['Flow']['boot']()", patched)
 
+    def test_bundle_probe_supports_the_object_create_root_anchor(self) -> None:
+        # Current published builds no longer call Flow.boot() by name; they
+        # create the root object with Object.create(null) and mark it BUILT.
+        original = (
+            b"(()=>{var zz=Object['create'](null);zz['BUILT']=!0x0,"
+            b"zz['LIFT']=0x12;use(zz);})();"
+        )
+        patched, installed = patch_game_bundle(original)
+        self.assertTrue(installed)
+        self.assertIn(b"zz=Object['create'](null);window.__PS_BOT_G=zz;", patched)
+
     def test_moves_toward_a_safe_pickup_when_no_enemy_is_near(self) -> None:
         strategy = SurvivalStrategy()
         keys = strategy.choose(

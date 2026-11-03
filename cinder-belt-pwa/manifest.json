@@ -1,0 +1,22 @@
+{
+  "name": "CINDER BELT — space mining & combat",
+  "short_name": "CINDER BELT",
+  "description": "A single-player .io salvage war in a dying ring. Mine asteroids, upgrade your hull, fight AI pilots across PvE and PvP zones, and break the Corsair Nexus before the belt collapses.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "background_color": "#050711",
+  "theme_color": "#050711",
+  "orientation": "any",
+  "lang": "en",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

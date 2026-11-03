@@ -1,0 +1,6 @@
+const KEY='tidefall-save-v2',DB='tidefall-db',STORE='saves';
+function openDB(){return new Promise((resolve,reject)=>{if(!('indexedDB'in globalThis))return reject(new Error('IndexedDB unavailable'));const request=indexedDB.open(DB,1);request.onupgradeneeded=()=>request.result.createObjectStore(STORE);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
+export async function load(){try{const db=await openDB();const value=await new Promise((resolve,reject)=>{const req=db.transaction(STORE).objectStore(STORE).get(KEY);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});db.close();if(value)return value}catch{}try{const raw=localStorage.getItem(KEY);return raw?JSON.parse(raw):null}catch{return null}}
+export async function save(data){try{const db=await openDB();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(data,KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});db.close()}catch{try{localStorage.setItem(KEY,JSON.stringify(data))}catch{}}}
+export function exportSave(data){return JSON.stringify(data,null,2)}
+export async function importSave(file){const parsed=JSON.parse(await file.text());if(!parsed||typeof parsed!=='object'||!parsed.player||!parsed.world)throw new Error('Invalid Tidefall save');return parsed}

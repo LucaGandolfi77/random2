@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CINDER BELT — free space mining &amp; combat game</title>
+    <meta name="description" content="CINDER BELT is a free browser space game: mine asteroids, upgrade your hull, fight AI pilots in PvE and PvP zones, and break the Corsair Nexus before the ring collapses. Offline PWA.">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="author" content="Luca Gandolfi">
+    <meta name="copyright" content="© 2026 Luca Gandolfi">
+    <meta name="theme-color" content="#050711">
+    <meta name="color-scheme" content="dark">
+    <link rel="canonical" href="https://lucagandolfi77.github.io/random2/cinder-belt-pwa/">
+    <link rel="license" href="https://github.com/LucaGandolfi77/random2/blob/main/LICENSE">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CINDER BELT">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="CINDER BELT — mine, fight, break the Nexus">
+    <meta property="og:description" content="A single-player .io space game in a dying ring. Four zones, PvE and PvP law, AI pilots with their own economy, and a Leviathan core that can end the war.">
+    <meta property="og:url" content="https://lucagandolfi77.github.io/random2/cinder-belt-pwa/">
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/cinder-belt-pwa/icons/og-cover.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="CINDER BELT — free space mining &amp; combat">
+    <meta name="twitter:description" content="Mine the belt. Hold the relays. Break the Nexus. A free offline space game.">
+    <meta name="twitter:image" content="https://lucagandolfi77.github.io/random2/cinder-belt-pwa/icons/og-cover.png">
+</head>
+<body>
+    <canvas id="game" aria-label="Cinder Belt game canvas"></canvas>
+
+    <div id="ui">
+        <!-- ===== in-run HUD ===== -->
+        <section id="hud" hidden>
+            <header class="hud-top">
+                <div class="objective-panel">
+                    <div class="match-clock"><span id="timer">15:00</span><small>COLLAPSE</small></div>
+                    <div class="objective-copy">
+                        <strong id="objective">HOLD TWO RELAYS</strong>
+                        <span id="objective-detail">The Nexus shield is up.</span>
+                    </div>
+                    <div class="relay-pips" id="relay-pips" aria-label="Relay ownership"></div>
+                </div>
+                <div class="team-scores" aria-label="Team score">
+                    <div class="team free"><span>FREE</span><b id="score-free">0</b></div>
+                    <div class="team corsair"><span>CORSAIR</span><b id="score-corsair">0</b></div>
+                </div>
+            </header>
+
+            <div id="killfeed" aria-live="polite"></div>
+            <div id="zone-banner" class="zone-banner" hidden>
+                <span class="zone-name"></span>
+                <span class="zone-sub"></span>
+                <span class="zone-blurb"></span>
+            </div>
+            <div id="event-message" class="event-message" hidden></div>
+            <div id="comms" class="comms" hidden></div>
+
+            <aside id="status-panel">
+                <div class="hull-line">
+                    <span id="hull-name">SPARROW</span>
+                    <span id="hull-tier">T1</span>
+                </div>
+                <div class="bar hull"><i id="bar-hull"></i><span id="txt-hull">145</span></div>
+                <div class="bar shield"><i id="bar-shield"></i><span id="txt-shield">85</span></div>
+                <div class="bar energy"><i id="bar-energy"></i><span id="txt-energy">105</span></div>
+                <div class="cargo-line">
+                    <span class="cargo-label">HOLD <b id="cargo-units">0</b>/<b id="cargo-max">32</b></span>
+                    <span class="credits"><b id="credits">0</b> cr</span>
+                </div>
+                <div class="bar cargo"><i id="bar-cargo"></i></div>
+                <div class="ability-line">
+                    <span class="key">SPACE</span>
+                    <span id="ability-name">AFTERBURNER</span>
+                    <span id="ability-cd" class="cd"></span>
+                </div>
+                <div class="order-line" id="order-line">1 Mine · 2 Attack · 3 Defend · 4 Follow</div>
+            </aside>
+
+            <aside id="map-panel">
+                <canvas id="minimap" width="180" height="180" aria-label="Minimap"></canvas>
+                <div class="map-zone" id="zone-tag">ANCHORAGE</div>
+                <div class="map-legend"><span class="lg free"></span>FREE <span class="lg corsair"></span>CORSAIR <span class="lg feral"></span>FERAL</div>
+            </aside>
+
+            <div id="dock-prompt" hidden><span class="key">E</span> DOCK AT ANCHORAGE</div>
+            <div id="toast" class="toast" hidden></div>
+
+            <div id="touch-controls" hidden>
+                <div class="stick left" id="stick-left"><div class="knob"></div></div>
+                <div class="stick right" id="stick-right"><div class="knob"></div></div>
+                <button id="btn-ability" class="touch-btn ability" type="button">ABILITY</button>
+                <button id="btn-boost" class="touch-btn boost" type="button">BOOST</button>
+                <button id="btn-dock" class="touch-btn dock" type="button">DOCK</button>
+                <button id="btn-pause" class="touch-btn pause" type="button">II</button>
+            </div>
+
+            <button id="pause-btn" class="corner-btn" type="button" aria-label="Pause">II</button>
+        </section>
+
+        <!-- ===== main menu ===== -->
+        <section id="menu" class="screen">
+            <div class="menu-sky" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div class="menu-wrap">
+                <div class="title-block">
+                    <p class="eyebrow">A SINGLE-PLAYER .IO SALVAGE WAR</p>
+                    <h1>CINDER<span>BELT</span></h1>
+                    <p class="tagline">Mine the belt. Hold the relays. Break the Nexus before the ring collapses.</p>
+                </div>
+                <div class="menu-actions">
+                    <button id="btn-launch" class="big-btn primary" type="button">LAUNCH RUN</button>
+                    <div class="menu-row">
+                        <button id="btn-howto" class="big-btn" type="button">HOW TO PLAY</button>
+                        <button id="btn-settings" class="big-btn" type="button">SETTINGS</button>
+                    </div>
+                </div>
+                <div class="difficulty-picker" role="group" aria-label="Difficulty">
+                    <span>DIFFICULTY</span>
+                    <button data-diff="cadet" type="button">CADET</button>
+                    <button data-diff="pilot" type="button" class="on">PILOT</button>
+                    <button data-diff="ace" type="button">ACE</button>
+                </div>
+                <div class="profile-strip">
+                    <div><b id="best-score">0</b><span>BEST SCORE</span></div>
+                    <div><b id="best-wins">0</b><span>NEXUS KILLS</span></div>
+                    <div><b id="best-kills">0</b><span>TOTAL KILLS</span></div>
+                    <div><b id="best-ore">0</b><span>ORE BANKED</span></div>
+                </div>
+                <p class="menu-foot">WASD thrust · mouse aim · hold fire · SPACE ability · E dock · ESC pause<br>Fully offline. No accounts. No trackers. Works with touch.</p>
+            </div>
+        </section>
+
+        <!-- ===== hangar ===== -->
+        <section id="hangar" class="overlay" hidden>
+            <div class="hangar-card">
+                <header>
+                    <div>
+                        <p class="eyebrow">ANCHORAGE // DRYDOCK</p>
+                        <h2>HULL BAY</h2>
+                    </div>
+                    <div class="hangar-credits"><b id="hangar-credits">0</b> cr</div>
+                </header>
+                <div class="hangar-body">
+                    <div class="hangar-left">
+                        <canvas id="hull-preview" width="220" height="130"></canvas>
+                        <h3 id="hangar-hull">SPARROW</h3>
+                        <p id="hangar-role">STARTER · TIER 1</p>
+                        <div class="stat-grid" id="hangar-stats"></div>
+                        <p class="hangar-note" id="hangar-note">Every hull keeps the same controls. The doctrine changes how you survive.</p>
+                    </div>
+                    <div class="hangar-right">
+                        <h3 id="upgrade-title">CHOOSE A DOCTRINE</h3>
+                        <div id="upgrade-options" class="upgrade-options"></div>
+                        <div class="hangar-actions">
+                            <button id="btn-undock" class="big-btn primary" type="button">UNDOCK</button>
+                            <button id="btn-hangar-menu" class="big-btn" type="button">ABANDON RUN</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== pause ===== -->
+        <section id="pause" class="overlay" hidden>
+            <div class="modal small">
+                <p class="eyebrow">PAUSED</p>
+                <h2>HOLDING PATTERN</h2>
+                <div class="modal-actions">
+                    <button id="btn-resume" class="big-btn primary" type="button">RESUME</button>
+                    <button id="btn-pause-settings" class="big-btn" type="button">SETTINGS</button>
+                    <button id="btn-pause-menu" class="big-btn" type="button">ABANDON RUN</button>
+                </div>
+                <p class="modal-note">The belt waits. The match clock does not.</p>
+            </div>
+        </section>
+
+        <!-- ===== game over ===== -->
+        <section id="gameover" class="overlay" hidden>
+            <div class="modal result">
+                <p class="eyebrow" id="result-kicker">RUN COMPLETE</p>
+                <h2 id="result-title">THE BELT REMEMBERS</h2>
+                <p id="result-reason">The Nexus is dust. The ring is yours.</p>
+                <div class="result-grid">
+                    <div><b id="result-score">0</b><span>SCORE</span></div>
+                    <div><b id="result-kills">0</b><span>KILLS</span></div>
+                    <div><b id="result-ore">0</b><span>ORE BANKED</span></div>
+                    <div><b id="result-time">0:00</b><span>TIME</span></div>
+                </div>
+                <div class="modal-actions">
+                    <button id="btn-retry" class="big-btn primary" type="button">FLY AGAIN</button>
+                    <button id="btn-result-menu" class="big-btn" type="button">MAIN MENU</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== how to play ===== -->
+        <section id="howto" class="overlay" hidden>
+            <div class="modal wide">
+                <p class="eyebrow">FIELD MANUAL</p>
+                <h2>WELCOME TO THE BELT</h2>
+                <div class="howto-grid">
+                    <div>
+                        <h3>FLY &amp; MINE</h3>
+                        <p><b>WASD</b> thrusts, the mouse aims, hold <b>left click</b> to fire. Shots crack asteroids; fly through the chunks to tractor them into your hold. <b>E</b> docks at the Anchorage to bank ore, repair and upgrade.</p>
+                    </div>
+                    <div>
+                        <h3>THE LAW</h3>
+                        <p><b>Anchorage</b>: safe, turrets online. <b>Drift</b>: PvE; shooting a pilot marks you <b>OUTLAW</b>. <b>Scab</b>: open PvP. <b>Maw</b>: PvP, gravity, the richest ore.</p>
+                    </div>
+                    <div>
+                        <h3>WIN THE RUN</h3>
+                        <p>Hold two of the three relays to drop the Nexus shield, then destroy the Nexus. Or kill the <b>Leviathan</b>, carry its <b>Singularity Core</b> into the Nexus for an instant breach.</p>
+                    </div>
+                    <div>
+                        <h3>WINGMEN</h3>
+                        <p><b>1</b> mine · <b>2</b> attack · <b>3</b> defend · <b>4</b> follow. Your three allies run the same economy you do.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button id="btn-howto-close" class="big-btn primary" type="button">BACK</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== settings ===== -->
+        <section id="settings" class="overlay" hidden>
+            <div class="modal small">
+                <p class="eyebrow">SYSTEM</p>
+                <h2>SETTINGS</h2>
+                <div class="setting-row"><span>Sound</span><button class="toggle" data-setting="sound" type="button">ON</button></div>
+                <div class="setting-row"><span>Haptics</span><button class="toggle" data-setting="haptics" type="button">ON</button></div>
+                <div class="setting-row"><span>Screen shake</span><button class="toggle" data-setting="shake" type="button">ON</button></div>
+                <div class="setting-row"><span>Quality</span><button class="toggle" data-setting="quality" type="button">HIGH</button></div>
+                <div class="setting-row"><span>Aim assist</span><button class="toggle" data-setting="aimAssist" type="button">OFF</button></div>
+                <div class="modal-actions">
+                    <button id="btn-settings-close" class="big-btn primary" type="button">CLOSE</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="../shared/arcade.js"></script>
+    <script src="src/config.js"></script>
+    <script src="src/rng.js"></script>
+    <script src="src/storage.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/input.js"></script>
+    <script src="src/shipyard.js"></script>
+    <script src="src/zones.js"></script>
+    <script src="src/world.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/npcs.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/minimap.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

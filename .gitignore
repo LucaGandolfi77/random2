@@ -5,3 +5,8 @@ package.json
 *.spec.*
 plane-portrait-pwa/
 test-expanded.js
+
+__pycache__/
+*.pyc
+!cinder-belt-pwa/tests/*.test.js
+!tidefall-pwa/tests/*.test.js
