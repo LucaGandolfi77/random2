@@ -1,0 +1,400 @@
+{
+  "$schema": "../../schema/map.schema.json",
+  "id": "fidenza",
+  "name": "Fidenza",
+  "version": "2.0.0",
+  "center": { "lat": 44.8665, "lon": 10.0612 },
+  "origin": { "lat": 44.8665, "lon": 10.0612 },
+  "bbox": { "south": 44.8500, "west": 10.0400, "north": 44.8820, "east": 10.0850 },
+  "projection": "local-tangent",
+  "sources": {
+    "cityData": "data/city.json",
+    "terrainData": "data/terrain.json",
+    "osm": "OpenStreetMap via Overpass",
+    "terrain": "Terrain Tiles (Mapzen, EU-DEM Copernicus)"
+  },
+  "attribution": {
+    "map": "© OpenStreetMap contributors (ODbL)",
+    "region": "© Regione Emilia-Romagna",
+    "terrain": "Terrain Tiles (Mapzen, EU-DEM Copernicus)"
+  },
+  "places": [
+    {
+      "id": "duomo",
+      "name": "Duomo di San Donnino",
+      "short": "Duomo",
+      "aliases": ["Cattedrale di San Donnino", "Duomo"],
+      "category": "church",
+      "osm": "way/182278537",
+      "lat": 44.866476,
+      "lon": 10.057810,
+      "collectible": true,
+      "beacon": { "x": -296, "z": 3 },
+      "radius": 8,
+      "description": "La cattedrale romanica dedicata a San Donnino. La facciata, con il rosone e il portale, è legata alla tradizione di Benedetto Antelami e guarda verso Piazza Duomo.",
+      "fact": "La facciata del Duomo è rimasta incompiuta: per questo ha un profilo così particolare."
+    },
+    {
+      "id": "piazza-duomo",
+      "name": "Piazza Duomo",
+      "short": "Piazza Duomo",
+      "category": "square",
+      "osm": "way/488935098",
+      "lat": 44.866537,
+      "lon": 10.057439,
+      "collectible": true,
+      "radius": 8,
+      "description": "La piazza davanti alla cattedrale, cuore antico di Fidenza. Da qui si raggiungono a piedi il Duomo, la Porta San Donnino e il Ponte romano.",
+      "fact": "La piazza si trova a ovest del Duomo, sul lato della facciata principale."
+    },
+    {
+      "id": "porta",
+      "name": "Porta di San Donnino",
+      "short": "Porta San Donnino",
+      "category": "monument",
+      "osm": "way/652879042",
+      "lat": 44.866930,
+      "lon": 10.057332,
+      "collectible": true,
+      "radius": 8,
+      "description": "L'antica porta medievale che segnava l'ingresso al borgo lungo la Via Emilia. Oggi è uno degli angoli più riconoscibili del centro.",
+      "fact": "Fidenza si chiamava Borgo San Donnino: il nome attuale arrivò solo nel 1927."
+    },
+    {
+      "id": "ponte",
+      "name": "Ponte romano",
+      "short": "Ponte romano",
+      "category": "monument",
+      "osm": "way/652879043",
+      "lat": 44.867042,
+      "lon": 10.057271,
+      "collectible": true,
+      "radius": 8,
+      "description": "Il ponte di origine romana vicino alla porta, punto di passaggio storico verso il torrente Stirone.",
+      "fact": "La Via Emilia attraversa Fidenza da est a ovest: è l'asse storico della città."
+    },
+    {
+      "id": "teatro",
+      "name": "Teatro Girolamo Magnani",
+      "short": "Teatro Magnani",
+      "category": "theatre",
+      "osm": "way/652879035",
+      "lat": 44.865852,
+      "lon": 10.060008,
+      "collectible": true,
+      "radius": 8,
+      "description": "Il teatro ottocentesco intitolato a Girolamo Magnani, pittore e scenografo fidentino. È il salotto culturale del centro.",
+      "fact": "Il teatro porta il nome di un artista nato a Fidenza, famoso per le sue scenografie."
+    },
+    {
+      "id": "comunale",
+      "name": "Palazzo Comunale",
+      "short": "Municipio",
+      "category": "civic",
+      "osm": "relation/2428450",
+      "lat": 44.865870,
+      "lon": 10.060792,
+      "collectible": true,
+      "radius": 8,
+      "description": "Il Palazzo Comunale storico di Fidenza, tra Piazza Verdi e il Teatro Magnani. È la sede simbolo delle istituzioni cittadine.",
+      "fact": "Il municipio storico si trova a sud del Duomo, vicino al teatro e a Piazza Verdi."
+    },
+    {
+      "id": "granmadre",
+      "name": "Santuario della Gran Madre di Dio",
+      "short": "Gran Madre",
+      "category": "church",
+      "osm": "way/182278306",
+      "lat": 44.865170,
+      "lon": 10.066467,
+      "collectible": true,
+      "radius": 8,
+      "description": "Il santuario della Gran Madre di Dio, uno dei principali luoghi di culto di Fidenza, poco fuori dal centro storico.",
+      "fact": "La sua cupola si vede da diversi punti della città."
+    },
+    {
+      "id": "sanpietro",
+      "name": "Chiesa di San Pietro",
+      "short": "San Pietro",
+      "category": "church",
+      "osm": "way/182278235",
+      "lat": 44.864714,
+      "lon": 10.057816,
+      "collectible": true,
+      "radius": 8,
+      "description": "La chiesa di San Pietro, una delle più antiche del centro, custodisce secoli di storia fidentina.",
+      "fact": "Intorno a San Pietro si è sviluppato uno dei nuclei più antichi della città."
+    },
+    {
+      "id": "musini",
+      "name": "Museo civico del Risorgimento Luigi Musini",
+      "short": "Museo Musini",
+      "category": "museum",
+      "osm": "node/3183577908",
+      "lat": 44.864830,
+      "lon": 10.066011,
+      "collectible": true,
+      "radius": 8,
+      "description": "Il museo civico dedicato a Luigi Musini, figura del Risorgimento italiano e della storia locale.",
+      "fact": "Il museo racconta il legame tra Fidenza e il Risorgimento."
+    },
+    {
+      "id": "stazione",
+      "name": "Stazione di Fidenza",
+      "short": "Stazione",
+      "category": "station",
+      "osm": "node/13742535638",
+      "lat": 44.867621,
+      "lon": 10.063423,
+      "collectible": true,
+      "radius": 8,
+      "description": "La stazione ferroviaria di Fidenza, sulla linea Milano-Bologna. Un punto di arrivo e partenza per tutta la città.",
+      "fact": "La ferrovia corre a nord del centro storico, separando la città dalla campagna."
+    },
+    {
+      "id": "stirone",
+      "name": "Torrente Stirone",
+      "short": "Stirone",
+      "category": "nature",
+      "osm": "way/167581729",
+      "linear": true,
+      "lat": 44.8665,
+      "lon": 10.0456,
+      "collectible": true,
+      "beacon": { "x": -1230.8, "z": 0 },
+      "radius": 8,
+      "description": "Il torrente Stirone a ovest del centro, tra alberi, sentieri e il rumore dell'acqua. È il polmone naturale della città.",
+      "fact": "Il torrente dà il nome al parco regionale che attraversa la provincia di Parma."
+    },
+    {
+      "id": "obelisco",
+      "name": "Obelisco",
+      "short": "Obelisco",
+      "category": "monument",
+      "osm": "way/652879039",
+      "lat": 44.866212,
+      "lon": 10.061034,
+      "collectible": false,
+      "beacon": { "x": -13.1, "z": 32 },
+      "radius": 8,
+      "description": "L'obelisco di Piazza Garibaldi, uno dei monumenti più riconoscibili del centro.",
+      "fact": "Piazza Garibaldi è un altro salotto della città, a est del Duomo."
+    },
+    {
+      "id": "piazza-garibaldi",
+      "name": "Piazza Garibaldi",
+      "short": "Piazza Garibaldi",
+      "category": "square",
+      "osm": "way/445470949",
+      "lat": 44.866689,
+      "lon": 10.061385,
+      "collectible": false,
+      "radius": 10,
+      "description": "Piazza Garibaldi, con l'obelisco e il viavai del centro.",
+      "fact": "Qui si trova l'obelisco che molti scambiano per Piazza Duomo."
+    },
+    {
+      "id": "piazza-verdi",
+      "name": "Piazza Giuseppe Verdi",
+      "short": "Piazza Verdi",
+      "category": "square",
+      "osm": "way/142546108",
+      "lat": 44.865555,
+      "lon": 10.060964,
+      "collectible": false,
+      "radius": 10,
+      "description": "Piazza Verdi, vicino al Teatro Magnani e al Palazzo Comunale.",
+      "fact": "È uno dei luoghi di ritrovo del centro storico."
+    },
+    {
+      "id": "piazza-matteotti",
+      "name": "Piazza Giacomo Matteotti",
+      "short": "Piazza Matteotti",
+      "category": "square",
+      "osm": "way/142546150",
+      "lat": 44.865519,
+      "lon": 10.061760,
+      "collectible": false,
+      "radius": 10,
+      "description": "Piazza Matteotti, tra il teatro e il cuore commerciale della città.",
+      "fact": "La piazza collega il centro storico alle vie dello shopping."
+    },
+    {
+      "id": "piazza-repubblica",
+      "name": "Piazza della Repubblica",
+      "short": "Piazza Repubblica",
+      "category": "square",
+      "osm": "way/1304344561",
+      "lat": 44.867430,
+      "lon": 10.063671,
+      "collectible": false,
+      "radius": 10,
+      "description": "Piazza della Repubblica, davanti alla stazione ferroviaria.",
+      "fact": "È il primo spazio che molti visitatori vedono arrivando in treno."
+    },
+    {
+      "id": "comune-uffici",
+      "name": "Comune di Fidenza — uffici",
+      "short": "Uffici comunali",
+      "category": "civic",
+      "osm": "node/1560440147",
+      "lat": 44.867118,
+      "lon": 10.061459,
+      "collectible": false,
+      "radius": 10,
+      "description": "Gli uffici comunali di Fidenza, in Piazza Garibaldi.",
+      "fact": "Non vanno confusi con il Palazzo Comunale storico, che si trova più a sud."
+    },
+    {
+      "id": "chiesa-santa-maria",
+      "name": "Chiesa di Santa Maria Annunziata",
+      "short": "Santa Maria",
+      "category": "church",
+      "osm": "way/182279850",
+      "lat": 44.866116,
+      "lon": 10.062568,
+      "collectible": false,
+      "radius": 10,
+      "description": "La chiesa di Santa Maria Annunziata, nel cuore del centro.",
+      "fact": "La sua posizione la rende uno dei punti di riferimento della città."
+    },
+    {
+      "id": "chiesa-san-paolo",
+      "name": "Chiesa di San Paolo",
+      "short": "San Paolo",
+      "category": "church",
+      "osm": "way/182278201",
+      "lat": 44.862992,
+      "lon": 10.052401,
+      "collectible": false,
+      "radius": 10,
+      "description": "La chiesa di San Paolo, a sud-ovest del centro.",
+      "fact": "È uno dei luoghi di culto storici della città."
+    },
+    {
+      "id": "chiesa-sant-antonio",
+      "name": "Chiesa di Sant'Antonio Abate",
+      "short": "Sant'Antonio",
+      "category": "church",
+      "osm": "way/652879054",
+      "lat": 44.868652,
+      "lon": 10.052631,
+      "collectible": false,
+      "radius": 10,
+      "description": "La chiesa di Sant'Antonio Abate, a nord-ovest del centro.",
+      "fact": "La chiesa si trova vicino al torrente Stirone."
+    },
+    {
+      "id": "parco-vittorio-veneto",
+      "name": "Parco Vittorio Veneto",
+      "short": "Parco Vittorio Veneto",
+      "category": "park",
+      "osm": "way/759129986",
+      "lat": 44.860981,
+      "lon": 10.058233,
+      "collectible": false,
+      "radius": 12,
+      "description": "Un parco urbano a sud del centro, con alberi e sentieri.",
+      "fact": "È uno dei polmoni verdi della città."
+    },
+    {
+      "id": "parco-della-pace",
+      "name": "Parco della Pace",
+      "short": "Parco della Pace",
+      "category": "park",
+      "osm": "way/1257168492",
+      "lat": 44.859331,
+      "lon": 10.064730,
+      "collectible": false,
+      "radius": 12,
+      "description": "Il Parco della Pace, a sud-est del centro.",
+      "fact": "Uno spazio verde ampio, ideale per una passeggiata."
+    }
+  ],
+  "landmarks": [
+    { "id": "duomo", "place": "duomo", "model": "duomo", "rotation": 180 },
+    { "id": "piazza-duomo", "place": "piazza-duomo", "model": "piazza-duomo" },
+    { "id": "porta", "place": "porta", "model": "porta" },
+    { "id": "ponte", "place": "ponte", "model": "ponte" },
+    { "id": "teatro", "place": "teatro", "model": "teatro" },
+    { "id": "comunale", "place": "comunale", "model": "comunale" },
+    { "id": "granmadre", "place": "granmadre", "model": "granmadre" },
+    { "id": "sanpietro", "place": "sanpietro", "model": "sanpietro" },
+    { "id": "musini", "place": "musini", "model": "musini" },
+    { "id": "stazione", "place": "stazione", "model": "stazione" },
+    { "id": "stirone", "place": "stirone", "model": "stirone" },
+    { "id": "obelisco", "place": "obelisco", "model": "obelisco" }
+  ],
+  "missions": [
+    {
+      "id": "ambulance",
+      "type": "ambulance",
+      "title": "Emergenza al parco",
+      "short": "Un pellegrino si sente male al Parco Vittorio Veneto. Prendi l'ambulanza e portalo in ospedale.",
+      "time": 190,
+      "reward": 800,
+      "steps": [
+        { "x": -234, "z": 613, "name": "Paziente al Parco Vittorio Veneto", "prompt": "carica il paziente", "radius": 13 },
+        { "x": -1450, "z": 1710, "name": "Ospedale di Fidenza", "prompt": "consegna il paziente", "radius": 20 }
+      ]
+    },
+    {
+      "id": "chase",
+      "type": "chase",
+      "title": "Inseguimento in Via Emilia",
+      "short": "Un fuggitivo scappa lungo la Via Emilia. Restagli vicino per qualche secondo e fermalo.",
+      "time": 150,
+      "reward": 900,
+      "chase": true
+    },
+    {
+      "id": "pizza",
+      "type": "pizza",
+      "title": "Pizza in Vespa",
+      "short": "Tre consegne a domicilio nel centro di Fidenza. La Vespa è parcheggiata vicino al tabellone.",
+      "time": 170,
+      "reward": 700,
+      "steps": [
+        { "place": "piazza-duomo", "offsetX": 8, "offsetZ": 6, "name": "Consegna in Piazza Duomo", "prompt": "consegna la pizza", "radius": 11 },
+        { "place": "teatro", "offsetX": 6, "offsetZ": 8, "name": "Consegna al Teatro Magnani", "prompt": "consegna la pizza", "radius": 11 },
+        { "place": "stazione", "offsetX": -8, "offsetZ": 6, "name": "Consegna alla stazione", "prompt": "consegna la pizza", "radius": 12 }
+      ]
+    },
+    {
+      "id": "taxi",
+      "type": "taxi",
+      "title": "Taxi dalla stazione",
+      "short": "Un viaggiatore è appena sceso dal treno. Portalo dalla stazione al Teatro Magnani.",
+      "time": 150,
+      "reward": 750,
+      "steps": [
+        { "place": "stazione", "offsetX": 4, "offsetZ": 10, "name": "Viaggiatore alla stazione", "prompt": "fai salire il viaggiatore", "radius": 12 },
+        { "place": "teatro", "offsetX": 3, "offsetZ": 12, "name": "Teatro Magnani", "prompt": "fai scendere il viaggiatore", "radius": 12 }
+      ]
+    },
+    {
+      "id": "photo",
+      "type": "photo",
+      "title": "Cartoline di Fidenza",
+      "short": "Scatta cinque cartoline ai luoghi simbolo della città. Avvicinati e premi E.",
+      "time": 200,
+      "reward": 900,
+      "steps": [
+        { "place": "duomo", "offsetX": -5, "offsetZ": 8, "name": "Duomo di San Donnino", "prompt": "scatta la foto", "radius": 12, "photo": true },
+        { "place": "piazza-duomo", "offsetX": 0, "offsetZ": 8, "name": "Piazza Duomo", "prompt": "scatta la foto", "radius": 12, "photo": true },
+        { "place": "porta", "offsetX": 4, "offsetZ": 10, "name": "Porta San Donnino", "prompt": "scatta la foto", "radius": 12, "photo": true },
+        { "place": "teatro", "offsetX": 8, "offsetZ": 10, "name": "Teatro Magnani", "prompt": "scatta la foto", "radius": 12, "photo": true },
+        { "place": "comunale", "offsetX": 4, "offsetZ": 10, "name": "Palazzo Comunale", "prompt": "scatta la foto", "radius": 12, "photo": true }
+      ]
+    }
+  ],
+  "seasons": {
+    "default": "auto",
+    "styles": {
+      "spring": "maps/fidenza/styles/spring.json",
+      "summer": "maps/fidenza/styles/summer.json",
+      "autumn": "maps/fidenza/styles/autumn.json",
+      "winter": "maps/fidenza/styles/winter.json"
+    }
+  }
+}

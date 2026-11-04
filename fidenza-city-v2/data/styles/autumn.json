@@ -1,0 +1,42 @@
+{
+  "id": "autumn",
+  "label": "Autunno",
+  "palette": {
+    "terrainTint": "#f6e6cf",
+    "areaTint": "#f7e3c2",
+    "tree": [
+      "#c46a2e",
+      "#d18a3a",
+      "#8a4b2a",
+      "#a85a2a",
+      "#c9a24a"
+    ],
+    "snow": 0,
+    "groundDetail": "#f7ead8"
+  },
+  "lighting": {
+    "sunColor": "#ffd2a1",
+    "sunIntensity": 0.92,
+    "ambient": 1,
+    "hemi": 0.95,
+    "fogColor": "#c9b08a",
+    "fogNear": 150,
+    "fogFar": 760,
+    "exposure": 1.03
+  },
+  "particles": {
+    "type": "leaves",
+    "count": 260,
+    "color": "#c46a2e",
+    "size": 0.2,
+    "speed": 1.1
+  },
+  "weather": {
+    "rain": 0.2,
+    "clouds": 0.45
+  },
+  "props": {
+    "christmas": false,
+    "umbrellas": false
+  }
+}

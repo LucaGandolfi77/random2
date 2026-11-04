@@ -1,0 +1,28 @@
+{
+  "name": "Fidenza da Giocare v2",
+  "short_name": "Fidenza",
+  "description": "Open world gratuito nel browser ambientato a Fidenza: mappa corretta, stagioni, missioni e 27 stelle nascoste.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1b241e",
+  "theme_color": "#1b241e",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Gioca",
+      "short_name": "Gioca",
+      "url": "./",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

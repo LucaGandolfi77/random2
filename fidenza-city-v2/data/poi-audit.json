@@ -1,0 +1,232 @@
+{
+  "generated": "2026-11-03T23:06:43.282Z",
+  "source": "OpenStreetMap via Overpass",
+  "totals": {
+    "places": 22,
+    "checked": 22,
+    "errors": 0,
+    "warnings": 0
+  },
+  "rows": [
+    {
+      "id": "duomo",
+      "name": "Duomo di San Donnino",
+      "osm": "way/182278537",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Cattedrale di San Donnino",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "piazza-duomo",
+      "name": "Piazza Duomo",
+      "osm": "way/488935098",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Piazza Duomo",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "porta",
+      "name": "Porta di San Donnino",
+      "osm": "way/652879042",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Porta di San Donnino",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "ponte",
+      "name": "Ponte romano",
+      "osm": "way/652879043",
+      "ok": true,
+      "distance": 0.1,
+      "osmName": "Ponte romano",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "teatro",
+      "name": "Teatro Girolamo Magnani",
+      "osm": "way/652879035",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Teatro Girolamo Magnani",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "comunale",
+      "name": "Palazzo Comunale",
+      "osm": "relation/2428450",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Palazzo Comunale (Fidenza)",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "granmadre",
+      "name": "Santuario della Gran Madre di Dio",
+      "osm": "way/182278306",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Santuario della Gran Madre di Dio",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "sanpietro",
+      "name": "Chiesa di San Pietro",
+      "osm": "way/182278235",
+      "ok": true,
+      "distance": 0.1,
+      "osmName": "Chiesa di San Pietro",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "musini",
+      "name": "Museo civico del Risorgimento Luigi Musini",
+      "osm": "node/3183577908",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Museo civico del Risorgimento Luigi Musini",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "stazione",
+      "name": "Stazione di Fidenza",
+      "osm": "node/13742535638",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Fidenza",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "stirone",
+      "name": "Torrente Stirone",
+      "osm": "way/167581729",
+      "ok": true,
+      "distance": 3746.2,
+      "osmName": "Torrente Stirone",
+      "note": "",
+      "info": "feature lineare: distanza dal centro non significativa"
+    },
+    {
+      "id": "obelisco",
+      "name": "Obelisco",
+      "osm": "way/652879039",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Obelisco",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "piazza-garibaldi",
+      "name": "Piazza Garibaldi",
+      "osm": "way/445470949",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Piazza Giuseppe Garibaldi",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "piazza-verdi",
+      "name": "Piazza Giuseppe Verdi",
+      "osm": "way/142546108",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Piazza Giuseppe Verdi",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "piazza-matteotti",
+      "name": "Piazza Giacomo Matteotti",
+      "osm": "way/142546150",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Piazza Giacomo Matteotti",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "piazza-repubblica",
+      "name": "Piazza della Repubblica",
+      "osm": "way/1304344561",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Piazza della Repubblica",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "comune-uffici",
+      "name": "Comune di Fidenza — uffici",
+      "osm": "node/1560440147",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Comune Di Fidenza",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "chiesa-santa-maria",
+      "name": "Chiesa di Santa Maria Annunziata",
+      "osm": "way/182279850",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Chiesa di Santa Maria Annunziata",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "chiesa-san-paolo",
+      "name": "Chiesa di San Paolo",
+      "osm": "way/182278201",
+      "ok": true,
+      "distance": 0,
+      "osmName": "San Paolo",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "chiesa-sant-antonio",
+      "name": "Chiesa di Sant'Antonio Abate",
+      "osm": "way/652879054",
+      "ok": true,
+      "distance": 0.1,
+      "osmName": "Chiesa di Sant'Antonio Abate",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "parco-vittorio-veneto",
+      "name": "Parco Vittorio Veneto",
+      "osm": "way/759129986",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Parco Vittorio Veneto",
+      "note": "",
+      "info": ""
+    },
+    {
+      "id": "parco-della-pace",
+      "name": "Parco della Pace",
+      "osm": "way/1257168492",
+      "ok": true,
+      "distance": 0,
+      "osmName": "Parco della Pace",
+      "note": "",
+      "info": ""
+    }
+  ]
+}
