@@ -1,4 +1,4 @@
-const CACHE = 'fidenza-da-giocare-v2.0.3';
+const CACHE = 'fidenza-da-giocare-v2.5.2';
 const ASSETS = [
   './',
   './index.html',
@@ -36,11 +36,19 @@ const ASSETS = [
   './js/hud.js',
   './js/models.js',
   './js/world.js',
+  './js/transit.js',
   './js/landmarks.js',
   './js/player.js',
   './js/vehicles.js',
   './js/missions.js',
   './js/map.js',
+  './js/photo-mode.js',
+  './js/photo-store.js',
+  './js/achievements.js',
+  './js/daily.js',
+  './js/career.js',
+  './js/events.js',
+  './js/map-overrides.js',
   './data/city.json',
   './data/terrain.json',
   './data/map.json',
@@ -50,6 +58,10 @@ const ASSETS = [
   './data/styles/winter.json',
   './data/ATTRIBUTION.md'
 ];
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+});
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -73,6 +85,20 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+
+  const dynamicData = url.pathname.endsWith('/data/map.json') || url.pathname.includes('/data/styles/');
+  if (dynamicData) {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
 
   if (req.mode === 'navigate') {
     event.respondWith(

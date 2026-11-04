@@ -15,6 +15,10 @@ export class Input {
     this.touchHorn = false;
     this.touchAct = false;
     this.enabled = true;
+    this.allowPointerLock = true;
+    this.padKeys = new Set();
+    this.padButtons = new Set();
+    this.padActive = false;
     this.canvas.addEventListener('contextmenu', e => e.preventDefault());
     this._bindKeyboard();
     this._bindMouse();
@@ -22,7 +26,7 @@ export class Input {
   }
 
   _bindKeyboard() {
-    const gameKeys = new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space','KeyE','KeyF','KeyN','KeyM','KeyH','Escape','KeyP']);
+    const gameKeys = new Set(['KeyW','KeyA','KeyS','KeyD','KeyQ','KeyE','KeyF','KeyN','KeyM','KeyH','KeyP','KeyC','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space','Escape','BracketLeft','BracketRight']);
     window.addEventListener('keydown', e => {
       if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') && e.target.closest('dialog[open]')) return;
       if (gameKeys.has(e.code)) e.preventDefault();
@@ -46,7 +50,7 @@ export class Input {
     });
     this.canvas.addEventListener('mousedown', e => {
       if (e.button !== 0) return;
-      if (this.enabled && !this.pointerLocked && !this.isTouch()) {
+      if (this.enabled && this.allowPointerLock && !this.pointerLocked && !this.isTouch()) {
         try { const p = this.canvas.requestPointerLock?.(); p?.catch?.(() => {}); } catch { /* ignore */ }
       }
       this.dragging = true;
@@ -60,7 +64,7 @@ export class Input {
       }
     });
     this.canvas.addEventListener('click', () => {
-      if (this.enabled && !this.pointerLocked && !this.isTouch()) {
+      if (this.enabled && this.allowPointerLock && !this.pointerLocked && !this.isTouch()) {
         try { const p = this.canvas.requestPointerLock?.(); p?.catch?.(() => {}); } catch { /* ignore */ }
       }
     });
@@ -161,7 +165,56 @@ export class Input {
   }
 
   isDown(code) {
-    return this.keys.has(code);
+    return this.keys.has(code) || this.padKeys.has(code);
+  }
+
+  pollGamepad() {
+    if (!navigator.getGamepads) return;
+    let pad = null;
+    for (const candidate of navigator.getGamepads()) {
+      if (candidate && candidate.connected) { pad = candidate; break; }
+    }
+    this.padKeys.clear();
+    if (!pad) {
+      this.padActive = false;
+      this.padButtons.clear();
+      return;
+    }
+    this.padActive = true;
+    const dead = 0.22;
+    const axis = i => Math.abs(pad.axes[i] || 0) > dead ? pad.axes[i] : 0;
+    const ax = axis(0);
+    const ay = axis(1);
+    if (ay < -dead) this.padKeys.add('KeyW');
+    if (ay > dead) this.padKeys.add('KeyS');
+    if (ax < -dead) this.padKeys.add('KeyA');
+    if (ax > dead) this.padKeys.add('KeyD');
+    if (pad.buttons[12]?.pressed) this.padKeys.add('KeyW');
+    if (pad.buttons[13]?.pressed) this.padKeys.add('KeyS');
+    if (pad.buttons[14]?.pressed) this.padKeys.add('KeyA');
+    if (pad.buttons[15]?.pressed) this.padKeys.add('KeyD');
+    if (pad.buttons[1]?.pressed) this.padKeys.add('Space');
+    if (pad.buttons[2]?.pressed) this.padKeys.add('ShiftLeft');
+    if (pad.buttons[5]?.pressed) this.padKeys.add('KeyH');
+
+    const pressed = new Set();
+    const tapMap = {
+      0: 'KeyE',
+      3: 'KeyF',
+      8: 'KeyN',
+      9: 'Escape'
+    };
+    for (const [index, code] of Object.entries(tapMap)) {
+      const down = !!pad.buttons[index]?.pressed;
+      if (down) pressed.add(code);
+      if (down && !this.padButtons.has(code)) this.justPressed.add(code);
+    }
+    this.padButtons = pressed;
+
+    const lookX = axis(2);
+    const lookY = axis(3);
+    if (lookX) this.mouseDX += lookX * 13;
+    if (lookY) this.mouseDY += lookY * 13;
   }
 
   consume(code) {

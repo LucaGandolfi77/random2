@@ -94,6 +94,92 @@ export function makeCar({ color = '#c2684b', taxi = false, ambulance = false, pa
   return g;
 }
 
+export function makeBus({ color = '#e8ddc4', accent = '#2f6b4f' } = {}) {
+  const g = new THREE.Group();
+  const body = box(2.45, 2.15, 9.2, color, 0, 1.35, 0);
+  g.add(body);
+  g.add(box(2.5, 0.32, 9.25, accent, 0, 2.46, 0));
+  g.add(box(2.5, 0.22, 9.25, accent, 0, 0.28, 0));
+  // Finestrini laterali
+  for (const side of [-1.24, 1.24]) {
+    g.add(box(0.03, 0.72, 6.7, '#2e3b40', side, 1.78, -0.35));
+    g.add(box(0.03, 0.42, 1.2, '#2e3b40', side, 1.58, 3.55));
+  }
+  // Parabrezza e lunotto
+  g.add(box(2.2, 1.02, 0.04, '#2e3b40', 0, 1.82, 4.62));
+  g.add(box(2.05, 0.7, 0.04, '#2e3b40', 0, 1.9, -4.62));
+  // Porte
+  for (const z of [2.55, -2.4]) {
+    g.add(box(0.05, 1.7, 0.92, '#d9e2e0', 1.26, 1.2, z));
+    g.add(box(0.05, 1.7, 0.92, '#d9e2e0', -1.26, 1.2, z));
+  }
+  // Ruote
+  for (const x of [-1.18, 1.18]) {
+    for (const z of [-2.8, 2.8]) {
+      const w = wheel(0.46, 0.26);
+      w.position.set(x, 0.48, z);
+      g.add(w);
+    }
+  }
+  // Fari
+  const headMat = new THREE.MeshBasicMaterial({ color: '#fff2bd' });
+  const tailMat = new THREE.MeshBasicMaterial({ color: '#b33b2b' });
+  for (const x of [-0.82, 0.82]) {
+    const h = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.2, 0.05), headMat);
+    h.position.set(x, 0.86, 4.63);
+    g.add(h);
+    const t = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.18, 0.05), tailMat);
+    t.position.set(x, 0.86, -4.63);
+    g.add(t);
+  }
+  const sign = box(1.45, 0.34, 0.05, accent, 0, 2.2, 4.64);
+  g.add(sign);
+  g.userData.type = 'bus';
+  g.userData.wheels = g.children.filter(c => c.geometry?.type === 'CylinderGeometry');
+  return g;
+}
+
+export function makeTrain({ color = '#e9e4d8', accent = '#8f3e34' } = {}) {
+  const g = new THREE.Group();
+  const cars = 3;
+  for (let i = 0; i < cars; i++) {
+    const z = (i - (cars - 1) / 2) * 10.6;
+    const body = box(2.8, 2.5, 9.6, color, 0, 1.7, z);
+    g.add(body);
+    g.add(box(2.86, 0.26, 9.7, accent, 0, 2.92, z));
+    g.add(box(2.86, 0.2, 9.7, '#5a5f59', 0, 0.48, z));
+    // finestrini
+    for (const side of [-1.42, 1.42]) {
+      for (let w = -3.3; w <= 3.3; w += 1.65) {
+        g.add(box(0.03, 0.68, 1.1, '#2e3b40', side, 1.95, z + w));
+      }
+    }
+    g.add(box(2.34, 0.86, 0.04, '#2e3b40', 0, 1.95, z + 4.82));
+    g.add(box(2.34, 0.86, 0.04, '#2e3b40', 0, 1.95, z - 4.82));
+    // carrelli
+    for (const wz of [z - 3.1, z + 3.1]) {
+      for (const wx of [-1.25, 1.25]) {
+        const w = wheel(0.38, 0.2, '#202321');
+        w.position.set(wx, 0.5, wz);
+        g.add(w);
+      }
+    }
+    if (i === cars - 1) {
+      const nose = box(2.7, 1.5, 0.5, accent, 0, 1.55, z + 4.9);
+      g.add(nose);
+      const lightMat = new THREE.MeshBasicMaterial({ color: '#fff2bd' });
+      for (const x of [-0.82, 0.82]) {
+        const light = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.22, 0.05), lightMat);
+        light.position.set(x, 1.2, z + 5.18);
+        g.add(light);
+      }
+    }
+  }
+  g.userData.type = 'train';
+  g.userData.wheels = g.children.filter(c => c.geometry?.type === 'CylinderGeometry');
+  return g;
+}
+
 export function makeVespa({ color = '#4f8fa8' } = {}) {
   const g = new THREE.Group();
   const frame = box(0.42, 0.24, 1.25, color, 0, 0.62, 0);

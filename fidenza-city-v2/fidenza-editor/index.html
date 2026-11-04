@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fidenza Editor · mappa visuale</title>
+  <meta name="description" content="Editor visuale per modificare e riorganizzare la mappa di Fidenza da Giocare v2.">
+  <link rel="stylesheet" href="../assets/fonts/fonts.css">
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Fidenza <span>Editor</span></div>
+    <div id="map-title" class="map-title">Fidenza · editor mappa</div>
+    <div class="toolbar">
+      <button id="btn-undo" class="icon" title="Annulla (Ctrl+Z)">↶</button>
+      <button id="btn-redo" class="icon" title="Ripeti (Ctrl+Y)">↷</button>
+      <button id="btn-fit" title="Inquadra tutta la città">Fit</button>
+      <button id="btn-focus" title="Centra sulla selezione">◎</button>
+      <label class="snap-label">Snap
+        <select id="snap">
+          <option value="0">off</option>
+          <option value="1" selected>1 m</option>
+          <option value="5">5 m</option>
+          <option value="10">10 m</option>
+        </select>
+      </label>
+      <span class="divider"></span>
+      <button id="btn-save-manifest" class="primary">Salva manifest</button>
+      <button id="btn-save-bundle">Salva bundle</button>
+      <button id="btn-save-both">Salva entrambi</button>
+      <button id="btn-import">Importa</button>
+      <button id="btn-reset">Ripristina</button>
+      <button id="btn-clear-draft">Elimina bozza</button>
+      <a id="btn-game" class="button-link" href="../index.html" target="_blank" rel="noopener">Apri gioco ↗</a>
+      <span id="validation-badge" class="badge ok">valida</span>
+      <input id="file-input" type="file" accept=".json,application/json" hidden>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <aside class="sidebar">
+      <div class="mode-row">
+        <button id="btn-mode-select" class="mode active">Seleziona</button>
+        <button id="btn-mode-move" class="mode">Sposta</button>
+        <button id="btn-mode-place" class="mode">+ POI</button>
+        <button id="btn-mode-star" class="mode">+ Stella</button>
+      </div>
+
+      <div class="search-row">
+        <input id="search" type="search" placeholder="Cerca nome, ID, OSM…" autocomplete="off">
+      </div>
+
+      <nav class="tabs">
+        <button data-tab="places" class="active">POI</button>
+        <button data-tab="landmarks">Landmark</button>
+        <button data-tab="stars">Stelle</button>
+        <button data-tab="missions">Missioni</button>
+        <button data-tab="vehicles">Veicoli</button>
+        <button data-tab="props">Prop</button>
+        <button data-tab="overrides">Override</button>
+      </nav>
+      <div id="tab-tools" class="tab-tools"></div>
+      <div id="entity-list" class="entity-list"></div>
+
+      <section class="panel layers-panel">
+        <h3>Livelli</h3>
+        <div class="layer-grid">
+          <label><input type="checkbox" data-layer="buildings" checked> Edifici</label>
+          <label><input type="checkbox" data-layer="roads" checked> Strade</label>
+          <label><input type="checkbox" data-layer="areas" checked> Aree</label>
+          <label><input type="checkbox" data-layer="water" checked> Acqua</label>
+          <label><input type="checkbox" data-layer="rail" checked> Ferrovia</label>
+          <label><input type="checkbox" data-layer="pois" checked> POI</label>
+          <label><input type="checkbox" data-layer="landmarks" checked> Landmark</label>
+          <label><input type="checkbox" data-layer="stars" checked> Stelle</label>
+          <label><input type="checkbox" data-layer="missions" checked> Missioni</label>
+          <label><input type="checkbox" data-layer="vehicles" checked> Veicoli</label>
+          <label><input type="checkbox" data-layer="props" checked> Prop</label>
+          <label><input type="checkbox" data-layer="transit" checked> Navetta</label>
+          <label><input type="checkbox" data-layer="spawn" checked> Spawn</label>
+        </div>
+      </section>
+
+      <section class="panel validation-panel">
+        <h3>Validazione</h3>
+        <div id="validation-list" class="validation-list"></div>
+      </section>
+    </aside>
+
+    <section class="canvas-wrap">
+      <canvas id="editor-canvas"></canvas>
+      <div class="canvas-help">
+        Click = seleziona · trascina = sposta · Shift+trascina = pan · rotella = zoom · F = inquadra
+      </div>
+    </section>
+
+    <aside id="inspector" class="inspector"></aside>
+  </main>
+
+  <footer class="statusbar">
+    <span id="status-text">Caricamento…</span>
+    <span id="coords"></span>
+    <span id="zoom"></span>
+    <span id="save-state" class="save-state"></span>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

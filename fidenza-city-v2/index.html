@@ -74,6 +74,7 @@
       <div class="chips">
         <span id="stars" title="Stelle trovate">★ 0/27</span>
         <span id="places" title="Luoghi scoperti">◆ 0/11</span>
+        <span id="career-chip" title="Carriera">Lv 1 · 0 €</span>
       </div>
     </div>
 
@@ -108,7 +109,7 @@
 
     <div id="speed" hidden><b>0</b><span>km/h</span></div>
 
-    <div id="hint">WASD muovi · Shift corri · Mouse guarda · E interagisci · F missioni · N mappa · M audio · Esc pausa</div>
+    <div id="hint">WASD muovi · Shift corri · E interagisci · F missioni · C carriera · N mappa · M audio · P foto · Esc pausa</div>
 
     <div id="touch" aria-hidden="true">
       <div id="stick"><div id="knob"></div></div>
@@ -163,6 +164,18 @@
           <div class="today-row">
             <div id="weather" class="weather"><span id="weather-icon">☀</span><b id="weather-temp">—</b><small id="weather-desc">cielo</small></div>
             <button type="button" id="board-open" class="link-btn">I tuoi record →</button>
+          </div>
+          <div id="daily-card" class="daily-card">
+            <div class="daily-head"><span>⚑ Sfida del giorno</span><span id="daily-reward">+150</span></div>
+            <b id="daily-title">—</b>
+            <p id="daily-desc"></p>
+            <div class="daily-bar"><i id="daily-bar"></i></div>
+            <span id="daily-progress" class="daily-progress"></span>
+          </div>
+          <div id="event-card" class="event-card">
+            <div class="event-head"><span>⚑ Oggi in città</span><span id="event-time">—</span></div>
+            <b id="event-title">Nessun evento</b>
+            <p id="event-desc">Fidenza scorre tranquilla.</p>
           </div>
           <div class="season-row">
             <label for="season-select-intro">Stagione</label>
@@ -244,11 +257,18 @@
     <div class="dialog-in">
       <p class="eyebrow">Pausa</p>
       <h2 id="pause-title">Fidenza aspetta</h2>
+      <div id="pause-event" class="pause-event"></div>
+      <div id="pause-daily" class="pause-daily"></div>
       <div class="pause-actions">
         <button type="button" id="resume" class="primary">Continua</button>
         <button type="button" id="pause-map">Apri mappa</button>
+        <button type="button" id="pause-career">Carriera</button>
         <button type="button" id="pause-missions">Missioni</button>
         <button type="button" id="pause-board">Record</button>
+        <button type="button" id="pause-achievements">Obiettivi e statistiche</button>
+        <button type="button" id="pause-photo">Modalità foto</button>
+        <button type="button" id="pause-export">Esporta salvataggio</button>
+        <button type="button" id="pause-import">Importa salvataggio</button>
         <button type="button" id="pause-audio">Audio on/off</button>
         <label class="season-row" for="season-select">Stagione
           <select id="season-select">
@@ -276,6 +296,36 @@
     </div>
   </dialog>
 
+  <dialog id="achievements-dialog" class="dialog" aria-labelledby="achievements-title">
+    <div class="dialog-in wide">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Il tuo percorso</p><h2 id="achievements-title">Obiettivi e statistiche</h2></div>
+        <button type="button" class="dialog-close" data-close="achievements-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="stats-grid" class="stats-grid"></div>
+      <div id="achievement-summary" class="achievement-summary"></div>
+      <div id="achievement-list" class="achievement-list"></div>
+      <p class="dialog-note">Obiettivi e statistiche sono salvati solo su questo dispositivo.</p>
+    </div>
+  </dialog>
+
+  <dialog id="career-dialog" class="dialog" aria-labelledby="career-title">
+    <div class="dialog-in wide">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Fidenza Carriera</p><h2 id="career-title">Il tuo lavoro in città</h2></div>
+        <button type="button" class="dialog-close" data-close="career-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="career-summary" class="career-summary"></div>
+      <div id="career-license" class="career-license"></div>
+      <div id="career-tabs" class="career-tabs"></div>
+      <div id="career-jobs" class="career-jobs"></div>
+      <div class="career-section-title"><h3>Garage</h3><span>Migliora i tuoi veicoli</span></div>
+      <div id="career-garage" class="career-garage"></div>
+      <div id="career-history" class="career-history"></div>
+      <p class="dialog-note">Lavori, soldi e potenziamenti sono salvati solo su questo dispositivo.</p>
+    </div>
+  </dialog>
+
   <dialog id="confirm-dialog" class="dialog" aria-labelledby="confirm-title">
     <div class="dialog-in">
       <h2 id="confirm-title">Azzerare tutto?</h2>
@@ -283,6 +333,69 @@
       <div class="field-row"><button type="button" id="confirm-yes" class="danger">Azzera</button><button type="button" id="confirm-no">Annulla</button></div>
     </div>
   </dialog>
+
+
+  <div id="photo-mode" hidden>
+    <div class="photo-top">
+      <div><span class="photo-kicker">Modalità foto</span><b id="photo-place">Fidenza</b><span id="photo-status" class="photo-status"></span></div>
+      <div class="photo-actions">
+        <button type="button" id="photo-gallery-open">Galleria</button>
+        <button type="button" id="photo-capture" class="primary">Scatta</button>
+        <button type="button" id="photo-exit">Esci</button>
+      </div>
+    </div>
+    <div id="photo-grid" hidden></div>
+    <div class="photo-bottom">
+      <label>Filtro
+        <select id="photo-filter">
+          <option value="natural">Naturale</option>
+          <option value="warm">Caldo</option>
+          <option value="mono">Bianco e nero</option>
+          <option value="vintage">Vintage</option>
+          <option value="fidenza">Fidenza</option>
+        </select>
+      </label>
+      <label>Cornice
+        <select id="photo-frame">
+          <option value="none">Nessuna</option>
+          <option value="cartolina">Cartolina</option>
+          <option value="fidenza">Fidenza</option>
+        </select>
+      </label>
+      <label>Ora
+        <input id="photo-hour" type="range" min="0" max="24" step="0.5">
+      </label>
+      <label>Stagione
+        <select id="photo-season">
+          <option value="spring">Primavera</option>
+          <option value="summer">Estate</option>
+          <option value="autumn">Autunno</option>
+          <option value="winter">Inverno</option>
+        </select>
+      </label>
+      <label class="check"><input id="photo-grid-toggle" type="checkbox"> Griglia</label>
+      <label class="check"><input id="photo-player-toggle" type="checkbox" checked> Giocatore</label>
+      <label class="check"><input id="photo-vehicles-toggle" type="checkbox" checked> Veicoli</label>
+      <span class="photo-help">WASD muovi · Q/E altezza · Shift veloce · [ ] FOV · P/Esc esci</span>
+    </div>
+    <div id="photo-stick" aria-hidden="true"><div id="photo-knob"></div></div>
+  </div>
+
+  <dialog id="photo-gallery" class="dialog">
+    <div class="dialog-in wide">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Galleria locale</p><h2>Le tue cartoline</h2></div>
+        <button type="button" class="dialog-close" data-close="photo-gallery" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="photo-gallery-grid" class="photo-gallery-grid"></div>
+      <p id="photo-gallery-empty" class="dialog-note">Nessuna foto ancora. Scatta la prima cartolina di Fidenza.</p>
+      <p class="dialog-note">Le foto restano in questo browser (IndexedDB). Puoi scaricarle o eliminarle.</p>
+    </div>
+  </dialog>
+
+  <input id="save-import" type="file" accept="application/json,.json" hidden>
+
+  <button type="button" id="pwa-update" hidden>Nuova versione disponibile · Aggiorna</button>
 
   <div id="rotate-hint" hidden>Gira il telefono in orizzontale per giocare meglio</div>
 

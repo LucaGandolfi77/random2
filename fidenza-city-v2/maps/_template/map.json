@@ -2,10 +2,21 @@
   "$schema": "../../schema/map.schema.json",
   "id": "nuova-citta",
   "name": "Nuova Città",
-  "version": "2.0.0",
-  "center": { "lat": 44.8665, "lon": 10.0612 },
-  "origin": { "lat": 44.8665, "lon": 10.0612 },
-  "bbox": { "south": 44.8500, "west": 10.0400, "north": 44.8820, "east": 10.0850 },
+  "version": "2.3.0",
+  "center": {
+    "lat": 44.8665,
+    "lon": 10.0612
+  },
+  "origin": {
+    "lat": 44.8665,
+    "lon": 10.0612
+  },
+  "bbox": {
+    "south": 44.85,
+    "west": 10.04,
+    "north": 44.882,
+    "east": 10.085
+  },
   "projection": "local-tangent",
   "sources": {
     "cityData": "data/city.json",
@@ -33,7 +44,16 @@
     }
   ],
   "landmarks": [
-    { "id": "piazza-principale", "place": "piazza-principale", "model": "piazza-duomo", "rotation": 0 }
+    {
+      "id": "piazza-principale",
+      "place": "piazza-principale",
+      "model": "piazza-duomo",
+      "rotation": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    }
   ],
   "missions": [],
   "seasons": {
@@ -44,5 +64,18 @@
       "autumn": "maps/nuova-citta/styles/autumn.json",
       "winter": "maps/nuova-citta/styles/winter.json"
     }
-  }
+  },
+  "spawn": {
+    "x": 0,
+    "z": 0,
+    "yaw": 0
+  },
+  "missionBoard": {
+    "x": 0,
+    "z": 0
+  },
+  "vehicles": [],
+  "stars": [],
+  "overrides": {},
+  "props": []
 }

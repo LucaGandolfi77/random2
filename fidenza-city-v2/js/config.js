@@ -133,7 +133,14 @@ export const MISSION_TYPES = {
   chase:     { icon: '➤', label: 'Inseguimento', color: '#9a4a34' },
   pizza:     { icon: '◕', label: 'Pizza in Vespa', color: '#c99a3f' },
   taxi:      { icon: '◈', label: 'Taxi', color: '#3f748a' },
-  photo:     { icon: '▣', label: 'Fotografo', color: '#4f7748' }
+  photo:     { icon: '▣', label: 'Fotografo', color: '#4f7748' },
+  pilgrim:   { icon: '✦', label: 'Pellegrino', color: '#8a6a3a' },
+  delivery:  { icon: '▤', label: 'Consegna', color: '#3f748a' },
+  tour:      { icon: '◈', label: 'Giro turistico', color: '#7a5a8a' },
+  train:     { icon: '⇄', label: 'Coincidenza', color: '#3f748a' },
+  night:     { icon: '☾', label: 'Notturna', color: '#3a4a6a' },
+  bus:       { icon: '▤', label: 'Navetta', color: '#2f6b4f' },
+  custom:    { icon: '★', label: 'Personalizzata', color: '#7a5a8a' }
 };
 
 export const CONTROLS = {

@@ -74,6 +74,44 @@ export class AudioEngine {
     if (this.ctx?.state === 'suspended') this.ctx.resume();
   }
 
+  setZone(zone = 'city') {
+    if (!this.ctx || !this.ambient) return;
+    const presets = {
+      city: { gain: 0.05, freq: 430 },
+      center: { gain: 0.045, freq: 520 },
+      station: { gain: 0.075, freq: 260 },
+      park: { gain: 0.032, freq: 900 },
+      stirone: { gain: 0.038, freq: 800 },
+      festival: { gain: 0.085, freq: 620 }
+    };
+    const preset = presets[zone] || presets.city;
+    const now = this.ctx.currentTime;
+    this.ambient.gain.gain.cancelScheduledValues(now);
+    this.ambient.filter.frequency.cancelScheduledValues(now);
+    this.ambient.gain.gain.linearRampToValueAtTime(this.muted ? 0 : preset.gain, now + 1.2);
+    this.ambient.filter.frequency.linearRampToValueAtTime(preset.freq, now + 1.2);
+    this.zone = zone;
+  }
+
+  stationChime() {
+    if (!this.ctx || this.muted) return;
+    [523.25, 659.25, 783.99].forEach((f, i) => this.tone(f, 0.38, 'sine', 0.045, null, i * 0.13));
+    this.tone(1046.5, 0.45, 'sine', 0.03, null, 0.42);
+  }
+
+  festivalChime() {
+    if (!this.ctx || this.muted) return;
+    [392, 523.25, 659.25, 783.99].forEach((f, i) => this.tone(f, 0.5, 'triangle', 0.045, null, i * 0.14));
+    this.tone(1046.5, 0.6, 'sine', 0.025, null, 0.6);
+  }
+
+  firework() {
+    if (!this.ctx || this.muted) return;
+    this.noiseBurst(0.7, 0.08, 260);
+    this.tone(65, 0.55, 'sine', 0.09, 34);
+    this.tone(120, 0.32, 'triangle', 0.04, 48, 0.08);
+  }
+
   _now() {
     return this.ctx ? this.ctx.currentTime : 0;
   }

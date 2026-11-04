@@ -1,19 +1,11 @@
 {
-  "generated": "2026-11-03T23:15:24.787Z",
+  "generated": "2026-11-04T17:33:44.559Z",
   "totals": {
-    "checks": 84,
-    "errors": 0
+    "checks": 106,
+    "errors": 0,
+    "overrides": 0
   },
   "rows": [
-    {
-      "kind": "place",
-      "id": "duomo",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -267.47,
-      "z": 2.67,
-      "collectible": true
-    },
     {
       "kind": "beacon",
       "id": "duomo",
@@ -21,15 +13,6 @@
       "msg": "beacon accessibile",
       "x": -296,
       "z": 3
-    },
-    {
-      "kind": "place",
-      "id": "piazza-duomo",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -296.74,
-      "z": -4.11,
-      "collectible": true
     },
     {
       "kind": "beacon",
@@ -40,30 +23,12 @@
       "z": -4.11
     },
     {
-      "kind": "place",
-      "id": "porta",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -305.18,
-      "z": -47.79,
-      "collectible": true
-    },
-    {
       "kind": "beacon",
       "id": "porta",
       "ok": true,
       "msg": "beacon accessibile",
       "x": -299.28,
       "z": -36.86
-    },
-    {
-      "kind": "place",
-      "id": "ponte",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -309.99,
-      "z": -60.23,
-      "collectible": true
     },
     {
       "kind": "beacon",
@@ -74,30 +39,12 @@
       "z": -68.96
     },
     {
-      "kind": "place",
-      "id": "teatro",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -94.05,
-      "z": 72.01,
-      "collectible": true
-    },
-    {
       "kind": "beacon",
       "id": "teatro",
       "ok": true,
       "msg": "beacon accessibile",
       "x": -83.68,
       "z": 64.51
-    },
-    {
-      "kind": "place",
-      "id": "comunale",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -32.19,
-      "z": 70.01,
-      "collectible": true
     },
     {
       "kind": "beacon",
@@ -108,30 +55,12 @@
       "z": 56.77
     },
     {
-      "kind": "place",
-      "id": "granmadre",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 415.56,
-      "z": 147.81,
-      "collectible": true
-    },
-    {
       "kind": "beacon",
       "id": "granmadre",
       "ok": true,
       "msg": "beacon accessibile",
       "x": 391.43,
       "z": 148.72
-    },
-    {
-      "kind": "place",
-      "id": "sanpietro",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -266.99,
-      "z": 198.48,
-      "collectible": true
     },
     {
       "kind": "beacon",
@@ -142,30 +71,12 @@
       "z": 185.65
     },
     {
-      "kind": "place",
-      "id": "musini",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 379.58,
-      "z": 185.59,
-      "collectible": true
-    },
-    {
       "kind": "beacon",
       "id": "musini",
       "ok": true,
       "msg": "beacon accessibile",
       "x": 379.58,
       "z": 185.59
-    },
-    {
-      "kind": "place",
-      "id": "stazione",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 175.39,
-      "z": -124.58,
-      "collectible": true
     },
     {
       "kind": "beacon",
@@ -176,15 +87,6 @@
       "z": -112.64
     },
     {
-      "kind": "place",
-      "id": "stirone",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -1230.81,
-      "z": 0,
-      "collectible": true
-    },
-    {
       "kind": "beacon",
       "id": "stirone",
       "ok": true,
@@ -193,427 +95,476 @@
       "z": 0
     },
     {
-      "kind": "place",
-      "id": "obelisco",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -13.1,
-      "z": 32.01,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "piazza-garibaldi",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 14.6,
-      "z": -21,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "piazza-verdi",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -18.62,
-      "z": 105.02,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "piazza-matteotti",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 44.18,
-      "z": 109.02,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "piazza-repubblica",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 194.96,
-      "z": -103.35,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "comune-uffici",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 20.43,
-      "z": -68.68,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "chiesa-santa-maria",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 107.93,
-      "z": 42.67,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "chiesa-san-paolo",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -694.23,
-      "z": 389.85,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "chiesa-sant-antonio",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -676.08,
-      "z": -239.16,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "parco-vittorio-veneto",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": -234.09,
-      "z": 613.34,
-      "collectible": false
-    },
-    {
-      "kind": "place",
-      "id": "parco-della-pace",
-      "ok": true,
-      "msg": "dentro l’area giocabile",
-      "x": 278.51,
-      "z": 796.71,
-      "collectible": false
-    },
-    {
-      "kind": "landmark",
-      "id": "duomo",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -267.47,
-      "z": 2.67,
-      "model": "duomo"
-    },
-    {
-      "kind": "landmark",
-      "id": "piazza-duomo",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -296.74,
-      "z": -4.11,
-      "model": "piazza-duomo"
-    },
-    {
-      "kind": "landmark",
-      "id": "porta",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -305.18,
-      "z": -47.79,
-      "model": "porta"
-    },
-    {
-      "kind": "landmark",
-      "id": "ponte",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -309.99,
-      "z": -60.23,
-      "model": "ponte"
-    },
-    {
-      "kind": "landmark",
-      "id": "teatro",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -94.05,
-      "z": 72.01,
-      "model": "teatro"
-    },
-    {
-      "kind": "landmark",
-      "id": "comunale",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -32.19,
-      "z": 70.01,
-      "model": "comunale"
-    },
-    {
-      "kind": "landmark",
-      "id": "granmadre",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": 415.56,
-      "z": 147.81,
-      "model": "granmadre"
-    },
-    {
-      "kind": "landmark",
-      "id": "sanpietro",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -266.99,
-      "z": 198.48,
-      "model": "sanpietro"
-    },
-    {
-      "kind": "landmark",
-      "id": "musini",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": 379.58,
-      "z": 185.59,
-      "model": "musini"
-    },
-    {
-      "kind": "landmark",
-      "id": "stazione",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": 175.39,
-      "z": -124.58,
-      "model": "stazione"
-    },
-    {
-      "kind": "landmark",
-      "id": "stirone",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -1230.81,
-      "z": 0,
-      "model": "stirone"
-    },
-    {
-      "kind": "landmark",
-      "id": "obelisco",
-      "ok": true,
-      "msg": "modello 3D posizionato",
-      "x": -13.1,
-      "z": 32.01,
-      "model": "obelisco"
-    },
-    {
       "kind": "star",
-      "id": "star--878.1--187.9",
+      "id": "star-0",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -878.1,
       "z": -187.9
     },
     {
       "kind": "star",
-      "id": "star--343.6-857.9",
+      "id": "star-1",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -343.6,
       "z": 857.9
     },
     {
       "kind": "star",
-      "id": "star-1204.7-394",
+      "id": "star-2",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 1204.7,
       "z": 394
     },
     {
       "kind": "star",
-      "id": "star--736.9-1043.1",
+      "id": "star-3",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -736.9,
       "z": 1043.1
     },
     {
       "kind": "star",
-      "id": "star-1400.9-555.4",
+      "id": "star-4",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 1400.9,
       "z": 555.4
     },
     {
       "kind": "star",
-      "id": "star--484.9-717.6",
+      "id": "star-5",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -484.9,
       "z": 717.6
     },
     {
       "kind": "star",
-      "id": "star--555.7-1552.3",
+      "id": "star-6",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -555.7,
       "z": 1552.3
     },
     {
       "kind": "star",
-      "id": "star--108.7-165.5",
+      "id": "star-7",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -108.7,
       "z": 165.5
     },
     {
       "kind": "star",
-      "id": "star-175.3-1187.2",
+      "id": "star-8",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 175.3,
       "z": 1187.2
     },
     {
       "kind": "star",
-      "id": "star-673.3-953.4",
+      "id": "star-9",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 673.3,
       "z": 953.4
     },
     {
       "kind": "star",
-      "id": "star-351.4-989.9",
+      "id": "star-10",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 351.4,
       "z": 989.9
     },
     {
       "kind": "star",
-      "id": "star-899.3-1064.8",
+      "id": "star-11",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 899.3,
       "z": 1064.8
     },
     {
       "kind": "star",
-      "id": "star--309.2-1344.4",
+      "id": "star-12",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -309.2,
       "z": 1344.4
     },
     {
       "kind": "star",
-      "id": "star--457.6--88.1",
+      "id": "star-13",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -457.6,
       "z": -88.1
     },
     {
       "kind": "star",
-      "id": "star-454.1-897",
+      "id": "star-14",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 454.1,
       "z": 897
     },
     {
       "kind": "star",
-      "id": "star-335.4-336.6",
+      "id": "star-15",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 335.4,
       "z": 336.6
     },
     {
       "kind": "star",
-      "id": "star--1445.6--197.5",
+      "id": "star-16",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -1445.6,
       "z": -197.5
     },
     {
       "kind": "star",
-      "id": "star--241.2-200.4",
+      "id": "star-17",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -241.2,
       "z": 200.4
     },
     {
       "kind": "star",
-      "id": "star-396.6-148.3",
+      "id": "star-18",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 396.6,
       "z": 148.3
     },
     {
       "kind": "star",
-      "id": "star-119.5-213.6",
+      "id": "star-19",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 119.5,
       "z": 213.6
     },
     {
       "kind": "star",
-      "id": "star--469.2-896.9",
+      "id": "star-20",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -469.2,
       "z": 896.9
     },
     {
       "kind": "star",
-      "id": "star--501.7-1137.9",
+      "id": "star-21",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -501.7,
       "z": 1137.9
     },
     {
       "kind": "star",
-      "id": "star--766.5--110.6",
+      "id": "star-22",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": -766.5,
       "z": -110.6
     },
     {
       "kind": "star",
-      "id": "star-1341-850",
+      "id": "star-23",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 1341,
       "z": 850
     },
     {
       "kind": "star",
-      "id": "star-654.8-272.8",
+      "id": "star-24",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 654.8,
       "z": 272.8
     },
     {
       "kind": "star",
-      "id": "star-133.1-8.6",
+      "id": "star-25",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 133.1,
       "z": 8.6
     },
     {
       "kind": "star",
-      "id": "star-799.2-303.8",
+      "id": "star-26",
       "ok": true,
-      "msg": "stella raggiungibile",
+      "msg": "stella accessibile",
       "x": 799.2,
       "z": 303.8
+    },
+    {
+      "kind": "vehicle",
+      "id": "car-Auto",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -343,
+      "z": 24
+    },
+    {
+      "kind": "vehicle",
+      "id": "vespa-Vespa",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -341.8,
+      "z": 21
+    },
+    {
+      "kind": "vehicle",
+      "id": "car-Taxi",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": 205,
+      "z": -100
+    },
+    {
+      "kind": "vehicle",
+      "id": "vespa-Vespa pizza",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -342.5,
+      "z": 28.9
+    },
+    {
+      "kind": "vehicle",
+      "id": "car-Auto",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -342.1,
+      "z": 17.8
+    },
+    {
+      "kind": "vehicle",
+      "id": "car-Ambulanza",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -302.6,
+      "z": 41.7
+    },
+    {
+      "kind": "spawn",
+      "id": "spawn",
+      "ok": true,
+      "msg": "spawn accessibile",
+      "x": -312,
+      "z": 12
+    },
+    {
+      "kind": "missionBoard",
+      "id": "mission-board",
+      "ok": true,
+      "msg": "tabellone accessibile",
+      "x": -314,
+      "z": 6
+    },
+    {
+      "kind": "prop",
+      "id": "sign-duomo",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -291.5,
+      "z": 10
+    },
+    {
+      "kind": "prop",
+      "id": "sign-teatro",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -80,
+      "z": 68.5
+    },
+    {
+      "kind": "prop",
+      "id": "sign-comunale",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -16,
+      "z": 66
+    },
+    {
+      "kind": "prop",
+      "id": "sign-porta",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -297,
+      "z": -31
+    },
+    {
+      "kind": "prop",
+      "id": "sign-ponte",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -313,
+      "z": -64
+    },
+    {
+      "kind": "prop",
+      "id": "sign-stazione",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 184,
+      "z": -106
+    },
+    {
+      "kind": "prop",
+      "id": "sign-musini",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 381,
+      "z": 192
+    },
+    {
+      "kind": "prop",
+      "id": "sign-granmadre",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 395,
+      "z": 154
+    },
+    {
+      "kind": "prop",
+      "id": "street-via-emilia",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -300,
+      "z": 16
+    },
+    {
+      "kind": "prop",
+      "id": "street-piazza-duomo",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -300,
+      "z": -2
+    },
+    {
+      "kind": "prop",
+      "id": "street-piazza-garibaldi",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -20,
+      "z": 80
+    },
+    {
+      "kind": "prop",
+      "id": "street-piazza-verdi",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -90,
+      "z": 60
+    },
+    {
+      "kind": "prop",
+      "id": "bench-piazza-1",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -306,
+      "z": -10
+    },
+    {
+      "kind": "prop",
+      "id": "bench-piazza-2",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -289,
+      "z": -12
+    },
+    {
+      "kind": "prop",
+      "id": "bench-piazza-3",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -300,
+      "z": 12
+    },
+    {
+      "kind": "prop",
+      "id": "tree-piazza-1",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -312,
+      "z": 0
+    },
+    {
+      "kind": "prop",
+      "id": "tree-piazza-2",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -291,
+      "z": -2
+    },
+    {
+      "kind": "prop",
+      "id": "planter-piazza",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -303,
+      "z": 7
+    },
+    {
+      "kind": "prop",
+      "id": "stall-stazione",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 176,
+      "z": -102
+    },
+    {
+      "kind": "prop",
+      "id": "stall-granmadre",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 403,
+      "z": 150
+    },
+    {
+      "kind": "prop",
+      "id": "bollard-1",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -304,
+      "z": -6
+    },
+    {
+      "kind": "prop",
+      "id": "bollard-2",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -296,
+      "z": -6
+    },
+    {
+      "kind": "prop",
+      "id": "bollard-3",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -304,
+      "z": 2
+    },
+    {
+      "kind": "prop",
+      "id": "bollard-4",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -296,
+      "z": 2
     },
     {
       "kind": "mission-step",
@@ -710,6 +661,198 @@
       "msg": "Palazzo Comunale",
       "x": -10.25,
       "z": 66.77
+    },
+    {
+      "kind": "mission-step",
+      "id": "pilgrim:0",
+      "ok": true,
+      "msg": "Pellegrino alla stazione",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "pilgrim:1",
+      "ok": true,
+      "msg": "Duomo di San Donnino",
+      "x": -301,
+      "z": 11
+    },
+    {
+      "kind": "mission-step",
+      "id": "pilgrim:2",
+      "ok": true,
+      "msg": "Porta San Donnino",
+      "x": -295.28,
+      "z": -26.86
+    },
+    {
+      "kind": "mission-step",
+      "id": "delivery:0",
+      "ok": true,
+      "msg": "Farmacia Cavour",
+      "x": -54.25,
+      "z": -6.21
+    },
+    {
+      "kind": "mission-step",
+      "id": "delivery:1",
+      "ok": true,
+      "msg": "Ospedale di Fidenza",
+      "x": -1450,
+      "z": 1710
+    },
+    {
+      "kind": "mission-step",
+      "id": "tour:0",
+      "ok": true,
+      "msg": "Cliente alla stazione",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "tour:1",
+      "ok": true,
+      "msg": "Teatro Magnani",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "tour:2",
+      "ok": true,
+      "msg": "Piazza Duomo",
+      "x": -296.74,
+      "z": 3.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "tour:3",
+      "ok": true,
+      "msg": "Santuario della Gran Madre",
+      "x": 397.43,
+      "z": 156.72
+    },
+    {
+      "kind": "mission-step",
+      "id": "coincidenza:0",
+      "ok": true,
+      "msg": "Ritiro bagaglio al Teatro",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "coincidenza:1",
+      "ok": true,
+      "msg": "Stazione di Fidenza",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "ultimo-treno:0",
+      "ok": true,
+      "msg": "Viaggiatore notturno",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "ultimo-treno:1",
+      "ok": true,
+      "msg": "Gran Madre",
+      "x": 397.43,
+      "z": 156.72
+    },
+    {
+      "kind": "mission-step",
+      "id": "capolinea:0",
+      "ok": true,
+      "msg": "Capolinea stazione",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "capolinea:1",
+      "ok": true,
+      "msg": "Fermata Teatro",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "capolinea:2",
+      "ok": true,
+      "msg": "Fermata Piazza Duomo",
+      "x": -296.74,
+      "z": 3.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-procession:0",
+      "ok": true,
+      "msg": "Partenza della processione",
+      "x": -300,
+      "z": 13
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-procession:1",
+      "ok": true,
+      "msg": "Piazza Duomo",
+      "x": -296.74,
+      "z": 5.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-procession:2",
+      "ok": true,
+      "msg": "Piazza Garibaldi",
+      "x": -7.1,
+      "z": 42
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-torta-fritta:0",
+      "ok": true,
+      "msg": "Cucina della festa",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-torta-fritta:1",
+      "ok": true,
+      "msg": "Bancarelle in festa",
+      "x": -296.74,
+      "z": 7.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-photo:0",
+      "ok": true,
+      "msg": "Foto alla festa",
+      "x": -296.74,
+      "z": 7.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-photo:1",
+      "ok": true,
+      "msg": "Foto al Duomo",
+      "x": -300,
+      "z": 15
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-photo:2",
+      "ok": true,
+      "msg": "Foto al Teatro",
+      "x": -76.15,
+      "z": 70.81
     }
   ]
 }

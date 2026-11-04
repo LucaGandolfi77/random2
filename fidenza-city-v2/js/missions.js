@@ -86,6 +86,7 @@ export class MissionManager {
     this.chaseHold = 0;
     this.marker = makeMissionMarker();
     scene.add(this.marker.group);
+    this.eventId = null;
     this.defs = this._makeDefs();
   }
 
@@ -97,8 +98,10 @@ export class MissionManager {
         out[m.id] = {
           ...meta,
           id: m.id,
+          type: m.type || m.id,
           title: m.title,
           short: m.short,
+          event: m.event || null,
           time: m.time,
           reward: m.reward,
           chase: !!m.chase,
@@ -179,11 +182,17 @@ export class MissionManager {
     };
   }
 
+  setEvent(eventId = null) {
+    this.eventId = eventId;
+  }
+
   list() {
-    return Object.values(this.defs).map(def => ({
-      ...def,
-      record: getMissionRecord(def.id)
-    }));
+    return Object.values(this.defs)
+      .filter(def => !def.event || def.event === this.eventId)
+      .map(def => ({
+        ...def,
+        record: getMissionRecord(def.id)
+      }));
   }
 
   get activeId() { return this.active?.def.id || null; }
@@ -191,6 +200,15 @@ export class MissionManager {
   start(id) {
     const def = this.defs[id];
     if (!def) return false;
+    return this._start(def);
+  }
+
+  startJob(def) {
+    if (!def || !def.steps?.length && !def.chase) return false;
+    return this._start(def);
+  }
+
+  _start(def) {
     this.abort(true);
     this.active = {
       def,
@@ -273,32 +291,47 @@ export class MissionManager {
         return null;
       }
       if (d < (t.radius || 12)) {
+        if (t.photoRequired) return { text: '📷 scatta una foto qui con <kbd>P</kbd>', action: 'mission-step', step: t };
         return { text: `<kbd>E</kbd> ${t.prompt}`, action: 'mission-step', step: t };
       }
     }
     return null;
   }
 
-  interact(player) {
+  interact(player, force = false) {
     if (!this.active) return false;
     const t = this.currentTarget;
     if (!t) return false;
     const d = Math.hypot(player.position.x - t.x, player.position.z - t.z);
     if (this.active.def.chase) return false;
     if (d > (t.radius || 12)) return false;
+    if (t.photoRequired && !force) return false;
     const def = this.active.def;
     this.active.progress++;
-    if (def.id === 'photo') this.active.photos++;
+    if (def.id === 'photo' || t.photoRequired) this.active.photos++;
     this.audio?.tone(740, 0.12, 'triangle', 0.06, 980);
     if (this.active.stepIndex < (def.steps?.length || 0) - 1) {
       this.active.stepIndex++;
       const next = this.currentTarget;
       if (next) this.marker.group.position.set(next.x, 0, next.z);
-      this.onToast?.(def.id === 'photo' ? `Foto scattata (${this.active.photos}/${def.steps.length})` : 'Tappa completata');
+      const text = (def.id === 'photo' || t.photoRequired)
+        ? `Foto scattata (${this.active.photos}/${def.steps.length})`
+        : (t.comment || next?.comment || 'Tappa completata');
+      this.onToast?.(text);
       return true;
     }
     this._complete();
     return true;
+  }
+
+  registerPhoto(photo) {
+    if (!this.active || !this.player) return false;
+    const t = this.currentTarget;
+    if (!t?.photoRequired) return false;
+    const d = Math.hypot(this.player.position.x - t.x, this.player.position.z - t.z);
+    if (d > (t.radius || 12)) return false;
+    this.onToast?.(`Foto scattata · ${photo?.place || t.name}`);
+    return this.interact(this.player, true);
   }
 
   _complete() {
@@ -308,7 +341,7 @@ export class MissionManager {
     const timeBonus = Math.max(0, Math.round(a.timer * SCORE.missionTimeBonus));
     const points = a.def.reward + timeBonus;
     addScore(points);
-    completeMission(a.def.id, elapsed, points);
+    if (!a.def.career) completeMission(a.def.id, elapsed, points);
     this.audio?.missionComplete();
     this.onComplete?.(a.def, points, elapsed, a);
     this._cleanup();

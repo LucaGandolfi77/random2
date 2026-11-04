@@ -60,6 +60,9 @@ function overpassQuery() {
   node["historic"](${b});
   node["amenity"~"place_of_worship|townhall|theatre|hospital|marketplace|fuel|pharmacy|bank|restaurant|cafe|bar|school|police"](${b});
   node["railway"="station"](${b});
+  node["highway"="traffic_signals"](${b});
+  node["highway"="crossing"](${b});
+  way["highway"="crossing"](${b});
   relation["natural"="water"](${b});
   relation["waterway"="riverbank"](${b});
   relation["leisure"~"park|garden|playground|pitch|sports_centre|common"](${b});
@@ -92,7 +95,7 @@ async function fetchRaw() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-      if (!json.elements) throw new Error('risposta Overpass senza elements');
+      if (!json.elements || json.elements.length === 0) throw new Error('risposta Overpass vuota');
       fs.writeFileSync(RAW, JSON.stringify(json));
       console.log(`✓ ${json.elements.length} elementi OSM salvati`);
       return json;
@@ -318,6 +321,8 @@ function build() {
   const railways = [];
   const pois = [];
   const seenPoi = new Set();
+  const trafficSignals = [];
+  const crossings = [];
 
   for (const el of elements) {
     const tags = el.tags || {};
@@ -396,6 +401,17 @@ function build() {
       if (pts && pts.length >= 2) {
         railways.push({ id: el.id, kind: tags.railway, name: tags.name || '', pts: simplify(pts, 1.0) });
       }
+    }
+
+    if (el.type === 'node' && tags.highway === 'traffic_signals') {
+      const xy = project(el.lat, el.lon);
+      trafficSignals.push({ id: el.id, x: xy[0], z: xy[1] });
+      continue;
+    }
+    if (el.type === 'node' && tags.highway === 'crossing') {
+      const xy = project(el.lat, el.lon);
+      crossings.push({ id: el.id, x: xy[0], z: xy[1], kind: tags.crossing || 'uncontrolled' });
+      continue;
     }
 
     // POI
@@ -513,7 +529,9 @@ function build() {
         waterways: waterways.length,
         railways: railways.length,
         pois: pois.length,
-        stars: stars.length
+        stars: stars.length,
+        trafficSignals: trafficSignals.length,
+        crossings: crossings.length
       },
       attribution: {
         map: '© OpenStreetMap contributors (ODbL)',
@@ -527,7 +545,9 @@ function build() {
     waterways,
     railways,
     pois,
-    stars
+    stars,
+    trafficSignals,
+    crossings
   };
 
   fs.writeFileSync(OUT, JSON.stringify(out));
@@ -540,6 +560,8 @@ function build() {
   console.log(`  ferrovie: ${railways.length}`);
   console.log(`  POI: ${pois.length}`);
   console.log(`  stelle: ${stars.length}`);
+  console.log(`  semafori: ${trafficSignals.length}`);
+  console.log(`  attraversamenti: ${crossings.length}`);
   console.log(`  dimensione: ${(size / 1e6).toFixed(2)} MB`);
   console.log(`  hash: ${crypto.createHash('sha1').update(fs.readFileSync(OUT)).digest('hex').slice(0, 12)}`);
 }

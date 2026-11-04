@@ -276,6 +276,28 @@ export class GameMap {
         ctx.stroke();
       }
     }
+    // bus e treno
+    if (this.world.bus) {
+      const p = toScreen(this.world.bus.mesh.position.x, this.world.bus.mesh.position.z);
+      ctx.fillStyle = '#2f6b4f';
+      ctx.fillRect(p.x - 4, p.y - 3, 8, 6);
+      ctx.strokeStyle = '#f4ebda';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(p.x - 4, p.y - 3, 8, 6);
+    }
+    if (this.world.event) {
+      const place = this.world.placesById?.get(this.world.event.placeId);
+      if (place) {
+        const p = toScreen(place.beaconX ?? place.x, place.beaconZ ?? place.z);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = this.world.event.color || '#e7b95a';
+        ctx.fill();
+        ctx.strokeStyle = '#fff8e8';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+      }
+    }
 
     // giocatore al centro
     ctx.save();
@@ -484,6 +506,60 @@ export class GameMap {
       ctx.stroke();
       ctx.fillStyle = 'rgba(194,104,75,.25)';
       ctx.fill();
+    }
+
+    // bus e treno
+    if (this.world.bus) {
+      const p = toScreen(this.world.bus.mesh.position.x, this.world.bus.mesh.position.z);
+      if (p.x > -20 && p.y > -20 && p.x < W + 20 && p.y < H + 20) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#2f6b4f';
+        ctx.fill();
+        ctx.strokeStyle = '#f4ebda';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = '#f4ebda';
+        ctx.font = '700 10px Oswald, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('B', p.x, p.y + 0.5);
+      }
+    }
+    if (this.world.train) {
+      const p = toScreen(this.world.train.mesh.position.x, this.world.train.mesh.position.z);
+      if (p.x > -20 && p.y > -20 && p.x < W + 20 && p.y < H + 20) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+        ctx.fillStyle = '#8f3e34';
+        ctx.fill();
+        ctx.strokeStyle = '#f4ebda';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fillStyle = '#f4ebda';
+        ctx.font = '700 10px Oswald, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('T', p.x, p.y + 0.5);
+      }
+    }
+    if (this.world.event) {
+      const place = this.world.placesById?.get(this.world.event.placeId);
+      if (place) {
+        const p = toScreen(place.beaconX ?? place.x, place.beaconZ ?? place.z);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = this.world.event.color || '#e7b95a';
+        ctx.fill();
+        ctx.strokeStyle = '#fff8e8';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = '#fff8e8';
+        ctx.font = '700 11px Oswald, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⚑', p.x, p.y + 0.5);
+      }
     }
 
     // icone POI

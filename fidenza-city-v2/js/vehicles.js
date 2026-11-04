@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { VEHICLES, WORLD } from './config.js';
 import { clamp, damp, groundHeightAt, resolveCirclePolygon } from './utils.js';
 import { makeCar, makeVespa } from './models.js';
+import { getCareer } from './save.js';
 
 export class Vehicle {
   constructor({ scene, type = 'car', x, z, yaw = 0, color, taxi = false, label = '', world, audio }) {
@@ -9,9 +10,13 @@ export class Vehicle {
     this.world = world;
     this.audio = audio;
     this.type = type;
-    this.config = VEHICLES[type];
+    this.baseConfig = { ...VEHICLES[type] };
+    this.config = { ...this.baseConfig };
+    this.applyUpgrades();
     this.label = label || this.config.name;
     this.color = color;
+    this.taxi = !!taxi;
+    this.ambulance = label === 'Ambulanza';
     this.position = new THREE.Vector3(x, 0, z);
     this.heading = yaw;
     this.speed = 0;
@@ -30,6 +35,18 @@ export class Vehicle {
   }
 
   get radius() { return this.config.radius; }
+
+  applyUpgrades(upgrades = getCareer().upgrades || {}) {
+    const base = this.baseConfig;
+    this.config = { ...base };
+    const engine = upgrades.engine || 0;
+    const handling = upgrades.handling || 0;
+    const brakes = upgrades.brakes || 0;
+    this.config.maxSpeed = base.maxSpeed * (1 + engine * 0.07);
+    this.config.acceleration = base.acceleration * (1 + engine * 0.09);
+    this.config.steer = base.steer * (1 + handling * 0.08);
+    this.config.brake = base.brake * (1 + brakes * 0.1);
+  }
 
   setActive(active, player) {
     if (active === this.active) return;
@@ -182,6 +199,10 @@ export class VehicleManager {
       });
       this.vehicles.push(v);
     }
+  }
+
+  applyUpgrades(upgrades = getCareer().upgrades || {}) {
+    for (const vehicle of this.vehicles) vehicle.applyUpgrades(upgrades);
   }
 
   nearest(x, z, maxDist = 3.2) {

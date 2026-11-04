@@ -1,10 +1,10 @@
-# Fidenza da Giocare v2
+# Fidenza da Giocare v2.5
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
-Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2
-corregge i punti di interesse, raddrizza la facciata del Duomo, aggiunge tetti,
-comignoli, stagioni, un livello POI completo e un formato mappa editabile.
+Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.5
+aggiunge gli eventi in città: mercato, mercatino di Natale, festa di San Donnino,
+serate a Teatro, dehors estivi e ora di punta in stazione.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 
@@ -37,10 +37,100 @@ npx serve fidenza-city-v2
 | Freno | Spazio | pulsante Freno |
 | Clacson | H | pulsante 📯 |
 | Missioni | F | tabellone con ▶ |
+| Carriera | C o voce in pausa | voce in pausa |
 | Mappa | N o click sulla minimappa | click sulla minimappa |
+| Modalità foto | P o voce in pausa | voce in pausa |
 | Audio | M | pulsante audio |
 | Stagione | selettore in pausa o nell’intro | selettore |
-| Pausa | Esc / P | Esc |
+| Pausa | Esc | Esc |
+
+Nella modalità foto: WASD per muoverti, trascina il mouse per guardare, Q/E per
+l’altezza, Shift per andare veloce, `[` e `]` per il campo visivo, P/Esc per
+uscire. La galleria e i download sono solo locali. Su mobile compare uno stick
+virtuale per muovere la camera.
+
+**Controller**: stick sinistro per muoversi, stick destro per guardare, A per
+interagire, B per frenare, X per correre, Y per le missioni, Back per la mappa,
+Start per la pausa.
+
+**Performance**: aggiungi `?quality=low`, `?quality=medium` o `?quality=high`
+all’URL per forzare il livello grafico.
+
+## Novità v2.5 — Eventi in città
+
+- **Calendario urbano**: mercato del mercoledì e del sabato, mercatino di Natale,
+  festa di San Donnino, serate al Teatro Magnani, dehors estivi e ora di punta
+  in stazione.
+- **Eventi visibili**: bancarelle, albero di Natale, luci, palco, tappeto rosso,
+  ombrelloni e folla animano i luoghi.
+- **Lavori speciali**: ogni evento aggiunge offerte di carriera dedicate, con
+  paga aumentata.
+- **San Donnino**: processione animata, bancarelle di torta fritta, culatello e
+  gnocco fritto, programma della festa, fuochi d’artificio alle 22:30 e tre
+  missioni dedicate: *La processione*, *Torta fritta in festa* e *La foto della
+  festa*.
+- **Badge evento**: completando le tre missioni di San Donnino si ottiene il
+  badge della festa.
+- **Card “Oggi in città”** nell’intro e nel menu pausa, con orario e prossimo
+  evento.
+- **Eventi visitati**: statistiche, sfida del giorno e achievement dedicati.
+- **Anteprima forzata**: aggiungi `?event=market`, `?event=christmas-market`,
+  `?event=san-donnino`, `?event=theatre-night`, `?event=summer-dehors` o
+  `?event=station-rush` all’URL per provare un evento fuori stagione.
+
+## Novità v2.4 — Fidenza Carriera
+
+- **Patente**: un esame di guida con tre checkpoint sblocca taxi e consegne.
+- **Tre carriere**: tassista, corriere e fotografo, con lavori generati dai POI
+  della città, distanza, tempo e paga.
+- **Progressione**: XP, livelli, soldi, reputazione, bonus notturni e storico
+  degli ultimi lavori.
+- **Garage**: potenziamenti per motore, assetto e freni applicati davvero ai
+  veicoli.
+- **Lavori fotografici**: richiedono una vera foto in modalità foto vicino al
+  soggetto.
+- **Integrazione**: sfida del giorno, statistiche e nuovi achievement dedicati
+  alla carriera.
+
+## Novità v2.3 — Fidenza si muove
+
+- **Navetta urbana**: percorso reale calcolato sulla rete stradale, quattro
+  fermate (Stazione, Piazza Duomo, Teatro Magnani, Gran Madre), pensiline e
+  cartelli. La navetta si ferma alle fermate e riparte.
+- **Treno in transito**: convoglio a tre carrozze sulla linea vicino alla
+  stazione, con sosta in banchina e ripartenza.
+- **Sala d’attesa e banchina**: pensilina, panchine, biglietteria automatica,
+  tabellone delle partenze e insegna del binario.
+- **Pedoni sulle strisce**: attraversano quando le auto hanno il rosso e
+  aspettano il momento giusto; il traffico ambientale continua a fermarsi.
+- **Tre missioni nuove**: *Coincidenza*, *Ultimo treno* e *Capolinea*.
+- **Audio di zona**: l’ambiente cambia tra centro, stazione, parco e Stirone,
+  con campanella alla stazione.
+- **Foto**: cornici cartolina/Fidenza, didascalie con luogo e data, galleria
+  raggruppata per luogo e stick virtuale su mobile.
+- **Qualità della vita**: esporta/importa il salvataggio e avviso di nuova
+  versione PWA.
+
+## Novità v2.2 — Vita in città
+
+- **Tre missioni nuove**: *Il pellegrino* sulla Via Francigena, *Consegna urgente*
+  dalla Farmacia Cavour all’Ospedale e *Giro turistico* dalla stazione a Teatro,
+  Piazza Duomo e Gran Madre.
+- **Modalità foto**: camera libera, filtri, ora e stagione di anteprima, griglia,
+  nascondi giocatore/veicoli, scatto in JPEG, galleria IndexedDB e download PNG.
+- **Achievement e statistiche**: 18 obiettivi, km a piedi e in auto, velocità
+  massima, missioni, stelle, luoghi, foto, stagioni, giorni e tempo di gioco.
+- **Sfida del giorno**: obiettivo deterministico dalla data, progresso e record
+  salvati per giorno, ricompensa in punti. Solo locale, nessun backend.
+- **Semafori e attraversamenti**: 12 semafori e 15 attraversamenti, ciclo
+  rosso/giallo/verde e traffico ambientale che rallenta o si ferma. Il giocatore
+  resta libero: è un gioco arcade.
+- **Insegne 3D**: pannelli leggibili per Duomo, Teatro, Palazzo Comunale, Porta,
+  Ponte, Stazione, Museo Musini e Gran Madre, più targhe per le piazze e Via
+  Emilia. Testo e posizione sono modificabili dal manifest o dall’editor.
+- **Editor**: mission builder visuale, palette props (insegne, targhe, alberi,
+  panchine, lampioni, fioriere, bancarelle e auto parcheggiate) e validazione
+  dei prop.
 
 ## Cosa c’è nella v2
 
@@ -56,8 +146,10 @@ npx serve fidenza-city-v2
   particelle, nebbia, neve al suolo, luci natalizie e meteo.
 - **Mappa editabile**: manifest JSON, schema, template per nuove città, importer,
   audit POI e validatore di raggiungibilità.
-- **Gameplay**: auto, Vespa, taxi, ambulanza, cinque missioni, 27 stelle, mappa
-  completa, audio sintetizzato, PWA offline.
+- **Gameplay**: auto, Vespa, taxi, ambulanza, undici missioni, carriera con
+  lavori e garage, 27 stelle, mappa completa, audio sintetizzato, PWA offline.
+- **Vita in città**: foto, obiettivi, statistiche, sfida del giorno, semafori,
+  attraversamenti e insegne 3D.
 
 ## Dati e correzioni
 
@@ -82,6 +174,36 @@ node tools/import-map.mjs --map maps/fidenza/map.json
 node tools/audit-pois.mjs
 node tools/validate-map.mjs
 ```
+
+Se Overpass non risponde, `build-city.mjs` interrompe la rigenerazione invece di
+sovrascrivere `data/city.json` con una risposta vuota. In quel caso usa i dati
+già presenti e rilancia l’audit quando il servizio torna disponibile.
+
+
+## Editor mappa
+
+Apri:
+
+```text
+http://localhost:8081/fidenza-editor/
+```
+
+L’editor visuale permette di spostare POI, beacon, landmark, stelle, missioni,
+veicoli, prop, spawn e tabellone; può anche nascondere/spostare/ruotare edifici
+e strade tramite override, senza toccare i dati OSM originali.
+
+- Trascina un POI per spostare il punto e il beacon.
+- Trascina un landmark per spostare il modello 3D.
+- Trascina un edificio o una strada per creare un override.
+- Crea missioni complete: tipo, titolo, tempo, reward, tappe cliccando sulla
+  mappa, riordino, POI collegato, commenti e foto.
+- Posiziona props e insegne con la palette; testo, rotazione, scala e colore
+  sono modificabili dall’inspector.
+- Undo/redo, snap, layer, ricerca, validazione integrata.
+- Salvataggio diretto con File System Access API, oppure download/import JSON.
+- Bozza automatica in `localStorage`.
+
+Dettagli: `fidenza-editor/README.md`.
 
 ## Mappe e stagioni
 
@@ -108,13 +230,28 @@ fidenza-city-v2/
   js/
     main.js          avvio, loop, stagioni, interazioni
     world.js         terreno, edifici, tetti, props, stagioni, traffico
+    map-compiler.js   compilatore mappa condiviso
+    map-overrides.js  override edifici/strade/aree
+    map-validate.js   validazione condivisa
     landmarks.js     modelli dei luoghi simbolo
     missions.js      missioni guidate dal manifest
-    map.js           minimappa, mappa completa, POI
+    achievements.js  obiettivi e progresso locale
+    daily.js         sfida del giorno deterministica
+    career.js        lavori, XP, soldi, reputazione e garage
+    events.js        calendario ed eventi della città
+    photo-mode.js    camera libera, filtri, cornici e cattura
+    photo-store.js   galleria foto in IndexedDB
+    transit.js       grafo stradale e percorso della navetta
+    map.js           minimappa, mappa completa, POI, bus e treno
     player.js        controller terza persona
     vehicles.js      guida arcade
     hud.js           interfaccia DOM
     audio.js         audio sintetizzato WebAudio
+  fidenza-editor/
+    index.html
+    editor.css
+    README.md
+    js/
   maps/
     fidenza/
       map.json
@@ -127,6 +264,7 @@ fidenza-city-v2/
     style.schema.json
   tools/
     build-city.mjs
+    build-traffic.mjs
     build-terrain.mjs
     import-map.mjs
     audit-pois.mjs

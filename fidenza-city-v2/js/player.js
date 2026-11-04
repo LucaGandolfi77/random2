@@ -87,7 +87,7 @@ export class Player {
     const forward = (this.input.isDown('KeyW') || this.input.isDown('ArrowUp') ? 1 : 0) - (this.input.isDown('KeyS') || this.input.isDown('ArrowDown') ? 1 : 0);
     const strafe = (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0) - (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0);
     let mx = 0, mz = 0;
-    if (this.input.isTouch()) {
+    if (this.input.isTouch() && !this.input.padActive) {
       mx = this.input.touchMove.x;
       mz = -this.input.touchMove.y;
     } else {

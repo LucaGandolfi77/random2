@@ -4,6 +4,8 @@ La cartella `maps/` contiene i manifest delle mappe. La mappa di Fidenza è in
 `maps/fidenza/map.json`; `maps/_template/` è il punto di partenza per una nuova
 città o una nuova versione.
 
+Per modificare visivamente la mappa apri `../fidenza-editor/` con il server statico attivo.
+
 ## Flusso di lavoro
 
 1. Copia `maps/_template/` in `maps/<id>/`.
@@ -11,7 +13,11 @@ città o una nuova versione.
    - `center`, `origin`, `bbox`;
    - `places` con coordinate `lat/lon` e, quando possibile, ID OSM (`way/…`, `node/…`, `relation/…`);
    - `landmarks` con il modello 3D e l’eventuale rotazione;
-   - `missions` con passi `x/z` oppure `place` + `offsetX/offsetZ`;
+   - `missions` con tipo (`ambulance`, `chase`, `pizza`, `taxi`, `photo`,
+     `pilgrim`, `delivery`, `tour`, `train`, `night`, `bus`, `custom`) e passi
+     `x/z` oppure `place` + `offsetX/offsetZ`;
+   - `props` per insegne (`sign`, `street-sign`) e arredi (`tree`, `bench`,
+     `lamp`, `bollard`, `planter`, `stall`, `parked-car`);
    - `seasons`.
 3. Rigenera la geometria:
 
@@ -29,9 +35,11 @@ node tools/import-map.mjs --map maps/<id>/map.json --out data/map.json
 5. Verifica POI, beacon, stelle e missioni:
 
 ```bash
-node tools/audit-pois.mjs
-node tools/validate-map.mjs
+node tools/audit-pois.mjs --map maps/<id>/map.json
+node tools/validate-map.mjs --map maps/<id>/map.json --city data/city.json
 ```
+
+Per modificare la mappa con l'interfaccia visuale apri `../fidenza-editor/`.
 
 `audit-pois.mjs` confronta i POI con OpenStreetMap; `validate-map.mjs` controlla
 che beacon, stelle e target delle missioni siano fuori dagli edifici e dentro
@@ -51,6 +59,27 @@ l’area giocabile. I report finiscono in `data/poi-audit.json` e
 | `beacon` | posizione locale opzionale del fascio di luce; se assente viene calcolata dall’importer |
 | `radius` | raggio di interazione in metri |
 | `description`, `fact` | testi della scheda |
+
+## Campi principali di `props`
+
+| Campo | Descrizione |
+| --- | --- |
+| `id` | identificatore univoco |
+| `type` | `sign`, `street-sign`, `tree`, `bench`, `lamp`, `bollard`, `planter`, `stall`, `parked-car` |
+| `x`, `z` | posizione locale in metri |
+| `rotation` | rotazione in radianti |
+| `scale` | scala del prop |
+| `color` | colore principale, dove applicabile |
+| `text`, `sub` | testo e sottotitolo per insegne e targhe |
+| `width`, `height` | dimensioni del pannello per insegne e targhe |
+
+Le insegne dei luoghi principali vengono create automaticamente se il manifest
+non ne contiene già una con lo stesso nome; quelle esplicite restano editabili.
+
+La navetta urbana non richiede campi aggiuntivi: il gioco calcola il percorso
+sulla rete stradale collegando i POI `stazione`, `piazza-duomo`, `teatro` e
+`granmadre`. Se uno di questi POI viene rinominato o rimosso, la linea usa le
+fermate ancora disponibili.
 
 ## Stili stagionali
 

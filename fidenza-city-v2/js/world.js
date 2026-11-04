@@ -8,8 +8,10 @@ import {
   groundHeightAt, hashString, formatNumber
 } from './utils.js';
 import { buildLandmarks, makeTextSprite } from './landmarks.js';
-import { makeCar, makePerson, makeTreeGeometry } from './models.js';
+import { makeCar, makeBus, makeTrain, makePerson, makeBench, makeTreeGeometry } from './models.js';
 import { hasStar, hasPlace } from './save.js';
+import { applyOverrides } from './map-overrides.js';
+import { buildBusRoute, makeLoopRoute } from './transit.js';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -207,7 +209,8 @@ export class World {
   constructor({ scene, renderer, city, terrain, map, quality = 'high' }) {
     this.scene = scene;
     this.renderer = renderer;
-    this.city = city;
+    this.rawCity = city;
+    this.city = applyOverrides(city, map.overrides || {});
     this.terrain = terrain;
     this.map = map;
     this.places = map.places || [];
@@ -217,6 +220,10 @@ export class World {
     const ambulance = (map.missions || []).find(m => m.id === 'ambulance');
     const hospitalStep = ambulance?.steps?.[ambulance.steps.length - 1];
     this.hospital = hospitalStep ? { x: hospitalStep.x, z: hospitalStep.z, name: hospitalStep.name } : null;
+    this.starDefs = (map.stars?.length ? map.stars : city.stars) || [];
+    this.vehicleDefs = Array.isArray(map.vehicles) ? map.vehicles : null;
+    this.spawnDef = map.spawn || null;
+    this.missionBoardDef = map.missionBoard || null;
     this.quality = quality;
     this.time = 0;
     this.hour = 15;
@@ -242,6 +249,12 @@ export class World {
     this.sunSprite = null;
     this.moonSprite = null;
     this.stars = null;
+    this.trafficLights = [];
+    this.crossingWalkers = [];
+    this.bus = null;
+    this.busStops = [];
+    this.train = null;
+    this.stationArea = null;
     this.windowMesh = null;
     this.bulbMesh = null;
     this.rainPoints = null;
@@ -265,13 +278,16 @@ export class World {
     await step(0.12, 'Disegno il rilievo…', () => this._buildTerrain());
     await step(0.20, 'Coloro parchi e piazze…', () => this._buildAreas());
     await step(0.32, 'Traccio le strade…', () => this._buildRoads());
+    await step(0.38, 'Semafori e attraversamenti…', () => this._buildTrafficFurniture());
     await step(0.40, 'Poso i binari…', () => this._buildRailways());
     onProgress(0.45, 'Costruisco gli edifici…');
     await this._buildBuildings(onProgress);
     await step(0.64, 'Accendo le finestre…', () => this._buildWindows());
     await step(0.70, 'Pianto gli alberi…', () => this._buildProps());
     await step(0.78, 'Metto i luoghi simbolo…', () => this._buildLandmarks());
-    await step(0.85, 'Nascondo le stelle…', () => this._buildCollectibles());
+    await step(0.82, 'Appendo insegne e arredi…', () => this._buildMapProps());
+    await step(0.85, 'Metto in moto bus e treno…', () => this._buildTransit());
+    await step(0.87, 'Nascondo le stelle…', () => this._buildCollectibles());
     await step(0.90, 'Parcheggio auto e Vespe…', () => this._buildVehicles());
     await step(0.94, 'Faccio girare la città…', () => this._buildTraffic());
     await step(0.97, 'Ultimi ritocchi…', () => this._buildAtmosphere());
@@ -628,6 +644,152 @@ export class World {
       const sp = makeTextSprite(l.text, { scale: 0.86, fontSize: 38, pad: 18, bg: 'rgba(244,235,218,.78)', color: '#334036' });
       sp.position.set(l.x, 5.4, l.z);
       this.scene.add(sp);
+    }
+  }
+
+
+  _nearestRoadInfo(x, z) {
+    let best = null;
+    for (const r of this.city.roads) {
+      for (let i = 1; i < r.pts.length; i++) {
+        const [ax, az] = r.pts[i - 1], [bx, bz] = r.pts[i];
+        const dx = bx - ax, dz = bz - az;
+        const len = Math.hypot(dx, dz);
+        if (len < 0.5) continue;
+        const ux = dx / len, uz = dz / len;
+        const t = clamp(((x - ax) * dx + (z - az) * dz) / (len * len), 0, 1);
+        const px = ax + dx * t, pz = az + dz * t;
+        const d = Math.hypot(x - px, z - pz);
+        if (!best || d < best.d) best = { x: px, z: pz, ux, uz, w: r.w, kind: r.kind, d };
+      }
+    }
+    return best;
+  }
+
+  _buildTrafficFurniture() {
+    // Attraversamenti pedonali
+    const positions = [];
+    for (const c of this.city.crossings || []) {
+      const info = this._nearestRoadInfo(c.x, c.z);
+      if (!info || info.d > 25) continue;
+      const nx = -info.uz, nz = info.ux;
+      const halfRoad = Math.min(9, info.w / 2);
+      for (let i = -2; i <= 2; i++) {
+        const cx = info.x + info.ux * i * 0.95, cz = info.z + info.uz * i * 0.95;
+        const lx = cx + nx * halfRoad, lz = cz + nz * halfRoad;
+        const rx = cx - nx * halfRoad, rz = cz - nz * halfRoad;
+        const ex = info.ux * 0.22, ez = info.uz * 0.22;
+        addQuad(positions,
+          lx - ex, 0.101, lz - ez,
+          rx - ex, 0.101, rz - ez,
+          rx + ex, 0.101, rz + ez,
+          lx + ex, 0.101, lz + ez);
+      }
+    }
+    if (positions.length) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      g.computeVertexNormals();
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: '#e8ddc4' }));
+      m.name = 'attraversamenti';
+      this.scene.add(m);
+    }
+
+    // Semafori
+    const poleGeo = new THREE.CylinderGeometry(0.1, 0.13, 4.2, 7);
+    poleGeo.translate(0, 2.1, 0);
+    const poleMat = new THREE.MeshLambertMaterial({ color: '#2f3632' });
+    for (let i = 0; i < (this.city.trafficSignals || []).length; i++) {
+      const sig = this.city.trafficSignals[i];
+      const info = this._nearestRoadInfo(sig.x, sig.z);
+      if (!info) continue;
+      const nx = -info.uz, nz = info.ux;
+      const group = new THREE.Group();
+      group.position.set(info.x + nx * (info.w / 2 + 1.25), 0, info.z + nz * (info.w / 2 + 1.25));
+      group.rotation.y = Math.atan2(info.ux, info.uz);
+      const pole = new THREE.Mesh(poleGeo, poleMat);
+      pole.castShadow = true;
+      group.add(pole);
+      const box = new THREE.Mesh(new THREE.BoxGeometry(0.38, 1.15, 0.3), new THREE.MeshLambertMaterial({ color: '#1d241f' }));
+      box.position.set(0, 4.15, 0.08);
+      box.castShadow = true;
+      group.add(box);
+      const mats = {
+        red: new THREE.MeshBasicMaterial({ color: '#4d1f1a' }),
+        yellow: new THREE.MeshBasicMaterial({ color: '#4d421a' }),
+        green: new THREE.MeshBasicMaterial({ color: '#1d4d2a' })
+      };
+      const lights = {};
+      ['red', 'yellow', 'green'].forEach((name, k) => {
+        const light = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), mats[name]);
+        light.position.set(0, 4.52 - k * 0.33, 0.25);
+        group.add(light);
+        lights[name] = light;
+      });
+      this.scene.add(group);
+      this.trafficLights.push({ group, lights, phase: (i * 2.7) % 12 });
+    }
+
+    this._buildCrossingWalkers();
+  }
+
+  _buildCrossingWalkers() {
+    const rnd = seededRandom(311);
+    const candidates = [];
+    for (const crossing of this.city.crossings || []) {
+      const info = this._nearestRoadInfo(crossing.x, crossing.z);
+      if (!info || info.d > 18) continue;
+      let signal = null;
+      let best = 38;
+      for (const light of this.trafficLights) {
+        const d = Math.hypot(light.group.position.x - info.x, light.group.position.z - info.z);
+        if (d < best) { best = d; signal = light; }
+      }
+      if (!signal) continue;
+      const nx = -info.uz;
+      const nz = info.ux;
+      const half = Math.min(8, info.w / 2) + 1.7;
+      candidates.push({ info, signal, nx, nz, half });
+    }
+    const chosen = candidates.slice(0, this.quality === 'low' ? 3 : 6);
+    const shirts = ['#c2684b', '#4f8fa8', '#7c8d5b', '#d9c9a8', '#9a4a34'];
+    for (const c of chosen) {
+      const person = makePerson({
+        shirt: shirts[Math.floor(rnd() * shirts.length)],
+        pants: '#3a3f46',
+        skin: '#d8aa85',
+        hair: '#3a2a20'
+      });
+      const side = rnd() > 0.5 ? 1 : 0;
+      const dir = side === 0 ? 1 : -1;
+      const crossing = {
+        person, ...c,
+        t: side,
+        target: side === 0 ? 1 : 0,
+        state: 'waiting',
+        wait: 0.6 + rnd() * 3,
+        speed: 1.15 + rnd() * 0.35,
+        phase: rnd() * Math.PI * 2,
+        dir
+      };
+      this.scene.add(person);
+      this.crossingWalkers.push(crossing);
+    }
+  }
+
+  _signalState(light, time) {
+    const t = (time + light.phase) % 12;
+    if (t < 5.4) return 'green';
+    if (t < 6.6) return 'yellow';
+    return 'red';
+  }
+
+  _updateTrafficLights() {
+    for (const l of this.trafficLights) {
+      const state = this._signalState(l, this.time);
+      l.lights.red.material.color.set(state === 'red' ? '#ff5a4e' : '#4d1f1a');
+      l.lights.yellow.material.color.set(state === 'yellow' ? '#ffd75e' : '#4d421a');
+      l.lights.green.material.color.set(state === 'green' ? '#54e08a' : '#1d4d2a');
     }
   }
 
@@ -1185,13 +1347,856 @@ export class World {
     // piazza: fontana/aiuole
   }
 
+  _signTexture(text, sub = '', { street = false, color = '' } = {}) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 640;
+    canvas.height = street ? 180 : 240;
+    const ctx = canvas.getContext('2d');
+    const bg = color || (street ? '#24506b' : '#1b241e');
+    const fg = '#fff8e8';
+    const accent = street ? '#dfeaf2' : '#e7b95a';
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = street ? 8 : 10;
+    ctx.strokeRect(6, 6, canvas.width - 12, canvas.height - 12);
+
+    const rawLines = String(text || 'FIDENZA').split('\n');
+    const lines = [];
+    if (street) {
+      for (const line of rawLines) lines.push(line);
+    } else {
+      for (const line of rawLines) {
+        const words = line.trim().split(/\s+/);
+        let current = '';
+        for (const word of words) {
+          if (current && (current + ' ' + word).length > 17) {
+            lines.push(current);
+            current = word;
+          } else {
+            current = current ? `${current} ${word}` : word;
+          }
+        }
+        if (current) lines.push(current);
+      }
+    }
+    const limited = lines.slice(0, 3);
+    lines.length = 0;
+    lines.push(...limited);
+    const base = street ? 56 : (lines.length > 2 ? 42 : lines.length > 1 ? 52 : 62);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = fg;
+    ctx.font = `700 ${base}px Anton, "Arial Narrow", sans-serif`;
+    const lineHeight = base * 1.04;
+    const total = lines.length * lineHeight + (sub ? 26 : 0);
+    let y = (canvas.height - total) / 2 + lineHeight * 0.52;
+    for (const line of lines) {
+      ctx.fillText(line.toUpperCase(), canvas.width / 2, y);
+      y += lineHeight;
+    }
+    if (sub) {
+      ctx.fillStyle = street ? '#dfeaf2' : accent;
+      ctx.font = `600 23px Oswald, "Trebuchet MS", sans-serif`;
+      ctx.fillText(String(sub).toUpperCase(), canvas.width / 2, y + 4);
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(8, this.renderer?.capabilities?.getMaxAnisotropy?.() || 1);
+    return tex;
+  }
+
+  _addSign(x, z, rotation, text, sub = '', { street = false, width = 0, height = 0, scale = 1, color = '' } = {}) {
+    const group = new THREE.Group();
+    const w = (width || (street ? 1.9 : 4.4)) * scale;
+    const h = (height || (street ? 0.54 : 1.35)) * scale;
+    const postH = street ? 2.9 : 3.25;
+    const panelY = street ? 2.75 : 3.15;
+    const postMat = new THREE.MeshLambertMaterial({ color: '#2f3632' });
+    for (const px of [-w * 0.36, w * 0.36]) {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.095, postH, 6), postMat);
+      post.position.set(px, postH / 2, 0);
+      post.castShadow = true;
+      group.add(post);
+    }
+    const back = new THREE.Mesh(new THREE.BoxGeometry(w + 0.1, h + 0.1, 0.1), new THREE.MeshLambertMaterial({ color: '#1b241e' }));
+    back.position.set(0, panelY, -0.06);
+    back.castShadow = true;
+    group.add(back);
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({ map: this._signTexture(text, sub, { street, color }), side: THREE.DoubleSide })
+    );
+    panel.position.set(0, panelY, 0.01);
+    group.add(panel);
+    group.position.set(x, 0, z);
+    group.rotation.y = rotation;
+    this.scene.add(group);
+    this.signMeshes = this.signMeshes || [];
+    this.signMeshes.push(group);
+    return group;
+  }
+
+  _buildMapProps() {
+    const props = this.map.props || [];
+    const placedSigns = [];
+    for (const p of props) {
+      const spot = this.isFree(p.x, p.z, 0.6) ? { x: p.x, z: p.z } : (this.findFreeSpot(p.x, p.z, 0.6) || { x: p.x, z: p.z });
+      const scale = p.scale || 1;
+      const rot = p.rotation || 0;
+      const color = p.color || '';
+      switch (p.type) {
+        case 'sign':
+          this._addSign(spot.x, spot.z, rot, p.text || 'FIDENZA', p.sub || '', { width: p.width, height: p.height, scale, color });
+          placedSigns.push((p.text || '').toLowerCase());
+          break;
+        case 'street-sign':
+          this._addSign(spot.x, spot.z, rot, p.text || 'VIA EMILIA', p.sub || 'FIDENZA', { street: true, width: p.width, height: p.height, scale, color });
+          placedSigns.push((p.text || '').toLowerCase());
+          break;
+        case 'tree': {
+          const { trunk, foliage } = makeTreeGeometry();
+          const g = new THREE.Group();
+          const t = new THREE.Mesh(trunk, new THREE.MeshLambertMaterial({ color: '#6b4c35' }));
+          const f = new THREE.Mesh(foliage, new THREE.MeshLambertMaterial({ color: color || '#5d8850' }));
+          t.castShadow = f.castShadow = true;
+          g.add(t, f);
+          g.position.set(spot.x, 0, spot.z);
+          g.rotation.y = rot;
+          g.scale.setScalar(scale);
+          this.scene.add(g);
+          break;
+        }
+        case 'bench': {
+          const g = new THREE.Group();
+          const wood = new THREE.MeshLambertMaterial({ color: color || '#8a5f3d' });
+          const metal = new THREE.MeshLambertMaterial({ color: '#2f3632' });
+          const seat = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.12, 0.52), wood);
+          seat.position.y = 0.46;
+          const back = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.45, 0.1), wood);
+          back.position.set(0, 0.78, -0.22);
+          g.add(seat, back);
+          for (const x of [-0.72, 0.72]) {
+            const leg = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.46, 0.45), metal);
+            leg.position.set(x, 0.23, 0);
+            g.add(leg);
+          }
+          g.position.set(spot.x, 0, spot.z);
+          g.rotation.y = rot;
+          g.scale.setScalar(scale);
+          g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+          this.scene.add(g);
+          break;
+        }
+        case 'lamp': {
+          const g = new THREE.Group();
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 4.2, 7), new THREE.MeshLambertMaterial({ color: '#2f3632' }));
+          pole.position.y = 2.1;
+          const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), new THREE.MeshBasicMaterial({ color: color || '#ffe6a6' }));
+          bulb.position.y = 4.28;
+          g.add(pole, bulb);
+          g.position.set(spot.x, 0, spot.z);
+          g.rotation.y = rot;
+          g.scale.setScalar(scale);
+          this.scene.add(g);
+          break;
+        }
+        case 'bollard': {
+          const m = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.85, 8), new THREE.MeshLambertMaterial({ color: color || '#3a423c' }));
+          m.position.set(spot.x, 0.43, spot.z);
+          m.castShadow = true;
+          this.scene.add(m);
+          break;
+        }
+        case 'planter': {
+          const g = new THREE.Group();
+          const box = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.5, 0.7), new THREE.MeshLambertMaterial({ color: color || '#a77a58' }));
+          box.position.y = 0.25;
+          const bush = new THREE.Mesh(new THREE.SphereGeometry(0.42, 8, 6), new THREE.MeshLambertMaterial({ color: '#5d8850' }));
+          bush.position.y = 0.64;
+          g.add(box, bush);
+          g.position.set(spot.x, 0, spot.z);
+          g.rotation.y = rot;
+          g.scale.setScalar(scale);
+          this.scene.add(g);
+          break;
+        }
+        case 'stall': {
+          const g = new THREE.Group();
+          const counter = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.85, 1.1), new THREE.MeshLambertMaterial({ color: color || '#b07a4e' }));
+          counter.position.y = 0.43;
+          const canopy = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.1, 1.4), new THREE.MeshLambertMaterial({ color: '#e7b95a' }));
+          canopy.position.y = 2.1;
+          g.add(counter, canopy);
+          for (const x of [-1.1, 1.1]) for (const z of [-0.5, 0.5]) {
+            const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.1, 5), new THREE.MeshLambertMaterial({ color: '#6b4c35' }));
+            post.position.set(x, 1.05, z);
+            g.add(post);
+          }
+          g.position.set(spot.x, 0, spot.z);
+          g.rotation.y = rot;
+          g.scale.setScalar(scale);
+          g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+          this.scene.add(g);
+          break;
+        }
+        case 'parked-car': {
+          const car = makeCar({ color: color || '#7b8b88', parked: true });
+          car.position.set(spot.x, 0.05, spot.z);
+          car.rotation.y = rot;
+          car.scale.setScalar(scale * 0.94);
+          this.scene.add(car);
+          break;
+        }
+        default:
+          break;
+      }
+    }
+
+    // Insegne automatiche per i luoghi principali non ancora coperti dal manifest.
+    const major = new Set(['duomo', 'teatro', 'comunale', 'porta', 'ponte', 'stazione', 'musini', 'granmadre']);
+    for (const l of this.landmarks) {
+      if (!major.has(l.model)) continue;
+      const text = (l.short || l.name || '').toLowerCase();
+      if (!text || placedSigns.some(s => s && (s === text || s.includes(text) || text.includes(s)))) continue;
+      const place = this.placesById.get(l.placeId);
+      const baseX = place?.beaconX ?? l.x;
+      const baseZ = place?.beaconZ ?? l.z;
+      const spot = this.findFreeSpot(baseX + 4, baseZ + 4, 1.1) || { x: baseX + 4, z: baseZ + 4 };
+      this._addSign(spot.x, spot.z, 0, l.name || l.short, 'Fidenza');
+    }
+  }
+
+  _boardTexture(title, rows) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 720;
+    canvas.height = 340;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#f4ebda';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#1b241e';
+    ctx.lineWidth = 9;
+    ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+    ctx.fillStyle = '#2f4a3c';
+    ctx.fillRect(10, 10, canvas.width - 20, 62);
+    ctx.fillStyle = '#e7b95a';
+    ctx.font = '700 30px Anton, "Arial Narrow", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(title.toUpperCase(), 26, 43);
+    ctx.font = '600 17px Oswald, "Trebuchet MS", sans-serif';
+    ctx.fillStyle = 'rgba(244,235,218,.72)';
+    ctx.textAlign = 'right';
+    ctx.fillText('FIDENZA', canvas.width - 26, 43);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    rows.slice(0, 6).forEach((row, i) => {
+      const y = 96 + i * 37;
+      ctx.fillStyle = i % 2 ? 'rgba(27,36,30,.04)' : 'transparent';
+      ctx.fillRect(18, y - 17, canvas.width - 36, 34);
+      ctx.fillStyle = '#1b241e';
+      ctx.font = '600 19px Oswald, "Trebuchet MS", sans-serif';
+      ctx.fillText(row[0] || '', 28, y);
+      ctx.font = '500 18px Oswald, "Trebuchet MS", sans-serif';
+      ctx.fillStyle = '#4d4a40';
+      ctx.fillText(row[1] || '', 132, y);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#9a4a34';
+      ctx.font = '700 18px Oswald, "Trebuchet MS", sans-serif';
+      ctx.fillText(row[2] || '', canvas.width - 28, y);
+      ctx.textAlign = 'left';
+    });
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(8, this.renderer?.capabilities?.getMaxAnisotropy?.() || 1);
+    return tex;
+  }
+
+  _addBoard(x, z, rotation, title, rows, width = 4.4, height = 2.1) {
+    const group = new THREE.Group();
+    const postMat = new THREE.MeshLambertMaterial({ color: '#2f3632' });
+    for (const px of [-width * 0.38, width * 0.38]) {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 3.1, 6), postMat);
+      post.position.set(px, 1.55, 0);
+      post.castShadow = true;
+      group.add(post);
+    }
+    const back = new THREE.Mesh(new THREE.BoxGeometry(width + 0.12, height + 0.12, 0.12), new THREE.MeshLambertMaterial({ color: '#1b241e' }));
+    back.position.set(0, 2.9, -0.07);
+    group.add(back);
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(width, height),
+      new THREE.MeshBasicMaterial({ map: this._boardTexture(title, rows), side: THREE.DoubleSide })
+    );
+    panel.position.set(0, 2.9, 0.01);
+    group.add(panel);
+    group.position.set(x, 0, z);
+    group.rotation.y = rotation;
+    this.scene.add(group);
+    return group;
+  }
+
+  _buildBusLine() {
+    const defs = [
+      { id: 'stazione', name: 'Stazione', place: 'stazione' },
+      { id: 'piazza-duomo', name: 'Piazza Duomo', place: 'piazza-duomo' },
+      { id: 'teatro', name: 'Teatro Magnani', place: 'teatro' },
+      { id: 'granmadre', name: 'Gran Madre', place: 'granmadre' }
+    ];
+    const stops = defs.map(d => {
+      const p = this.placesById.get(d.place);
+      return p ? { id: d.id, name: d.name, x: p.beaconX ?? p.x, z: p.beaconZ ?? p.z } : null;
+    }).filter(Boolean);
+    if (stops.length < 2) return;
+    const route = buildBusRoute(this.city, stops);
+    if (!route || !route.total) return;
+    this.busRoute = route;
+    const mesh = makeBus({ color: '#e8ddc4', accent: '#2f6b4f' });
+    mesh.scale.setScalar(0.92);
+    this.scene.add(mesh);
+    const first = route.stops[0];
+    this.bus = {
+      mesh,
+      route,
+      t: first.t,
+      nextStop: route.stops.length > 1 ? 1 : 0,
+      dwell: 5,
+      speed: 8.4,
+      wheelSpin: 0
+    };
+    this._placeBus();
+    this.busStops = route.stops.map(stop => {
+      const pose = route.pose(stop.t);
+      const len = Math.hypot(pose.dx, pose.dz) || 1;
+      const nx = -pose.dz / len;
+      const nz = pose.dx / len;
+      const spot = this.findFreeSpot(pose.x + nx * 5.2, pose.z + nz * 5.2, 1.4) || { x: pose.x + nx * 5.2, z: pose.z + nz * 5.2 };
+      const rot = Math.atan2(nx, nz);
+      this._addSign(spot.x, spot.z, rot, stop.name, 'Fermata navetta', { street: true, width: 2.3, height: 0.62 });
+      const shelter = new THREE.Group();
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.1, 1.45), new THREE.MeshLambertMaterial({ color: '#2f4a3c' }));
+      roof.position.y = 2.55;
+      shelter.add(roof);
+      for (const sx of [-1.35, 1.35]) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 2.55, 6), new THREE.MeshLambertMaterial({ color: '#2f3632' }));
+        post.position.set(sx, 1.27, -0.55);
+        shelter.add(post);
+      }
+      const bench = makeBench();
+      bench.scale.setScalar(0.75);
+      bench.position.set(0, 0, -0.35);
+      bench.rotation.y = Math.PI;
+      shelter.add(bench);
+      shelter.position.set(spot.x, 0, spot.z);
+      shelter.rotation.y = rot + Math.PI / 2;
+      this.scene.add(shelter);
+      return { ...stop, x: spot.x, z: spot.z };
+    });
+  }
+
+  _placeBus() {
+    if (!this.bus) return;
+    const pose = this.bus.route.pose(this.bus.t);
+    this.bus.mesh.position.set(pose.x, 0.12, pose.z);
+    this.bus.mesh.rotation.y = Math.atan2(pose.dx, pose.dz);
+  }
+
+  _updateBus(dt) {
+    const bus = this.bus;
+    if (!bus) return;
+    if (bus.dwell > 0) {
+      bus.dwell -= dt;
+      return;
+    }
+    const total = bus.route.total;
+    const prev = bus.t;
+    bus.t = (bus.t + bus.speed * dt) % total;
+    const target = bus.route.stops[bus.nextStop];
+    if (target) {
+      const crossed = prev <= bus.t
+        ? target.t > prev && target.t <= bus.t
+        : target.t > prev || target.t <= bus.t;
+      if (crossed) {
+        bus.t = target.t;
+        bus.dwell = 5.5;
+        bus.nextStop = (bus.nextStop + 1) % bus.route.stops.length;
+      }
+    }
+    this._placeBus();
+    bus.wheelSpin += dt * 6;
+    bus.mesh.userData.wheels?.forEach(w => { w.rotation.x = bus.wheelSpin; });
+  }
+
+  _buildTrainLine() {
+    const st = this.placesById.get('stazione');
+    if (!st) return;
+    let best = null;
+    for (const rail of this.city.railways || []) {
+      if (!rail.pts || rail.pts.length < 2) continue;
+      let len = 0;
+      for (let i = 1; i < rail.pts.length; i++) len += Math.hypot(rail.pts[i][0] - rail.pts[i - 1][0], rail.pts[i][1] - rail.pts[i - 1][1]);
+      if (len < 350) continue;
+      let dist = Infinity;
+      for (const [x, z] of rail.pts) dist = Math.min(dist, Math.hypot(x - st.x, z - st.z));
+      if (dist > 45) continue;
+      if (!best || len > best.len) best = { rail, len, dist };
+    }
+    if (!best) return;
+    let pts = best.rail.pts.map(([x, z]) => [x, z]);
+    const dStart = Math.hypot(pts[0][0] - st.x, pts[0][1] - st.z);
+    const dEnd = Math.hypot(pts[pts.length - 1][0] - st.x, pts[pts.length - 1][1] - st.z);
+    if (dEnd < dStart) pts = pts.slice().reverse();
+    const walker = makeRouteWalker(pts, 0, 1, 13.5);
+    const mesh = makeTrain();
+    mesh.scale.setScalar(0.95);
+    this.scene.add(mesh);
+    this.train = { mesh, walker, dwell: 4, cooldown: 20, station: { x: st.x, z: st.z }, wheelSpin: 0 };
+    this._placeTrain();
+  }
+
+  _placeTrain() {
+    if (!this.train) return;
+    const pose = this.train.walker.pose();
+    this.train.mesh.position.set(pose.x, 0.12, pose.z);
+    this.train.mesh.rotation.y = Math.atan2(pose.dx, pose.dz);
+  }
+
+  _updateTrain(dt) {
+    const train = this.train;
+    if (!train) return;
+    train.cooldown = Math.max(0, train.cooldown - dt);
+    if (train.dwell > 0) {
+      train.dwell -= dt;
+      return;
+    }
+    train.walker.advance(dt);
+    this._placeTrain();
+    train.wheelSpin += dt * 9;
+    train.mesh.userData.wheels?.forEach(w => { w.rotation.x = train.wheelSpin; });
+    const pose = train.walker.pose();
+    const d = Math.hypot(pose.x - train.station.x, pose.z - train.station.z);
+    if (d < 38 && train.cooldown <= 0) {
+      train.dwell = 5.5;
+      train.cooldown = 25;
+    }
+  }
+
+  _buildStationArea() {
+    const st = this.placesById.get('stazione');
+    if (!st) return;
+    const base = this.findFreeSpot(st.x + 15, st.z - 24, 4.5) || { x: st.x + 15, z: st.z - 24 };
+    this.stationArea = { x: base.x, z: base.z, name: 'Sala d’attesa' };
+    const platform = new THREE.Mesh(new THREE.BoxGeometry(19, 0.22, 6.4), new THREE.MeshLambertMaterial({ color: '#b9b3a8' }));
+    platform.position.set(base.x, 0.11, base.z);
+    platform.receiveShadow = true;
+    this.scene.add(platform);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(19, 0.18, 6.8), new THREE.MeshLambertMaterial({ color: '#4b5d53' }));
+    roof.position.set(base.x, 3.7, base.z);
+    roof.castShadow = true;
+    this.scene.add(roof);
+    for (const dx of [-8.4, -2.8, 2.8, 8.4]) {
+      for (const dz of [-2.7, 2.7]) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 3.7, 6), new THREE.MeshLambertMaterial({ color: '#2f3632' }));
+        post.position.set(base.x + dx, 1.85, base.z + dz);
+        this.scene.add(post);
+      }
+    }
+    for (const dx of [-5.4, 5.4]) {
+      const bench = makeBench();
+      bench.position.set(base.x + dx, 0, base.z + 1.65);
+      bench.rotation.y = Math.PI;
+      this.scene.add(bench);
+    }
+    const board = this._addBoard(base.x, base.z + 3.7, 0, 'Partenze', [
+      ['15:42', 'Bologna Centrale', '1'],
+      ['15:58', 'Milano Centrale', '2'],
+      ['16:12', 'Parma', '1'],
+      ['16:30', 'Piacenza', '2']
+    ], 4.2, 2.0);
+    board.rotation.y = 0;
+    const machine = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.8, 0.5), new THREE.MeshLambertMaterial({ color: '#2f4a3c' }));
+    machine.position.set(base.x - 8.2, 0.9, base.z - 2.1);
+    this.scene.add(machine);
+    this._addSign(base.x + 7.8, base.z + 3.1, Math.PI, 'STAZIONE', 'Binario 1', { width: 3.4, height: 1.0 });
+  }
+
+  _buildTransit() {
+    this._buildBusLine();
+    this._buildTrainLine();
+    this._buildStationArea();
+  }
+
+  _eventStall(color = '#b07a4e') {
+    const g = new THREE.Group();
+    const counter = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.78, 1.05), new THREE.MeshLambertMaterial({ color }));
+    counter.position.y = 0.4;
+    counter.castShadow = true;
+    g.add(counter);
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(2.55, 0.09, 1.35), new THREE.MeshLambertMaterial({ color: '#e7b95a' }));
+    canopy.position.y = 2.05;
+    canopy.castShadow = true;
+    g.add(canopy);
+    for (const x of [-1.02, 1.02]) {
+      for (const z of [-0.48, 0.48]) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 2.05, 5), new THREE.MeshLambertMaterial({ color: '#6b4c35' }));
+        post.position.set(x, 1.02, z);
+        g.add(post);
+      }
+    }
+    for (let i = 0; i < 4; i++) {
+      const good = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.18, 0.28), new THREE.MeshLambertMaterial({ color: ['#c2684b', '#7c8d5b', '#d9c9a8', '#9a4a34'][i] }));
+      good.position.set(-0.7 + i * 0.46, 0.9, 0.2);
+      g.add(good);
+    }
+    return g;
+  }
+
+  _eventFoodStall(label, color = '#9b6a45') {
+    const g = this._eventStall(color);
+    const tex = this._signTexture(label, 'Specialità della festa', { street: true, color: '#7a3f2f' });
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.8, 0.48),
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
+    );
+    panel.position.set(0, 1.52, 0.53);
+    g.add(panel);
+    return g;
+  }
+
+  _eventUmbrella(color = '#c2684b') {
+    const g = new THREE.Group();
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 2.4, 6), new THREE.MeshLambertMaterial({ color: '#6b4c35' }));
+    pole.position.y = 1.2;
+    g.add(pole);
+    const top = new THREE.Mesh(new THREE.ConeGeometry(1.45, 0.5, 8), new THREE.MeshLambertMaterial({ color }));
+    top.position.y = 2.45;
+    top.castShadow = true;
+    g.add(top);
+    const table = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.07, 10), new THREE.MeshLambertMaterial({ color: '#e8ddc4' }));
+    table.position.y = 0.72;
+    g.add(table);
+    return g;
+  }
+
+  _eventBanner(text, sub = 'Fidenza', color = '#2f4a3c') {
+    const group = new THREE.Group();
+    const tex = this._signTexture(text, sub, { color });
+    const panel = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.8, 1.35),
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
+    );
+    panel.position.y = 3.1;
+    group.add(panel);
+    for (const x of [-1.45, 1.45]) {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 3.1, 6), new THREE.MeshLambertMaterial({ color: '#2f3632' }));
+      post.position.set(x, 1.55, 0);
+      group.add(post);
+    }
+    return group;
+  }
+
+  _eventChristmasTree() {
+    const g = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.28, 1.2, 7), new THREE.MeshLambertMaterial({ color: '#6b4c35' }));
+    trunk.position.y = 0.6;
+    g.add(trunk);
+    for (let i = 0; i < 4; i++) {
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(2.2 - i * 0.42, 1.35, 9), new THREE.MeshLambertMaterial({ color: i % 2 ? '#3f6b4a' : '#4f7748' }));
+      cone.position.y = 1.45 + i * 0.9;
+      cone.castShadow = true;
+      g.add(cone);
+    }
+    const star = new THREE.Mesh(new THREE.OctahedronGeometry(0.32, 0), new THREE.MeshBasicMaterial({ color: '#ffd75e' }));
+    star.position.y = 4.9;
+    g.add(star);
+    return g;
+  }
+
+  _eventCrowd(center, count = 8, radius = 10) {
+    const shirts = ['#c2684b', '#4f8fa8', '#7c8d5b', '#d9c9a8', '#9a4a34', '#5c6b5f'];
+    const pants = ['#2f4a3c', '#3a3f46', '#5b4a3a'];
+    const rnd = seededRandom(620);
+    for (let i = 0; i < count; i++) {
+      const angle = rnd() * Math.PI * 2;
+      const r = radius + rnd() * 10;
+      const x = center.x + Math.cos(angle) * r;
+      const z = center.z + Math.sin(angle) * r;
+      const spot = this.findFreeSpot(x, z, 0.4) || { x, z };
+      const person = makePerson({ shirt: shirts[Math.floor(rnd() * shirts.length)], pants: pants[Math.floor(rnd() * pants.length)] });
+      person.position.set(spot.x, 0.04, spot.z);
+      person.rotation.y = rnd() * Math.PI * 2;
+      this._eventGroup.add(person);
+    }
+  }
+
+  _disposeGroup(root) {
+    root.traverse(obj => {
+      if (obj.isMesh) {
+        obj.geometry?.dispose?.();
+        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+        for (const mat of mats) {
+          mat?.map?.dispose?.();
+          mat?.dispose?.();
+        }
+      }
+    });
+  }
+
+  setEvent(event) {
+    const id = event?.id || null;
+    if (this._eventId === id) return;
+    this._eventId = id;
+    if (this._eventGroup) {
+      this.scene.remove(this._eventGroup);
+      this._disposeGroup(this._eventGroup);
+      this._eventGroup = null;
+    }
+    if (this._eventFireworks?.bursts) {
+      for (const burst of this._eventFireworks.bursts) {
+        this.scene.remove(burst.points);
+        burst.points.geometry.dispose();
+        burst.points.material.dispose();
+      }
+    }
+    this._eventProcession = null;
+    this._eventFireworks = null;
+    this.event = event || null;
+    if (!event) return;
+    const place = this.placesById.get(event.placeId);
+    if (!place) return;
+    const center = { x: place.beaconX ?? place.x, z: place.beaconZ ?? place.z };
+    const group = new THREE.Group();
+    group.name = `evento-${event.id}`;
+    this._eventGroup = group;
+
+    const stalls = event.type === 'market' ? 8 : event.type === 'christmas' ? 7 : event.type === 'festival' ? 6 : event.type === 'summer' ? 3 : 0;
+    for (let i = 0; i < stalls; i++) {
+      const angle = (i / Math.max(1, stalls)) * Math.PI * 2 + 0.3;
+      const radius = 12 + (i % 2) * 4;
+      const x = center.x + Math.cos(angle) * radius;
+      const z = center.z + Math.sin(angle) * radius;
+      const spot = this.findFreeSpot(x, z, 1.1) || { x, z };
+      const stall = this._eventStall(['#b07a4e', '#9b6a45', '#a77a58'][i % 3]);
+      stall.position.set(spot.x, 0, spot.z);
+      stall.rotation.y = Math.atan2(center.x - spot.x, center.z - spot.z);
+      group.add(stall);
+    }
+
+    if (event.type === 'christmas') {
+      const tree = this._eventChristmasTree();
+      tree.position.set(center.x, 0, center.z);
+      group.add(tree);
+      for (let i = 0; i < 26; i++) {
+        const a = i / 26 * Math.PI * 2;
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 4), new THREE.MeshBasicMaterial({ color: i % 3 ? '#ffd75e' : '#ff8a5e' }));
+        bulb.position.set(center.x + Math.cos(a) * 13, 3.2 + Math.sin(i) * 0.25, center.z + Math.sin(a) * 13);
+        group.add(bulb);
+      }
+    }
+
+    if (event.type === 'festival') {
+      const stage = new THREE.Mesh(new THREE.BoxGeometry(7, 0.35, 4), new THREE.MeshLambertMaterial({ color: '#6b4c35' }));
+      stage.position.set(center.x, 0.18, center.z + 5);
+      group.add(stage);
+      const banner = this._eventBanner('SAN DONNINO', 'Festa patronale', '#7a3f2f');
+      banner.position.set(center.x, 0, center.z + 9);
+      group.add(banner);
+      const program = this._eventBanner('PROGRAMMA', '20:30 banda · 22:30 fuochi', '#3f6b4a');
+      program.scale.setScalar(0.72);
+      program.position.set(center.x + 8, 0, center.z + 8);
+      group.add(program);
+
+      const foods = [
+        ['TORTA FRITTA', center.x - 17, center.z + 2, '#b07a4e'],
+        ['CULATELLO', center.x + 15, center.z - 3, '#9a4a34'],
+        ['GNOCCO FRITTO', center.x - 12, center.z - 11, '#a77a58']
+      ];
+      for (const [label, x, z, color] of foods) {
+        const spot = this.findFreeSpot(x, z, 1.1) || { x, z };
+        const stall = this._eventFoodStall(label, color);
+        stall.position.set(spot.x, 0, spot.z);
+        stall.rotation.y = Math.atan2(center.x - spot.x, center.z - spot.z);
+        group.add(stall);
+      }
+
+      for (let i = 0; i < 34; i++) {
+        const a = i / 34 * Math.PI * 2;
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.09, 5, 4), new THREE.MeshBasicMaterial({ color: i % 2 ? '#ffd75e' : '#ff8a5e' }));
+        bulb.position.set(center.x + Math.cos(a) * 19, 3.4 + Math.sin(i * 0.8) * 0.18, center.z + Math.sin(a) * 19);
+        group.add(bulb);
+      }
+      this._eventProcession = this._buildProcession(center, group);
+      this._eventFireworks = { center, timer: 0.8, bursts: [] };
+    } else {
+      this._eventProcession = null;
+      this._eventFireworks = null;
+    }
+
+    if (event.type === 'theatre') {
+      const carpet = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.04, 10), new THREE.MeshLambertMaterial({ color: '#8f3e34' }));
+      carpet.position.set(center.x, 0.05, center.z + 4);
+      group.add(carpet);
+      const banner = this._eventBanner('TEATRO MAGNANI', 'Serata di scena', '#7a5a8a');
+      banner.position.set(center.x, 0, center.z + 8);
+      group.add(banner);
+    }
+
+    if (event.type === 'summer') {
+      for (let i = 0; i < 4; i++) {
+        const angle = i / 4 * Math.PI * 2 + 0.5;
+        const umbrella = this._eventUmbrella(['#c2684b', '#4f8fa8', '#c99a3f', '#7c8d5b'][i]);
+        umbrella.position.set(center.x + Math.cos(angle) * 12, 0, center.z + Math.sin(angle) * 12);
+        group.add(umbrella);
+      }
+    }
+
+    if (event.type === 'rush') {
+      const banner = this._eventBanner('ORA DI PUNTA', 'Stazione di Fidenza', '#3f748a');
+      banner.position.set(center.x, 0, center.z + 8);
+      group.add(banner);
+    }
+
+    this._eventCrowd(center, event.type === 'rush' ? 12 : 8, 8);
+    this.scene.add(group);
+  }
+
+  _buildProcession(center, group) {
+    const points = [];
+    for (let i = 0; i < 28; i++) {
+      const angle = i / 28 * Math.PI * 2;
+      const radius = 15 + Math.sin(i * 1.7) * 2.2;
+      points.push({ x: center.x + Math.cos(angle) * radius, z: center.z + Math.sin(angle) * radius });
+    }
+    const route = makeLoopRoute(points);
+    const people = [];
+    const shirts = ['#f4ebda', '#e7b95a', '#c2684b', '#4f8fa8', '#d9c9a8'];
+    const rnd = seededRandom(731);
+    for (let i = 0; i < 10; i++) {
+      const person = makePerson({
+        shirt: shirts[i % shirts.length],
+        pants: i % 2 ? '#3a3f46' : '#5b4a3a',
+        skin: '#d8aa85',
+        hair: '#3a2a20'
+      });
+      people.push(person);
+      group.add(person);
+    }
+    const banner = this._eventBanner('SAN DONNINO', 'Processione', '#7a3f2f');
+    banner.scale.setScalar(0.6);
+    group.add(banner);
+    return {
+      route,
+      people,
+      banner,
+      t: 0,
+      spread: route.total / people.length,
+      rnd
+    };
+  }
+
+  _spawnFirework(center) {
+    const count = 48;
+    const positions = new Float32Array(count * 3);
+    const velocities = [];
+    const ox = center.x + (Math.random() - 0.5) * 10;
+    const oz = center.z + (Math.random() - 0.5) * 10;
+    const oy = 18 + Math.random() * 8;
+    for (let i = 0; i < count; i++) {
+      positions[i * 3] = ox;
+      positions[i * 3 + 1] = oy;
+      positions[i * 3 + 2] = oz;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(Math.random() * 2 - 1);
+      const speed = 4 + Math.random() * 7;
+      velocities.push({
+        x: Math.sin(phi) * Math.cos(theta) * speed,
+        y: Math.cos(phi) * speed,
+        z: Math.sin(phi) * Math.sin(theta) * speed
+      });
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const colors = ['#ffd75e', '#ff8a5e', '#9fd7ff', '#ffffff'];
+    const material = new THREE.PointsMaterial({
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: 0.65,
+      transparent: true,
+      opacity: 1,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending
+    });
+    const points = new THREE.Points(geometry, material);
+    points.frustumCulled = false;
+    this.scene.add(points);
+    this._eventFireworks?.bursts.push({ points, velocities, age: 0, life: 2.6 });
+    this.onFirework?.();
+  }
+
+  _updateEvent(dt) {
+    if (this._eventProcession) {
+      const p = this._eventProcession;
+      p.t += dt * 0.55;
+      p.people.forEach((person, i) => {
+        const pose = p.route.pose(p.t - i * p.spread);
+        person.position.set(pose.x, 0.04, pose.z);
+        person.rotation.y = Math.atan2(pose.dx, pose.dz);
+        const limbs = person.userData.limbs;
+        const a = Math.sin(this.time * 4.2 + i * 0.7) * 0.38;
+        const b = Math.sin(this.time * 4.2 + i * 0.7 + Math.PI) * 0.38;
+        if (limbs) {
+          limbs.legL.rotation.x = a;
+          limbs.legR.rotation.x = b;
+          limbs.armL.rotation.x = b * 0.55;
+          limbs.armR.rotation.x = a * 0.55;
+        }
+      });
+      const bannerPose = p.route.pose(p.t + 2.4);
+      p.banner.position.set(bannerPose.x, 0, bannerPose.z);
+      p.banner.rotation.y = Math.atan2(bannerPose.dx, bannerPose.dz);
+    }
+
+    if (!this._eventFireworks) return;
+    const hour = this.hour;
+    const show = hour >= 22.25 && hour < 23.2;
+    if (show) {
+      this._eventFireworks.timer -= dt;
+      if (this._eventFireworks.timer <= 0) {
+        this._eventFireworks.timer = 1.4 + Math.random() * 1.2;
+        this._spawnFirework(this._eventFireworks.center);
+      }
+    }
+    const bursts = this._eventFireworks.bursts;
+    for (let i = bursts.length - 1; i >= 0; i--) {
+      const burst = bursts[i];
+      burst.age += dt;
+      const pos = burst.points.geometry.attributes.position;
+      for (let j = 0; j < pos.count; j++) {
+        const v = burst.velocities[j];
+        pos.setXYZ(j,
+          pos.getX(j) + v.x * dt,
+          pos.getY(j) + v.y * dt,
+          pos.getZ(j) + v.z * dt
+        );
+        v.y -= 4.2 * dt;
+      }
+      pos.needsUpdate = true;
+      burst.points.material.opacity = Math.max(0, 1 - burst.age / burst.life);
+      if (burst.age >= burst.life) {
+        this.scene.remove(burst.points);
+        burst.points.geometry.dispose();
+        burst.points.material.dispose();
+        bursts.splice(i, 1);
+      }
+    }
+  }
+
   _buildCollectibles() {
     const starGeo = makeStarGeometry();
     const starMat = new THREE.MeshBasicMaterial({ color: '#ffd75e' });
     const ringGeo = new THREE.TorusGeometry(0.9, 0.035, 6, 24);
     const ringMat = new THREE.MeshBasicMaterial({ color: '#e7b95a' });
     const glowTex = createGlowTexture('rgba(255,225,130,1)');
-    this.city.stars.forEach((s, i) => {
+    this.starDefs.forEach((s, i) => {
       const id = `star-${i}`;
       const collected = hasStar(id);
       const group = new THREE.Group();
@@ -1235,7 +2240,7 @@ export class World {
   }
 
   _buildVehicles() {
-    const cand = [
+    const cand = this.vehicleDefs || [
       { type: 'car', x: -330, z: 24, yaw: 1.99, label: 'Auto', color: '#c2684b' },
       { type: 'vespa', x: -338, z: 18, yaw: 1.2, label: 'Vespa', color: '#4f8fa8' },
       { type: 'car', x: 205, z: -100, yaw: Math.PI, label: 'Taxi', color: '#e7b95a', taxi: true },
@@ -1244,7 +2249,7 @@ export class World {
       { type: 'car', x: -300, z: 32, yaw: 2.4, label: 'Ambulanza', color: '#f1ede2' }
     ];
     for (const c of cand) {
-      const spot = this.findFreeSpot(c.x, c.z, c.type === 'car' ? 2.2 : 1.2);
+      const spot = this.vehicleDefs ? { x: c.x, z: c.z } : this.findFreeSpot(c.x, c.z, c.type === 'car' ? 2.2 : 1.2);
       if (spot) this.vehicleSpawns.push({ ...c, x: spot.x, z: spot.z });
     }
   }
@@ -1583,8 +2588,13 @@ export class World {
     this._updateSky(playerPos);
     this._updateStars();
     this._updatePlaces();
+    this._updateTrafficLights();
     this._updateTraffic(dt);
     this._updatePedestrians(dt);
+    this._updateCrossingWalkers(dt);
+    this._updateBus(dt);
+    this._updateTrain(dt);
+    this._updateEvent(dt);
     this._updateRain(dt, playerPos);
     this._updateSeasonParticles(dt, playerPos);
     this._updateClouds(dt);
@@ -1678,11 +2688,58 @@ export class World {
 
   _updateTraffic(dt) {
     for (const t of this.trafficCars) {
-      t.walker.advance(dt);
+      const before = t.walker.pose();
+      let stop = false;
+      for (const l of this.trafficLights) {
+        if (Math.hypot(before.x - l.group.position.x, before.z - l.group.position.z) < 13 && this._signalState(l, this.time) === 'red') {
+          stop = true;
+          break;
+        }
+      }
+      if (!stop) t.walker.advance(dt);
       const p = t.walker.pose();
       t.car.position.set(p.x, 0.06, p.z);
       t.car.rotation.y = Math.atan2(p.dx, p.dz);
       t.car.userData.wheels?.forEach((w, i) => { w.rotation.x += dt * 7 * (t.walker.dir); });
+    }
+  }
+
+  _updateCrossingWalkers(dt) {
+    const time = this.time;
+    for (const p of this.crossingWalkers) {
+      const signal = p.signal ? this._signalState(p.signal, time) : 'red';
+      if (p.state === 'waiting') {
+        p.wait -= dt;
+        if (signal === 'red' && p.wait <= 0) {
+          p.state = 'crossing';
+          p.target = p.t <= 0.01 ? 1 : 0;
+        }
+      } else {
+        const span = Math.max(1, p.half * 2);
+        const dir = p.target > p.t ? 1 : -1;
+        p.t += dir * (p.speed / span) * dt;
+        if ((dir > 0 && p.t >= p.target) || (dir < 0 && p.t <= p.target)) {
+          p.t = p.target;
+          p.state = 'waiting';
+          p.wait = 1.4 + Math.random() * 2.5;
+        }
+      }
+      const offset = (p.t * 2 - 1) * p.half;
+      p.person.position.set(p.info.x + p.nx * offset, 0.04, p.info.z + p.nz * offset);
+      if (p.state === 'crossing') {
+        const dir = p.target > p.t ? 1 : -1;
+        p.person.rotation.y = Math.atan2(p.nx * dir, p.nz * dir);
+      }
+      const limbs = p.person.userData.limbs;
+      const moving = p.state === 'crossing';
+      const a = moving ? Math.sin(time * 7.2 + p.phase) * 0.65 : 0;
+      const b = moving ? Math.sin(time * 7.2 + p.phase + Math.PI) * 0.65 : 0;
+      if (limbs) {
+        limbs.legL.rotation.x = a;
+        limbs.legR.rotation.x = b;
+        limbs.armL.rotation.x = b * 0.65;
+        limbs.armR.rotation.x = a * 0.65;
+      }
     }
   }
 

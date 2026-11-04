@@ -2,10 +2,21 @@
   "$schema": "../../schema/map.schema.json",
   "id": "fidenza",
   "name": "Fidenza",
-  "version": "2.0.0",
-  "center": { "lat": 44.8665, "lon": 10.0612 },
-  "origin": { "lat": 44.8665, "lon": 10.0612 },
-  "bbox": { "south": 44.8500, "west": 10.0400, "north": 44.8820, "east": 10.0850 },
+  "version": "2.3.0",
+  "center": {
+    "lat": 44.8665,
+    "lon": 10.0612
+  },
+  "origin": {
+    "lat": 44.8665,
+    "lon": 10.0612
+  },
+  "bbox": {
+    "south": 44.85,
+    "west": 10.04,
+    "north": 44.882,
+    "east": 10.085
+  },
   "projection": "local-tangent",
   "sources": {
     "cityData": "data/city.json",
@@ -23,13 +34,19 @@
       "id": "duomo",
       "name": "Duomo di San Donnino",
       "short": "Duomo",
-      "aliases": ["Cattedrale di San Donnino", "Duomo"],
+      "aliases": [
+        "Cattedrale di San Donnino",
+        "Duomo"
+      ],
       "category": "church",
       "osm": "way/182278537",
       "lat": 44.866476,
-      "lon": 10.057810,
+      "lon": 10.05781,
       "collectible": true,
-      "beacon": { "x": -296, "z": 3 },
+      "beacon": {
+        "x": -296,
+        "z": 3
+      },
       "radius": 8,
       "description": "La cattedrale romanica dedicata a San Donnino. La facciata, con il rosone e il portale, è legata alla tradizione di Benedetto Antelami e guarda verso Piazza Duomo.",
       "fact": "La facciata del Duomo è rimasta incompiuta: per questo ha un profilo così particolare."
@@ -53,7 +70,7 @@
       "short": "Porta San Donnino",
       "category": "monument",
       "osm": "way/652879042",
-      "lat": 44.866930,
+      "lat": 44.86693,
       "lon": 10.057332,
       "collectible": true,
       "radius": 8,
@@ -92,7 +109,7 @@
       "short": "Municipio",
       "category": "civic",
       "osm": "relation/2428450",
-      "lat": 44.865870,
+      "lat": 44.86587,
       "lon": 10.060792,
       "collectible": true,
       "radius": 8,
@@ -105,7 +122,7 @@
       "short": "Gran Madre",
       "category": "church",
       "osm": "way/182278306",
-      "lat": 44.865170,
+      "lat": 44.86517,
       "lon": 10.066467,
       "collectible": true,
       "radius": 8,
@@ -131,7 +148,7 @@
       "short": "Museo Musini",
       "category": "museum",
       "osm": "node/3183577908",
-      "lat": 44.864830,
+      "lat": 44.86483,
       "lon": 10.066011,
       "collectible": true,
       "radius": 8,
@@ -161,7 +178,10 @@
       "lat": 44.8665,
       "lon": 10.0456,
       "collectible": true,
-      "beacon": { "x": -1230.8, "z": 0 },
+      "beacon": {
+        "x": -1230.8,
+        "z": 0
+      },
       "radius": 8,
       "description": "Il torrente Stirone a ovest del centro, tra alberi, sentieri e il rumore dell'acqua. È il polmone naturale della città.",
       "fact": "Il torrente dà il nome al parco regionale che attraversa la provincia di Parma."
@@ -175,7 +195,10 @@
       "lat": 44.866212,
       "lon": 10.061034,
       "collectible": false,
-      "beacon": { "x": -13.1, "z": 32 },
+      "beacon": {
+        "x": -13.1,
+        "z": 32
+      },
       "radius": 8,
       "description": "L'obelisco di Piazza Garibaldi, uno dei monumenti più riconoscibili del centro.",
       "fact": "Piazza Garibaldi è un altro salotto della città, a est del Duomo."
@@ -213,7 +236,7 @@
       "category": "square",
       "osm": "way/142546150",
       "lat": 44.865519,
-      "lon": 10.061760,
+      "lon": 10.06176,
       "collectible": false,
       "radius": 10,
       "description": "Piazza Matteotti, tra il teatro e il cuore commerciale della città.",
@@ -225,7 +248,7 @@
       "short": "Piazza Repubblica",
       "category": "square",
       "osm": "way/1304344561",
-      "lat": 44.867430,
+      "lat": 44.86743,
       "lon": 10.063671,
       "collectible": false,
       "radius": 10,
@@ -304,26 +327,136 @@
       "category": "park",
       "osm": "way/1257168492",
       "lat": 44.859331,
-      "lon": 10.064730,
+      "lon": 10.06473,
       "collectible": false,
       "radius": 12,
       "description": "Il Parco della Pace, a sud-est del centro.",
       "fact": "Uno spazio verde ampio, ideale per una passeggiata."
+    },
+    {
+      "id": "farmacia-cavour",
+      "name": "Farmacia Cavour",
+      "short": "Farmacia Cavour",
+      "category": "service",
+      "osm": "node/4756787772",
+      "lat": 44.86656299,
+      "lon": 10.06022026,
+      "collectible": false,
+      "radius": 8,
+      "description": "La farmacia del centro, punto di ritiro per le consegne urgenti.",
+      "fact": "Le farmacie di turno sono un presidio importante per la città."
     }
   ],
   "landmarks": [
-    { "id": "duomo", "place": "duomo", "model": "duomo", "rotation": 180 },
-    { "id": "piazza-duomo", "place": "piazza-duomo", "model": "piazza-duomo" },
-    { "id": "porta", "place": "porta", "model": "porta" },
-    { "id": "ponte", "place": "ponte", "model": "ponte" },
-    { "id": "teatro", "place": "teatro", "model": "teatro" },
-    { "id": "comunale", "place": "comunale", "model": "comunale" },
-    { "id": "granmadre", "place": "granmadre", "model": "granmadre" },
-    { "id": "sanpietro", "place": "sanpietro", "model": "sanpietro" },
-    { "id": "musini", "place": "musini", "model": "musini" },
-    { "id": "stazione", "place": "stazione", "model": "stazione" },
-    { "id": "stirone", "place": "stirone", "model": "stirone" },
-    { "id": "obelisco", "place": "obelisco", "model": "obelisco" }
+    {
+      "id": "duomo",
+      "place": "duomo",
+      "model": "duomo",
+      "rotation": 180,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "piazza-duomo",
+      "place": "piazza-duomo",
+      "model": "piazza-duomo",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "porta",
+      "place": "porta",
+      "model": "porta",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "ponte",
+      "place": "ponte",
+      "model": "ponte",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "teatro",
+      "place": "teatro",
+      "model": "teatro",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "comunale",
+      "place": "comunale",
+      "model": "comunale",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "granmadre",
+      "place": "granmadre",
+      "model": "granmadre",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "sanpietro",
+      "place": "sanpietro",
+      "model": "sanpietro",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "musini",
+      "place": "musini",
+      "model": "musini",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "stazione",
+      "place": "stazione",
+      "model": "stazione",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "stirone",
+      "place": "stirone",
+      "model": "stirone",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    },
+    {
+      "id": "obelisco",
+      "place": "obelisco",
+      "model": "obelisco",
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    }
   ],
   "missions": [
     {
@@ -334,8 +467,20 @@
       "time": 190,
       "reward": 800,
       "steps": [
-        { "x": -234, "z": 613, "name": "Paziente al Parco Vittorio Veneto", "prompt": "carica il paziente", "radius": 13 },
-        { "x": -1450, "z": 1710, "name": "Ospedale di Fidenza", "prompt": "consegna il paziente", "radius": 20 }
+        {
+          "x": -234,
+          "z": 613,
+          "name": "Paziente al Parco Vittorio Veneto",
+          "prompt": "carica il paziente",
+          "radius": 13
+        },
+        {
+          "x": -1450,
+          "z": 1710,
+          "name": "Ospedale di Fidenza",
+          "prompt": "consegna il paziente",
+          "radius": 20
+        }
       ]
     },
     {
@@ -355,9 +500,30 @@
       "time": 170,
       "reward": 700,
       "steps": [
-        { "place": "piazza-duomo", "offsetX": 8, "offsetZ": 6, "name": "Consegna in Piazza Duomo", "prompt": "consegna la pizza", "radius": 11 },
-        { "place": "teatro", "offsetX": 6, "offsetZ": 8, "name": "Consegna al Teatro Magnani", "prompt": "consegna la pizza", "radius": 11 },
-        { "place": "stazione", "offsetX": -8, "offsetZ": 6, "name": "Consegna alla stazione", "prompt": "consegna la pizza", "radius": 12 }
+        {
+          "place": "piazza-duomo",
+          "offsetX": 8,
+          "offsetZ": 6,
+          "name": "Consegna in Piazza Duomo",
+          "prompt": "consegna la pizza",
+          "radius": 11
+        },
+        {
+          "place": "teatro",
+          "offsetX": 6,
+          "offsetZ": 8,
+          "name": "Consegna al Teatro Magnani",
+          "prompt": "consegna la pizza",
+          "radius": 11
+        },
+        {
+          "place": "stazione",
+          "offsetX": -8,
+          "offsetZ": 6,
+          "name": "Consegna alla stazione",
+          "prompt": "consegna la pizza",
+          "radius": 12
+        }
       ]
     },
     {
@@ -368,8 +534,22 @@
       "time": 150,
       "reward": 750,
       "steps": [
-        { "place": "stazione", "offsetX": 4, "offsetZ": 10, "name": "Viaggiatore alla stazione", "prompt": "fai salire il viaggiatore", "radius": 12 },
-        { "place": "teatro", "offsetX": 3, "offsetZ": 12, "name": "Teatro Magnani", "prompt": "fai scendere il viaggiatore", "radius": 12 }
+        {
+          "place": "stazione",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Viaggiatore alla stazione",
+          "prompt": "fai salire il viaggiatore",
+          "radius": 12
+        },
+        {
+          "place": "teatro",
+          "offsetX": 3,
+          "offsetZ": 12,
+          "name": "Teatro Magnani",
+          "prompt": "fai scendere il viaggiatore",
+          "radius": 12
+        }
       ]
     },
     {
@@ -380,11 +560,362 @@
       "time": 200,
       "reward": 900,
       "steps": [
-        { "place": "duomo", "offsetX": -5, "offsetZ": 8, "name": "Duomo di San Donnino", "prompt": "scatta la foto", "radius": 12, "photo": true },
-        { "place": "piazza-duomo", "offsetX": 0, "offsetZ": 8, "name": "Piazza Duomo", "prompt": "scatta la foto", "radius": 12, "photo": true },
-        { "place": "porta", "offsetX": 4, "offsetZ": 10, "name": "Porta San Donnino", "prompt": "scatta la foto", "radius": 12, "photo": true },
-        { "place": "teatro", "offsetX": 8, "offsetZ": 10, "name": "Teatro Magnani", "prompt": "scatta la foto", "radius": 12, "photo": true },
-        { "place": "comunale", "offsetX": 4, "offsetZ": 10, "name": "Palazzo Comunale", "prompt": "scatta la foto", "radius": 12, "photo": true }
+        {
+          "place": "duomo",
+          "offsetX": -5,
+          "offsetZ": 8,
+          "name": "Duomo di San Donnino",
+          "prompt": "scatta la foto",
+          "radius": 12,
+          "photo": true
+        },
+        {
+          "place": "piazza-duomo",
+          "offsetX": 0,
+          "offsetZ": 8,
+          "name": "Piazza Duomo",
+          "prompt": "scatta la foto",
+          "radius": 12,
+          "photo": true
+        },
+        {
+          "place": "porta",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Porta San Donnino",
+          "prompt": "scatta la foto",
+          "radius": 12,
+          "photo": true
+        },
+        {
+          "place": "teatro",
+          "offsetX": 8,
+          "offsetZ": 10,
+          "name": "Teatro Magnani",
+          "prompt": "scatta la foto",
+          "radius": 12,
+          "photo": true
+        },
+        {
+          "place": "comunale",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Palazzo Comunale",
+          "prompt": "scatta la foto",
+          "radius": 12,
+          "photo": true
+        }
+      ]
+    },
+    {
+      "id": "pilgrim",
+      "type": "pilgrim",
+      "title": "Il pellegrino",
+      "time": 210,
+      "reward": 800,
+      "short": "Un pellegrino della Via Francigena è arrivato in stazione. Accompagnalo al Duomo e alla Porta San Donnino.",
+      "steps": [
+        {
+          "place": "stazione",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Pellegrino alla stazione",
+          "prompt": "fai salire il pellegrino",
+          "radius": 12,
+          "comment": "Il pellegrino cerca il Duomo: è la sua prima tappa in città."
+        },
+        {
+          "place": "duomo",
+          "offsetX": -5,
+          "offsetZ": 8,
+          "name": "Duomo di San Donnino",
+          "prompt": "mostra il Duomo al pellegrino",
+          "radius": 12,
+          "comment": "La facciata del Duomo lascia il pellegrino senza parole."
+        },
+        {
+          "place": "porta",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Porta San Donnino",
+          "prompt": "congeda il pellegrino",
+          "radius": 12,
+          "comment": "La Via Francigena entrava in città da qui: buon cammino!"
+        }
+      ]
+    },
+    {
+      "id": "delivery",
+      "type": "delivery",
+      "title": "Consegna urgente",
+      "time": 150,
+      "reward": 850,
+      "short": "Un pacco urgente è pronto in farmacia. Portalo all’Ospedale di Fidenza prima che scada il tempo.",
+      "steps": [
+        {
+          "place": "farmacia-cavour",
+          "offsetX": 0,
+          "offsetZ": 0,
+          "name": "Farmacia Cavour",
+          "prompt": "ritira il pacco urgente",
+          "radius": 10,
+          "comment": "Il pacco è fragile: guida con attenzione."
+        },
+        {
+          "x": -1450,
+          "z": 1710,
+          "name": "Ospedale di Fidenza",
+          "prompt": "consegna il pacco",
+          "radius": 20,
+          "comment": "Consegna completata: il personale ti ringrazia."
+        }
+      ]
+    },
+    {
+      "id": "tour",
+      "type": "tour",
+      "title": "Giro turistico",
+      "time": 220,
+      "reward": 1000,
+      "short": "Un cliente vuole vedere il meglio di Fidenza: Teatro, Piazza Duomo e Gran Madre. Fagli da tassista.",
+      "steps": [
+        {
+          "place": "stazione",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Cliente alla stazione",
+          "prompt": "fai salire il cliente",
+          "radius": 12,
+          "comment": "«Portami nei posti più belli di Fidenza.»"
+        },
+        {
+          "place": "teatro",
+          "offsetX": 6,
+          "offsetZ": 8,
+          "name": "Teatro Magnani",
+          "prompt": "fermati al Teatro",
+          "radius": 12,
+          "comment": "Il Teatro Magnani è il salotto culturale della città."
+        },
+        {
+          "place": "piazza-duomo",
+          "offsetX": 0,
+          "offsetZ": 8,
+          "name": "Piazza Duomo",
+          "prompt": "fermati in Piazza Duomo",
+          "radius": 12,
+          "comment": "La piazza e il Duomo: la cartolina di Fidenza."
+        },
+        {
+          "place": "granmadre",
+          "offsetX": 6,
+          "offsetZ": 8,
+          "name": "Santuario della Gran Madre",
+          "prompt": "congeda il cliente",
+          "radius": 14,
+          "comment": "La Gran Madre chiude il giro: il cliente è soddisfatto."
+        }
+      ]
+    },
+    {
+      "id": "coincidenza",
+      "type": "train",
+      "title": "Coincidenza",
+      "time": 115,
+      "reward": 950,
+      "short": "Il bagaglio è pronto al Teatro: corri alla stazione prima che il treno parta.",
+      "steps": [
+        {
+          "place": "teatro",
+          "offsetX": 6,
+          "offsetZ": 8,
+          "name": "Ritiro bagaglio al Teatro",
+          "prompt": "ritira il bagaglio",
+          "radius": 11,
+          "comment": "Bagaglio recuperato: il treno parte tra pochi minuti!"
+        },
+        {
+          "place": "stazione",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Stazione di Fidenza",
+          "prompt": "sali sul treno",
+          "radius": 14,
+          "comment": "Ce l’hai fatta: il treno è ancora in banchina."
+        }
+      ]
+    },
+    {
+      "id": "ultimo-treno",
+      "type": "night",
+      "title": "Ultimo treno",
+      "time": 135,
+      "reward": 900,
+      "short": "Un viaggiatore notturno cerca un passaggio dalla stazione alla Gran Madre.",
+      "steps": [
+        {
+          "place": "stazione",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Viaggiatore notturno",
+          "prompt": "fai salire il viaggiatore",
+          "radius": 12,
+          "comment": "«Alla Gran Madre, per favore. È tardi.»"
+        },
+        {
+          "place": "granmadre",
+          "offsetX": 6,
+          "offsetZ": 8,
+          "name": "Gran Madre",
+          "prompt": "accompagna il viaggiatore",
+          "radius": 14,
+          "comment": "Il viaggiatore ti ringrazia e scompare nella notte."
+        }
+      ]
+    },
+    {
+      "id": "capolinea",
+      "type": "bus",
+      "title": "Capolinea",
+      "time": 230,
+      "reward": 1100,
+      "short": "La navetta parte dalla stazione: accompagna i passeggeri tra Teatro e Piazza Duomo.",
+      "steps": [
+        {
+          "place": "stazione",
+          "offsetX": 4,
+          "offsetZ": 10,
+          "name": "Capolinea stazione",
+          "prompt": "apri le porte",
+          "radius": 14,
+          "comment": "I passeggeri salgono: prima fermata Teatro Magnani."
+        },
+        {
+          "place": "teatro",
+          "offsetX": 6,
+          "offsetZ": 8,
+          "name": "Fermata Teatro",
+          "prompt": "ferma la navetta",
+          "radius": 12,
+          "comment": "Scende la prima coppia: applausi dal fondo."
+        },
+        {
+          "place": "piazza-duomo",
+          "offsetX": 0,
+          "offsetZ": 8,
+          "name": "Fermata Piazza Duomo",
+          "prompt": "ferma la navetta",
+          "radius": 12,
+          "comment": "Ultima fermata: la piazza è piena di luce."
+        }
+      ]
+    },
+    {
+      "id": "san-donnino-procession",
+      "type": "custom",
+      "event": "san-donnino",
+      "title": "La processione",
+      "time": 190,
+      "reward": 1300,
+      "short": "Apri la processione di San Donnino e accompagnala dal Duomo a Piazza Garibaldi.",
+      "steps": [
+        {
+          "place": "duomo",
+          "offsetX": -4,
+          "offsetZ": 10,
+          "name": "Partenza della processione",
+          "prompt": "apri la processione",
+          "radius": 14,
+          "comment": "La banda intona l’inno: la processione parte."
+        },
+        {
+          "place": "piazza-duomo",
+          "offsetX": 0,
+          "offsetZ": 10,
+          "name": "Piazza Duomo",
+          "prompt": "attraversa la piazza",
+          "radius": 16,
+          "comment": "La piazza è piena di fedeli e visitatori."
+        },
+        {
+          "place": "obelisco",
+          "offsetX": 6,
+          "offsetZ": 10,
+          "name": "Piazza Garibaldi",
+          "prompt": "concludi la processione",
+          "radius": 16,
+          "comment": "La processione termina tra applausi e campane."
+        }
+      ]
+    },
+    {
+      "id": "san-donnino-torta-fritta",
+      "type": "delivery",
+      "event": "san-donnino",
+      "title": "Torta fritta in festa",
+      "time": 150,
+      "reward": 1150,
+      "short": "Le bancarelle hanno finito la torta fritta: corri a consegnare un’altra cassa in Piazza Duomo.",
+      "steps": [
+        {
+          "place": "teatro",
+          "offsetX": 6,
+          "offsetZ": 8,
+          "name": "Cucina della festa",
+          "prompt": "ritira la cassa di torta fritta",
+          "radius": 12,
+          "comment": "Cassa calda e fragrante: non perderla!"
+        },
+        {
+          "place": "piazza-duomo",
+          "offsetX": 0,
+          "offsetZ": 12,
+          "name": "Bancarelle in festa",
+          "prompt": "consegna la torta fritta",
+          "radius": 16,
+          "comment": "La torta fritta finisce in un attimo: festa salva."
+        }
+      ]
+    },
+    {
+      "id": "san-donnino-photo",
+      "type": "photo",
+      "event": "san-donnino",
+      "title": "La foto della festa",
+      "time": 220,
+      "reward": 1250,
+      "short": "Il comitato vuole le cartoline della festa: scatta foto tra Duomo, piazza e Teatro.",
+      "steps": [
+        {
+          "place": "piazza-duomo",
+          "offsetX": 0,
+          "offsetZ": 12,
+          "name": "Foto alla festa",
+          "prompt": "scatta una foto alla festa",
+          "radius": 20,
+          "photoRequired": true,
+          "comment": "Bancarelle, luci e folla: scatto perfetto."
+        },
+        {
+          "place": "duomo",
+          "offsetX": -4,
+          "offsetZ": 12,
+          "name": "Foto al Duomo",
+          "prompt": "scatta una foto al Duomo",
+          "radius": 20,
+          "photoRequired": true,
+          "comment": "La facciata illuminata è la cartolina della festa."
+        },
+        {
+          "place": "teatro",
+          "offsetX": 6,
+          "offsetZ": 10,
+          "name": "Foto al Teatro",
+          "prompt": "scatta la foto finale",
+          "radius": 20,
+          "photoRequired": true,
+          "comment": "Servizio completato: il comitato è soddisfatto."
+        }
       ]
     }
   ],
@@ -396,5 +927,383 @@
       "autumn": "maps/fidenza/styles/autumn.json",
       "winter": "maps/fidenza/styles/winter.json"
     }
-  }
+  },
+  "spawn": {
+    "x": -312,
+    "z": 12,
+    "yaw": 1.99
+  },
+  "missionBoard": {
+    "x": -314,
+    "z": 6
+  },
+  "vehicles": [
+    {
+      "type": "car",
+      "label": "Auto",
+      "x": -343,
+      "z": 24,
+      "yaw": 1.99,
+      "color": "#c2684b"
+    },
+    {
+      "type": "vespa",
+      "label": "Vespa",
+      "x": -341.8,
+      "z": 21,
+      "yaw": 1.2,
+      "color": "#4f8fa8"
+    },
+    {
+      "type": "car",
+      "label": "Taxi",
+      "x": 205,
+      "z": -100,
+      "yaw": 3.14159,
+      "color": "#e7b95a",
+      "taxi": true
+    },
+    {
+      "type": "vespa",
+      "label": "Vespa pizza",
+      "x": -342.5,
+      "z": 28.9,
+      "yaw": 2.2,
+      "color": "#c2684b"
+    },
+    {
+      "type": "car",
+      "label": "Auto",
+      "x": -342.1,
+      "z": 17.8,
+      "yaw": 1.6,
+      "color": "#d9c9a8"
+    },
+    {
+      "type": "car",
+      "label": "Ambulanza",
+      "x": -302.6,
+      "z": 41.7,
+      "yaw": 2.4,
+      "color": "#f1ede2"
+    }
+  ],
+  "stars": [
+    {
+      "id": "star-0",
+      "x": -878.1,
+      "z": -187.9
+    },
+    {
+      "id": "star-1",
+      "x": -343.6,
+      "z": 857.9
+    },
+    {
+      "id": "star-2",
+      "x": 1204.7,
+      "z": 394
+    },
+    {
+      "id": "star-3",
+      "x": -736.9,
+      "z": 1043.1
+    },
+    {
+      "id": "star-4",
+      "x": 1400.9,
+      "z": 555.4
+    },
+    {
+      "id": "star-5",
+      "x": -484.9,
+      "z": 717.6
+    },
+    {
+      "id": "star-6",
+      "x": -555.7,
+      "z": 1552.3
+    },
+    {
+      "id": "star-7",
+      "x": -108.7,
+      "z": 165.5
+    },
+    {
+      "id": "star-8",
+      "x": 175.3,
+      "z": 1187.2
+    },
+    {
+      "id": "star-9",
+      "x": 673.3,
+      "z": 953.4
+    },
+    {
+      "id": "star-10",
+      "x": 351.4,
+      "z": 989.9
+    },
+    {
+      "id": "star-11",
+      "x": 899.3,
+      "z": 1064.8
+    },
+    {
+      "id": "star-12",
+      "x": -309.2,
+      "z": 1344.4
+    },
+    {
+      "id": "star-13",
+      "x": -457.6,
+      "z": -88.1
+    },
+    {
+      "id": "star-14",
+      "x": 454.1,
+      "z": 897
+    },
+    {
+      "id": "star-15",
+      "x": 335.4,
+      "z": 336.6
+    },
+    {
+      "id": "star-16",
+      "x": -1445.6,
+      "z": -197.5
+    },
+    {
+      "id": "star-17",
+      "x": -241.2,
+      "z": 200.4
+    },
+    {
+      "id": "star-18",
+      "x": 396.6,
+      "z": 148.3
+    },
+    {
+      "id": "star-19",
+      "x": 119.5,
+      "z": 213.6
+    },
+    {
+      "id": "star-20",
+      "x": -469.2,
+      "z": 896.9
+    },
+    {
+      "id": "star-21",
+      "x": -501.7,
+      "z": 1137.9
+    },
+    {
+      "id": "star-22",
+      "x": -766.5,
+      "z": -110.6
+    },
+    {
+      "id": "star-23",
+      "x": 1341,
+      "z": 850
+    },
+    {
+      "id": "star-24",
+      "x": 654.8,
+      "z": 272.8
+    },
+    {
+      "id": "star-25",
+      "x": 133.1,
+      "z": 8.6
+    },
+    {
+      "id": "star-26",
+      "x": 799.2,
+      "z": 303.8
+    }
+  ],
+  "overrides": {},
+  "props": [
+    {
+      "id": "sign-duomo",
+      "type": "sign",
+      "x": -291.5,
+      "z": 10,
+      "text": "DUOMO DI SAN DONNINO",
+      "sub": "Cattedrale di Fidenza"
+    },
+    {
+      "id": "sign-teatro",
+      "type": "sign",
+      "x": -80,
+      "z": 68.5,
+      "text": "TEATRO MAGNANI",
+      "sub": "Teatro comunale"
+    },
+    {
+      "id": "sign-comunale",
+      "type": "sign",
+      "x": -16,
+      "z": 66,
+      "text": "PALAZZO COMUNALE",
+      "sub": "Municipio di Fidenza"
+    },
+    {
+      "id": "sign-porta",
+      "type": "sign",
+      "x": -297,
+      "z": -31,
+      "text": "PORTA SAN DONNINO",
+      "sub": "Antica porta urbica"
+    },
+    {
+      "id": "sign-ponte",
+      "type": "sign",
+      "x": -313,
+      "z": -64,
+      "text": "PONTE ROMANO",
+      "sub": "Sul torrente Stirone"
+    },
+    {
+      "id": "sign-stazione",
+      "type": "sign",
+      "x": 184,
+      "z": -106,
+      "text": "STAZIONE",
+      "sub": "Fidenza · RFI"
+    },
+    {
+      "id": "sign-musini",
+      "type": "sign",
+      "x": 381,
+      "z": 192,
+      "text": "MUSEO MUSINI",
+      "sub": "Museo del Risorgimento"
+    },
+    {
+      "id": "sign-granmadre",
+      "type": "sign",
+      "x": 395,
+      "z": 154,
+      "text": "GRAN MADRE",
+      "sub": "Santuario diocesano"
+    },
+    {
+      "id": "street-via-emilia",
+      "type": "street-sign",
+      "x": -300,
+      "z": 16,
+      "text": "VIA EMILIA",
+      "sub": "Fidenza"
+    },
+    {
+      "id": "street-piazza-duomo",
+      "type": "street-sign",
+      "x": -300,
+      "z": -2,
+      "text": "PIAZZA DUOMO",
+      "sub": "Fidenza"
+    },
+    {
+      "id": "street-piazza-garibaldi",
+      "type": "street-sign",
+      "x": -20,
+      "z": 80,
+      "text": "PIAZZA GARIBALDI",
+      "sub": "Fidenza"
+    },
+    {
+      "id": "street-piazza-verdi",
+      "type": "street-sign",
+      "x": -90,
+      "z": 60,
+      "text": "PIAZZA VERDI",
+      "sub": "Fidenza"
+    },
+    {
+      "id": "bench-piazza-1",
+      "type": "bench",
+      "x": -306,
+      "z": -10,
+      "rotation": 1.57
+    },
+    {
+      "id": "bench-piazza-2",
+      "type": "bench",
+      "x": -289,
+      "z": -12,
+      "rotation": -1.57
+    },
+    {
+      "id": "bench-piazza-3",
+      "type": "bench",
+      "x": -300,
+      "z": 12,
+      "rotation": 0
+    },
+    {
+      "id": "tree-piazza-1",
+      "type": "tree",
+      "x": -312,
+      "z": 0,
+      "scale": 1.2
+    },
+    {
+      "id": "tree-piazza-2",
+      "type": "tree",
+      "x": -291,
+      "z": -2,
+      "scale": 1.1
+    },
+    {
+      "id": "planter-piazza",
+      "type": "planter",
+      "x": -303,
+      "z": 7,
+      "rotation": 0.4
+    },
+    {
+      "id": "stall-stazione",
+      "type": "stall",
+      "x": 176,
+      "z": -102,
+      "rotation": 0.4,
+      "color": "#b07a4e"
+    },
+    {
+      "id": "stall-granmadre",
+      "type": "stall",
+      "x": 403,
+      "z": 150,
+      "rotation": -0.5,
+      "color": "#9b6a45"
+    },
+    {
+      "id": "bollard-1",
+      "type": "bollard",
+      "x": -304,
+      "z": -6
+    },
+    {
+      "id": "bollard-2",
+      "type": "bollard",
+      "x": -296,
+      "z": -6
+    },
+    {
+      "id": "bollard-3",
+      "type": "bollard",
+      "x": -304,
+      "z": 2
+    },
+    {
+      "id": "bollard-4",
+      "type": "bollard",
+      "x": -296,
+      "z": 2
+    }
+  ]
 }

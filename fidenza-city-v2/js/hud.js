@@ -13,6 +13,7 @@ export class HUD {
       pop: document.getElementById('pop'),
       stars: document.getElementById('stars'),
       places: document.getElementById('places'),
+      careerChip: document.getElementById('career-chip'),
       barLm: document.getElementById('bar-lm'),
       barSt: document.getElementById('bar-st'),
       target: document.getElementById('target'),
@@ -115,6 +116,11 @@ export class HUD {
     if (this.el.places) this.el.places.textContent = `◆ ${places}/${totalPlaces}`;
     if (this.el.barSt) this.el.barSt.style.width = `${totalStars ? stars / totalStars * 100 : 0}%`;
     if (this.el.barLm) this.el.barLm.style.width = `${totalPlaces ? places / totalPlaces * 100 : 0}%`;
+  }
+
+  setCareer(level, money) {
+    if (!this.el.careerChip) return;
+    this.el.careerChip.textContent = `Lv ${level} · ${formatNumber(money || 0)} €`;
   }
 
   setTarget(target) {

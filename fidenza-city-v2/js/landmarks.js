@@ -407,11 +407,13 @@ export function buildLandmarks({ world, scene, landmarks, city }) {
     'piazza-garibaldi': buildPiazzaGaribaldi
   };
   for (const l of landmarks) {
+    if (l.hidden) continue;
     const model = l.model || l.type;
     const fn = builders[model] || builders[l.type] || buildMuseo;
     const g = new THREE.Group();
-    g.position.set(l.x, 0, l.z);
+    g.position.set(l.x + (l.offsetX || 0), 0, l.z + (l.offsetZ || 0));
     g.rotation.y = (l.rotation || 0) * Math.PI / 180;
+    g.scale.setScalar(Number.isFinite(l.scale) ? l.scale : 1);
     g.name = `landmark-${l.id}`;
     fn(g, world);
     scene.add(g);
@@ -419,7 +421,7 @@ export function buildLandmarks({ world, scene, landmarks, city }) {
   }
   // Tabellone missioni in Piazza Duomo
   const board = new THREE.Group();
-  const boardSpot = world.findFreeSpot(-316, 20, 1.2) || { x: -316, z: 20 };
+  const boardSpot = world.missionBoardDef || world.findFreeSpot(-316, 20, 1.2) || { x: -316, z: 20 };
   board.position.set(boardSpot.x, 0, boardSpot.z);
   buildMissionBoard(board);
   scene.add(board);
