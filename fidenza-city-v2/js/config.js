@@ -1,4 +1,4 @@
-export const VERSION = '1.0.0';
+export const VERSION = '2.6.0';
 export const SAVE_KEY = 'fidenza-da-giocare-v1';
 
 export const COLORS = {
@@ -86,16 +86,18 @@ export const PLAYER = {
   cameraDistance: 7.8,
   cameraHeight: 2.8,
   cameraMinPitch: -0.05,
-  cameraMaxPitch: 0.85
+  cameraMaxPitch: 0.85,
+  flySpeed: 13,
+  flyBoost: 30
 };
 
 export const VEHICLES = {
   car: {
     name: 'Auto',
-    maxSpeed: 16.5,
-    reverseSpeed: 5.2,
-    acceleration: 8.8,
-    brake: 16,
+    maxSpeed: 24,
+    reverseSpeed: 6.5,
+    acceleration: 12,
+    brake: 20,
     drag: 1.8,
     steer: 1.65,
     radius: 1.35,

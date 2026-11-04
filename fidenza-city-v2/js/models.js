@@ -27,10 +27,14 @@ function sphere(r, color, x = 0, y = 0, z = 0, opts = {}) {
 }
 
 function wheel(r, width, color = '#242424') {
+  const pivot = new THREE.Group();
+  pivot.userData.wheel = true;
+  pivot.userData.radius = r;
   const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, width, 12), mat(color));
   m.rotation.z = Math.PI / 2;
   m.castShadow = true;
-  return m;
+  pivot.add(m);
+  return pivot;
 }
 
 export function makeCar({ color = '#c2684b', taxi = false, ambulance = false, parked = false } = {}) {
@@ -89,7 +93,7 @@ export function makeCar({ color = '#c2684b', taxi = false, ambulance = false, pa
     g.userData.emergencyLight = light;
   }
   g.userData.type = 'car';
-  g.userData.wheels = g.children.filter(c => c.geometry?.type === 'CylinderGeometry');
+  g.userData.wheels = g.children.filter(c => c.userData.wheel);
   if (parked) g.userData.parked = true;
   return g;
 }
@@ -135,7 +139,7 @@ export function makeBus({ color = '#e8ddc4', accent = '#2f6b4f' } = {}) {
   const sign = box(1.45, 0.34, 0.05, accent, 0, 2.2, 4.64);
   g.add(sign);
   g.userData.type = 'bus';
-  g.userData.wheels = g.children.filter(c => c.geometry?.type === 'CylinderGeometry');
+  g.userData.wheels = g.children.filter(c => c.userData.wheel);
   return g;
 }
 
@@ -176,7 +180,7 @@ export function makeTrain({ color = '#e9e4d8', accent = '#8f3e34' } = {}) {
     }
   }
   g.userData.type = 'train';
-  g.userData.wheels = g.children.filter(c => c.geometry?.type === 'CylinderGeometry');
+  g.userData.wheels = g.children.filter(c => c.userData.wheel);
   return g;
 }
 
@@ -200,6 +204,57 @@ export function makeVespa({ color = '#4f8fa8' } = {}) {
   g.add(light);
   g.add(box(0.22, 0.12, 0.05, '#b33b2b', 0, 0.72, -1.02));
   g.userData.type = 'vespa';
+  g.userData.wheels = [front, back];
+  return g;
+}
+
+function bikeWheel(r = 0.34) {
+  const pivot = new THREE.Group();
+  pivot.userData.wheel = true;
+  pivot.userData.radius = r;
+  const tire = new THREE.Mesh(new THREE.TorusGeometry(r, 0.035, 6, 16), mat('#242424'));
+  tire.rotation.y = Math.PI / 2;
+  tire.castShadow = true;
+  pivot.add(tire);
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.09, 8), mat('#d7d2c7'));
+  hub.rotation.z = Math.PI / 2;
+  pivot.add(hub);
+  for (let i = 0; i < 3; i++) {
+    const spoke = new THREE.Mesh(new THREE.BoxGeometry(0.012, r * 1.55, 0.012), mat('#d7d2c7'));
+    spoke.rotation.x = i * Math.PI / 3;
+    pivot.add(spoke);
+  }
+  return pivot;
+}
+
+export function makeBicycle({ color = '#4f8fa8' } = {}) {
+  const g = new THREE.Group();
+  const front = bikeWheel();
+  front.position.set(0, 0.36, 0.58);
+  const back = bikeWheel();
+  back.position.set(0, 0.36, -0.58);
+  g.add(front, back);
+
+  const frameMat = new THREE.MeshLambertMaterial({ color });
+  const tube = (w, h, d, x, y, z, rz = 0) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), frameMat);
+    m.position.set(x, y, z);
+    m.rotation.z = rz;
+    m.castShadow = true;
+    g.add(m);
+    return m;
+  };
+  tube(0.055, 0.055, 1.05, 0, 0.64, 0);
+  tube(0.055, 0.55, 0.055, 0, 0.62, -0.22, -0.18);
+  tube(0.055, 0.58, 0.055, 0, 0.65, 0.38, 0.2);
+  tube(0.055, 0.48, 0.055, 0, 0.55, 0.12);
+  tube(0.28, 0.06, 0.14, 0, 0.9, -0.25);
+  tube(0.5, 0.055, 0.055, 0, 0.98, 0.45);
+  tube(0.1, 0.08, 0.3, 0, 0.47, 0.05);
+  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.07, 7, 5), new THREE.MeshBasicMaterial({ color: '#fff2bd' }));
+  lamp.position.set(0, 0.72, 0.55);
+  g.add(lamp);
+  g.userData.type = 'bicycle';
   g.userData.wheels = [front, back];
   return g;
 }

@@ -8,7 +8,7 @@ import {
   groundHeightAt, hashString, formatNumber
 } from './utils.js';
 import { buildLandmarks, makeTextSprite } from './landmarks.js';
-import { makeCar, makeBus, makeTrain, makePerson, makeBench, makeTreeGeometry } from './models.js';
+import { makeCar, makeBus, makeTrain, makePerson, makeBicycle, makeBench, makeTreeGeometry } from './models.js';
 import { hasStar, hasPlace } from './save.js';
 import { applyOverrides } from './map-overrides.js';
 import { buildBusRoute, makeLoopRoute } from './transit.js';
@@ -238,6 +238,7 @@ export class World {
     this.placeObjects = [];
     this.trafficCars = [];
     this.pedestrians = [];
+    this.cyclists = [];
     this.lampLights = [];
     this.vehicleSpawns = [];
     this.landmarkGroups = new Map();
@@ -2281,6 +2282,72 @@ export class World {
       this.scene.add(person);
       this.pedestrians.push({ person, walker, phase: rnd() * Math.PI * 2 });
     }
+    this._buildBicycles(rnd);
+  }
+
+  _buildBicycles(rnd = seededRandom(88)) {
+    const parked = [
+      [-310, 8], [-292, -18], [183, -105], [-84, 62], [381, 190],
+      [-20, 62], [-200, 220], [250, 100], [-110, 145], [-470, 90]
+    ];
+    const colors = ['#4f8fa8', '#c2684b', '#5c6b5f', '#c99a3f', '#7a5a8a'];
+    for (const [x, z] of parked) {
+      const spot = this.findFreeSpot(x, z, 0.7);
+      if (!spot) continue;
+      const bike = makeBicycle({ color: colors[Math.floor(rnd() * colors.length)] });
+      bike.position.set(spot.x, 0, spot.z);
+      bike.rotation.y = rnd() * Math.PI * 2;
+      bike.scale.setScalar(0.9 + rnd() * 0.15);
+      this.scene.add(bike);
+    }
+
+    const cycleRoads = this.city.roads.filter(r =>
+      ['cycleway', 'residential', 'tertiary', 'living_street'].includes(r.kind) &&
+      r.length > 55 && !r.tunnel
+    );
+    const cyclistCount = this.quality === 'low' ? 3 : this.quality === 'medium' ? 5 : 7;
+    const shirts = ['#c2684b', '#4f8fa8', '#7c8d5b', '#d9c9a8', '#9a4a34'];
+    const pants = ['#2f4a3c', '#3a3f46', '#5b4a3a'];
+    for (let i = 0; i < cyclistCount; i++) {
+      const road = cycleRoads[Math.floor(rnd() * cycleRoads.length)];
+      if (!road?.pts?.length) continue;
+      const walker = makeRouteWalker(road.pts, rnd() * 60, rnd() > 0.5 ? 1 : -1, 3.4 + rnd() * 2.2);
+      const bike = makeBicycle({ color: colors[Math.floor(rnd() * colors.length)] });
+      const rider = makePerson({
+        shirt: shirts[Math.floor(rnd() * shirts.length)],
+        pants: pants[Math.floor(rnd() * pants.length)]
+      });
+      rider.scale.setScalar(0.82);
+      rider.position.y = 0.35;
+      bike.add(rider);
+      this.scene.add(bike);
+      this.cyclists.push({
+        bike,
+        rider,
+        walker,
+        phase: rnd() * Math.PI * 2
+      });
+    }
+  }
+
+  _updateCyclists(dt) {
+    for (const c of this.cyclists) {
+      c.walker.advance(dt);
+      const pose = c.walker.pose();
+      c.bike.position.set(pose.x, 0.05, pose.z);
+      c.bike.rotation.y = Math.atan2(pose.dx, pose.dz);
+      for (const w of c.bike.userData.wheels || []) {
+        w.rotation.x += (c.walker.speed * dt) / (w.userData.radius || 0.34);
+      }
+      const limbs = c.rider.userData.limbs;
+      if (limbs) {
+        const pedal = Math.sin(this.time * 7 + c.phase) * 0.45;
+        limbs.legL.rotation.x = pedal;
+        limbs.legR.rotation.x = -pedal;
+        limbs.armL.rotation.x = -0.35;
+        limbs.armR.rotation.x = -0.35;
+      }
+    }
   }
 
   _buildAtmosphere() {
@@ -2592,6 +2659,7 @@ export class World {
     this._updateTraffic(dt);
     this._updatePedestrians(dt);
     this._updateCrossingWalkers(dt);
+    this._updateCyclists(dt);
     this._updateBus(dt);
     this._updateTrain(dt);
     this._updateEvent(dt);
@@ -2700,7 +2768,9 @@ export class World {
       const p = t.walker.pose();
       t.car.position.set(p.x, 0.06, p.z);
       t.car.rotation.y = Math.atan2(p.dx, p.dz);
-      t.car.userData.wheels?.forEach((w, i) => { w.rotation.x += dt * 7 * (t.walker.dir); });
+      t.car.userData.wheels?.forEach(w => {
+        w.rotation.x += (t.walker.speed * dt) / (w.userData.radius || 0.34);
+      });
     }
   }
 

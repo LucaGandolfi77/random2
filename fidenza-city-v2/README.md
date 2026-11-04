@@ -1,10 +1,10 @@
-# Fidenza da Giocare v2.5
+# Fidenza da Giocare v2.6
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
-Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.5
-aggiunge gli eventi in città: mercato, mercatino di Natale, festa di San Donnino,
-serate a Teatro, dehors estivi e ora di punta in stazione.
+Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.6
+aggiunge il volo libero, auto più veloci, più biciclette, il ritorno alla
+schermata iniziale, il link all’editor e la versione del gioco nell’intro.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 
@@ -31,6 +31,7 @@ npx serve fidenza-city-v2
 | --- | --- | --- |
 | Muoversi | WASD / frecce | levetta |
 | Correre | Shift | pulsante Corri |
+| Volare | V (poi WASD, Space/Q, Shift) | tasto Volo non previsto |
 | Guardare | mouse (pointer lock) | trascina sul canvas |
 | Interagire | E | pulsante ▶ |
 | Entrare/uscire dal veicolo | E vicino al veicolo | pulsante ▶ / Auto |
@@ -55,6 +56,17 @@ Start per la pausa.
 
 **Performance**: aggiungi `?quality=low`, `?quality=medium` o `?quality=high`
 all’URL per forzare il livello grafico.
+
+## Novità v2.6 — Volo e città viva
+
+- **Ritorno alla schermata iniziale** dal menu pausa, senza azzerare i progressi.
+- **Link all’editor** direttamente dall’intro.
+- **Auto più veloci**: fino a circa 86 km/h, con accelerazione e freni ricalibrati.
+- **Volo libero** con `V`: WASD, Space/Q per la quota, Shift per la velocità,
+  mouse per guardare e `V` per atterrare.
+- **Ruote corrette** su auto, Vespa, bus e treno: rotolano sull’asse giusto.
+- **Più biciclette**: bici parcheggiate e ciclisti animati in città.
+- **Versione del gioco** visibile nell’intro.
 
 ## Novità v2.5 — Eventi in città
 

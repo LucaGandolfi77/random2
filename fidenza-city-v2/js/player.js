@@ -21,6 +21,7 @@ export class Player {
     this.vehicle = null;
     this.controlEnabled = true;
     this.cameraShake = 0;
+    this.flyMode = false;
 
     this.mesh = makePerson({ shirt: '#e7b95a', pants: '#2e4439', skin: '#d8aa85', hair: '#2d2119' });
     this.mesh.traverse(o => { if (o.isMesh) o.castShadow = true; });
@@ -50,13 +51,35 @@ export class Player {
   }
 
   spawn(x, z, yaw = this.yaw) {
+    this.flyMode = false;
     this.position.set(x, 0, z);
     this.velocity.set(0, 0, 0);
     this.yaw = yaw;
     this.cameraYaw = yaw;
     this.currentSpeed = 0;
+    if (this.shadow) this.shadow.visible = true;
     this._syncMesh();
     this.updateCamera(0, true);
+  }
+
+  setFlyMode(on) {
+    this.flyMode = !!on;
+    if (this.flyMode) {
+      this.position.y = Math.max(this.position.y, groundHeightAt(this.world.terrain, this.position.x, this.position.z, 0) + 1.5);
+      this.velocity.set(0, 0, 0);
+      if (this.shadow) this.shadow.visible = false;
+    } else {
+      const spot = this.world.findFreeSpot?.(this.position.x, this.position.z, 1.0);
+      if (spot) {
+        this.position.x = spot.x;
+        this.position.z = spot.z;
+      }
+      this.position.y = groundHeightAt(this.world.terrain, this.position.x, this.position.z, 0);
+      this.cameraPitch = clamp(this.cameraPitch, PLAYER.cameraMinPitch, PLAYER.cameraMaxPitch);
+      if (this.shadow) this.shadow.visible = true;
+      this.velocity.set(0, 0, 0);
+    }
+    this._syncMesh();
   }
 
   setVehicle(vehicle) {
@@ -83,6 +106,10 @@ export class Player {
     }
 
     if (!ignoreLook) this._look(dt);
+    if (this.flyMode) {
+      this._updateFly(dt);
+      return;
+    }
 
     const forward = (this.input.isDown('KeyW') || this.input.isDown('ArrowUp') ? 1 : 0) - (this.input.isDown('KeyS') || this.input.isDown('ArrowDown') ? 1 : 0);
     const strafe = (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0) - (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0);
@@ -142,12 +169,56 @@ export class Player {
     this.updateCamera(dt);
   }
 
+  _updateFly(dt) {
+    const forward = (this.input.isDown('KeyW') || this.input.isDown('ArrowUp') ? 1 : 0) - (this.input.isDown('KeyS') || this.input.isDown('ArrowDown') ? 1 : 0);
+    const strafe = (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0) - (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0);
+    const vertical = (this.input.isDown('Space') || this.input.isDown('KeyE') ? 1 : 0) - (this.input.isDown('KeyQ') || this.input.isDown('ControlLeft') ? 1 : 0);
+    const boost = this.input.isDown('ShiftLeft') || this.input.isDown('ShiftRight');
+    const speed = boost ? PLAYER.flyBoost : PLAYER.flySpeed;
+    const cy = Math.cos(this.cameraYaw);
+    const sy = Math.sin(this.cameraYaw);
+    const cp = Math.cos(this.cameraPitch);
+    const sp = -Math.sin(this.cameraPitch);
+    let dx = (sy * cp * forward + cy * strafe) * speed;
+    let dy = (sp * forward + vertical) * speed;
+    let dz = (cy * cp * forward - sy * strafe) * speed;
+    const len = Math.hypot(dx, dy, dz);
+    if (len > 0.001) {
+      const norm = speed / len;
+      dx *= norm;
+      dy *= norm;
+      dz *= norm;
+      this.position.x += dx * dt;
+      this.position.y += dy * dt;
+      this.position.z += dz * dt;
+      this.yaw = this.cameraYaw;
+      this.currentSpeed = speed;
+    } else {
+      this.currentSpeed = 0;
+    }
+    this.position.x = clamp(this.position.x, WORLD.bounds.minX + 2, WORLD.bounds.maxX - 2);
+    this.position.z = clamp(this.position.z, WORLD.bounds.minZ + 2, WORLD.bounds.maxZ - 2);
+    this.position.y = clamp(this.position.y, 1.4, 160);
+    const limbs = this.mesh.userData.limbs;
+    if (limbs) {
+      limbs.legL.rotation.x = Math.sin(this.walkPhase * 2) * 0.08;
+      limbs.legR.rotation.x = -Math.sin(this.walkPhase * 2) * 0.08;
+      limbs.armL.rotation.x = -0.08;
+      limbs.armR.rotation.x = -0.08;
+    }
+    this.walkPhase += dt * 1.5;
+    this._syncMesh();
+    this.updateCamera(dt);
+  }
+
   _look(dt) {
     const { dx, dy } = this.input.consumeLook();
     if (!dx && !dy) return;
     const sens = this.input.isTouch() ? 0.0034 : 0.0022;
     this.cameraYaw += dx * sens;
-    this.cameraPitch = clamp(this.cameraPitch + dy * (this.input.isTouch() ? 0.0026 : 0.0017), PLAYER.cameraMinPitch, PLAYER.cameraMaxPitch);
+    const minPitch = this.flyMode ? -1.1 : PLAYER.cameraMinPitch;
+    const maxPitch = this.flyMode ? 1.1 : PLAYER.cameraMaxPitch;
+    this.cameraPitch = clamp(this.cameraPitch + dy * (this.input.isTouch() ? 0.0026 : 0.0017), minPitch, maxPitch);
     this.cameraYaw = ((this.cameraYaw + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
   }
 
@@ -187,17 +258,19 @@ export class Player {
       target.y + up,
       target.z - Math.cos(this.cameraYaw) * horiz
     );
-    // evita di entrare nei palazzi
-    const dir = desired.clone().sub(target);
-    const maxDist = dir.length();
-    dir.normalize();
-    let safe = maxDist;
-    for (let d = 1.2; d < maxDist; d += 0.45) {
-      const x = target.x + dir.x * d;
-      const z = target.z + dir.z * d;
-      if (!this.world.isFree(x, z, 0.28)) { safe = Math.max(1.0, d - 0.35); break; }
+    // evita di entrare nei palazzi (non serve in volo)
+    if (!this.flyMode) {
+      const dir = desired.clone().sub(target);
+      const maxDist = dir.length();
+      dir.normalize();
+      let safe = maxDist;
+      for (let d = 1.2; d < maxDist; d += 0.45) {
+        const x = target.x + dir.x * d;
+        const z = target.z + dir.z * d;
+        if (!this.world.isFree(x, z, 0.28)) { safe = Math.max(1.0, d - 0.35); break; }
+      }
+      desired = target.clone().addScaledVector(dir, safe);
     }
-    desired = target.clone().addScaledVector(dir, safe);
     // non sotto terra
     const minY = groundHeightAt(this.world.terrain, desired.x, desired.z, 0) + 0.7;
     if (desired.y < minY) desired.y = minY;

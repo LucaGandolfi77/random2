@@ -114,7 +114,7 @@ export class Vehicle {
     this.position.x = clamp(this.position.x, WORLD.bounds.minX + 3, WORLD.bounds.maxX - 3);
     this.position.z = clamp(this.position.z, WORLD.bounds.minZ + 3, WORLD.bounds.maxZ - 3);
     this.position.y = groundHeightAt(this.world.terrain, this.position.x, this.position.z, 0);
-    this._updateMesh();
+    this._updateMesh(dt);
     this.audio?.updateEngine(this.speed, throttle);
     if (player) {
       player.position.copy(this.position);
@@ -144,14 +144,16 @@ export class Vehicle {
     }
   }
 
-  _updateMesh() {
+  _updateMesh(dt = 0) {
     this.mesh.position.set(this.position.x, this.position.y + 0.04, this.position.z);
     this.mesh.rotation.y = this.heading;
     const lean = this.type === 'vespa' ? this.steer * this.speed * 0.006 : this.steer * this.speed * 0.004;
     this.mesh.rotation.z = clamp(-lean, -0.12, 0.12);
     const wheels = this.mesh.userData.wheels;
     if (wheels) {
-      for (const w of wheels) w.rotation.y += this.speed * 0.03;
+      for (const w of wheels) {
+        w.rotation.x += (this.speed * dt) / (w.userData.radius || 0.34);
+      }
     }
     if (this.emergencyLight) {
       this.emergencyLight.material.color.set(Math.sin(performance.now() * 0.012) > 0 ? '#ff5a4e' : '#6b1d18');

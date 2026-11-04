@@ -109,7 +109,7 @@
 
     <div id="speed" hidden><b>0</b><span>km/h</span></div>
 
-    <div id="hint">WASD muovi · Shift corri · E interagisci · F missioni · C carriera · N mappa · M audio · P foto · Esc pausa</div>
+    <div id="hint">WASD muovi · Shift corri · E interagisci · V volo · F missioni · C carriera · N mappa · M audio · P foto · Esc pausa</div>
 
     <div id="touch" aria-hidden="true">
       <div id="stick"><div id="knob"></div></div>
@@ -143,7 +143,7 @@
   <div id="intro">
     <main class="poster">
       <section class="talk">
-        <p class="eyebrow">Fidenza, Emilia-Romagna</p>
+        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v2.6.0</span></p>
         <h1 class="wordmark" aria-label="Fidenza da Giocare">
           <span>Fidenza</span>
           <span>da Giocare</span>
@@ -192,6 +192,7 @@
 
         <div class="meta">
           <span class="credit">Un progetto indipendente per Fidenza</span>
+          <a href="./fidenza-editor/" target="_blank" rel="noopener">Editor città ↗</a>
           <a href="#" id="reset">Azzera progressi</a>
         </div>
       </section>
@@ -261,6 +262,7 @@
       <div id="pause-daily" class="pause-daily"></div>
       <div class="pause-actions">
         <button type="button" id="resume" class="primary">Continua</button>
+        <button type="button" id="pause-home">Torna alla schermata iniziale</button>
         <button type="button" id="pause-map">Apri mappa</button>
         <button type="button" id="pause-career">Carriera</button>
         <button type="button" id="pause-missions">Missioni</button>

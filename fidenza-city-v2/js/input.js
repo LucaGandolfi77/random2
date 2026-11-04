@@ -26,7 +26,7 @@ export class Input {
   }
 
   _bindKeyboard() {
-    const gameKeys = new Set(['KeyW','KeyA','KeyS','KeyD','KeyQ','KeyE','KeyF','KeyN','KeyM','KeyH','KeyP','KeyC','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space','Escape','BracketLeft','BracketRight']);
+    const gameKeys = new Set(['KeyW','KeyA','KeyS','KeyD','KeyQ','KeyE','KeyF','KeyN','KeyM','KeyH','KeyP','KeyC','KeyV','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','Space','Escape','BracketLeft','BracketRight']);
     window.addEventListener('keydown', e => {
       if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') && e.target.closest('dialog[open]')) return;
       if (gameKeys.has(e.code)) e.preventDefault();

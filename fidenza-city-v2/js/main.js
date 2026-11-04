@@ -108,6 +108,7 @@ const ui = {
   confirmDialog: document.getElementById('confirm-dialog'),
   resume: document.getElementById('resume'),
   pauseMap: document.getElementById('pause-map'),
+  pauseHome: document.getElementById('pause-home'),
   pauseMissions: document.getElementById('pause-missions'),
   pauseCareer: document.getElementById('pause-career'),
   pauseBoard: document.getElementById('pause-board'),
@@ -293,6 +294,8 @@ function updateClock() {
 }
 
 async function init() {
+  const versionEl = document.getElementById('game-version');
+  if (versionEl) versionEl.textContent = `v${VERSION}`;
   hud.setLoading(0.02, 'Carico la mappa di Fidenza…');
   await document.fonts?.ready;
   updateClock();
@@ -881,6 +884,7 @@ function bindUI() {
     ui.pauseDialog.close();
     requestPointerLock();
   });
+  ui.pauseHome?.addEventListener('click', returnToIntro);
   ui.pauseMap?.addEventListener('click', () => {
     ui.pauseDialog.close();
     openMap();
@@ -1071,6 +1075,47 @@ function onResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'high' ? 1.5 : 1.15));
+}
+
+function returnToIntro() {
+  if (state !== 'playing') return;
+  state = 'intro';
+  started = false;
+  pendingStart = false;
+  input.exitPointerLock();
+  input.reset();
+  input.allowPointerLock = true;
+  map?.close?.();
+  if (vehicles?.current) vehicles.exit();
+  if (missions?.activeId) missions.abort(true);
+  if (career) career.activeOffer = null;
+  if (photoMode?.active) exitPhoto();
+  if (player) {
+    player.setFlyMode(false);
+    player.controlEnabled = true;
+    player.mesh.visible = true;
+  }
+  if (ui.pauseDialog?.open) ui.pauseDialog.close();
+  if (ui.careerDialog?.open) ui.careerDialog.close();
+  if (ui.achievementsDialog?.open) ui.achievementsDialog.close();
+  if (ui.missionDialog?.open) ui.missionDialog.close();
+  if (ui.boardDialog?.open) ui.boardDialog.close();
+  if (ui.infoDialog?.open) ui.infoDialog.close();
+  if (ui.photoGallery?.open) ui.photoGallery.close();
+  hud.hideHUD();
+  hud.showIntro();
+  hud.setPlayReady(true, 'Gioca');
+  audio.stopEngine?.();
+  audio.setZone('city');
+  lastPlayerTrack = null;
+  lastZone = '';
+  lastZoneKind = '';
+  currentInteraction = null;
+  lastPromptKey = '';
+  selectedPlace = null;
+  canvas.style.cursor = '';
+  clearPhotoStatus();
+  refreshSaveUI();
 }
 
 function startGame() {
@@ -1300,6 +1345,22 @@ async function onPhotoGalleryClick(event) {
   }
 }
 
+function toggleFly() {
+  if (!player || photoMode?.active) return;
+  if (vehicles?.current) {
+    hud.setToast('Scendi dal veicolo per attivare il volo', 2600);
+    return;
+  }
+  player.setFlyMode(!player.flyMode);
+  if (player.flyMode) {
+    hud.setBig('VOLO', 1000);
+    hud.setToast('Volo attivo · WASD muoviti · Space/Q quota · Shift boost · V atterra', 4200);
+  } else {
+    hud.setBig('A TERRA', 800);
+    hud.setToast('Atterraggio completato', 2000);
+  }
+}
+
 function openPause() {
   if (state !== 'playing') return;
   if (ui.pauseDialog.open) return;
@@ -1427,6 +1488,11 @@ function getNearestLandmark(x, z, radius = 80, cameraYaw = null) {
 
 function updateInteraction() {
   if (!player || !missions || !vehicles) return;
+  if (player.flyMode) {
+    currentInteraction = null;
+    setPromptSafe({ text: '<kbd>V</kbd> atterra', action: 'land' });
+    return;
+  }
   if (vehicles.current) {
     currentInteraction = { type: 'exit' };
     setPromptSafe({ text: '<kbd>E</kbd> scendi dal veicolo', action: 'exit' });
@@ -1494,7 +1560,7 @@ function updateHUD(dt) {
   hud.setProgress(save.stars.length, world.starObjects.length, save.places.length, world.placeObjects.length);
 
   const inVehicle = !!vehicles.current;
-  const mode = inVehicle ? (vehicles.current.type === 'vespa' ? 'Vespa' : 'Auto') : 'A piedi';
+  const mode = inVehicle ? (vehicles.current.type === 'vespa' ? 'Vespa' : 'Auto') : (player.flyMode ? 'Volo' : 'A piedi');
   const nearest = getNearestLandmark(player.position.x, player.position.z, 160, player.cameraYaw);
   const zoneName = nearest ? (nearest.l.short || nearest.l.name) : (inVehicle ? 'Fidenza' : 'Fidenza');
   if (zoneName !== lastZone || hud.el.mode?.textContent !== mode) {
@@ -1567,9 +1633,11 @@ function updateHUD(dt) {
 
   updateInteraction();
 
-  // stelle automatiche
-  const nearStar = world.getNearbyStar(player.position.x, player.position.z, 2.0);
-  if (nearStar) collectStar(nearStar.star);
+  // stelle automatiche (solo a terra)
+  if (!player.flyMode) {
+    const nearStar = world.getNearbyStar(player.position.x, player.position.z, 2.0);
+    if (nearStar) collectStar(nearStar.star);
+  }
 
   // evento in corso: visita e sfida del giorno
   if (eventSnapshot?.active) {
@@ -1679,6 +1747,9 @@ function handleKeys(paused) {
   }
   if (input.consume('KeyC')) {
     if (!paused) openCareer();
+  }
+  if (input.consume('KeyV')) {
+    if (!paused) toggleFly();
   }
   if (input.consume('KeyE')) {
     if (!paused) handleInteract();
