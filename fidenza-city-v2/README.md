@@ -1,10 +1,10 @@
-# Fidenza da Giocare v2.9
+# Fidenza da Giocare v2.10
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
-Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.9
-ricostruisce i tetti sulla footprint reale degli edifici, aggiunge dettagli
-architettonici e introduce audit e import di dati edilizi da fonti libere.
+Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
+v2.10 aggiunge le insegne delle attività sugli edifici e rende parchi e prati
+più verdi, densi e vivi.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 
@@ -59,6 +59,17 @@ Start per la pausa.
 
 **Performance**: aggiungi `?quality=low`, `?quality=medium` o `?quality=high`
 all’URL per forzare il livello grafico.
+
+## Novità v2.10 — Insegne e parchi verdi
+
+- **Insegne delle attività** su 51 POI commerciali: ristoranti, bar, caffè,
+  farmacie, banche, hotel, musei e negozi.
+- Insegne montate sulla facciata più vicina, con colore, categoria, tenda e
+  pannello leggibile.
+- **Prato texturizzato** con erba, ciuffi, cespugli e fiori.
+- **Alberi aumentati** fino a 850 su qualità alta.
+- **Parchi più vivi** con dettagli verdi distribuiti sulle aree verdi.
+- **Audit insegne** in `data/poi-sign-audit.json`.
 
 ## Novità v2.9 — Tetti e dettagli edilizi
 
@@ -231,6 +242,7 @@ node tools/import-map.mjs --map maps/fidenza/map.json
 node tools/audit-pois.mjs
 node tools/validate-map.mjs
 node tools/audit-buildings.mjs
+node tools/audit-poi-signs.mjs
 # opzionale: aggiorna altezze/tetti da un GeoJSON DBTR/Microsoft/Overture
 node tools/merge-buildings.mjs --geojson edifici.geojson --dry-run
 ```
@@ -294,6 +306,7 @@ fidenza-city-v2/
     map-overrides.js  override edifici/strade/aree
     map-validate.js   validazione condivisa
     building-geometry.js geometria e classificazione tetti
+    poi-signs.js      associazione POI-attività e facciate
     landmarks.js     modelli dei luoghi simbolo
     missions.js      missioni guidate dal manifest
     achievements.js  obiettivi e progresso locale
@@ -331,6 +344,7 @@ fidenza-city-v2/
     audit-pois.mjs
     validate-map.mjs
     audit-buildings.mjs
+    audit-poi-signs.mjs
     merge-buildings.mjs
   data/
     city.json
@@ -340,6 +354,7 @@ fidenza-city-v2/
     poi-audit.json
     map-validation.json
     building-audit.json
+    poi-sign-audit.json
   assets/
     fonts/
     icons/

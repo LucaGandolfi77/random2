@@ -1,7 +1,7 @@
 {
-  "name": "Fidenza da Giocare v2.9",
+  "name": "Fidenza da Giocare v2.10",
   "short_name": "Fidenza",
-  "description": "Open world gratuito nel browser ambientato a Fidenza: carriera, eventi, trasporti, foto, bici, volo, tetti 3D e 27 stelle nascoste.",
+  "description": "Open world gratuito nel browser ambientato a Fidenza: carriera, eventi, trasporti, foto, bici, volo, insegne delle attività, parchi verdi e 27 stelle nascoste.",
   "lang": "it",
   "dir": "ltr",
   "start_url": "./",

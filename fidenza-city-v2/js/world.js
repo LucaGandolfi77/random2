@@ -13,6 +13,7 @@ import { hasStar, hasPlace } from './save.js';
 import { applyOverrides } from './map-overrides.js';
 import { buildBusRoute, makeLoopRoute } from './transit.js';
 import { classifyBuildingRoof, polygonCentroid } from './building-geometry.js';
+import { planPoiSigns } from './poi-signs.js';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -252,6 +253,7 @@ export class World {
     this.trafficCars = [];
     this.pedestrians = [];
     this.cyclists = [];
+    this.poiSigns = [];
     this.lampLights = [];
     this.vehicleSpawns = [];
     this.landmarkGroups = new Map();
@@ -298,6 +300,7 @@ export class World {
     onProgress(0.45, 'Costruisco gli edifici…');
     await this._buildBuildings(onProgress);
     await step(0.64, 'Accendo le finestre…', () => this._buildWindows());
+    await step(0.68, 'Appendo le insegne delle attività…', () => this._buildPoiSigns());
     await step(0.70, 'Pianto gli alberi…', () => this._buildProps());
     await step(0.78, 'Metto i luoghi simbolo…', () => this._buildLandmarks());
     await step(0.82, 'Appendo insegne e arredi…', () => this._buildMapProps());
@@ -484,24 +487,38 @@ export class World {
   }
 
   _buildAreas() {
-    const geoms = [];
+    const greenGeoms = [];
+    const otherGeoms = [];
     const waterGeoms = [];
+    const greenKinds = new Set(['park', 'grass', 'forest', 'sport']);
     const rnd = seededRandom(7);
     for (const a of this.city.areas) {
       const style = AREA_STYLE[a.kind] || AREA_STYLE.urban;
-      const y = a.kind === 'water' ? 0.018 : a.kind === 'park' || a.kind === 'grass' || a.kind === 'forest' ? 0.026 : 0.032;
+      const y = a.kind === 'water' ? 0.018 : greenKinds.has(a.kind) ? 0.036 : 0.032;
       const g = makePolygonGeometry(a.poly, y + (a.id % 5) * 0.0003, style.color);
       if (!g) continue;
       if (a.kind === 'water') waterGeoms.push(g);
-      else geoms.push(g);
+      else if (greenKinds.has(a.kind)) greenGeoms.push(g);
+      else otherGeoms.push(g);
     }
-    const merged = mergeClean(geoms);
-    if (merged) {
-      const mesh = new THREE.Mesh(merged, new THREE.MeshLambertMaterial({ vertexColors: true }));
+    this.areaMeshes = [];
+    const green = mergeClean(greenGeoms);
+    if (green) {
+      assignPlanarUV(green, 8);
+      const mesh = new THREE.Mesh(green, new THREE.MeshLambertMaterial({ vertexColors: true, map: this._grassTexture() }));
+      mesh.receiveShadow = true;
+      mesh.name = 'aree-verdi';
+      this.scene.add(mesh);
+      this.areaMeshes.push(mesh);
+      this.areaMesh = mesh;
+    }
+    const other = mergeClean(otherGeoms);
+    if (other) {
+      const mesh = new THREE.Mesh(other, new THREE.MeshLambertMaterial({ vertexColors: true }));
       mesh.receiveShadow = true;
       mesh.name = 'aree';
       this.scene.add(mesh);
-      this.areaMesh = mesh;
+      this.areaMeshes.push(mesh);
     }
     const water = mergeClean(waterGeoms);
     if (water) {
@@ -658,6 +675,28 @@ export class World {
       for (let i = 0; i < 450; i++) {
         ctx.fillStyle = `rgba(${120 + Math.floor(rnd() * 40)},${70 + Math.floor(rnd() * 30)},55,.12)`;
         ctx.fillRect(rnd() * size, rnd() * size, 2, 2);
+      }
+    });
+  }
+
+  _grassTexture() {
+    return this._texture('grass', (ctx, size) => {
+      ctx.fillStyle = '#e6efd8';
+      ctx.fillRect(0, 0, size, size);
+      const rnd = seededRandom(144);
+      for (let i = 0; i < 2600; i++) {
+        const g = 150 + Math.floor(rnd() * 80);
+        ctx.strokeStyle = `rgba(${90 + Math.floor(rnd() * 40)},${g},${70 + Math.floor(rnd() * 30)},.28)`;
+        ctx.lineWidth = 1;
+        const x = rnd() * size, y = rnd() * size;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (rnd() - 0.5) * 3, y - 2 - rnd() * 3);
+        ctx.stroke();
+      }
+      for (let i = 0; i < 220; i++) {
+        ctx.fillStyle = `rgba(255,255,240,${0.08 + rnd() * 0.12})`;
+        ctx.fillRect(rnd() * size, rnd() * size, 1 + rnd() * 2, 1 + rnd() * 2);
       }
     });
   }
@@ -1235,7 +1274,8 @@ export class World {
     const stoneColor = new THREE.Color('#d8cbb6');
     const addColoredQuad = (arr, cols, color, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4) => {
       addQuad(arr, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4);
-      for (let k = 0; k < 4; k++) cols.push(color.r, color.g, color.b);
+      // addQuad genera due triangoli: 6 vertici, quindi 6 colori.
+      for (let k = 0; k < 6; k++) cols.push(color.r, color.g, color.b);
     };
     let buildingIndex = 0;
     for (const b of this.city.buildings) {
@@ -1529,6 +1569,82 @@ export class World {
     }
   }
 
+  _poiSignTexture(name, type) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 720;
+    canvas.height = 180;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = type.color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = 'rgba(255,248,232,.88)';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
+
+    // piccolo medaglione con il glifo della categoria
+    ctx.fillStyle = 'rgba(255,248,232,.92)';
+    ctx.beginPath();
+    ctx.arc(80, 90, 43, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = type.color;
+    ctx.font = '700 44px Anton, "Arial Narrow", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(type.glyph, 80, 94);
+
+    const label = String(name || '').toUpperCase();
+    const maxWidth = 540;
+    let fontSize = label.length > 26 ? 36 : label.length > 18 ? 44 : 54;
+    ctx.font = `700 ${fontSize}px Anton, "Arial Narrow", sans-serif`;
+    while (ctx.measureText(label).width > maxWidth && fontSize > 24) {
+      fontSize -= 2;
+      ctx.font = `700 ${fontSize}px Anton, "Arial Narrow", sans-serif`;
+    }
+    ctx.fillStyle = '#fff8e8';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, 142, 82);
+    ctx.fillStyle = 'rgba(255,248,232,.72)';
+    ctx.font = '600 22px Oswald, "Trebuchet MS", sans-serif';
+    ctx.fillText(type.label, 144, 128);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(8, this.renderer?.capabilities?.getMaxAnisotropy?.() || 1);
+    return tex;
+  }
+
+  _buildPoiSigns() {
+    const plan = planPoiSigns(this.city);
+    this.poiSigns = plan.signs;
+    for (const sign of plan.signs) {
+      const group = new THREE.Group();
+      const back = new THREE.Mesh(
+        new THREE.BoxGeometry(sign.width + 0.1, sign.height + 0.1, 0.1),
+        new THREE.MeshLambertMaterial({ color: '#1b241e' })
+      );
+      back.position.z = -0.055;
+      back.castShadow = true;
+      group.add(back);
+      const panel = new THREE.Mesh(
+        new THREE.PlaneGeometry(sign.width, sign.height),
+        new THREE.MeshBasicMaterial({ map: this._poiSignTexture(sign.poi.name, sign.type), side: THREE.DoubleSide })
+      );
+      panel.position.z = 0.005;
+      group.add(panel);
+      if (sign.awning) {
+        const awning = new THREE.Mesh(
+          new THREE.BoxGeometry(sign.width * 0.86, 0.08, 0.62),
+          new THREE.MeshLambertMaterial({ color: sign.type.color })
+        );
+        awning.position.set(0, -sign.height * 0.72, 0.34);
+        awning.castShadow = true;
+        group.add(awning);
+      }
+      group.position.set(sign.x, sign.y, sign.z);
+      group.rotation.y = sign.rotation;
+      group.name = `insegna-${sign.poi.id}`;
+      this.scene.add(group);
+    }
+  }
+
   _buildProps() {
     const rnd = seededRandom(1234);
     const treeMatrices = [];
@@ -1541,7 +1657,11 @@ export class World {
       const isSquare = a.kind === 'square';
       if (!['park', 'forest', 'grass', 'sport'].includes(a.kind) && !isSquare) continue;
       const bounds = polygonBounds(a.poly);
-      const n = isSquare ? clamp(Math.round(a.area / 1300), 1, 6) : clamp(Math.round(a.area / 380), 1, 16);
+      const n = isSquare
+        ? clamp(Math.round(a.area / 900), 1, 8)
+        : a.kind === 'sport'
+          ? clamp(Math.round(a.area / 900), 1, 10)
+          : clamp(Math.round(a.area / 160), 2, 55);
       for (let i = 0; i < n; i++) {
         const x = bounds.minX + rnd() * (bounds.maxX - bounds.minX);
         const z = bounds.minZ + rnd() * (bounds.maxZ - bounds.minZ);
@@ -1568,7 +1688,7 @@ export class World {
         }
       }
     }
-    const trees = treeMatrices.slice(0, this.quality === 'low' ? 160 : 360);
+    const trees = treeMatrices.slice(0, this.quality === 'low' ? 280 : this.quality === 'medium' ? 520 : 850);
     if (trees.length) {
       const { trunk, foliage } = makeTreeGeometry();
       const trunkMesh = new THREE.InstancedMesh(trunk, new THREE.MeshLambertMaterial({ color: '#6b4c35' }), trees.length);
@@ -1596,6 +1716,99 @@ export class World {
       foliageMesh.instanceMatrix.needsUpdate = true;
       if (foliageMesh.instanceColor) foliageMesh.instanceColor.needsUpdate = true;
       this.scene.add(trunkMesh, foliageMesh);
+    }
+
+    // cespugli, ciuffi d'erba e fiori nei parchi
+    const shrubs = [];
+    const tufts = [];
+    const flowers = [];
+    const flowerColors = ['#e8a7b8', '#f2d36b', '#f4ebda', '#c95b55', '#b18bd0'];
+    for (const a of this.city.areas) {
+      if (!['park', 'grass', 'forest'].includes(a.kind)) continue;
+      const bounds = polygonBounds(a.poly);
+      const shrubN = clamp(Math.round(a.area / 2400), 1, 14);
+      const tuftN = clamp(Math.round(a.area / 170), 4, 120);
+      const flowerN = clamp(Math.round(a.area / 700), 1, 34);
+      for (let i = 0; i < shrubN; i++) {
+        const x = bounds.minX + rnd() * (bounds.maxX - bounds.minX);
+        const z = bounds.minZ + rnd() * (bounds.maxZ - bounds.minZ);
+        if (pointInPoly(x, z, a.poly) && this.isFree(x, z, 0.25)) {
+          shrubs.push({ x, z, s: 0.55 + rnd() * 0.75, r: rnd() * Math.PI * 2 });
+        }
+      }
+      for (let i = 0; i < tuftN; i++) {
+        const x = bounds.minX + rnd() * (bounds.maxX - bounds.minX);
+        const z = bounds.minZ + rnd() * (bounds.maxZ - bounds.minZ);
+        if (pointInPoly(x, z, a.poly) && this.isFree(x, z, 0.08)) {
+          tufts.push({ x, z, s: 0.65 + rnd() * 0.8, r: rnd() * Math.PI * 2 });
+        }
+      }
+      for (let i = 0; i < flowerN; i++) {
+        const x = bounds.minX + rnd() * (bounds.maxX - bounds.minX);
+        const z = bounds.minZ + rnd() * (bounds.maxZ - bounds.minZ);
+        if (pointInPoly(x, z, a.poly) && this.isFree(x, z, 0.06)) {
+          flowers.push({ x, z, s: 0.7 + rnd() * 0.8, c: flowerColors[Math.floor(rnd() * flowerColors.length)] });
+        }
+      }
+    }
+    const shrubLimit = this.quality === 'low' ? 50 : this.quality === 'medium' ? 120 : 220;
+    const tuftLimit = this.quality === 'low' ? 250 : this.quality === 'medium' ? 700 : 1400;
+    const flowerLimit = this.quality === 'low' ? 0 : this.quality === 'medium' ? 160 : 360;
+    const shrubList = shrubs.slice(0, shrubLimit);
+    const tuftList = tufts.slice(0, tuftLimit);
+    const flowerList = flowers.slice(0, flowerLimit);
+    if (shrubList.length) {
+      const geo = new THREE.IcosahedronGeometry(0.46, 0);
+      const mesh = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: '#ffffff' }), shrubList.length);
+      const dummy = new THREE.Object3D();
+      const color = new THREE.Color();
+      const greens = ['#4f7748', '#5d8850', '#6f9a5a', '#476b40'];
+      shrubList.forEach((s, i) => {
+        dummy.position.set(s.x, 0.38 * s.s, s.z);
+        dummy.rotation.y = s.r;
+        dummy.scale.set(s.s, s.s * 0.8, s.s);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+        mesh.setColorAt(i, color.set(greens[i % greens.length]));
+      });
+      mesh.castShadow = true;
+      mesh.name = 'cespugli';
+      this.scene.add(mesh);
+      this.shrubMesh = mesh;
+    }
+    if (tuftList.length) {
+      const geo = new THREE.ConeGeometry(0.08, 0.38, 3);
+      const mesh = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({ color: '#ffffff' }), tuftList.length);
+      const dummy = new THREE.Object3D();
+      const color = new THREE.Color();
+      const greens = ['#5d8850', '#6f9a5a', '#7fa164', '#4f7748'];
+      tuftList.forEach((s, i) => {
+        dummy.position.set(s.x, 0.19 * s.s, s.z);
+        dummy.rotation.y = s.r;
+        dummy.scale.set(s.s, s.s, s.s);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+        mesh.setColorAt(i, color.set(greens[i % greens.length]));
+      });
+      mesh.name = 'ciuffi-erba';
+      this.scene.add(mesh);
+      this.grassTuftMesh = mesh;
+    }
+    if (flowerList.length) {
+      const geo = new THREE.SphereGeometry(0.075, 5, 4);
+      const mesh = new THREE.InstancedMesh(geo, new THREE.MeshBasicMaterial({ color: '#ffffff' }), flowerList.length);
+      const dummy = new THREE.Object3D();
+      const color = new THREE.Color();
+      flowerList.forEach((s, i) => {
+        dummy.position.set(s.x, 0.22, s.z);
+        dummy.scale.setScalar(s.s);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+        mesh.setColorAt(i, color.set(s.c));
+      });
+      mesh.name = 'fiori';
+      this.scene.add(mesh);
+      this.flowerMesh = mesh;
     }
 
     // lampioni
@@ -2916,7 +3129,10 @@ export class World {
     this.seasonId = id;
     const palette = style?.palette || {};
     if (this.terrainMesh) this.terrainMesh.material.color.set(palette.terrainTint || '#ffffff');
-    if (this.areaMesh) this.areaMesh.material.color.set(palette.areaTint || '#ffffff');
+    for (const mesh of this.areaMeshes || (this.areaMesh ? [this.areaMesh] : [])) {
+      // Il prato mantiene il suo verde: il tint autunnale serve ad aree e piazze.
+      mesh.material.color.set(mesh.name === 'aree-verdi' ? '#ffffff' : (palette.areaTint || '#ffffff'));
+    }
 
     if (this.foliageMesh && palette.tree?.length) {
       const color = new THREE.Color();
