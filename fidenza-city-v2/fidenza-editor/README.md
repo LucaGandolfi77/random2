@@ -1,6 +1,8 @@
-# Fidenza Editor
+# Fidenza Editor 2.16
 
-Editor visuale 2D per la mappa di **Fidenza da Giocare v2**.
+Editor visuale 2D per la mappa di **Fidenza da Giocare v2**. Pensato per il
+lavoro da PC: scorciatoie, command palette, modifica vertice per vertice e
+geometrie custom che il gioco 3D vede senza rigenerare i dati OSM.
 
 ```text
 http://localhost:8081/fidenza-editor/
@@ -28,93 +30,166 @@ python3 -m http.server 8081
   fioriere, bancarelle e auto parcheggiate; testo, rotazione, scala e colore.
 - **Spawn** e **tabellone missioni**.
 - **Navetta**: percorso e fermate calcolati dai POI, visibili nel layer Navetta.
-- **Edifici**: nascondi, sposta, ruota, scala, altezza, colore.
-- **Strade**: nascondi, sposta, ruota, larghezza, superficie.
-- **Aree**: nascondi, sposta, ruota, scala.
-- **Corsi d'acqua e ferrovie**: nascondi/sposta.
+- **Edifici**: nascondi, sposta, ruota, scala, altezza, piani, tetto, colore e
+  vertici.
+- **Strade**: nascondi, sposta, ruota, scala, larghezza, tipo, superficie,
+  senso unico, marciapiede, ponte, tunnel e vertici.
+- **Aree**: nascondi, sposta, ruota, scala, tipo, colore e vertici.
+- **Corsi d’acqua**: tipo, larghezza, spostamento, visibilità e vertici.
+- **Ferrovie**: tipo, larghezza, ponte, spostamento, visibilità e vertici.
+- **Nuove geometrie custom**: strada, area, edificio, corso d’acqua e ferrovia.
 
-Le modifiche a edifici e strade sono **override** in `map.overrides`: i dati OSM originali non vengono toccati e possono essere rigenerati.
+Le modifiche alle feature OSM sono **override** in `map.overrides`: i dati
+originali non vengono toccati. Le nuove geometrie finiscono in `map.custom` e
+vengono unite dal gioco in `applyOverrides`.
 
-## Interazioni
+## Scorciatoie
 
-- Click: seleziona.
-- Trascina: sposta l'elemento selezionato.
-- Shift + trascina: pan.
-- Rotella: zoom.
-- `F`: inquadra tutta la città.
-- `Ctrl+Z` / `Ctrl+Y`: annulla/ripeti.
-- `Delete`: elimina l'elemento selezionato.
-- `Esc`: deseleziona.
+| Tasto | Azione |
+| --- | --- |
+| `V` | Seleziona |
+| `H` | Mano / pan |
+| `R` | Disegna strada |
+| `A` | Disegna area |
+| `B` | Disegna edificio |
+| `W` | Disegna corso d’acqua |
+| `T` | Disegna ferrovia |
+| `P` | Aggiungi POI |
+| `S` | Aggiungi stella |
+| `G` | Snap on/off |
+| `F` | Inquadra tutta la città |
+| `Shift+F` | Centra sulla selezione |
+| `Spazio` | Pan temporaneo |
+| `Ctrl+Z` / `Ctrl+Y` | Annulla / ripeti |
+| `Ctrl+S` | Salva manifest |
+| `Ctrl+Shift+S` | Salva manifest + bundle |
+| `Ctrl+O` | Importa |
+| `Ctrl+D` | Duplica |
+| `Ctrl+K` | Command palette |
+| `Delete` | Elimina elemento o vertice attivo |
+| Frecce | Sposta di 1 m |
+| `Shift+Frecce` | Sposta di 10 m |
+| `Alt+←/→` | Ruota di 5° |
+| `,` / `.` | Ruota di 5° |
+| `+` / `-` | Zoom |
+| `0` | Inquadra tutto |
+| `1…9` | Cambia tab |
+| `?` / `F1` | Mostra scorciatoie |
+| `Esc` | Annulla disegno / vertice / selezione |
 
-Il tratteggio rosso mostra la posizione originale di un edificio/strada modificato.
+Durante il disegno:
 
-L’editor è volutamente solo 2D: dopo il salvataggio apri il gioco per vedere il risultato in 3D.
+- click per aggiungere un punto;
+- `Invio` o doppio clic per chiudere;
+- click sul primo punto per chiudere un poligono;
+- `Backspace` rimuove l’ultimo punto;
+- `Esc` annulla.
 
-## POI, landmark e edifici
+## Modifica vertici
 
-Sono tre cose distinte:
+Seleziona un edificio, una strada, un’area, un corso d’acqua o una ferrovia:
 
-- trascinare un **POI** muove il punto e il beacon; il modello 3D del landmark resta fermo e va spostato con il suo handle;
-- trascinare un **landmark** muove solo il modello 3D (offset);
-- trascinare un **edificio** crea un override geometrico della footprint.
+- i vertici diventano maniglie bianche;
+- trascina un vertice per spostarlo;
+- `Alt+clic` su un segmento inserisce un vertice;
+- `Delete` rimuove il vertice attivo (minimo 3 per un poligono, 2 per una linea);
+- **Inverti** cambia direzione alla linea;
+- **Semplifica** riduce i vertici mantenendo la forma.
 
-Per spostare un intero edificio con il suo modello, sposta l'edificio e il landmark insieme.
+La modifica di una feature OSM crea un override con geometria assoluta
+(`pts`/`poly`), quindi non serve rigenerare la città.
 
-## Mission builder
+## Nuove geometrie custom
 
-1. Apri il tab **Missioni** e premi **+ Nuova missione**.
-2. Scegli il tipo (`pellegrino`, `consegna`, `taxi`, `foto`, `inseguimento`,
-   `ambulanza`, `coincidenza`, `notturna`, `navetta`, `personalizzata`), titolo,
-   testo, tempo e reward.
-3. Seleziona la missione e premi **+ Tappa sulla mappa**: il click successivo
-   aggiunge una tappa nella posizione scelta.
-4. Usa l’inspector per nome, prompt, commento, raggio, foto, POI collegato e
-   offset. Le frecce ↑/↓ riordinano le tappe; il cestino le elimina.
-5. La validazione segnala missioni senza tappe o target dentro un edificio.
+Il modello dati è:
 
-## Palette props
+```json
+"custom": {
+  "buildings": [],
+  "roads": [],
+  "areas": [],
+  "waterways": [],
+  "railways": []
+}
+```
 
-Nel tab **Prop** scegli un tipo dalla palette e clicca sulla mappa. I prop sono
-salvati in `map.props` e il gioco li costruisce in 3D.
+Esempio di strada:
 
-- **Insegna** e **Targa**: testo, sottotitolo, larghezza, altezza, colore,
-  rotazione e scala.
-- **Albero, panchina, lampione, bollard, fioriera, bancarella, auto parcheggiata**:
-  posizione, rotazione, scala e colore dove applicabile.
-- La validazione controlla tipo, area giocabile e sovrapposizione con edifici.
+```json
+{
+  "id": "custom-road-abc",
+  "name": "Via Nuova",
+  "kind": "residential",
+  "pts": [[-120, 40], [-60, 52], [10, 48]],
+  "w": 7,
+  "surface": "asphalt",
+  "oneway": false,
+  "sidewalk": true
+}
+```
+
+Le feature custom sono visibili in 3D (edifici, manto stradale, aree verdi,
+acqua, binari), nella minimappa e nella mappa grande. Hanno ID testuali stabili
+e non collidono con gli ID OSM numerici.
+
+## Command palette
+
+`Ctrl+K` apre la palette. Cerca:
+
+- comandi (salvataggio, modalità, tab, geometria, vista, snap, aiuto);
+- POI, missioni, strade, aree, edifici, acqua e ferrovie.
+
+`↑`/`↓` naviga, `Invio` esegue, `Esc` chiude.
+
+## Performance
+
+- **Spatial hash** per hit test di edifici, strade, aree, acqua e ferrovie.
+- **Culling** delle feature fuori dalla vista.
+- **Rendering in requestAnimationFrame**, al massimo una volta per frame.
+- **Drag leggero**: durante il trascinamento non parte la validazione completa.
+- **Validazione al rilascio** o dopo una modifica da inspector.
+- **Layer cache dell’indice** ricostruita solo quando cambia la città patchata.
+- **Liste limitate a 500 righe** per tab, con ricerca immediata.
+
+La status bar mostra i millisecondi dell’ultimo render, le aree visibili,
+controlli, errori, override e feature custom.
+
+## Validazione
+
+Il pannello esegue la stessa validazione del CLI e segnala:
+
+- beacon, stelle, veicoli, spawn e target dentro edifici;
+- elementi fuori dall’area giocabile;
+- ID duplicati o riferimenti mancanti;
+- override riferiti a feature inesistenti;
+- geometrie custom con pochi vertici, vertici duplicati, area/linea troppo
+  piccola o lati che si incrociano;
+- altezze edificio e larghezze strada non valide;
+- geometrie assolute degli override non valide.
+
+Un click sull’errore seleziona l’elemento e lo centra sulla mappa.
+
+Puoi anche lanciare:
+
+```bash
+node tools/validate-map.mjs
+node tools/import-map.mjs
+```
 
 ## Salvataggio
 
 - **Salva manifest**: scrive `maps/fidenza/map.json`.
-- **Salva bundle**: scrive un file `data-map.json` da sostituire a `data/map.json` (o usa “Salva entrambi”).
+- **Salva bundle**: scrive un file `data-map.json` da sostituire a `data/map.json`.
 - **Salva entrambi**: usa la File System Access API per scrivere direttamente
   `maps/fidenza/map.json` e `data/map.json` nella cartella scelta.
-- Nei browser senza File System Access API vengono scaricati i file.
 - **Importa** carica un manifest JSON.
 - La bozza viene salvata automaticamente in `localStorage`.
 - **Ripristina** ricarica il manifest originale dal server.
 - **Elimina bozza** cancella il salvataggio locale.
 
-Dopo aver salvato direttamente i file non serve altro: il gioco legge
-`data/map.json`, che nel service worker è servito in network-first. Se il browser
-mostra ancora la versione vecchia, fai un hard reload o incrementa `CACHE` in
-`sw.js`. Se hai scaricato i file, sostituiscili nel progetto.
-
-## Validazione
-
-Il pannello laterale esegue la stessa validazione del CLI:
-
-- beacon, stelle, veicoli, spawn e target fuori dagli edifici;
-- elementi fuori dall’area giocabile;
-- ID duplicati o riferimenti mancanti;
-- override riferiti a elementi inesistenti.
-
-Puoi anche lanciare:
-
-```bash
-node tools/audit-pois.mjs
-node tools/validate-map.mjs
-```
+Dopo il salvataggio diretto il gioco legge `data/map.json` senza altre
+operazioni. Se il browser mostra una versione vecchia, fai un hard reload o
+incrementa `CACHE` in `sw.js`.
 
 ## File
 
@@ -122,12 +197,14 @@ node tools/validate-map.mjs
 fidenza-editor/
   index.html
   editor.css
-  js/main.js
-  js/state.js
-  js/map-view.js
-  js/inspector.js
-  js/io.js
-  js/geo.js
+  js/main.js          scorciatoie, command palette, tab e salvataggi
+  js/state.js         stato, undo, custom feature, vertici e override
+  js/map-view.js      canvas, disegno, vertici, hit test e culling
+  js/inspector.js     pannelli POI, missioni, prop e geometrie
+  js/geometry.js      semplificazione, rotazione, snap e test geometrici
+  js/spatial.js       indice spaziale per hit test e culling
+  js/io.js            import/export e bozza locale
+  js/geo.js           proiezioni e utility di base
 ```
 
 Moduli condivisi con il gioco e i tool:
@@ -136,4 +213,5 @@ Moduli condivisi con il gioco e i tool:
 js/map-compiler.js
 js/map-overrides.js
 js/map-validate.js
+schema/map.schema.json
 ```

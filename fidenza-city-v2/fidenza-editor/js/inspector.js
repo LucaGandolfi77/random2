@@ -1,3 +1,5 @@
+import { featureLabel, isLineKind, lineLength } from './geometry.js';
+
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const num = v => Number.isFinite(Number(v)) ? Number(v) : 0;
 
@@ -5,6 +7,17 @@ const MODELS = ['duomo', 'piazza-duomo', 'porta', 'ponte', 'teatro', 'comunale',
 const CATEGORIES = ['church', 'museum', 'theatre', 'square', 'monument', 'station', 'park', 'civic', 'nature', 'service', 'food'];
 const MISSION_TYPES = ['ambulance', 'chase', 'pizza', 'taxi', 'photo', 'pilgrim', 'delivery', 'tour', 'train', 'night', 'bus', 'custom'];
 const PROP_TYPES = ['sign', 'street-sign', 'tree', 'bench', 'lamp', 'bollard', 'planter', 'stall', 'parked-car'];
+const MAP_KINDS = ['building', 'road', 'area', 'waterway', 'railway'];
+const ROAD_KINDS = ['residential', 'primary', 'secondary', 'tertiary', 'service', 'living_street', 'pedestrian', 'footway', 'cycleway', 'path', 'unclassified'];
+const AREA_KINDS = ['park', 'grass', 'forest', 'farmland', 'cemetery', 'industrial', 'urban', 'square', 'parking', 'school', 'hospital', 'sport', 'platform', 'water'];
+const WATER_KINDS = ['stream', 'canal', 'river', 'drain', 'ditch'];
+const RAIL_KINDS = ['rail', 'light_rail', 'tram', 'narrow_gauge', 'service', 'yard'];
+const BUILDING_KINDS = ['building', 'church', 'school', 'hospital', 'civic', 'industrial', 'commercial', 'roof'];
+const ROOF_KINDS = ['gabled', 'hipped', 'flat', 'pyramidal'];
+const SURFACES = ['asphalt', 'paving_stones', 'cobblestone', 'concrete', 'gravel', 'dirt', 'grass'];
+const KIND_LABEL = {
+  building: 'Edificio', road: 'Strada', area: 'Area', waterway: 'Corso d’acqua', railway: 'Ferrovia'
+};
 
 function field(label, inner, hint = '') {
   return `<label class="field"><span>${label}</span>${inner}${hint ? `<small>${hint}</small>` : ''}</label>`;
@@ -52,7 +65,7 @@ export class Inspector {
     else if (s.kind === 'prop') this._renderProp(s);
     else if (s.kind === 'spawn') this._renderSpawn(s);
     else if (s.kind === 'missionBoard') this._renderBoard(s);
-    else if (s.kind === 'building' || s.kind === 'road' || s.kind === 'area') this._renderMapFeature(s);
+    else if (MAP_KINDS.includes(s.kind)) this._renderMapFeature(s);
     this._bind();
   }
 
@@ -232,28 +245,82 @@ export class Inspector {
   }
 
   _renderMapFeature(s) {
-    const group = s.kind === 'building' ? 'buildings' : s.kind === 'road' ? 'roads' : 'areas';
-    const source = this.state.city[group]?.find(x => String(x.id) === String(s.id));
-    const o = this.state.getOverride(s.kind, s.id);
+    const isCustom = !!s.custom;
+    const patched = this.state.patchedFeature(s.kind, s.id);
+    const source = isCustom
+      ? this.state.customFeature(s.kind, s.id)
+      : (patched || this.state.sourceFeature(s.kind, s.id));
+    const override = this.state.getOverride(s.kind, s.id);
     if (!source) return;
     const isBuilding = s.kind === 'building';
     const isRoad = s.kind === 'road';
+    const isArea = s.kind === 'area';
+    const isWaterway = s.kind === 'waterway';
+    const isRailway = s.kind === 'railway';
+    const geometry = this.state.getFeatureGeometry(s.kind, s.id) || [];
+    const length = geometry.length > 1 ? lineLength(geometry) : 0;
+    const customGeometry = !!override.poly || !!override.pts;
+    const kindOptions = isBuilding ? BUILDING_KINDS
+      : isRoad ? ROAD_KINDS
+        : isArea ? AREA_KINDS
+          : isWaterway ? WATER_KINDS : RAIL_KINDS;
+    const title = source.name || `${KIND_LABEL[s.kind] || 'Elemento'} ${source.id}`;
+    const kicker = `${isCustom ? 'custom · ' : 'OSM · '}${featureLabel(s.kind)}`;
     this.root.innerHTML = `
-      ${this._head(source.name || `${isBuilding ? 'Edificio' : isRoad ? 'Strada' : 'Area'} ${source.id}`, isBuilding ? 'Edificio' : isRoad ? 'Strada' : 'Area', true)}
+      ${this._head(title, kicker, true)}
       <div class="inspector-body">
         ${field('ID', input('id', source.id, 'text', 'disabled'))}
-        ${field('Tipo', input('kind', source.kind || '', 'text', 'disabled'))}
-        ${field('Nascosto', checkbox('hidden', o.hidden))}
-        ${field('Sposta X', number('moveX', o.moveX || 0, 0.1))}
-        ${field('Sposta Z', number('moveZ', o.moveZ || 0, 0.1))}
-        ${field('Rotazione (°)', number('rotate', o.rotate || 0, 1))}
-        ${isBuilding ? field('Scala', number('scale', o.scale ?? 1, 0.05)) : ''}
-        ${isBuilding ? field('Altezza (m)', number('height', o.height ?? source.h ?? '', 0.5, 'placeholder="auto"')) : ''}
-        ${isRoad ? field('Larghezza (m)', number('width', o.width ?? source.w ?? '', 0.5, 'placeholder="auto"')) : ''}
-        ${isBuilding ? field('Colore', input('color', o.color || source.color || '#d8c6ae', 'color')) : ''}
-        ${!isBuilding && !isRoad ? field('Scala', number('scale', o.scale ?? 1, 0.05)) : ''}
-        <div class="actions-row">${button('Ripristina elemento', 'resetOverride', 'danger')}</div>
-        <p class="coords">Usa Shift+trascina per pan. Il tratteggio rosso mostra la posizione originale.</p>
+        ${field('Nome', input('name', source.name || '', 'text', 'placeholder="opzionale"'))}
+        ${field('Tipo', select('kind', source.kind || kindOptions[0], kindOptions))}
+        ${field('Nascosto', checkbox('hidden', isCustom ? source.hidden : override.hidden))}
+        ${!isCustom ? `
+          <div class="section-title">Trasformazioni</div>
+          ${field('Sposta X', number('moveX', override.moveX || 0, 0.1))}
+          ${field('Sposta Z', number('moveZ', override.moveZ || 0, 0.1))}
+          ${field('Rotazione (°)', number('rotate', override.rotate || 0, 1))}
+          ${field('Scala', number('scale', override.scale ?? 1, 0.05))}
+          ${customGeometry ? '<p class="hint-row">Geometria assoluta attiva: i vertici hanno sostituito le trasformazioni.</p>' : ''}
+        ` : ''}
+        ${isBuilding ? `
+          <div class="section-title">Edificio</div>
+          ${field('Altezza (m)', number('height', isCustom ? (source.h ?? source.height ?? 8) : (override.height ?? patched?.h ?? ''), 0.5, 'placeholder="auto"'))}
+          ${field('Piani', number('levels', isCustom ? (source.levels || 2) : (override.levels ?? patched?.levels ?? ''), 1, 'min="1" max="40"'))}
+          ${field('Tetto', select('roof', source.roof || 'gabled', ROOF_KINDS))}
+          ${field('Colore', input('color', source.color || '#d8c6ae', 'color'))}
+        ` : ''}
+        ${isRoad ? `
+          <div class="section-title">Strada</div>
+          ${field('Larghezza (m)', number('width', isCustom ? (source.w ?? 7) : (override.width ?? patched?.w ?? ''), 0.5, 'placeholder="auto"'))}
+          ${field('Superficie', select('surface', source.surface || 'asphalt', SURFACES))}
+          <div class="check-grid">
+            <label>${checkbox('oneway', source.oneway)} Senso unico</label>
+            <label>${checkbox('sidewalk', source.sidewalk !== false)} Marciapiede</label>
+            <label>${checkbox('bridge', source.bridge)} Ponte</label>
+            <label>${checkbox('tunnel', source.tunnel)} Tunnel</label>
+          </div>
+        ` : ''}
+        ${isArea ? `
+          <div class="section-title">Area</div>
+          ${field('Colore', input('color', source.color || '#d8cdb9', 'color'))}
+        ` : ''}
+        ${isWaterway || isRailway ? `
+          <div class="section-title">${isWaterway ? 'Acqua' : 'Ferrovia'}</div>
+          ${field('Larghezza (m)', number('width', isCustom ? (source.w ?? 3.5) : (override.width ?? patched?.w ?? ''), 0.5, 'placeholder="auto"'))}
+          ${isRailway ? `<div class="check-grid"><label>${checkbox('bridge', source.bridge)} Ponte</label></div>` : ''}
+        ` : ''}
+        <div class="section-title">Geometria</div>
+        <div class="geometry-stats">
+          <span><b>${geometry.length}</b> vertici</span>
+          <span>${isLineKind(s.kind) ? `${length.toFixed(1)} m` : `${Number(patched?.area || source.area || 0).toFixed(1)} m²`}</span>
+          ${isCustom ? '<span class="custom-chip">custom</span>' : ''}
+        </div>
+        <div class="actions-row">
+          ${button('Inverti', 'flipFeature')}
+          ${button('Semplifica', 'simplifyFeature')}
+          ${button('Elimina', 'delete', 'danger')}
+        </div>
+        ${!isCustom ? `<div class="actions-row">${button('Ripristina elemento', 'resetOverride', 'danger')}</div>` : ''}
+        <p class="coords">Trascina i vertici bianchi. <b>Alt+clic</b> su un segmento aggiunge un vertice, <b>Canc</b> rimuove il vertice attivo. Shift+trascina per pan.</p>
       </div>`;
   }
 
@@ -283,6 +350,16 @@ export class Inspector {
     });
     this.root.querySelector('[data-action="resetOverride"]')?.addEventListener('click', () => {
       this.state.resetOverride();
+      this.onChange?.();
+    });
+    this.root.querySelector('[data-action="flipFeature"]')?.addEventListener('click', () => {
+      if (!this.state.isMapKind(s.kind)) return;
+      this.state.reverseFeature(s.kind, s.id);
+      this.onChange?.();
+    });
+    this.root.querySelector('[data-action="simplifyFeature"]')?.addEventListener('click', () => {
+      if (!this.state.isMapKind(s.kind)) return;
+      this.state.simplifyFeature(s.kind, s.id, 1.2);
       this.onChange?.();
     });
     this.root.querySelectorAll('[data-action="selectStep"]').forEach(el => el.addEventListener('click', () => {
@@ -338,8 +415,13 @@ export class Inspector {
         else if (field === 'osm') p.osm = value;
         else if (field === 'lat') p.lat = numeric(value);
         else if (field === 'lon') p.lon = numeric(value);
-        else if (field === 'beaconX') p.beacon = { x: numeric(value), z: p.beacon?.z ?? beacon.z ?? 0 };
-        else if (field === 'beaconZ') p.beacon = { x: p.beacon?.x ?? beacon.x ?? 0, z: numeric(value) };
+        else if (field === 'beaconX') {
+          const beacon = this.state.compiled.places.find(place => place.id === p.id);
+          p.beacon = { x: numeric(value), z: p.beacon?.z ?? beacon?.beaconZ ?? beacon?.z ?? 0 };
+        } else if (field === 'beaconZ') {
+          const beacon = this.state.compiled.places.find(place => place.id === p.id);
+          p.beacon = { x: p.beacon?.x ?? beacon?.beaconX ?? beacon?.x ?? 0, z: numeric(value) };
+        }
         else if (field === 'description') p.description = value;
         else if (field === 'fact') p.fact = value;
       });
@@ -420,17 +502,44 @@ export class Inspector {
         if (field === 'x') map.missionBoard.x = numeric(value);
         else if (field === 'z') map.missionBoard.z = numeric(value);
       });
-    } else if (['building', 'road', 'area'].includes(s.kind)) {
-      const patch = {};
-      if (field === 'hidden') patch.hidden = value;
-      else if (field === 'moveX') patch.moveX = numeric(value);
-      else if (field === 'moveZ') patch.moveZ = numeric(value);
-      else if (field === 'rotate') patch.rotate = numeric(value);
-      else if (field === 'scale') patch.scale = numeric(value);
-      else if (field === 'height') patch.height = value === '' ? null : numeric(value);
-      else if (field === 'width') patch.width = value === '' ? null : numeric(value);
-      else if (field === 'color') patch.color = value;
-      this.state.setOverride(s.kind, s.id, patch, 'modifica elemento');
+    } else if (MAP_KINDS.includes(s.kind)) {
+      if (s.custom) {
+        const patch = {};
+        if (field === 'hidden') patch.hidden = value;
+        else if (field === 'name') patch.name = value;
+        else if (field === 'kind') patch.kind = value;
+        else if (field === 'height') patch.h = numeric(value);
+        else if (field === 'width') patch.w = numeric(value);
+        else if (field === 'levels') patch.levels = numeric(value);
+        else if (field === 'roof') patch.roof = value;
+        else if (field === 'color') patch.color = value;
+        else if (field === 'surface') patch.surface = value;
+        else if (field === 'oneway') patch.oneway = value;
+        else if (field === 'bridge') patch.bridge = value;
+        else if (field === 'tunnel') patch.tunnel = value;
+        else if (field === 'sidewalk') patch.sidewalk = value;
+        this.state.setCustomFeature(s.kind, s.id, patch, 'modifica geometria custom');
+      } else {
+        const patch = {};
+        if (field === 'hidden') patch.hidden = value;
+        else if (field === 'name') patch.name = value;
+        else if (field === 'kind') patch.kind = value;
+        else if (field === 'moveX') patch.moveX = numeric(value);
+        else if (field === 'moveZ') patch.moveZ = numeric(value);
+        else if (field === 'rotate') patch.rotate = numeric(value);
+        else if (field === 'scale') patch.scale = numeric(value);
+        else if (field === 'height') patch.height = value === '' ? null : numeric(value);
+        else if (field === 'width') patch.width = value === '' ? null : numeric(value);
+        else if (field === 'levels') patch.levels = value === '' ? null : numeric(value);
+        else if (field === 'roof') patch.roof = value;
+        else if (field === 'color') patch.color = value;
+        else if (field === 'surface') patch.surface = value;
+        else if (field === 'oneway') patch.oneway = value;
+        else if (field === 'bridge') patch.bridge = value;
+        else if (field === 'tunnel') patch.tunnel = value;
+        else if (field === 'sidewalk') patch.sidewalk = value;
+        this.state.setOverride(s.kind, s.id, patch, 'modifica elemento');
+      }
     }
     this.onChange?.();
   }

@@ -220,6 +220,12 @@ export function compileMap(map, city) {
     custom: !!v.custom
   }));
 
+  const custom = map.custom || {};
+  const customCounts = Object.fromEntries(
+    ['buildings', 'roads', 'areas', 'waterways', 'railways']
+      .map(group => [group, Array.isArray(custom[group]) ? custom[group].length : 0])
+  );
+
   return {
     meta: {
       id: map.id,
@@ -240,7 +246,13 @@ export function compileMap(map, city) {
         vehicles: vehicles?.length ?? 0,
         props: props.length,
         districts: districts.length,
-        venues: venues.length
+        venues: venues.length,
+        buildings: city?.buildings?.length || 0,
+        roads: city?.roads?.length || 0,
+        areas: city?.areas?.length || 0,
+        waterways: city?.waterways?.length || 0,
+        railways: city?.railways?.length || 0,
+        customFeatures: Object.values(customCounts).reduce((n, v) => n + v, 0)
       }
     },
     places,
@@ -254,6 +266,7 @@ export function compileMap(map, city) {
     spawn: map.spawn || null,
     missionBoard: map.missionBoard || null,
     overrides: map.overrides || {},
+    custom,
     seasons: map.seasons || { default: 'auto', styles: {} }
   };
 }

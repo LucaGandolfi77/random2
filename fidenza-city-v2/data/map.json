@@ -2,8 +2,8 @@
   "meta": {
     "id": "fidenza",
     "name": "Fidenza",
-    "version": "2.15.0",
-    "generated": "2026-11-05T16:01:37.791Z",
+    "version": "2.16.0",
+    "generated": "2026-11-05T17:30:29.271Z",
     "center": {
       "lat": 44.8665,
       "lon": 10.0612
@@ -33,7 +33,13 @@
       "vehicles": 11,
       "props": 24,
       "districts": 6,
-      "venues": 4
+      "venues": 4,
+      "buildings": 3373,
+      "roads": 1816,
+      "areas": 185,
+      "waterways": 13,
+      "railways": 62,
+      "customFeatures": 0
     }
   },
   "places": [
@@ -1972,6 +1978,7 @@
     "z": 6
   },
   "overrides": {},
+  "custom": {},
   "seasons": {
     "default": "auto",
     "styles": {

@@ -1,10 +1,11 @@
-# Fidenza da Giocare v2.15
+# Fidenza da Giocare v2.16
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.15 accende la **città viva**: turni degli NPC, orari dei locali, folle che
-cambiano per ora e quartiere, oltre al **Diario di Fidenza** e al terreno
+v2.16 porta l’**Editor Pro**: scorciatoie da PC, command palette, modifica
+vertice per vertice e nuove geometrie (strade, aree, edifici, acqua e ferrovie)
+che il gioco 3D vede subito. Restano la **città viva** della v2.15 e il terreno
 **AWS Terrain Tiles** della v2.14.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
@@ -18,8 +19,8 @@ cambiano per ora e quartiere, oltre al **Diario di Fidenza** e al terreno
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
-- [Novità v2.15](#novità-v215--città-viva-turni-e-orari)
-- [Novità precedenti](#novità-v214--diario-di-fidenza-e-terreno-aws)
+- [Novità v2.16](#novità-v216--editor-pro)
+- [Novità precedenti](#novità-v215--città-viva-turni-e-orari)
 - [Dati, rigenerazione ed editor](#dati-e-correzioni)
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
@@ -241,10 +242,15 @@ self-hosted in `vendor/` e `assets/fonts/`.
 
 ### Editor e dati
 
-- **Editor visuale** per POI, beacon, landmark, stelle, missioni, veicoli,
-  prop, spawn, tabellone, edifici e strade.
+- **Editor Pro**: scorciatoie PC, command palette, multi-tab geometrici e
+  modifica vertice per vertice.
+- **Geometrie custom**: nuove strade, aree, edifici, corsi d’acqua e ferrovie
+  salvate in `map.custom` e visibili in 3D, minimappa e mappa grande.
 - **Mission builder** con tappe, tempo, reward, POI collegato, commenti e foto.
-- **Undo/redo**, snap, layer, ricerca e validazione integrata.
+- **Undo/redo**, snap, layer, ricerca, duplicazione, nudge e validazione
+  geometrica integrata.
+- **Prestazioni**: spatial hash, culling, rendering in rAF e validazione
+  rimandata al rilascio del drag.
 - **Salvataggio** con File System Access API, download/import JSON e bozza in
   `localStorage`.
 - **Audit e validatori**: POI, edifici, insegne, traffico e raggiungibilità.
@@ -480,6 +486,34 @@ all’URL per forzare il livello grafico.
   poi ritagliata per minimappa e mappa grande.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
+
+## Novità v2.16 — Editor Pro
+
+- **Scorciatoie complete**: `V/H/R/A/B/W/T/P/S/G/F`, `Ctrl+Z/Y`, `Ctrl+S`,
+  `Ctrl+Shift+S`, `Ctrl+O`, `Ctrl+D`, `Ctrl+K`, `Delete`, frecce, `+/-/0`,
+  `1…9`, `?` e `Esc`.
+- **Command palette** `Ctrl+K` per comandi ed entità.
+- **Pannello scorciatoie** con `?` o `F1`.
+- **Vertici modificabili** su edifici, strade, aree, acqua e ferrovie OSM.
+- **Alt+clic** inserisce un vertice, `Delete` rimuove quello attivo,
+  **Inverti** e **Semplifica** trasformano la geometria.
+- **Disegno di nuove feature**: strada, area, edificio, corso d’acqua e
+  ferrovia, con chiusura a doppio clic, `Invio` o click sul primo punto.
+- **Modello `map.custom`** con `buildings`, `roads`, `areas`, `waterways` e
+  `railways`.
+- **Override assoluti** `pts`/`poly` per modificare le feature OSM senza
+  rigenerare la città.
+- **Edifici**: altezza, piani, tetto, colore. **Strade**: larghezza, tipo,
+  superficie, senso unico, marciapiede, ponte e tunnel.
+- **Acqua e ferrovie**: tipo, larghezza, visibilità e spostamento.
+- **Duplicazione** (`Ctrl+D`), spostamento con frecce (1 m / 10 m) e rotazione
+  (`Alt+←/→`, `,`/`.`).
+- **Prestazioni**: spatial hash, culling, rendering in `requestAnimationFrame`,
+  drag senza validazione completa e indice ricostruito solo al bisogno.
+- **Validazione geometrica**: vertici duplicati, poligoni auto-intersecanti,
+  feature troppo piccole, ID duplicati e override assoluti non validi.
+- **Gioco 3D e minimappa** aggiornati per colori, larghezze, tetti e feature
+  custom.
 
 ## Novità v2.15 — Città viva, turni e orari
 
@@ -774,17 +808,20 @@ http://localhost:8081/fidenza-editor/
 ```
 
 L’editor visuale permette di spostare POI, beacon, landmark, stelle, missioni,
-veicoli, prop, spawn e tabellone; può anche nascondere/spostare/ruotare edifici
-e strade tramite override, senza toccare i dati OSM originali.
+veicoli, prop, spawn e tabellone; può anche modificare edifici, strade, aree,
+acqua e ferrovie tramite override, senza toccare i dati OSM originali.
 
 - Trascina un POI per spostare il punto e il beacon.
 - Trascina un landmark per spostare il modello 3D.
-- Trascina un edificio o una strada per creare un override.
+- Seleziona una feature geometrica e trascina i vertici bianchi.
+- `Alt+clic` su un segmento aggiunge un vertice; `Delete` rimuove quello attivo.
+- Disegna nuove strade, aree, edifici, corsi d’acqua e ferrovie con `R/A/B/W/T`.
 - Crea missioni complete: tipo, titolo, tempo, reward, tappe cliccando sulla
   mappa, riordino, POI collegato, commenti e foto.
 - Posiziona props e insegne con la palette; testo, rotazione, scala e colore
   sono modificabili dall’inspector.
-- Undo/redo, snap, layer, ricerca, validazione integrata.
+- `Ctrl+K` apre la command palette; `?` mostra le scorciatoie.
+- Undo/redo, snap, layer, ricerca, duplicazione, nudge e validazione integrata.
 - Salvataggio diretto con File System Access API, oppure download/import JSON.
 - Bozza automatica in `localStorage`.
 
@@ -844,6 +881,12 @@ fidenza-city-v2/
     editor.css
     README.md
     js/
+      main.js          scorciatoie, command palette e tab
+      state.js         undo, override, custom feature e vertici
+      map-view.js      disegno, vertici, hit test e culling
+      inspector.js     pannelli entità e geometrie
+      geometry.js      semplificazione, rotazione e snap
+      spatial.js       indice spaziale
   maps/
     fidenza/
       map.json

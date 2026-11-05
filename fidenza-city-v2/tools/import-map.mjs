@@ -64,6 +64,29 @@ function validate(map) {
     }
     if (!group || typeof group !== 'object') fail(`overrides.${groupId} deve essere un oggetto`);
   }
+  const geometricGroups = {
+    buildings: true, areas: true, roads: false, waterways: false, railways: false
+  };
+  for (const [groupId, polygon] of Object.entries(geometricGroups)) {
+    const list = map.custom?.[groupId];
+    if (list == null) continue;
+    if (!Array.isArray(list)) fail(`custom.${groupId} deve essere un array`);
+    const ids = new Set();
+    for (const item of list) {
+      if (!item?.id) fail(`custom.${groupId}: elemento senza id`);
+      if (ids.has(item.id)) fail(`custom.${groupId}: id duplicato ${item.id}`);
+      ids.add(item.id);
+      const points = polygon ? item.poly : item.pts;
+      if (!Array.isArray(points) || points.length < (polygon ? 3 : 2)) {
+        fail(`custom.${groupId}/${item.id}: geometria non valida`);
+      }
+      for (const point of points) {
+        if (!Array.isArray(point) || !Number.isFinite(point[0]) || !Number.isFinite(point[1])) {
+          fail(`custom.${groupId}/${item.id}: coordinate non valide`);
+        }
+      }
+    }
+  }
 }
 
 function main() {
@@ -101,6 +124,7 @@ function main() {
   console.log(`  stars: ${out.meta.counts.stars}`);
   console.log(`  vehicles: ${out.meta.counts.vehicles}`);
   console.log(`  overrides: ${Object.values(out.overrides || {}).reduce((n, g) => n + Object.keys(g || {}).length, 0)}`);
+  console.log(`  custom: ${out.meta.counts.customFeatures} feature · ${out.meta.counts.buildings} edifici · ${out.meta.counts.roads} strade`);
   console.log(`  seasons: ${Object.keys(compiledSeasons.styles).join(', ') || 'nessuna'}`);
   console.log(`  output: ${path.relative(ROOT, OUT_FILE)}`);
 }

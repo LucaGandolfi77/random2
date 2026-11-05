@@ -610,6 +610,41 @@
           "type": "string"
         }
       }
+    },
+    "custom": {
+      "type": "object",
+      "properties": {
+        "buildings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customPolygon"
+          }
+        },
+        "areas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customPolygon"
+          }
+        },
+        "roads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customLine"
+          }
+        },
+        "waterways": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customLine"
+          }
+        },
+        "railways": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customLine"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -665,6 +700,39 @@
               "string",
               "null"
             ]
+          },
+          "poly": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/coordinate"
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "levels": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 40
+          },
+          "roof": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       }
@@ -706,6 +774,43 @@
               "string",
               "null"
             ]
+          },
+          "pts": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/coordinate"
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "oneway": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "bridge": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "tunnel": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "sidewalk": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           }
         }
       }
@@ -729,7 +834,145 @@
           },
           "scale": {
             "type": "number"
+          },
+          "pts": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/coordinate"
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "width": {
+            "type": [
+              "number",
+              "null"
+            ]
           }
+        }
+      }
+    },
+    "coordinate": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "customPolygon": {
+      "type": "object",
+      "required": [
+        "poly"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "poly": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/$defs/coordinate"
+          }
+        },
+        "h": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "height": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "levels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "roof": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "hidden": {
+          "type": "boolean"
+        }
+      }
+    },
+    "customLine": {
+      "type": "object",
+      "required": [
+        "pts"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "pts": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/coordinate"
+          }
+        },
+        "w": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 80
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 80
+        },
+        "surface": {
+          "type": "string"
+        },
+        "oneway": {
+          "type": "boolean"
+        },
+        "bridge": {
+          "type": "boolean"
+        },
+        "tunnel": {
+          "type": "boolean"
+        },
+        "sidewalk": {
+          "type": "boolean"
+        },
+        "hidden": {
+          "type": "boolean"
         }
       }
     }

@@ -64,11 +64,14 @@ export function transformLine(points, { moveX = 0, moveZ = 0, rotate = 0, scale 
 function applyPolygonOverride(item, o) {
   if (!o) return item;
   if (o.hidden) return null;
-  const moveX = Number(o.moveX) || 0;
-  const moveZ = Number(o.moveZ) || 0;
-  const rotate = Number(o.rotate) || 0;
-  const scale = Number.isFinite(o.scale) ? o.scale : 1;
-  const poly = transformPolygon(item.poly, { moveX, moveZ, rotate, scale });
+  const poly = Array.isArray(o.poly) && o.poly.length >= 3
+    ? o.poly.map(p => [+p[0], +p[1]])
+    : transformPolygon(item.poly, {
+        moveX: Number(o.moveX) || 0,
+        moveZ: Number(o.moveZ) || 0,
+        rotate: Number(o.rotate) || 0,
+        scale: Number.isFinite(o.scale) ? o.scale : 1
+      });
   const [cx, cz] = polygonCentroid(poly);
   return {
     ...item,
@@ -77,7 +80,11 @@ function applyPolygonOverride(item, o) {
     z: +cz.toFixed(1),
     area: +polygonArea(poly).toFixed(1),
     ...(o.height != null ? { h: Number(o.height) } : {}),
+    ...(o.levels != null ? { levels: Number(o.levels) } : {}),
+    ...(o.roof ? { roof: o.roof, roofShape: o.roof } : {}),
     ...(o.color ? { color: o.color } : {}),
+    ...(o.kind ? { kind: o.kind } : {}),
+    ...(o.name ? { name: o.name } : {}),
     _override: true
   };
 }
@@ -85,11 +92,14 @@ function applyPolygonOverride(item, o) {
 function applyRoadOverride(item, o) {
   if (!o) return item;
   if (o.hidden) return null;
-  const moveX = Number(o.moveX) || 0;
-  const moveZ = Number(o.moveZ) || 0;
-  const rotate = Number(o.rotate) || 0;
-  const scale = Number.isFinite(o.scale) ? o.scale : 1;
-  const pts = transformLine(item.pts, { moveX, moveZ, rotate, scale });
+  const pts = Array.isArray(o.pts) && o.pts.length >= 2
+    ? o.pts.map(p => [+p[0], +p[1]])
+    : transformLine(item.pts, {
+        moveX: Number(o.moveX) || 0,
+        moveZ: Number(o.moveZ) || 0,
+        rotate: Number(o.rotate) || 0,
+        scale: Number.isFinite(o.scale) ? o.scale : 1
+      });
   let length = 0;
   for (let i = 1; i < pts.length; i++) length += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
   return {
@@ -98,12 +108,77 @@ function applyRoadOverride(item, o) {
     w: o.width != null ? Number(o.width) : item.w,
     length: +length.toFixed(1),
     ...(o.kind ? { kind: o.kind } : {}),
+    ...(o.name ? { name: o.name } : {}),
     ...(o.surface ? { surface: o.surface } : {}),
+    ...(o.oneway != null ? { oneway: !!o.oneway } : {}),
+    ...(o.bridge != null ? { bridge: !!o.bridge } : {}),
+    ...(o.tunnel != null ? { tunnel: !!o.tunnel } : {}),
+    ...(o.sidewalk != null ? { sidewalk: !!o.sidewalk } : {}),
     _override: true
   };
 }
 
-export function applyOverrides(city, overrides = {}) {
+function applyLineOverride(item, o) {
+  if (!o) return item;
+  if (o.hidden) return null;
+  const pts = Array.isArray(o.pts) && o.pts.length >= 2
+    ? o.pts.map(p => [+p[0], +p[1]])
+    : transformLine(item.pts, {
+        moveX: Number(o.moveX) || 0,
+        moveZ: Number(o.moveZ) || 0,
+        rotate: Number(o.rotate) || 0,
+        scale: Number.isFinite(o.scale) ? o.scale : 1
+      });
+  return {
+    ...item,
+    pts,
+    ...(o.kind ? { kind: o.kind } : {}),
+    ...(o.name ? { name: o.name } : {}),
+    ...(o.width != null ? { w: Number(o.width) } : {}),
+    _override: true
+  };
+}
+
+function customPolygon(item, group, index = 0) {
+  if (!item || item.hidden) return null;
+  if (!item.poly || item.poly.length < 3) return null;
+  const poly = item.poly.map(p => [+p[0], +p[1]]);
+  const [x, z] = polygonCentroid(poly);
+  return {
+    ...item,
+    id: item.id || `custom-${group}-${index + 1}`,
+    poly,
+    x: +x.toFixed(1),
+    z: +z.toFixed(1),
+    area: +polygonArea(poly).toFixed(1),
+    kind: item.kind || (group === 'buildings' ? 'building' : 'urban'),
+    h: item.h ?? item.height ?? 8,
+    color: item.color || '#d8c6ae',
+    ...(item.roof ? { roofShape: item.roof } : {}),
+    _custom: true
+  };
+}
+
+function customLine(item, group, index = 0) {
+  if (!item || item.hidden) return null;
+  if (!item.pts || item.pts.length < 2) return null;
+  const pts = item.pts.map(p => [+p[0], +p[1]]);
+  let length = 0;
+  for (let i = 1; i < pts.length; i++) length += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+  const defaultKind = group === 'railways' ? 'rail' : group === 'waterways' ? 'stream' : 'residential';
+  const defaultWidth = group === 'railways' ? 3.5 : group === 'waterways' ? 4 : 6;
+  return {
+    ...item,
+    id: item.id || `custom-${group}-${index + 1}`,
+    pts,
+    length: +length.toFixed(1),
+    kind: item.kind || defaultKind,
+    w: item.w ?? item.width ?? defaultWidth,
+    _custom: true
+  };
+}
+
+export function applyOverrides(city, overrides = {}, custom = {}) {
   const ob = overrides?.buildings || {};
   const or = overrides?.roads || {};
   const oa = overrides?.areas || {};
@@ -115,27 +190,49 @@ export function applyOverrides(city, overrides = {}) {
     const patched = applyPolygonOverride(b, ob[String(b.id)]);
     if (patched) buildings.push(patched);
   }
+  for (const [i, b] of (custom.buildings || []).entries()) {
+    const patched = customPolygon(b, 'buildings', i);
+    if (patched) buildings.push(patched);
+  }
+
   const roads = [];
   for (const r of city.roads || []) {
     const patched = applyRoadOverride(r, or[String(r.id)]);
     if (patched) roads.push(patched);
   }
+  for (const [i, r] of (custom.roads || []).entries()) {
+    const patched = customLine(r, 'roads', i);
+    if (patched) roads.push(patched);
+  }
+
   const areas = [];
   for (const a of city.areas || []) {
     const patched = applyPolygonOverride(a, oa[String(a.id)]);
     if (patched) areas.push(patched);
   }
+  for (const [i, a] of (custom.areas || []).entries()) {
+    const patched = customPolygon(a, 'areas', i);
+    if (patched) areas.push(patched);
+  }
+
   const waterways = [];
   for (const w of city.waterways || []) {
-    const o = ow[String(w.id)];
-    if (o?.hidden) continue;
-    waterways.push(o ? { ...w, pts: transformLine(w.pts, o), _override: true } : w);
+    const patched = applyLineOverride(w, ow[String(w.id)]);
+    if (patched) waterways.push(patched);
   }
+  for (const [i, w] of (custom.waterways || []).entries()) {
+    const patched = customLine(w, 'waterways', i);
+    if (patched) waterways.push(patched);
+  }
+
   const railways = [];
   for (const r of city.railways || []) {
-    const o = ol[String(r.id)];
-    if (o?.hidden) continue;
-    railways.push(o ? { ...r, pts: transformLine(r.pts, o), _override: true } : r);
+    const patched = applyLineOverride(r, ol[String(r.id)]);
+    if (patched) railways.push(patched);
+  }
+  for (const [i, r] of (custom.railways || []).entries()) {
+    const patched = customLine(r, 'railways', i);
+    if (patched) railways.push(patched);
   }
 
   return {

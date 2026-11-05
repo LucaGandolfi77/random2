@@ -3,20 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fidenza Editor · mappa visuale</title>
-  <meta name="description" content="Editor visuale per modificare e riorganizzare la mappa di Fidenza da Giocare v2.">
+  <title>Fidenza Editor Pro 2.16 · mappa visuale</title>
+  <meta name="description" content="Editor Pro per modificare a fondo la mappa di Fidenza da Giocare v2: vertici, strade, aree, edifici, acqua, ferrovie e feature custom.">
   <link rel="stylesheet" href="../assets/fonts/fonts.css">
   <link rel="stylesheet" href="editor.css">
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">Fidenza <span>Editor</span></div>
+    <div class="brand">Fidenza <span>Editor Pro</span></div>
     <div id="map-title" class="map-title">Fidenza · editor mappa</div>
     <div class="toolbar">
       <button id="btn-undo" class="icon" title="Annulla (Ctrl+Z)">↶</button>
       <button id="btn-redo" class="icon" title="Ripeti (Ctrl+Y)">↷</button>
-      <button id="btn-fit" title="Inquadra tutta la città">Fit</button>
-      <button id="btn-focus" title="Centra sulla selezione">◎</button>
+      <button id="btn-fit" title="Inquadra tutta la città (F)">Fit</button>
+      <button id="btn-focus" title="Centra sulla selezione (Shift+F)">◎</button>
+      <button id="btn-command" class="command-button" title="Command palette (Ctrl+K)">⌘K Comandi</button>
+      <button id="btn-help" class="icon" title="Scorciatoie (?)">?</button>
       <label class="snap-label">Snap
         <select id="snap">
           <option value="0">off</option>
@@ -26,10 +28,10 @@
         </select>
       </label>
       <span class="divider"></span>
-      <button id="btn-save-manifest" class="primary">Salva manifest</button>
-      <button id="btn-save-bundle">Salva bundle</button>
-      <button id="btn-save-both">Salva entrambi</button>
-      <button id="btn-import">Importa</button>
+      <button id="btn-save-manifest" class="primary" title="Ctrl+S">Salva manifest</button>
+      <button id="btn-save-bundle" title="Salva solo bundle dati">Salva bundle</button>
+      <button id="btn-save-both" title="Ctrl+Shift+S">Salva entrambi</button>
+      <button id="btn-import" title="Ctrl+O">Importa</button>
       <button id="btn-reset">Ripristina</button>
       <button id="btn-clear-draft">Elimina bozza</button>
       <a id="btn-game" class="button-link" href="../index.html" target="_blank" rel="noopener">Apri gioco ↗</a>
@@ -41,18 +43,33 @@
   <main class="workspace">
     <aside class="sidebar">
       <div class="mode-row">
-        <button id="btn-mode-select" class="mode active">Seleziona</button>
-        <button id="btn-mode-move" class="mode">Sposta</button>
-        <button id="btn-mode-place" class="mode">+ POI</button>
-        <button id="btn-mode-star" class="mode">+ Stella</button>
+        <button id="btn-mode-select" class="mode active" title="Seleziona e sposta (V)">Seleziona</button>
+        <button id="btn-mode-pan" class="mode" title="Mano / pan (H)">Mano</button>
+        <button id="btn-mode-place" class="mode" title="Aggiungi POI (P)">+ POI</button>
+        <button id="btn-mode-star" class="mode" title="Aggiungi stella (S)">+ Stella</button>
+      </div>
+
+      <div class="draw-tools" id="draw-tools">
+        <span class="draw-label">Disegna</span>
+        <button data-draw="drawRoad" title="Disegna strada (R)">Strada <kbd>R</kbd></button>
+        <button data-draw="drawArea" title="Disegna area (A)">Area <kbd>A</kbd></button>
+        <button data-draw="drawBuilding" title="Disegna edificio (B)">Edificio <kbd>B</kbd></button>
+        <button data-draw="drawWater" title="Disegna corso d’acqua (W)">Acqua <kbd>W</kbd></button>
+        <button data-draw="drawRail" title="Disegna ferrovia (T)">Ferrovia <kbd>T</kbd></button>
       </div>
 
       <div class="search-row">
         <input id="search" type="search" placeholder="Cerca nome, ID, OSM…" autocomplete="off">
       </div>
 
-      <nav class="tabs">
+      <nav class="tabs" id="tabs">
         <button data-tab="places" class="active">POI</button>
+        <button data-tab="buildings">Edifici</button>
+        <button data-tab="roads">Strade</button>
+        <button data-tab="areas">Aree</button>
+        <button data-tab="waterways">Acqua</button>
+        <button data-tab="railways">Ferrovia</button>
+        <button data-tab="custom">Custom</button>
         <button data-tab="landmarks">Landmark</button>
         <button data-tab="stars">Stelle</button>
         <button data-tab="missions">Missioni</button>
@@ -90,8 +107,9 @@
 
     <section class="canvas-wrap">
       <canvas id="editor-canvas"></canvas>
+      <div id="draw-hint" class="draw-hint" hidden></div>
       <div class="canvas-help">
-        Click = seleziona · trascina = sposta · Shift+trascina = pan · rotella = zoom · F = inquadra
+        Click = seleziona · trascina = sposta · Shift+trascina = pan · rotella = zoom · ? = scorciatoie
       </div>
     </section>
 
@@ -100,10 +118,64 @@
 
   <footer class="statusbar">
     <span id="status-text">Caricamento…</span>
+    <span id="perf"></span>
     <span id="coords"></span>
     <span id="zoom"></span>
     <span id="save-state" class="save-state"></span>
   </footer>
+
+  <div id="palette-overlay" class="palette-overlay" hidden>
+    <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div class="palette-head">
+        <input id="palette-input" type="search" placeholder="Cerca un comando, un POI, una strada, un edificio…" autocomplete="off" spellcheck="false">
+        <kbd>Esc</kbd>
+      </div>
+      <div id="palette-list" class="palette-list"></div>
+      <div class="palette-foot"><span>↑↓ naviga</span><span>Invio esegue</span><span>Ctrl+K</span></div>
+    </div>
+  </div>
+
+  <div id="help-overlay" class="help-overlay" hidden>
+    <div class="help-card" role="dialog" aria-modal="true" aria-label="Scorciatoie editor">
+      <div class="help-head">
+        <div><span class="kicker">Editor Pro</span><h2>Scorciatoie</h2></div>
+        <button id="btn-close-help" class="icon" type="button">✕</button>
+      </div>
+      <div class="shortcut-grid">
+        <div><kbd>V</kbd><span>Seleziona</span></div>
+        <div><kbd>H</kbd><span>Mano / pan</span></div>
+        <div><kbd>R</kbd><span>Disegna strada</span></div>
+        <div><kbd>A</kbd><span>Disegna area</span></div>
+        <div><kbd>B</kbd><span>Disegna edificio</span></div>
+        <div><kbd>W</kbd><span>Disegna acqua</span></div>
+        <div><kbd>T</kbd><span>Disegna ferrovia</span></div>
+        <div><kbd>P</kbd><span>Aggiungi POI</span></div>
+        <div><kbd>S</kbd><span>Aggiungi stella</span></div>
+        <div><kbd>G</kbd><span>Snap on/off</span></div>
+        <div><kbd>F</kbd><span>Inquadra tutto</span></div>
+        <div><kbd>Shift+F</kbd><span>Centra selezione</span></div>
+        <div><kbd>Ctrl+K</kbd><span>Command palette</span></div>
+        <div><kbd>Ctrl+Z</kbd><span>Annulla</span></div>
+        <div><kbd>Ctrl+Y</kbd><span>Ripeti</span></div>
+        <div><kbd>Ctrl+D</kbd><span>Duplica</span></div>
+        <div><kbd>Ctrl+S</kbd><span>Salva manifest</span></div>
+        <div><kbd>Ctrl+Shift+S</kbd><span>Salva tutto</span></div>
+        <div><kbd>Ctrl+O</kbd><span>Importa</span></div>
+        <div><kbd>Canc</kbd><span>Elimina / rimuovi vertice</span></div>
+        <div><kbd>Frecce</kbd><span>Sposta 1 m</span></div>
+        <div><kbd>Shift+Frecce</kbd><span>Sposta 10 m</span></div>
+        <div><kbd>Alt+←/→</kbd><span>Ruota 5°</span></div>
+        <div><kbd>Alt+clic</kbd><span>Aggiungi vertice</span></div>
+        <div><kbd>Invio</kbd><span>Chiudi disegno</span></div>
+        <div><kbd>Esc</kbd><span>Annulla / deseleziona</span></div>
+        <div><kbd>1…9</kbd><span>Cambia tab</span></div>
+        <div><kbd>+ / −</kbd><span>Zoom</span></div>
+        <div><kbd>0</kbd><span>Inquadra tutto</span></div>
+        <div><kbd>Spazio</kbd><span>Pan temporaneo</span></div>
+      </div>
+      <p class="help-note">Trascina i vertici bianchi per modificare la geometria. Con una feature selezionata, Alt+clic su un segmento inserisce un vertice. I locali e i turni NPC arriveranno nella v2.17.</p>
+    </div>
+  </div>
 
   <div id="toast" class="toast"></div>
   <script type="module" src="js/main.js"></script>

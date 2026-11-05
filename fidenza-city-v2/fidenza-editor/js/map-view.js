@@ -1,7 +1,17 @@
 import {
   pointInPoly, distanceToPolyline, polygonCentroid, polygonBounds, clamp
 } from './geo.js';
+import { SpatialIndex } from './spatial.js';
+import { featureGroup, isLineKind, pointsBounds } from './geometry.js';
 import { buildBusRoute } from '../../js/transit.js';
+
+const DRAW_MODES = {
+  drawRoad: { kind: 'road', min: 2, label: 'strada' },
+  drawArea: { kind: 'area', min: 3, label: 'area' },
+  drawBuilding: { kind: 'building', min: 3, label: 'edificio' },
+  drawWater: { kind: 'waterway', min: 2, label: 'corso d’acqua' },
+  drawRail: { kind: 'railway', min: 2, label: 'ferrovia' }
+};
 
 const CATEGORY = {
   church: { letter: '†', color: '#6b5a43' },
@@ -40,12 +50,13 @@ function diamond(ctx, x, y, r) {
 }
 
 export class MapView {
-  constructor({ canvas, state, onChange, onStatus }) {
+  constructor({ canvas, state, onChange, onStatus, onDrawing }) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.state = state;
     this.onChange = onChange;
     this.onStatus = onStatus;
+    this.onDrawing = onDrawing;
     this.scale = 1;
     this.center = { x: 0, z: 0 };
     this.mode = 'select';
@@ -55,6 +66,7 @@ export class MapView {
       pois: true, landmarks: true, stars: true, missions: true, vehicles: true, props: true, transit: true, spawn: true
     };
     this.pendingPropType = 'sign';
+    this.pendingMissionId = null;
     this.transitRoute = null;
     this.transitSignature = '';
     this.hover = null;
@@ -62,6 +74,16 @@ export class MapView {
     this.panning = false;
     this.dragMoved = false;
     this.last = null;
+    this.drawing = null;
+    this._lastDrawClick = null;
+    this.activeVertex = null;
+    this.vertexDrag = null;
+    this.spacePan = false;
+    this._raf = 0;
+    this._index = null;
+    this._indexedCity = null;
+    this.lastRenderMs = 0;
+    this.visibleCount = 0;
     this._bind();
     this.fit();
   }
@@ -77,23 +99,38 @@ export class MapView {
     this.render();
   }
 
+  scheduleRender() {
+    if (this._raf) return;
+    this._raf = requestAnimationFrame(() => {
+      this._raf = 0;
+      this.render();
+    });
+  }
+
   fit() {
     const city = this.state.patchedCity || this.state.city;
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-    for (const b of city.buildings || []) {
-      if (b.x < minX) minX = b.x;
-      if (b.x > maxX) maxX = b.x;
-      if (b.z < minZ) minZ = b.z;
-      if (b.z > maxZ) maxZ = b.z;
-    }
+    const consider = points => {
+      if (!points?.length) return;
+      const bounds = pointsBounds(points);
+      if (bounds.minX < minX) minX = bounds.minX;
+      if (bounds.maxX > maxX) maxX = bounds.maxX;
+      if (bounds.minZ < minZ) minZ = bounds.minZ;
+      if (bounds.maxZ > maxZ) maxZ = bounds.maxZ;
+    };
+    for (const b of city.buildings || []) consider(b.poly);
+    for (const a of city.areas || []) consider(a.poly);
+    for (const r of city.roads || []) consider(r.pts);
+    for (const w of city.waterways || []) consider(w.pts);
+    for (const r of city.railways || []) consider(r.pts);
     if (!Number.isFinite(minX)) { minX = -1600; maxX = 1800; minZ = -1600; maxZ = 1800; }
     const pad = 80;
-    const w = maxX - minX, h = maxZ - minZ;
+    const w = Math.max(1, maxX - minX), h = Math.max(1, maxZ - minZ);
     this.center = { x: (minX + maxX) / 2, z: (minZ + maxZ) / 2 };
     const rect = this.canvas.getBoundingClientRect();
     this.w = rect.width || 900;
     this.h = rect.height || 600;
-    this.scale = Math.min((this.w - pad * 2) / w, (this.h - pad * 2) / h);
+    this.scale = clamp(Math.min((this.w - pad * 2) / w, (this.h - pad * 2) / h), 0.15, 12);
     this.render();
   }
 
@@ -117,15 +154,156 @@ export class MapView {
     };
   }
 
+  viewBounds(pad = 0) {
+    const a = this.screenToWorld(-pad, -pad);
+    const b = this.screenToWorld(this.w + pad, this.h + pad);
+    return { minX: a.x, minZ: a.z, maxX: b.x, maxZ: b.z };
+  }
+
+  zoomBy(factor, sx = this.w / 2, sy = this.h / 2) {
+    const before = this.screenToWorld(sx, sy);
+    this.scale = clamp(this.scale * factor, 0.15, 12);
+    const after = this.screenToWorld(sx, sy);
+    this.center.x += before.x - after.x;
+    this.center.z += before.z - after.z;
+    this.scheduleRender();
+    this.onStatus?.(this.screenToWorld(sx, sy), this.scale);
+  }
+
   _bind() {
     const el = this.canvas;
     el.addEventListener('pointerdown', e => this._down(e));
     el.addEventListener('pointermove', e => this._move(e));
     el.addEventListener('pointerup', e => this._up(e));
     el.addEventListener('pointercancel', e => this._up(e));
-    el.addEventListener('pointerleave', () => { this.hover = null; this.render(); });
+    el.addEventListener('pointerleave', () => {
+      if (this.dragging || this.panning || this.vertexDrag) return;
+      this.hover = null;
+      this.scheduleRender();
+    });
     el.addEventListener('wheel', e => this._wheel(e), { passive: false });
     el.addEventListener('contextmenu', e => e.preventDefault());
+  }
+
+  isDrawingMode() {
+    return !!DRAW_MODES[this.mode];
+  }
+
+  _snapWorld(world) {
+    const snap = Number(this.snap) || 0;
+    return {
+      x: snap ? Math.round(world.x / snap) * snap : world.x,
+      z: snap ? Math.round(world.z / snap) * snap : world.z
+    };
+  }
+
+  _startDrawing(mode, world) {
+    const spec = DRAW_MODES[mode];
+    this.drawing = { mode, kind: spec.kind, points: [[+world.x.toFixed(2), +world.z.toFixed(2)]], cursor: [world.x, world.z] };
+    this.activeVertex = null;
+    this._notifyDrawing();
+    this.scheduleRender();
+  }
+
+  _notifyDrawing() {
+    if (!this.onDrawing) return;
+    if (!this.drawing) { this.onDrawing(null); return; }
+    const spec = DRAW_MODES[this.drawing.mode];
+    this.onDrawing({
+      mode: this.drawing.mode,
+      kind: this.drawing.kind,
+      label: spec?.label || '',
+      count: this.drawing.points.length,
+      min: spec?.min || 2
+    });
+  }
+
+  _drawClick(p, e) {
+    const now = performance.now();
+    const last = this._lastDrawClick;
+    if (last && now - last.t < 340 && Math.hypot(p.x - last.x, p.y - last.y) < 7) {
+      this.finishDrawing();
+      return;
+    }
+    const world = this._snapWorld(this.screenToWorld(p.x, p.y));
+    if (!this.drawing) {
+      this._startDrawing(this.mode, world);
+      this._lastDrawClick = { t: now, x: p.x, y: p.y };
+      return;
+    }
+    const spec = DRAW_MODES[this.drawing.mode];
+    const first = this.drawing.points[0];
+    if (spec.min === 3 && this.drawing.points.length >= 3) {
+      const firstScreen = this.worldToScreen(first[0], first[1]);
+      if (Math.hypot(p.x - firstScreen.x, p.y - firstScreen.y) < 11) {
+        this.finishDrawing();
+        return;
+      }
+    }
+    this.drawing.points.push([+world.x.toFixed(2), +world.z.toFixed(2)]);
+    this.drawing.cursor = [world.x, world.z];
+    this._lastDrawClick = { t: now, x: p.x, y: p.y };
+    this._notifyDrawing();
+    this.scheduleRender();
+  }
+
+  finishDrawing() {
+    if (!this.drawing) return false;
+    const spec = DRAW_MODES[this.drawing.mode];
+    if (this.drawing.points.length < spec.min) {
+      this.onDrawing?.({
+        ...this.drawing,
+        label: spec.label,
+        count: this.drawing.points.length,
+        min: spec.min,
+        error: `Servono almeno ${spec.min} punti`
+      });
+      return false;
+    }
+    const feature = this.state.addCustomFeature(this.drawing.kind, this.drawing.points);
+    if (!feature) {
+      this.onDrawing?.({
+        ...this.drawing,
+        label: spec.label,
+        count: this.drawing.points.length,
+        min: spec.min,
+        error: 'Geometria non valida: sposta i punti e riprova'
+      });
+      return false;
+    }
+    this.drawing = null;
+    this._lastDrawClick = null;
+    this.mode = 'select';
+    this._notifyDrawing();
+    this.onChange?.({ final: true });
+    this.scheduleRender();
+    return true;
+  }
+
+  cancelDrawing() {
+    if (!this.drawing) return false;
+    this.drawing = null;
+    this._lastDrawClick = null;
+    this.mode = 'select';
+    this._notifyDrawing();
+    this.onChange?.({ final: true });
+    this.scheduleRender();
+    return true;
+  }
+
+  undoDrawingPoint() {
+    if (!this.drawing?.points?.length) return false;
+    this.drawing.points.pop();
+    if (!this.drawing.points.length) {
+      this.drawing = null;
+      this.mode = 'select';
+    } else {
+      const last = this.drawing.points[this.drawing.points.length - 1];
+      this.drawing.cursor = [last[0], last[1]];
+    }
+    this._notifyDrawing();
+    this.scheduleRender();
+    return true;
   }
 
   _eventPoint(e) {
@@ -133,11 +311,27 @@ export class MapView {
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
 
+  _hitVertex(sx, sy) {
+    const selection = this.state.selection;
+    if (!selection || !this.state.isMapKind(selection.kind)) return null;
+    const points = this.state.getFeatureGeometry(selection.kind, selection.id);
+    if (!points) return null;
+    for (let i = 0; i < points.length; i++) {
+      const screen = this.worldToScreen(points[i][0], points[i][1]);
+      if (Math.hypot(sx - screen.x, sy - screen.y) <= 9) return { index: i, x: points[i][0], z: points[i][1] };
+    }
+    return null;
+  }
+
   _down(e) {
     const p = this._eventPoint(e);
     this.last = p;
+    if (this.isDrawingMode()) {
+      this._drawClick(p, e);
+      return;
+    }
     if (this.mode === 'addPlace') {
-      const world = this.screenToWorld(p.x, p.y);
+      const world = this._snapWorld(this.screenToWorld(p.x, p.y));
       const ll = this._unproject(world.x, world.z);
       this.state.addPlace(ll.lat, ll.lon);
       this.mode = 'select';
@@ -145,41 +339,65 @@ export class MapView {
       return;
     }
     if (this.mode === 'addStar') {
-      const world = this.screenToWorld(p.x, p.y);
+      const world = this._snapWorld(this.screenToWorld(p.x, p.y));
       this.state.addStar(world.x, world.z);
       this.mode = 'select';
       this.onChange?.({ final: true });
       return;
     }
     if (this.mode === 'addProp') {
-      const world = this.screenToWorld(p.x, p.y);
+      const world = this._snapWorld(this.screenToWorld(p.x, p.y));
       this.state.addProp(this.pendingPropType || 'sign', world.x, world.z);
       this.mode = 'select';
       this.onChange?.({ final: true });
       return;
     }
     if (this.mode === 'addMissionStep') {
-      const world = this.screenToWorld(p.x, p.y);
+      const world = this._snapWorld(this.screenToWorld(p.x, p.y));
       this.state.addMissionStep(this.pendingMissionId, world.x, world.z);
       this.mode = 'select';
       this.onChange?.({ final: true });
       return;
     }
-    const panButton = e.button === 1 || e.button === 2 || e.shiftKey;
-    if (panButton) {
+    if (this.mode === 'pan' || e.button === 1 || e.button === 2 || e.shiftKey || this.spacePan) {
       this.panning = true;
       this.canvas.setPointerCapture?.(e.pointerId);
       return;
     }
+
+    const vertex = this._hitVertex(p.x, p.y);
+    if (vertex) {
+      this.activeVertex = vertex.index;
+      this.vertexDrag = { index: vertex.index, moved: false };
+      this.canvas.setPointerCapture?.(e.pointerId);
+      this.scheduleRender();
+      return;
+    }
+
+    const selection = this.state.selection;
+    if (e.altKey && selection && this.state.isMapKind(selection.kind)) {
+      const world = this._snapWorld(this.screenToWorld(p.x, p.y));
+      const inserted = this.state.insertNearestVertex(selection.kind, selection.id, world.x, world.z);
+      if (inserted !== false) {
+        this.activeVertex = inserted;
+        this.state.refresh();
+        this.onChange?.({ final: true });
+        this.scheduleRender();
+      }
+      return;
+    }
+
     const hit = this.hitTest(p.x, p.y);
     if (hit) {
       this.state.select(hit);
+      this.activeVertex = null;
       this.dragging = true;
       this.dragMoved = false;
       this.canvas.setPointerCapture?.(e.pointerId);
       this.onChange?.({ final: true });
       return;
     }
+    this.activeVertex = null;
     this.state.select(null);
     this.panning = true;
     this.canvas.setPointerCapture?.(e.pointerId);
@@ -201,49 +419,76 @@ export class MapView {
       this.center.x -= dx / this.scale;
       this.center.z -= dy / this.scale;
       this.last = p;
-      this.render();
+      this.scheduleRender();
+      return;
+    }
+    if (this.vertexDrag) {
+      if (!this.vertexDrag.moved) {
+        this.state.pushUndo('modifica vertice');
+        this.vertexDrag.moved = true;
+      }
+      const world = this._snapWorld(this.screenToWorld(p.x, p.y));
+      this.state.setFeatureVertex(this.state.selection.kind, this.state.selection.id, this.vertexDrag.index, world.x, world.z);
+      this.state.previewRefresh();
+      this.dragMoved = true;
+      this.onStatus?.(this.screenToWorld(p.x, p.y), this.scale);
+      this.scheduleRender();
       return;
     }
     if (this.dragging) {
       if (!this.dragMoved) this.state.pushUndo('sposta elemento');
-      const world = this.screenToWorld(p.x, p.y);
-      const snap = this.snap;
-      const x = snap ? Math.round(world.x / snap) * snap : world.x;
-      const z = snap ? Math.round(world.z / snap) * snap : world.z;
-      this.state.setSelectionPosition(x, z);
-      this.state.refresh();
+      const world = this._snapWorld(this.screenToWorld(p.x, p.y));
+      this.state.setSelectionPosition(world.x, world.z);
+      this.state.previewRefresh();
       this.dragMoved = true;
-      this.onChange?.();
-      this.render();
+      this.onStatus?.(world, this.scale);
+      this.scheduleRender();
+      return;
+    }
+    if (this.drawing) {
+      const world = this._snapWorld(this.screenToWorld(p.x, p.y));
+      this.drawing.cursor = [world.x, world.z];
+      this.onStatus?.(world, this.scale);
+      this.scheduleRender();
       return;
     }
     const hit = this.hitTest(p.x, p.y);
     const changed = JSON.stringify(hit) !== JSON.stringify(this.hover);
     this.hover = hit;
     this.onStatus?.(this.screenToWorld(p.x, p.y), this.scale);
-    if (changed) this.render();
-    const placing = ['addPlace', 'addStar', 'addProp', 'addMissionStep'].includes(this.mode);
-    this.canvas.style.cursor = placing ? 'crosshair' : hit ? (this.dragging ? 'grabbing' : 'grab') : (this.panning ? 'grabbing' : 'default');
+    if (changed) this.scheduleRender();
+    const placing = this.isDrawingMode() || ['addPlace', 'addStar', 'addProp', 'addMissionStep'].includes(this.mode);
+    const vertex = this._hitVertex(p.x, p.y);
+    this.canvas.style.cursor = placing || this.mode === 'pan'
+      ? (this.mode === 'pan' && !this.panning ? 'grab' : 'crosshair')
+      : vertex ? 'pointer'
+        : hit ? (this.dragging ? 'grabbing' : 'grab')
+          : (this.panning ? 'grabbing' : 'default');
   }
 
   _up(e) {
+    if (this.vertexDrag) {
+      const moved = this.vertexDrag.moved;
+      this.vertexDrag = null;
+      if (moved) this.state.refresh();
+      this.onChange?.({ final: true });
+    } else if (this.dragging) {
+      const moved = this.dragMoved;
+      this.dragging = false;
+      if (moved) this.state.refresh();
+    }
     this.dragging = false;
     this.panning = false;
     this.last = null;
-    this.render();
     this.onChange?.({ final: true });
+    this.scheduleRender();
   }
 
   _wheel(e) {
     e.preventDefault();
     const p = this._eventPoint(e);
-    const before = this.screenToWorld(p.x, p.y);
     const factor = Math.exp(-e.deltaY * 0.0012);
-    this.scale = clamp(this.scale * factor, 0.15, 12);
-    const after = this.screenToWorld(p.x, p.y);
-    this.center.x += before.x - after.x;
-    this.center.z += before.z - after.z;
-    this.render();
+    this.zoomBy(factor, p.x, p.y);
   }
 
   _visible(item) {
@@ -251,7 +496,9 @@ export class MapView {
     const layers = this.layers;
     if (item.kind === 'building') return layers.buildings;
     if (item.kind === 'road') return layers.roads;
-    if (item.kind === 'area') return layers.areas;
+    if (item.kind === 'area') return layers.areas || (item.areaKind === 'water' && layers.water);
+    if (item.kind === 'waterway') return layers.water;
+    if (item.kind === 'railway') return layers.rail;
     if (item.kind === 'place' || item.kind === 'beacon') return layers.pois;
     if (item.kind === 'landmark') return layers.landmarks;
     if (item.kind === 'star') return layers.stars;
@@ -316,37 +563,88 @@ export class MapView {
       return this._visible(c) ? c : null;
     }
 
+    const index = this._ensureIndex();
     if (this.layers.buildings) {
       let best = null;
-      for (const b of this.state.patchedCity.buildings) {
-        if (pointInPoly(world.x, world.z, b.poly)) {
-          if (!best || b.area < best.area) best = b;
-        }
+      for (const { data: building } of index.buildings.queryPoint(world.x, world.z)) {
+        if (!pointInPoly(world.x, world.z, building.poly)) continue;
+        if (!best || building.area < best.area) best = building;
       }
-      if (best) return { kind: 'building', id: String(best.id) };
+      if (best) return { kind: 'building', id: String(best.id), custom: !!best._custom };
     }
     if (this.layers.roads) {
       let best = null;
-      for (const r of this.state.patchedCity.roads) {
-        const d = distanceToPolyline(world.x, world.z, r.pts);
-        if (d < 5 / this.scale && (!best || d < best.d)) best = { road: r, d };
+      for (const { data: road } of index.roads.queryPoint(world.x, world.z)) {
+        const distance = distanceToPolyline(world.x, world.z, road.pts);
+        const threshold = Math.max(5 / this.scale, (Number(road.w) || 5) / 2);
+        if (distance < threshold && (!best || distance < best.distance)) best = { item: road, distance };
       }
-      if (best) return { kind: 'road', id: String(best.road.id) };
+      if (best) return { kind: 'road', id: String(best.item.id), custom: !!best.item._custom };
     }
-    if (this.layers.areas) {
+    if (this.layers.areas || this.layers.water) {
       let best = null;
-      for (const a of this.state.patchedCity.areas) {
-        if (pointInPoly(world.x, world.z, a.poly)) {
-          if (!best || a.area < best.area) best = a;
-        }
+      for (const { data: area } of index.areas.queryPoint(world.x, world.z)) {
+        if (area.kind === 'water' && !this.layers.water) continue;
+        if (area.kind !== 'water' && !this.layers.areas) continue;
+        if (!pointInPoly(world.x, world.z, area.poly)) continue;
+        if (!best || area.area < best.area) best = area;
       }
-      if (best) return { kind: 'area', id: String(best.id) };
+      if (best) return { kind: 'area', id: String(best.id), custom: !!best._custom, areaKind: best.kind };
+    }
+    if (this.layers.water) {
+      let best = null;
+      for (const { data: water } of index.waterways.queryPoint(world.x, world.z)) {
+        const distance = distanceToPolyline(world.x, world.z, water.pts);
+        const threshold = Math.max(5 / this.scale, (Number(water.w) || 3) / 2);
+        if (distance < threshold && (!best || distance < best.distance)) best = { item: water, distance };
+      }
+      if (best) return { kind: 'waterway', id: String(best.item.id), custom: !!best.item._custom };
+    }
+    if (this.layers.rail) {
+      let best = null;
+      for (const { data: rail } of index.railways.queryPoint(world.x, world.z)) {
+        const distance = distanceToPolyline(world.x, world.z, rail.pts);
+        const threshold = Math.max(5 / this.scale, (Number(rail.w) || 3) / 2);
+        if (distance < threshold && (!best || distance < best.distance)) best = { item: rail, distance };
+      }
+      if (best) return { kind: 'railway', id: String(best.item.id), custom: !!best.item._custom };
     }
     return null;
   }
 
+  _ensureIndex() {
+    const city = this.state.patchedCity;
+    if (this._index && this._indexedCity === city) return this._index;
+    const build = (group, polygon) => {
+      const index = new SpatialIndex(120);
+      for (const item of city[group] || []) {
+        const points = polygon ? item.poly : item.pts;
+        if (!points?.length) continue;
+        const bbox = pointsBounds(points);
+        if (!Number.isFinite(bbox.minX)) continue;
+        index.add(item, bbox);
+      }
+      return index;
+    };
+    this._index = {
+      buildings: build('buildings', true),
+      roads: build('roads', false),
+      areas: build('areas', true),
+      waterways: build('waterways', false),
+      railways: build('railways', false)
+    };
+    this._indexedCity = city;
+    return this._index;
+  }
+
+  _queryVisible(index) {
+    const bounds = this.viewBounds(8);
+    return index.queryRect(bounds.minX, bounds.minZ, bounds.maxX, bounds.maxZ);
+  }
+
   render() {
     if (!this.ctx) return;
+    const started = performance.now();
     const ctx = this.ctx;
     const dpr = this.dpr || 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -364,14 +662,17 @@ export class MapView {
     this._drawSelectedOriginal(ctx);
     this._drawMissionPath(ctx);
     this._drawMarkers(ctx);
+    this._drawDrawing(ctx);
+    this._drawFeatureHandles(ctx);
     this._drawScale(ctx);
+    this.lastRenderMs = +(performance.now() - started).toFixed(1);
   }
 
   _updateTransit() {
     const ids = ['stazione', 'piazza-duomo', 'teatro', 'granmadre'];
     const stops = ids.map(id => this.state.compiled.places.find(p => p.id === id)).filter(Boolean)
       .map(p => ({ id: p.id, name: p.short || p.name, x: p.beaconX ?? p.x, z: p.beaconZ ?? p.z }));
-    const signature = stops.map(p => `${p.id}:${p.x.toFixed(1)}:${p.z.toFixed(1)}`).join('|');
+    const signature = `${stops.map(p => `${p.id}:${p.x.toFixed(1)}:${p.z.toFixed(1)}`).join('|')}|roads:${this.state.patchedCity.roads?.length || 0}|data:${this.state.dataRevision}`;
     if (signature === this.transitSignature) return;
     this.transitSignature = signature;
     this.transitRoute = stops.length >= 2 ? buildBusRoute(this.state.patchedCity, stops) : null;
@@ -447,44 +748,83 @@ export class MapView {
 
   _drawAreas(ctx) {
     if (!this.layers.areas) return;
+    const index = this._ensureIndex();
     ctx.save();
-    for (const a of this.state.patchedCity.areas) {
-      this._polyPath(ctx, a.poly);
+    let visible = 0;
+    for (const { data: area } of this._queryVisible(index.areas)) {
+      if (area.kind === 'water') continue;
+      this._polyPath(ctx, area.poly);
       const style = {
         park: '#7c9a5c', grass: '#86a86c', forest: '#5a7d51', farmland: '#b3a46f',
         cemetery: '#8b9b7b', industrial: '#a4a39a', urban: '#d8cdb9', square: '#d9c9ad',
         parking: '#8a8c86', school: '#c2b9a3', hospital: '#d7d2c7', platform: '#b9b3a8', sport: '#7fa05c'
-      }[a.kind] || '#d8cdb9';
+      }[area.kind] || '#d8cdb9';
       ctx.fillStyle = style;
       ctx.globalAlpha = 0.55;
       ctx.fill();
       ctx.globalAlpha = 1;
-      if (this._isSelected('area', a.id)) {
+      if (area._custom) {
+        ctx.strokeStyle = 'rgba(201,154,58,.75)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      if (this._isSelected('area', area.id)) {
+        ctx.strokeStyle = '#c2684b';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+      visible++;
+    }
+    this.visibleCount = visible;
+    ctx.restore();
+  }
+
+  _drawWater(ctx) {
+    if (!this.layers.water) return;
+    const index = this._ensureIndex();
+    ctx.save();
+    for (const { data: area } of this._queryVisible(index.areas)) {
+      if (area.kind !== 'water') continue;
+      this._polyPath(ctx, area.poly);
+      ctx.fillStyle = area.color || '#86b4c4';
+      ctx.globalAlpha = 0.85;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      if (area._custom) {
+        ctx.strokeStyle = 'rgba(201,154,58,.75)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      if (this._isSelected('area', area.id)) {
         ctx.strokeStyle = '#c2684b';
         ctx.lineWidth = 3;
         ctx.stroke();
       }
     }
-    ctx.restore();
-  }
-
-  _drawWater(ctx) {
-    if (!this.layers.areas) return;
-    ctx.save();
-    for (const a of this.state.patchedCity.areas.filter(a => a.kind === 'water')) {
-      this._polyPath(ctx, a.poly);
-      ctx.fillStyle = '#86b4c4';
-      ctx.globalAlpha = 0.85;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-    if (this.layers.water) {
-      for (const w of this.state.patchedCity.waterways || []) {
-        this._linePath(ctx, w.pts);
-        ctx.strokeStyle = '#6aa2b6';
-        ctx.lineWidth = Math.max(1.5, (w.kind === 'river' ? 9 : w.kind === 'stream' ? 5 : 3) * this.scale);
-        ctx.lineCap = 'round';
+    for (const { data: water } of this._queryVisible(index.waterways)) {
+      this._linePath(ctx, water.pts);
+      const width = Number(water.w) || (water.kind === 'river' ? 9 : water.kind === 'stream' ? 5 : water.kind === 'canal' ? 4 : 3);
+      ctx.strokeStyle = '#6aa2b6';
+      ctx.lineWidth = Math.max(1.5, width * this.scale);
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      if (water._custom) {
+        ctx.strokeStyle = 'rgba(201,154,58,.55)';
+        ctx.lineWidth = Math.max(1, (width + 2) * this.scale);
+        ctx.globalAlpha = 0.5;
         ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      if (this._isSelected('waterway', water.id)) {
+        ctx.strokeStyle = '#c2684b';
+        ctx.lineWidth = Math.max(2, (width + 3) * this.scale);
+        ctx.globalAlpha = 0.55;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
       }
     }
     ctx.restore();
@@ -492,33 +832,51 @@ export class MapView {
 
   _drawRail(ctx) {
     if (!this.layers.rail) return;
+    const index = this._ensureIndex();
     ctx.save();
     ctx.strokeStyle = '#766f62';
     ctx.lineWidth = Math.max(1, 2.5 * this.scale);
     ctx.setLineDash([6, 4]);
-    for (const r of this.state.patchedCity.railways || []) {
-      this._linePath(ctx, r.pts);
+    for (const { data: rail } of this._queryVisible(index.railways)) {
+      this._linePath(ctx, rail.pts);
       ctx.stroke();
+      if (this._isSelected('railway', rail.id)) {
+        ctx.strokeStyle = '#c2684b';
+        ctx.lineWidth = Math.max(2, ((Number(rail.w) || 3) + 3) * this.scale);
+        ctx.globalAlpha = 0.5;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = '#766f62';
+        ctx.lineWidth = Math.max(1, 2.5 * this.scale);
+      }
     }
     ctx.restore();
   }
 
   _drawRoads(ctx) {
     if (!this.layers.roads) return;
+    const index = this._ensureIndex();
     ctx.save();
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    for (const r of this.state.patchedCity.roads) {
-      this._linePath(ctx, r.pts);
+    for (const { data: road } of this._queryVisible(index.roads)) {
+      this._linePath(ctx, road.pts);
       ctx.strokeStyle = '#a09483';
-      ctx.lineWidth = Math.max(1.2, (r.w + 2.2) * this.scale);
+      ctx.lineWidth = Math.max(1.2, ((Number(road.w) || 5) + 2.2) * this.scale);
       ctx.stroke();
-      ctx.strokeStyle = r.kind === 'pedestrian' || r.kind === 'footway' ? '#c4b69d' : '#5e6261';
-      ctx.lineWidth = Math.max(1, r.w * this.scale);
+      ctx.strokeStyle = road.kind === 'pedestrian' || road.kind === 'footway' ? '#c4b69d' : '#5e6261';
+      ctx.lineWidth = Math.max(1, (Number(road.w) || 5) * this.scale);
       ctx.stroke();
-      if (this._isSelected('road', r.id)) {
+      if (road._custom) {
+        ctx.strokeStyle = 'rgba(201,154,58,.5)';
+        ctx.lineWidth = Math.max(1, ((Number(road.w) || 5) + 2) * this.scale);
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      if (this._isSelected('road', road.id)) {
         ctx.strokeStyle = '#c2684b';
-        ctx.lineWidth = Math.max(2, (r.w + 3) * this.scale);
+        ctx.lineWidth = Math.max(2, ((Number(road.w) || 5) + 3) * this.scale);
         ctx.globalAlpha = 0.5;
         ctx.stroke();
         ctx.globalAlpha = 1;
@@ -529,15 +887,18 @@ export class MapView {
 
   _drawBuildings(ctx) {
     if (!this.layers.buildings) return;
+    const index = this._ensureIndex();
     ctx.save();
-    for (const b of this.state.patchedCity.buildings) {
-      this._polyPath(ctx, b.poly);
-      ctx.fillStyle = b.color || '#d8c6ae';
+    for (const { data: building } of this._queryVisible(index.buildings)) {
+      this._polyPath(ctx, building.poly);
+      ctx.fillStyle = building.color || '#d8c6ae';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(90,72,52,.45)';
-      ctx.lineWidth = 0.6;
+      ctx.strokeStyle = building._custom ? 'rgba(201,154,58,.8)' : 'rgba(90,72,52,.45)';
+      ctx.lineWidth = building._custom ? 1.2 : 0.6;
+      if (building._custom) ctx.setLineDash([4, 3]);
       ctx.stroke();
-      if (this._isSelected('building', b.id)) {
+      ctx.setLineDash([]);
+      if (this._isSelected('building', building.id)) {
         ctx.strokeStyle = '#c2684b';
         ctx.lineWidth = 2.5;
         ctx.stroke();
@@ -547,16 +908,16 @@ export class MapView {
   }
 
   _drawSelectedOriginal(ctx) {
-    const s = this.state.selection;
-    if (!s || !['building', 'road', 'area'].includes(s.kind)) return;
-    const group = s.kind === 'building' ? 'buildings' : s.kind === 'road' ? 'roads' : 'areas';
-    const original = this.state.city[group]?.find(x => String(x.id) === String(s.id));
+    const selection = this.state.selection;
+    if (!selection || !this.state.isMapKind(selection.kind) || selection.custom) return;
+    const group = featureGroup(selection.kind);
+    const original = this.state.city[group]?.find(item => String(item.id) === String(selection.id));
     if (!original) return;
     ctx.save();
     ctx.strokeStyle = 'rgba(194,104,75,.55)';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([7, 5]);
-    if (s.kind === 'road') this._linePath(ctx, original.pts);
+    if (isLineKind(selection.kind)) this._linePath(ctx, original.pts);
     else this._polyPath(ctx, original.poly);
     ctx.stroke();
     ctx.restore();
@@ -791,6 +1152,112 @@ export class MapView {
       ctx.fillStyle = l.color;
       ctx.fillText(l.text, l.x, l.y - 4);
     }
+  }
+
+  _drawDrawing(ctx) {
+    if (!this.drawing) return;
+    const spec = DRAW_MODES[this.drawing.mode];
+    if (!spec) return;
+    const points = this.drawing.points;
+    const cursor = this.drawing.cursor || points[points.length - 1];
+    const color = this.drawing.kind === 'building' ? '#8a5f3d'
+      : this.drawing.kind === 'area' ? '#4f7748'
+        : this.drawing.kind === 'waterway' ? '#4f8fa8'
+          : this.drawing.kind === 'railway' ? '#766f62' : '#9a4a34';
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    points.forEach((point, index) => {
+      const screen = this.worldToScreen(point[0], point[1]);
+      if (index === 0) ctx.moveTo(screen.x, screen.y);
+      else ctx.lineTo(screen.x, screen.y);
+    });
+    const end = this.worldToScreen(cursor[0], cursor[1]);
+    ctx.lineTo(end.x, end.y);
+    if (spec.min === 3) {
+      const first = this.worldToScreen(points[0][0], points[0][1]);
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.16;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (points.length >= 3 && Math.hypot(end.x - first.x, end.y - first.y) < 11) {
+        ctx.beginPath();
+        ctx.arc(first.x, first.y, 9, 0, Math.PI * 2);
+        ctx.strokeStyle = '#c2684b';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+    } else {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = Math.max(2, (this.drawing.kind === 'road' ? 7 : 3) * this.scale);
+      ctx.globalAlpha = 0.45;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    points.forEach((point, index) => {
+      const screen = this.worldToScreen(point[0], point[1]);
+      ctx.beginPath();
+      ctx.arc(screen.x, screen.y, index === 0 ? 5 : 4, 0, Math.PI * 2);
+      ctx.fillStyle = index === 0 ? '#c2684b' : '#fff8e8';
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+    ctx.beginPath();
+    ctx.arc(end.x, end.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  _drawFeatureHandles(ctx) {
+    const selection = this.state.selection;
+    if (!selection || !this.state.isMapKind(selection.kind)) return;
+    const points = this.state.getFeatureGeometry(selection.kind, selection.id);
+    if (!points?.length) return;
+    if (this.activeVertex != null && this.activeVertex >= points.length) this.activeVertex = null;
+    ctx.save();
+    const closed = !isLineKind(selection.kind);
+    if (closed) {
+      this._polyPath(ctx, points);
+      ctx.strokeStyle = 'rgba(194,104,75,.55)';
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([3, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    const count = closed ? points.length : points.length - 1;
+    if (this.scale > 0.22) {
+      for (let i = 0; i < count; i++) {
+        const a = points[i], b = points[(i + 1) % points.length];
+        const m = this.worldToScreen((a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(194,104,75,.45)';
+        ctx.fill();
+      }
+    }
+    for (let i = 0; i < points.length; i++) {
+      const screen = this.worldToScreen(points[i][0], points[i][1]);
+      ctx.beginPath();
+      ctx.arc(screen.x, screen.y, i === this.activeVertex ? 6 : 4.5, 0, Math.PI * 2);
+      ctx.fillStyle = i === this.activeVertex ? '#c2684b' : '#fff8e8';
+      ctx.fill();
+      ctx.strokeStyle = i === this.activeVertex ? '#7a2f20' : '#2f4a3c';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   _drawScale(ctx) {

@@ -149,7 +149,7 @@ export class GameMap {
     for (const a of this.city.areas) {
       const style = AREA_STYLE[a.kind] || AREA_STYLE.urban;
       pathPolygon(ctx, a.poly, (x, z) => this.project(x, z));
-      ctx.fillStyle = style.color;
+      ctx.fillStyle = a.color || style.color;
       ctx.globalAlpha = a.kind === 'water' ? 0.92 : 0.78;
       ctx.fill();
       ctx.globalAlpha = 1;
@@ -162,7 +162,7 @@ export class GameMap {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     for (const w of this.city.waterways) {
-      const width = (w.kind === 'river' ? 9.5 : w.kind === 'stream' ? 5.6 : w.kind === 'canal' ? 4 : 2.2) * this.mapScale;
+      const width = (Number(w.w) || (w.kind === 'river' ? 9.5 : w.kind === 'stream' ? 5.6 : w.kind === 'canal' ? 4 : 2.2)) * this.mapScale;
       ctx.beginPath();
       w.pts.forEach((p, i) => {
         const q = this.project(p[0], p[1]);
@@ -212,7 +212,7 @@ export class GameMap {
     // Edifici
     for (const b of this.city.buildings) {
       pathPolygon(ctx, b.poly, (x, z) => this.project(x, z));
-      ctx.fillStyle = b.kind === 'church' ? '#d8c5a2' : '#cdbba4';
+      ctx.fillStyle = b.color || (b.kind === 'church' ? '#d8c5a2' : '#cdbba4');
       ctx.fill();
       ctx.strokeStyle = 'rgba(95,78,58,.38)';
       ctx.lineWidth = 0.7;

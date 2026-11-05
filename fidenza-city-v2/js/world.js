@@ -304,7 +304,7 @@ export class World {
     this.scene = scene;
     this.renderer = renderer;
     this.rawCity = city;
-    this.city = applyOverrides(city, map.overrides || {});
+    this.city = applyOverrides(city, map.overrides || {}, map.custom || {});
     this.districts = buildDistricts(map.districts || [], WORLD.bounds);
     this.districtById = new Map(this.districts.map(d => [d.id, d]));
     this.venues = map.venues || [];
@@ -584,9 +584,10 @@ export class World {
     const greenKinds = new Set(['park', 'grass', 'forest', 'sport']);
     const rnd = seededRandom(7);
     for (const a of this.city.areas) {
-      const style = AREA_STYLE[a.kind] || AREA_STYLE.urban;
+      const baseStyle = AREA_STYLE[a.kind] || AREA_STYLE.urban;
+      const style = { ...baseStyle, color: a.color || baseStyle.color };
       const y = a.kind === 'water' ? 0.018 : greenKinds.has(a.kind) ? 0.036 : 0.032;
-      const g = makePolygonGeometry(a.poly, y + (a.id % 5) * 0.0003, style.color);
+      const g = makePolygonGeometry(a.poly, y + (hashString(String(a.id)) % 5) * 0.0003, style.color);
       if (!g) continue;
       if (a.kind === 'water') waterGeoms.push(g);
       else if (greenKinds.has(a.kind)) greenGeoms.push(g);
@@ -634,7 +635,7 @@ export class World {
     const lineGeoms = [];
     const bankGeoms = [];
     for (const w of this.city.waterways) {
-      const width = w.kind === 'river' ? 9.5 : w.kind === 'stream' ? 5.6 : w.kind === 'canal' ? 4 : 2.2;
+      const width = Number(w.w) || (w.kind === 'river' ? 9.5 : w.kind === 'stream' ? 5.6 : w.kind === 'canal' ? 4 : 2.2);
       const bank = makeRibbon(w.pts, width + 3.2, 0.022, '#6f8b5f');
       if (bank) bankGeoms.push(bank);
       const waterLine = makeRibbon(w.pts, width, 0.028, '#4f8fa8');
@@ -901,7 +902,7 @@ export class World {
     for (const r of this.city.roads) {
       if (r.tunnel) continue;
       const style = ROAD_STYLE[r.kind] || ROAD_STYLE.residential;
-      const baseY = 0.085 + (r.id % 9) * 0.0007;
+      const baseY = 0.085 + (hashString(String(r.id)) % 9) * 0.0007;
       const isBridge = r.bridge;
       const y = baseY + (isBridge ? 0.38 : 0);
       const pedestrian = pedestrianKinds.has(r.kind);
@@ -1209,7 +1210,8 @@ export class World {
     const bedGeoms = [];
     const railGeoms = [];
     for (const r of this.city.railways) {
-      const bed = makeRibbon(r.pts, 3.4, 0.07, '#6c6d66');
+      const bedWidth = Math.max(3.4, (Number(r.w) || 0) + 1.4);
+      const bed = makeRibbon(r.pts, bedWidth, 0.07, '#6c6d66');
       if (bed) bedGeoms.push(bed);
       // due rotaie offsettate
       const left = [], right = [];

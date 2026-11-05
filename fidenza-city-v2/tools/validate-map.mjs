@@ -34,7 +34,7 @@ function main() {
     rows: result.rows
   };
   fs.writeFileSync(OUT, JSON.stringify(report, null, 2));
-  console.log(`Controlli: ${result.totals.checks} · Errori: ${result.totals.errors} · Override: ${result.totals.overrides}`);
+  console.log(`Controlli: ${result.totals.checks} · Errori: ${result.totals.errors} · Override: ${result.totals.overrides} · Custom: ${result.totals.customFeatures || 0}`);
   for (const e of result.errors) console.log(`  ✗ ${e.kind} ${e.id}: ${e.msg}`);
   console.log(`Report: ${path.relative(ROOT, OUT)}`);
   if (result.errors.length) process.exitCode = 1;
