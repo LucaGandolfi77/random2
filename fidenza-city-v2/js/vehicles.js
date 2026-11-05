@@ -84,8 +84,19 @@ export class Vehicle {
   update(dt, input, player) {
     if (!this.active) return;
     this._hornCooldown = Math.max(0, this._hornCooldown - dt);
-    const throttle = (input.isDown('KeyW') || input.isDown('ArrowUp') ? 1 : 0) - (input.isDown('KeyS') || input.isDown('ArrowDown') ? 1 : 0);
-    const steerInput = (input.isDown('KeyA') || input.isDown('ArrowLeft') ? 1 : 0) - (input.isDown('KeyD') || input.isDown('ArrowRight') ? 1 : 0);
+    const touch = input.isTouch() && !input.padActive ? input.touchMove : { x: 0, y: 0 };
+    const throttle = clamp(
+      (input.isDown('KeyW') || input.isDown('ArrowUp') ? 1 : 0) -
+      (input.isDown('KeyS') || input.isDown('ArrowDown') ? 1 : 0) -
+      touch.y,
+      -1, 1
+    );
+    const steerInput = clamp(
+      (input.isDown('KeyA') || input.isDown('ArrowLeft') ? 1 : 0) -
+      (input.isDown('KeyD') || input.isDown('ArrowRight') ? 1 : 0) -
+      touch.x,
+      -1, 1
+    );
     const brake = input.isDown('Space') || input.touchBrake;
     const horn = input.isDown('KeyH') || input.touchHorn;
     if (horn && this._hornCooldown <= 0) {
@@ -236,6 +247,16 @@ export class VehicleManager {
   nearest(x, z, maxDist = 3.2) {
     let best = null;
     for (const v of this.vehicles) {
+      const d = Math.hypot(v.position.x - x, v.position.z - z);
+      if (d < maxDist + v.radius * 0.5 && (!best || d < best.dist)) best = { vehicle: v, dist: d };
+    }
+    return best;
+  }
+
+  nearestBike(x, z, maxDist = 8) {
+    let best = null;
+    for (const v of this.vehicles) {
+      if (v.type !== 'bike') continue;
       const d = Math.hypot(v.position.x - x, v.position.z - z);
       if (d < maxDist + v.radius * 0.5 && (!best || d < best.dist)) best = { vehicle: v, dist: d };
     }

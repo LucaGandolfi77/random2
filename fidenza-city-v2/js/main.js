@@ -186,6 +186,7 @@ const ui = {
   rotateHint: document.getElementById('rotate-hint'),
   touchQuick: document.getElementById('touch-quick'),
   touchDrive: document.getElementById('touch-drive'),
+  touchFly: document.getElementById('touch-fly'),
   btnRun: document.getElementById('btn-run'),
   btnBrake: document.getElementById('btn-brake'),
   btnHorn: document.getElementById('btn-horn'),
@@ -417,7 +418,7 @@ async function init() {
     }
   });
 
-  map = new GameMap({ world, player, missions });
+  map = new GameMap({ world, player, missions, vehicles });
 
   photoMode = new PhotoMode({
     canvas, renderer, scene, camera, player, vehicles, input, world,
@@ -1406,6 +1407,7 @@ function handleTouchAction(action) {
   else if (action === 'career') openCareer();
   else if (action === 'photo') enterPhoto();
   else if (action === 'fly') toggleFly();
+  else if (action === 'bike') toggleBike();
   else if (action === 'audio') toggleAudio();
   updateTouchUI();
 }
@@ -1413,14 +1415,55 @@ function handleTouchAction(action) {
 function updateTouchUI() {
   if (!isMobile) return;
   const inVehicle = !!vehicles?.current;
-  if (ui.touchDrive) ui.touchDrive.classList.toggle('vehicle', inVehicle);
+  const flying = !!player?.flyMode;
+  if (ui.touchDrive) {
+    ui.touchDrive.classList.toggle('vehicle', inVehicle);
+    ui.touchDrive.hidden = flying;
+  }
+  if (ui.touchFly) ui.touchFly.hidden = !flying;
   if (ui.btnBrake) ui.btnBrake.hidden = !inVehicle;
   if (ui.btnHorn) ui.btnHorn.hidden = !inVehicle;
   if (ui.btnRun) ui.btnRun.hidden = inVehicle;
   const flyBtn = ui.touchQuick?.querySelector('[data-touch-action="fly"]');
-  flyBtn?.classList.toggle('active', !!player?.flyMode);
+  flyBtn?.classList.toggle('active', flying);
+  const bikeBtn = ui.touchQuick?.querySelector('[data-touch-action="bike"]');
+  bikeBtn?.classList.toggle('active', vehicles?.current?.type === 'bike');
   const audioBtn = ui.touchQuick?.querySelector('[data-touch-action="audio"]');
   audioBtn?.classList.toggle('active', audio.muted);
+}
+
+function toggleBike() {
+  if (!player || !vehicles || photoMode?.active) return;
+  if (player.flyMode) {
+    hud.setToast('Atterra prima di prendere la bici', 2600);
+    return;
+  }
+  if (vehicles.current) {
+    if (vehicles.current.type === 'bike') {
+      vehicles.exit();
+      haptic(15);
+      hud.setToast('Sei sceso dalla bici');
+      updateTouchUI();
+      return;
+    }
+    hud.setToast('Scendi prima dal veicolo per prendere la bici', 2600);
+    return;
+  }
+  const near = vehicles.nearestBike(player.position.x, player.position.z, 8);
+  if (near) {
+    vehicles.enter(near.vehicle);
+    haptic(18);
+    hud.setBig('BICI', 900);
+    hud.setToast('Sei in sella · joystick per pedalare · 📯 campanello · 🚲 scendi', 3400);
+    updateTouchUI();
+    return;
+  }
+  const anyBike = vehicles.nearestBike(player.position.x, player.position.z, Infinity);
+  if (anyBike) {
+    hud.setToast(`Nessuna bici entro 8 m · la più vicina è a ${formatDistance(anyBike.dist)}`, 3000);
+  } else {
+    hud.setToast('Nessuna bici disponibile in città', 2600);
+  }
 }
 
 function toggleFly() {
@@ -1433,7 +1476,12 @@ function toggleFly() {
   haptic(18);
   if (player.flyMode) {
     hud.setBig('VOLO', 1000);
-    hud.setToast('Volo attivo · WASD muoviti · Space/Q quota · Shift boost · V atterra', 4200);
+    hud.setToast(
+      isMobile
+        ? 'Volo attivo · joystick per muoverti · ▲/▼ quota · ✈ atterra'
+        : 'Volo attivo · WASD muoviti · Space/Q quota · Shift boost · V atterra',
+      4200
+    );
   } else {
     hud.setBig('A TERRA', 800);
     hud.setToast('Atterraggio completato', 2000);

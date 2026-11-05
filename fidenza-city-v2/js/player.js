@@ -170,9 +170,10 @@ export class Player {
   }
 
   _updateFly(dt) {
-    const forward = (this.input.isDown('KeyW') || this.input.isDown('ArrowUp') ? 1 : 0) - (this.input.isDown('KeyS') || this.input.isDown('ArrowDown') ? 1 : 0);
-    const strafe = (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0) - (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0);
-    const vertical = (this.input.isDown('Space') || this.input.isDown('KeyE') ? 1 : 0) - (this.input.isDown('KeyQ') || this.input.isDown('ControlLeft') ? 1 : 0);
+    const touch = this.input.isTouch() && !this.input.padActive ? this.input.touchMove : { x: 0, y: 0 };
+    const forward = (this.input.isDown('KeyW') || this.input.isDown('ArrowUp') ? 1 : 0) - (this.input.isDown('KeyS') || this.input.isDown('ArrowDown') ? 1 : 0) - touch.y;
+    const strafe = (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0) - (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0) - touch.x;
+    const vertical = (this.input.isDown('Space') || this.input.isDown('KeyE') || this.input.touchFlyUp ? 1 : 0) - (this.input.isDown('KeyQ') || this.input.isDown('ControlLeft') || this.input.touchFlyDown ? 1 : 0);
     const boost = this.input.isDown('ShiftLeft') || this.input.isDown('ShiftRight');
     const speed = boost ? PLAYER.flyBoost : PLAYER.flySpeed;
     const cy = Math.cos(this.cameraYaw);

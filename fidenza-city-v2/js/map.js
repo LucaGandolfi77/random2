@@ -12,6 +12,21 @@ function pathPolygon(ctx, poly, project) {
   ctx.closePath();
 }
 
+function bikePath(ctx, x, y, r) {
+  ctx.beginPath();
+  ctx.arc(x - r * 0.58, y + r * 0.18, r * 0.42, 0, Math.PI * 2);
+  ctx.moveTo(x + r * 1.0, y + r * 0.18);
+  ctx.arc(x + r * 0.58, y + r * 0.18, r * 0.42, 0, Math.PI * 2);
+  ctx.moveTo(x - r * 0.58, y + r * 0.18);
+  ctx.lineTo(x - r * 0.1, y - r * 0.55);
+  ctx.lineTo(x + r * 0.35, y - r * 0.55);
+  ctx.lineTo(x + r * 0.58, y + r * 0.18);
+  ctx.moveTo(x - r * 0.1, y - r * 0.55);
+  ctx.lineTo(x + r * 0.18, y + r * 0.18);
+  ctx.lineTo(x + r * 0.58, y + r * 0.18);
+  ctx.stroke();
+}
+
 function starPath(ctx, x, y, r) {
   ctx.beginPath();
   for (let i = 0; i < 10; i++) {
@@ -58,10 +73,11 @@ const POI_STYLE = {
 };
 
 export class GameMap {
-  constructor({ world, player, missions }) {
+  constructor({ world, player, missions, vehicles }) {
     this.world = world;
     this.player = player;
     this.missions = missions;
+    this.vehicles = vehicles;
     this.city = world.city;
     this.landmarks = world.landmarks;
     this.places = world.places;
@@ -297,6 +313,23 @@ export class GameMap {
         ctx.lineWidth = 1.4;
         ctx.stroke();
       }
+    }
+
+    // bici parcheggiate
+    for (const vehicle of this.vehicles?.vehicles || []) {
+      if (vehicle.type !== 'bike' || vehicle === this.vehicles.current) continue;
+      const p = toScreen(vehicle.position.x, vehicle.position.z);
+      if (p.x < -8 || p.y < -8 || p.x > W + 8 || p.y > H + 8) continue;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = '#e7b95a';
+      ctx.fill();
+      ctx.strokeStyle = '#1b241e';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.strokeStyle = '#1b241e';
+      ctx.lineWidth = 1.1;
+      bikePath(ctx, p.x, p.y, 3.1);
     }
 
     // giocatore al centro
@@ -608,6 +641,23 @@ export class GameMap {
         ctx.fillStyle = '#f4ebda';
         ctx.fillText(text, p.x, p.y + 12);
       }
+    }
+
+    // bici parcheggiate
+    for (const vehicle of this.vehicles?.vehicles || []) {
+      if (vehicle.type !== 'bike' || vehicle === this.vehicles.current) continue;
+      const p = toScreen(vehicle.position.x, vehicle.position.z);
+      if (p.x < -20 || p.y < -20 || p.x > W + 20 || p.y > H + 20) continue;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+      ctx.fillStyle = '#e7b95a';
+      ctx.fill();
+      ctx.strokeStyle = '#1b241e';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+      ctx.strokeStyle = '#1b241e';
+      ctx.lineWidth = 1.6;
+      bikePath(ctx, p.x, p.y, 5.1);
     }
 
     // giocatore

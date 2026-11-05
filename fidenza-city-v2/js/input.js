@@ -13,6 +13,8 @@ export class Input {
     this.touchRun = false;
     this.touchBrake = false;
     this.touchHorn = false;
+    this.touchFlyUp = false;
+    this.touchFlyDown = false;
     this.touchAct = false;
     this.enabled = true;
     this.allowPointerLock = true;
@@ -41,6 +43,7 @@ export class Input {
       this.keys.clear();
       this.touchMove.x = this.touchMove.y = 0;
       this.touchRun = this.touchBrake = this.touchHorn = false;
+      this.touchFlyUp = this.touchFlyDown = false;
     });
   }
 
@@ -152,6 +155,8 @@ export class Input {
     bindHold('btn-run', 'touchRun');
     bindHold('btn-brake', 'touchBrake');
     bindHold('btn-horn', 'touchHorn');
+    bindHold('btn-fly-up', 'touchFlyUp');
+    bindHold('btn-fly-down', 'touchFlyDown');
 
     const carBtn = document.getElementById('btn-car');
     carBtn?.addEventListener('pointerdown', e => {
@@ -252,5 +257,6 @@ export class Input {
     this.justPressed.clear();
     this.touchMove.x = this.touchMove.y = 0;
     this.touchRun = this.touchBrake = this.touchHorn = false;
+    this.touchFlyUp = this.touchFlyDown = false;
   }
 }

@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <title>Fidenza da Giocare v2.10 · open world gratis nel browser</title>
+  <title>Fidenza da Giocare v2.11 · open world gratis nel browser</title>
   <meta name="description" content="Scorrazza per Fidenza, guida l'auto e la Vespa, scopri il Duomo, il Teatro Magnani e 27 stelle nascoste. Un open world gratuito nel browser, ispirato alla città di Fidenza.">
   <meta name="theme-color" content="#1d2620">
   <meta name="color-scheme" content="light dark">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Fidenza da Giocare">
-  <meta property="og:title" content="Fidenza da Giocare v2.10 · open world gratis nel browser">
+  <meta property="og:title" content="Fidenza da Giocare v2.11 · open world gratis nel browser">
   <meta property="og:description" content="Fidenza vera, strada per strada, come open world: guida, esplora, completa missioni e trova le 27 stelle.">
   <meta property="og:locale" content="it_IT">
   <meta property="og:image" content="assets/img/og.jpg">
@@ -120,12 +120,23 @@
         <button type="button" data-touch-action="career" aria-label="Carriera" title="Carriera">▤</button>
         <button type="button" data-touch-action="photo" aria-label="Modalità foto" title="Modalità foto">▣</button>
         <button type="button" data-touch-action="fly" aria-label="Volo" title="Volo">✈</button>
+        <button type="button" data-touch-action="bike" aria-label="Bici" title="Bici">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="5.5" cy="17.5" r="3.5"/>
+            <circle cx="18.5" cy="17.5" r="3.5"/>
+            <path d="M5.5 17.5 9 10h5l4.5 7.5M9 10 7 7h3M14 10l2.5 2.5H9"/>
+          </svg>
+        </button>
         <button type="button" data-touch-action="audio" aria-label="Audio" title="Audio">♪</button>
       </div>
       <div id="touch-drive">
         <button type="button" id="btn-run">Corri</button>
         <button type="button" id="btn-brake">Freno</button>
         <button type="button" id="btn-horn">📯</button>
+      </div>
+      <div id="touch-fly" hidden>
+        <button type="button" id="btn-fly-up">▲ Sali</button>
+        <button type="button" id="btn-fly-down">▼ Scendi</button>
       </div>
       <button id="btn-act" hidden>▶</button>
     </div>
@@ -147,13 +158,14 @@
       <span><i class="dot place"></i> luoghi</span>
       <span><i class="dot poi"></i> POI</span>
       <span><i class="dot mission"></i> missioni</span>
+      <span><i class="dot bike"></i> bici</span>
     </div>
   </div>
 
   <div id="intro">
     <main class="poster">
       <section class="talk">
-        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v2.10.0</span></p>
+        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v2.11.0</span></p>
         <h1 class="wordmark" aria-label="Fidenza da Giocare">
           <span>Fidenza</span>
           <span>da Giocare</span>
@@ -222,7 +234,7 @@
           <p class="tag"><b>11 luoghi</b>segui la luce e scopri Fidenza</p>
           <p class="tag"><b>Mobile</b>levetta e pulsanti sul telefono</p>
         </div>
-        <p class="controls">WASD muovi · Shift corri · Mouse guarda · E interagisci · F missioni · N mappa · M audio · Esc pausa</p>
+        <p class="controls">WASD muovi · Shift corri · Mouse guarda · E interagisci · V volo · F missioni · N mappa · P foto · Esc pausa</p>
       </section>
 
       <footer class="road">

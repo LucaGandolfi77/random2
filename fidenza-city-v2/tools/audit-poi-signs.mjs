@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Fidenza da Giocare v2.10 — audit insegne POI
+ * Fidenza da Giocare v2.11 — audit insegne POI
  *
  * Verifica quali attività commerciali possono ricevere un'insegna sulla
  * facciata e produce data/poi-sign-audit.json.

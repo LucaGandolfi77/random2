@@ -1,4 +1,4 @@
-const CACHE = 'fidenza-da-giocare-v2.10.0';
+const CACHE = 'fidenza-da-giocare-v2.11.0';
 const ASSETS = [
   './',
   './index.html',
@@ -39,6 +39,7 @@ const ASSETS = [
   './js/transit.js',
   './js/building-geometry.js',
   './js/poi-signs.js',
+  './js/traffic.js',
   './js/landmarks.js',
   './js/player.js',
   './js/vehicles.js',

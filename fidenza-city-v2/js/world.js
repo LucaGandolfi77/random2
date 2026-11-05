@@ -14,6 +14,7 @@ import { applyOverrides } from './map-overrides.js';
 import { buildBusRoute, makeLoopRoute } from './transit.js';
 import { classifyBuildingRoof, polygonCentroid } from './building-geometry.js';
 import { planPoiSigns } from './poi-signs.js';
+import { planTraffic } from './traffic.js';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -2881,19 +2882,25 @@ export class World {
 
   _buildTraffic() {
     const rnd = seededRandom(77);
-    const carRoads = this.city.roads.filter(r => ['primary', 'secondary', 'tertiary', 'residential'].includes(r.kind) && r.length > 70 && !r.tunnel);
+    const plans = planTraffic(this.city, this.quality, rnd);
+    const roadsById = new Map(this.city.roads.map(road => [road.id, road]));
     const pedRoads = this.city.roads.filter(r => ['footway', 'pedestrian', 'residential', 'living_street', 'path'].includes(r.kind) && r.length > 35 && !r.tunnel);
     const colors = ['#c2684b', '#4f8fa8', '#d9c9a8', '#5c6b5f', '#9a4a34', '#d7d2c7'];
-    const carCount = this.quality === 'low' ? 4 : this.quality === 'medium' ? 6 : 9;
-    for (let i = 0; i < carCount; i++) {
-      const road = carRoads[Math.floor(rnd() * carRoads.length)];
+    for (const plan of plans) {
+      const road = roadsById.get(plan.roadId);
       if (!road) continue;
-      const walker = makeRouteWalker(road.pts, rnd() * 80, rnd() > 0.5 ? 1 : -1, 4.2 + rnd() * 2.5);
+      const walker = makeRouteWalker(road.pts, plan.offset, plan.direction, plan.speed);
       const car = makeCar({ color: colors[Math.floor(rnd() * colors.length)] });
       car.position.y = 0.06;
       car.scale.setScalar(0.94);
       this.scene.add(car);
-      this.trafficCars.push({ car, walker, phase: rnd() * 10 });
+      this.trafficCars.push({
+        car,
+        walker,
+        phase: rnd() * 10,
+        roadId: road.id,
+        roadKind: road.kind
+      });
     }
     const pedCount = this.quality === 'low' ? 6 : this.quality === 'medium' ? 9 : 13;
     const shirts = ['#c2684b', '#4f8fa8', '#d9c9a8', '#5c6b5f', '#9a4a34', '#7c8d5b', '#d7d2c7'];

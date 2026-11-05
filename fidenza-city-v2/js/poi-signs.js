@@ -1,5 +1,5 @@
 /**
- * Fidenza da Giocare v2.10 — insegne delle attività
+ * Fidenza da Giocare v2.11 — insegne delle attività
  *
  * Associa i POI commerciali all'edificio più vicino e calcola la posizione
  * dell'insegna sulla facciata. Funzioni pure condivise da mondo e audit.

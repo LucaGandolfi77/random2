@@ -1,0 +1,360 @@
+{
+  "generated": "2026-11-05T12:36:19.533Z",
+  "counts": {
+    "low": {
+      "total": 8,
+      "primary": 4,
+      "secondary": 2,
+      "tertiary": 2
+    },
+    "medium": {
+      "total": 14,
+      "primary": 6,
+      "secondary": 5,
+      "tertiary": 3
+    },
+    "high": {
+      "total": 22,
+      "primary": 8,
+      "secondary": 8,
+      "tertiary": 6
+    }
+  },
+  "allowedKinds": [
+    "primary",
+    "secondary",
+    "tertiary"
+  ],
+  "forbiddenKinds": [
+    "pedestrian",
+    "footway",
+    "cycleway",
+    "path",
+    "steps",
+    "living_street",
+    "service",
+    "track",
+    "residential",
+    "unclassified"
+  ],
+  "roadCounts": {
+    "secondary": 134,
+    "primary_link": 19,
+    "primary": 14,
+    "residential": 539,
+    "tertiary": 177,
+    "unclassified": 139,
+    "service": 289,
+    "track": 41,
+    "pedestrian": 31,
+    "footway": 292,
+    "cycleway": 96,
+    "living_street": 1,
+    "path": 41,
+    "secondary_link": 1,
+    "steps": 2
+  },
+  "eligibleByKind": {
+    "primary": 12,
+    "secondary": 42,
+    "tertiary": 54
+  },
+  "forbiddenRoads": {
+    "residential": 539,
+    "unclassified": 139,
+    "service": 289,
+    "track": 41,
+    "pedestrian": 31,
+    "footway": 292,
+    "cycleway": 96,
+    "living_street": 1,
+    "path": 41,
+    "steps": 2
+  },
+  "runs": {
+    "low": {
+      "expected": {
+        "total": 8,
+        "primary": 4,
+        "secondary": 2,
+        "tertiary": 2
+      },
+      "actual": {
+        "total": 8,
+        "byKind": {
+          "primary": 4,
+          "secondary": 2,
+          "tertiary": 2
+        },
+        "uniqueRoads": 8,
+        "forbidden": 0
+      },
+      "forbidden": 0,
+      "plans": [
+        {
+          "roadId": 152961803,
+          "kind": "primary",
+          "speed": 5.53
+        },
+        {
+          "roadId": 60120381,
+          "kind": "primary",
+          "speed": 4.21
+        },
+        {
+          "roadId": 152961823,
+          "kind": "primary",
+          "speed": 6.28
+        },
+        {
+          "roadId": 152961822,
+          "kind": "primary",
+          "speed": 5.21
+        },
+        {
+          "roadId": 134071901,
+          "kind": "secondary",
+          "speed": 6.05
+        },
+        {
+          "roadId": 62219928,
+          "kind": "secondary",
+          "speed": 6.12
+        },
+        {
+          "roadId": 28158304,
+          "kind": "tertiary",
+          "speed": 6.23
+        },
+        {
+          "roadId": 70843341,
+          "kind": "tertiary",
+          "speed": 6.62
+        }
+      ]
+    },
+    "medium": {
+      "expected": {
+        "total": 14,
+        "primary": 6,
+        "secondary": 5,
+        "tertiary": 3
+      },
+      "actual": {
+        "total": 14,
+        "byKind": {
+          "primary": 6,
+          "secondary": 5,
+          "tertiary": 3
+        },
+        "uniqueRoads": 14,
+        "forbidden": 0
+      },
+      "forbidden": 0,
+      "plans": [
+        {
+          "roadId": 152961803,
+          "kind": "primary",
+          "speed": 5.9
+        },
+        {
+          "roadId": 60120381,
+          "kind": "primary",
+          "speed": 5.37
+        },
+        {
+          "roadId": 152961823,
+          "kind": "primary",
+          "speed": 5.67
+        },
+        {
+          "roadId": 152961822,
+          "kind": "primary",
+          "speed": 5.41
+        },
+        {
+          "roadId": 152961841,
+          "kind": "primary",
+          "speed": 6.05
+        },
+        {
+          "roadId": 60120380,
+          "kind": "primary",
+          "speed": 6.12
+        },
+        {
+          "roadId": 25876371,
+          "kind": "secondary",
+          "speed": 6.62
+        },
+        {
+          "roadId": 37629547,
+          "kind": "secondary",
+          "speed": 5.67
+        },
+        {
+          "roadId": 36875563,
+          "kind": "secondary",
+          "speed": 5.37
+        },
+        {
+          "roadId": 209290956,
+          "kind": "secondary",
+          "speed": 5.77
+        },
+        {
+          "roadId": 692637863,
+          "kind": "secondary",
+          "speed": 5.88
+        },
+        {
+          "roadId": 142554482,
+          "kind": "tertiary",
+          "speed": 6.16
+        },
+        {
+          "roadId": 36875503,
+          "kind": "tertiary",
+          "speed": 6.16
+        },
+        {
+          "roadId": 184285488,
+          "kind": "tertiary",
+          "speed": 4.88
+        }
+      ]
+    },
+    "high": {
+      "expected": {
+        "total": 22,
+        "primary": 8,
+        "secondary": 8,
+        "tertiary": 6
+      },
+      "actual": {
+        "total": 22,
+        "byKind": {
+          "primary": 8,
+          "secondary": 8,
+          "tertiary": 6
+        },
+        "uniqueRoads": 22,
+        "forbidden": 0
+      },
+      "forbidden": 0,
+      "plans": [
+        {
+          "roadId": 152961803,
+          "kind": "primary",
+          "speed": 6.03
+        },
+        {
+          "roadId": 60120381,
+          "kind": "primary",
+          "speed": 4.64
+        },
+        {
+          "roadId": 152961823,
+          "kind": "primary",
+          "speed": 5.45
+        },
+        {
+          "roadId": 152961822,
+          "kind": "primary",
+          "speed": 6.52
+        },
+        {
+          "roadId": 152961841,
+          "kind": "primary",
+          "speed": 4.22
+        },
+        {
+          "roadId": 60120380,
+          "kind": "primary",
+          "speed": 4.91
+        },
+        {
+          "roadId": 152961833,
+          "kind": "primary",
+          "speed": 6.23
+        },
+        {
+          "roadId": 26717467,
+          "kind": "primary",
+          "speed": 6.62
+        },
+        {
+          "roadId": 142431466,
+          "kind": "secondary",
+          "speed": 5.91
+        },
+        {
+          "roadId": 25876371,
+          "kind": "secondary",
+          "speed": 4.44
+        },
+        {
+          "roadId": 142546079,
+          "kind": "secondary",
+          "speed": 4.77
+        },
+        {
+          "roadId": 209290956,
+          "kind": "secondary",
+          "speed": 5.11
+        },
+        {
+          "roadId": 142431471,
+          "kind": "secondary",
+          "speed": 4.4
+        },
+        {
+          "roadId": 62219899,
+          "kind": "secondary",
+          "speed": 6.58
+        },
+        {
+          "roadId": 36875563,
+          "kind": "secondary",
+          "speed": 6.65
+        },
+        {
+          "roadId": 1296592348,
+          "kind": "secondary",
+          "speed": 5.24
+        },
+        {
+          "roadId": 142348271,
+          "kind": "tertiary",
+          "speed": 5.32
+        },
+        {
+          "roadId": 1448357786,
+          "kind": "tertiary",
+          "speed": 5.48
+        },
+        {
+          "roadId": 62219809,
+          "kind": "tertiary",
+          "speed": 5.46
+        },
+        {
+          "roadId": 142348253,
+          "kind": "tertiary",
+          "speed": 5.65
+        },
+        {
+          "roadId": 551723469,
+          "kind": "tertiary",
+          "speed": 4.31
+        },
+        {
+          "roadId": 551723467,
+          "kind": "tertiary",
+          "speed": 5.01
+        }
+      ]
+    }
+  },
+  "errors": 0
+}
