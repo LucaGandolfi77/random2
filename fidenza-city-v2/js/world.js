@@ -12,6 +12,7 @@ import { makeCar, makeBus, makeTrain, makePerson, makeBicycle, makeBench, makeTr
 import { hasStar, hasPlace } from './save.js';
 import { applyOverrides } from './map-overrides.js';
 import { buildBusRoute, makeLoopRoute } from './transit.js';
+import { classifyBuildingRoof, polygonCentroid } from './building-geometry.js';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -1000,7 +1001,121 @@ export class World {
     const roofGeoms = [];
     const chimneyGeoms = [];
     const chimneyCapGeoms = [];
+    const roofTrimGeoms = [];
+    const roofDetailGeoms = [];
     let count = 0;
+
+    const addGabledRoof = (b, info, roofColor) => {
+      const { edge, bounds, ridgeHeight } = info;
+      const span = Math.max(2, bounds.width);
+      const length = Math.max(2, bounds.length);
+      const half = span / 2 + 0.45;
+      const shape = new THREE.Shape();
+      shape.moveTo(-half, 0);
+      shape.lineTo(half, 0);
+      shape.lineTo(0, ridgeHeight);
+      shape.closePath();
+      const roofGeo = new THREE.ExtrudeGeometry(shape, { depth: length + 0.9, bevelEnabled: false, steps: 1 });
+      roofGeo.translate(0, 0, -(length + 0.9) / 2);
+      const angle = Math.atan2(edge.ux, edge.uz);
+      roofGeo.rotateY(angle);
+      roofGeo.translate(bounds.centerX, b.h, bounds.centerZ);
+      roofGeoms.push(paintGeometry(roofGeo, roofColor, { roofColor }));
+
+      // colmo e fasce di gronda
+      const ridge = new THREE.BoxGeometry(0.18, 0.14, length + 0.45);
+      ridge.rotateY(angle);
+      ridge.translate(bounds.centerX, b.h + ridgeHeight + 0.035, bounds.centerZ);
+      roofTrimGeoms.push(paintGeometry(ridge, '#6d4b3a'));
+      const nx = -edge.uz;
+      const nz = edge.ux;
+      for (const side of [-1, 1]) {
+        const bx = bounds.centerX + nx * side * (half - 0.08);
+        const bz = bounds.centerZ + nz * side * (half - 0.08);
+        const fascia = new THREE.BoxGeometry(0.2, 0.2, length + 0.9);
+        fascia.rotateY(angle);
+        fascia.translate(bx, b.h - 0.06, bz);
+        roofTrimGeoms.push(paintGeometry(fascia, '#7b5a46'));
+      }
+
+      if (this.quality !== 'low' && b.area > 70 && count % 4 === 0) {
+        const hv = hashString(String(b.id));
+        const along = ((hv % 100) / 100 - 0.5) * length * 0.5;
+        const dormer = new THREE.BoxGeometry(0.85, 0.7, 0.65);
+        dormer.rotateY(angle);
+        dormer.translate(
+          bounds.centerX + edge.ux * along + nx * span * 0.18,
+          b.h + ridgeHeight * 0.58,
+          bounds.centerZ + edge.uz * along + nz * span * 0.18
+        );
+        roofDetailGeoms.push(paintGeometry(dormer, '#8f6a4e'));
+      }
+    };
+
+    const addHippedRoof = (b, info, roofColor) => {
+      const poly = b.poly;
+      const centroid = polygonCentroid(poly);
+      const outer = poly.map(([x, z]) => ({
+        x: centroid.x + (x - centroid.x) * 1.025,
+        z: centroid.z + (z - centroid.z) * 1.025
+      }));
+      const inner = poly.map(([x, z]) => ({
+        x: centroid.x + (x - centroid.x) * 0.34,
+        z: centroid.z + (z - centroid.z) * 0.34
+      }));
+      const positions = [];
+      const pushTri = (a, b, c) => {
+        positions.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+      };
+      for (let i = 0; i < poly.length; i++) {
+        const j = (i + 1) % poly.length;
+        const o1 = { x: outer[i].x, y: b.h, z: outer[i].z };
+        const o2 = { x: outer[j].x, y: b.h, z: outer[j].z };
+        const i1 = { x: inner[i].x, y: b.h + info.ridgeHeight, z: inner[i].z };
+        const i2 = { x: inner[j].x, y: b.h + info.ridgeHeight, z: inner[j].z };
+        pushTri(o1, o2, i2);
+        pushTri(o1, i2, i1);
+        pushTri(i1, i2, { x: centroid.x, y: b.h + info.ridgeHeight, z: centroid.z });
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geo.computeVertexNormals();
+      roofGeoms.push(paintGeometry(geo, roofColor, { roofColor }));
+    };
+
+    const addFlatRoof = (b, info, roofColor) => {
+      const pts = b.poly.map(p => [p[0], -p[1]]);
+      const shape = new THREE.Shape();
+      shape.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i][0], pts[i][1]);
+      shape.closePath();
+      const slab = new THREE.ExtrudeGeometry(shape, { depth: 0.14, bevelEnabled: false, steps: 1 });
+      slab.rotateX(-Math.PI / 2);
+      slab.translate(0, b.h + 0.02, 0);
+      roofGeoms.push(paintGeometry(slab, roofColor, { roofColor }));
+
+      if (this.quality !== 'low') {
+        for (let i = 0; i < b.poly.length; i++) {
+          const a = b.poly[i];
+          const c = b.poly[(i + 1) % b.poly.length];
+          const dx = c[0] - a[0];
+          const dz = c[1] - a[1];
+          const len = Math.hypot(dx, dz);
+          if (len < 1) continue;
+          const parapet = new THREE.BoxGeometry(0.18, 0.34, len);
+          parapet.rotateY(Math.atan2(dx, dz));
+          parapet.translate((a[0] + c[0]) / 2, b.h + 0.24, (a[1] + c[1]) / 2);
+          roofTrimGeoms.push(paintGeometry(parapet, '#9a8f7e'));
+        }
+      }
+      if (this.quality === 'high' && b.area > 70 && count % 5 === 0) {
+        const hv = hashString(String(b.id));
+        const box = new THREE.BoxGeometry(1.1, 0.7, 0.9);
+        box.translate(b.x + ((hv % 80) / 80 - 0.5) * 5, b.h + 0.48, b.z + ((hv % 57) / 57 - 0.5) * 5);
+        roofDetailGeoms.push(paintGeometry(box, '#8d9691'));
+      }
+    };
+
     for (const b of this.city.buildings) {
       const bounds = polygonBounds(b.poly);
       const collider = { poly: b.poly, bounds, name: b.name, kind: b.kind };
@@ -1030,43 +1145,23 @@ export class World {
       const plinth = new THREE.Color(b.color).multiplyScalar(0.52).getStyle();
       geoms.push(paintGeometry(geom, b.color, { roofColor: roof, darkColor: dark, baseColor: plinth, baseHeight: 1.7 }));
 
-      // Tetti: a falde per la maggior parte degli edifici, piatti per capannoni e garage.
-      const flatKinds = new Set(['commercial', 'industrial', 'warehouse', 'factory', 'garage', 'garages', 'roof', 'shed', 'train_station', 'hospital', 'school']);
-      const isFlat = b.roofShape === 'flat' || flatKinds.has(b.kind) || b.h < 4.2 || b.area < 36;
-      if (!isFlat) {
-        const bw = bounds.maxX - bounds.minX;
-        const bd = bounds.maxZ - bounds.minZ;
-        const cx = (bounds.minX + bounds.maxX) / 2;
-        const cz = (bounds.minZ + bounds.maxZ) / 2;
-        const alongX = bw >= bd;
-        const span = alongX ? bd : bw;
-        const ridgeH = Math.max(1.0, Math.min(4.8, b.roofHeight || span * 0.22));
-        const half = span / 2 + 0.45;
-        const shape = new THREE.Shape();
-        shape.moveTo(-half, 0);
-        shape.lineTo(half, 0);
-        shape.lineTo(0, ridgeH);
-        shape.closePath();
-        const roofGeo = new THREE.ExtrudeGeometry(shape, { depth: (alongX ? bw : bd) + 0.9, bevelEnabled: false, steps: 1 });
-        if (alongX) {
-          roofGeo.rotateY(Math.PI / 2);
-          roofGeo.translate(bounds.minX - 0.45, b.h, cz);
-        } else {
-          roofGeo.translate(cx, b.h, bounds.minZ - 0.45);
-        }
-        roofGeoms.push(paintGeometry(roofGeo, roof, { roofColor: roof }));
-        // comignoli su una parte degli edifici
-        if (this.quality !== 'low' && count % 3 === 0) {
-          const hv = hashString(String(b.id));
-          const ox = ((hv % 100) / 100 - 0.5) * (alongX ? bw * 0.55 : bw * 0.2);
-          const oz = ((hv % 73) / 73 - 0.5) * (alongX ? bd * 0.2 : bd * 0.55);
-          const chimney = new THREE.BoxGeometry(0.55, 1.25, 0.55);
-          chimney.translate(cx + ox, b.h + ridgeH * 0.55, cz + oz);
-          chimneyGeoms.push(paintGeometry(chimney, '#9b6a52'));
-          const cap = new THREE.BoxGeometry(0.72, 0.12, 0.72);
-          cap.translate(cx + ox, b.h + ridgeH * 0.55 + 0.66, cz + oz);
-          chimneyCapGeoms.push(paintGeometry(cap, '#6f4c3c'));
-        }
+      // Tetti classificati sulla footprint reale, non sul bounding box.
+      const roofInfo = classifyBuildingRoof(b);
+      if (roofInfo.style === 'gabled') addGabledRoof(b, roofInfo, roof);
+      else if (roofInfo.style === 'hipped') addHippedRoof(b, roofInfo, roof);
+      else addFlatRoof(b, roofInfo, roof);
+
+      // comignoli su una parte degli edifici con tetto inclinato
+      if (this.quality !== 'low' && roofInfo.style !== 'flat' && count % 3 === 0) {
+        const hv = hashString(String(b.id));
+        const ox = ((hv % 100) / 100 - 0.5) * Math.min(4, roofInfo.length * 0.45);
+        const oz = ((hv % 73) / 73 - 0.5) * Math.min(4, roofInfo.bounds.width * 0.35);
+        const chimney = new THREE.BoxGeometry(0.55, 1.25, 0.55);
+        chimney.translate(roofInfo.bounds.centerX + ox, b.h + roofInfo.ridgeHeight * 0.55, roofInfo.bounds.centerZ + oz);
+        chimneyGeoms.push(paintGeometry(chimney, '#9b6a52'));
+        const cap = new THREE.BoxGeometry(0.72, 0.12, 0.72);
+        cap.translate(roofInfo.bounds.centerX + ox, b.h + roofInfo.ridgeHeight * 0.55 + 0.66, roofInfo.bounds.centerZ + oz);
+        chimneyCapGeoms.push(paintGeometry(cap, '#6f4c3c'));
       }
       count++;
       if (count % 400 === 0) {
@@ -1085,7 +1180,7 @@ export class World {
     const roofs = mergeClean(roofGeoms);
     if (roofs) {
       assignPlanarUV(roofs, 4.2);
-      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
       if (this.quality !== 'low') mat.map = this._roofTexture();
       const mesh = new THREE.Mesh(roofs, mat);
       mesh.castShadow = true;
@@ -1093,6 +1188,20 @@ export class World {
       mesh.name = 'tetti';
       this.scene.add(mesh);
       this.roofMesh = mesh;
+    }
+    const roofTrim = mergeClean(roofTrimGeoms);
+    if (roofTrim) {
+      const mesh = new THREE.Mesh(roofTrim, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      mesh.castShadow = true;
+      mesh.name = 'dettagli-tetti';
+      this.scene.add(mesh);
+    }
+    const roofDetails = mergeClean(roofDetailGeoms);
+    if (roofDetails) {
+      const mesh = new THREE.Mesh(roofDetails, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      mesh.castShadow = true;
+      mesh.name = 'impianti-tetti';
+      this.scene.add(mesh);
     }
     const chimneys = mergeClean(chimneyGeoms);
     if (chimneys) {
@@ -1118,6 +1227,7 @@ export class World {
     const shutterPositions = [];
     const shutterColors = [];
     const downpipeGeoms = [];
+    const stepGeoms = [];
     const awningGeoms = [];
     const balconyGeoms = [];
     const awningColors = ['#b5503f', '#c2684b', '#3f748a', '#5d7a52', '#c99a3f', '#7f5a46'];
@@ -1237,6 +1347,32 @@ export class World {
 
       // Porta d'ingresso sul lato più lungo.
       const longest = edges.reduce((a, b) => a.len > b.len ? a : b, edges[0]);
+      if (['commercial', 'retail', 'food', 'cafe', 'shop', 'supermarket'].includes(b.kind) && longest.len > 7) {
+        for (const u of [0.28, 0.72]) {
+          const cx = longest.ax + (longest.bx - longest.ax) * u + longest.nx * 0.07;
+          const cz = longest.az + (longest.bz - longest.az) * u + longest.nz * 0.07;
+          const ex = longest.ux * 1.05, ez = longest.uz * 1.05;
+          addQuad(positions,
+            cx - ex, 0.55, cz - ez,
+            cx + ex, 0.55, cz + ez,
+            cx + ex, 1.95, cz + ez,
+            cx - ex, 1.95, cz - ez);
+          if (this.quality !== 'low') {
+            const fx = cx + longest.nx * 0.03, fz = cz + longest.nz * 0.03;
+            const exf = longest.ux * 1.12, ezf = longest.uz * 1.12;
+            addQuad(framePositions,
+              fx - exf, 1.95, fz - ezf,
+              fx + exf, 1.95, fz + ezf,
+              fx + exf, 2.07, fz + ezf,
+              fx - exf, 2.07, fz - ezf);
+            addQuad(framePositions,
+              fx - exf, 0.45, fz - ezf,
+              fx + exf, 0.45, fz + ezf,
+              fx + exf, 0.57, fz + ezf,
+              fx - exf, 0.57, fz - ezf);
+          }
+        }
+      }
       if (buildingIndex % 2 === 0 && longest.len > 5) {
         const u = 0.5;
         const cx = longest.ax + (longest.bx - longest.ax) * u + longest.nx * 0.07;
@@ -1265,6 +1401,11 @@ export class World {
               sx - longest.ux * 0.055, 2.47, sz - longest.uz * 0.055);
           }
         }
+        const stepAngle = Math.atan2(longest.nx, longest.nz);
+        const step = new THREE.BoxGeometry(1.55, 0.16, 0.55);
+        step.rotateY(stepAngle);
+        step.translate(cx + longest.nx * 0.28, 0.08, cz + longest.nz * 0.28);
+        stepGeoms.push(paintGeometry(step, '#b8a58d'));
       }
 
       // Tende colorate sopra alcune porte.
@@ -1352,6 +1493,13 @@ export class World {
     if (downpipes) {
       const mesh = new THREE.Mesh(downpipes, new THREE.MeshLambertMaterial({ vertexColors: true }));
       mesh.name = 'pluviali';
+      this.scene.add(mesh);
+    }
+
+    const steps = mergeClean(stepGeoms);
+    if (steps) {
+      const mesh = new THREE.Mesh(steps, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      mesh.name = 'gradini';
       this.scene.add(mesh);
     }
 

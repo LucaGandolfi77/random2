@@ -1,10 +1,10 @@
-# Fidenza da Giocare v2.8
+# Fidenza da Giocare v2.9
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
-Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.8
-chiude una serie di bug, allinea versioni e documentazione, estende l’editor e
-migliora il comportamento di eventi, foto e traffico.
+Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.9
+ricostruisce i tetti sulla footprint reale degli edifici, aggiunge dettagli
+architettonici e introduce audit e import di dati edilizi da fonti libere.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 
@@ -59,6 +59,18 @@ Start per la pausa.
 
 **Performance**: aggiungi `?quality=low`, `?quality=medium` o `?quality=high`
 all’URL per forzare il livello grafico.
+
+## Novità v2.9 — Tetti e dettagli edilizi
+
+- **Tetti sulla footprint reale**: niente più tetti generati sul bounding box.
+- **Tetti a falde orientati** sul lato più lungo dell’edificio.
+- **Tetti a padiglione** per footprint convesse irregolari.
+- **Tetti piani con parapetto** per capannoni, garage, scuole e ospedali.
+- **Dettagli**: colmi, fasce di gronda, pluviali, comignoli con cappello,
+  abbaini, impianti sui tetti piani, cornici, persiane, gradini e vetrine.
+- **Audit edifici** su tutti i 3.373 edifici con report `data/building-audit.json`.
+- **Import edifici** da GeoJSON/DBTR/Microsoft/Overture tramite
+  `tools/merge-buildings.mjs`.
 
 ## Novità v2.8 — Fix, mobile e coerenza
 
@@ -218,6 +230,9 @@ node tools/build-terrain.mjs --map maps/fidenza/map.json --refresh
 node tools/import-map.mjs --map maps/fidenza/map.json
 node tools/audit-pois.mjs
 node tools/validate-map.mjs
+node tools/audit-buildings.mjs
+# opzionale: aggiorna altezze/tetti da un GeoJSON DBTR/Microsoft/Overture
+node tools/merge-buildings.mjs --geojson edifici.geojson --dry-run
 ```
 
 Se Overpass non risponde, `build-city.mjs` interrompe la rigenerazione invece di
@@ -278,6 +293,7 @@ fidenza-city-v2/
     map-compiler.js   compilatore mappa condiviso
     map-overrides.js  override edifici/strade/aree
     map-validate.js   validazione condivisa
+    building-geometry.js geometria e classificazione tetti
     landmarks.js     modelli dei luoghi simbolo
     missions.js      missioni guidate dal manifest
     achievements.js  obiettivi e progresso locale
@@ -314,6 +330,8 @@ fidenza-city-v2/
     import-map.mjs
     audit-pois.mjs
     validate-map.mjs
+    audit-buildings.mjs
+    merge-buildings.mjs
   data/
     city.json
     terrain.json
@@ -321,6 +339,7 @@ fidenza-city-v2/
     styles/
     poi-audit.json
     map-validation.json
+    building-audit.json
   assets/
     fonts/
     icons/
@@ -341,6 +360,22 @@ fidenza-city-v2/
 - Il service worker mette in cache shell, dati, stili, font e Three.js.
 
 > Se modifichi file statici, incrementa la costante `CACHE` in `sw.js`.
+
+## Fonti edilizie opzionali
+
+L’audit e il merge sono pronti per dati esterni, ma i dati non vengono scaricati
+a runtime.
+
+- **DBTR Emilia-Romagna** — edifici e unità volumetriche, licenza **CC BY 4.0**.
+- **OpenStreetMap** — base già usata, licenza **ODbL**.
+- **Microsoft Global Building Footprints** — licenza da verificare sulla
+  distribuzione scelta.
+- **Google Open Buildings 2.5D** — altezze stimate, licenza **CC BY 4.0/ODbL**
+  secondo la distribuzione.
+- **Overture Maps Buildings** — licenza **ODbL**.
+
+Usa `tools/merge-buildings.mjs` su un’esportazione GeoJSON e controlla sempre il
+report `data/building-audit.json` dopo l’import.
 
 ## Licenze
 
