@@ -38,6 +38,7 @@ export class Vehicle {
     scene.add(this.mesh);
     this._updateMesh();
     this._hornCooldown = 0;
+    this.braking = false;
   }
 
   get radius() { return this.config.radius; }
@@ -106,6 +107,7 @@ export class Vehicle {
     }
 
     const cfg = this.config;
+    this.braking = brake;
     if (brake) {
       this.speed = damp(this.speed, 0, cfg.brake, dt);
     } else if (throttle > 0) {
@@ -192,6 +194,8 @@ export class Vehicle {
         limbs.armR.rotation.x = -0.34;
       }
     }
+    const tail = this.mesh.userData.tailMaterial;
+    if (tail) tail.color.set(this.braking ? '#ff3926' : '#b33b2b');
     if (this.emergencyLight) {
       this.emergencyLight.material.color.set(Math.sin(performance.now() * 0.012) > 0 ? '#ff5a4e' : '#6b1d18');
     }
@@ -220,6 +224,11 @@ export class VehicleManager {
     this.input = input;
     this.vehicles = [];
     this.current = null;
+    this.headlight = new THREE.SpotLight('#fff0c4', 0, 55, 0.52, 0.55, 1.15);
+    this.headlight.castShadow = false;
+    this.headlightTarget = new THREE.Object3D();
+    this.headlight.target = this.headlightTarget;
+    this.scene.add(this.headlight, this.headlightTarget);
   }
 
   spawnAll() {
@@ -289,6 +298,17 @@ export class VehicleManager {
     if (this.current) {
       this.player.position.set(this.current.position.x, this.current.position.y, this.current.position.z);
       this.player.yaw = this.current.heading;
+      const v = this.current;
+      if (v.type === 'car') {
+        const sx = Math.sin(v.heading), cz = Math.cos(v.heading);
+        this.headlight.position.set(v.position.x + sx * 1.85, v.position.y + 1.0, v.position.z + cz * 1.85);
+        this.headlightTarget.position.set(v.position.x + sx * 22, v.position.y + 0.25, v.position.z + cz * 22);
+        this.headlight.intensity = (this.world?.ambientNight || 0) * 24;
+      } else {
+        this.headlight.intensity = 0;
+      }
+    } else {
+      this.headlight.intensity = 0;
     }
   }
 }

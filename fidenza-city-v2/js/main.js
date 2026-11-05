@@ -15,6 +15,7 @@ import { VehicleManager } from './vehicles.js';
 import { MissionManager } from './missions.js';
 import { GameMap } from './map.js';
 import { PhotoMode, PHOTO_FILTERS } from './photo-mode.js';
+import { PostFX } from './postfx.js';
 import { buildDiary } from './diary.js';
 import { listPhotos, deletePhoto, downloadPhoto, clearPhotos } from './photo-store.js';
 
@@ -60,11 +61,16 @@ function applyRendererScale(ratio) {
   currentPixelRatio = clamp(ratio, 0.72, pixelRatioCap);
   renderer.setPixelRatio(currentPixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight, false);
+  postfx?.setSize();
 }
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(isMobile ? 70 : 74, window.innerWidth / window.innerHeight, 0.1, 5000);
+
+let postfx = null;
+postfx = new PostFX({ renderer, quality, isMobile });
+postfx.setSize();
 
 let world = null;
 let mapData = null;
@@ -178,6 +184,7 @@ const ui = {
   photoStick: document.getElementById('photo-stick'),
   photoKnob: document.getElementById('photo-knob'),
   photoHour: document.getElementById('photo-hour'),
+  graphicsQuality: document.getElementById('graphics-quality'),
   photoSeason: document.getElementById('photo-season'),
   photoGrid: document.getElementById('photo-grid'),
   photoGridToggle: document.getElementById('photo-grid-toggle'),
@@ -326,6 +333,7 @@ async function loadWeather() {
 }
 
 function updateClock() {
+  if (photoMode?.active) return;
   const d = new Date();
   const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d);
   const h = Number(parts.find(p => p.type === 'hour')?.value || 15);
@@ -453,6 +461,7 @@ async function init() {
       if (newly.length) setPhotoStatus(`Obiettivo sbloccato · ${newly[0].title}`, 3400);
     }
   });
+  photoMode.renderFrame = () => postfx.render(scene, camera, { dof: quality === 'high' && !isMobile ? 0.34 : 0.2 });
 
   world.setWeather(weather);
   updateClock();
@@ -467,7 +476,7 @@ async function init() {
   hud.setLoading(1, 'Fidenza è pronta');
   hud.setPlayReady(true, 'Gioca');
   hud.hideLoading();
-  window.__fidenza = { world, player, vehicles, missions, career, map, photoMode, hud, renderer, scene, camera, input, setHour: h => world.setHour(h), applySeason, enterPhoto, exitPhoto, freezeClock: (f = true) => { clockFrozen = !!f; } };
+  window.__fidenza = { world, player, vehicles, missions, career, map, photoMode, hud, renderer, scene, camera, input, postfx, setHour: h => world.setHour(h), applySeason, enterPhoto, exitPhoto, freezeClock: (f = true) => { clockFrozen = !!f; } };
   camera.position.set(-40, 20, 100);
   camera.lookAt(-120, 8, 20);
   requestAnimationFrame(loop);
@@ -884,6 +893,20 @@ function buyUpgrade(key) {
 }
 
 function bindUI() {
+  if (ui.graphicsQuality) {
+    ui.graphicsQuality.value = qualityParam || 'auto';
+    ui.graphicsQuality.addEventListener('change', event => {
+      if (!window.confirm('Cambiare qualità grafica ricaricherà il gioco. Continuare?')) {
+        event.target.value = qualityParam || 'auto';
+        return;
+      }
+      flushStats();
+      const url = new URL(location.href);
+      if (event.target.value === 'auto') url.searchParams.delete('quality');
+      else url.searchParams.set('quality', event.target.value);
+      location.href = url.toString();
+    });
+  }
   ui.play?.addEventListener('click', () => {
     audio.init();
     audio.setMuted(audio.muted);
@@ -2094,7 +2117,7 @@ function loop() {
   }
 
   if (state === 'playing') handleKeys(paused);
-  renderer.render(scene, camera);
+  postfx.render(scene, camera, { dof: photoActive ? (quality === 'high' && !isMobile ? 0.34 : 0.2) : 0 });
 }
 
 function handleKeys(paused) {

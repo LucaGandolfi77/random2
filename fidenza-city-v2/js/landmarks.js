@@ -9,7 +9,7 @@ const WOOD = '#8a6547';
 const METAL = '#3c443f';
 const GLASS = '#2f4348';
 
-function lam(color, opts = {}) { return new THREE.MeshLambertMaterial({ color, ...opts }); }
+function lam(color, opts = {}) { return new THREE.MeshStandardMaterial({ color, roughness: 0.68, metalness: 0.03, ...opts }); }
 
 function box(g, w, h, d, color, x = 0, y = 0, z = 0, ry = 0) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), lam(color));

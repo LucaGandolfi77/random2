@@ -21,6 +21,15 @@ import { scheduleSlotFor, crowdVisible, isVenueOpen, venueLabel, venueStatus } f
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
+function litMaterial(quality, params = {}, physical = {}) {
+  if (quality === 'low') return new THREE.MeshLambertMaterial(params);
+  return new THREE.MeshStandardMaterial({
+    ...params,
+    roughness: physical.roughness ?? 0.9,
+    metalness: physical.metalness ?? 0.02
+  });
+}
+
 function paintGeometry(geom, color, { roofColor = null, darkColor = null, baseColor = null, baseHeight = 1.5 } = {}) {
   let g = geom.index ? geom.toNonIndexed() : geom;
   g.deleteAttribute('uv');
@@ -403,7 +412,7 @@ export class World {
   }
 
   _setupScene() {
-    this.scene.background = new THREE.Color('#9dc6d6');
+    this.scene.background = new THREE.Color('#8fbccd');
     this.scene.fog = new THREE.Fog('#bcd3d2', 170, 820);
 
     const hemi = new THREE.HemisphereLight('#cfe6ef', '#5b5a44', 1.15);
@@ -424,6 +433,8 @@ export class World {
     sun.shadow.camera.top = 110;
     sun.shadow.camera.bottom = -110;
     sun.shadow.bias = -0.0006;
+    sun.shadow.normalBias = 0.025;
+    sun.shadow.radius = 2.5;
     this.scene.add(sun);
     this.scene.add(sun.target);
     this.sunLight = sun;
@@ -432,8 +443,11 @@ export class World {
     const skyGeo = new THREE.SphereGeometry(4200, 32, 16);
     const skyMat = new THREE.ShaderMaterial({
       uniforms: {
-        topColor: { value: new THREE.Color('#6fa8c8') },
-        bottomColor: { value: new THREE.Color('#d9e6df') },
+        topColor: { value: new THREE.Color('#285f8c') },
+        bottomColor: { value: new THREE.Color('#9fc4ca') },
+        sunColor: { value: new THREE.Color('#ffe1a8') },
+        sunDirection: { value: new THREE.Vector3(0, 1, 0) },
+        sunGlow: { value: 0.7 },
         offset: { value: 120 },
         exponent: { value: 0.85 }
       },
@@ -448,14 +462,26 @@ export class World {
       fragmentShader: `
         uniform vec3 topColor;
         uniform vec3 bottomColor;
+        uniform vec3 sunColor;
+        uniform vec3 sunDirection;
+        uniform float sunGlow;
         uniform float offset;
         uniform float exponent;
         varying vec3 vWorldPosition;
         void main() {
-          float h = normalize(vWorldPosition + vec3(0.0, offset, 0.0)).y;
-          gl_FragColor = vec4(mix(bottomColor, topColor, pow(max(h, 0.0), exponent)), 1.0);
+          vec3 direction = normalize(vWorldPosition + vec3(0.0, offset, 0.0));
+          float h = direction.y;
+          vec3 color = mix(bottomColor, topColor, pow(max(h, 0.0), exponent));
+          float sun = pow(max(dot(direction, normalize(sunDirection)), 0.0), 48.0);
+          float horizon = pow(1.0 - abs(h), 5.0);
+          color += sunColor * sun * sunGlow;
+          color += sunColor * horizon * sunGlow * 0.08;
+          gl_FragColor = vec4(color, 1.0);
+          #include <tonemapping_fragment>
+          #include <colorspace_fragment>
         }
       `,
+      toneMapped: true,
       side: THREE.BackSide,
       depthWrite: false
     });
@@ -598,7 +624,7 @@ export class World {
     const green = mergeClean(greenGeoms);
     if (green) {
       assignPlanarUV(green, 8);
-      const mesh = new THREE.Mesh(green, new THREE.MeshLambertMaterial({ vertexColors: true, map: this._grassTexture() }));
+      const mesh = new THREE.Mesh(green, litMaterial(this.quality, { vertexColors: true, map: this._grassTexture() }, { roughness: 0.96 }));
       mesh.receiveShadow = true;
       mesh.name = 'aree-verdi';
       this.scene.add(mesh);
@@ -608,7 +634,9 @@ export class World {
     const squares = mergeClean(squareGeoms);
     if (squares) {
       assignPlanarUV(squares, 6);
-      const mesh = new THREE.Mesh(squares, new THREE.MeshLambertMaterial({ vertexColors: true, map: this._piazzaTexture() }));
+      const mat = litMaterial(this.quality, { vertexColors: true, map: this._piazzaTexture() }, { roughness: 0.82 });
+      if (this.quality !== 'low') mat.normalMap = this._normalTexture('piazza', this._piazzaTexture(), 1.5);
+      const mesh = new THREE.Mesh(squares, mat);
       mesh.receiveShadow = true;
       mesh.name = 'piazze';
       this.scene.add(mesh);
@@ -617,7 +645,7 @@ export class World {
     }
     const other = mergeClean(otherGeoms);
     if (other) {
-      const mesh = new THREE.Mesh(other, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      const mesh = new THREE.Mesh(other, litMaterial(this.quality, { vertexColors: true }, { roughness: 0.94 }));
       mesh.receiveShadow = true;
       mesh.name = 'aree';
       this.scene.add(mesh);
@@ -625,10 +653,22 @@ export class World {
     }
     const water = mergeClean(waterGeoms);
     if (water) {
-      const mesh = new THREE.Mesh(water, new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, opacity: 0.94 }));
+      assignPlanarUV(water, 12);
+      this.waterMaterial = new THREE.MeshStandardMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.88,
+        roughness: 0.18,
+        metalness: 0.03,
+        normalMap: this._waterNormalTexture(),
+        normalScale: new THREE.Vector2(0.55, 0.55),
+        depthWrite: false
+      });
+      const mesh = new THREE.Mesh(water, this.waterMaterial);
       mesh.receiveShadow = true;
       mesh.name = 'acqua';
       this.scene.add(mesh);
+      this.waterMesh = mesh;
     }
 
     // Corsi d'acqua lineari
@@ -649,7 +689,19 @@ export class World {
     }
     const lineMesh = mergeClean(lineGeoms);
     if (lineMesh) {
-      const m = new THREE.Mesh(lineMesh, new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, opacity: 0.94 }));
+      assignPlanarUV(lineMesh, 10);
+      const material = this.waterMaterial || new THREE.MeshStandardMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.88,
+        roughness: 0.18,
+        metalness: 0.03,
+        normalMap: this._waterNormalTexture(),
+        normalScale: new THREE.Vector2(0.55, 0.55),
+        depthWrite: false
+      });
+      this.waterMaterial = material;
+      const m = new THREE.Mesh(lineMesh, material);
       m.receiveShadow = true;
       m.name = 'stirone';
       this.scene.add(m);
@@ -698,6 +750,85 @@ export class World {
     tex.anisotropy = Math.min(8, this.renderer?.capabilities?.getMaxAnisotropy?.() || 1);
     this.textureCache[key] = tex;
     return tex;
+  }
+
+  _normalTexture(key, texture, strength = 1.5) {
+    const cacheKey = `normal:${key}`;
+    if (this.textureCache[cacheKey]) return this.textureCache[cacheKey];
+    const image = texture?.image;
+    if (!image?.getContext || !image.width || !image.height) return null;
+    const width = image.width;
+    const height = image.height;
+    const sourceCtx = image.getContext('2d', { willReadFrequently: true });
+    let pixels;
+    try {
+      pixels = sourceCtx.getImageData(0, 0, width, height).data;
+    } catch {
+      return null;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const out = ctx.createImageData(width, height);
+    const luminance = (x, y) => {
+      const index = ((((y + height) % height) * width) + ((x + width) % width)) * 4;
+      return (pixels[index] * 0.299 + pixels[index + 1] * 0.587 + pixels[index + 2] * 0.114) / 255;
+    };
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const dx = (luminance(x + 1, y) - luminance(x - 1, y)) * strength * 4;
+        const dy = (luminance(x, y + 1) - luminance(x, y - 1)) * strength * 4;
+        const length = Math.hypot(dx, dy, 1);
+        const index = (y * width + x) * 4;
+        out.data[index] = Math.round(((-dx / length) * 0.5 + 0.5) * 255);
+        out.data[index + 1] = Math.round(((-dy / length) * 0.5 + 0.5) * 255);
+        out.data[index + 2] = Math.round(((1 / length) * 0.5 + 0.5) * 255);
+        out.data[index + 3] = 255;
+      }
+    }
+    ctx.putImageData(out, 0, 0);
+    const normal = new THREE.CanvasTexture(canvas);
+    normal.wrapS = normal.wrapT = THREE.RepeatWrapping;
+    normal.repeat.copy(texture.repeat);
+    normal.colorSpace = THREE.NoColorSpace;
+    normal.anisotropy = texture.anisotropy || 1;
+    this.textureCache[cacheKey] = normal;
+    return normal;
+  }
+
+  _waterNormalTexture() {
+    const cacheKey = 'water-normal';
+    if (this.textureCache[cacheKey]) return this.textureCache[cacheKey];
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const out = ctx.createImageData(size, size);
+    const tau = Math.PI * 2;
+    const wave = (x, y) => Math.sin(tau * (3 * x + y) / size) +
+      0.6 * Math.sin(tau * (2 * y - 4 * x) / size) +
+      0.35 * Math.sin(tau * 5 * (x + y) / size);
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const dx = (wave(x + 1, y) - wave(x - 1, y)) * 1.4;
+        const dy = (wave(x, y + 1) - wave(x, y - 1)) * 1.4;
+        const length = Math.hypot(dx, dy, 1);
+        const index = (y * size + x) * 4;
+        out.data[index] = Math.round(((-dx / length) * 0.5 + 0.5) * 255);
+        out.data[index + 1] = Math.round(((-dy / length) * 0.5 + 0.5) * 255);
+        out.data[index + 2] = Math.round(((1 / length) * 0.5 + 0.5) * 255);
+        out.data[index + 3] = 255;
+      }
+    }
+    ctx.putImageData(out, 0, 0);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(4, 4);
+    texture.colorSpace = THREE.NoColorSpace;
+    texture.anisotropy = Math.min(8, this.renderer?.capabilities?.getMaxAnisotropy?.() || 1);
+    this.textureCache[cacheKey] = texture;
+    return texture;
   }
 
   _asphaltTexture() {
@@ -896,6 +1027,8 @@ export class World {
     const markGeoms = [];
     const edgePositions = [];
     const manholeGeoms = [];
+    const wearGeoms = [];
+    const puddleGeoms = [];
     const labels = [];
     const rnd = seededRandom(19);
     const pedestrianKinds = new Set(['pedestrian', 'footway', 'living_street', 'path', 'cycleway', 'track', 'steps']);
@@ -981,6 +1114,26 @@ export class World {
               manholeGeoms.push(circle);
             }
           }
+          if (this.quality === 'high' && r.length > 18 && r.w >= 4.5 && !pedestrian) {
+            for (let d = 10 + rnd() * 26; d < len; d += 46 + rnd() * 30) {
+              const cx = ax + ux * d + nx * (rnd() - 0.5) * r.w * 0.68;
+              const cz = az + uz * d + nz * (rnd() - 0.5) * r.w * 0.68;
+              if (rnd() < 0.6) {
+                const patch = new THREE.CircleGeometry(0.35 + rnd() * 0.85, 7);
+                patch.scale(1.25 + rnd() * 0.9, 0.65 + rnd() * 0.45, 1);
+                patch.rotateX(-Math.PI / 2);
+                patch.translate(cx, y + 0.007, cz);
+                wearGeoms.push(paintGeometry(patch, '#343936'));
+              }
+              if (rnd() < 0.46) {
+                const puddle = new THREE.CircleGeometry(0.45 + rnd() * 1.2, 9);
+                puddle.scale(1.35 + rnd() * 1.1, 0.55 + rnd() * 0.5, 1);
+                puddle.rotateX(-Math.PI / 2);
+                puddle.translate(cx, y + 0.006, cz);
+                puddleGeoms.push(puddle);
+              }
+            }
+          }
         }
       }
       if (r.name && r.length > 140 && labels.length < 9 && ['primary', 'secondary', 'tertiary'].includes(r.kind)) {
@@ -997,8 +1150,13 @@ export class World {
     const roadMesh = mergeClean(roadGeoms);
     if (roadMesh) {
       assignPlanarUV(roadMesh, 18);
-      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
-      if (this.quality !== 'low') mat.map = this._asphaltTexture();
+      const mat = litMaterial(this.quality, { vertexColors: true }, { roughness: 0.72, metalness: 0.025 });
+      if (this.quality !== 'low') {
+        mat.map = this._asphaltTexture();
+        mat.normalMap = this._normalTexture('asphalt', mat.map, 1.8);
+        mat.normalScale = new THREE.Vector2(0.42, 0.42);
+      }
+      this.roadMaterial = mat;
       const m = new THREE.Mesh(roadMesh, mat);
       m.receiveShadow = true;
       m.name = 'strade';
@@ -1007,8 +1165,13 @@ export class World {
     const sidewalkMesh = mergeClean(sidewalkGeoms);
     if (sidewalkMesh) {
       assignPlanarUV(sidewalkMesh, 7);
-      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
-      if (this.quality !== 'low') mat.map = this._concreteTexture();
+      const mat = litMaterial(this.quality, { vertexColors: true }, { roughness: 0.9 });
+      if (this.quality !== 'low') {
+        mat.map = this._concreteTexture();
+        mat.normalMap = this._normalTexture('concrete', mat.map, 1.2);
+        mat.normalScale = new THREE.Vector2(0.35, 0.35);
+      }
+      this.sidewalkMaterial = mat;
       const m = new THREE.Mesh(sidewalkMesh, mat);
       m.receiveShadow = true;
       m.name = 'marciapiedi';
@@ -1016,7 +1179,7 @@ export class World {
     }
     const curbMesh = mergeClean(curbGeoms);
     if (curbMesh) {
-      const m = new THREE.Mesh(curbMesh, new THREE.MeshLambertMaterial({ vertexColors: true, color: '#ffffff' }));
+      const m = new THREE.Mesh(curbMesh, litMaterial(this.quality, { vertexColors: true, color: '#ffffff' }, { roughness: 0.86 }));
       m.receiveShadow = true;
       m.name = 'cordoli';
       this.scene.add(m);
@@ -1024,8 +1187,12 @@ export class World {
     const pavingMesh = mergeClean(pavingGeoms);
     if (pavingMesh) {
       assignPlanarUV(pavingMesh, 4.5);
-      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
-      if (this.quality !== 'low') mat.map = this._pavingTexture();
+      const mat = litMaterial(this.quality, { vertexColors: true }, { roughness: 0.86 });
+      if (this.quality !== 'low') {
+        mat.map = this._pavingTexture();
+        mat.normalMap = this._normalTexture('paving', mat.map, 1.4);
+        mat.normalScale = new THREE.Vector2(0.32, 0.32);
+      }
       const m = new THREE.Mesh(pavingMesh, mat);
       m.receiveShadow = true;
       m.name = 'pavimentazione-pedonale';
@@ -1034,8 +1201,12 @@ export class World {
     const piazzaMesh = mergeClean(piazzaGeoms);
     if (piazzaMesh) {
       assignPlanarUV(piazzaMesh, 6);
-      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
-      if (this.quality !== 'low') mat.map = this._piazzaTexture();
+      const mat = litMaterial(this.quality, { vertexColors: true }, { roughness: 0.82 });
+      if (this.quality !== 'low') {
+        mat.map = this._piazzaTexture();
+        mat.normalMap = this._normalTexture('piazza', mat.map, 1.4);
+        mat.normalScale = new THREE.Vector2(0.3, 0.3);
+      }
       const m = new THREE.Mesh(piazzaMesh, mat);
       m.receiveShadow = true;
       m.name = 'piazze';
@@ -1052,6 +1223,20 @@ export class World {
       const m = new THREE.Mesh(manholes, new THREE.MeshLambertMaterial({ color: '#3f4341' }));
       m.name = 'tombini';
       this.scene.add(m);
+    }
+    const wear = mergeClean(wearGeoms);
+    if (wear) {
+      const m = new THREE.Mesh(wear, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.22, depthWrite: false }));
+      m.name = 'usura-strade';
+      this.scene.add(m);
+    }
+    if (puddleGeoms.length) {
+      const puddles = mergeClean(puddleGeoms);
+      this.puddleMaterial = new THREE.MeshBasicMaterial({ color: '#9fbec9', transparent: true, opacity: 0, depthWrite: false });
+      this.puddleMesh = new THREE.Mesh(puddles, this.puddleMaterial);
+      this.puddleMesh.name = 'pozzanghere';
+      this.puddleMesh.visible = false;
+      this.scene.add(this.puddleMesh);
     }
     for (const l of labels) {
       const sp = makeTextSprite(l.text, { scale: 0.86, fontSize: 38, pad: 18, bg: 'rgba(244,235,218,.78)', color: '#334036' });
@@ -1440,7 +1625,7 @@ export class World {
     }
     const merged = mergeClean(geoms);
     if (merged) {
-      const mesh = new THREE.Mesh(merged, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      const mesh = new THREE.Mesh(merged, litMaterial(this.quality, { vertexColors: true }, { roughness: 0.93 }));
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       mesh.name = 'edifici';
@@ -1449,8 +1634,12 @@ export class World {
     const roofs = mergeClean(roofGeoms);
     if (roofs) {
       assignPlanarUV(roofs, 4.2);
-      const mat = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
-      if (this.quality !== 'low') mat.map = this._roofTexture();
+      const mat = litMaterial(this.quality, { vertexColors: true, side: THREE.DoubleSide }, { roughness: 0.84 });
+      if (this.quality !== 'low') {
+        mat.map = this._roofTexture();
+        mat.normalMap = this._normalTexture('roof', mat.map, 1.7);
+        mat.normalScale = new THREE.Vector2(0.5, 0.5);
+      }
       const mesh = new THREE.Mesh(roofs, mat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
@@ -1922,7 +2111,25 @@ export class World {
     if (trees.length) {
       const { trunk, foliage } = makeTreeGeometry();
       const trunkMesh = new THREE.InstancedMesh(trunk, new THREE.MeshLambertMaterial({ color: '#6b4c35' }), trees.length);
-      const foliageMesh = new THREE.InstancedMesh(foliage, new THREE.MeshLambertMaterial({ color: '#ffffff' }), trees.length);
+      const foliageMaterial = new THREE.MeshLambertMaterial({ color: '#ffffff' });
+      if (this.quality !== 'low') {
+        this.windUniform = { value: 0 };
+        foliageMaterial.onBeforeCompile = shader => {
+          shader.uniforms.uWindTime = this.windUniform;
+          shader.vertexShader = `uniform float uWindTime;\n${shader.vertexShader}`;
+          shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>
+            #ifdef USE_INSTANCING
+              float windPhase = instanceMatrix[3].x * 0.11 + instanceMatrix[3].z * 0.17;
+            #else
+              float windPhase = 0.0;
+            #endif
+            float sway = sin(uWindTime * 1.35 + windPhase) * 0.05;
+            transformed.x += sway * max(position.y, 0.0);
+            transformed.z += cos(uWindTime * 1.08 + windPhase) * 0.032 * max(position.y, 0.0);`);
+        };
+        foliageMaterial.customProgramCacheKey = () => 'fidenza-tree-wind';
+      }
+      const foliageMesh = new THREE.InstancedMesh(foliage, foliageMaterial, trees.length);
       const dummy = new THREE.Object3D();
       const color = new THREE.Color();
       const greens = ['#4f7748', '#5d8850', '#6f9a5a', '#476b40', '#7fa164'];
@@ -3650,6 +3857,14 @@ export class World {
       if (npc.person.visible && npc.kind === 'fixed' && d < 9) {
         npc.person.rotation.y = Math.atan2(playerPos.x - p.x, playerPos.z - p.z);
       }
+      const limbs = npc.person.userData.limbs;
+      if (limbs && npc.kind === 'fixed') {
+        const gesture = Math.sin(this.time * 1.35 + npc.phase) * 0.07;
+        limbs.armR.rotation.x = -0.12 + gesture;
+        limbs.armL.rotation.x = 0.05 - gesture * 0.55;
+        limbs.armR.rotation.z = -0.05;
+        limbs.armL.rotation.z = 0.05;
+      }
     }
   }
 
@@ -3929,6 +4144,21 @@ export class World {
   setWeather(weather = {}) {
     this.weather = { rain: weather.rain || 0, clouds: weather.clouds ?? 0.2 };
     if (this.rainPoints) this.rainPoints.visible = this.weather.rain > 0.15;
+    const wet = clamp(this.weather.rain * 1.4, 0, 1);
+    if (this.roadMaterial?.isMeshStandardMaterial) {
+      this.roadMaterial.roughness = 0.72 - wet * 0.52;
+      this.roadMaterial.metalness = 0.025 + wet * 0.16;
+      this.roadMaterial.color.setRGB(1 - wet * 0.22, 1 - wet * 0.2, 1 - wet * 0.17);
+    }
+    if (this.sidewalkMaterial?.isMeshStandardMaterial) {
+      this.sidewalkMaterial.roughness = 0.9 - wet * 0.45;
+      this.sidewalkMaterial.color.setRGB(1 - wet * 0.12, 1 - wet * 0.12, 1 - wet * 0.1);
+    }
+    if (this.waterMaterial) this.waterMaterial.opacity = 0.88 + wet * 0.04;
+    if (this.puddleMaterial) {
+      this.puddleMaterial.opacity = wet * 0.38;
+      this.puddleMesh.visible = wet > 0.04;
+    }
   }
 
   setSeason(style, id = 'autumn') {
@@ -4113,24 +4343,32 @@ export class World {
     const night = 1 - day;
     const sl = this.seasonStyle?.lighting || {};
 
-    const nightTop = new THREE.Color('#16283d');
-    const nightBottom = new THREE.Color('#3b5361');
-    const dayTop = new THREE.Color('#6fa8c8');
-    const dayBottom = new THREE.Color('#d9e6df');
-    const sunsetTop = new THREE.Color('#5e748e');
-    const sunsetBottom = new THREE.Color('#e8b27b');
+    const nightTop = new THREE.Color('#101f34');
+    const nightBottom = new THREE.Color('#304a5a');
+    const dayTop = new THREE.Color('#285f8c');
+    const dayBottom = new THREE.Color('#9fc4ca');
+    const sunsetTop = new THREE.Color('#526a86');
+    const sunsetBottom = new THREE.Color('#e0a572');
     const top = nightTop.clone().lerp(dayTop, day).lerp(sunsetTop, sunset * 0.45);
     const bottom = nightBottom.clone().lerp(dayBottom, day).lerp(sunsetBottom, sunset * 0.55);
     if (this.skyUniforms) {
       this.skyUniforms.topColor.value.copy(top);
       this.skyUniforms.bottomColor.value.copy(bottom);
+      this.skyUniforms.sunColor.value.set(day > 0.35 ? '#ffe8b5' : '#ffbf82');
+      this.skyUniforms.sunGlow.value = (0.6 + sunset * 0.8) * (1 - night * 0.55);
     }
+    if (this.waterMaterial?.normalMap) {
+      this.waterMaterial.normalMap.offset.x = this.time * 0.012;
+      this.waterMaterial.normalMap.offset.y = this.time * 0.017;
+    }
+    if (this.windUniform) this.windUniform.value = this.time;
     this.scene.fog.color.copy(bottom).lerp(top, 0.25);
     if (sl.fogColor) this.scene.fog.color.lerp(new THREE.Color(sl.fogColor), 0.32);
     this.scene.fog.near = sl.fogNear ?? 150;
     this.scene.fog.far = (sl.fogFar ?? 820) - night * 120;
 
     const sunDir = new THREE.Vector3(Math.cos(theta), Math.max(-0.2, Math.sin(theta)), 0.32).normalize();
+    if (this.skyUniforms) this.skyUniforms.sunDirection.value.copy(sunDir);
     this.sunLight.position.copy(playerPos).addScaledVector(sunDir, 220);
     this.sunLight.target.position.copy(playerPos);
     this.sunLight.intensity = (day * 2.1 + sunset * 0.45 + night * 0.32) * (sl.sunIntensity ?? 1);
@@ -4145,16 +4383,16 @@ export class World {
     this.moonSprite.position.copy(playerPos).addScaledVector(new THREE.Vector3(-sunDir.x, -sunDir.y, -sunDir.z), 2600);
     this.moonSprite.visible = elev < 0.1;
     this.stars.visible = night > 0.55;
-    if (this.stars.visible) this.stars.material.opacity = 0.55 + night * 0.35;
+    if (this.stars.visible) this.stars.material.opacity = 0.55 + night * 0.35 + Math.sin(this.time * 0.7) * 0.025;
 
     if (this.windowMesh) {
       this.windowMesh.visible = true;
       const dayWin = new THREE.Color('#4b5654');
-      const nightWin = new THREE.Color('#ffd58a');
+      const nightWin = new THREE.Color('#ffd58a').multiplyScalar(1.42);
       this.windowMesh.material.color.copy(dayWin).lerp(nightWin, night);
     }
     if (this.bulbMesh) {
-      const c = new THREE.Color('#6f6f63').lerp(new THREE.Color('#ffe6a6'), night);
+      const c = new THREE.Color('#6f6f63').lerp(new THREE.Color('#ffe6a6').multiplyScalar(1.35), night);
       this.bulbMesh.material.color.copy(c);
     }
     for (const l of this.lampLights) l.intensity = night * 1.6;

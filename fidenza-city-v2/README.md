@@ -1,11 +1,12 @@
-# Fidenza da Giocare v2.16
+# Fidenza da Giocare v2.17
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.16 porta l’**Editor Pro**: scorciatoie da PC, command palette, modifica
-vertice per vertice e nuove geometrie (strade, aree, edifici, acqua e ferrovie)
-che il gioco 3D vede subito. Restano la **città viva** della v2.15 e il terreno
+v2.17 porta il **Visual Upgrade**: post-processing con bloom, materiali PBR e
+normal map, acqua animata, strade bagnate e pozzanghere, cielo con alone solare,
+vento sugli alberi, veicoli e abitanti più curati e modalità foto con DOF.
+Restano l’**Editor Pro** della v2.16, la **città viva** della v2.15 e il terreno
 **AWS Terrain Tiles** della v2.14.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
@@ -19,8 +20,8 @@ che il gioco 3D vede subito. Restano la **città viva** della v2.15 e il terreno
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
-- [Novità v2.16](#novità-v216--editor-pro)
-- [Novità precedenti](#novità-v215--città-viva-turni-e-orari)
+- [Novità v2.17](#novità-v217--visual-upgrade)
+- [Novità precedenti](#novità-v216--editor-pro)
 - [Dati, rigenerazione ed editor](#dati-e-correzioni)
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
@@ -54,6 +55,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **JavaScript ES2022 (moduli ES)** | Tutto il codice del gioco, import/export tra moduli, nessun bundler a runtime. |
 | **Three.js r169** | Scena 3D, camera, materiali, luci, ombre, geometrie, `InstancedMesh`, `BufferGeometryUtils`. |
 | **WebGL** | Rendering accelerato di città, veicoli, alberi, particelle e cielo. |
+| **Post-processing custom** | Bloom, tone mapping, color grading, vignetta e DOF con render target HDR, senza addon esterni. |
 | **Canvas 2D** | Minimappa e mappa grande, texture procedurali, insegne delle attività, cattura foto. |
 | **Web Audio API** | Audio interamente sintetizzato: motori, campanello bici, clacson, ambiente, eventi e segnali. |
 | **Web Storage (`localStorage`)** | Salvataggio locale di nome, punti, stelle, luoghi, missioni, carriera, impostazioni e statistiche. |
@@ -107,6 +109,10 @@ self-hosted in `vendor/` e `assets/fonts/`.
   Museo Musini, Stazione, Stirone e Obelisco.
 - **51 insegne di attività** su ristoranti, bar, caffè, farmacie, banche, hotel
   e musei, montate sulla facciata più vicina.
+- **Grafica PBR**: materiali con rugosità, normal map procedurali, acqua
+  animata, asfalto bagnato, pozzanghere e usura stradale.
+- **Post-processing**: bloom, tone mapping, color grading, vignetta e DOF nella
+  modalità foto. Selettore qualità Auto/Bassa/Media/Alta.
 - **Tetti 3D** a falde, padiglione e piano, con comignoli, abbaini, grondaie,
   cornici, persiane, balconi, gradini e vetrine.
 - **Vegetazione viva**: fino a **850 alberi**, cespugli, ciuffi d’erba e fiori
@@ -487,6 +493,29 @@ all’URL per forzare il livello grafico.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
 
+## Novità v2.17 — Visual Upgrade
+
+- **Post-processing** con bloom su neon, finestre, lampioni e fari; color
+  grading, vignetta e tone mapping ACES.
+- **Materiali PBR** su strade, marciapiedi, piazze, tetti, edifici, landmark,
+  acqua e veicoli.
+- **Normal map procedurali** per asfalto, cemento, pavimentazione, piazze e
+  coppi, generate offline dal rilievo delle texture.
+- **Acqua animata** con normal map in movimento, riflessi solari e trasparenza.
+- **Strade bagnate**: rugosità e colore cambiano con la pioggia; compaiono
+  pozzanghere e usura stradale.
+- **Cielo migliorato** con alone solare, gradiente più profondo e nuvole.
+- **Vento sugli alberi** con shader procedurale leggero.
+- **Veicoli più curati**: cerchi con razze, specchi, targhe, fari emissivi e
+  SpotLight reale per l’auto guidata; stop più luminosi in frenata.
+- **Abitanti più curati**: volti, occhi, sciarpe, borse, cappelli e berretti,
+  con gesti idle quando sono fermi.
+- **Modalità foto** con DOF reale, bloom e cattura attraverso la pipeline
+  post-processing.
+- **Selettore qualità** Auto/Bassa/Media/Alta nel menu pausa.
+- **Fix**: l’ora della modalità foto non viene più sovrascritta dall’orologio
+  reale.
+
 ## Novità v2.16 — Editor Pro
 
 - **Scorciatoie complete**: `V/H/R/A/B/W/T/P/S/G/F`, `Ctrl+Z/Y`, `Ctrl+S`,
@@ -852,6 +881,7 @@ fidenza-city-v2/
   js/
     main.js          avvio, loop, stagioni, interazioni
     world.js         terreno, edifici, tetti, props, stagioni, traffico
+    postfx.js        bloom, tone mapping, color grading, vignetta e DOF
     map-compiler.js   compilatore mappa condiviso
     map-overrides.js  override edifici/strade/aree
     map-validate.js   validazione condivisa

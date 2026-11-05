@@ -169,7 +169,8 @@ export class PhotoMode {
 
   async capture() {
     if (!this.active) return null;
-    this.renderer.render(this.scene, this.camera);
+    if (this.renderFrame) this.renderFrame();
+    else this.renderer.render(this.scene, this.camera);
     const src = this.canvas;
     const out = document.createElement('canvas');
     out.width = src.width;
