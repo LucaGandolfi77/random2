@@ -535,7 +535,7 @@ function build() {
       },
       attribution: {
         map: '© OpenStreetMap contributors (ODbL)',
-        terrain: 'Terrain Tiles (Mapzen, EU-DEM Copernicus)',
+        terrain: 'AWS Open Data — Terrain Tiles (Mapzen / EU-DEM Copernicus)',
         region: '© Regione Emilia-Romagna'
       }
     },

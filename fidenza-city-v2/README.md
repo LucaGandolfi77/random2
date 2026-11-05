@@ -1,11 +1,11 @@
-# Fidenza da Giocare v2.11
+# Fidenza da Giocare v2.15
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.11 completa il volo su mobile, aggiunge il pulsante **🚲 Bici**, aumenta il
-traffico sulle strade principali e documenta tecnologie, funzioni, guida e
-curiosità del progetto.
+v2.15 accende la **città viva**: turni degli NPC, orari dei locali, folle che
+cambiano per ora e quartiere, oltre al **Diario di Fidenza** e al terreno
+**AWS Terrain Tiles** della v2.14.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 > Nessun codice, asset, testo o audio di altri giochi è stato riutilizzato.
@@ -18,8 +18,8 @@ curiosità del progetto.
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
-- [Novità v2.11](#novità-v211--volo-mobile-bici-e-traffico)
-- [Novità precedenti](#novità-v210--insegne-e-parchi-verdi)
+- [Novità v2.15](#novità-v215--città-viva-turni-e-orari)
+- [Novità precedenti](#novità-v214--diario-di-fidenza-e-terreno-aws)
 - [Dati, rigenerazione ed editor](#dati-e-correzioni)
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
@@ -68,7 +68,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **File System Access API** | Salvataggio diretto dei manifest dall’editor di mappa. |
 | **Node.js (script CLI)** | Rigenerazione città, terreno, import mappa, audit e validazione. |
 | **Overpass API** | Pipeline offline per scaricare i dati OpenStreetMap di Fidenza. |
-| **Terrain Tiles / EU-DEM Copernicus** | Rilievo del terreno fuori dal centro urbano. |
+| **AWS Open Data Terrain Tiles** | Heightmap Terrarium zoom 15, griglia 512×512, con dati EU-DEM Copernicus per il rilievo fuori dal centro. |
 | **OpenStreetMap (ODbL)** | Edifici, strade, piazze, parchi, corsi d’acqua, POI e attraversamenti. |
 | **GitHub Pages** | Hosting statico della build pubblica. |
 
@@ -84,8 +84,13 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - **Collisioni 2D** cerchio-poligono con spatial hash.
 - **Qualità adattiva**: risoluzione e dettagli cambiano su mobile e in base al
   carico.
+- **Heightmap AWS**: il terreno usa i tile Terrarium AWS ad alta risoluzione,
+  ricampionati in una griglia 512×512 e verificati con un audit dedicato.
 - **Dati separati dal codice**: la città è editabile con manifest, schema,
   template e tool di validazione.
+- **Quartieri Voronoi**: i confini dei sei macro-quartieri sono calcolati da
+  semi nel manifest, così restano coerenti e modificabili senza ridisegnare
+  poligoni a mano.
 
 ## Features
 
@@ -112,21 +117,81 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - **Vita urbana**: pedoni, ciclisti, auto ambientali, navetta, treno e bici
   parcheggiate.
 
+### Abitanti e dialoghi
+
+- **Fino a 19 abitanti con dialoghi originali**: 13 fissi in piazze, parchi,
+  stazione, teatro, Gran Madre, farmacia e Bar Blu Piramide, più 6 camminanti.
+- **Fino a 30 pedoni camminanti** su marciapiedi, vie pedonali e sentieri, con
+  qualità bassa/media/alta.
+- **Icona 💬** sopra gli abitanti non ancora incontrati, visibile quando ti
+  avvicini.
+- Dialogo con nome, ruolo, zona, 2–3 battute e un consiglio pratico.
+- **Primo incontro**: +25 punti, registrazione negli incontri e 2 nuovi
+  achievement dedicati.
+- Gli NPC fissi si girano verso il giocatore quando si avvicina.
+
+### Quartieri e Bar Blu Piramide
+
+- **Sei macro-quartieri** con confini Voronoi editabili: **Centro, Monica,
+  San Lazzaro, Le Azalee, Corea e Luce**.
+- HUD con il nome del quartiere, mappa grande con aree colorate ed etichette.
+- Primo ingresso in un quartiere: **+50 punti**, scheda descrittiva e
+  registrazione in `districtsSeen`.
+- Nuovo achievement **Sei quartieri** per averli visitati tutti.
+- **Bar Blu Piramide** in Via Ferraris 14, nel quartiere Le Azalee: insegna blu,
+  terrazza, tavolini, ombrelloni, auto parcheggiate e la barista **Blue**.
+- Il bar è un punto di ritrovo narrativo: qui si raccolgono storie e consigli
+  sui quartieri.
+- **Ritmi di città**: di notte pedoni e ciclisti ambientali si diradano, mentre
+  le insegne e le luci del Bar Blu restano accese.
+
+### Diario di Fidenza
+
+- **Gazzetta di Fidenza** con prima pagina, cronaca, annunci economici e
+  notizie generate dallo stato del gioco.
+- **Passaporto del Pellegrino** con sei timbri di quartiere.
+- **Radio Francigena** con frequenza, storia del quartiere e notiziario.
+- **Taccuino** con quartieri, abitanti incontrati, stelle, luoghi, foto,
+  achievement, carriera e tempo di gioco.
+- Accesso dal menu pausa, con interfaccia dedicata e contenuti sempre locali.
+
+### Città viva
+
+- **Turni degli NPC**: lavoro, pausa pranzo, tempo libero e casa.
+- **Presenze anti-pop**: i cambi di turno avvengono solo quando il giocatore è
+  abbastanza lontano.
+- **Bar Blu Piramide**: aperto 8:00–20:00, domenica chiuso; neon e luce seguono
+  l’orario.
+- **Bar Nuovo** (7:00–22:00), **Bar Diana** (7:00–23:00) e **La Strega**
+  (18:00–01:00) con tavolini, luci e avventori serali.
+- **Folle per quartiere**: Monica si riempie all’ora di punta, il Centro a
+  pranzo e la sera, i quartieri residenziali al mattino e nel tardo pomeriggio.
+- **Notte**: pedoni e ciclisti ambientali si diradano; restano solo i turni
+  notturni.
+- **Eventi**: mercato, teatro, stazione e San Donnino sovrascrivono i turni
+  normali.
+
 ### Mobilità
 
 - **Auto, Vespa, taxi e ambulanza** guidabili con fisica arcade, collisioni,
   ruote animate, clacson e potenziamenti.
-- **Bici guidabili** in 5 punti della città, con campanello, ruote e pedalata
-  animata; altre bici parcheggiate e ciclisti animati fanno da contorno.
+- **10 bici guidabili** in centro, piazze e parchi, con campanello, ruote e
+  pedalata animata. Le bici parcheggiate arrivano a **18/24/30** secondo la
+  qualità; i ciclisti animati completano il quadro.
 - **Navetta urbana** con percorso calcolato sulla rete stradale, 4 fermate,
   pensiline e cartelli.
 - **Treno** a tre carrozze con sosta in banchina.
 - **Volo libero** con WASD/joystick, quota, boost, atterraggio e camera ampia.
 - **Traffico ambientale** solo su strade `primary`, `secondary` e `tertiary`:
-  8 auto su qualità bassa, 14 su media, 22 su alta. Le strade pedonali,
+  12 auto su qualità bassa, 20 su media, 30 su alta. Le strade pedonali,
   ciclabili, di servizio e residenziali restano libere.
 - **Semafori** con ciclo rosso/giallo/verde: le auto rallentano e si fermano,
   i pedoni attraversano sulle strisce.
+- **Strade rinnovate**: asfalto procedurale con graniglia, crepe, rattoppi e
+  macchie; cordoli, marciapiedi rialzati, linee di bordo e mezzeria.
+- **Pedonali e piazze** con pavimentazioni in lastre, porfido e pattern
+  dedicati per quartiere.
+- **Bar Blu Piramide** con terrazza e arredi urbani dedicati.
 
 ### Missioni e carriera
 
@@ -151,7 +216,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
   di anteprima, nascondi giocatore/veicoli, scatto JPEG, galleria IndexedDB e
   download PNG.
 - **27 stelle** nascoste e **23 luoghi** da scoprire.
-- **37 achievement** e statistiche dettagliate: km a piedi e in auto, velocità
+- **40 achievement** e statistiche dettagliate: km a piedi e in auto, velocità
   massima, missioni, stelle, luoghi, foto, stagioni, giorni e tempo di gioco.
 - **Sfida del giorno** deterministica dalla data, con progresso e ricompensa
   salvati solo in locale.
@@ -211,8 +276,44 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - Ogni stella e ogni luogo danno punti; i punti sbloccano achievement e
   compaiono nella sfida del giorno.
 - La minimappa mostra stelle, luoghi, missione attiva, eventi e bici.
+- Attraversa i **sei macro-quartieri**: Centro, Monica, San Lazzaro, Le Azalee,
+  Corea e Luce. Al primo ingresso ricevi +50 punti e una scheda del quartiere.
+- Fermati al **Bar Blu Piramide**, in Le Azalee: la barista Blue ha storie e
+  consigli sui dintorni.
 
-### 4. Guidare auto, Vespa e bici
+### 4. Diario di Fidenza
+
+- Apri il **Diario di Fidenza** dal menu pausa.
+- **Gazzetta**: prima pagina e annunci generati da quartieri, meteo, eventi,
+  statistiche e incontri.
+- **Passaporto**: i sei timbri dei quartieri; si riempie visitando la città.
+- **Radio Francigena**: storia del quartiere e notiziario, con jingle.
+- **Taccuino**: riepilogo di quartieri, abitanti, stelle, luoghi, foto,
+  achievement, carriera e tempo di gioco.
+
+### 5. Orari e locali
+
+- Il Bar Blu Piramide è aperto **8:00–20:00**, domenica chiuso.
+- Bar Nuovo, Bar Diana e La Strega hanno orari e tavolini esterni.
+- Quando un locale è chiuso, luci e arredi si spengono.
+- Gli NPC seguono turni: lavoro, pausa, tempo libero e casa.
+- Se ti avvicini a un NPC al cambio turno, resta lì finché non ti allontani:
+  niente apparizioni o sparizioni improvvise.
+- La sera i locali si riempiono di avventori e il Centro prende vita.
+- Il Diario di Fidenza mostra **Aperti ora** e i turni del giorno.
+
+### 6. Parla con gli abitanti
+
+- Avvicinati a una persona con l’icona **💬** sopra la testa.
+- Premi **E** su desktop o tocca il pulsante **💬** su mobile.
+- Leggi la battuta, poi usa **Parla ancora** per sentire le altre frasi.
+- Alcuni abitanti danno consigli su volo, foto, bici, missioni ed eventi.
+- Al primo incontro guadagni **25 punti** e sblocchi i due achievement degli
+  incontri.
+- Se saluti e torni più tardi, l’abitante ti riconosce e può raccontarti di
+  nuovo le sue storie.
+
+### 7. Guidare auto, Vespa e bici
 
 - Avvicinati a un veicolo e premi **E** (o il pulsante azione).
 - **W/joystick su** accelera, **S/joystick giù** frena o va in retromarcia,
@@ -226,7 +327,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
   - altrimenti ti dice a quanti metri è la bici più vicina.
 - Le bici guidabili sono segnate in oro sulla mappa.
 
-### 5. Volare
+### 8. Volare
 
 - Premi **V** (desktop) o **✈** nel menu rapido (mobile).
 - **WASD/joystick** muove in orizzontale e in avanti, **Space/Q** o **▲/▼**
@@ -235,7 +336,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - Premi **V** o **✈** per atterrare.
 - Non puoi volare mentre sei su un veicolo: prima scendi.
 
-### 6. Missioni
+### 9. Missioni
 
 1. Apri il menu missioni con **F** o **☑**.
 2. Scegli una missione e segui il beacon sulla mappa.
@@ -243,7 +344,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 4. Completa la missione entro il tempo per ottenere punti e, se previsto,
    ricompense di carriera.
 
-### 7. Carriera
+### 10. Carriera
 
 1. Apri **Carriera** con **C** o **▤**.
 2. Sostieni l’esame di guida: tre checkpoint da raggiungere.
@@ -252,7 +353,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 5. Compra potenziamenti nel garage: motore, assetto e freni.
 6. I lavori fotografici richiedono una foto scattata vicino al soggetto.
 
-### 8. Modalità foto
+### 11. Modalità foto
 
 - Premi **P** o **▣**.
 - Muoviti con WASD, guarda con il mouse, regola l’altezza con Q/E, cambia FOV
@@ -262,14 +363,14 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - Scatta: la foto viene salvata in **IndexedDB** e compare nella galleria.
 - Puoi scaricarla in PNG o eliminarla; tutto resta locale.
 
-### 9. Eventi e sfida del giorno
+### 12. Eventi e sfida del giorno
 
 - La card **“Oggi in città”** mostra l’evento attivo e il prossimo.
 - Partecipa agli eventi per statistiche, achievement e lavori speciali.
 - La **sfida del giorno** cambia ogni giorno ed è deterministica dalla data.
 - La festa di San Donnino ha tre missioni dedicate e un badge.
 
-### 10. Salvataggio e PWA
+### 13. Salvataggio e PWA
 
 - Il progresso è salvato automaticamente in `localStorage`.
 - Dal menu pausa puoi esportare/importare il salvataggio o azzerare i progressi.
@@ -285,6 +386,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | Correre | Shift | pulsante Corri |
 | Guardare | mouse (pointer lock) | trascina sul canvas |
 | Interagire | E | pulsante azione contestuale |
+| Parlare con un abitante | E vicino a 💬 | pulsante azione 💬 |
 | Entrare/uscire dal veicolo | E vicino al veicolo | pulsante azione |
 | Bici | E vicino alla bici | pulsante 🚲 |
 | Accelerare | W / ↑ | joystick su |
@@ -297,6 +399,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | Atterrare | V | pulsante ✈ |
 | Missioni | F | menu rapido touch |
 | Carriera | C o voce in pausa | menu rapido touch |
+| Diario di Fidenza | voce in pausa | menu pausa |
 | Mappa | N o click sulla minimappa | menu rapido touch |
 | Modalità foto | P o voce in pausa | menu rapido touch |
 | Audio | M | menu rapido touch |
@@ -344,10 +447,31 @@ all’URL per forzare il livello grafico.
   su pedonali, ciclabili, marciapiedi o strade residenziali.
 - La città ha **12 semafori** e **15 attraversamenti**; i pedoni attraversano
   quando le auto hanno il rosso.
+- Gli **abitanti** hanno nomi e battute originali: Giulia al Duomo, Chiara in
+  stazione, Bianca al parco, Nadia in farmacia e molti altri.
+- I **sei macro-quartieri** usano confini Voronoi calcolati dai semi nel
+  manifest: niente poligoni disegnati a mano, ma confini coerenti e modificabili.
+- Il **Bar Blu Piramide** è ispirato al locale di Via Ferraris 14: nel gioco ha
+  terrazza, insegna blu e la barista Blue.
+- Il Bar Blu Piramide segue un orario realistico: **8:00–20:00**, domenica
+  chiuso. Di notte il neon si spegne.
+- **Bar Nuovo**, **Bar Diana** e **La Strega** hanno orari diversi: il quartiere
+  cambia volto a seconda dell’ora.
+- Gli NPC non si teletrasportano davanti al giocatore: i cambi di turno restano
+  in attesa finché non ti allontani.
+- La **Gazzetta di Fidenza** non usa un server: titoli e annunci vengono
+  composti nel browser a partire dai tuoi progressi.
+- Il **Passaporto** trasforma i sei quartieri in timbri da collezionare.
+- Il terreno usa i **Terrain Tiles AWS** in formato Terrarium: ogni pixel
+  contiene una quota, non un colore.
+- La heightmap è una griglia **512×512** a zoom 15, ricampionata con
+  interpolazione bilineare per evitare scalini.
+- Le **bici guidabili** sono 10 e le parcheggiate fino a 30: il centro si
+  attraversa volentieri a pedali.
 - Le **27 stelle** e i **23 luoghi** sono posizionati sul manifest e validati
   con un controllo di raggiungibilità.
-- I **37 achievement** coprono stelle, luoghi, missioni, guida, foto,
-  stagioni, carriera, eventi e San Donnino.
+- I **40 achievement** coprono stelle, luoghi, missioni, guida, foto, NPC,
+  quartieri, stagioni, carriera, eventi e San Donnino.
 - L’audio è **completamente sintetizzato** con la Web Audio API: non ci sono
   file audio registrati.
 - Le foto sono salvate in **IndexedDB** e non vengono mai caricate su un server.
@@ -356,6 +480,67 @@ all’URL per forzare il livello grafico.
   poi ritagliata per minimappa e mappa grande.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
+
+## Novità v2.15 — Città viva, turni e orari
+
+- **Turni NPC** con lavoro, pausa pranzo, tempo libero e casa.
+- **Anti-pop**: i cambi di turno avvengono solo quando il giocatore è lontano.
+- **Bar Blu Piramide** con orario 8:00–20:00, domenica chiuso, neon e luci
+  sincronizzati.
+- **Bar Nuovo**, **Bar Diana** e **La Strega** con orari, tavolini, luci e
+  avventori serali.
+- **Folle dinamiche** per ora e quartiere.
+- **Notte più quieta**: pedoni e ciclisti ambientali si diradano.
+- **Eventi** che sovrascrivono i turni normali.
+- **Diario di Fidenza** aggiornato con locali aperti e turni.
+- **README** aggiornato con orari e nuove routine.
+
+## Novità v2.14 — Diario di Fidenza e terreno AWS
+
+- **Diario di Fidenza** dal menu pausa, con quattro sezioni.
+- **Gazzetta di Fidenza**: prima pagina, cronaca, annunci e notizie dinamiche.
+- **Passaporto del Pellegrino**: sei timbri di quartiere.
+- **Radio Francigena**: frequenza, storia del quartiere, notiziario e jingle.
+- **Taccuino**: riepilogo di quartieri, abitanti, stelle, luoghi, foto,
+  achievement, carriera e tempo.
+- **AWS Terrain Tiles** ad alta risoluzione: formato Terrarium, zoom 15,
+  griglia **512×512**, dati EU-DEM Copernicus.
+- **Heightmap più precisa** con ricampionamento bilineare e terreno a 220
+  segmenti.
+- **Ritmi di città**: di notte pedoni e ciclisti ambientali si diradano.
+- **Audit terreno** in `data/terrain-audit.json`.
+- README aggiornato con Diario, heightmap e attribuzioni AWS.
+
+## Novità v2.13 — Quartieri, Bar Blu Piramide e strade
+
+- **Sei macro-quartieri**: Centro, Monica, San Lazzaro, Le Azalee, Corea e Luce.
+- **Confini Voronoi** calcolati dai centri nel manifest e modificabili.
+- **HUD e mappa** con quartiere corrente, aree colorate ed etichette.
+- **Scoperta dei quartieri**: +50 punti al primo ingresso.
+- **Nuovo achievement** Sei quartieri (totale **40**).
+- **Bar Blu Piramide** in Via Ferraris 14: insegna blu, terrazza, tavolini,
+  ombrelloni, auto parcheggiate e NPC barista.
+- **Strade rinnovate**: asfalto più ricco, cordoli, marciapiedi rialzati,
+  linee di bordo, mezzeria, tombini e piazze con lastre dedicate.
+- **Pavimentazioni pedonali** differenziate per quartiere.
+- **Mappa estesa a est** per includere il Bar Blu Piramide.
+- **README aggiornato** con quartieri, bar e nuove finiture.
+
+## Novità v2.12 — Abitanti, bici e traffico
+
+- **Fino a 18 abitanti con dialoghi originali**: 12 fissi e 6 camminanti.
+- **Fino a 30 pedoni camminanti** su marciapiedi, vie pedonali e sentieri.
+- **Icona 💬** sopra gli NPC non ancora incontrati.
+- Dialogo con nome, ruolo, zona, battute multiple e consiglio pratico.
+- **Primo incontro**: +25 punti, registrazione in `npcsMet` e 2 nuovi
+  achievement (totale **39**).
+- **10 bici guidabili**: 5 del manifest e 5 nuove nelle zone pedonali.
+- **Bici parcheggiate** aumentate a 18/24/30 secondo la qualità.
+- **Traffico aumentato**: 12/20/30 auto su `primary`, `secondary` e `tertiary`,
+  sempre zero sulle strade pedonali.
+- **Pedoni sulle strisce** aumentati a 4/6/8.
+- **Nuovo dialog NPC** accessibile con E o dal pulsante azione mobile.
+- **README aggiornato** con la guida agli abitanti e i nuovi conteggi.
 
 ## Novità v2.11 — Volo mobile, bici e traffico
 
@@ -527,14 +712,24 @@ all’URL per forzare il livello grafico.
   particelle, nebbia, neve al suolo, luci natalizie e meteo.
 - **Mappa editabile**: manifest JSON, schema, template per nuove città, importer,
   audit POI e validatore di raggiungibilità.
-- **Gameplay**: auto, Vespa, taxi, ambulanza, bici, 14 missioni, carriera con
-  lavori e garage, 27 stelle, mappa completa, audio sintetizzato, PWA offline.
-- **Vita in città**: foto, 37 achievement, statistiche, sfida del giorno,
-  semafori, attraversamenti, insegne 3D e traffico sulle strade principali.
+- **Gameplay**: auto, Vespa, taxi, ambulanza, 10 bici, 19 abitanti con
+  dialoghi, sei quartieri, Bar Blu Piramide, 14 missioni, carriera con lavori
+  e garage, 27 stelle, mappa completa, audio sintetizzato, PWA offline.
+- **Vita in città**: foto, 40 achievement, statistiche, sfida del giorno,
+  fino a 43 persone in città (13 fisse + 30 camminanti, 19 con dialoghi),
+  sei quartieri, 4 locali con orari, turni NPC, folle dinamiche, Bar Blu
+  Piramide, semafori, attraversamenti, insegne 3D e traffico.
+- **Diario di Fidenza**: Gazzetta, Passaporto, Radio e Taccuino, con contenuti
+  generati dai progressi locali.
+- **Città viva**: turni NPC, orari dei locali e folle che cambiano per ora e
+  quartiere.
+- **Terreno AWS**: heightmap Terrarium zoom 15, griglia 512×512 e dati EU-DEM
+  Copernicus per un rilievo più accurato.
 
 ## Dati e correzioni
 
-La mappa è costruita da **OpenStreetMap** e **Terrain Tiles**. I POI sono
+La mappa è costruita da **OpenStreetMap** e **AWS Terrain Tiles** (Terrarium,
+EU-DEM Copernicus). I POI sono
 confrontati con le feature OSM tramite `tools/audit-pois.mjs`. L’attribuzione
 del progetto include **© OpenStreetMap contributors (ODbL)** e
 **© Regione Emilia-Romagna** come riferimento territoriale.
@@ -559,6 +754,8 @@ node tools/validate-map.mjs
 node tools/audit-buildings.mjs
 node tools/audit-poi-signs.mjs
 node tools/audit-traffic.mjs
+node tools/audit-districts.mjs
+node tools/audit-terrain.mjs
 # opzionale: aggiorna altezze/tetti da un GeoJSON DBTR/Microsoft/Overture
 node tools/merge-buildings.mjs --geojson edifici.geojson --dry-run
 ```
@@ -624,6 +821,10 @@ fidenza-city-v2/
     building-geometry.js geometria e classificazione tetti
     poi-signs.js      associazione POI-attività e facciate
     traffic.js       pianificazione traffico su strade principali
+    npcs.js          abitanti, ruoli, battute e posizioni
+    districts.js     macro-quartieri e confini Voronoi
+    diary.js         Gazzetta, Passaporto, Radio e Taccuino
+    schedules.js     turni NPC, orari locali e folle
     landmarks.js     modelli dei luoghi simbolo
     missions.js      missioni guidate dal manifest
     achievements.js  obiettivi e progresso locale
@@ -663,6 +864,8 @@ fidenza-city-v2/
     audit-buildings.mjs
     audit-poi-signs.mjs
     audit-traffic.mjs
+    audit-districts.mjs
+    audit-terrain.mjs
     merge-buildings.mjs
   data/
     city.json
@@ -674,6 +877,8 @@ fidenza-city-v2/
     building-audit.json
     poi-sign-audit.json
     traffic-audit.json
+    district-audit.json
+    terrain-audit.json
   assets/
     fonts/
     icons/
@@ -692,6 +897,9 @@ fidenza-city-v2/
 - La mappa 2D è disegnata dai dati della città su un canvas offscreen, senza
   tile server a runtime.
 - Il service worker mette in cache shell, dati, stili, font e Three.js.
+- La resa di strade e pedonali è procedurale e originale. Google Maps è usato
+  solo come riferimento visivo per gerarchia e arredo, non come fonte di tile,
+  dati o stile proprietario.
 
 > Se modifichi file statici, incrementa la costante `CACHE` in `sw.js`.
 
@@ -716,7 +924,7 @@ report `data/building-audit.json` dopo l’import.
 - Codice del gioco: originale, distribuito con la licenza del repository.
 - Dati OpenStreetMap: ODbL.
 - Riferimento territoriale: © Regione Emilia-Romagna.
-- Terrain Tiles: attribuzione Mapzen / EU-DEM Copernicus.
+- AWS Terrain Tiles: attribuzione Mapzen / EU-DEM Copernicus.
 - Three.js: MIT.
 - Font Anton e Oswald: SIL Open Font License 1.1.
 

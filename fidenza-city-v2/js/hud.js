@@ -46,6 +46,12 @@ export class HUD {
       infoTitle: document.getElementById('info-title'),
       infoDescription: document.getElementById('info-description'),
       infoFact: document.getElementById('info-fact'),
+      npcEyebrow: document.getElementById('npc-eyebrow'),
+      npcTitle: document.getElementById('npc-title'),
+      npcRole: document.getElementById('npc-role'),
+      npcText: document.getElementById('npc-text'),
+      npcHint: document.getElementById('npc-hint'),
+      npcNext: document.getElementById('npc-next'),
       boardBody: document.getElementById('board-body'),
       btnAudio: document.getElementById('btn-audio'),
       rotateHint: document.getElementById('rotate-hint')
@@ -175,7 +181,7 @@ export class HUD {
     this.el.prompt.innerHTML = text;
     if (isTouch && this.el.btnAct) {
       this.el.btnAct.hidden = false;
-      const icons = { missions: '☰', vehicle: '🚗', exit: '✕', place: '◆', 'mission-step': '▶', land: '▼' };
+      const icons = { missions: '☰', vehicle: '🚗', exit: '✕', place: '◆', 'mission-step': '▶', land: '▼', npc: '💬' };
       this.el.btnAct.textContent = prompt.icon || icons[prompt.action] || '▶';
       this.el.btnAct.setAttribute('aria-label', prompt.action || 'azione');
     } else {
@@ -251,6 +257,20 @@ export class HUD {
     if (this.el.infoDescription) this.el.infoDescription.textContent = landmark.description || '';
     if (this.el.infoFact) this.el.infoFact.textContent = landmark.fact || '';
     const d = document.getElementById('info-dialog');
+    if (d && !d.open) d.showModal();
+  }
+
+  showNpc(npc, lineIndex = 0, isNew = false) {
+    if (!npc) return;
+    if (this.el.npcEyebrow) {
+      this.el.npcEyebrow.textContent = isNew ? 'Nuovo incontro · Abitante di Fidenza' : 'Abitante di Fidenza';
+    }
+    if (this.el.npcTitle) this.el.npcTitle.textContent = npc.name;
+    if (this.el.npcRole) this.el.npcRole.textContent = `${npc.role} · ${npc.area}`;
+    if (this.el.npcText) this.el.npcText.textContent = npc.lines?.[lineIndex] || '';
+    if (this.el.npcHint) this.el.npcHint.textContent = npc.hint || '';
+    if (this.el.npcNext) this.el.npcNext.hidden = (npc.lines?.length || 0) <= 1;
+    const d = document.getElementById('npc-dialog');
     if (d && !d.open) d.showModal();
   }
 

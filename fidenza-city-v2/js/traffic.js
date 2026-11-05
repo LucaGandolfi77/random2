@@ -1,5 +1,5 @@
 /**
- * Fidenza da Giocare v2.11 — pianificazione del traffico ambientale
+ * Fidenza da Giocare v2.13 — pianificazione del traffico ambientale
  *
  * Le auto possono circolare solo su strade carrabili principali. Le strade
  * pedonali, ciclabili, di servizio e residenziali restano libere. Il modulo è
@@ -14,9 +14,9 @@ export const FORBIDDEN_TRAFFIC_KINDS = [
 ];
 
 export const TRAFFIC_COUNTS = {
-  low: { total: 8, primary: 4, secondary: 2, tertiary: 2 },
-  medium: { total: 14, primary: 6, secondary: 5, tertiary: 3 },
-  high: { total: 22, primary: 8, secondary: 8, tertiary: 6 }
+  low: { total: 12, primary: 5, secondary: 4, tertiary: 3 },
+  medium: { total: 20, primary: 7, secondary: 8, tertiary: 5 },
+  high: { total: 30, primary: 10, secondary: 12, tertiary: 8 }
 };
 
 export function eligibleTrafficRoads(city) {

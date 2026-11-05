@@ -15,6 +15,7 @@ import { VehicleManager } from './vehicles.js';
 import { MissionManager } from './missions.js';
 import { GameMap } from './map.js';
 import { PhotoMode, PHOTO_FILTERS } from './photo-mode.js';
+import { buildDiary } from './diary.js';
 import { listPhotos, deletePhoto, downloadPhoto, clearPhotos } from './photo-store.js';
 
 const canvas = document.getElementById('game');
@@ -97,12 +98,17 @@ const forcedEvent = new URLSearchParams(location.search).get('event');
 let state = 'intro';
 let started = false;
 let currentInteraction = null;
+let activeNpc = null;
+let activeNpcLine = 0;
+let npcFirstMeet = false;
 let selectedPlace = null;
 let weather = { temp: null, label: 'cielo', icon: '☀', rain: 0, clouds: 0.2 };
 let baseHour = 15;
 let lastHudUpdate = 0;
 let lastZone = '';
 let lastZoneKind = '';
+let lastDistrictId = '';
+let diaryTab = 'gazzetta';
 let lastPromptKey = '';
 let pausedByDialog = false;
 let gameTime = 0;
@@ -117,6 +123,12 @@ const ui = {
   missionDialog: document.getElementById('mission-dialog'),
   infoDialog: document.getElementById('info-dialog'),
   infoClose: document.getElementById('info-close'),
+  npcDialog: document.getElementById('npc-dialog'),
+  diaryDialog: document.getElementById('diary-dialog'),
+  diaryTabs: document.getElementById('diary-tabs'),
+  diaryContent: document.getElementById('diary-content'),
+  npcNext: document.getElementById('npc-next'),
+  npcClose: document.getElementById('npc-close'),
   pauseDialog: document.getElementById('pause-dialog'),
   boardDialog: document.getElementById('board-dialog'),
   confirmDialog: document.getElementById('confirm-dialog'),
@@ -127,6 +139,7 @@ const ui = {
   pauseMissions: document.getElementById('pause-missions'),
   pauseCareer: document.getElementById('pause-career'),
   pauseBoard: document.getElementById('pause-board'),
+  pauseDiary: document.getElementById('pause-diary'),
   pauseAudio: document.getElementById('pause-audio'),
   pausePhoto: document.getElementById('pause-photo'),
   pauseAchievements: document.getElementById('pause-achievements'),
@@ -964,6 +977,23 @@ function bindUI() {
     ui.pauseDialog.close();
     openBoard();
   });
+  ui.pauseDiary?.addEventListener('click', () => {
+    ui.pauseDialog.close();
+    openDiary();
+  });
+  ui.diaryTabs?.addEventListener('click', event => {
+    const btn = event.target.closest('[data-diary-tab]');
+    if (!btn) return;
+    diaryTab = btn.dataset.diaryTab;
+    renderDiary();
+  });
+  ui.diaryContent?.addEventListener('click', event => {
+    if (!event.target.closest('[data-diary-action="radio-jingle"]')) return;
+    audio.init();
+    audio.resume();
+    audio.stationChime();
+    hud.setToast('Radio Francigena · jingle di Fidenza', 2200);
+  });
   ui.pauseAchievements?.addEventListener('click', () => {
     ui.pauseDialog.close();
     openAchievements();
@@ -1038,6 +1068,28 @@ function bindUI() {
   });
   ui.infoDialog?.addEventListener('close', () => {
     selectedPlace = null;
+    document.activeElement?.blur?.();
+    requestPointerLock();
+  });
+  ui.npcClose?.addEventListener('click', () => ui.npcDialog?.close());
+  ui.npcNext?.addEventListener('click', () => {
+    if (!activeNpc?.lines?.length) return;
+    activeNpcLine = (activeNpcLine + 1) % activeNpc.lines.length;
+    hud.showNpc(activeNpc, activeNpcLine, npcFirstMeet);
+  });
+  ui.npcDialog?.addEventListener('close', () => {
+    if (activeNpc && npcFirstMeet) {
+      hud.setToast(`Hai conosciuto ${activeNpc.name} · +${SCORE.npc} punti`, 3200);
+      checkAchievements(true);
+      refreshSaveUI();
+    }
+    activeNpc = null;
+    activeNpcLine = 0;
+    npcFirstMeet = false;
+    document.activeElement?.blur?.();
+    requestPointerLock();
+  });
+  ui.diaryDialog?.addEventListener('close', () => {
     document.activeElement?.blur?.();
     requestPointerLock();
   });
@@ -1152,6 +1204,11 @@ function returnToIntro() {
   if (ui.missionDialog?.open) ui.missionDialog.close();
   if (ui.boardDialog?.open) ui.boardDialog.close();
   if (ui.infoDialog?.open) ui.infoDialog.close();
+  activeNpc = null;
+  activeNpcLine = 0;
+  npcFirstMeet = false;
+  if (ui.npcDialog?.open) ui.npcDialog.close();
+  if (ui.diaryDialog?.open) ui.diaryDialog.close();
   if (ui.photoGallery?.open) ui.photoGallery.close();
   hud.hideHUD();
   hud.showIntro();
@@ -1161,6 +1218,7 @@ function returnToIntro() {
   lastPlayerTrack = null;
   lastZone = '';
   lastZoneKind = '';
+  lastDistrictId = '';
   currentInteraction = null;
   lastPromptKey = '';
   selectedPlace = null;
@@ -1489,6 +1547,104 @@ function toggleFly() {
   updateTouchUI();
 }
 
+function openDiary(tab = diaryTab) {
+  if (!world) return;
+  input.exitPointerLock();
+  diaryTab = tab;
+  renderDiary();
+  hud.openDialog('diary-dialog');
+}
+
+function renderDiary() {
+  if (!world || !ui.diaryContent) return;
+  const save = getSave();
+  const stats = getStats();
+  const district = world.getDistrictAt(player.position.x, player.position.z);
+  const diary = buildDiary({
+    save,
+    stats,
+    districts: world.districts,
+    seenDistricts: stats.districtsSeen || [],
+    totalStars: world.starObjects.length,
+    totalPlaces: world.placeObjects.length,
+    date: new Date(),
+    event: eventSnapshot?.active || eventSnapshot?.next || null,
+    daily: getDailySnapshot(),
+    weather,
+    district,
+    venues: world.getVenueStatuses()
+  });
+  for (const btn of ui.diaryTabs?.querySelectorAll('[data-diary-tab]') || []) {
+    btn.classList.toggle('active', btn.dataset.diaryTab === diaryTab);
+  }
+  if (diaryTab === 'passaporto') {
+    const p = diary.passport;
+    ui.diaryContent.innerHTML = `
+      <p class="passport-summary">${p.visited}/${p.total} timbri · ${p.complete ? 'Passaporto completo: sei un pellegrino di Fidenza.' : 'Ogni quartiere visitato lascia un timbro.'}</p>
+      <div class="passport-grid">
+        ${p.stamps.map(s => `
+          <div class="passport-stamp ${s.visited ? 'visited' : ''}" style="border-color:${s.color}">
+            <div class="stamp-top"><span>Timbro ${String(s.number).padStart(2, '0')}</span><span>${s.visited ? 'visitato' : 'da scoprire'}</span></div>
+            <b>${escapeHtml(s.name)}</b>
+            <p>${escapeHtml(s.description)}</p>
+            <div class="stamp-mark">${s.visited ? '✓ timbrato' : '○ in attesa'}</div>
+          </div>`).join('')}
+      </div>`;
+    return;
+  }
+  if (diaryTab === 'radio') {
+    const r = diary.radio;
+    ui.diaryContent.innerHTML = `
+      <div class="radio-panel">
+        <div class="radio-now">${escapeHtml(r.station)} · ${escapeHtml(r.frequency)} · ${escapeHtml(r.now)}</div>
+        <h3>In onda</h3>
+        <p>${escapeHtml(r.story)}</p>
+        <ul>${r.bulletin.map(h => `<li><b>${escapeHtml(h.title)}</b> — ${escapeHtml(h.body)}</li>`).join('')}</ul>
+        <p style="margin-top:14px"><button type="button" class="primary" data-diary-action="radio-jingle">Accendi la radio</button></p>
+        <p style="margin:10px 0 0;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#6b6253">${escapeHtml(r.signOff)}</p>
+      </div>`;
+    return;
+  }
+  if (diaryTab === 'taccuino') {
+    const n = diary.notebook;
+    ui.diaryContent.innerHTML = `
+      <div class="notebook-grid">
+        ${n.metrics.map(m => `<div class="notebook-stat"><span>${escapeHtml(m.label)}</span><b>${escapeHtml(m.value)}</b></div>`).join('')}
+      </div>
+      <div class="notebook-people">
+        ${n.people.length ? n.people.map(p => `<div class="notebook-person"><b>${escapeHtml(p.name)}</b><span>${escapeHtml(p.role)} · ${escapeHtml(p.area)}</span></div>`).join('') : '<p class="dialog-note">Non hai ancora incontrato nessun abitante. Cerca l’icona 💬 in città.</p>'}
+      </div>
+      <p class="notebook-sign">${escapeHtml(n.signature)}</p>`;
+    return;
+  }
+  const g = diary.gazette;
+  const lead = g.headlines[0];
+  const others = g.headlines.slice(1);
+  ui.diaryContent.innerHTML = `
+    <div class="gazette">
+      <div class="gazette-head">
+        <h3>La Gazzetta di Fidenza</h3>
+        <span>Edizione n. ${g.issue}<br>${escapeHtml(g.dateLabel)}</span>
+      </div>
+      <div class="gazette-grid">
+        <div>
+          <article>
+            <div class="kicker">Prima pagina</div>
+            <h4>${escapeHtml(lead.title)}</h4>
+            <p>${escapeHtml(lead.body)}</p>
+          </article>
+          ${others.map(h => `<article><div class="kicker">Cronaca di città</div><h4>${escapeHtml(h.title)}</h4><p>${escapeHtml(h.body)}</p></article>`).join('')}
+        </div>
+        <div class="gazette-classifieds">
+          <h4>Annunci economici</h4>
+          <ul>${g.classifieds.map(c => `<li>${escapeHtml(c)}</li>`).join('')}</ul>
+          <p class="dialog-note" style="margin-top:14px">${escapeHtml(g.photoLine)} · ${escapeHtml(g.careerLine)}</p>
+        </div>
+      </div>
+      <div class="gazette-foot"><span>Fidenza, Emilia-Romagna</span><span>Edizione locale · solo nel tuo browser</span></div>
+    </div>`;
+}
+
 function openPause() {
   if (state !== 'playing') return;
   if (ui.pauseDialog.open) return;
@@ -1636,6 +1792,16 @@ function updateInteraction() {
     setPromptSafe(missionPrompt);
     return;
   }
+  const nearNpc = world.getNearbyNpc(player.position.x, player.position.z, 4.0);
+  if (nearNpc) {
+    currentInteraction = { type: 'npc', npc: nearNpc.npc };
+    setPromptSafe({
+      text: `<kbd>E</kbd> parla con ${escapeHtml(nearNpc.npc.name)}`,
+      action: 'npc',
+      icon: '💬'
+    });
+    return;
+  }
   const nearPlace = world.getNearbyPlace(player.position.x, player.position.z, 30);
   if (nearPlace) {
     currentInteraction = { type: 'place', place: nearPlace.place };
@@ -1684,6 +1850,10 @@ function handleInteract() {
     missions.interact(player);
     return;
   }
+  if (currentInteraction.type === 'npc') {
+    openNpcDialog(currentInteraction.npc);
+    return;
+  }
   if (currentInteraction.type === 'place') {
     collectPlace(currentInteraction.place);
     return;
@@ -1697,6 +1867,19 @@ function handleInteract() {
   }
 }
 
+function openNpcDialog(npc) {
+  if (!npc) return;
+  activeNpc = npc;
+  activeNpcLine = 0;
+  input.exitPointerLock();
+  npcFirstMeet = addUniqueStat('npcsMet', npc.id);
+  npc.met = true;
+  if (npc.bubble) npc.bubble.visible = false;
+  if (npcFirstMeet) addScore(SCORE.npc);
+  hud.showNpc(npc, 0, npcFirstMeet);
+  audio.click?.();
+}
+
 function updateHUD(dt) {
   if (!player || !world || !missions) return;
   const save = getSave();
@@ -1708,10 +1891,22 @@ function updateHUD(dt) {
     ? (vehicles.current.type === 'vespa' ? 'Vespa' : vehicles.current.type === 'bike' ? 'Bici' : 'Auto')
     : (player.flyMode ? 'Volo' : 'A piedi');
   const nearest = getNearestLandmark(player.position.x, player.position.z, 160, player.cameraYaw);
-  const zoneName = nearest ? (nearest.l.short || nearest.l.name) : (inVehicle ? 'Fidenza' : 'Fidenza');
+  const district = world.getDistrictAt(player.position.x, player.position.z);
+  const zoneName = district?.name || (nearest ? (nearest.l.short || nearest.l.name) : 'Fidenza');
   if (zoneName !== lastZone || hud.el.mode?.textContent !== mode) {
     lastZone = zoneName;
     hud.setMode(mode, zoneName);
+  }
+  if (district && district.id !== lastDistrictId) {
+    lastDistrictId = district.id;
+    const first = addUniqueStat('districtsSeen', district.id);
+    if (first && started) {
+      addScore(50);
+      hud.setBig(district.name.toUpperCase(), 1400);
+      hud.setToast(`Benvenuto a ${district.name} · ${district.description}`, 4200);
+      checkAchievements(true);
+    }
+    audio.setZone(district.ambience || 'city');
   }
   if (nearest) {
     const id = nearest.l.id;

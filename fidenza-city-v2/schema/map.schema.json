@@ -491,6 +491,125 @@
           }
         }
       }
+    },
+    "districts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "x",
+          "z"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          },
+          "ambience": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "venues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "x",
+          "z"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "hours": {
+            "type": "object",
+            "properties": {
+              "open": {
+                "type": "number"
+              },
+              "close": {
+                "type": "number"
+              },
+              "closedDays": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                }
+              }
+            }
+          },
+          "existing": {
+            "type": "boolean"
+          },
+          "custom": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "terrain": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "zoom": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18
+        },
+        "grid": {
+          "type": "integer",
+          "minimum": 64
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tileUrl": {
+          "type": "string"
+        }
+      }
     }
   },
   "$defs": {

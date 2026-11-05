@@ -7,7 +7,7 @@
 - **Mappa e dati vettoriali**: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), distribuiti con licenza [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
   - Il file `data/city.json` è un database derivato da OpenStreetMap e resta soggetto a ODbL.
   - Per usi che modificano o redistribuiscono il database, valgono gli obblighi di attribuzione e condivisione allo stesso modo previsti da ODbL.
-- **Rilievo fuori centro**: [Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) — Mapzen, con dati EU-DEM Copernicus. Il file `data/terrain.json` è derivato da questi tile.
+- **Rilievo fuori centro**: [AWS Open Data — Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) — Mapzen, con dati EU-DEM Copernicus. Il file `data/terrain.json` è derivato dai tile Terrarium AWS ad alta risoluzione.
 - **Dati territoriali di riferimento**: © Regione Emilia-Romagna. Per Fidenza non vengono usati dati della Regione Friuli-Venezia Giulia: la riga FVG presente in altri progetti non è geograficamente valida per l'Emilia-Romagna.
 
 ## Software

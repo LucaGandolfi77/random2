@@ -13,6 +13,8 @@ const DEFAULT_STATS = () => ({
   moneyEarned: 0,
   eventJobs: 0,
   eventsSeen: [],
+  npcsMet: [],
+  districtsSeen: [],
   badges: []
 });
 
@@ -75,6 +77,8 @@ export function loadSave() {
     if (!Array.isArray(state.stats.seasons)) state.stats.seasons = [];
     if (!Array.isArray(state.stats.days)) state.stats.days = [];
     if (!Array.isArray(state.stats.eventsSeen)) state.stats.eventsSeen = [];
+    if (!Array.isArray(state.stats.npcsMet)) state.stats.npcsMet = [];
+    if (!Array.isArray(state.stats.districtsSeen)) state.stats.districtsSeen = [];
     if (!Array.isArray(state.stats.badges)) state.stats.badges = [];
     if (state.stats.photoDuomo == null) state.stats.photoDuomo = false;
     if (!Array.isArray(state.career.history)) state.career.history = [];

@@ -1,4 +1,4 @@
-export const VERSION = '2.11.0';
+export const VERSION = '2.15.0';
 export const SAVE_KEY = 'fidenza-da-giocare-v1';
 
 export const COLORS = {
@@ -15,13 +15,13 @@ export const WORLD = {
   mPerDegLat: 111132.0,
   mPerDegLon: 111320.0 * Math.cos(44.8665 * Math.PI / 180),
   // Area giocabile (leggermente più ampia del centro, fino ai bordi della città)
-  bounds: { minX: -1660, maxX: 1940, minZ: -1740, maxZ: 1840 },
+  bounds: { minX: -1660, maxX: 2120, minZ: -1740, maxZ: 1840 },
   // Area in cui il terreno viene appiattito sotto la città
-  flat: { minX: -1550, maxX: 1850, minZ: -1650, maxZ: 1750 },
+  flat: { minX: -1550, maxX: 2100, minZ: -1650, maxZ: 1750 },
   spawn: { x: -312, z: 12, yaw: 1.99 },
   terrain: {
     widthKm: 6.4,
-    segments: 180
+    segments: 220
   },
   sky: {
     dayTop: '#6fa8c8',
@@ -141,7 +141,8 @@ export const SCORE = {
   place: 250,
   mission: 600,
   missionTimeBonus: 3,
-  placeBonus: 100
+  placeBonus: 100,
+  npc: 25
 };
 
 export const MISSION_TYPES = {
@@ -166,6 +167,6 @@ export const CONTROLS = {
 
 export const ATTRIBUTION = {
   map: '© OpenStreetMap contributors (ODbL)',
-  terrain: 'Terrain Tiles (Mapzen, EU-DEM Copernicus)',
+  terrain: 'AWS Open Data — Terrain Tiles (Mapzen / EU-DEM Copernicus)',
   region: '© Regione Emilia-Romagna'
 };

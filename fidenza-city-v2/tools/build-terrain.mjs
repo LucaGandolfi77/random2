@@ -2,7 +2,8 @@
 /**
  * Fidenza da Giocare — terrain builder
  *
- * Scarica i Terrain Tiles (Mapzen, EU-DEM Copernicus) e produce una heightmap
+ * Scarica gli AWS Terrain Tiles (Terrarium, Mapzen / EU-DEM Copernicus) e
+ * produce una heightmap
  * compatta per il terreno attorno a Fidenza. Formato Terrarium.
  *
  * Uso: node tools/build-terrain.mjs [--refresh]
@@ -22,9 +23,11 @@ const MAP_ID = mapConfig?.id || 'fidenza';
 const CACHE = path.join(ROOT, '.cache', `terrain-${MAP_ID}`);
 const OUT = path.resolve(ROOT, getArg('--out', 'data/terrain.json'));
 const BBOX = mapConfig?.bbox || { south: 44.8500, west: 10.0400, north: 44.8820, east: 10.0850 };
-const MARGIN = 0.024; // ~2,5 km
-const Z = 14;
-const GRID = 320;
+const TERRAIN = mapConfig?.terrain || {};
+const MARGIN = Number(TERRAIN.margin ?? 0.03); // ~3 km
+const Z = Number(TERRAIN.zoom ?? 15);
+const GRID = Number(TERRAIN.grid ?? 512);
+const TILE_URL = TERRAIN.tileUrl || 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
 const TILE = 256;
 
 fs.mkdirSync(CACHE, { recursive: true });
@@ -110,7 +113,7 @@ function decodePNG(buf) {
 async function fetchTile(x, y) {
   const file = path.join(CACHE, `${Z}-${x}-${y}.png`);
   if (fs.existsSync(file) && !refresh) return fs.readFileSync(file);
-  const url = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${Z}/${x}/${y}.png`;
+  const url = TILE_URL.replace('{z}', Z).replace('{x}', x).replace('{y}', y);
   console.log(`↓ ${url}`);
   const res = await fetch(url, { signal: AbortSignal.timeout(60000) });
   if (!res.ok) throw new Error(`HTTP ${res.status} per ${url}`);
@@ -229,8 +232,11 @@ for (let j = 0; j < GRID; j++) {
 
 const out = {
   meta: {
-    source: 'Terrain Tiles (Mapzen, EU-DEM Copernicus)',
+    source: 'AWS Open Data — Terrain Tiles (Mapzen / EU-DEM Copernicus)',
+    provider: 'aws-terrarium',
+    format: 'Terrarium PNG',
     url: 'https://registry.opendata.aws/terrain-tiles/',
+    tileUrl: TILE_URL,
     zoom: Z,
     generated: new Date().toISOString(),
     bounds: { south, west, north, east },

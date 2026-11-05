@@ -1,0 +1,101 @@
+{
+  "generated": "2026-11-05T16:08:54.558Z",
+  "bounds": {
+    "minX": -1660,
+    "maxX": 2120,
+    "minZ": -1740,
+    "maxZ": 1840
+  },
+  "districts": [
+    {
+      "id": "centro",
+      "name": "Centro",
+      "center": {
+        "x": -120,
+        "z": 20
+      },
+      "vertices": 5,
+      "color": "#c2684b"
+    },
+    {
+      "id": "monica",
+      "name": "Monica",
+      "center": {
+        "x": 300,
+        "z": -180
+      },
+      "vertices": 5,
+      "color": "#4f8fa8"
+    },
+    {
+      "id": "sanlazzaro",
+      "name": "San Lazzaro",
+      "center": {
+        "x": 560,
+        "z": 160
+      },
+      "vertices": 4,
+      "color": "#5c8a5a"
+    },
+    {
+      "id": "azalee",
+      "name": "Le Azalee",
+      "center": {
+        "x": 1250,
+        "z": 520
+      },
+      "vertices": 5,
+      "color": "#b86b8a"
+    },
+    {
+      "id": "corea",
+      "name": "Corea",
+      "center": {
+        "x": 620,
+        "z": 900
+      },
+      "vertices": 5,
+      "color": "#c99a3f"
+    },
+    {
+      "id": "luce",
+      "name": "Luce",
+      "center": {
+        "x": -850,
+        "z": 260
+      },
+      "vertices": 5,
+      "color": "#7a5a8a"
+    }
+  ],
+  "samples": 3780,
+  "overlaps": 0,
+  "gaps": 0,
+  "venues": [
+    {
+      "id": "bar-blu-piramide",
+      "name": "Bar Blu Piramide",
+      "district": "azalee",
+      "expected": "azalee"
+    },
+    {
+      "id": "bar-nuovo",
+      "name": "Bar Nuovo",
+      "district": "centro",
+      "expected": null
+    },
+    {
+      "id": "bar-diana",
+      "name": "Bar Diana",
+      "district": "centro",
+      "expected": null
+    },
+    {
+      "id": "la-strega",
+      "name": "La Strega",
+      "district": "centro",
+      "expected": null
+    }
+  ],
+  "errors": 0
+}

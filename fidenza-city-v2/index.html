@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <title>Fidenza da Giocare v2.11 · open world gratis nel browser</title>
-  <meta name="description" content="Scorrazza per Fidenza, guida l'auto e la Vespa, scopri il Duomo, il Teatro Magnani e 27 stelle nascoste. Un open world gratuito nel browser, ispirato alla città di Fidenza.">
+  <title>Fidenza da Giocare v2.15 · open world gratis nel browser</title>
+  <meta name="description" content="Scorrazza per Fidenza, esplora sei quartieri, guida auto e bici, parla con gli abitanti, apri il Diario di Fidenza e fermati al Bar Blu Piramide. Scopri il Duomo, il Teatro Magnani e 27 stelle nascoste. Un open world gratuito nel browser, ispirato alla città di Fidenza.">
   <meta name="theme-color" content="#1d2620">
   <meta name="color-scheme" content="light dark">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Fidenza da Giocare">
-  <meta property="og:title" content="Fidenza da Giocare v2.11 · open world gratis nel browser">
-  <meta property="og:description" content="Fidenza vera, strada per strada, come open world: guida, esplora, completa missioni e trova le 27 stelle.">
+  <meta property="og:title" content="Fidenza da Giocare v2.15 · open world gratis nel browser">
+  <meta property="og:description" content="Fidenza vera, quartiere per quartiere, come open world: guida, parla con gli abitanti, esplora, completa missioni, apri il Diario di Fidenza e trova le 27 stelle.">
   <meta property="og:locale" content="it_IT">
   <meta property="og:image" content="assets/img/og.jpg">
   <meta property="og:image:width" content="1200">
@@ -41,7 +41,7 @@
     "@context": "https://schema.org",
     "@type": "VideoGame",
     "name": "Fidenza da Giocare",
-    "description": "Open world gratuito nel browser ambientato a Fidenza, Emilia-Romagna.",
+    "description": "Open world gratuito nel browser ambientato a Fidenza, Emilia-Romagna: esplorazione, quartieri, missioni, bici, volo, abitanti con dialoghi, Diario di Fidenza, Bar Blu Piramide, turni NPC, orari dei locali e terreno AWS.",
     "inLanguage": "it-IT",
     "genre": ["Open world", "Guida", "Esplorazione"],
     "gamePlatform": ["Web browser", "PC", "Smartphone"],
@@ -159,13 +159,14 @@
       <span><i class="dot poi"></i> POI</span>
       <span><i class="dot mission"></i> missioni</span>
       <span><i class="dot bike"></i> bici</span>
+      <span><i class="dot bar"></i> bar</span>
     </div>
   </div>
 
   <div id="intro">
     <main class="poster">
       <section class="talk">
-        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v2.11.0</span></p>
+        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v2.15.0</span></p>
         <h1 class="wordmark" aria-label="Fidenza da Giocare">
           <span>Fidenza</span>
           <span>da Giocare</span>
@@ -276,6 +277,38 @@
     </div>
   </dialog>
 
+  <dialog id="diary-dialog" class="dialog" aria-labelledby="diary-title">
+    <div class="dialog-in wide diary-card">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Diario di Fidenza</p><h2 id="diary-title">La città che racconta</h2></div>
+        <button type="button" class="dialog-close" data-close="diary-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="diary-tabs" class="diary-tabs" role="tablist" aria-label="Sezioni del diario">
+        <button type="button" class="diary-tab active" data-diary-tab="gazzetta" role="tab">Gazzetta</button>
+        <button type="button" class="diary-tab" data-diary-tab="passaporto" role="tab">Passaporto</button>
+        <button type="button" class="diary-tab" data-diary-tab="radio" role="tab">Radio</button>
+        <button type="button" class="diary-tab" data-diary-tab="taccuino" role="tab">Taccuino</button>
+      </div>
+      <div id="diary-content" class="diary-content"></div>
+    </div>
+  </dialog>
+
+  <dialog id="npc-dialog" class="dialog" aria-labelledby="npc-title">
+    <div class="dialog-in info-card">
+      <div class="dialog-head">
+        <div><p class="eyebrow" id="npc-eyebrow">Abitante di Fidenza</p><h2 id="npc-title">—</h2></div>
+        <button type="button" class="dialog-close" data-close="npc-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <p id="npc-role" class="npc-role"></p>
+      <p id="npc-text"></p>
+      <p id="npc-hint" class="fact"></p>
+      <div class="info-actions">
+        <button type="button" id="npc-next" class="primary">Parla ancora</button>
+        <button type="button" id="npc-close">Saluta</button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="pause-dialog" class="dialog" aria-labelledby="pause-title">
     <div class="dialog-in">
       <p class="eyebrow">Pausa</p>
@@ -289,6 +322,7 @@
         <button type="button" id="pause-career">Carriera</button>
         <button type="button" id="pause-missions">Missioni</button>
         <button type="button" id="pause-board">Record</button>
+        <button type="button" id="pause-diary">Diario di Fidenza</button>
         <button type="button" id="pause-achievements">Obiettivi e statistiche</button>
         <button type="button" id="pause-fly">Volo on/off</button>
         <button type="button" id="pause-photo">Modalità foto</button>

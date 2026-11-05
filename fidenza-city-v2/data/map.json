@@ -2,8 +2,8 @@
   "meta": {
     "id": "fidenza",
     "name": "Fidenza",
-    "version": "2.11.0",
-    "generated": "2026-11-05T12:10:02.269Z",
+    "version": "2.15.0",
+    "generated": "2026-11-05T16:01:37.791Z",
     "center": {
       "lat": 44.8665,
       "lon": 10.0612
@@ -22,7 +22,7 @@
     "attribution": {
       "map": "© OpenStreetMap contributors (ODbL)",
       "region": "© Regione Emilia-Romagna",
-      "terrain": "Terrain Tiles (Mapzen, EU-DEM Copernicus)"
+      "terrain": "AWS Open Data — Terrain Tiles (Mapzen / EU-DEM Copernicus)"
     },
     "counts": {
       "places": 23,
@@ -31,7 +31,9 @@
       "missions": 14,
       "stars": 27,
       "vehicles": 11,
-      "props": 24
+      "props": 24,
+      "districts": 6,
+      "venues": 4
     }
   },
   "places": [
@@ -1837,6 +1839,127 @@
       "width": 0,
       "height": 0,
       "hidden": false
+    }
+  ],
+  "districts": [
+    {
+      "id": "centro",
+      "name": "Centro",
+      "x": -120,
+      "z": 20,
+      "color": "#c2684b",
+      "ambience": "center",
+      "description": "Il cuore storico di Fidenza, tra il Duomo e Piazza Garibaldi."
+    },
+    {
+      "id": "monica",
+      "name": "Monica",
+      "x": 300,
+      "z": -180,
+      "color": "#4f8fa8",
+      "ambience": "station",
+      "description": "La zona della stazione e di Piazza della Repubblica, sempre in movimento."
+    },
+    {
+      "id": "sanlazzaro",
+      "name": "San Lazzaro",
+      "x": 560,
+      "z": 160,
+      "color": "#5c8a5a",
+      "ambience": "city",
+      "description": "Quartiere residenziale a est, con la chiesa di San Lazzaro e le vie del dopoguerra."
+    },
+    {
+      "id": "azalee",
+      "name": "Le Azalee",
+      "x": 1250,
+      "z": 520,
+      "color": "#b86b8a",
+      "ambience": "park",
+      "description": "Il quartiere verde a est, tra villette, giardini e nuovi servizi."
+    },
+    {
+      "id": "corea",
+      "name": "Corea",
+      "x": 620,
+      "z": 900,
+      "color": "#c99a3f",
+      "ambience": "city",
+      "description": "Il quartiere residenziale a sud-est, tra via Baracca e i viali alberati."
+    },
+    {
+      "id": "luce",
+      "name": "Luce",
+      "x": -850,
+      "z": 260,
+      "color": "#7a5a8a",
+      "ambience": "park",
+      "description": "Il quartiere a ovest, con i viali di via Tagliamento e la chiesa di San Paolo."
+    }
+  ],
+  "venues": [
+    {
+      "id": "bar-blu-piramide",
+      "type": "bar",
+      "name": "Bar Blu Piramide",
+      "x": 2080,
+      "z": 780,
+      "color": "#2f6fa8",
+      "description": "Bar e tabaccheria ai margini est di Fidenza, punto di ritrovo del quartiere Azalee.",
+      "hours": {
+        "open": 8,
+        "close": 20,
+        "closedDays": [
+          0
+        ]
+      },
+      "existing": false,
+      "custom": true
+    },
+    {
+      "id": "bar-nuovo",
+      "type": "bar",
+      "name": "Bar Nuovo",
+      "x": -20,
+      "z": -2.6,
+      "color": "#8a5a3a",
+      "description": "Bar storico vicino a Piazza Garibaldi.",
+      "hours": {
+        "open": 7,
+        "close": 22
+      },
+      "existing": true,
+      "custom": false
+    },
+    {
+      "id": "bar-diana",
+      "type": "cafe",
+      "name": "Bar Diana",
+      "x": 35.2,
+      "z": 176.6,
+      "color": "#b07a4e",
+      "description": "Caffè di Piazza Verdi, punto di ritrovo del quartiere.",
+      "hours": {
+        "open": 7,
+        "close": 23
+      },
+      "existing": true,
+      "custom": false
+    },
+    {
+      "id": "la-strega",
+      "type": "bar",
+      "name": "La Strega",
+      "x": -51.6,
+      "z": 2,
+      "color": "#5b3a5a",
+      "description": "Locale serale del centro, aperto fino a tardi.",
+      "hours": {
+        "open": 18,
+        "close": 1
+      },
+      "existing": true,
+      "custom": false
     }
   ],
   "spawn": {

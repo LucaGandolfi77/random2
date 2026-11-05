@@ -25,6 +25,18 @@ export const ACHIEVEMENTS = [
     target: ctx => ctx.totalPlaces, value: save => save.places.length
   },
   {
+    id: 'npc-first', icon: '💬', title: 'Buongiorno, Fidenza', desc: 'Parla con un abitante.',
+    target: () => 1, value: () => (getStats().npcsMet || []).length
+  },
+  {
+    id: 'npc-10', icon: '☺', title: 'Volti di Fidenza', desc: 'Parla con 10 abitanti.',
+    target: () => 10, value: () => (getStats().npcsMet || []).length
+  },
+  {
+    id: 'districts-all', icon: '⌘', title: 'Sei quartieri', desc: 'Visita tutti i quartieri di Fidenza.',
+    target: () => 6, value: () => (getStats().districtsSeen || []).length
+  },
+  {
     id: 'first-mission', icon: '✓', title: 'Primo incarico', desc: 'Completa la prima missione.',
     target: () => 1, value: save => missionCount(save)
   },

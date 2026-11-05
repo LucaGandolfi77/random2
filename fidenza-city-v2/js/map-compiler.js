@@ -197,6 +197,29 @@ export function compileMap(map, city) {
     hidden: !!p.hidden
   })).filter(p => !p.hidden);
 
+  const districts = (map.districts || []).map(d => ({
+    id: d.id,
+    name: d.name || d.id,
+    x: +Number(d.x || 0).toFixed(2),
+    z: +Number(d.z || 0).toFixed(2),
+    color: d.color || '#8a7f6a',
+    ambience: d.ambience || 'city',
+    description: d.description || ''
+  }));
+
+  const venues = (map.venues || []).map(v => ({
+    id: v.id,
+    type: v.type || 'bar',
+    name: v.name || v.id,
+    x: +Number(v.x || 0).toFixed(2),
+    z: +Number(v.z || 0).toFixed(2),
+    color: v.color || '#2f6fa8',
+    description: v.description || '',
+    hours: v.hours || null,
+    existing: !!v.existing,
+    custom: !!v.custom
+  }));
+
   return {
     meta: {
       id: map.id,
@@ -215,7 +238,9 @@ export function compileMap(map, city) {
         missions: missions.length,
         stars: stars.length,
         vehicles: vehicles?.length ?? 0,
-        props: props.length
+        props: props.length,
+        districts: districts.length,
+        venues: venues.length
       }
     },
     places,
@@ -224,6 +249,8 @@ export function compileMap(map, city) {
     stars,
     vehicles,
     props,
+    districts,
+    venues,
     spawn: map.spawn || null,
     missionBoard: map.missionBoard || null,
     overrides: map.overrides || {},

@@ -1,0 +1,24 @@
+{
+  "generated": "2026-11-05T16:08:54.513Z",
+  "source": "AWS Open Data — Terrain Tiles (Mapzen / EU-DEM Copernicus)",
+  "provider": "aws-terrarium",
+  "format": "Terrarium PNG",
+  "zoom": 15,
+  "grid": 512,
+  "values": 262144,
+  "min": 43.2,
+  "max": 161.6,
+  "mean": 74.6,
+  "invalid": 0,
+  "checks": {
+    "awsProvider": true,
+    "terrariumFormat": true,
+    "highZoom": true,
+    "highGrid": true,
+    "correctLength": true,
+    "finiteHeights": true,
+    "plausibleRange": true,
+    "metadataMinMax": true
+  },
+  "errors": []
+}

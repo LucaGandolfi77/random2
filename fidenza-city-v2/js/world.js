@@ -9,12 +9,15 @@ import {
 } from './utils.js';
 import { buildLandmarks, makeTextSprite } from './landmarks.js';
 import { makeCar, makeBus, makeTrain, makePerson, makeBicycle, makeBench, makeTreeGeometry } from './models.js';
-import { hasStar, hasPlace } from './save.js';
+import { hasStar, hasPlace, getStats } from './save.js';
 import { applyOverrides } from './map-overrides.js';
 import { buildBusRoute, makeLoopRoute } from './transit.js';
 import { classifyBuildingRoof, polygonCentroid } from './building-geometry.js';
 import { planPoiSigns } from './poi-signs.js';
 import { planTraffic } from './traffic.js';
+import { NPC_FIXED, NPC_WALKERS } from './npcs.js';
+import { buildDistricts, getDistrictAt as findDistrictAt } from './districts.js';
+import { scheduleSlotFor, crowdVisible, isVenueOpen, venueLabel, venueStatus } from './schedules.js';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -124,6 +127,45 @@ function makeRibbon(pts, width, y, color, { roofColor = null } = {}) {
   return paintGeometry(g, color, { roofColor });
 }
 
+function offsetPolyline(pts, distance) {
+  if (!pts || pts.length < 2) return [];
+  const out = [];
+  for (let i = 0; i < pts.length; i++) {
+    const [x, z] = pts[i];
+    let nx = 0, nz = 0;
+    if (i === 0) {
+      const dx = pts[1][0] - x, dz = pts[1][1] - z;
+      const l = Math.hypot(dx, dz) || 1;
+      nx = -dz / l; nz = dx / l;
+    } else if (i === pts.length - 1) {
+      const dx = x - pts[i - 1][0], dz = z - pts[i - 1][1];
+      const l = Math.hypot(dx, dz) || 1;
+      nx = -dz / l; nz = dx / l;
+    } else {
+      const d1x = x - pts[i - 1][0], d1z = z - pts[i - 1][1];
+      const d2x = pts[i + 1][0] - x, d2z = pts[i + 1][1] - z;
+      const l1 = Math.hypot(d1x, d1z) || 1;
+      const l2 = Math.hypot(d2x, d2z) || 1;
+      const n1x = -d1z / l1, n1z = d1x / l1;
+      const n2x = -d2z / l2, n2z = d2x / l2;
+      let mx = n1x + n2x, mz = n1z + n2z;
+      const ml = Math.hypot(mx, mz);
+      if (ml < 1e-6) { mx = n1x; mz = n1z; }
+      else { mx /= ml; mz /= ml; }
+      const dot = Math.max(0.35, mx * n1x + mz * n1z);
+      const scale = Math.min(2.4, 1 / dot);
+      nx = mx * scale; nz = mz * scale;
+    }
+    out.push([x + nx * distance, z + nz * distance]);
+  }
+  return out;
+}
+
+function makeSideRibbon(pts, roadWidth, sideWidth, side, y, color) {
+  const offset = side * (roadWidth / 2 + sideWidth / 2);
+  return makeRibbon(offsetPolyline(pts, offset), sideWidth, y, color);
+}
+
 function makePolygonGeometry(poly, y, color) {
   if (!poly || poly.length < 3) return null;
   const pts = poly.map(p => [p[0], -p[1]]);
@@ -184,6 +226,43 @@ function makeGlowSprite(color) {
   return sp;
 }
 
+function makeSpeechBubble() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  const x = 8, y = 7, w = 48, h = 36, r = 11;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255,248,232,.96)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(27,36,30,.35)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(24, 42);
+  ctx.lineTo(20, 55);
+  ctx.lineTo(35, 42);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(255,248,232,.96)';
+  ctx.fill();
+  ctx.fillStyle = '#2f4a3c';
+  for (const cx of [21, 32, 43]) {
+    ctx.beginPath();
+    ctx.arc(cx, 25, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+  sp.scale.set(0.55, 0.55, 1);
+  return sp;
+}
+
 function makeRouteWalker(points, startT = 0, direction = 1, speed = 5) {
   const segs = [];
   let total = 0;
@@ -226,6 +305,13 @@ export class World {
     this.renderer = renderer;
     this.rawCity = city;
     this.city = applyOverrides(city, map.overrides || {});
+    this.districts = buildDistricts(map.districts || [], WORLD.bounds);
+    this.districtById = new Map(this.districts.map(d => [d.id, d]));
+    this.venues = map.venues || [];
+    this.venueById = new Map(this.venues.map(v => [v.id, v]));
+    this.barBlue = null;
+    this._venueBucket = -1;
+    this._scheduleBucket = -1;
     this.terrain = terrain;
     this.map = map;
     this.places = map.places || [];
@@ -253,6 +339,7 @@ export class World {
     this.placeObjects = [];
     this.trafficCars = [];
     this.pedestrians = [];
+    this.npcs = [];
     this.cyclists = [];
     this.poiSigns = [];
     this.lampLights = [];
@@ -305,10 +392,12 @@ export class World {
     await step(0.70, 'Pianto gli alberi…', () => this._buildProps());
     await step(0.78, 'Metto i luoghi simbolo…', () => this._buildLandmarks());
     await step(0.82, 'Appendo insegne e arredi…', () => this._buildMapProps());
+    await step(0.835, 'Apro il Bar Blu Piramide…', () => this._buildVenues());
     await step(0.85, 'Metto in moto bus e treno…', () => this._buildTransit());
     await step(0.87, 'Nascondo le stelle…', () => this._buildCollectibles());
     await step(0.90, 'Parcheggio auto e Vespe…', () => this._buildVehicles());
     await step(0.94, 'Faccio girare la città…', () => this._buildTraffic());
+    await step(0.955, 'Popolo strade e piazze…', () => this._buildNpcs());
     await step(0.97, 'Ultimi ritocchi…', () => this._buildAtmosphere());
     onProgress(1, 'Fidenza è pronta');
   }
@@ -490,6 +579,7 @@ export class World {
   _buildAreas() {
     const greenGeoms = [];
     const otherGeoms = [];
+    const squareGeoms = [];
     const waterGeoms = [];
     const greenKinds = new Set(['park', 'grass', 'forest', 'sport']);
     const rnd = seededRandom(7);
@@ -500,6 +590,7 @@ export class World {
       if (!g) continue;
       if (a.kind === 'water') waterGeoms.push(g);
       else if (greenKinds.has(a.kind)) greenGeoms.push(g);
+      else if (a.kind === 'square') squareGeoms.push(g);
       else otherGeoms.push(g);
     }
     this.areaMeshes = [];
@@ -512,6 +603,16 @@ export class World {
       this.scene.add(mesh);
       this.areaMeshes.push(mesh);
       this.areaMesh = mesh;
+    }
+    const squares = mergeClean(squareGeoms);
+    if (squares) {
+      assignPlanarUV(squares, 6);
+      const mesh = new THREE.Mesh(squares, new THREE.MeshLambertMaterial({ vertexColors: true, map: this._piazzaTexture() }));
+      mesh.receiveShadow = true;
+      mesh.name = 'piazze';
+      this.scene.add(mesh);
+      this.areaMeshes.push(mesh);
+      this.piazzaMesh = mesh;
     }
     const other = mergeClean(otherGeoms);
     if (other) {
@@ -575,23 +676,6 @@ export class World {
         }
       }
     }
-    // giunti di pavimentazione sulle strade pedonali
-    for (const r of this.city.roads) {
-      if (!['pedestrian', 'living_street'].includes(r.kind) || r.w < 4) continue;
-      for (let i = 1; i < r.pts.length; i++) {
-        const [ax, az] = r.pts[i - 1], [bx, bz] = r.pts[i];
-        const dx = bx - ax, dz = bz - az;
-        const len = Math.hypot(dx, dz);
-        if (len < 1) continue;
-        const ux = dx / len, uz = dz / len;
-        const nx = -uz, nz = ux;
-        for (let d = 1.5; d < len; d += 3.2) {
-          const cx = ax + ux * d, cz = az + uz * d;
-          const hw = r.w / 2;
-          pavingPoints.push(cx - nx * hw, 0.038, cz - nz * hw, cx + nx * hw, 0.038, cz + nz * hw);
-        }
-      }
-    }
     if (pavingPoints.length) {
       const pg = new THREE.BufferGeometry();
       pg.setAttribute('position', new THREE.Float32BufferAttribute(pavingPoints, 3));
@@ -617,23 +701,110 @@ export class World {
 
   _asphaltTexture() {
     return this._texture('asphalt', (ctx, size) => {
-      ctx.fillStyle = '#c9cbc8';
+      ctx.fillStyle = '#c3c6c1';
       ctx.fillRect(0, 0, size, size);
       const rnd = seededRandom(511);
-      for (let i = 0; i < 4200; i++) {
-        const v = 150 + Math.floor(rnd() * 90);
-        ctx.fillStyle = `rgb(${v},${v + 2},${v})`;
-        ctx.fillRect(rnd() * size, rnd() * size, 1, 1);
+      for (let i = 0; i < 6200; i++) {
+        const v = 130 + Math.floor(rnd() * 105);
+        ctx.fillStyle = `rgba(${v},${v + 2},${v - 1},${0.22 + rnd() * 0.48})`;
+        ctx.fillRect(rnd() * size, rnd() * size, 1 + (rnd() > 0.86 ? 1 : 0), 1);
       }
-      ctx.strokeStyle = 'rgba(100,105,102,.16)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i < 8; i++) {
+      // rattoppi e macchie d'olio
+      for (let i = 0; i < 9; i++) {
+        const x = rnd() * size, y = rnd() * size;
+        ctx.fillStyle = `rgba(70,72,69,${0.05 + rnd() * 0.09})`;
         ctx.beginPath();
-        ctx.moveTo(rnd() * size, 0);
-        ctx.lineTo(rnd() * size, size);
+        ctx.ellipse(x, y, 7 + rnd() * 22, 4 + rnd() * 10, rnd() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // crepe e giunti
+      ctx.strokeStyle = 'rgba(82,84,81,.24)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 7; i++) {
+        let x = rnd() * size, y = rnd() * size;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        for (let s = 0; s < 4; s++) {
+          x += (rnd() - 0.5) * 18;
+          y += 5 + rnd() * 12;
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(95,96,90,.18)';
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, rnd() * size);
+        ctx.lineTo(size, rnd() * size);
         ctx.stroke();
       }
     });
+  }
+
+  _pavingTexture() {
+    return this._texture('paving', (ctx, size) => {
+      ctx.fillStyle = '#d8ccb8';
+      ctx.fillRect(0, 0, size, size);
+      const rnd = seededRandom(821);
+      const slabW = 64, slabH = 32;
+      for (let y = 0; y < size; y += slabH) {
+        for (let x = 0; x < size; x += slabW) {
+          const v = 190 + Math.floor(rnd() * 42);
+          ctx.fillStyle = `rgb(${v},${v - 8},${v - 22})`;
+          ctx.fillRect(x + 1, y + 1, slabW - 2, slabH - 2);
+          if (rnd() > 0.75) {
+            ctx.fillStyle = 'rgba(120,104,82,.08)';
+            ctx.fillRect(x + 6, y + 5, slabW - 16, slabH - 12);
+          }
+        }
+      }
+      ctx.strokeStyle = 'rgba(116,103,84,.34)';
+      ctx.lineWidth = 1.2;
+      for (let y = 0; y <= size; y += slabH) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(size, y); ctx.stroke();
+      }
+      for (let y = 0; y < size; y += slabH) {
+        const shift = (Math.floor(y / slabH) % 2) * (slabW / 2);
+        for (let x = shift; x <= size; x += slabW) {
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + slabH); ctx.stroke();
+        }
+      }
+      for (let i = 0; i < 1800; i++) {
+        ctx.fillStyle = `rgba(120,108,90,${0.02 + rnd() * 0.06})`;
+        ctx.fillRect(rnd() * size, rnd() * size, 1 + rnd() * 3, 1);
+      }
+    }, 256);
+  }
+
+  _piazzaTexture() {
+    return this._texture('piazza', (ctx, size) => {
+      ctx.fillStyle = '#d9c9ad';
+      ctx.fillRect(0, 0, size, size);
+      const rnd = seededRandom(622);
+      const slab = 64;
+      for (let y = 0; y < size; y += slab) {
+        for (let x = 0; x < size; x += slab) {
+          const v = 194 + Math.floor(rnd() * 34);
+          ctx.fillStyle = `rgb(${v},${v - 12},${v - 30})`;
+          ctx.fillRect(x + 2, y + 2, slab - 4, slab - 4);
+          if (rnd() > 0.68) {
+            ctx.strokeStyle = 'rgba(140,120,92,.16)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x + 8, y + 8, slab - 16, slab - 16);
+          }
+        }
+      }
+      ctx.strokeStyle = 'rgba(130,112,86,.3)';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i <= size; i += slab) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, size); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(size, i); ctx.stroke();
+      }
+      for (let i = 0; i < 1200; i++) {
+        ctx.fillStyle = `rgba(150,130,100,${0.015 + rnd() * 0.04})`;
+        ctx.fillRect(rnd() * size, rnd() * size, 2, 1);
+      }
+    }, 256);
   }
 
   _concreteTexture() {
@@ -702,23 +873,51 @@ export class World {
     });
   }
 
+  _districtPavingColor(x, z) {
+    const district = this.getDistrictAt(x, z);
+    const colors = {
+      centro: '#b58f74',
+      monica: '#c2b49c',
+      sanlazzaro: '#b9b09a',
+      azalee: '#c4a89a',
+      corea: '#c0ae92',
+      luce: '#b5b19b'
+    };
+    return colors[district?.id] || '#b9ac96';
+  }
+
   _buildRoads() {
     const roadGeoms = [];
+    const pavingGeoms = [];
+    const piazzaGeoms = [];
     const sidewalkGeoms = [];
+    const curbGeoms = [];
     const markGeoms = [];
     const edgePositions = [];
     const manholeGeoms = [];
     const labels = [];
     const rnd = seededRandom(19);
+    const pedestrianKinds = new Set(['pedestrian', 'footway', 'living_street', 'path', 'cycleway', 'track', 'steps']);
     for (const r of this.city.roads) {
       if (r.tunnel) continue;
       const style = ROAD_STYLE[r.kind] || ROAD_STYLE.residential;
       const baseY = 0.085 + (r.id % 9) * 0.0007;
       const isBridge = r.bridge;
       const y = baseY + (isBridge ? 0.38 : 0);
-      if (style.sidewalk && r.w >= 4.5) {
-        const sw = makeRibbon(r.pts, r.w + 2.6, 0.037 + (r.id % 5) * 0.0004, '#c3b79f');
-        if (sw) sidewalkGeoms.push(sw);
+      const pedestrian = pedestrianKinds.has(r.kind);
+      if (!pedestrian && style.sidewalk && r.w >= 4.5) {
+        for (const side of [-1, 1]) {
+          const sw = makeSideRibbon(r.pts, r.w, 1.35, side, y + 0.018, '#c3b79f');
+          if (sw) sidewalkGeoms.push(sw);
+          const curb = makeSideRibbon(r.pts, r.w, 0.18, side, y + 0.024, '#8f897b');
+          if (curb) curbGeoms.push(curb);
+        }
+      }
+      if (pedestrian) {
+        const mid = r.pts[Math.floor(r.pts.length / 2)] || r.pts[0];
+        const paving = makeRibbon(r.pts, r.w, y, this._districtPavingColor(mid[0], mid[1]));
+        if (paving) (r.kind === 'pedestrian' ? piazzaGeoms : pavingGeoms).push(paving);
+        continue;
       }
       const road = makeRibbon(r.pts, r.w, y, style.color);
       if (road) roadGeoms.push(road);
@@ -813,6 +1012,34 @@ export class World {
       m.receiveShadow = true;
       m.name = 'marciapiedi';
       this.scene.add(m);
+    }
+    const curbMesh = mergeClean(curbGeoms);
+    if (curbMesh) {
+      const m = new THREE.Mesh(curbMesh, new THREE.MeshLambertMaterial({ vertexColors: true, color: '#ffffff' }));
+      m.receiveShadow = true;
+      m.name = 'cordoli';
+      this.scene.add(m);
+    }
+    const pavingMesh = mergeClean(pavingGeoms);
+    if (pavingMesh) {
+      assignPlanarUV(pavingMesh, 4.5);
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      if (this.quality !== 'low') mat.map = this._pavingTexture();
+      const m = new THREE.Mesh(pavingMesh, mat);
+      m.receiveShadow = true;
+      m.name = 'pavimentazione-pedonale';
+      this.scene.add(m);
+    }
+    const piazzaMesh = mergeClean(piazzaGeoms);
+    if (piazzaMesh) {
+      assignPlanarUV(piazzaMesh, 6);
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      if (this.quality !== 'low') mat.map = this._piazzaTexture();
+      const m = new THREE.Mesh(piazzaMesh, mat);
+      m.receiveShadow = true;
+      m.name = 'piazze';
+      this.scene.add(m);
+      this.piazzaMesh = m;
     }
     const marks = mergeClean(markGeoms);
     if (marks) {
@@ -936,7 +1163,7 @@ export class World {
       const half = Math.min(8, info.w / 2) + 1.7;
       candidates.push({ info, signal, nx, nz, half });
     }
-    const chosen = candidates.slice(0, this.quality === 'low' ? 3 : 6);
+    const chosen = candidates.slice(0, this.quality === 'low' ? 4 : this.quality === 'medium' ? 6 : 8);
     const shirts = ['#c2684b', '#4f8fa8', '#7c8d5b', '#d9c9a8', '#9a4a34'];
     for (const c of chosen) {
       const person = makePerson({
@@ -2191,6 +2418,291 @@ export class World {
     }
   }
 
+  _barSignTexture(name, hoursLabel = '') {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 192;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#102b48';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#6fe3ff';
+    ctx.lineWidth = 10;
+    ctx.strokeRect(6, 6, canvas.width - 12, canvas.height - 12);
+    // piccola piramide stilizzata
+    ctx.fillStyle = '#6fe3ff';
+    ctx.beginPath();
+    ctx.moveTo(78, 122);
+    ctx.lineTo(118, 58);
+    ctx.lineTo(158, 122);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#102b48';
+    ctx.beginPath();
+    ctx.moveTo(118, 84);
+    ctx.lineTo(136, 112);
+    ctx.lineTo(100, 112);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#eafaff';
+    ctx.font = '700 62px Anton, "Arial Narrow", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name.toUpperCase(), 190, 100);
+    ctx.fillStyle = '#6fe3ff';
+    ctx.font = '600 23px Oswald, "Trebuchet MS", sans-serif';
+    ctx.letterSpacing = '4px';
+    ctx.fillText('BAR · TABACCHI · CAFFÈ', 192, 148);
+    if (hoursLabel) {
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#6fe3ff';
+      ctx.font = '600 22px Oswald, "Trebuchet MS", sans-serif';
+      ctx.fillText(hoursLabel, canvas.width - 26, 148);
+      ctx.textAlign = 'left';
+    }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(8, this.renderer?.capabilities?.getMaxAnisotropy?.() || 1);
+    return tex;
+  }
+
+  _buildVenues() {
+    for (const venue of this.venues) {
+      if (venue.existing) {
+        this._buildExistingVenue(venue);
+        continue;
+      }
+      if (venue.type !== 'bar') continue;
+      const x = venue.x;
+      const z = venue.z;
+      const y = groundHeightAt(this.terrain, x, z, 0);
+      const group = new THREE.Group();
+      group.position.set(x, y, z);
+
+      // Terrazza e parcheggio.
+      const terrace = new THREE.Mesh(
+        new THREE.PlaneGeometry(22, 15),
+        new THREE.MeshLambertMaterial({ color: '#898b80' })
+      );
+      terrace.rotation.x = -Math.PI / 2;
+      terrace.position.set(0, 0.09, 5);
+      terrace.receiveShadow = true;
+      group.add(terrace);
+
+      // Accesso carrabile verso Via Ferraris.
+      const driveway = new THREE.Mesh(
+        new THREE.PlaneGeometry(18, 7),
+        new THREE.MeshLambertMaterial({ color: '#5f625f' })
+      );
+      driveway.rotation.x = -Math.PI / 2;
+      driveway.position.set(15, 0.095, 3);
+      driveway.receiveShadow = true;
+      group.add(driveway);
+
+      // Corpo del bar.
+      const wall = new THREE.MeshLambertMaterial({ color: '#e6ddca' });
+      const dark = new THREE.MeshLambertMaterial({ color: '#24313a' });
+      const building = new THREE.Mesh(new THREE.BoxGeometry(12, 3.3, 8), wall);
+      building.position.y = 1.65;
+      building.castShadow = true;
+      building.receiveShadow = true;
+      group.add(building);
+
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(13, 0.32, 9), dark);
+      roof.position.y = 3.45;
+      roof.castShadow = true;
+      group.add(roof);
+
+      const facadeBand = new THREE.Mesh(
+        new THREE.BoxGeometry(12.25, 0.35, 0.12),
+        new THREE.MeshLambertMaterial({ color: venue.color || '#2f6fa8' })
+      );
+      facadeBand.position.set(0, 2.15, 4.06);
+      group.add(facadeBand);
+
+      const glass = new THREE.Mesh(
+        new THREE.BoxGeometry(9.4, 1.5, 0.08),
+        new THREE.MeshLambertMaterial({ color: '#8fc7dd' })
+      );
+      glass.position.set(0, 1.32, 4.08);
+      group.add(glass);
+
+      const door = new THREE.Mesh(
+        new THREE.BoxGeometry(2.1, 2.5, 0.12),
+        new THREE.MeshLambertMaterial({ color: '#2f4a3c' })
+      );
+      door.position.set(3.9, 1.25, 4.1);
+      group.add(door);
+
+      // Insegna principale e insegna laterale.
+      const signMat = new THREE.MeshBasicMaterial({ map: this._barSignTexture(venue.name || 'Bar Blu Piramide', venueLabel(venue.hours || {})) });
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 1.25), signMat);
+      sign.position.set(0, 2.78, 4.16);
+      group.add(sign);
+      const sideSign = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 1.2), signMat);
+      sideSign.position.set(6.08, 2.78, 0);
+      sideSign.rotation.y = Math.PI / 2;
+      group.add(sideSign);
+
+      // Neon sul tetto.
+      const neonMat = new THREE.MeshBasicMaterial({ color: '#6fe3ff' });
+      const neonFront = new THREE.Mesh(new THREE.BoxGeometry(12.4, 0.08, 0.08), neonMat);
+      neonFront.position.set(0, 3.55, 4.1);
+      group.add(neonFront);
+      const neonSide = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 8.2), neonMat);
+      neonSide.position.set(6.06, 3.55, 0);
+      group.add(neonSide);
+
+      // Tenda blu.
+      const awning = new THREE.Mesh(
+        new THREE.BoxGeometry(12.8, 0.14, 2.2),
+        new THREE.MeshLambertMaterial({ color: venue.color || '#2f6fa8' })
+      );
+      awning.position.set(0, 3.62, 5.05);
+      awning.castShadow = true;
+      group.add(awning);
+
+      // Tavolini, sedie e ombrelloni.
+      const tableTop = new THREE.MeshLambertMaterial({ color: '#efe6d6' });
+      const chairMat = new THREE.MeshLambertMaterial({ color: '#2f4a3c' });
+      const addTable = (tx, tz) => {
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.08, 14), tableTop);
+        top.position.set(tx, 0.78, tz);
+        top.castShadow = true;
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.76, 7), dark);
+        pole.position.set(tx, 0.38, tz);
+        group.add(top, pole);
+        for (let i = 0; i < 3; i++) {
+          const a = i * Math.PI * 2 / 3 + 0.4;
+          const chair = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.48, 0.46), chairMat);
+          chair.position.set(tx + Math.cos(a) * 1.02, 0.25, tz + Math.sin(a) * 1.02);
+          chair.castShadow = true;
+          group.add(chair);
+        }
+      };
+      const umbrellaMat = new THREE.MeshLambertMaterial({ color: venue.color || '#2f6fa8' });
+      const addUmbrella = (tx, tz) => {
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.55, 7), dark);
+        pole.position.set(tx, 1.28, tz);
+        const cap = new THREE.Mesh(new THREE.ConeGeometry(1.75, 0.5, 12), umbrellaMat);
+        cap.position.set(tx, 2.55, tz);
+        cap.castShadow = true;
+        group.add(pole, cap);
+      };
+      for (const [tx, tz] of [[-3.8, 6.4], [0, 6.4], [3.8, 6.4]]) {
+        addTable(tx, tz);
+        addUmbrella(tx, tz);
+      }
+
+      // Fioriere e dettagli.
+      for (const [px, pz] of [[-5.6, 4.8], [5.6, 4.8]]) {
+        const planter = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.55, 0.65), new THREE.MeshLambertMaterial({ color: '#a77a58' }));
+        planter.position.set(px, 0.28, pz);
+        const bush = new THREE.Mesh(new THREE.SphereGeometry(0.42, 8, 6), new THREE.MeshLambertMaterial({ color: '#5d8850' }));
+        bush.position.set(px, 0.72, pz);
+        group.add(planter, bush);
+      }
+
+      // Auto parcheggiate.
+      for (const [cx, cz, color] of [[-13, 6, '#4f8fa8'], [-13, 10.5, '#c2684b']]) {
+        const car = makeCar({ color, parked: true });
+        car.position.set(cx, 0.05, cz);
+        car.rotation.y = Math.PI / 2;
+        car.scale.setScalar(0.94);
+        group.add(car);
+      }
+
+      this.scene.add(group);
+      this.addBoxCollider(x, z, 12, 8, venue.name || 'Bar Blu Piramide');
+      venue.group = group;
+      venue.terrace = terrace;
+      venue.signMaterial = signMat;
+      venue.neonMeshes = [neonFront, neonSide];
+      venue.open = true;
+      this.barBlue = venue;
+
+      const light = new THREE.PointLight('#6fe3ff', 0, 26);
+      light.position.set(x, 4.2, z + 4.8);
+      this.scene.add(light);
+      venue.light = light;
+      this.barLight = light;
+    }
+  }
+
+  _buildExistingVenue(venue) {
+    const spot = this.findFreeSpot(venue.x, venue.z, 1.4) || { x: venue.x, z: venue.z };
+    const group = new THREE.Group();
+    group.position.set(spot.x, 0, spot.z);
+    const furniture = new THREE.Group();
+    const terrace = new THREE.Mesh(
+      new THREE.PlaneGeometry(10, 7),
+      new THREE.MeshLambertMaterial({ color: '#9b9487', transparent: true, opacity: 0.82 })
+    );
+    terrace.rotation.x = -Math.PI / 2;
+    terrace.position.y = 0.045;
+    group.add(terrace);
+
+    const dark = new THREE.MeshLambertMaterial({ color: '#2f3632' });
+    const tableMat = new THREE.MeshLambertMaterial({ color: '#efe6d6' });
+    const chairMat = new THREE.MeshLambertMaterial({ color: venue.color || '#8a5a3a' });
+    const umbrellaMat = new THREE.MeshLambertMaterial({ color: venue.color || '#8a5a3a' });
+    for (const [tx, tz] of [[-2.4, 1.4], [2.2, 1.4], [0, -1.8]]) {
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.08, 12), tableMat);
+      top.position.set(tx, 0.74, tz);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.72, 6), dark);
+      pole.position.set(tx, 0.36, tz);
+      const umbrella = new THREE.Mesh(new THREE.ConeGeometry(1.45, 0.42, 10), umbrellaMat);
+      umbrella.position.set(tx, 2.35, tz);
+      const umbrellaPole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 2.2, 6), dark);
+      umbrellaPole.position.set(tx, 1.12, tz);
+      furniture.add(top, pole, umbrella, umbrellaPole);
+      for (let i = 0; i < 2; i++) {
+        const chair = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.42, 0.4), chairMat);
+        chair.position.set(tx + (i ? 0.9 : -0.9), 0.22, tz);
+        furniture.add(chair);
+      }
+    }
+    const sign = makeTextSprite(`${venue.name || 'BAR'}\n${venueLabel(venue.hours || {})}`, {
+      scale: 0.42,
+      fontSize: 30,
+      pad: 14,
+      bg: 'rgba(255,248,232,.94)',
+      color: '#1b241e'
+    });
+    sign.position.set(0, 2.75, 0);
+    furniture.add(sign);
+
+    const lights = new THREE.Group();
+    for (let i = -4; i <= 4; i++) {
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.07, 6, 4), new THREE.MeshBasicMaterial({ color: '#ffe6a6' }));
+      bulb.position.set(i * 1.1, 2.55, 0);
+      lights.add(bulb);
+    }
+    group.add(furniture, lights);
+    this.scene.add(group);
+    venue.group = group;
+    venue.furniture = furniture;
+    venue.lights = lights;
+    venue.crowd = [];
+    const crowdCount = this.quality === 'low' ? 2 : 3;
+    for (let i = 0; i < crowdCount; i++) {
+      const person = makePerson({
+        shirt: ['#c2684b', '#4f8fa8', '#7c8d5b'][i % 3],
+        pants: '#3a3f46'
+      });
+      person.position.set((i - 1) * 1.5, 0.04, 1.4 + (i % 2) * 0.8);
+      person.rotation.y = i * 1.8;
+      person.visible = false;
+      group.add(person);
+      venue.crowd.push(person);
+    }
+    venue.terrace = terrace;
+    venue.open = true;
+    const glow = new THREE.PointLight(venue.color || '#ffd9a0', 0, 16);
+    glow.position.set(0, 2.7, 0);
+    group.add(glow);
+    venue.light = glow;
+  }
+
   _boardTexture(title, rows) {
     const canvas = document.createElement('canvas');
     canvas.width = 720;
@@ -2884,7 +3396,7 @@ export class World {
     const rnd = seededRandom(77);
     const plans = planTraffic(this.city, this.quality, rnd);
     const roadsById = new Map(this.city.roads.map(road => [road.id, road]));
-    const pedRoads = this.city.roads.filter(r => ['footway', 'pedestrian', 'residential', 'living_street', 'path'].includes(r.kind) && r.length > 35 && !r.tunnel);
+    const pedRoads = this.city.roads.filter(r => ['footway', 'pedestrian', 'living_street', 'path'].includes(r.kind) && r.length > 35 && !r.tunnel);
     const colors = ['#c2684b', '#4f8fa8', '#d9c9a8', '#5c6b5f', '#9a4a34', '#d7d2c7'];
     for (const plan of plans) {
       const road = roadsById.get(plan.roadId);
@@ -2902,7 +3414,7 @@ export class World {
         roadKind: road.kind
       });
     }
-    const pedCount = this.quality === 'low' ? 6 : this.quality === 'medium' ? 9 : 13;
+    const pedCount = this.quality === 'low' ? 9 : this.quality === 'medium' ? 15 : 24;
     const shirts = ['#c2684b', '#4f8fa8', '#d9c9a8', '#5c6b5f', '#9a4a34', '#7c8d5b', '#d7d2c7'];
     const pants = ['#2f4a3c', '#3a3f46', '#5b4a3a', '#4e5a63'];
     for (let i = 0; i < pedCount; i++) {
@@ -2911,9 +3423,48 @@ export class World {
       const walker = makeRouteWalker(road.pts, rnd() * 40, rnd() > 0.5 ? 1 : -1, 0.9 + rnd() * 0.45);
       const person = makePerson({ shirt: shirts[Math.floor(rnd() * shirts.length)], pants: pants[Math.floor(rnd() * pants.length)] });
       this.scene.add(person);
-      this.pedestrians.push({ person, walker, phase: rnd() * Math.PI * 2 });
+      const pose = walker.pose();
+      const district = this.getDistrictAt(pose.x, pose.z);
+      this.pedestrians.push({ person, walker, phase: rnd() * Math.PI * 2, district: district.id, crowdSlot: i % 3 });
     }
     this._buildBicycles(rnd);
+  }
+
+  _nearestPedestrianRoad(x, z) {
+    const kinds = new Set(['pedestrian', 'footway', 'living_street', 'path', 'cycleway']);
+    let best = null;
+    for (const road of this.city.roads) {
+      if (!kinds.has(road.kind) || road.length < 25 || road.tunnel || !road.pts?.length) continue;
+      for (const point of road.pts) {
+        const d = Math.hypot(point[0] - x, point[1] - z);
+        if (!best || d < best.d) best = { road, d };
+      }
+    }
+    return best;
+  }
+
+  _roadOffsetForPoint(road, x, z) {
+    let best = Infinity;
+    let bestT = 0;
+    let total = 0;
+    for (let i = 1; i < road.pts.length; i++) {
+      const [ax, az] = road.pts[i - 1];
+      const [bx, bz] = road.pts[i];
+      const dx = bx - ax;
+      const dz = bz - az;
+      const len = Math.hypot(dx, dz);
+      if (len < 0.01) continue;
+      const t = clamp(((x - ax) * dx + (z - az) * dz) / (len * len), 0, 1);
+      const px = ax + dx * t;
+      const pz = az + dz * t;
+      const d = Math.hypot(x - px, z - pz);
+      if (d < best) {
+        best = d;
+        bestT = total + len * t;
+      }
+      total += len;
+    }
+    return bestT;
   }
 
   _buildBicycles(rnd = seededRandom(88)) {
@@ -2922,14 +3473,70 @@ export class World {
       [-20, 62], [-200, 220], [250, 100], [-110, 145], [-470, 90]
     ];
     const colors = ['#4f8fa8', '#c2684b', '#5c6b5f', '#c99a3f', '#7a5a8a'];
-    for (const [x, z] of parked) {
+    const placedBikes = [];
+    const addParkedBike = (x, z) => {
       const spot = this.findFreeSpot(x, z, 0.7);
-      if (!spot) continue;
+      if (!spot) return null;
+      if (placedBikes.some(b => Math.hypot(b.x - spot.x, b.z - spot.z) < 4.2)) return null;
+      if (this.vehicleSpawns.some(v => Math.hypot(v.x - spot.x, v.z - spot.z) < 3.5)) return null;
       const bike = makeBicycle({ color: colors[Math.floor(rnd() * colors.length)] });
       bike.position.set(spot.x, 0, spot.z);
       bike.rotation.y = rnd() * Math.PI * 2;
       bike.scale.setScalar(0.9 + rnd() * 0.15);
       this.scene.add(bike);
+      const entry = { x: spot.x, z: spot.z };
+      placedBikes.push(entry);
+      return entry;
+    };
+    for (const [x, z] of parked) addParkedBike(x, z);
+
+    const pedestrianRoads = this.city.roads.filter(r =>
+      ['pedestrian', 'footway', 'living_street', 'path', 'cycleway'].includes(r.kind) &&
+      r.length > 28 && !r.tunnel
+    );
+
+    // Bici guidabili aggiuntive, distribuite nelle zone pedonali.
+    const rideableDefs = [
+      { label: 'Bici Via Emilia', x: -290, z: -24 },
+      { label: 'Bici Piazza Garibaldi', x: 14, z: -21 },
+      { label: 'Bici Piazza Verdi', x: -18, z: 105 },
+      { label: 'Bici Parco', x: -234, z: 613 },
+      { label: 'Bici Repubblica', x: 195, z: -103 }
+    ];
+    for (const def of rideableDefs) {
+      let spot = this.findFreeSpot(def.x, def.z, 0.8);
+      if (!spot) {
+        const near = this._nearestPedestrianRoad(def.x, def.z);
+        if (!near) continue;
+        const offset = this._roadOffsetForPoint(near.road, def.x, def.z);
+        const pose = makeRouteWalker(near.road.pts, offset, 1, 1).pose();
+        spot = this.findFreeSpot(pose.x, pose.z, 0.8);
+      }
+      if (!spot) continue;
+      if (this.vehicleSpawns.some(v => Math.hypot(v.x - spot.x, v.z - spot.z) < 8)) continue;
+      if (placedBikes.some(b => Math.hypot(b.x - spot.x, b.z - spot.z) < 5)) continue;
+      this.vehicleSpawns.push({
+        type: 'bike',
+        label: def.label,
+        x: +spot.x.toFixed(1),
+        z: +spot.z.toFixed(1),
+        yaw: rnd() * Math.PI * 2,
+        color: colors[Math.floor(rnd() * colors.length)]
+      });
+    }
+
+    const extraParked = this.quality === 'low' ? 8 : this.quality === 'medium' ? 14 : 20;
+    for (let i = 0; i < extraParked && pedestrianRoads.length; i++) {
+      const road = pedestrianRoads[Math.floor(rnd() * pedestrianRoads.length)];
+      if (!road?.pts?.length) continue;
+      const index = 1 + Math.floor(rnd() * (road.pts.length - 1));
+      const a = road.pts[index - 1];
+      const b = road.pts[index];
+      const t = rnd();
+      addParkedBike(
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t
+      );
     }
 
     const cycleRoads = this.city.roads.filter(r =>
@@ -2961,8 +3568,108 @@ export class World {
     }
   }
 
+  _makeNpcPerson(def, rnd) {
+    const person = makePerson({
+      shirt: def.shirt || '#c2684b',
+      pants: def.pants || '#2f4a3c',
+      skin: def.skin || '#d8aa85',
+      hair: def.hair || '#3a2a20'
+    });
+    person.scale.setScalar(0.94 + rnd() * 0.1);
+    return person;
+  }
+
+  _buildNpcs() {
+    const rnd = seededRandom(912);
+    const met = new Set(getStats().npcsMet || []);
+    const fixedCount = this.quality === 'low' ? 9 : this.quality === 'medium' ? 11 : 13;
+    for (const def of NPC_FIXED.slice(0, fixedCount)) {
+      const spot = this.findFreeSpot(def.x, def.z, 1.2) || { x: def.x, z: def.z };
+      const person = this._makeNpcPerson(def, rnd);
+      person.position.set(spot.x, 0.04, spot.z);
+      person.rotation.y = rnd() * Math.PI * 2;
+      this.scene.add(person);
+      const bubble = makeSpeechBubble();
+      bubble.position.set(0, 2.15, 0);
+      bubble.visible = false;
+      person.add(bubble);
+      this.npcs.push({
+        ...def,
+        kind: 'fixed',
+        person,
+        bubble,
+        met: met.has(def.id),
+        phase: rnd() * Math.PI * 2
+      });
+    }
+
+    const walkerCount = this.quality === 'low' ? 3 : this.quality === 'medium' ? 5 : 6;
+    for (const def of NPC_WALKERS.slice(0, walkerCount)) {
+      const near = this._nearestPedestrianRoad(def.x, def.z);
+      if (!near) continue;
+      const offset = this._roadOffsetForPoint(near.road, def.x, def.z);
+      const walker = makeRouteWalker(near.road.pts, offset, rnd() > 0.5 ? 1 : -1, 0.9 + rnd() * 0.35);
+      const pose = walker.pose();
+      const person = this._makeNpcPerson(def, rnd);
+      person.position.set(pose.x, 0.04, pose.z);
+      person.rotation.y = Math.atan2(pose.dx, pose.dz);
+      this.scene.add(person);
+      const bubble = makeSpeechBubble();
+      bubble.position.set(0, 2.15, 0);
+      bubble.visible = false;
+      person.add(bubble);
+      const entry = {
+        ...def,
+        kind: 'walker',
+        person,
+        walker,
+        bubble,
+        met: met.has(def.id),
+        phase: rnd() * Math.PI * 2
+      };
+      this.pedestrians.push({ person, walker, phase: entry.phase, npc: entry });
+      this.npcs.push(entry);
+    }
+  }
+
+  _updateNpcs(dt, playerPos) {
+    if (!playerPos) return;
+    for (const npc of this.npcs) {
+      const p = npc.person.position;
+      const d = Math.hypot(p.x - playerPos.x, p.z - playerPos.z);
+      if (npc.bubble) {
+        const show = npc.person.visible && !npc.met && d < 22;
+        npc.bubble.visible = show;
+        if (show) {
+          npc.bubble.position.y = 2.15 + Math.sin(this.time * 2.2 + npc.phase) * 0.08;
+          npc.bubble.material.opacity = clamp(1 - Math.max(0, d - 16) / 8, 0.35, 1);
+        }
+      }
+      if (npc.person.visible && npc.kind === 'fixed' && d < 9) {
+        npc.person.rotation.y = Math.atan2(playerPos.x - p.x, playerPos.z - p.z);
+      }
+    }
+  }
+
+  getDistrictAt(x, z) {
+    return findDistrictAt(this.districts, x, z);
+  }
+
+  getNearbyNpc(x, z, radius = 3.4) {
+    let best = null;
+    for (const npc of this.npcs) {
+      if (!npc.person.visible) continue;
+      const p = npc.person.position;
+      const d = Math.hypot(p.x - x, p.z - z);
+      if (d < radius && (!best || d < best.dist)) best = { npc, dist: d };
+    }
+    return best;
+  }
+
   _updateCyclists(dt) {
+    const daylight = this.hour >= 6 && this.hour < 23;
     for (const c of this.cyclists) {
+      c.bike.visible = daylight;
       c.walker.advance(dt);
       const pose = c.walker.pose();
       c.bike.position.set(pose.x, 0.05, pose.z);
@@ -3120,6 +3827,97 @@ export class World {
   setPlaceVisited(id) {
     const p = this.placeObjects.find(p => p.id === id);
     if (p) { p.visited = true; p.group.visible = false; }
+  }
+
+  _updateVenues() {
+    const weekday = new Date().getDay();
+    for (const venue of this.venues) {
+      const status = venueStatus(this.hour, venue, weekday);
+      venue.status = status;
+      venue.open = status.open;
+      if (venue.existing) {
+        if (venue.furniture) venue.furniture.visible = status.open;
+        if (venue.lights) venue.lights.visible = status.open;
+        if (venue.light) venue.light.intensity = status.open ? (this.ambientNight > 0.45 ? 1.3 : 0.5) : 0;
+        const evening = this.hour >= 17 || this.hour < 2;
+        for (const person of venue.crowd || []) person.visible = status.open && evening;
+      } else {
+        for (const mesh of venue.neonMeshes || []) mesh.visible = status.open;
+        if (venue.signMaterial) venue.signMaterial.color.set(status.open ? '#ffffff' : '#7a8384');
+        if (venue.light) venue.light.intensity = status.open && this.ambientNight > 0.45 ? 3.2 : 0;
+      }
+    }
+  }
+
+  _scheduleTargetFor(npc) {
+    let slot = scheduleSlotFor(npc.id, this.hour);
+    if (npc.id === 'blue-bartender') {
+      const bar = this.venueById.get('bar-blu-piramide');
+      if (bar && !bar.open) slot = { visible: false, activity: 'chiuso' };
+    }
+    const key = slot.visible
+      ? `${slot.x ?? 'route'}:${slot.z ?? 'route'}:${slot.activity || 'in giro'}`
+      : 'hidden';
+    return { slot, key };
+  }
+
+  _applySchedule(npc, target) {
+    npc.scheduleVisible = !!target.slot.visible;
+    npc.scheduleActivity = target.slot.activity || '';
+    npc._scheduleKey = target.key;
+    npc._pendingSchedule = null;
+    if (npc.kind === 'walker') {
+      npc.person.visible = npc.scheduleVisible;
+      return;
+    }
+    if (!npc.scheduleVisible) {
+      npc.person.visible = false;
+      if (npc.bubble) npc.bubble.visible = false;
+      return;
+    }
+    if (Number.isFinite(target.slot.x) && Number.isFinite(target.slot.z)) {
+      const spot = this.findFreeSpot(target.slot.x, target.slot.z, 1.2) || { x: target.slot.x, z: target.slot.z };
+      npc.person.position.set(spot.x, 0.04, spot.z);
+    }
+    npc.person.visible = true;
+  }
+
+  _updateSchedules(dt, playerPos) {
+    if (dt <= 0) return;
+    const bucket = Math.floor(this.hour * 6);
+    if (bucket !== this._scheduleBucket) {
+      this._scheduleBucket = bucket;
+      this._updateVenues();
+    }
+    for (const npc of this.npcs) {
+      const target = this._scheduleTargetFor(npc);
+      const p = npc.person.position;
+      const d = Math.hypot(p.x - playerPos.x, p.z - playerPos.z);
+      if (npc._pendingSchedule) {
+        if (d > 55) this._applySchedule(npc, npc._pendingSchedule);
+        continue;
+      }
+      if (target.key === npc._scheduleKey && npc.scheduleVisible === !!target.slot.visible) continue;
+      const samePos = npc.person.visible && Number.isFinite(target.slot.x) &&
+        Math.hypot(p.x - target.slot.x, p.z - target.slot.z) < 3;
+      const canApply = d > 55 || samePos || (!target.slot.visible && !npc.scheduleVisible);
+      if (canApply) this._applySchedule(npc, target);
+      else npc._pendingSchedule = target;
+    }
+  }
+
+  getVenueStatuses() {
+    return this.venues.map(v => ({
+      id: v.id,
+      name: v.name,
+      type: v.type,
+      color: v.color,
+      open: !!v.open,
+      hours: v.hours || null,
+      label: venueLabel(v.hours || {}),
+      text: v.open ? 'aperto' : 'chiuso',
+      status: v.status || null
+    }));
   }
 
   setHour(hour) {
@@ -3287,11 +4085,13 @@ export class World {
   update(dt, playerPos, camera) {
     this.time += dt;
     this._updateSky(playerPos);
+    this._updateSchedules(dt, playerPos);
     this._updateStars();
     this._updatePlaces();
     this._updateTrafficLights();
     this._updateTraffic(dt);
     this._updatePedestrians(dt);
+    this._updateNpcs(dt, playerPos);
     this._updateCrossingWalkers(dt);
     this._updateCyclists(dt);
     this._updateBus(dt);
@@ -3356,6 +4156,7 @@ export class World {
       this.bulbMesh.material.color.copy(c);
     }
     for (const l of this.lampLights) l.intensity = night * 1.6;
+    if (this.barLight) this.barLight.intensity = this.barBlue?.open === false ? 0 : night * 3.2;
     if (this.playerLight) {
       this.playerLight.position.set(playerPos.x, playerPos.y + 3.4, playerPos.z);
       this.playerLight.intensity = night * 1.35;
@@ -3412,7 +4213,9 @@ export class World {
 
   _updateCrossingWalkers(dt) {
     const time = this.time;
+    const daylight = this.hour >= 6 && this.hour < 23;
     for (const p of this.crossingWalkers) {
+      p.person.visible = daylight;
       const signal = p.signal ? this._signalState(p.signal, time) : 'red';
       if (p.state === 'waiting') {
         p.wait -= dt;
@@ -3451,7 +4254,11 @@ export class World {
 
   _updatePedestrians(dt) {
     const time = this.time;
+    const daylight = this.hour >= 6 && this.hour < 23;
     for (const p of this.pedestrians) {
+      p.person.visible = p.npc
+        ? p.npc.scheduleVisible !== false
+        : daylight && crowdVisible(p.district, p.crowdSlot ?? 0, this.hour);
       p.walker.advance(dt);
       const pose = p.walker.pose();
       p.person.position.set(pose.x, 0.04, pose.z);

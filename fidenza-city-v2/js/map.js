@@ -27,6 +27,23 @@ function bikePath(ctx, x, y, r) {
   ctx.stroke();
 }
 
+function drawBarMarker(ctx, x, y, r, color = '#2f6fa8') {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.strokeStyle = '#eafaff';
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+  if (r >= 6) {
+    ctx.fillStyle = '#eafaff';
+    ctx.font = '700 9px Oswald, "Trebuchet MS", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('B', x, y + 0.5);
+  }
+}
+
 function starPath(ctx, x, y, r) {
   ctx.beginPath();
   for (let i = 0; i < 10; i++) {
@@ -78,6 +95,8 @@ export class GameMap {
     this.player = player;
     this.missions = missions;
     this.vehicles = vehicles;
+    this.districts = world.districts || [];
+    this.barBlue = world.barBlue || null;
     this.city = world.city;
     this.landmarks = world.landmarks;
     this.places = world.places;
@@ -332,6 +351,13 @@ export class GameMap {
       bikePath(ctx, p.x, p.y, 3.1);
     }
 
+    if (this.barBlue) {
+      const p = toScreen(this.barBlue.x, this.barBlue.z);
+      if (p.x > -10 && p.y > -10 && p.x < W + 10 && p.y < H + 10) {
+        drawBarMarker(ctx, p.x, p.y, 6, this.barBlue.color);
+      }
+    }
+
     // giocatore al centro
     ctx.save();
     ctx.translate(W / 2, H / 2);
@@ -505,6 +531,35 @@ export class GameMap {
       return { x: destX + p.x * drawScale, y: destY + p.y * drawScale };
     };
 
+    // quartieri
+    for (const district of this.districts) {
+      if (!district.poly?.length) continue;
+      pathPolygon(ctx, district.poly, (x, z) => toScreen(x, z));
+      ctx.globalAlpha = 0.11;
+      ctx.fillStyle = district.color || '#8a7f6a';
+      ctx.fill();
+      ctx.globalAlpha = 0.5;
+      ctx.strokeStyle = district.color || '#8a7f6a';
+      ctx.lineWidth = 1.4 / Math.max(0.5, drawScale);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    if (this.zoom >= 0.8) {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      for (const district of this.districts) {
+        const p = toScreen(district.x, district.z);
+        if (p.x < 0 || p.y < 0 || p.x > W || p.y > H) continue;
+        ctx.font = '700 13px Oswald, "Trebuchet MS", sans-serif';
+        const label = district.name.toUpperCase();
+        const w = ctx.measureText(label).width;
+        ctx.fillStyle = 'rgba(20,28,23,.65)';
+        ctx.fillRect(p.x - w / 2 - 8, p.y - 11, w + 16, 22);
+        ctx.fillStyle = district.color || '#f4ebda';
+        ctx.fillText(label, p.x, p.y);
+      }
+    }
+
     // stelle
     for (const s of this.world.starObjects) {
       if (s.collected) continue;
@@ -658,6 +713,24 @@ export class GameMap {
       ctx.strokeStyle = '#1b241e';
       ctx.lineWidth = 1.6;
       bikePath(ctx, p.x, p.y, 5.1);
+    }
+
+    if (this.barBlue) {
+      const p = toScreen(this.barBlue.x, this.barBlue.z);
+      if (p.x > -24 && p.y > -24 && p.x < W + 24 && p.y < H + 24) {
+        drawBarMarker(ctx, p.x, p.y, 10, this.barBlue.color);
+        if (this.zoom >= 1.25) {
+          ctx.fillStyle = 'rgba(20,28,23,.72)';
+          ctx.font = '600 11px Oswald, "Trebuchet MS", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          const label = 'BAR BLU PIRAMIDE';
+          const w = ctx.measureText(label).width;
+          ctx.fillRect(p.x - w / 2 - 5, p.y + 12, w + 10, 17);
+          ctx.fillStyle = '#eafaff';
+          ctx.fillText(label, p.x, p.y + 14);
+        }
+      }
     }
 
     // giocatore
