@@ -1,10 +1,10 @@
-# Fidenza da Giocare v2.7
+# Fidenza da Giocare v2.8
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
-Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.7
-aggiunge le biciclette guidabili, l’inversione dei controlli laterali e un
-deciso miglioramento di case, tetti e strade.
+Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.8
+chiude una serie di bug, allinea versioni e documentazione, estende l’editor e
+migliora il comportamento di eventi, foto e traffico.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 
@@ -29,19 +29,19 @@ npx serve fidenza-city-v2
 
 | Azione | Desktop | Mobile |
 | --- | --- | --- |
-| Muoversi | WASD / frecce | levetta |
+| Muoversi | WASD / frecce | joystick sinistro |
 | Correre | Shift | pulsante Corri |
-| Volare | V (poi WASD, Space/Q, Shift) | tasto Volo non previsto |
+| Volare | V (poi WASD, Space/Q, Shift) | pulsante Volo nel menu rapido |
 | Guardare | mouse (pointer lock) | trascina sul canvas |
-| Interagire | E | pulsante ▶ |
-| Entrare/uscire dal veicolo | E vicino al veicolo | pulsante ▶ / Auto |
+| Interagire | E | pulsante azione contestuale |
+| Entrare/uscire dal veicolo | E vicino al veicolo | pulsante azione |
 | Freno | Spazio | pulsante Freno |
 | Clacson | H | pulsante 📯 |
-| Missioni | F | tabellone con ▶ |
-| Carriera | C o voce in pausa | voce in pausa |
-| Mappa | N o click sulla minimappa | click sulla minimappa |
-| Modalità foto | P o voce in pausa | voce in pausa |
-| Audio | M | pulsante audio |
+| Missioni | F | menu rapido touch |
+| Carriera | C o voce in pausa | menu rapido touch |
+| Mappa | N o click sulla minimappa | menu rapido touch |
+| Modalità foto | P o voce in pausa | menu rapido touch |
+| Audio | M | menu rapido touch |
 | Stagione | selettore in pausa o nell’intro | selettore |
 | Pausa | Esc | Esc |
 
@@ -59,6 +59,23 @@ Start per la pausa.
 
 **Performance**: aggiungi `?quality=low`, `?quality=medium` o `?quality=high`
 all’URL per forzare il livello grafico.
+
+## Novità v2.8 — Fix, mobile e coerenza
+
+- **Mobile**: joystick migliorato, pulsanti contestuali, menu rapido touch,
+  pulsanti guida dinamici e feedback aptico.
+- **Prestazioni mobile**: risoluzione adattiva, HUD/minimappa limitati, ombre
+  disattivate su mobile e dettagli ridotti.
+- **Editor**: supporto bici, campo evento missione e “foto obbligatoria”.
+- **Ruote del traffico**: si fermano davvero quando l’auto è ferma al rosso.
+- **Eventi sincronizzati** con l’orologio del mondo, non solo con l’ora reale.
+- **Modalità foto**: il timer delle missioni fotografiche continua a scorrere.
+- **Azzera progressi**: ora cancella anche la galleria fotografica.
+- **Ritorno all’intro**: conferma se c’è una missione attiva e salva le
+  statistiche pendenti.
+- **Volo accessibile da mobile** tramite il menu pausa.
+- **Versioni allineate**: gioco, mappa, bundle e PWA a **2.8.0**.
+- **Performance**: cornici e davanzali saltati sulla qualità low.
 
 ## Novità v2.7 — Bici e città reale
 

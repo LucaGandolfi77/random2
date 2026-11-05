@@ -120,6 +120,7 @@ export class Input {
       if (lookId !== null) return;
       lookId = e.pointerId;
       lastX = e.clientX; lastY = e.clientY;
+      try { this.canvas.setPointerCapture?.(e.pointerId); } catch { /* ignore */ }
       e.preventDefault();
     }, { passive: false });
     this.canvas.addEventListener('pointermove', e => {
@@ -131,7 +132,11 @@ export class Input {
       this.mouseDY += dy * 1.45;
       e.preventDefault();
     }, { passive: false });
-    const lookEnd = e => { if (e.pointerId === lookId) lookId = null; };
+    const lookEnd = e => {
+      if (e.pointerId !== lookId) return;
+      lookId = null;
+      try { this.canvas.releasePointerCapture?.(e.pointerId); } catch { /* ignore */ }
+    };
     this.canvas.addEventListener('pointerup', lookEnd);
     this.canvas.addEventListener('pointercancel', lookEnd);
 

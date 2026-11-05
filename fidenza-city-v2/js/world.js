@@ -1162,42 +1162,44 @@ export class World {
               cx + ex, y + h / 2, cz + ez,
               cx - ex, y + h / 2, cz - ez);
 
-            // cornice e davanzale
-            const fx = cx + e.nx * 0.02, fz = cz + e.nz * 0.02;
-            const hw = w / 2;
-            const exTop = e.ux * (hw + 0.09), ezTop = e.uz * (hw + 0.09);
-            addQuad(framePositions,
-              fx - exTop, y + h / 2 + 0.005, fz - ezTop,
-              fx + exTop, y + h / 2 + 0.005, fz + ezTop,
-              fx + exTop, y + h / 2 + 0.075, fz + ezTop,
-              fx - exTop, y + h / 2 + 0.075, fz - ezTop);
-            const exSill = e.ux * (hw + 0.12), ezSill = e.uz * (hw + 0.12);
-            addQuad(framePositions,
-              fx - exSill, y - h / 2 - 0.10, fz - ezSill,
-              fx + exSill, y - h / 2 - 0.10, fz + ezSill,
-              fx + exSill, y - h / 2 - 0.015, fz + ezSill,
-              fx - exSill, y - h / 2 - 0.015, fz - ezSill);
-            for (const side of [-1, 1]) {
-              const sx = fx + e.ux * side * (hw + 0.035);
-              const sz = fz + e.uz * side * (hw + 0.035);
+            if (this.quality !== 'low') {
+              // cornice e davanzale
+              const fx = cx + e.nx * 0.02, fz = cz + e.nz * 0.02;
+              const hw = w / 2;
+              const exTop = e.ux * (hw + 0.09), ezTop = e.uz * (hw + 0.09);
               addQuad(framePositions,
-                sx - e.ux * 0.032, y - h / 2 - 0.06, sz - e.uz * 0.032,
-                sx + e.ux * 0.032, y - h / 2 - 0.06, sz + e.uz * 0.032,
-                sx + e.ux * 0.032, y + h / 2 + 0.06, sz + e.uz * 0.032,
-                sx - e.ux * 0.032, y + h / 2 + 0.06, sz - e.uz * 0.032);
-            }
-
-            // persiane su una parte delle finestre
-            if (this.quality === 'high' && (buildingIndex + f + i) % 3 === 0) {
-              const color = shutterPalette[(buildingIndex + i) % shutterPalette.length];
+                fx - exTop, y + h / 2 + 0.005, fz - ezTop,
+                fx + exTop, y + h / 2 + 0.005, fz + ezTop,
+                fx + exTop, y + h / 2 + 0.075, fz + ezTop,
+                fx - exTop, y + h / 2 + 0.075, fz - ezTop);
+              const exSill = e.ux * (hw + 0.12), ezSill = e.uz * (hw + 0.12);
+              addQuad(framePositions,
+                fx - exSill, y - h / 2 - 0.10, fz - ezSill,
+                fx + exSill, y - h / 2 - 0.10, fz + ezSill,
+                fx + exSill, y - h / 2 - 0.015, fz + ezSill,
+                fx - exSill, y - h / 2 - 0.015, fz - ezSill);
               for (const side of [-1, 1]) {
-                const sx = fx + e.ux * side * (hw + 0.23);
-                const sz = fz + e.uz * side * (hw + 0.23);
-                addColoredQuad(shutterPositions, shutterColors, color,
-                  sx - e.ux * 0.16, y - h / 2 - 0.03, sz - e.uz * 0.16,
-                  sx + e.ux * 0.16, y - h / 2 - 0.03, sz + e.uz * 0.16,
-                  sx + e.ux * 0.16, y + h / 2 + 0.03, sz + e.uz * 0.16,
-                  sx - e.ux * 0.16, y + h / 2 + 0.03, sz - e.uz * 0.16);
+                const sx = fx + e.ux * side * (hw + 0.035);
+                const sz = fz + e.uz * side * (hw + 0.035);
+                addQuad(framePositions,
+                  sx - e.ux * 0.032, y - h / 2 - 0.06, sz - e.uz * 0.032,
+                  sx + e.ux * 0.032, y - h / 2 - 0.06, sz + e.uz * 0.032,
+                  sx + e.ux * 0.032, y + h / 2 + 0.06, sz + e.uz * 0.032,
+                  sx - e.ux * 0.032, y + h / 2 + 0.06, sz - e.uz * 0.032);
+              }
+
+              // persiane su una parte delle finestre
+              if (this.quality === 'high' && (buildingIndex + f + i) % 3 === 0) {
+                const color = shutterPalette[(buildingIndex + i) % shutterPalette.length];
+                for (const side of [-1, 1]) {
+                  const sx = fx + e.ux * side * (hw + 0.23);
+                  const sz = fz + e.uz * side * (hw + 0.23);
+                  addColoredQuad(shutterPositions, shutterColors, color,
+                    sx - e.ux * 0.16, y - h / 2 - 0.03, sz - e.uz * 0.16,
+                    sx + e.ux * 0.16, y - h / 2 - 0.03, sz + e.uz * 0.16,
+                    sx + e.ux * 0.16, y + h / 2 + 0.03, sz + e.uz * 0.16,
+                    sx - e.ux * 0.16, y + h / 2 + 0.03, sz - e.uz * 0.16);
+                }
               }
             }
           }
@@ -1245,21 +1247,23 @@ export class World {
           cx + ex, 0.12, cz + ez,
           cx + ex, 2.35, cz + ez,
           cx - ex, 2.35, cz - ez);
-        const fx = cx + longest.nx * 0.03, fz = cz + longest.nz * 0.03;
-        const exf = longest.ux * 0.74, ezf = longest.uz * 0.74;
-        addQuad(framePositions,
-          fx - exf, 2.35, fz - ezf,
-          fx + exf, 2.35, fz + ezf,
-          fx + exf, 2.48, fz + ezf,
-          fx - exf, 2.48, fz - ezf);
-        for (const side of [-1, 1]) {
-          const sx = fx + longest.ux * side * 0.72;
-          const sz = fz + longest.uz * side * 0.72;
+        if (this.quality !== 'low') {
+          const fx = cx + longest.nx * 0.03, fz = cz + longest.nz * 0.03;
+          const exf = longest.ux * 0.74, ezf = longest.uz * 0.74;
           addQuad(framePositions,
-            sx - longest.ux * 0.055, 0.12, sz - longest.uz * 0.055,
-            sx + longest.ux * 0.055, 0.12, sz + longest.uz * 0.055,
-            sx + longest.ux * 0.055, 2.47, sz + longest.uz * 0.055,
-            sx - longest.ux * 0.055, 2.47, sz - longest.uz * 0.055);
+            fx - exf, 2.35, fz - ezf,
+            fx + exf, 2.35, fz + ezf,
+            fx + exf, 2.48, fz + ezf,
+            fx - exf, 2.48, fz - ezf);
+          for (const side of [-1, 1]) {
+            const sx = fx + longest.ux * side * 0.72;
+            const sz = fz + longest.uz * side * 0.72;
+            addQuad(framePositions,
+              sx - longest.ux * 0.055, 0.12, sz - longest.uz * 0.055,
+              sx + longest.ux * 0.055, 0.12, sz + longest.uz * 0.055,
+              sx + longest.ux * 0.055, 2.47, sz + longest.uz * 0.055,
+              sx - longest.ux * 0.055, 2.47, sz - longest.uz * 0.055);
+          }
         }
       }
 
@@ -2171,6 +2175,8 @@ export class World {
   }
 
   _eventCrowd(center, count = 8, radius = 10) {
+    if (this.quality === 'low') count = Math.min(count, 5);
+    else if (this.quality === 'medium') count = Math.min(count, 8);
     const shirts = ['#c2684b', '#4f8fa8', '#7c8d5b', '#d9c9a8', '#9a4a34', '#5c6b5f'];
     const pants = ['#2f4a3c', '#3a3f46', '#5b4a3a'];
     const rnd = seededRandom(620);
@@ -2353,7 +2359,7 @@ export class World {
   }
 
   _spawnFirework(center) {
-    const count = 48;
+    const count = this.quality === 'low' ? 24 : this.quality === 'medium' ? 36 : 48;
     const positions = new Float32Array(count * 3);
     const velocities = [];
     const ox = center.x + (Math.random() - 0.5) * 10;
@@ -3021,13 +3027,15 @@ export class World {
           break;
         }
       }
-      if (!stop) t.walker.advance(dt);
+      if (!stop) {
+        t.walker.advance(dt);
+        t.car.userData.wheels?.forEach(w => {
+          w.rotation.x += (t.walker.speed * dt) / (w.userData.radius || 0.34);
+        });
+      }
       const p = t.walker.pose();
       t.car.position.set(p.x, 0.06, p.z);
       t.car.rotation.y = Math.atan2(p.dx, p.dz);
-      t.car.userData.wheels?.forEach(w => {
-        w.rotation.x += (t.walker.speed * dt) / (w.userData.radius || 0.34);
-      });
     }
   }
 

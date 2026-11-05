@@ -19,9 +19,11 @@ python3 -m http.server 8081
 - **Beacon**: posizione separata dal POI.
 - **Landmark 3D**: modello, rotazione, offset, scala, visibilità.
 - **Stelle**: posizione, aggiunta, rimozione.
-- **Missioni**: builder visuale con tipo, titolo, testo, tempo, reward, tappe
-  cliccando sulla mappa, riordino, raggio, prompt, commento, foto e POI collegato.
-- **Veicoli**: tipo, etichetta, posizione, rotazione, colore.
+- **Missioni**: builder visuale con tipo, evento, titolo, testo, tempo, reward,
+  tappe cliccando sulla mappa, riordino, raggio, prompt, commento, foto, foto
+  obbligatoria e POI collegato.
+- **Veicoli**: tipo (`car`, `vespa`, `bike`), etichetta, posizione, rotazione,
+  colore.
 - **Prop**: palette per insegne, targhe, alberi, panchine, lampioni, bollard,
   fioriere, bancarelle e auto parcheggiate; testo, rotazione, scala e colore.
 - **Spawn** e **tabellone missioni**.

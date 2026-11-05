@@ -15,7 +15,7 @@ import { VehicleManager } from './vehicles.js';
 import { MissionManager } from './missions.js';
 import { GameMap } from './map.js';
 import { PhotoMode, PHOTO_FILTERS } from './photo-mode.js';
-import { listPhotos, deletePhoto, downloadPhoto } from './photo-store.js';
+import { listPhotos, deletePhoto, downloadPhoto, clearPhotos } from './photo-store.js';
 
 const canvas = document.getElementById('game');
 const clock = new THREE.Clock();
@@ -40,12 +40,26 @@ const renderer = new THREE.WebGLRenderer({
   powerPreference: 'high-performance',
   alpha: false
 });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'high' ? 1.5 : 1.15));
+const pixelRatioCap = isMobile
+  ? (quality === 'high' ? 1.35 : quality === 'medium' ? 1.2 : 1)
+  : (quality === 'high' ? 1.5 : 1.15);
+let currentPixelRatio = Math.min(window.devicePixelRatio || 1, pixelRatioCap);
+let minimapTimer = 0;
+let bigMapTimer = 0;
+let adaptiveFrames = 0;
+let adaptiveLast = performance.now();
+renderer.setPixelRatio(currentPixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
-renderer.shadowMap.enabled = quality === 'high';
+renderer.shadowMap.enabled = quality === 'high' && !isMobile;
+
+function applyRendererScale(ratio) {
+  currentPixelRatio = clamp(ratio, 0.72, pixelRatioCap);
+  renderer.setPixelRatio(currentPixelRatio);
+  renderer.setSize(window.innerWidth, window.innerHeight, false);
+}
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
@@ -109,6 +123,7 @@ const ui = {
   resume: document.getElementById('resume'),
   pauseMap: document.getElementById('pause-map'),
   pauseHome: document.getElementById('pause-home'),
+  pauseFly: document.getElementById('pause-fly'),
   pauseMissions: document.getElementById('pause-missions'),
   pauseCareer: document.getElementById('pause-career'),
   pauseBoard: document.getElementById('pause-board'),
@@ -168,13 +183,25 @@ const ui = {
   confirmYes: document.getElementById('confirm-yes'),
   confirmNo: document.getElementById('confirm-no'),
   mapbox: document.getElementById('mapbox'),
-  rotateHint: document.getElementById('rotate-hint')
+  rotateHint: document.getElementById('rotate-hint'),
+  touchQuick: document.getElementById('touch-quick'),
+  touchDrive: document.getElementById('touch-drive'),
+  btnRun: document.getElementById('btn-run'),
+  btnBrake: document.getElementById('btn-brake'),
+  btnHorn: document.getElementById('btn-horn'),
+  btnAct: document.getElementById('btn-act')
 };
 
 async function fetchJSON(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   return res.json();
+}
+
+function haptic(pattern = 18) {
+  if (isMobile && navigator.vibrate) {
+    try { navigator.vibrate(pattern); } catch { /* ignore */ }
+  }
 }
 
 function nowLabel() {
@@ -359,11 +386,13 @@ async function init() {
         recordDailyProgress('mission', 1);
         checkEventBadges();
       }
+      haptic(35);
       refreshSaveUI();
       recordDailyProgress('score', points);
       checkAchievements(true);
     },
     onFail: (def) => {
+      if (photoMode?.active) setPhotoStatus(`Tempo scaduto · ${def.title}`, 3600);
       const careerResult = career?.failJob(def);
       if (careerResult) {
         hud.setBig(careerResult.kind === 'license' ? 'ESAME NON SUPERATO' : 'LAVORO FALLITO', 1700);
@@ -539,9 +568,16 @@ function refreshDailyUI() {
   }
 }
 
+function eventClockDate() {
+  const date = new Date();
+  const hour = Number.isFinite(world?.hour) ? world.hour : date.getHours() + date.getMinutes() / 60;
+  date.setHours(Math.floor(hour) % 24, Math.floor((hour % 1) * 60), 0, 0);
+  return date;
+}
+
 function refreshEventUI() {
   if (!world) return;
-  eventSnapshot = getEventSnapshot(new Date(), forcedEvent);
+  eventSnapshot = getEventSnapshot(eventClockDate(), forcedEvent);
   const active = eventSnapshot.active;
   world.setEvent(active);
   career?.setEvent(active);
@@ -885,6 +921,11 @@ function bindUI() {
     requestPointerLock();
   });
   ui.pauseHome?.addEventListener('click', returnToIntro);
+  ui.pauseFly?.addEventListener('click', () => {
+    ui.pauseDialog.close();
+    toggleFly();
+    requestPointerLock();
+  });
   ui.pauseMap?.addEventListener('click', () => {
     ui.pauseDialog.close();
     openMap();
@@ -947,6 +988,11 @@ function bindUI() {
     ui.pauseDialog.close();
     enterPhoto();
   });
+  ui.touchQuick?.addEventListener('click', event => {
+    const btn = event.target.closest('[data-touch-action]');
+    if (!btn) return;
+    handleTouchAction(btn.dataset.touchAction);
+  });
   ui.photoExit?.addEventListener('click', exitPhoto);
   ui.photoCapture?.addEventListener('click', capturePhoto);
   ui.photoGalleryOpen?.addEventListener('click', openPhotoGallery);
@@ -980,8 +1026,9 @@ function bindUI() {
   ui.boardOpen?.addEventListener('click', openBoard);
   ui.reset?.addEventListener('click', () => ui.confirmDialog.showModal());
   ui.confirmNo?.addEventListener('click', () => ui.confirmDialog.close());
-  ui.confirmYes?.addEventListener('click', () => {
+  ui.confirmYes?.addEventListener('click', async () => {
     resetSave();
+    try { await clearPhotos(); } catch { /* galleria non disponibile */ }
     location.reload();
   });
   ui.infoClose?.addEventListener('click', () => {
@@ -1018,6 +1065,7 @@ function bindUI() {
   });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) input.exitPointerLock();
+    else clock.getDelta();
   });
   bindPhotoStick();
   updateRotateHint();
@@ -1073,12 +1121,14 @@ function updateRotateHint() {
 function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight, false);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality === 'high' ? 1.5 : 1.15));
+  applyRendererScale(currentPixelRatio);
 }
 
 function returnToIntro() {
   if (state !== 'playing') return;
+  if (missions?.activeId && !window.confirm('Tornare alla schermata iniziale? La missione o il lavoro attivo verrà annullato.')) return;
+  flushStats();
+  statsFlushTimer = 0;
   state = 'intro';
   started = false;
   pendingStart = false;
@@ -1127,6 +1177,7 @@ function startGame() {
   hud.showHUD();
   hud.setPlayReady(true, 'Gioca');
   updateRotateHint();
+  updateTouchUI();
   const save = getSave();
   hud.setToast(`Benvenuto a Fidenza${save.name ? `, ${save.name}` : ''}`, 2600);
   hud.setBig('FIDENZA', 1500);
@@ -1240,6 +1291,7 @@ function exitPhoto() {
   canvas.style.cursor = '';
   if (player) lastPlayerTrack = { x: player.position.x, z: player.position.z };
   if (started) hud.showHUD();
+  updateTouchUI();
   hud.setToast('Modalità foto chiusa', 1400);
   requestPointerLock();
 }
@@ -1249,6 +1301,7 @@ async function capturePhoto() {
   if (ui.photoCapture) ui.photoCapture.disabled = true;
   try {
     const photo = await photoMode.capture();
+    if (photo) haptic(12);
     if (!photo) setPhotoStatus('Impossibile salvare la foto');
   } catch (err) {
     console.error('Scatto non riuscito', err);
@@ -1345,6 +1398,31 @@ async function onPhotoGalleryClick(event) {
   }
 }
 
+function handleTouchAction(action) {
+  if (!action) return;
+  if (action === 'pause') openPause();
+  else if (action === 'map') openMap();
+  else if (action === 'missions') openMissions();
+  else if (action === 'career') openCareer();
+  else if (action === 'photo') enterPhoto();
+  else if (action === 'fly') toggleFly();
+  else if (action === 'audio') toggleAudio();
+  updateTouchUI();
+}
+
+function updateTouchUI() {
+  if (!isMobile) return;
+  const inVehicle = !!vehicles?.current;
+  if (ui.touchDrive) ui.touchDrive.classList.toggle('vehicle', inVehicle);
+  if (ui.btnBrake) ui.btnBrake.hidden = !inVehicle;
+  if (ui.btnHorn) ui.btnHorn.hidden = !inVehicle;
+  if (ui.btnRun) ui.btnRun.hidden = inVehicle;
+  const flyBtn = ui.touchQuick?.querySelector('[data-touch-action="fly"]');
+  flyBtn?.classList.toggle('active', !!player?.flyMode);
+  const audioBtn = ui.touchQuick?.querySelector('[data-touch-action="audio"]');
+  audioBtn?.classList.toggle('active', audio.muted);
+}
+
 function toggleFly() {
   if (!player || photoMode?.active) return;
   if (vehicles?.current) {
@@ -1352,6 +1430,7 @@ function toggleFly() {
     return;
   }
   player.setFlyMode(!player.flyMode);
+  haptic(18);
   if (player.flyMode) {
     hud.setBig('VOLO', 1000);
     hud.setToast('Volo attivo · WASD muoviti · Space/Q quota · Shift boost · V atterra', 4200);
@@ -1359,6 +1438,7 @@ function toggleFly() {
     hud.setBig('A TERRA', 800);
     hud.setToast('Atterraggio completato', 2000);
   }
+  updateTouchUI();
 }
 
 function openPause() {
@@ -1366,6 +1446,7 @@ function openPause() {
   if (ui.pauseDialog.open) return;
   input.exitPointerLock();
   ui.pauseAudio.textContent = audio.muted ? 'Audio off' : 'Audio on';
+  if (ui.pauseFly) ui.pauseFly.textContent = player?.flyMode ? 'Atterra' : 'Volo';
   refreshDailyUI();
   ui.pauseDialog.showModal();
 }
@@ -1435,6 +1516,7 @@ function toggleAudio() {
   const save = getSave();
   save.settings.audio = !muted;
   try { localStorage.setItem('fidenza-da-giocare-v1', JSON.stringify(save)); } catch { /* ignore */ }
+  updateTouchUI();
 }
 
 function collectStar(starObj) {
@@ -1444,6 +1526,7 @@ function collectStar(starObj) {
     addScore(SCORE.star);
     world.setStarCollected(id);
     audio.star();
+    haptic(22);
     hud.setToast(`Stella trovata · +${SCORE.star}`, 2000);
     hud.setBig('★', 600);
     refreshSaveUI();
@@ -1460,6 +1543,7 @@ function collectPlace(placeObj) {
     addScore(SCORE.place);
     world.setPlaceVisited(l.id);
     audio.place();
+    haptic(30);
     hud.setBig('LUOGO SCOPERTO', 1400);
     const save = getSave();
     hud.showInfo(l, save.places.length, world.placeObjects.length);
@@ -1489,8 +1573,8 @@ function getNearestLandmark(x, z, radius = 80, cameraYaw = null) {
 function updateInteraction() {
   if (!player || !missions || !vehicles) return;
   if (player.flyMode) {
-    currentInteraction = null;
-    setPromptSafe({ text: '<kbd>V</kbd> atterra', action: 'land' });
+    currentInteraction = { type: 'land' };
+    setPromptSafe({ text: input.isTouch() ? 'Tocca ▼ per atterrare' : '<kbd>V</kbd> atterra', action: 'land' });
     return;
   }
   if (vehicles.current) {
@@ -1513,7 +1597,11 @@ function updateInteraction() {
   const nearVehicle = vehicles.nearest(player.position.x, player.position.z, 4.2);
   if (nearVehicle) {
     currentInteraction = { type: 'vehicle', vehicle: nearVehicle.vehicle };
-    setPromptSafe({ text: `<kbd>E</kbd> guida ${nearVehicle.vehicle.label}`, action: 'vehicle' });
+    setPromptSafe({
+      text: `<kbd>E</kbd> guida ${nearVehicle.vehicle.label}`,
+      action: 'vehicle',
+      icon: nearVehicle.vehicle.type === 'bike' ? '🚲' : '🚗'
+    });
     return;
   }
   currentInteraction = null;
@@ -1529,9 +1617,15 @@ function setPromptSafe(prompt) {
 
 function handleInteract() {
   if (!currentInteraction) return;
+  if (currentInteraction.type === 'land') {
+    toggleFly();
+    return;
+  }
   if (currentInteraction.type === 'exit') {
     vehicles.exit();
+    haptic(15);
     hud.setToast('Sei sceso dal veicolo');
+    updateTouchUI();
     return;
   }
   if (currentInteraction.type === 'missions') {
@@ -1548,7 +1642,9 @@ function handleInteract() {
   }
   if (currentInteraction.type === 'vehicle') {
     vehicles.enter(currentInteraction.vehicle);
+    haptic(15);
     hud.setToast(`Sei su: ${currentInteraction.vehicle.label}`);
+    updateTouchUI();
     return;
   }
 }
@@ -1664,6 +1760,8 @@ function updateHUD(dt) {
     }
   }
 
+  updateTouchUI();
+
   // meteo/notte
   if (world) world.setWeather(weather);
 }
@@ -1672,6 +1770,18 @@ function loop() {
   requestAnimationFrame(loop);
   input.pollGamepad();
   const dt = Math.min(0.1, clock.getDelta());
+  if (isMobile) {
+    adaptiveFrames++;
+    const now = performance.now();
+    const elapsed = now - adaptiveLast;
+    if (elapsed >= 2000) {
+      const fps = adaptiveFrames / (elapsed / 1000);
+      if (fps < 42 && currentPixelRatio > 0.75) applyRendererScale(currentPixelRatio - 0.1);
+      else if (fps > 56 && currentPixelRatio < pixelRatioCap) applyRendererScale(currentPixelRatio + 0.05);
+      adaptiveFrames = 0;
+      adaptiveLast = now;
+    }
+  }
   const dialogOpen = !!document.querySelector('dialog[open]');
   const photoActive = !!photoMode?.active;
   const paused = state === 'intro' || dialogOpen || map?.isOpen || photoActive;
@@ -1694,6 +1804,7 @@ function loop() {
     }
     world.update(dt, player.position, camera);
   } else if (photoActive) {
+    if (missions?.currentTarget?.photoRequired) missions.update(dt, player, true);
     photoMode.update(dt);
     photoPlaceTimer -= dt;
     if (photoPlaceTimer <= 0) {
@@ -1716,10 +1827,25 @@ function loop() {
   }
 
   if (player && world && missions) {
-    // aggiorna HUD anche in pausa (senza input)
-    if (!paused) updateHUD(dt);
-    map?.drawBigMap(player, player.cameraYaw, missions.currentTarget);
-    if (state !== 'intro') {
+    if (!paused) {
+      lastHudUpdate += dt;
+      const hudInterval = isMobile ? 0.08 : 0.033;
+      if (lastHudUpdate >= hudInterval) {
+        const hudDt = lastHudUpdate;
+        lastHudUpdate = 0;
+        updateHUD(hudDt);
+      }
+    }
+    if (map?.isOpen) {
+      bigMapTimer += dt;
+      if (bigMapTimer >= (isMobile ? 0.08 : 0.033)) {
+        bigMapTimer = 0;
+        map.drawBigMap(player, player.cameraYaw, missions.currentTarget);
+      }
+    }
+    minimapTimer += dt;
+    if (state !== 'intro' && !photoActive && minimapTimer >= (isMobile ? 0.1 : 0.033)) {
+      minimapTimer = 0;
       map?.drawMinimap(player, player.cameraYaw, missions.currentTarget);
     }
   }

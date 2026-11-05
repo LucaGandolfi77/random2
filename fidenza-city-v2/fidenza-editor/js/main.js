@@ -109,7 +109,7 @@ function renderList() {
     items = (ed.map.missions || []).filter(m => !q || m.title?.toLowerCase().includes(q) || m.id.includes(q)).map(m => ({
       key: `mission:${m.id}`,
       title: m.title || m.id,
-      sub: `${m.steps?.length || 0} tappe · ${m.time}s`,
+      sub: `${m.steps?.length || 0} tappe · ${m.time}s${m.event ? ' · evento ' + m.event : ''}`,
       sel: { kind: 'mission', id: m.id }
     }));
   } else if (state.tab === 'vehicles') {

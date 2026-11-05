@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <title>Fidenza da Giocare v2 · open world gratis nel browser</title>
+  <title>Fidenza da Giocare v2.8 · open world gratis nel browser</title>
   <meta name="description" content="Scorrazza per Fidenza, guida l'auto e la Vespa, scopri il Duomo, il Teatro Magnani e 27 stelle nascoste. Un open world gratuito nel browser, ispirato alla città di Fidenza.">
   <meta name="theme-color" content="#1d2620">
   <meta name="color-scheme" content="light dark">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Fidenza da Giocare">
-  <meta property="og:title" content="Fidenza da Giocare v2 · open world gratis nel browser">
+  <meta property="og:title" content="Fidenza da Giocare v2.8 · open world gratis nel browser">
   <meta property="og:description" content="Fidenza vera, strada per strada, come open world: guida, esplora, completa missioni e trova le 27 stelle.">
   <meta property="og:locale" content="it_IT">
   <meta property="og:image" content="assets/img/og.jpg">
@@ -111,14 +111,24 @@
 
     <div id="hint">WASD muovi · Shift corri · E interagisci · V volo · F missioni · C carriera · N mappa · M audio · P foto · Esc pausa</div>
 
-    <div id="touch" aria-hidden="true">
+    <div id="touch">
       <div id="stick"><div id="knob"></div></div>
-      <button id="btn-car">Auto</button>
-      <button id="btn-run">Corri</button>
-      <button id="btn-brake">Freno</button>
-      <button id="btn-horn">📯</button>
+      <div id="touch-quick" aria-label="Menu rapido">
+        <button type="button" data-touch-action="pause" aria-label="Pausa" title="Pausa">☰</button>
+        <button type="button" data-touch-action="map" aria-label="Mappa" title="Mappa">▦</button>
+        <button type="button" data-touch-action="missions" aria-label="Missioni" title="Missioni">☑</button>
+        <button type="button" data-touch-action="career" aria-label="Carriera" title="Carriera">▤</button>
+        <button type="button" data-touch-action="photo" aria-label="Modalità foto" title="Modalità foto">▣</button>
+        <button type="button" data-touch-action="fly" aria-label="Volo" title="Volo">✈</button>
+        <button type="button" data-touch-action="audio" aria-label="Audio" title="Audio">♪</button>
+      </div>
+      <div id="touch-drive">
+        <button type="button" id="btn-run">Corri</button>
+        <button type="button" id="btn-brake">Freno</button>
+        <button type="button" id="btn-horn">📯</button>
+      </div>
+      <button id="btn-act" hidden>▶</button>
     </div>
-    <button id="btn-act" hidden>▶</button>
   </div>
 
   <div id="bigmap" hidden>
@@ -143,7 +153,7 @@
   <div id="intro">
     <main class="poster">
       <section class="talk">
-        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v2.7.0</span></p>
+        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v2.8.0</span></p>
         <h1 class="wordmark" aria-label="Fidenza da Giocare">
           <span>Fidenza</span>
           <span>da Giocare</span>
@@ -268,6 +278,7 @@
         <button type="button" id="pause-missions">Missioni</button>
         <button type="button" id="pause-board">Record</button>
         <button type="button" id="pause-achievements">Obiettivi e statistiche</button>
+        <button type="button" id="pause-fly">Volo on/off</button>
         <button type="button" id="pause-photo">Modalità foto</button>
         <button type="button" id="pause-export">Esporta salvataggio</button>
         <button type="button" id="pause-import">Importa salvataggio</button>
@@ -331,7 +342,7 @@
   <dialog id="confirm-dialog" class="dialog" aria-labelledby="confirm-title">
     <div class="dialog-in">
       <h2 id="confirm-title">Azzerare tutto?</h2>
-      <p>Stelle, luoghi, missioni e record verranno cancellati. L'operazione non si può annullare.</p>
+      <p>Stelle, luoghi, missioni, carriera, record e foto della galleria verranno cancellati. L'operazione non si può annullare.</p>
       <div class="field-row"><button type="button" id="confirm-yes" class="danger">Azzera</button><button type="button" id="confirm-no">Annulla</button></div>
     </div>
   </dialog>

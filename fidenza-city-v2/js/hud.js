@@ -175,7 +175,9 @@ export class HUD {
     this.el.prompt.innerHTML = text;
     if (isTouch && this.el.btnAct) {
       this.el.btnAct.hidden = false;
-      this.el.btnAct.textContent = prompt.action === 'missions' ? '☰' : '▶';
+      const icons = { missions: '☰', vehicle: '🚗', exit: '✕', place: '◆', 'mission-step': '▶', land: '▼' };
+      this.el.btnAct.textContent = prompt.icon || icons[prompt.action] || '▶';
+      this.el.btnAct.setAttribute('aria-label', prompt.action || 'azione');
     } else {
       this.el.btnAct?.setAttribute('hidden', '');
     }

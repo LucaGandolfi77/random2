@@ -133,6 +133,7 @@ export class Inspector {
       ${this._head(m.title || m.id, 'Missione', false)}
       <div class="inspector-body">
         ${field('Tipo', select('missionType', m.type || 'custom', MISSION_TYPES))}
+        ${field('Evento', input('event', m.event || '', 'text', 'placeholder="es. san-donnino"'))}
         ${field('Titolo', input('title', m.title || ''))}
         ${field('Testo breve', textarea('short', m.short || ''))}
         ${field('Tempo (s)', number('time', m.time || 150, 1))}
@@ -156,6 +157,7 @@ export class Inspector {
           ${field('Commento', input('stepComment', step.comment || ''))}
           ${field('Raggio', number('stepRadius', step.radius || 12, 1))}
           ${field('Foto', checkbox('stepPhoto', step.photo))}
+          ${field('Foto obbligatoria', checkbox('stepPhotoRequired', step.photoRequired))}
           ${field('Collegata al POI', select('stepPlace', step.place || '', [''].concat(places.map(p => p.id))))}
           ${field('Offset X', number('stepOffsetX', step.offsetX || 0, 0.1))}
           ${field('Offset Z', number('stepOffsetZ', step.offsetZ || 0, 0.1))}
@@ -195,7 +197,7 @@ export class Inspector {
     this.root.innerHTML = `
       ${this._head(v.label || `Veicolo ${s.index + 1}`, 'Veicolo', true)}
       <div class="inspector-body">
-        ${field('Tipo', select('type', v.type || 'car', ['car', 'vespa']))}
+        ${field('Tipo', select('type', v.type || 'car', ['car', 'vespa', 'bike']))}
         ${field('Etichetta', input('label', v.label || ''))}
         ${field('X', number('x', v.x, 0.1))}
         ${field('Z', number('z', v.z, 0.1))}
@@ -358,6 +360,7 @@ export class Inspector {
     } else if (s.kind === 'mission' || s.kind === 'missionStep') {
       this.state.updateMission(s.id, 'modifica missione', m => {
         if (field === 'missionType') m.type = value;
+        else if (field === 'event') m.event = value || null;
         else if (field === 'title') m.title = value;
         else if (field === 'short') m.short = value;
         else if (field === 'time') m.time = numeric(value);
@@ -370,6 +373,7 @@ export class Inspector {
           else if (field === 'stepComment') st.comment = value;
           else if (field === 'stepRadius') st.radius = numeric(value);
           else if (field === 'stepPhoto') st.photo = value;
+          else if (field === 'stepPhotoRequired') st.photoRequired = value;
           else if (field === 'stepPlace') {
             if (value) st.place = value;
             else { delete st.place; delete st.offsetX; delete st.offsetZ; }

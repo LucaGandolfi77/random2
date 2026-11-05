@@ -263,41 +263,83 @@ canvas { display: block; }
 @media (pointer: coarse) {
   #touch { display: block; position: absolute; inset: 0; pointer-events: none; }
   #stick {
-    position: absolute; left: max(22px, env(safe-area-inset-left)); bottom: max(74px, calc(env(safe-area-inset-bottom) + 74px));
-    width: 112px; height: 112px; border-radius: 50%;
-    background: rgba(20,28,23,.28);
-    border: 1px solid rgba(255,244,220,.28);
+    position: absolute; left: max(18px, env(safe-area-inset-left)); bottom: max(86px, calc(env(safe-area-inset-bottom) + 86px));
+    width: 120px; height: 120px; border-radius: 50%;
+    background: rgba(20,28,23,.32);
+    border: 1px solid rgba(255,244,220,.32);
     pointer-events: auto; touch-action: none;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 0 24px rgba(0,0,0,.15);
   }
   #knob {
-    position: absolute; left: 50%; top: 50%; width: 50px; height: 50px; margin: -25px 0 0 -25px;
-    border-radius: 50%; background: rgba(244,235,218,.82);
-    box-shadow: 0 4px 18px rgba(0,0,0,.28);
+    position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; margin: -27px 0 0 -27px;
+    border-radius: 50%; background: rgba(244,235,218,.9);
+    box-shadow: 0 4px 18px rgba(0,0,0,.3);
   }
-  #touch button {
-    position: absolute; pointer-events: auto;
+  #touch-quick {
+    position: absolute;
+    left: max(16px, env(safe-area-inset-left));
+    top: max(108px, calc(env(safe-area-inset-top) + 108px));
+    display: grid;
+    grid-template-columns: repeat(2, 42px);
+    gap: 6px;
+    pointer-events: auto;
+  }
+  #touch-quick button {
+    width: 42px; height: 42px;
     border: 1px solid rgba(255,244,220,.24);
-    background: rgba(20,28,23,.56);
+    background: rgba(20,28,23,.62);
     color: #fff4dc;
-    border-radius: 999px;
-    font-size: 12px; letter-spacing: .04em;
-    padding: 10px 15px;
-    backdrop-filter: blur(6px);
-    box-shadow: 0 4px 18px rgba(0,0,0,.18);
+    border-radius: 12px;
+    font-size: 17px; line-height: 1;
+    display: grid; place-items: center;
+    padding: 0;
+    backdrop-filter: blur(7px);
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    touch-action: manipulation;
   }
-  #btn-car { right: max(22px, env(safe-area-inset-right)); bottom: max(184px, calc(env(safe-area-inset-bottom) + 184px)); }
-  #btn-run { right: max(104px, calc(env(safe-area-inset-right) + 82px)); bottom: max(138px, calc(env(safe-area-inset-bottom) + 138px)); }
-  #btn-brake { right: max(22px, env(safe-area-inset-right)); bottom: max(128px, calc(env(safe-area-inset-bottom) + 128px)); }
-  #btn-horn { right: max(104px, calc(env(safe-area-inset-right) + 82px)); bottom: max(76px, calc(env(safe-area-inset-bottom) + 76px)); }
+  #touch-quick button.active {
+    background: var(--gold);
+    color: var(--ink);
+    border-color: transparent;
+  }
+  #touch-drive {
+    position: absolute;
+    right: max(18px, env(safe-area-inset-right));
+    bottom: max(76px, calc(env(safe-area-inset-bottom) + 76px));
+    display: grid;
+    grid-template-columns: repeat(2, 58px);
+    grid-auto-rows: 48px;
+    gap: 8px;
+    pointer-events: none;
+  }
+  #touch-drive button {
+    width: 100%; height: 100%;
+    pointer-events: auto;
+    border: 1px solid rgba(255,244,220,.26);
+    background: rgba(20,28,23,.62);
+    color: #fff4dc;
+    border-radius: 16px;
+    font-size: 11px; font-weight: 600; letter-spacing: .04em;
+    backdrop-filter: blur(7px);
+    box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    touch-action: manipulation;
+  }
+  #btn-run { grid-column: 2; grid-row: 1; }
+  #btn-brake { grid-column: 2; grid-row: 2; }
+  #btn-horn { grid-column: 1; grid-row: 2; font-size: 18px; }
+  #touch-drive.vehicle #btn-brake { grid-column: 2; grid-row: 1; }
+  #touch-drive.vehicle #btn-horn { grid-column: 1; grid-row: 1; }
   #btn-act {
-    position: absolute; left: 50%; bottom: max(210px, calc(env(safe-area-inset-bottom) + 210px)); transform: translateX(-50%);
-    width: 58px; height: 58px; border-radius: 50%;
-    border: 2px solid rgba(255,244,220,.6);
+    position: absolute;
+    right: max(20px, env(safe-area-inset-right));
+    bottom: max(196px, calc(env(safe-area-inset-bottom) + 196px));
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 2px solid rgba(255,244,220,.66);
     background: var(--gold); color: var(--ink);
-    font-size: 22px; font-weight: 700;
+    font-size: 24px; font-weight: 700;
     pointer-events: auto; touch-action: none;
-    box-shadow: 0 8px 30px rgba(0,0,0,.28);
+    box-shadow: 0 8px 30px rgba(0,0,0,.3);
   }
   #btn-act[hidden] { display: none; }
   #zone { bottom: max(18px, env(safe-area-inset-bottom)); }
@@ -308,6 +350,26 @@ canvas { display: block; }
   #target { top: max(118px, calc(env(safe-area-inset-top) + 118px)); font-size: 11.5px; max-width: 64vw; }
   #score { font-size: 36px; }
   #mission { bottom: 254px; width: min(280px, 64vw); }
+}
+
+@media (pointer: coarse) and (orientation: landscape) {
+  #touch-quick {
+    top: max(52px, calc(env(safe-area-inset-top) + 52px));
+    left: 50%;
+    transform: translateX(-50%);
+    grid-template-columns: repeat(7, 38px);
+    gap: 5px;
+  }
+  #touch-quick button { width: 38px; height: 38px; font-size: 14px; }
+  #stick { bottom: max(20px, env(safe-area-inset-bottom)); width: 100px; height: 100px; }
+  #knob { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+  #btn-act { bottom: max(118px, calc(env(safe-area-inset-bottom) + 118px)); width: 58px; height: 58px; }
+  #touch-drive { bottom: max(20px, env(safe-area-inset-bottom)); grid-template-columns: repeat(2, 54px); grid-auto-rows: 44px; }
+  #mission { left: 50%; transform: translateX(-50%); bottom: 14px; width: min(330px, 36vw); }
+  #target { top: max(8px, env(safe-area-inset-top)); }
+  #zone { top: 80px; bottom: auto; }
+  #speed { bottom: 20px; right: 150px; }
+  #mapbox { width: 140px; }
 }
 
 

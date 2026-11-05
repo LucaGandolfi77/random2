@@ -349,7 +349,7 @@ export class MissionManager {
     this.marker.group.visible = false;
   }
 
-  update(dt, player) {
+  update(dt, player, timerOnly = false) {
     if (!this.active) return;
     this.active.timer -= dt;
     if (this.active.timer <= 0) {
@@ -361,6 +361,7 @@ export class MissionManager {
       this.marker.group.visible = false;
       return;
     }
+    if (timerOnly) return;
     if (this.active.def.chase && this.chaseCar && this.chaseWalker) {
       this.chaseWalker.advance(dt);
       const pose = this.chaseWalker.pose();
