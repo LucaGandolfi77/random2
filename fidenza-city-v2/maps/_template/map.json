@@ -2,7 +2,7 @@
   "$schema": "../../schema/map.schema.json",
   "id": "nuova-citta",
   "name": "Nuova Città",
-  "version": "2.17.0",
+  "version": "2.18.0",
   "center": {
     "lat": 44.8665,
     "lon": 10.0612

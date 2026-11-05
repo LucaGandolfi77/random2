@@ -48,9 +48,10 @@ function overpassQuery() {
   way["highway"](${b});
   way["waterway"](${b});
   way["natural"="water"](${b});
-  way["natural"="wood"](${b});
-  way["leisure"~"park|garden|playground|pitch|sports_centre|common|swimming_pool"](${b});
-  way["landuse"~"grass|meadow|forest|farmland|cemetery|industrial|residential|commercial|retail|orchard|vineyard"](${b});
+  way["natural"~"wood|scrub|grassland"](${b});
+  way["natural"="tree_row"](${b});
+  way["leisure"~"park|garden|playground|pitch|sports_centre|common|swimming_pool|dog_park|fitness_station"](${b});
+  way["landuse"~"grass|meadow|forest|farmland|cemetery|industrial|residential|commercial|retail|orchard|vineyard|village_green|recreation_ground"](${b});
   way["place"~"square|neighbourhood"](${b});
   way["amenity"~"parking|school|hospital|marketplace|townhall|theatre|place_of_worship|fuel|pharmacy|bank|restaurant|cafe|bar"](${b});
   way["railway"~"rail|light_rail|narrow_gauge|platform|station"](${b});
@@ -65,8 +66,9 @@ function overpassQuery() {
   way["highway"="crossing"](${b});
   relation["natural"="water"](${b});
   relation["waterway"="riverbank"](${b});
-  relation["leisure"~"park|garden|playground|pitch|sports_centre|common"](${b});
-  relation["landuse"~"grass|meadow|forest|farmland|cemetery|industrial|residential|commercial|retail"](${b});
+  relation["leisure"~"park|garden|playground|pitch|sports_centre|common|dog_park|fitness_station"](${b});
+  relation["landuse"~"grass|meadow|forest|farmland|cemetery|industrial|residential|commercial|retail|village_green|recreation_ground"](${b});
+  relation["natural"~"water|wood|scrub|grassland"](${b});
 );
 out geom;`;
 }
@@ -198,8 +200,28 @@ function hashInt(n) {
 
 function parseNumber(value) {
   if (value == null) return NaN;
-  const m = String(value).replace(',', '.').match(/-?\d+(?:\.\d+)?/);
-  return m ? parseFloat(m[0]) : NaN;
+  const text = String(value).trim().toLowerCase();
+  const m = text.replace(',', '.').match(/-?\d+(?:\.\d+)?/);
+  if (!m) return NaN;
+  let n = parseFloat(m[0]);
+  if (/\b(ft|feet|foot)\b/.test(text)) n *= 0.3048;
+  if (/\b(cm)\b/.test(text)) n /= 100;
+  return n;
+}
+
+function parseLevels(value) {
+  if (value == null) return 0;
+  const levels = String(value).match(/\d+(?:[.,]\d+)?/g);
+  if (!levels?.length) return 0;
+  return Math.max(...levels.map(v => parseFloat(v.replace(',', '.'))));
+}
+
+function validColor(value) {
+  if (!value) return '';
+  const text = String(value).trim().toLowerCase();
+  if (/^#[0-9a-f]{3,8}$/.test(text)) return text;
+  if (/^[a-z]{3,24}$/.test(text)) return text;
+  return '';
 }
 
 const BUILDING_DEFAULTS = {
@@ -228,15 +250,51 @@ const SPECIAL_COLORS = {
   school: '#c9bda9', hospital: '#d7d2c7', commercial: '#cfc5b5', retail: '#d3c6b2'
 };
 
-function buildingHeight(tags, kind, id) {
-  let h = parseNumber(tags.height);
-  if (!Number.isFinite(h) || h <= 0) {
-    const levels = parseNumber(tags['building:levels']);
-    if (Number.isFinite(levels) && levels > 0) h = levels * 3.15 + 0.8;
+function buildingHeight(tags, kind, id, { area = 0, distance = 0, levels = 0 } = {}) {
+  const taggedHeight = parseNumber(tags.height);
+  const taggedLevels = levels || parseLevels(tags['building:levels']);
+  let h;
+  let source = 'inferred';
+
+  if (Number.isFinite(taggedHeight) && taggedHeight > 0) {
+    h = taggedHeight;
+    source = 'height';
+  } else if (taggedLevels > 0) {
+    h = taggedLevels * 3.15 + 0.8;
+    source = 'levels';
+  } else {
+    const rural = distance > 1200;
+    const small = area > 0 && area < 220;
+    const industrial = ['industrial', 'warehouse', 'factory', 'garage', 'garages', 'shed', 'hangar'].includes(kind);
+    if (industrial) h = kind === 'garage' || kind === 'garages' ? 3.2 : 8.6;
+    else if (['house', 'detached', 'semidetached_house', 'villa', 'farm', 'bungalow'].includes(kind)) h = small ? 6.4 : 7.4;
+    else if (kind === 'apartments') h = 14;
+    else if (kind === 'terrace') h = 10;
+    else if (['church', 'cathedral', 'chapel', 'monastery', 'convent'].includes(kind)) h = BUILDING_DEFAULTS[kind] ?? 16;
+    else if (['school', 'hospital', 'townhall', 'civic', 'museum', 'government'].includes(kind)) h = BUILDING_DEFAULTS[kind] ?? 11;
+    else if (kind === 'roof') h = 3;
+    else if (rural && small) h = 6.4;
+    else if (rural && area < 420) h = 7.6;
+    else h = BUILDING_DEFAULTS[kind] ?? (rural ? 8.2 : 9);
+    if (source === 'inferred') h *= 0.96 + (hashInt(id) % 9) / 100;
   }
-  if (!Number.isFinite(h) || h <= 0) h = BUILDING_DEFAULTS[kind] ?? 8;
-  const jitter = 0.92 + (hashInt(id) % 17) / 100;
-  return +Math.max(2.4, Math.min(48, h * jitter)).toFixed(2);
+
+  return {
+    h: +Math.max(2.4, Math.min(48, h)).toFixed(2),
+    source,
+    levels: taggedLevels > 0 ? +taggedLevels.toFixed(1) : Math.max(1, Math.round((h - 0.8) / 3.15))
+  };
+}
+
+function buildingStyle(kind, tags, { distance = 0, area = 0 } = {}) {
+  const text = `${kind} ${tags.building || ''} ${tags.amenity || ''} ${tags.tourism || ''}`.toLowerCase();
+  if (/(church|cathedral|chapel|monastery|convent|historic)/.test(text)) return 'historic';
+  if (/(industrial|warehouse|factory|garage|hangar|shed)/.test(text)) return 'industrial';
+  if (/(apartment|terrace|hotel|office|retail|commercial)/.test(text)) return 'urban';
+  if (/(school|hospital|townhall|civic|museum|government)/.test(text)) return 'civic';
+  if (distance > 1200 && area > 0 && area < 520) return 'rural';
+  if (/(house|detached|semidetached|villa|farm|bungalow)/.test(text)) return 'rural';
+  return 'urban';
 }
 
 function buildingColor(kind, id) {
@@ -253,13 +311,22 @@ const ROAD_WIDTHS = {
 };
 const WALKABLE = new Set(['footway', 'path', 'pedestrian', 'living_street', 'residential', 'service', 'cycleway', 'unclassified', 'track']);
 
+function roadWidth(tags, kind) {
+  const tagged = parseNumber(tags.width);
+  if (Number.isFinite(tagged) && tagged > 0.8) return +Math.min(40, tagged).toFixed(2);
+  const lanes = parseNumber(tags.lanes);
+  if (Number.isFinite(lanes) && lanes > 0) return +(lanes * 3.1 + 1.2).toFixed(2);
+  return ROAD_WIDTHS[kind] || 5.5;
+}
+
 const AREA_KINDS = {
   park: 'park', garden: 'park', playground: 'park', pitch: 'sport', sports_centre: 'sport',
   common: 'park', swimming_pool: 'water',
   grass: 'grass', meadow: 'grass', forest: 'forest', wood: 'forest',
   farmland: 'farmland', orchard: 'farmland', vineyard: 'farmland',
   cemetery: 'cemetery', industrial: 'industrial', residential: 'urban',
-  commercial: 'urban', retail: 'urban',
+  commercial: 'urban', retail: 'urban', village_green: 'park', recreation_ground: 'park',
+  dog_park: 'park', fitness_station: 'sport', scrub: 'forest', grassland: 'grass',
   water: 'water', riverbank: 'water', reservoir: 'water',
   square: 'square', parking: 'parking', school: 'school', hospital: 'hospital',
   marketplace: 'square', platform: 'platform'
@@ -319,6 +386,7 @@ function build() {
   const areas = [];
   const waterways = [];
   const railways = [];
+  const treeRows = [];
   const pois = [];
   const seenPoi = new Set();
   const trafficSignals = [];
@@ -335,20 +403,32 @@ function build() {
       if (simplified.length < 3 || polygonArea(simplified) < 12) continue;
       const kind = tags.building === 'yes' ? (tags['building:levels'] ? 'residential' : 'yes') : tags.building;
       const c = polygonCentroid(simplified);
+      const area = polygonArea(simplified);
+      const distance = Math.hypot(c[0], c[1]);
+      const height = buildingHeight(tags, kind, el.id, { area, distance });
+      const style = buildingStyle(kind, tags, { distance, area });
+      const wallTag = validColor(tags['building:colour'] || tags['building:color']);
+      const roofTag = validColor(tags['roof:colour'] || tags['roof:color']);
       buildings.push({
         id: el.id,
         kind,
         name: tags.name || '',
-        h: buildingHeight(tags, kind, el.id),
-        levels: parseNumber(tags['building:levels']) || 0,
-        roofShape: tags['roof:shape'] || '',
+        h: height.h,
+        heightSource: height.source,
+        levels: height.levels,
+        roofShape: (tags['roof:shape'] || '').toLowerCase(),
         roofHeight: parseNumber(tags['roof:height']) || 0,
+        roofColor: roofTag || '',
+        wallColor: wallTag || '',
+        wallMaterial: tags['building:material'] || '',
+        roofMaterial: tags['roof:material'] || '',
+        facadeStyle: style,
         addr: [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' '),
-        color: buildingColor(kind, el.id),
+        color: wallTag || buildingColor(kind, el.id),
         poly: simplified,
         x: +c[0].toFixed(1),
         z: +c[1].toFixed(1),
-        area: +polygonArea(simplified).toFixed(1)
+        area: +area.toFixed(1)
       });
       continue;
     }
@@ -356,8 +436,8 @@ function build() {
     // Strade
     if (el.type === 'way' && tags.highway) {
       const kind = tags.highway;
-      const w = ROAD_WIDTHS[kind];
-      if (!w) continue;
+      const hasWidth = Number.isFinite(parseNumber(tags.width)) || Number.isFinite(parseNumber(tags.lanes));
+      if (!ROAD_WIDTHS[kind] && !hasWidth) continue;
       if (tags.area === 'yes') continue;
       const pts = lineFromGeometry(el.geometry);
       if (!pts) continue;
@@ -366,18 +446,34 @@ function build() {
       let length = 0;
       for (let i = 1; i < simplified.length; i++) length += Math.hypot(simplified[i][0] - simplified[i - 1][0], simplified[i][1] - simplified[i - 1][1]);
       if (length < 1.5) continue;
+      const lanes = Math.round(parseNumber(tags.lanes)) || 0;
+      const maxspeed = Math.round(parseNumber(tags.maxspeed)) || 0;
       roads.push({
         id: el.id,
         kind,
         name: tags.name || '',
-        w,
+        w: roadWidth(tags, kind),
+        lanes,
+        maxspeed,
         pts: simplified,
         length: +length.toFixed(1),
         bridge: tags.bridge && tags.bridge !== 'no',
         tunnel: tags.tunnel && tags.tunnel !== 'no',
         oneway: tags.oneway === 'yes' || tags.oneway === '1' || tags.junction === 'roundabout',
-        surface: tags.surface || ''
+        surface: tags.surface || '',
+        sidewalk: tags.sidewalk == null ? undefined : !['no', 'separate'].includes(tags.sidewalk),
+        cycleway: tags.cycleway || '',
+        layer: Number.isFinite(parseNumber(tags.layer)) ? parseNumber(tags.layer) : 0
       });
+      continue;
+    }
+
+    // Filari alberati: verranno piantati lungo la linea dal mondo 3D.
+    if (el.type === 'way' && tags.natural === 'tree_row') {
+      const pts = lineFromGeometry(el.geometry);
+      if (pts && pts.length >= 2) {
+        treeRows.push({ id: el.id, name: tags.name || '', pts: simplify(pts, 0.9) });
+      }
       continue;
     }
 
@@ -528,6 +624,7 @@ function build() {
         areas: uniqAreas.length,
         waterways: waterways.length,
         railways: railways.length,
+        treeRows: treeRows.length,
         pois: pois.length,
         stars: stars.length,
         trafficSignals: trafficSignals.length,
@@ -544,6 +641,7 @@ function build() {
     areas: uniqAreas,
     waterways,
     railways,
+    treeRows,
     pois,
     stars,
     trafficSignals,
@@ -558,6 +656,7 @@ function build() {
   console.log(`  aree: ${uniqAreas.length}`);
   console.log(`  corsi d'acqua: ${waterways.length}`);
   console.log(`  ferrovie: ${railways.length}`);
+  console.log(`  filari alberati: ${treeRows.length}`);
   console.log(`  POI: ${pois.length}`);
   console.log(`  stelle: ${stars.length}`);
   console.log(`  semafori: ${trafficSignals.length}`);

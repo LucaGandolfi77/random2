@@ -19,6 +19,16 @@ let overlaps = 0;
 let gaps = 0;
 const step = 60;
 let samples = 0;
+const nearBoundary = (x, z, poly, tolerance = 1.2) => {
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const ax = poly[j][0], az = poly[j][1], bx = poly[i][0], bz = poly[i][1];
+    const dx = bx - ax, dz = bz - az;
+    const len2 = dx * dx + dz * dz || 1;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / len2));
+    if (Math.hypot(x - (ax + dx * t), z - (az + dz * t)) <= tolerance) return true;
+  }
+  return false;
+};
 for (let x = WORLD.bounds.minX + 17; x <= WORLD.bounds.maxX; x += step) {
   for (let z = WORLD.bounds.minZ + 17; z <= WORLD.bounds.maxZ; z += step) {
     samples++;
@@ -27,7 +37,7 @@ for (let x = WORLD.bounds.minX + 17; x <= WORLD.bounds.maxX; x += step) {
       if (districtPointInPoly(x, z, district.poly)) hits++;
     }
     if (hits > 1) overlaps++;
-    if (hits === 0) gaps++;
+    if (hits === 0 && !districts.some(d => nearBoundary(x, z, d.poly))) gaps++;
   }
 }
 

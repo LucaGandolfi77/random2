@@ -2,8 +2,8 @@
   "meta": {
     "id": "fidenza",
     "name": "Fidenza",
-    "version": "2.17.0",
-    "generated": "2026-11-05T18:59:41.223Z",
+    "version": "2.18.0",
+    "generated": "2026-11-05T21:16:15.176Z",
     "center": {
       "lat": 44.8665,
       "lon": 10.0612
@@ -13,10 +13,10 @@
       "lon": 10.0612
     },
     "bbox": {
-      "south": 44.85,
-      "west": 10.04,
-      "north": 44.882,
-      "east": 10.085
+      "south": 44.835,
+      "west": 10.038,
+      "north": 44.884,
+      "east": 10.108
     },
     "projection": "local-tangent",
     "attribution": {
@@ -25,20 +25,20 @@
       "terrain": "AWS Open Data — Terrain Tiles (Mapzen / EU-DEM Copernicus)"
     },
     "counts": {
-      "places": 23,
+      "places": 24,
       "collectibles": 11,
       "landmarks": 12,
       "missions": 14,
       "stars": 27,
       "vehicles": 11,
       "props": 24,
-      "districts": 6,
+      "districts": 7,
       "venues": 4,
-      "buildings": 3373,
-      "roads": 1816,
-      "areas": 185,
-      "waterways": 13,
-      "railways": 62,
+      "buildings": 4214,
+      "roads": 2396,
+      "areas": 249,
+      "waterways": 33,
+      "railways": 68,
       "customFeatures": 0
     }
   },
@@ -450,6 +450,22 @@
       "z": -7,
       "beaconX": -54.25,
       "beaconZ": -6.21
+    },
+    {
+      "id": "coduro",
+      "name": "Coduro",
+      "short": "Coduro",
+      "category": "civic",
+      "lat": 44.8494,
+      "lon": 10.0891,
+      "collectible": false,
+      "radius": 10,
+      "description": "Frazione ai margini sud-est di Fidenza, tra Via Coduro e la campagna.",
+      "fact": "Il nome Coduro compare nei documenti storici legati all’ingresso sud di Borgo San Donnino.",
+      "x": 2201.26,
+      "z": 1900.36,
+      "beaconX": 2192.28,
+      "beaconZ": 1895.66
     }
   ],
   "landmarks": [
@@ -1901,6 +1917,15 @@
       "color": "#7a5a8a",
       "ambience": "park",
       "description": "Il quartiere a ovest, con i viali di via Tagliamento e la chiesa di San Paolo."
+    },
+    {
+      "id": "coduro",
+      "name": "Coduro",
+      "x": 2200,
+      "z": 1930,
+      "color": "#7e9158",
+      "ambience": "park",
+      "description": "La frazione a sud-est tra Via Coduro, la campagna e le nuove vie residenziali."
     }
   ],
   "venues": [

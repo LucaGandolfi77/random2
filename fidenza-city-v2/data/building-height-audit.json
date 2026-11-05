@@ -1,0 +1,61 @@
+{
+  "generated": "2026-11-05T21:16:15.897Z",
+  "counts": {
+    "total": 4214,
+    "bySource": {
+      "inferred": 4130,
+      "levels": 84
+    },
+    "byStyle": {
+      "rural": 1502,
+      "urban": 2358,
+      "industrial": 330,
+      "historic": 14,
+      "civic": 10
+    },
+    "byKind": {
+      "yes": 3599,
+      "industrial": 323,
+      "retail": 7,
+      "commercial": 3,
+      "church": 14,
+      "apartments": 164,
+      "terrace": 34,
+      "grandstand": 1,
+      "hospital": 1,
+      "roof": 30,
+      "greenhouse": 1,
+      "school": 8,
+      "house": 5,
+      "semidetached_house": 3,
+      "train_station": 1,
+      "kindergarten": 2,
+      "residential": 4,
+      "garages": 4,
+      "shed": 1,
+      "detached": 2,
+      "hotel": 1,
+      "fire_station": 1,
+      "construction": 3,
+      "garage": 2
+    }
+  },
+  "heights": {
+    "min": 2.88,
+    "max": 18.72,
+    "mean": 8.36
+  },
+  "explicit": {
+    "height": 0,
+    "levels": 84,
+    "inferred": 4130,
+    "lidar": 0
+  },
+  "outliers": [],
+  "bounds": {
+    "minX": -1870,
+    "maxX": 3730,
+    "minZ": -2040,
+    "maxZ": 3540
+  }
+}

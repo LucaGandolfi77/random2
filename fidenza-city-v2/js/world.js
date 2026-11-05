@@ -1039,7 +1039,8 @@ export class World {
       const isBridge = r.bridge;
       const y = baseY + (isBridge ? 0.38 : 0);
       const pedestrian = pedestrianKinds.has(r.kind);
-      if (!pedestrian && style.sidewalk && r.w >= 4.5) {
+      const hasSidewalk = r.sidewalk === true || (r.sidewalk == null && style.sidewalk);
+      if (!pedestrian && hasSidewalk && r.w >= 4.5) {
         for (const side of [-1, 1]) {
           const sw = makeSideRibbon(r.pts, r.w, 1.35, side, y + 0.018, '#c3b79f');
           if (sw) sidewalkGeoms.push(sw);
@@ -1594,7 +1595,9 @@ export class World {
       const geom = new THREE.ExtrudeGeometry(shape, { depth: b.h, bevelEnabled: false, steps: 1, curveSegments: 1 });
       geom.rotateX(-Math.PI / 2);
       geom.translate(0, 0.06, 0);
-      const roof = new THREE.Color(b.color).lerp(new THREE.Color('#a65a42'), b.kind === 'church' ? 0.2 : 0.38).multiplyScalar(0.94).getStyle();
+      const roof = b.roofColor
+        ? new THREE.Color(b.roofColor).multiplyScalar(0.94).getStyle()
+        : new THREE.Color(b.color).lerp(new THREE.Color('#a65a42'), b.kind === 'church' ? 0.2 : 0.38).multiplyScalar(0.94).getStyle();
       const dark = new THREE.Color(b.color).multiplyScalar(0.68).getStyle();
       const plinth = new THREE.Color(b.color).multiplyScalar(0.52).getStyle();
       geoms.push(paintGeometry(geom, b.color, { roofColor: roof, darkColor: dark, baseColor: plinth, baseHeight: 1.7 }));
@@ -1700,6 +1703,10 @@ export class World {
     for (const b of this.city.buildings) {
       buildingIndex++;
       if (b.h < 4.2 || b.area < 28 || b.kind === 'roof') continue;
+      const facadeStyle = b.facadeStyle || 'urban';
+      const rural = facadeStyle === 'rural';
+      const industrial = facadeStyle === 'industrial';
+      const historic = facadeStyle === 'historic' || facadeStyle === 'civic';
       const edges = [];
       for (let i = 0, j = b.poly.length - 1; i < b.poly.length; j = i++) {
         const [ax, az] = b.poly[j], [bx, bz] = b.poly[i];
@@ -1714,8 +1721,13 @@ export class World {
       if (!edges.length) continue;
 
       for (const e of edges) {
-        const floors = Math.max(1, Math.min(6, Math.floor((b.h - 2.0) / 3.0)));
-        const count = Math.max(1, Math.min(8, Math.floor(e.len / 3.1)));
+        const floorLimit = industrial ? 2 : rural ? 3 : 8;
+        const floors = Math.max(1, Math.min(floorLimit, b.levels > 0 ? Math.round(b.levels) : Math.floor((b.h - 2.0) / 3.0)));
+        const count = industrial
+          ? Math.max(1, Math.min(4, Math.floor(e.len / 7)))
+          : rural
+            ? Math.max(1, Math.min(5, Math.floor(e.len / 4.2)))
+            : Math.max(1, Math.min(8, Math.floor(e.len / 3.1)));
         for (let f = 0; f < floors; f++) {
           const y = 2.15 + f * 3.0;
           if (y > b.h - 0.75) break;
@@ -1723,7 +1735,8 @@ export class World {
             const u = (i + 0.65) / (count + 0.3);
             const cx = e.ax + (e.bx - e.ax) * u + e.nx * 0.065;
             const cz = e.az + (e.bz - e.az) * u + e.nz * 0.065;
-            const w = 0.54, h = 0.82;
+            const w = industrial ? 0.95 : rural ? 0.46 : 0.54;
+            const h = industrial ? 1.15 : rural ? 0.70 : 0.82;
             const ex = e.ux * w * 0.5, ez = e.uz * w * 0.5;
             addQuad(positions,
               cx - ex, y - h / 2, cz - ez,
@@ -1758,7 +1771,7 @@ export class World {
               }
 
               // persiane su una parte delle finestre
-              if (this.quality === 'high' && (buildingIndex + f + i) % 3 === 0) {
+              if (this.quality === 'high' && !industrial && (rural ? (buildingIndex + f + i) % 2 === 0 : (buildingIndex + f + i) % 3 === 0)) {
                 const color = shutterPalette[(buildingIndex + i) % shutterPalette.length];
                 for (const side of [-1, 1]) {
                   const sx = fx + e.ux * side * (hw + 0.23);
@@ -1795,7 +1808,7 @@ export class World {
         }
       }
 
-      if (this.quality === 'high' && buildingIndex % 4 === 0 && edges.length) {
+      if (this.quality === 'high' && !industrial && buildingIndex % 4 === 0 && edges.length) {
         const e = edges[0];
         const px = e.ax + e.nx * 0.14;
         const pz = e.az + e.nz * 0.14;
@@ -1868,7 +1881,7 @@ export class World {
       }
 
       // Tende colorate sopra alcune porte.
-      if (this.quality !== 'low' && buildingIndex % 4 === 0 && longest.len > 7) {
+      if (this.quality !== 'low' && !rural && !industrial && buildingIndex % 4 === 0 && longest.len > 7) {
         const angle = Math.atan2(-longest.uz, longest.ux);
         const count = Math.max(1, Math.min(2, Math.floor(longest.len / 7)));
         for (let i = 0; i < count; i++) {
@@ -1883,7 +1896,7 @@ export class World {
       }
 
       // Balconi su alcune facciate.
-      if (this.quality === 'high' && buildingIndex % 5 === 0 && longest.len > 6) {
+      if (this.quality === 'high' && !rural && !industrial && buildingIndex % 5 === 0 && longest.len > 6) {
         const angle = Math.atan2(-longest.uz, longest.ux);
         const floors = Math.max(1, Math.min(5, Math.floor((b.h - 2.0) / 3.0)));
         for (let f = 1; f < floors; f++) {
@@ -2107,7 +2120,27 @@ export class World {
         }
       }
     }
-    const trees = treeMatrices.slice(0, this.quality === 'low' ? 280 : this.quality === 'medium' ? 520 : 850);
+    // Filari alberati censiti da OSM: alberi ravvicinati lungo il percorso reale.
+    if (this.quality !== 'low') {
+      for (const row of this.city.treeRows || []) {
+        let count = 0;
+        for (let i = 1; i < row.pts.length && count < 90; i++) {
+          const [ax, az] = row.pts[i - 1], [bx, bz] = row.pts[i];
+          const dx = bx - ax, dz = bz - az;
+          const len = Math.hypot(dx, dz);
+          if (len < 1) continue;
+          const ux = dx / len, uz = dz / len;
+          for (let d = 4; d < len && count < 90; d += 11) {
+            const x = ax + ux * d;
+            const z = az + uz * d;
+            addTree(x, z, 0.68 + rnd() * 0.28);
+            count++;
+          }
+        }
+      }
+    }
+    const treeLimit = this.quality === 'low' ? 320 : this.quality === 'medium' ? 650 : 1000;
+    const trees = treeMatrices.slice(0, treeLimit);
     if (trees.length) {
       const { trunk, foliage } = makeTreeGeometry();
       const trunkMesh = new THREE.InstancedMesh(trunk, new THREE.MeshLambertMaterial({ color: '#6b4c35' }), trees.length);
@@ -2251,7 +2284,7 @@ export class World {
     // lampioni
     const lampPositions = [];
     for (const r of this.city.roads) {
-      if (!ROAD_STYLE[r.kind]?.sidewalk || r.w < 6 || r.length < 30) continue;
+      if (!(r.sidewalk === true || (r.sidewalk == null && ROAD_STYLE[r.kind]?.sidewalk)) || r.w < 6 || r.length < 30) continue;
       const step = 36;
       for (let i = 1; i < r.pts.length; i++) {
         const [ax, az] = r.pts[i - 1], [bx, bz] = r.pts[i];
@@ -3965,7 +3998,6 @@ export class World {
   }
 
   isFree(x, z, radius = 0.5) {
-    const f = WORLD.flat;
     if (x < WORLD.bounds.minX || x > WORLD.bounds.maxX || z < WORLD.bounds.minZ || z > WORLD.bounds.maxZ) return false;
     const near = this.hash.query(x, z, radius);
     for (const c of near) {
@@ -4117,7 +4149,7 @@ export class World {
       if (target.key === npc._scheduleKey && npc.scheduleVisible === !!target.slot.visible) continue;
       const samePos = npc.person.visible && Number.isFinite(target.slot.x) &&
         Math.hypot(p.x - target.slot.x, p.z - target.slot.z) < 3;
-      const canApply = d > 55 || samePos || (!target.slot.visible && !npc.scheduleVisible);
+      const canApply = d > 55 || !npc.scheduleVisible || samePos;
       if (canApply) this._applySchedule(npc, target);
       else npc._pendingSchedule = target;
     }
@@ -4378,6 +4410,8 @@ export class World {
     this.hemi.groundColor.set(night > 0.6 ? '#2b3830' : '#5b5a44');
     if (this.ambient) this.ambient.intensity = (0.12 + night * 0.34) * (sl.ambient ?? 1);
 
+    if (this.skyDome) this.skyDome.position.set(playerPos.x, 0, playerPos.z);
+    if (this.stars) this.stars.position.set(playerPos.x, 0, playerPos.z);
     this.sunSprite.position.copy(playerPos).addScaledVector(sunDir, 2600);
     this.sunSprite.visible = elev > -0.08;
     this.moonSprite.position.copy(playerPos).addScaledVector(new THREE.Vector3(-sunDir.x, -sunDir.y, -sunDir.z), 2600);

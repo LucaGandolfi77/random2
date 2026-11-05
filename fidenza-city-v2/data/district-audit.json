@@ -1,10 +1,10 @@
 {
-  "generated": "2026-11-05T16:08:54.558Z",
+  "generated": "2026-11-05T21:16:15.701Z",
   "bounds": {
-    "minX": -1660,
-    "maxX": 2120,
-    "minZ": -1740,
-    "maxZ": 1840
+    "minX": -1870,
+    "maxX": 3730,
+    "minZ": -2040,
+    "maxZ": 3540
   },
   "districts": [
     {
@@ -24,7 +24,7 @@
         "x": 300,
         "z": -180
       },
-      "vertices": 5,
+      "vertices": 4,
       "color": "#4f8fa8"
     },
     {
@@ -44,7 +44,7 @@
         "x": 1250,
         "z": 520
       },
-      "vertices": 5,
+      "vertices": 6,
       "color": "#b86b8a"
     },
     {
@@ -54,7 +54,7 @@
         "x": 620,
         "z": 900
       },
-      "vertices": 5,
+      "vertices": 6,
       "color": "#c99a3f"
     },
     {
@@ -66,9 +66,19 @@
       },
       "vertices": 5,
       "color": "#7a5a8a"
+    },
+    {
+      "id": "coduro",
+      "name": "Coduro",
+      "center": {
+        "x": 2200,
+        "z": 1930
+      },
+      "vertices": 4,
+      "color": "#7e9158"
     }
   ],
-  "samples": 3780,
+  "samples": 8742,
   "overlaps": 0,
   "gaps": 0,
   "venues": [

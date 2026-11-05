@@ -1,4 +1,4 @@
-export const VERSION = '2.17.0';
+export const VERSION = '2.18.0';
 export const SAVE_KEY = 'fidenza-da-giocare-v1';
 
 export const COLORS = {
@@ -14,14 +14,19 @@ export const WORLD = {
   origin: { lat: 44.8665, lon: 10.0612 },
   mPerDegLat: 111132.0,
   mPerDegLon: 111320.0 * Math.cos(44.8665 * Math.PI / 180),
-  // Area giocabile (leggermente più ampia del centro, fino ai bordi della città)
-  bounds: { minX: -1660, maxX: 2120, minZ: -1740, maxZ: 1840 },
-  // Area in cui il terreno viene appiattito sotto la città
+  // Area giocabile: centro storico + espansione est/sud-est di Coduro.
+  bounds: { minX: -1870, maxX: 3730, minZ: -2040, maxZ: 3540 },
+  // Aree in cui il terreno viene appiattito sotto la città.
   flat: { minX: -1550, maxX: 2100, minZ: -1650, maxZ: 1750 },
+  flatZones: [
+    // Tutta l'area giocabile resta a quota 0: case, strade e piazze non
+    // possono galleggiare sui rilievi fuori dal vecchio centro.
+    { minX: -1870, maxX: 3730, minZ: -2040, maxZ: 3540 }
+  ],
   spawn: { x: -312, z: 12, yaw: 1.99 },
   terrain: {
-    widthKm: 6.4,
-    segments: 220
+    widthKm: 9.2,
+    segments: 260
   },
   sky: {
     dayTop: '#6fa8c8',

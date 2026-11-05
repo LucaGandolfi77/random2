@@ -1,12 +1,13 @@
-# Fidenza da Giocare v2.17
+# Fidenza da Giocare v2.18
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.17 porta il **Visual Upgrade**: post-processing con bloom, materiali PBR e
-normal map, acqua animata, strade bagnate e pozzanghere, cielo con alone solare,
-vento sugli alberi, veicoli e abitanti più curati e modalità foto con DOF.
-Restano l’**Editor Pro** della v2.16, la **città viva** della v2.15 e il terreno
+v2.18 estende **Fidenza verso est e sud-est fino a Coduro**, che diventa il
+**settimo quartiere**, e rigenera edifici, strade, parchi e filari alberati dal
+nuovo bbox OpenStreetMap. Arrivano anche altezze più credibili, facciate
+data-driven e un audit dedicato. Restano il **Visual Upgrade** della v2.17,
+l’**Editor Pro** della v2.16, la **città viva** della v2.15 e il terreno
 **AWS Terrain Tiles** della v2.14.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
@@ -20,8 +21,8 @@ Restano l’**Editor Pro** della v2.16, la **città viva** della v2.15 e il terr
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
-- [Novità v2.17](#novità-v217--visual-upgrade)
-- [Novità precedenti](#novità-v216--editor-pro)
+- [Novità v2.18](#novità-v218--coduro-e-mappa-estesa)
+- [Novità precedenti](#novità-v217--visual-upgrade)
 - [Dati, rigenerazione ed editor](#dati-e-correzioni)
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
@@ -91,7 +92,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
   ricampionati in una griglia 512×512 e verificati con un audit dedicato.
 - **Dati separati dal codice**: la città è editabile con manifest, schema,
   template e tool di validazione.
-- **Quartieri Voronoi**: i confini dei sei macro-quartieri sono calcolati da
+- **Quartieri Voronoi**: i confini dei sette macro-quartieri sono calcolati da
   semi nel manifest, così restano coerenti e modificabili senza ridisegnare
   poligoni a mano.
 
@@ -99,14 +100,15 @@ self-hosted in `vendor/` e `assets/fonts/`.
 
 ### Città e mondo
 
-- **Fidenza ricostruita** da OpenStreetMap: **3.373 edifici**, **1.816 segmenti
-  stradali**, **185 aree** (piazze, parchi, prato, sport), **13 corsi d’acqua**
-  e **62 binari**.
-- **85 POI** con icone e categorie: chiese, musei, teatri, piazze, monumenti,
-  stazione, parchi e uffici.
-- **23 luoghi** scopribili e **12 landmark** modellati: Duomo, Piazza Duomo,
-  Porta, Ponte, Teatro Magnani, Palazzo Comunale, Gran Madre, San Pietro,
-  Museo Musini, Stazione, Stirone e Obelisco.
+- **Fidenza ricostruita** da OpenStreetMap: **4.214 edifici**, **2.396 segmenti
+  stradali**, **249 aree** (piazze, parchi, prato, sport, agricole),
+  **33 corsi d’acqua** e **68 binari**.
+- **101 punti di interesse OSM** con icone e categorie, oltre a **24 luoghi**
+  scopribili e **12 landmark** modellati.
+- **Sette quartieri**: Centro, Monica, San Lazzaro, Le Azalee, Corea, Luce e
+  **Coduro**, con case, strade, parchi e filari provenienti dal nuovo bbox.
+- **Altezze e facciate data-driven**: `height`, `building:levels`, stile rurale,
+  industriale, urbano, storico o civico, colori e tetti OSM quando presenti.
 - **51 insegne di attività** su ristoranti, bar, caffè, farmacie, banche, hotel
   e musei, montate sulla facciata più vicina.
 - **Grafica PBR**: materiali con rugosità, normal map procedurali, acqua
@@ -115,12 +117,12 @@ self-hosted in `vendor/` e `assets/fonts/`.
   modalità foto. Selettore qualità Auto/Bassa/Media/Alta.
 - **Tetti 3D** a falde, padiglione e piano, con comignoli, abbaini, grondaie,
   cornici, persiane, balconi, gradini e vetrine.
-- **Vegetazione viva**: fino a **850 alberi**, cespugli, ciuffi d’erba e fiori
+- **Vegetazione viva**: fino a **1.000 alberi**, cespugli, ciuffi d’erba e fiori
   distribuiti su parchi e prato.
 - **Quattro stagioni** con palette, particelle, nebbia, neve, luci natalizie e
   meteo; **ciclo giorno/notte** con finestre illuminate e lampioni.
 - **Strade realistiche** con asfalto procedurale, marciapiedi, linee, tombini,
-  attraversamenti e **12 semafori** funzionanti.
+  attraversamenti e **7 semafori** funzionanti.
 - **Vita urbana**: pedoni, ciclisti, auto ambientali, navetta, treno e bici
   parcheggiate.
 
@@ -144,7 +146,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - HUD con il nome del quartiere, mappa grande con aree colorate ed etichette.
 - Primo ingresso in un quartiere: **+50 punti**, scheda descrittiva e
   registrazione in `districtsSeen`.
-- Nuovo achievement **Sei quartieri** per averli visitati tutti.
+- Nuovo achievement **Sei quartieri**, oggi **Sette quartieri** con Coduro, per averli visitati tutti.
 - **Bar Blu Piramide** in Via Ferraris 14, nel quartiere Le Azalee: insegna blu,
   terrazza, tavolini, ombrelloni, auto parcheggiate e la barista **Blue**.
 - Il bar è un punto di ritrovo narrativo: qui si raccolgono storie e consigli
@@ -222,7 +224,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - **Modalità foto** con camera libera, filtri, cornici, griglia, ora e stagione
   di anteprima, nascondi giocatore/veicoli, scatto JPEG, galleria IndexedDB e
   download PNG.
-- **27 stelle** nascoste e **23 luoghi** da scoprire.
+- **27 stelle** nascoste e **24 luoghi** da scoprire.
 - **40 achievement** e statistiche dettagliate: km a piedi e in auto, velocità
   massima, missioni, stelle, luoghi, foto, stagioni, giorni e tempo di gioco.
 - **Sfida del giorno** deterministica dalla data, con progresso e ricompensa
@@ -284,12 +286,12 @@ self-hosted in `vendor/` e `assets/fonts/`.
 ### 3. Esplorare e collezionare
 
 - Cerca le **27 stelle**: brillano in aria e si raccolgono passandoci vicino.
-- Scopri i **23 luoghi**: avvicinati al beacon e interagisci.
+- Scopri i **24 luoghi**: avvicinati al beacon e interagisci.
 - Ogni stella e ogni luogo danno punti; i punti sbloccano achievement e
   compaiono nella sfida del giorno.
 - La minimappa mostra stelle, luoghi, missione attiva, eventi e bici.
-- Attraversa i **sei macro-quartieri**: Centro, Monica, San Lazzaro, Le Azalee,
-  Corea e Luce. Al primo ingresso ricevi +50 punti e una scheda del quartiere.
+- Attraversa i **sette macro-quartieri**: Centro, Monica, San Lazzaro, Le Azalee,
+  Corea, Luce e Coduro. Al primo ingresso ricevi +50 punti e una scheda del quartiere.
 - Fermati al **Bar Blu Piramide**, in Le Azalee: la barista Blue ha storie e
   consigli sui dintorni.
 
@@ -451,17 +453,17 @@ all’URL per forzare il livello grafico.
   nel gioco è trattato come corso d’acqua lineare, non come punto.
 - **Piazza Duomo** non è l’obelisco: l’obelisco è un POI separato in Piazza
   Garibaldi. È una delle correzioni storiche rispetto alla v1.
-- La mappa usa **3.373 edifici** con footprint reali: i tetti non sono più
+- La mappa usa **4.214 edifici** con footprint reali: i tetti non sono più
   generati sul bounding box ma sulla forma dell’edificio.
 - Le **51 insegne** delle attività sono associate al POI commerciale e montate
   sulla facciata più vicina, evitando sovrapposizioni.
 - Il traffico ambientale è **solo su strade carrabili principali**: niente auto
   su pedonali, ciclabili, marciapiedi o strade residenziali.
-- La città ha **12 semafori** e **15 attraversamenti**; i pedoni attraversano
+- La città ha **7 semafori** e **307 attraversamenti OSM**; i pedoni attraversano
   quando le auto hanno il rosso.
 - Gli **abitanti** hanno nomi e battute originali: Giulia al Duomo, Chiara in
   stazione, Bianca al parco, Nadia in farmacia e molti altri.
-- I **sei macro-quartieri** usano confini Voronoi calcolati dai semi nel
+- I **sette macro-quartieri** usano confini Voronoi calcolati dai semi nel
   manifest: niente poligoni disegnati a mano, ma confini coerenti e modificabili.
 - Il **Bar Blu Piramide** è ispirato al locale di Via Ferraris 14: nel gioco ha
   terrazza, insegna blu e la barista Blue.
@@ -473,14 +475,14 @@ all’URL per forzare il livello grafico.
   in attesa finché non ti allontani.
 - La **Gazzetta di Fidenza** non usa un server: titoli e annunci vengono
   composti nel browser a partire dai tuoi progressi.
-- Il **Passaporto** trasforma i sei quartieri in timbri da collezionare.
+- Il **Passaporto** trasforma i sette quartieri in timbri da collezionare.
 - Il terreno usa i **Terrain Tiles AWS** in formato Terrarium: ogni pixel
   contiene una quota, non un colore.
 - La heightmap è una griglia **512×512** a zoom 15, ricampionata con
   interpolazione bilineare per evitare scalini.
 - Le **bici guidabili** sono 10 e le parcheggiate fino a 30: il centro si
   attraversa volentieri a pedali.
-- Le **27 stelle** e i **23 luoghi** sono posizionati sul manifest e validati
+- Le **27 stelle** e i **24 luoghi** sono posizionati sul manifest e validati
   con un controllo di raggiungibilità.
 - I **40 achievement** coprono stelle, luoghi, missioni, guida, foto, NPC,
   quartieri, stagioni, carriera, eventi e San Donnino.
@@ -492,6 +494,25 @@ all’URL per forzare il livello grafico.
   poi ritagliata per minimappa e mappa grande.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
+
+## Novità v2.18 — Coduro e mappa estesa
+
+- **Nuovo bbox** a est/sud-est: include Coduro, Via Coduro, Via Emilia Est,
+  Tangenziale e la zona artigianale.
+- **Coduro è il settimo quartiere**, con seed Voronoi, descrizione, timbro nel
+  Passaporto e achievement aggiornato.
+- **Mappa più grande**: 4.214 edifici, 2.396 strade, 249 aree, 33 corsi d’acqua
+  e 68 binari.
+- **Altezze più precise**: parsing di `height` e `building:levels`, inferenza
+  per case rurali, villette, appartamenti, capannoni e edifici civici.
+- **Facciate data-driven**: stile rurale, urbano, industriale, storico o civico;
+  finestre e persiane distribuite in base ai piani reali.
+- **Parchi e verde OSM**: nuove aree `park`, `grass`, `farmland`, `sport`,
+  `village_green`, `recreation_ground`, `dog_park` e filari alberati.
+- **Strade più precise**: larghezza reale, corsie, limite di velocità,
+  superficie, marciapiedi, piste ciclabili, ponti e gallerie.
+- **Nuovo audit altezze** in `data/building-height-audit.json`.
+- **Audit quartieri** aggiornato a sette quartieri.
 
 ## Novità v2.17 — Visual Upgrade
 
@@ -580,7 +601,7 @@ all’URL per forzare il livello grafico.
 - **Confini Voronoi** calcolati dai centri nel manifest e modificabili.
 - **HUD e mappa** con quartiere corrente, aree colorate ed etichette.
 - **Scoperta dei quartieri**: +50 punti al primo ingresso.
-- **Nuovo achievement** Sei quartieri (totale **40**).
+- **Nuovo achievement** Sei quartieri, oggi **Sette quartieri** (totale **40**).
 - **Bar Blu Piramide** in Via Ferraris 14: insegna blu, terrazza, tavolini,
   ombrelloni, auto parcheggiate e NPC barista.
 - **Strade rinnovate**: asfalto più ricco, cordoli, marciapiedi rialzati,
@@ -641,7 +662,7 @@ all’URL per forzare il livello grafico.
 - **Tetti piani con parapetto** per capannoni, garage, scuole e ospedali.
 - **Dettagli**: colmi, fasce di gronda, pluviali, comignoli con cappello,
   abbaini, impianti sui tetti piani, cornici, persiane, gradini e vetrine.
-- **Audit edifici** su tutti i 3.373 edifici con report `data/building-audit.json`.
+- **Audit edifici** su tutti i 4.214 edifici con report `data/building-audit.json`.
 - **Import edifici** da GeoJSON/DBTR/Microsoft/Overture tramite
   `tools/merge-buildings.mjs`.
 
@@ -752,7 +773,7 @@ all’URL per forzare il livello grafico.
   massima, missioni, stelle, luoghi, foto, stagioni, giorni e tempo di gioco.
 - **Sfida del giorno**: obiettivo deterministico dalla data, progresso e record
   salvati per giorno, ricompensa in punti. Solo locale, nessun backend.
-- **Semafori e attraversamenti**: 12 semafori e 15 attraversamenti, ciclo
+- **Semafori e attraversamenti**: 7 semafori e 307 attraversamenti OSM, ciclo
   rosso/giallo/verde e traffico ambientale che rallenta o si ferma. Il giocatore
   resta libero: è un gioco arcade.
 - **Insegne 3D**: pannelli leggibili per Duomo, Teatro, Palazzo Comunale, Porta,
@@ -767,7 +788,7 @@ all’URL per forzare il livello grafico.
 - **Mappa corretta**: Piazza Duomo riportata davanti alla cattedrale, Palazzo
   Comunale sulla relation OSM `2428450`, Obelisco separato in Piazza Garibaldi,
   Duomo con facciata rivolta a ovest.
-- **POI verificati**: 23 luoghi scopribili e 85 punti di interesse con icone
+- **POI verificati**: 24 luoghi scopribili e 101 punti di interesse OSM
   per chiese, musei, teatri, piazze, monumenti, stazione, parchi e uffici.
 - **Grafica**: tetti a falde, comignoli, facciate con finestre, fasce, balconi,
   tende, marciapiedi, arredo urbano, illuminazione e ombre morbide.
@@ -776,11 +797,11 @@ all’URL per forzare il livello grafico.
 - **Mappa editabile**: manifest JSON, schema, template per nuove città, importer,
   audit POI e validatore di raggiungibilità.
 - **Gameplay**: auto, Vespa, taxi, ambulanza, 10 bici, 19 abitanti con
-  dialoghi, sei quartieri, Bar Blu Piramide, 14 missioni, carriera con lavori
+  dialoghi, sette quartieri, Bar Blu Piramide, 14 missioni, carriera con lavori
   e garage, 27 stelle, mappa completa, audio sintetizzato, PWA offline.
 - **Vita in città**: foto, 40 achievement, statistiche, sfida del giorno,
   fino a 43 persone in città (13 fisse + 30 camminanti, 19 con dialoghi),
-  sei quartieri, 4 locali con orari, turni NPC, folle dinamiche, Bar Blu
+  sette quartieri, 4 locali con orari, turni NPC, folle dinamiche, Bar Blu
   Piramide, semafori, attraversamenti, insegne 3D e traffico.
 - **Diario di Fidenza**: Gazzetta, Passaporto, Radio e Taccuino, con contenuti
   generati dai progressi locali.
@@ -933,6 +954,7 @@ fidenza-city-v2/
     build-terrain.mjs
     import-map.mjs
     audit-pois.mjs
+    audit-heights.mjs
     validate-map.mjs
     audit-buildings.mjs
     audit-poi-signs.mjs

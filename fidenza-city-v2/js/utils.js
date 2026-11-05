@@ -175,16 +175,28 @@ export function terrainHeightAt(terrain, x, z) {
   return h00 * (1 - fx) * (1 - fz) + h10 * fx * (1 - fz) + h01 * (1 - fx) * fz + h11 * fx * fz;
 }
 
+export function flatZoneInfo(x, z, zones = WORLD.flatZones || [WORLD.flat]) {
+  let edgeDist = Infinity;
+  for (const zone of zones) {
+    const cx = clamp(x, zone.minX, zone.maxX);
+    const cz = clamp(z, zone.minZ, zone.maxZ);
+    const dist = Math.hypot(x - cx, z - cz);
+    if (dist < 1e-6) return { inside: true, edgeDist: 0 };
+    edgeDist = Math.min(edgeDist, dist);
+  }
+  return { inside: false, edgeDist };
+}
+
+export function isFlatAt(x, z) {
+  return flatZoneInfo(x, z).inside;
+}
+
 export function groundHeightAt(terrain, x, z, base = 0) {
-  // Dentro l'area urbana il suolo è piatto; fuori segue il rilievo reale.
-  const f = WORLD.flat;
-  const inside = x > f.minX && x < f.maxX && z > f.minZ && z < f.maxZ;
-  if (inside) return base;
+  // Dentro le aree urbane il suolo è piatto; fuori segue il rilievo reale.
+  const info = flatZoneInfo(x, z);
+  if (info.inside) return base;
   const h = terrainHeightAt(terrain, x, z);
-  const cx = clamp(x, f.minX, f.maxX);
-  const cz = clamp(z, f.minZ, f.maxZ);
-  const edgeDist = Math.hypot(x - cx, z - cz);
-  const blend = clamp(edgeDist / 220, 0, 1);
+  const blend = clamp(info.edgeDist / 220, 0, 1);
   return base + (h - 72) * blend;
 }
 

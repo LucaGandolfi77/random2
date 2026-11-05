@@ -1,9 +1,11 @@
 {
-  "generated": "2026-11-05T11:45:18.216Z",
+  "generated": "2026-11-05T21:16:15.596Z",
   "totals": {
-    "checks": 111,
+    "checks": 112,
     "errors": 0,
-    "overrides": 0
+    "overrides": 0,
+    "absoluteOverrides": 0,
+    "customFeatures": 0
   },
   "rows": [
     {
@@ -93,6 +95,12 @@
       "msg": "beacon accessibile",
       "x": -1230.8,
       "z": 0
+    },
+    {
+      "kind": "place",
+      "id": "coduro",
+      "ok": true,
+      "msg": "nessun ID OSM (solo avviso)"
     },
     {
       "kind": "star",

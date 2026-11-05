@@ -2,7 +2,7 @@
   "$schema": "../../schema/map.schema.json",
   "id": "fidenza",
   "name": "Fidenza",
-  "version": "2.17.0",
+  "version": "2.18.0",
   "center": {
     "lat": 44.8665,
     "lon": 10.0612
@@ -12,10 +12,10 @@
     "lon": 10.0612
   },
   "bbox": {
-    "south": 44.85,
-    "west": 10.04,
-    "north": 44.882,
-    "east": 10.085
+    "south": 44.835,
+    "west": 10.038,
+    "north": 44.884,
+    "east": 10.108
   },
   "projection": "local-tangent",
   "sources": {
@@ -83,6 +83,15 @@
       "color": "#7a5a8a",
       "ambience": "park",
       "description": "Il quartiere a ovest, con i viali di via Tagliamento e la chiesa di San Paolo."
+    },
+    {
+      "id": "coduro",
+      "name": "Coduro",
+      "x": 2200,
+      "z": 1930,
+      "color": "#7e9158",
+      "ambience": "park",
+      "description": "La frazione a sud-est tra Via Coduro, la campagna e le nuove vie residenziali."
     }
   ],
   "venues": [
@@ -462,6 +471,18 @@
       "radius": 8,
       "description": "La farmacia del centro, punto di ritiro per le consegne urgenti.",
       "fact": "Le farmacie di turno sono un presidio importante per la città."
+    },
+    {
+      "id": "coduro",
+      "name": "Coduro",
+      "short": "Coduro",
+      "category": "civic",
+      "lat": 44.8494,
+      "lon": 10.0891,
+      "collectible": false,
+      "radius": 10,
+      "description": "Frazione ai margini sud-est di Fidenza, tra Via Coduro e la campagna.",
+      "fact": "Il nome Coduro compare nei documenti storici legati all’ingresso sud di Borgo San Donnino."
     }
   ],
   "landmarks": [

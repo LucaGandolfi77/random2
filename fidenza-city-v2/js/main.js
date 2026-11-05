@@ -2077,8 +2077,8 @@ function loop() {
       photoPlaceTimer = 0.25;
       updatePhotoPlace();
     }
-    // dt 0: cielo e luci seguono l'ora scelta, traffico e particelle restano fermi.
-    world.update(0, player.position, camera);
+    // dt 0: cielo e luci seguono la camera libera, traffico e particelle restano fermi.
+    world.update(0, camera.position, camera);
   } else {
     world.update(dt, player.position, camera);
   }

@@ -1,10 +1,10 @@
 {
-  "generated": "2026-11-05T11:45:18.380Z",
+  "generated": "2026-11-05T21:16:16.037Z",
   "summary": {
-    "pois": 85,
-    "eligible": 51,
-    "signs": 51,
-    "skipped": 0
+    "pois": 101,
+    "eligible": 64,
+    "signs": 63,
+    "skipped": 1
   },
   "signs": [
     {
@@ -16,6 +16,17 @@
       "y": 3.45,
       "z": 877.73,
       "width": 2.71,
+      "awning": true
+    },
+    {
+      "poi": 441919303,
+      "name": "Tramvai Fidenza",
+      "subtype": "restaurant",
+      "building": 182278241,
+      "x": 2159.96,
+      "y": 3.45,
+      "z": 840.15,
+      "width": 3.03,
       "awning": true
     },
     {
@@ -272,6 +283,17 @@
       "awning": false
     },
     {
+      "poi": 5328093741,
+      "name": "The Cube",
+      "subtype": "hotel",
+      "building": 551728931,
+      "x": 1972.62,
+      "y": 3.45,
+      "z": -1832.19,
+      "width": 3.23,
+      "awning": false
+    },
+    {
       "poi": 5614999118,
       "name": "Bar Diana",
       "subtype": "cafe",
@@ -280,6 +302,17 @@
       "y": 3.45,
       "z": 178.39,
       "width": 3.49,
+      "awning": true
+    },
+    {
+      "poi": 6473850257,
+      "name": "L'Altro Pierre Ristorante Pizzeria",
+      "subtype": "restaurant",
+      "building": 690047924,
+      "x": 2007.93,
+      "y": 3.45,
+      "z": -1785.76,
+      "width": 4.28,
       "awning": true
     },
     {
@@ -316,6 +349,28 @@
       "awning": true
     },
     {
+      "poi": 9732393838,
+      "name": "Farmacia Dottoresse Cavalli e Vidale",
+      "subtype": "pharmacy",
+      "building": 182280275,
+      "x": 2040.23,
+      "y": 3.45,
+      "z": 773.32,
+      "width": 4.8,
+      "awning": false
+    },
+    {
+      "poi": 9732393852,
+      "name": "Dolce Vita",
+      "subtype": "bar",
+      "building": 182280275,
+      "x": 2033.44,
+      "y": 3.45,
+      "z": 770.56,
+      "width": 3.75,
+      "awning": true
+    },
+    {
       "poi": 9732562937,
       "name": "Caffè della Palta",
       "subtype": "cafe",
@@ -324,6 +379,17 @@
       "y": 3.45,
       "z": 306.55,
       "width": 4.8,
+      "awning": true
+    },
+    {
+      "poi": 10970195824,
+      "name": "Romanini",
+      "subtype": "restaurant",
+      "building": 179764476,
+      "x": 3554.57,
+      "y": 3.45,
+      "z": 1377.49,
+      "width": 3.23,
       "awning": true
     },
     {
@@ -357,6 +423,28 @@
       "y": 3.45,
       "z": -53.6,
       "width": 4.8,
+      "awning": true
+    },
+    {
+      "poi": 11336344345,
+      "name": "Sushiko",
+      "subtype": "restaurant",
+      "building": 1214359844,
+      "x": 2021.99,
+      "y": 3.45,
+      "z": -1926.17,
+      "width": 2.97,
+      "awning": true
+    },
+    {
+      "poi": 11544205342,
+      "name": "La Fonte",
+      "subtype": "cafe",
+      "building": 182265214,
+      "x": -1621.46,
+      "y": 3.45,
+      "z": 2036.09,
+      "width": 3.23,
       "awning": true
     },
     {
@@ -445,6 +533,28 @@
       "y": 3.45,
       "z": 1271.97,
       "width": 4.8,
+      "awning": true
+    },
+    {
+      "poi": 12079098524,
+      "name": "Medi-Market",
+      "subtype": "pharmacy",
+      "building": 202199863,
+      "x": 2462.52,
+      "y": 3.45,
+      "z": -1727.01,
+      "width": 4.01,
+      "awning": false
+    },
+    {
+      "poi": 12079098527,
+      "name": "illy",
+      "subtype": "cafe",
+      "building": 202199862,
+      "x": 2520.97,
+      "y": 3.45,
+      "z": -1693.19,
+      "width": 2.19,
       "awning": true
     },
     {
@@ -547,6 +657,28 @@
       "awning": true
     },
     {
+      "poi": 13243539651,
+      "name": "Koi Sushi",
+      "subtype": "restaurant",
+      "building": 179770171,
+      "x": 2518.5,
+      "y": 3.45,
+      "z": -1863.06,
+      "width": 3.49,
+      "awning": true
+    },
+    {
+      "poi": 13288735964,
+      "name": "Da Ivo",
+      "subtype": "restaurant",
+      "building": 179764882,
+      "x": 3520.7,
+      "y": 3.45,
+      "z": 1326.97,
+      "width": 2.71,
+      "awning": true
+    },
+    {
       "poi": 13778892733,
       "name": "Virgy Bar",
       "subtype": "cafe",
@@ -569,5 +701,12 @@
       "awning": true
     }
   ],
-  "skipped": []
+  "skipped": [
+    {
+      "poi": 5328093736,
+      "name": "Agribar",
+      "subtype": "cafe",
+      "reason": "no-building"
+    }
+  ]
 }

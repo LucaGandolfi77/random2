@@ -33,8 +33,8 @@ export const ACHIEVEMENTS = [
     target: () => 10, value: () => (getStats().npcsMet || []).length
   },
   {
-    id: 'districts-all', icon: '⌘', title: 'Sei quartieri', desc: 'Visita tutti i quartieri di Fidenza.',
-    target: () => 6, value: () => (getStats().districtsSeen || []).length
+    id: 'districts-all', icon: '⌘', title: 'Sette quartieri', desc: 'Visita tutti i quartieri di Fidenza, da Coduro al Centro.',
+    target: () => 7, value: () => (getStats().districtsSeen || []).length
   },
   {
     id: 'first-mission', icon: '✓', title: 'Primo incarico', desc: 'Completa la prima missione.',
