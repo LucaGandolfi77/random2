@@ -112,10 +112,10 @@ export class Player {
     }
 
     const forward = (this.input.isDown('KeyW') || this.input.isDown('ArrowUp') ? 1 : 0) - (this.input.isDown('KeyS') || this.input.isDown('ArrowDown') ? 1 : 0);
-    const strafe = (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0) - (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0);
+    const strafe = (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0) - (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0);
     let mx = 0, mz = 0;
     if (this.input.isTouch() && !this.input.padActive) {
-      mx = this.input.touchMove.x;
+      mx = -this.input.touchMove.x;
       mz = -this.input.touchMove.y;
     } else {
       mx = strafe;
@@ -171,7 +171,7 @@ export class Player {
 
   _updateFly(dt) {
     const forward = (this.input.isDown('KeyW') || this.input.isDown('ArrowUp') ? 1 : 0) - (this.input.isDown('KeyS') || this.input.isDown('ArrowDown') ? 1 : 0);
-    const strafe = (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0) - (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0);
+    const strafe = (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0) - (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0);
     const vertical = (this.input.isDown('Space') || this.input.isDown('KeyE') ? 1 : 0) - (this.input.isDown('KeyQ') || this.input.isDown('ControlLeft') ? 1 : 0);
     const boost = this.input.isDown('ShiftLeft') || this.input.isDown('ShiftRight');
     const speed = boost ? PLAYER.flyBoost : PLAYER.flySpeed;
@@ -249,7 +249,7 @@ export class Player {
   }
 
   updateCamera(dt, snap = false) {
-    const dist = this.vehicle ? (this.vehicle.type === 'vespa' ? 5.0 : 7.4) : this.cameraDistance;
+    const dist = this.vehicle ? (this.vehicle.type === 'vespa' ? 5.0 : this.vehicle.type === 'bike' ? 4.2 : 7.4) : this.cameraDistance;
     const horiz = Math.cos(this.cameraPitch) * dist;
     const up = 1.6 + Math.sin(this.cameraPitch) * dist;
     const target = new THREE.Vector3(this.position.x, this.position.y + (this.vehicle ? 1.2 : 1.4), this.position.z);

@@ -1,10 +1,10 @@
-# Fidenza da Giocare v2.6
+# Fidenza da Giocare v2.7
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
-Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.6
-aggiunge il volo libero, auto più veloci, più biciclette, il ritorno alla
-schermata iniziale, il link all’editor e la versione del gioco nell’intro.
+Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La v2.7
+aggiunge le biciclette guidabili, l’inversione dei controlli laterali e un
+deciso miglioramento di case, tetti e strade.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 
@@ -45,6 +45,9 @@ npx serve fidenza-city-v2
 | Stagione | selettore in pausa o nell’intro | selettore |
 | Pausa | Esc | Esc |
 
+Nota: i controlli laterali sono invertiti in tutte le modalità di movimento
+(a piedi, in auto e in volo): **A/←** va a destra, **D/→** va a sinistra.
+
 Nella modalità foto: WASD per muoverti, trascina il mouse per guardare, Q/E per
 l’altezza, Shift per andare veloce, `[` e `]` per il campo visivo, P/Esc per
 uscire. La galleria e i download sono solo locali. Su mobile compare uno stick
@@ -56,6 +59,19 @@ Start per la pausa.
 
 **Performance**: aggiungi `?quality=low`, `?quality=medium` o `?quality=high`
 all’URL per forzare il livello grafico.
+
+## Novità v2.7 — Bici e città reale
+
+- **Controlli laterali invertiti** a piedi, in auto e in volo, incluso touch e
+  gamepad.
+- **Biciclette guidabili** in cinque punti della città, con campanello, ruote e
+  pedalata animata.
+- **Case più dettagliate**: cornici, davanzali, persiane, pluviali, cappelli dei
+  comignoli e coperture con texture in coppi.
+- **Strade più realistiche**: asfalto procedurale, marciapiedi in cemento, linee
+  di bordo, tombini e texture su tutta la rete.
+- **Tetti texturizzati** e dettagli solo su qualità medium/high, con fallback
+  semplificato su low.
 
 ## Novità v2.6 — Volo e città viva
 

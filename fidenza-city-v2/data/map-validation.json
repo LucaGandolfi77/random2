@@ -1,7 +1,7 @@
 {
-  "generated": "2026-11-04T20:22:16.767Z",
+  "generated": "2026-11-04T20:49:19.007Z",
   "totals": {
-    "checks": 106,
+    "checks": 111,
     "errors": 0,
     "overrides": 0
   },
@@ -357,6 +357,46 @@
       "msg": "veicolo accessibile",
       "x": -302.6,
       "z": 41.7
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici stazione",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": 210,
+      "z": -95
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici Piazza Duomo",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -314.8,
+      "z": 17.1
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici Teatro",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -76,
+      "z": 70.8
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici Gran Madre",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": 402,
+      "z": 145
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici centro",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -302.5,
+      "z": 38
     },
     {
       "kind": "spawn",

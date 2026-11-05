@@ -3,7 +3,7 @@
     "id": "fidenza",
     "name": "Fidenza",
     "version": "2.3.0",
-    "generated": "2026-11-04T17:27:59.258Z",
+    "generated": "2026-11-04T20:41:34.103Z",
     "center": {
       "lat": 44.8665,
       "lon": 10.0612
@@ -30,7 +30,7 @@
       "landmarks": 12,
       "missions": 14,
       "stars": 27,
-      "vehicles": 6,
+      "vehicles": 11,
       "props": 24
     }
   },
@@ -1453,6 +1453,51 @@
       "z": 41.7,
       "yaw": 2.4,
       "color": "#f1ede2",
+      "taxi": false
+    },
+    {
+      "type": "bike",
+      "label": "Bici stazione",
+      "x": 210,
+      "z": -95,
+      "yaw": 1.57,
+      "color": "#4f8fa8",
+      "taxi": false
+    },
+    {
+      "type": "bike",
+      "label": "Bici Piazza Duomo",
+      "x": -314.8,
+      "z": 17.1,
+      "yaw": 0.5,
+      "color": "#c2684b",
+      "taxi": false
+    },
+    {
+      "type": "bike",
+      "label": "Bici Teatro",
+      "x": -76,
+      "z": 70.8,
+      "yaw": 2.2,
+      "color": "#5c6b5f",
+      "taxi": false
+    },
+    {
+      "type": "bike",
+      "label": "Bici Gran Madre",
+      "x": 402,
+      "z": 145,
+      "yaw": -0.8,
+      "color": "#c99a3f",
+      "taxi": false
+    },
+    {
+      "type": "bike",
+      "label": "Bici centro",
+      "x": -302.5,
+      "z": 38,
+      "yaw": 1.1,
+      "color": "#7a5a8a",
       "taxi": false
     }
   ],

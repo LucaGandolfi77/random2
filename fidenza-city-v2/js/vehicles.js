@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { VEHICLES, WORLD } from './config.js';
 import { clamp, damp, groundHeightAt, resolveCirclePolygon } from './utils.js';
-import { makeCar, makeVespa } from './models.js';
+import { makeCar, makeVespa, makeBicycle } from './models.js';
 import { getCareer } from './save.js';
 
 export class Vehicle {
@@ -22,7 +22,13 @@ export class Vehicle {
     this.speed = 0;
     this.steer = 0;
     this.active = false;
-    this.mesh = type === 'vespa' ? makeVespa({ color }) : makeCar({ color, taxi, ambulance: label === 'Ambulanza' });
+    this.mesh = type === 'vespa'
+      ? makeVespa({ color })
+      : type === 'bike'
+        ? makeBicycle({ color, rider: true })
+        : makeCar({ color, taxi, ambulance: label === 'Ambulanza' });
+    if (this.mesh.userData.rider) this.mesh.userData.rider.visible = false;
+    this.pedalPhase = Math.random() * Math.PI * 2;
     this.mesh.position.set(x, 0.05, z);
     this.mesh.rotation.y = yaw;
     this.mesh.userData.vehicle = this;
@@ -54,8 +60,13 @@ export class Vehicle {
     if (active) {
       player?.setVehicle(this);
       this.audio?.init();
-      this.audio?.enterVehicle(this.type);
-      this.audio?.startEngine(this.type);
+      if (this.type === 'bike') {
+        this.audio?.bikeBell();
+        if (this.mesh.userData.rider) this.mesh.userData.rider.visible = true;
+      } else {
+        this.audio?.enterVehicle(this.type);
+        this.audio?.startEngine(this.type);
+      }
       if (player) {
         player.cameraYaw = this.heading;
         player.cameraPitch = 0.2;
@@ -63,8 +74,9 @@ export class Vehicle {
     } else {
       this.speed = 0;
       this.steer = 0;
-      this.audio?.stopEngine();
+      if (this.type !== 'bike') this.audio?.stopEngine();
       this.audio?.exitVehicle();
+      if (this.mesh.userData.rider) this.mesh.userData.rider.visible = false;
       player?.setVehicle(null);
     }
   }
@@ -73,12 +85,13 @@ export class Vehicle {
     if (!this.active) return;
     this._hornCooldown = Math.max(0, this._hornCooldown - dt);
     const throttle = (input.isDown('KeyW') || input.isDown('ArrowUp') ? 1 : 0) - (input.isDown('KeyS') || input.isDown('ArrowDown') ? 1 : 0);
-    const steerInput = (input.isDown('KeyD') || input.isDown('ArrowRight') ? 1 : 0) - (input.isDown('KeyA') || input.isDown('ArrowLeft') ? 1 : 0);
+    const steerInput = (input.isDown('KeyA') || input.isDown('ArrowLeft') ? 1 : 0) - (input.isDown('KeyD') || input.isDown('ArrowRight') ? 1 : 0);
     const brake = input.isDown('Space') || input.touchBrake;
     const horn = input.isDown('KeyH') || input.touchHorn;
     if (horn && this._hornCooldown <= 0) {
-      this.audio?.horn(this.config.horn);
-      this._hornCooldown = 0.45;
+      if (this.type === 'bike') this.audio?.bikeBell();
+      else this.audio?.horn(this.config.horn);
+      this._hornCooldown = this.type === 'bike' ? 0.3 : 0.45;
     }
 
     const cfg = this.config;
@@ -115,7 +128,7 @@ export class Vehicle {
     this.position.z = clamp(this.position.z, WORLD.bounds.minZ + 3, WORLD.bounds.maxZ - 3);
     this.position.y = groundHeightAt(this.world.terrain, this.position.x, this.position.z, 0);
     this._updateMesh(dt);
-    this.audio?.updateEngine(this.speed, throttle);
+    if (this.type !== 'bike') this.audio?.updateEngine(this.speed, throttle);
     if (player) {
       player.position.copy(this.position);
       player.yaw = this.heading;
@@ -147,12 +160,25 @@ export class Vehicle {
   _updateMesh(dt = 0) {
     this.mesh.position.set(this.position.x, this.position.y + 0.04, this.position.z);
     this.mesh.rotation.y = this.heading;
-    const lean = this.type === 'vespa' ? this.steer * this.speed * 0.006 : this.steer * this.speed * 0.004;
-    this.mesh.rotation.z = clamp(-lean, -0.12, 0.12);
+    const lean = this.type === 'bike'
+      ? this.steer * this.speed * 0.018
+      : this.type === 'vespa' ? this.steer * this.speed * 0.006 : this.steer * this.speed * 0.004;
+    this.mesh.rotation.z = clamp(-lean, this.type === 'bike' ? -0.2 : -0.12, this.type === 'bike' ? 0.2 : 0.12);
     const wheels = this.mesh.userData.wheels;
     if (wheels) {
       for (const w of wheels) {
         w.rotation.x += (this.speed * dt) / (w.userData.radius || 0.34);
+      }
+    }
+    if (this.type === 'bike') {
+      this.pedalPhase += this.speed * dt * 1.8;
+      const rider = this.mesh.userData.rider;
+      const limbs = rider?.userData.limbs;
+      if (limbs) {
+        limbs.legL.rotation.x = Math.sin(this.pedalPhase) * 0.42;
+        limbs.legR.rotation.x = -Math.sin(this.pedalPhase) * 0.42;
+        limbs.armL.rotation.x = -0.34;
+        limbs.armR.rotation.x = -0.34;
       }
     }
     if (this.emergencyLight) {

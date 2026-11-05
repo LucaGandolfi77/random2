@@ -1560,7 +1560,9 @@ function updateHUD(dt) {
   hud.setProgress(save.stars.length, world.starObjects.length, save.places.length, world.placeObjects.length);
 
   const inVehicle = !!vehicles.current;
-  const mode = inVehicle ? (vehicles.current.type === 'vespa' ? 'Vespa' : 'Auto') : (player.flyMode ? 'Volo' : 'A piedi');
+  const mode = inVehicle
+    ? (vehicles.current.type === 'vespa' ? 'Vespa' : vehicles.current.type === 'bike' ? 'Bici' : 'Auto')
+    : (player.flyMode ? 'Volo' : 'A piedi');
   const nearest = getNearestLandmark(player.position.x, player.position.z, 160, player.cameraYaw);
   const zoneName = nearest ? (nearest.l.short || nearest.l.name) : (inVehicle ? 'Fidenza' : 'Fidenza');
   if (zoneName !== lastZone || hud.el.mode?.textContent !== mode) {

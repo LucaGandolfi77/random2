@@ -1,4 +1,4 @@
-export const VERSION = '2.6.0';
+export const VERSION = '2.7.0';
 export const SAVE_KEY = 'fidenza-da-giocare-v1';
 
 export const COLORS = {
@@ -119,6 +119,20 @@ export const VEHICLES = {
     width: 0.8,
     enterRadius: 2.4,
     horn: 523
+  },
+  bike: {
+    name: 'Bici',
+    maxSpeed: 8,
+    reverseSpeed: 2,
+    acceleration: 5.2,
+    brake: 10,
+    drag: 0.8,
+    steer: 2.9,
+    radius: 0.5,
+    length: 1.7,
+    width: 0.75,
+    enterRadius: 2.1,
+    horn: 880
   }
 };
 

@@ -181,6 +181,12 @@ export class AudioEngine {
     this.tone(180, 0.12, 'triangle', 0.04, 120);
   }
 
+  bikeBell() {
+    if (!this.ctx || this.muted) return;
+    this.tone(1680, 0.12, 'sine', 0.035, 2100);
+    this.tone(2100, 0.18, 'sine', 0.028, 2400, 0.09);
+  }
+
   horn(freq = 392) {
     if (!this.ctx || this.muted) return;
     const t0 = this.ctx.currentTime;

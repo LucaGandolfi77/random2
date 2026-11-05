@@ -227,7 +227,7 @@ function bikeWheel(r = 0.34) {
   return pivot;
 }
 
-export function makeBicycle({ color = '#4f8fa8' } = {}) {
+export function makeBicycle({ color = '#4f8fa8', rider = false } = {}) {
   const g = new THREE.Group();
   const front = bikeWheel();
   front.position.set(0, 0.36, 0.58);
@@ -254,6 +254,13 @@ export function makeBicycle({ color = '#4f8fa8' } = {}) {
   const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.07, 7, 5), new THREE.MeshBasicMaterial({ color: '#fff2bd' }));
   lamp.position.set(0, 0.72, 0.55);
   g.add(lamp);
+  if (rider) {
+    const person = makePerson({ shirt: '#e7b95a', pants: '#2e4439', skin: '#d8aa85', hair: '#2d2119' });
+    person.scale.setScalar(0.78);
+    person.position.set(0, 0.43, -0.02);
+    g.add(person);
+    g.userData.rider = person;
+  }
   g.userData.type = 'bicycle';
   g.userData.wheels = [front, back];
   return g;

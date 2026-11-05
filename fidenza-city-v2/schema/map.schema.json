@@ -359,7 +359,8 @@
             "type": "string",
             "enum": [
               "car",
-              "vespa"
+              "vespa",
+              "bike"
             ]
           },
           "label": {

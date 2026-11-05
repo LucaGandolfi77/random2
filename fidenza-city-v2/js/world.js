@@ -57,6 +57,18 @@ function mergeClean(geoms) {
   return merged;
 }
 
+function assignPlanarUV(geom, scale = 16) {
+  if (!geom?.attributes?.position) return geom;
+  const pos = geom.attributes.position;
+  const uv = new Float32Array(pos.count * 2);
+  for (let i = 0; i < pos.count; i++) {
+    uv[i * 2] = pos.getX(i) / scale;
+    uv[i * 2 + 1] = pos.getZ(i) / scale;
+  }
+  geom.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  return geom;
+}
+
 function makeRibbon(pts, width, y, color, { roofColor = null } = {}) {
   if (pts.length < 2) return null;
   const half = width / 2;
@@ -250,6 +262,7 @@ export class World {
     this.sunSprite = null;
     this.moonSprite = null;
     this.stars = null;
+    this.textureCache = {};
     this.trafficLights = [];
     this.crossingWalkers = [];
     this.bus = null;
@@ -569,10 +582,91 @@ export class World {
     }
   }
 
+  _texture(key, draw, size = 128) {
+    if (this.textureCache[key]) return this.textureCache[key];
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    draw(ctx, size);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = Math.min(8, this.renderer?.capabilities?.getMaxAnisotropy?.() || 1);
+    this.textureCache[key] = tex;
+    return tex;
+  }
+
+  _asphaltTexture() {
+    return this._texture('asphalt', (ctx, size) => {
+      ctx.fillStyle = '#c9cbc8';
+      ctx.fillRect(0, 0, size, size);
+      const rnd = seededRandom(511);
+      for (let i = 0; i < 4200; i++) {
+        const v = 150 + Math.floor(rnd() * 90);
+        ctx.fillStyle = `rgb(${v},${v + 2},${v})`;
+        ctx.fillRect(rnd() * size, rnd() * size, 1, 1);
+      }
+      ctx.strokeStyle = 'rgba(100,105,102,.16)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 8; i++) {
+        ctx.beginPath();
+        ctx.moveTo(rnd() * size, 0);
+        ctx.lineTo(rnd() * size, size);
+        ctx.stroke();
+      }
+    });
+  }
+
+  _concreteTexture() {
+    return this._texture('concrete', (ctx, size) => {
+      ctx.fillStyle = '#ded8c9';
+      ctx.fillRect(0, 0, size, size);
+      const rnd = seededRandom(733);
+      for (let i = 0; i < 1800; i++) {
+        const v = 185 + Math.floor(rnd() * 55);
+        ctx.fillStyle = `rgba(${v},${v - 3},${v - 10},.32)`;
+        ctx.fillRect(rnd() * size, rnd() * size, 2, 1);
+      }
+      ctx.strokeStyle = 'rgba(120,112,96,.15)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= size; x += 32) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, size); ctx.stroke();
+      }
+      for (let y = 0; y <= size; y += 32) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(size, y); ctx.stroke();
+      }
+    });
+  }
+
+  _roofTexture() {
+    return this._texture('roof', (ctx, size) => {
+      ctx.fillStyle = '#ead0b8';
+      ctx.fillRect(0, 0, size, size);
+      const rnd = seededRandom(912);
+      for (let row = 0; row < 8; row++) {
+        const y = row * 16;
+        ctx.fillStyle = row % 2 ? 'rgba(155,80,58,.14)' : 'rgba(255,235,210,.14)';
+        ctx.fillRect(0, y, size, 15);
+        ctx.strokeStyle = 'rgba(125,62,45,.32)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, y + 15.5); ctx.lineTo(size, y + 15.5); ctx.stroke();
+        for (let x = (row % 2) * 8; x < size; x += 16) {
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 15); ctx.stroke();
+        }
+      }
+      for (let i = 0; i < 450; i++) {
+        ctx.fillStyle = `rgba(${120 + Math.floor(rnd() * 40)},${70 + Math.floor(rnd() * 30)},55,.12)`;
+        ctx.fillRect(rnd() * size, rnd() * size, 2, 2);
+      }
+    });
+  }
+
   _buildRoads() {
     const roadGeoms = [];
     const sidewalkGeoms = [];
     const markGeoms = [];
+    const edgePositions = [];
+    const manholeGeoms = [];
     const labels = [];
     const rnd = seededRandom(19);
     for (const r of this.city.roads) {
@@ -617,21 +711,64 @@ export class World {
           }
         }
       }
+      if (['primary', 'secondary', 'tertiary'].includes(r.kind) && r.w >= 6) {
+        for (let i = 1; i < r.pts.length; i++) {
+          const [ax, az] = r.pts[i - 1];
+          const [bx, bz] = r.pts[i];
+          const dx = bx - ax, dz = bz - az;
+          const len = Math.hypot(dx, dz);
+          if (len < 1) continue;
+          const ux = dx / len, uz = dz / len;
+          const nx = -uz, nz = ux;
+          for (const side of [-1, 1]) {
+            const off = side * (r.w / 2 - 0.36);
+            const cx1 = ax + nx * off, cz1 = az + nz * off;
+            const cx2 = bx + nx * off, cz2 = bz + nz * off;
+            const hw = 0.055;
+            addQuad(edgePositions,
+              cx1 + nx * hw, y + 0.009, cz1 + nz * hw,
+              cx1 - nx * hw, y + 0.009, cz1 - nz * hw,
+              cx2 - nx * hw, y + 0.009, cz2 - nz * hw,
+              cx2 + nx * hw, y + 0.009, cz2 + nz * hw);
+          }
+          if (this.quality !== 'low' && r.length > 80) {
+            for (let d = 28 + rnd() * 40; d < len; d += 82) {
+              const cx = ax + ux * d, cz = az + uz * d;
+              const circle = new THREE.CircleGeometry(0.34, 10);
+              circle.rotateX(-Math.PI / 2);
+              circle.translate(cx, y + 0.012, cz);
+              manholeGeoms.push(circle);
+            }
+          }
+        }
+      }
       if (r.name && r.length > 140 && labels.length < 9 && ['primary', 'secondary', 'tertiary'].includes(r.kind)) {
         const mid = r.pts[Math.floor(r.pts.length / 2)];
         labels.push({ text: r.name.toUpperCase(), x: mid[0], z: mid[1] });
       }
     }
+    if (edgePositions.length) {
+      const eg = new THREE.BufferGeometry();
+      eg.setAttribute('position', new THREE.Float32BufferAttribute(edgePositions, 3));
+      eg.computeVertexNormals();
+      markGeoms.push(paintGeometry(eg, '#d9d3c2'));
+    }
     const roadMesh = mergeClean(roadGeoms);
     if (roadMesh) {
-      const m = new THREE.Mesh(roadMesh, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      assignPlanarUV(roadMesh, 18);
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      if (this.quality !== 'low') mat.map = this._asphaltTexture();
+      const m = new THREE.Mesh(roadMesh, mat);
       m.receiveShadow = true;
       m.name = 'strade';
       this.scene.add(m);
     }
     const sidewalkMesh = mergeClean(sidewalkGeoms);
     if (sidewalkMesh) {
-      const m = new THREE.Mesh(sidewalkMesh, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      assignPlanarUV(sidewalkMesh, 7);
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      if (this.quality !== 'low') mat.map = this._concreteTexture();
+      const m = new THREE.Mesh(sidewalkMesh, mat);
       m.receiveShadow = true;
       m.name = 'marciapiedi';
       this.scene.add(m);
@@ -639,6 +776,12 @@ export class World {
     const marks = mergeClean(markGeoms);
     if (marks) {
       const m = new THREE.Mesh(marks, new THREE.MeshBasicMaterial({ vertexColors: true }));
+      this.scene.add(m);
+    }
+    const manholes = mergeClean(manholeGeoms);
+    if (manholes) {
+      const m = new THREE.Mesh(manholes, new THREE.MeshLambertMaterial({ color: '#3f4341' }));
+      m.name = 'tombini';
       this.scene.add(m);
     }
     for (const l of labels) {
@@ -856,6 +999,7 @@ export class World {
     const geoms = [];
     const roofGeoms = [];
     const chimneyGeoms = [];
+    const chimneyCapGeoms = [];
     let count = 0;
     for (const b of this.city.buildings) {
       const bounds = polygonBounds(b.poly);
@@ -919,6 +1063,9 @@ export class World {
           const chimney = new THREE.BoxGeometry(0.55, 1.25, 0.55);
           chimney.translate(cx + ox, b.h + ridgeH * 0.55, cz + oz);
           chimneyGeoms.push(paintGeometry(chimney, '#9b6a52'));
+          const cap = new THREE.BoxGeometry(0.72, 0.12, 0.72);
+          cap.translate(cx + ox, b.h + ridgeH * 0.55 + 0.66, cz + oz);
+          chimneyCapGeoms.push(paintGeometry(cap, '#6f4c3c'));
         }
       }
       count++;
@@ -937,7 +1084,10 @@ export class World {
     }
     const roofs = mergeClean(roofGeoms);
     if (roofs) {
-      const mesh = new THREE.Mesh(roofs, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      assignPlanarUV(roofs, 4.2);
+      const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+      if (this.quality !== 'low') mat.map = this._roofTexture();
+      const mesh = new THREE.Mesh(roofs, mat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       mesh.name = 'tetti';
@@ -951,15 +1101,32 @@ export class World {
       mesh.name = 'comignoli';
       this.scene.add(mesh);
     }
+    const caps = mergeClean(chimneyCapGeoms);
+    if (caps) {
+      const mesh = new THREE.Mesh(caps, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      mesh.castShadow = true;
+      mesh.name = 'cappelli-comignoli';
+      this.scene.add(mesh);
+    }
   }
 
   _buildWindows() {
     const positions = [];
     const doorPositions = [];
     const bandPositions = [];
+    const framePositions = [];
+    const shutterPositions = [];
+    const shutterColors = [];
+    const downpipeGeoms = [];
     const awningGeoms = [];
     const balconyGeoms = [];
     const awningColors = ['#b5503f', '#c2684b', '#3f748a', '#5d7a52', '#c99a3f', '#7f5a46'];
+    const shutterPalette = ['#4f6b58', '#6b5a43', '#7a3f2f', '#3f5f6b'].map(c => new THREE.Color(c));
+    const stoneColor = new THREE.Color('#d8cbb6');
+    const addColoredQuad = (arr, cols, color, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4) => {
+      addQuad(arr, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4);
+      for (let k = 0; k < 4; k++) cols.push(color.r, color.g, color.b);
+    };
     let buildingIndex = 0;
     for (const b of this.city.buildings) {
       buildingIndex++;
@@ -994,6 +1161,45 @@ export class World {
               cx + ex, y - h / 2, cz + ez,
               cx + ex, y + h / 2, cz + ez,
               cx - ex, y + h / 2, cz - ez);
+
+            // cornice e davanzale
+            const fx = cx + e.nx * 0.02, fz = cz + e.nz * 0.02;
+            const hw = w / 2;
+            const exTop = e.ux * (hw + 0.09), ezTop = e.uz * (hw + 0.09);
+            addQuad(framePositions,
+              fx - exTop, y + h / 2 + 0.005, fz - ezTop,
+              fx + exTop, y + h / 2 + 0.005, fz + ezTop,
+              fx + exTop, y + h / 2 + 0.075, fz + ezTop,
+              fx - exTop, y + h / 2 + 0.075, fz - ezTop);
+            const exSill = e.ux * (hw + 0.12), ezSill = e.uz * (hw + 0.12);
+            addQuad(framePositions,
+              fx - exSill, y - h / 2 - 0.10, fz - ezSill,
+              fx + exSill, y - h / 2 - 0.10, fz + ezSill,
+              fx + exSill, y - h / 2 - 0.015, fz + ezSill,
+              fx - exSill, y - h / 2 - 0.015, fz - ezSill);
+            for (const side of [-1, 1]) {
+              const sx = fx + e.ux * side * (hw + 0.035);
+              const sz = fz + e.uz * side * (hw + 0.035);
+              addQuad(framePositions,
+                sx - e.ux * 0.032, y - h / 2 - 0.06, sz - e.uz * 0.032,
+                sx + e.ux * 0.032, y - h / 2 - 0.06, sz + e.uz * 0.032,
+                sx + e.ux * 0.032, y + h / 2 + 0.06, sz + e.uz * 0.032,
+                sx - e.ux * 0.032, y + h / 2 + 0.06, sz - e.uz * 0.032);
+            }
+
+            // persiane su una parte delle finestre
+            if (this.quality === 'high' && (buildingIndex + f + i) % 3 === 0) {
+              const color = shutterPalette[(buildingIndex + i) % shutterPalette.length];
+              for (const side of [-1, 1]) {
+                const sx = fx + e.ux * side * (hw + 0.23);
+                const sz = fz + e.uz * side * (hw + 0.23);
+                addColoredQuad(shutterPositions, shutterColors, color,
+                  sx - e.ux * 0.16, y - h / 2 - 0.03, sz - e.uz * 0.16,
+                  sx + e.ux * 0.16, y - h / 2 - 0.03, sz + e.uz * 0.16,
+                  sx + e.ux * 0.16, y + h / 2 + 0.03, sz + e.uz * 0.16,
+                  sx - e.ux * 0.16, y + h / 2 + 0.03, sz - e.uz * 0.16);
+              }
+            }
           }
         }
         // fasce orizzontali: danno profondità alle facciate
@@ -1018,6 +1224,15 @@ export class World {
         }
       }
 
+      if (this.quality === 'high' && buildingIndex % 4 === 0 && edges.length) {
+        const e = edges[0];
+        const px = e.ax + e.nx * 0.14;
+        const pz = e.az + e.nz * 0.14;
+        const pipe = new THREE.BoxGeometry(0.14, Math.max(2, b.h - 0.25), 0.14);
+        pipe.translate(px, b.h / 2, pz);
+        downpipeGeoms.push(paintGeometry(pipe, '#5f5548'));
+      }
+
       // Porta d'ingresso sul lato più lungo.
       const longest = edges.reduce((a, b) => a.len > b.len ? a : b, edges[0]);
       if (buildingIndex % 2 === 0 && longest.len > 5) {
@@ -1030,6 +1245,22 @@ export class World {
           cx + ex, 0.12, cz + ez,
           cx + ex, 2.35, cz + ez,
           cx - ex, 2.35, cz - ez);
+        const fx = cx + longest.nx * 0.03, fz = cz + longest.nz * 0.03;
+        const exf = longest.ux * 0.74, ezf = longest.uz * 0.74;
+        addQuad(framePositions,
+          fx - exf, 2.35, fz - ezf,
+          fx + exf, 2.35, fz + ezf,
+          fx + exf, 2.48, fz + ezf,
+          fx - exf, 2.48, fz - ezf);
+        for (const side of [-1, 1]) {
+          const sx = fx + longest.ux * side * 0.72;
+          const sz = fz + longest.uz * side * 0.72;
+          addQuad(framePositions,
+            sx - longest.ux * 0.055, 0.12, sz - longest.uz * 0.055,
+            sx + longest.ux * 0.055, 0.12, sz + longest.uz * 0.055,
+            sx + longest.ux * 0.055, 2.47, sz + longest.uz * 0.055,
+            sx - longest.ux * 0.055, 2.47, sz - longest.uz * 0.055);
+        }
       }
 
       // Tende colorate sopra alcune porte.
@@ -1092,6 +1323,32 @@ export class World {
       const doorMesh = new THREE.Mesh(doorGeo, new THREE.MeshLambertMaterial({ color: '#5a4636', side: THREE.DoubleSide }));
       doorMesh.name = 'porte';
       this.scene.add(doorMesh);
+    }
+
+    if (framePositions.length) {
+      const fg = new THREE.BufferGeometry();
+      fg.setAttribute('position', new THREE.Float32BufferAttribute(framePositions, 3));
+      fg.computeVertexNormals();
+      const mesh = new THREE.Mesh(fg, new THREE.MeshLambertMaterial({ color: '#d8cbb6', side: THREE.DoubleSide }));
+      mesh.name = 'cornici';
+      this.scene.add(mesh);
+    }
+
+    if (shutterPositions.length) {
+      const sg = new THREE.BufferGeometry();
+      sg.setAttribute('position', new THREE.Float32BufferAttribute(shutterPositions, 3));
+      sg.setAttribute('color', new THREE.Float32BufferAttribute(shutterColors, 3));
+      sg.computeVertexNormals();
+      const mesh = new THREE.Mesh(sg, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }));
+      mesh.name = 'persiane';
+      this.scene.add(mesh);
+    }
+
+    const downpipes = mergeClean(downpipeGeoms);
+    if (downpipes) {
+      const mesh = new THREE.Mesh(downpipes, new THREE.MeshLambertMaterial({ vertexColors: true }));
+      mesh.name = 'pluviali';
+      this.scene.add(mesh);
     }
 
     const awningMeshGeo = mergeClean(awningGeoms);
