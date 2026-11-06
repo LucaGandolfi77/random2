@@ -1,5 +1,5 @@
 import { WORLD, ROAD_STYLE, AREA_STYLE, COLORS } from './config.js';
-import { clamp, formatDistance } from './utils.js';
+import { clamp, formatDistance, polygonCentroid } from './utils.js';
 
 const MAP_SIZE = 2048;
 
@@ -129,6 +129,15 @@ export class GameMap {
     this.dragLast = null;
     this.pointers = new Map();
     this.pinchDist = 0;
+    this.parkingSpots = this.city.areas
+      .filter(a => a.kind === 'parking' && a.area > 700 && a.poly?.length >= 3)
+      .map(a => {
+        const [x, z] = polygonCentroid(a.poly);
+        return { x, z, name: a.name || '', area: a.area };
+      })
+      .sort((a, b) => b.area - a.area)
+      .slice(0, 80);
+    this._prepareStreetLabels();
     this._bindBigMap();
     this.renderStatic();
   }
@@ -138,6 +147,52 @@ export class GameMap {
       x: this.offsetX + (x - this.minX) * this.mapScale,
       y: this.offsetY + (z - this.minZ) * this.mapScale
     };
+  }
+
+  _prepareStreetLabels() {
+    const score = {
+      motorway: 10, trunk: 10, primary: 9, primary_link: 8,
+      secondary: 8, secondary_link: 7, tertiary: 7, tertiary_link: 6,
+      unclassified: 5, residential: 4, living_street: 3, service: 2, track: 1
+    };
+    const candidates = [];
+    for (const road of this.city.roads) {
+      const name = (road.name || '').trim();
+      if (!name || !road.pts || road.pts.length < 2) continue;
+      const base = score[road.kind];
+      if (!base) continue;
+      let total = 0;
+      let bestLen = 0;
+      let bestIdx = 0;
+      for (let i = 1; i < road.pts.length; i++) {
+        const len = Math.hypot(road.pts[i][0] - road.pts[i - 1][0], road.pts[i][1] - road.pts[i - 1][1]);
+        total += len;
+        if (len > bestLen) { bestLen = len; bestIdx = i; }
+      }
+      if (total < 70 || bestLen < 24) continue;
+      const [ax, az] = road.pts[bestIdx - 1];
+      const [bx, bz] = road.pts[bestIdx];
+      let angle = Math.atan2(bz - az, bx - ax);
+      if (angle > Math.PI / 2) angle -= Math.PI;
+      if (angle < -Math.PI / 2) angle += Math.PI;
+      candidates.push({
+        name,
+        x: (ax + bx) / 2,
+        z: (az + bz) / 2,
+        angle,
+        priority: base + Math.min(4, total / 700),
+        length: total
+      });
+    }
+    candidates.sort((a, b) => b.priority - a.priority || b.length - a.length);
+    const labels = [];
+    for (const candidate of candidates) {
+      if (labels.some(l => l.name === candidate.name &&
+          Math.hypot(l.x - candidate.x, l.z - candidate.z) < 260)) continue;
+      labels.push(candidate);
+      if (labels.length >= 380) break;
+    }
+    this.streetLabels = labels;
   }
 
   renderStatic() {
@@ -530,6 +585,75 @@ export class GameMap {
       const p = this.project(x, z);
       return { x: destX + p.x * drawScale, y: destY + p.y * drawScale };
     };
+
+    // Nomi delle vie
+    if (this.zoom >= 1.12 && this.streetLabels?.length) {
+      const minPriority = this.zoom >= 2 ? 0 : this.zoom >= 1.55 ? 6 : 8;
+      const used = [];
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.lineJoin = 'round';
+      for (const label of this.streetLabels) {
+        if (label.priority < minPriority) continue;
+        const p = toScreen(label.x, label.z);
+        if (p.x < -80 || p.y < -80 || p.x > W + 80 || p.y > H + 80) continue;
+        const major = label.priority >= 8;
+        ctx.font = `${major ? '700 12px' : '600 10px'} Oswald, "Trebuchet MS", sans-serif`;
+        const tw = ctx.measureText(label.name).width;
+        const ca = Math.abs(Math.cos(label.angle));
+        const sa = Math.abs(Math.sin(label.angle));
+        const bw = tw * ca + 15 * sa;
+        const bh = tw * sa + 15 * ca;
+        if (used.some(r =>
+          p.x - bw / 2 < r.x + r.w && p.x + bw / 2 > r.x &&
+          p.y - bh / 2 < r.y + r.h && p.y + bh / 2 > r.y)) continue;
+        used.push({ x: p.x - bw / 2, y: p.y - bh / 2, w: bw, h: bh });
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(label.angle);
+        ctx.lineWidth = major ? 3.4 : 2.8;
+        ctx.strokeStyle = 'rgba(239,228,208,.9)';
+        ctx.strokeText(label.name, 0, 0);
+        ctx.fillStyle = major ? '#3e362c' : '#5a4f41';
+        ctx.fillText(label.name, 0, 0);
+        ctx.restore();
+      }
+    }
+
+    // Parcheggi
+    if (this.zoom >= 0.9 && this.parkingSpots?.length) {
+      for (const lot of this.parkingSpots) {
+        if (this.zoom < 1.5 && lot.area < 1500) continue;
+        const p = toScreen(lot.x, lot.z);
+        if (p.x < -14 || p.y < -14 || p.x > W + 14 || p.y > H + 14) continue;
+        const r = this.zoom >= 1.6 ? 8 : 5.5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#2f6fa8';
+        ctx.fill();
+        ctx.strokeStyle = '#f4ebda';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        if (r >= 7) {
+          ctx.fillStyle = '#f4ebda';
+          ctx.font = '700 9px Oswald, "Trebuchet MS", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('P', p.x, p.y + 0.5);
+        }
+        if (this.zoom >= 2 && lot.name) {
+          ctx.font = '600 10px Oswald, "Trebuchet MS", sans-serif';
+          const text = lot.name;
+          const tw = ctx.measureText(text).width;
+          ctx.fillStyle = 'rgba(27,36,30,.72)';
+          ctx.fillRect(p.x - tw / 2 - 5, p.y + 11, tw + 10, 16);
+          ctx.fillStyle = '#f4ebda';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'top';
+          ctx.fillText(text, p.x, p.y + 13);
+        }
+      }
+    }
 
     // quartieri
     for (const district of this.districts) {

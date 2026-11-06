@@ -1,7 +1,7 @@
 {
-  "name": "Fidenza da Giocare v2.21",
+  "name": "Fidenza da Giocare v2.22",
   "short_name": "Fidenza",
-  "description": "Open world gratuito nel browser ambientato a Fidenza: carriera, eventi, trasporti, foto, bici, volo mobile, abitanti con dialoghi, sette quartieri, Duomo solido con palette 3D, negozi e arredo urbano del centro, parchi giocabili, campi sportivi, ferrovia, Diario di Fidenza, Bar Blu Piramide, turni NPC, orari dei locali, terreno AWS, editor Pro con geometrie custom, grafica PBR con bloom e acqua animata, insegne delle attività, parchi verdi, più bici nelle zone pedonali, traffico sulle strade principali e 27 stelle nascoste.",
+  "description": "Open world gratuito nel browser ambientato a Fidenza: carriera, eventi, trasporti, foto, bici, volo mobile, abitanti con dialoghi, sette quartieri, Duomo solido con palette 3D, negozi e arredo urbano del centro, parchi giocabili, campi sportivi, ferrovia, passaggi a livello, segnaletica dei parcheggi, Diario di Fidenza, Bar Blu Piramide, turni NPC, orari dei locali, terreno AWS, editor Pro con geometrie custom, grafica PBR con bloom e acqua animata, insegne delle attività, parchi verdi, più bici nelle zone pedonali, traffico sulle strade principali e 27 stelle nascoste.",
   "lang": "it",
   "dir": "ltr",
   "start_url": "./",

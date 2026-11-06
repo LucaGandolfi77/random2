@@ -376,6 +376,7 @@ export class World {
     this.textureCache = {};
     this.trafficLights = [];
     this.crossingWalkers = [];
+    this.levelCrossings = [];
     this.bus = null;
     this.busStops = [];
     this.train = null;
@@ -405,7 +406,9 @@ export class World {
     await step(0.32, 'Traccio le strade…', () => this._buildRoads());
     await step(0.38, 'Semafori e attraversamenti…', () => this._buildTrafficFurniture());
     await step(0.39, 'Segnaletica stradale…', () => this._buildRoadSigns());
+    await step(0.395, 'Segnaletica dei parcheggi…', () => this._buildParkingSigns());
     await step(0.40, 'Poso i binari…', () => this._buildRailways());
+    await step(0.405, 'Passaggi a livello…', () => this._buildLevelCrossings());
     await step(0.41, 'Dettagli ferroviari…', () => this._buildRailDetails());
     onProgress(0.45, 'Costruisco gli edifici…');
     await this._buildBuildings(onProgress);
@@ -1460,6 +1463,183 @@ export class World {
     if (rails) {
       const m = new THREE.Mesh(rails, new THREE.MeshLambertMaterial({ vertexColors: true }));
       this.scene.add(m);
+    }
+  }
+
+  _buildLevelCrossings() {
+    const roadKinds = new Set([
+      'motorway', 'trunk', 'primary', 'secondary', 'tertiary',
+      'unclassified', 'residential', 'living_street', 'service', 'track'
+    ]);
+    const hits = [];
+    for (const rail of this.city.railways || []) {
+      if (!rail.pts || rail.pts.length < 2) continue;
+      for (let i = 1; i < rail.pts.length; i++) {
+        const [ax, az] = rail.pts[i - 1];
+        const [bx, bz] = rail.pts[i];
+        const rdx = bx - ax, rdz = bz - az;
+        if (Math.abs(rdx) + Math.abs(rdz) < 1) continue;
+        const minX = Math.min(ax, bx) - 1.5, maxX = Math.max(ax, bx) + 1.5;
+        const minZ = Math.min(az, bz) - 1.5, maxZ = Math.max(az, bz) + 1.5;
+        for (const road of this.city.roads || []) {
+          if (!roadKinds.has(road.kind) || (road.layer ?? 0) !== 0) continue;
+          for (let j = 1; j < road.pts.length; j++) {
+            const [cx, cz] = road.pts[j - 1];
+            const [dx, dz] = road.pts[j];
+            if (Math.max(cx, dx) < minX || Math.min(cx, dx) > maxX ||
+                Math.max(cz, dz) < minZ || Math.min(cz, dz) > maxZ) continue;
+            const sx = dx - cx, sz = dz - cz;
+            const den = rdx * sz - rdz * sx;
+            if (Math.abs(den) < 1e-9) continue;
+            const t = ((cx - ax) * sz - (cz - az) * sx) / den;
+            const u = ((cx - ax) * rdz - (cz - az) * rdx) / den;
+            if (t < 0 || t > 1 || u < 0 || u > 1) continue;
+            hits.push({
+              x: ax + rdx * t,
+              z: az + rdz * t,
+              rdx,
+              rdz,
+              roadW: clamp(Number(road.w) || 5, 4.2, 11),
+              road: road.name || road.kind
+            });
+          }
+        }
+      }
+    }
+    if (!hits.length) return;
+    const clusters = [];
+    for (const hit of hits) {
+      let cluster = clusters.find(c => Math.hypot(c.x - hit.x, c.z - hit.z) < 26);
+      if (!cluster) {
+        cluster = { x: hit.x, z: hit.z, rdx: hit.rdx, rdz: hit.rdz, roadW: hit.roadW, road: hit.road, n: 0 };
+        clusters.push(cluster);
+      }
+      const n = cluster.n + 1;
+      cluster.x = (cluster.x * cluster.n + hit.x) / n;
+      cluster.z = (cluster.z * cluster.n + hit.z) / n;
+      cluster.n = n;
+      cluster.roadW = Math.max(cluster.roadW, hit.roadW);
+    }
+    const limit = this.quality === 'low' ? 4 : this.quality === 'medium' ? 6 : 8;
+    for (const cluster of clusters.slice(0, limit)) this._buildLevelCrossing(cluster);
+  }
+
+  _buildLevelCrossing(cluster) {
+    const { x, z, rdx, rdz, roadW } = cluster;
+    const angle = Math.atan2(rdx, rdz);
+    const y = groundHeightAt(this.terrain, x, z, 0);
+    const group = new THREE.Group();
+    group.position.set(x, y, z);
+    group.rotation.y = angle;
+
+    const deck = new THREE.Mesh(
+      new THREE.BoxGeometry(4.8, 0.09, roadW + 1.8),
+      new THREE.MeshLambertMaterial({ color: '#5f5b52' })
+    );
+    deck.position.y = 0.05;
+    deck.receiveShadow = true;
+    group.add(deck);
+    for (const x of [-1.55, 0, 1.55]) {
+      const plank = new THREE.Mesh(
+        new THREE.BoxGeometry(0.3, 0.025, roadW + 1.65),
+        new THREE.MeshLambertMaterial({ color: '#6b5a45' })
+      );
+      plank.position.set(x, 0.105, 0);
+      group.add(plank);
+    }
+    for (const side of [-1, 1]) {
+      const strip = new THREE.Mesh(
+        new THREE.BoxGeometry(4.8, 0.025, 0.22),
+        new THREE.MeshBasicMaterial({ color: '#d8d2c4' })
+      );
+      strip.position.set(0, 0.1, side * (roadW / 2 + 0.72));
+      group.add(strip);
+    }
+
+    // Barriere alzate, una per ogni senso di marcia.
+    const metal = new THREE.MeshLambertMaterial({ color: '#3a423c' });
+    const stripeCanvas = document.createElement('canvas');
+    stripeCanvas.width = 160;
+    stripeCanvas.height = 16;
+    const sctx = stripeCanvas.getContext('2d');
+    sctx.fillStyle = '#f4ebda';
+    sctx.fillRect(0, 0, 160, 16);
+    sctx.fillStyle = '#b83b32';
+    for (let i = 0; i < 10; i += 2) sctx.fillRect(i * 16, 0, 16, 16);
+    const stripeTex = new THREE.CanvasTexture(stripeCanvas);
+    stripeTex.colorSpace = THREE.SRGBColorSpace;
+    const boomMat = new THREE.MeshLambertMaterial({ map: stripeTex });
+    const boomLength = roadW / 2 + 1.0;
+
+    const crossCanvas = document.createElement('canvas');
+    crossCanvas.width = crossCanvas.height = 128;
+    const cctx = crossCanvas.getContext('2d');
+    cctx.clearRect(0, 0, 128, 128);
+    cctx.lineCap = 'butt';
+    for (const [color, width] of [['#b83b32', 21], ['#f4ebda', 12]]) {
+      cctx.strokeStyle = color;
+      cctx.lineWidth = width;
+      cctx.beginPath();
+      cctx.moveTo(24, 24); cctx.lineTo(104, 104);
+      cctx.moveTo(104, 24); cctx.lineTo(24, 104);
+      cctx.stroke();
+    }
+    const crossTex = new THREE.CanvasTexture(crossCanvas);
+    crossTex.colorSpace = THREE.SRGBColorSpace;
+    const crossMat = new THREE.MeshBasicMaterial({
+      map: crossTex,
+      side: THREE.DoubleSide,
+      alphaTest: 0.12
+    });
+    const crossGeo = new THREE.PlaneGeometry(0.82, 0.82);
+    const lights = [];
+
+    for (const side of [-1, 1]) {
+      const postX = side * 3.35;
+      const postZ = side * (roadW / 2 + 0.95);
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 2.9, 7), metal);
+      post.position.set(postX, 1.45, postZ);
+      post.castShadow = true;
+      group.add(post);
+
+      const dirZ = -side;
+      const pivot = new THREE.Group();
+      pivot.position.set(postX, 1.5, postZ);
+      pivot.rotation.x = -dirZ * 1.08;
+      const boom = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, boomLength), boomMat);
+      boom.position.z = dirZ * boomLength / 2;
+      boom.castShadow = true;
+      pivot.add(boom);
+      group.add(pivot);
+
+      const cross = new THREE.Mesh(crossGeo, crossMat);
+      cross.position.set(postX + side * 0.06, 2.55, postZ);
+      cross.rotation.y = side > 0 ? Math.PI / 2 : -Math.PI / 2;
+      group.add(cross);
+
+      for (const k of [-1, 1]) {
+        const light = new THREE.Mesh(
+          new THREE.SphereGeometry(0.1, 7, 6),
+          new THREE.MeshBasicMaterial({ color: '#4d1f1a' })
+        );
+        light.position.set(postX + side * 0.12, 2.05, postZ + k * 0.2);
+        group.add(light);
+        lights.push({ material: light.material, alt: k > 0 });
+      }
+    }
+
+    group.name = 'passaggio-livello';
+    this.scene.add(group);
+    this.levelCrossings.push({ x, z, lights });
+  }
+
+  _updateLevelCrossings() {
+    if (!this.levelCrossings.length) return;
+    const blink = Math.floor(this.time * 2.1) % 2 === 0;
+    for (const crossing of this.levelCrossings) {
+      for (const light of crossing.lights) {
+        light.material.color.set(blink === light.alt ? '#ff5a4e' : '#4d1f1a');
+      }
     }
   }
 
@@ -2681,6 +2861,68 @@ export class World {
       mesh.name = 'segnaletica-orizzontale';
       this.scene.add(mesh);
     }
+  }
+
+  _buildParkingSigns() {
+    const lots = (this.city.areas || [])
+      .filter(a => a.kind === 'parking' && a.area > 600 && a.poly?.length >= 3)
+      .sort((a, b) => (Number(Boolean(b.name)) - Number(Boolean(a.name))) || b.area - a.area);
+    if (!lots.length) return;
+    const limit = this.quality === 'low' ? 6 : this.quality === 'medium' ? 10 : 16;
+    const items = [];
+    for (const area of lots) {
+      if (items.length >= limit) break;
+      const centroid = polygonCentroid(area.poly);
+      const cx = centroid.x;
+      const cz = centroid.z;
+      const info = this._nearestRoadInfo(cx, cz);
+      if (!info || info.d > 55) continue;
+      let best = null;
+      for (const [px, pz] of area.poly) {
+        const d = Math.hypot(px - info.x, pz - info.z);
+        if (!best || d < best.d) best = { x: px, z: pz, d };
+      }
+      if (!best) continue;
+      const x = best.x + (cx - best.x) * 0.16;
+      const z = best.z + (cz - best.z) * 0.16;
+      if (items.some(item => Math.hypot(item.x - x, item.z - z) < 16)) continue;
+      if (!this.isFree(x, z, 0.55)) continue;
+      items.push({
+        x, z,
+        y: groundHeightAt(this.terrain, x, z, 0),
+        rot: Math.atan2(info.x - x, info.z - z)
+      });
+    }
+    if (!items.length) return;
+
+    const poleGeo = new THREE.CylinderGeometry(0.045, 0.055, 2.3, 6);
+    poleGeo.translate(0, 1.15, 0);
+    this._addInstanced(poleGeo, new THREE.MeshLambertMaterial({ color: '#3a423c' }), items, {
+      name: 'pali-parcheggi'
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#2f6fa8';
+    ctx.fillRect(6, 6, 116, 116);
+    ctx.strokeStyle = '#f4ebda';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(10, 10, 108, 108);
+    ctx.fillStyle = '#f4ebda';
+    ctx.font = '700 88px Anton, "Arial Narrow", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('P', 64, 68);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 4;
+    this._addInstanced(
+      new THREE.PlaneGeometry(0.72, 0.72),
+      new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, alphaTest: 0.12 }),
+      items,
+      { yOffset: 2.34, name: 'segnali-parcheggi' }
+    );
   }
 
   _buildCenterBarriers() {
@@ -5562,6 +5804,7 @@ export class World {
     this._updateStars();
     this._updatePlaces();
     this._updateTrafficLights();
+    this._updateLevelCrossings();
     this._updateTraffic(dt);
     this._updatePedestrians(dt);
     this._updateNpcs(dt, playerPos);

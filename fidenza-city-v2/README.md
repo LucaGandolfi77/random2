@@ -1,14 +1,15 @@
-# Fidenza da Giocare v2.21
+# Fidenza da Giocare v2.22
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.21 porta vita anche fuori dal centro: **parchi giocabili**, **campi
-sportivi**, dettagli ferroviari, canneti lungo lo Stirone, colture e container
-industriali. Restano il **centro storico vivo** della v2.20, il **Duomo solido**
-della v2.19, la mappa estesa con **Coduro e il settimo quartiere** della v2.18,
-il **Visual Upgrade** della v2.17, l’**Editor Pro** della v2.16, la **città
-viva** della v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
+v2.22 rifinisce la periferia con **passaggi a livello**, **segnaletica dei
+parcheggi** e **nomi delle vie sulla mappa 2D**. Restano i **parchi giocabili**,
+i **campi sportivi**, i dettagli ferroviari e fluviali della v2.21, il **centro
+storico vivo** della v2.20, il **Duomo solido** della v2.19, la mappa estesa con
+**Coduro e il settimo quartiere** della v2.18, il **Visual Upgrade** della
+v2.17, l’**Editor Pro** della v2.16, la **città viva** della v2.15 e il terreno
+**AWS Terrain Tiles** della v2.14.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 > Nessun codice, asset, testo o audio di altri giochi è stato riutilizzato.
@@ -21,6 +22,7 @@ viva** della v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
+- [Novità v2.22](#novità-v222--passaggi-a-livello-e-mappa-2d)
 - [Novità v2.21](#novità-v221--parchi-ferrovia-e-periferia)
 - [Novità v2.20](#novità-v220--centro-storico-vivo)
 - [Novità v2.19](#novità-v219--duomo-solido-con-palette-3d)
@@ -62,7 +64,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **Post-processing custom** | Bloom, tone mapping, color grading, vignetta e DOF con render target HDR, senza addon esterni. |
 | **Palette 3D → materiali** | Colori e texture procedurali del Duomo derivati dal modello 3D, senza splat a runtime. |
 | **Layer OSM del centro** | Negozi, arredo urbano, alberi, barriere e segnaletica letti da `city.json`, con instancing e merge. |
-| **Dettagli periferia** | Parchi, campi sportivi, ferrovia, argini e colture generati proceduralmente con instancing. |
+| **Dettagli periferia** | Parchi, campi sportivi, passaggi a livello, parcheggi, ferrovia, argini e colture, con instancing e limiti per qualità. |
 | **Canvas 2D** | Minimappa e mappa grande, texture procedurali, insegne delle attività, cattura foto. |
 | **Web Audio API** | Audio interamente sintetizzato: motori, campanello bici, clacson, ambiente, eventi e segnali. |
 | **Web Storage (`localStorage`)** | Salvataggio locale di nome, punti, stelle, luoghi, missioni, carriera, impostazioni e statistiche. |
@@ -503,10 +505,26 @@ all’URL per forzare il livello grafico.
   file audio registrati.
 - Le foto sono salvate in **IndexedDB** e non vengono mai caricate su un server.
 - Il gioco non ha **backend, account o telemetria**: tutto resta nel browser.
-- La mappa 2D è disegnata **una sola volta** su un canvas offscreen da 2048 px,
-  poi ritagliata per minimappa e mappa grande.
+- La base della mappa 2D è disegnata **una sola volta** su un canvas offscreen
+  da 2048 px, poi ritagliata per minimappa e mappa grande; nomi delle vie e
+  parcheggi sono sovrapposti in tempo reale solo sulla mappa grande.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
+
+## Novità v2.22 — Passaggi a livello e mappa 2D
+
+- **Passaggi a livello**: 6 incroci tra strada e ferrovia con piano di
+  attraversamento, assi, strisce bianche, barriere alzate a strisce rosse e
+  bianche, croci di Sant’Andrea e luci rosse lampeggianti.
+- **Segnaletica dei parcheggi**: insegne blu con la **P** in 16 parcheggi in
+  qualità alta (10 media, 6 bassa), orientate verso la strada più vicina.
+- **Mappa 2D**: nomi delle vie disegnati lungo le strade, con priorità per le
+  vie principali e comparsa progressiva allo zoom; icona **P** sui parcheggi e
+  nomi dei parcheggi principali.
+- **Legenda**: aggiunta la voce **parcheggi** alla mappa grande.
+- **Prestazioni**: barriere e insegne sono mesh leggere, i parcheggi sono
+  filtrati per area e i nomi delle vie sono limitati e culling per viewport.
+- **PWA**: cache **v2.22.0**.
 
 ## Novità v2.21 — Parchi, ferrovia e periferia
 
