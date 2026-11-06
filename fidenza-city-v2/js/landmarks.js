@@ -9,6 +9,18 @@ const WOOD = '#8a6547';
 const METAL = '#3c443f';
 const GLASS = '#2f4348';
 
+// Palette del Duomo derivata dalle zone illuminate del modello 3D.
+// È separata dalla palette degli altri landmark.
+const DUOMO_STONE = '#e9dcc6';
+const DUOMO_STONE_LIGHT = '#f3e7d4';
+const DUOMO_STONE_DARK = '#c9b698';
+const DUOMO_BRICK = '#c48868';
+const DUOMO_BRICK_DARK = '#96614a';
+const DUOMO_ROOF = '#b26c50';
+const DUOMO_ROOF_DARK = '#8f5741';
+const DUOMO_DARK = '#3a2f29';
+const DUOMO_GLASS = '#3f6f80';
+
 function lam(color, opts = {}) { return new THREE.MeshStandardMaterial({ color, roughness: 0.68, metalness: 0.03, ...opts }); }
 
 function box(g, w, h, d, color, x = 0, y = 0, z = 0, ry = 0) {
@@ -111,41 +123,187 @@ function addSign(group, text, x, y, z, scale = 1) {
   return sp;
 }
 
+function makeDuomoStoneTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#efe9de';
+  ctx.fillRect(0, 0, 128, 128);
+  let seed = 421;
+  const rnd = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  for (let i = 0; i < 700; i++) {
+    const radius = 0.4 + rnd() * 1.2;
+    ctx.fillStyle = rnd() < 0.5 ? 'rgba(92, 80, 66, 0.12)' : 'rgba(255, 250, 240, 0.12)';
+    ctx.beginPath();
+    ctx.arc(rnd() * 128, rnd() * 128, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.strokeStyle = 'rgba(90, 75, 58, 0.07)';
+  ctx.lineWidth = 1;
+  for (let y = 0; y < 128; y += 32) {
+    ctx.beginPath();
+    ctx.moveTo(0, y + 0.5);
+    ctx.lineTo(128, y + 0.5);
+    ctx.stroke();
+  }
+  for (let row = 0; row < 4; row++) {
+    const offset = row % 2 ? 32 : 0;
+    for (let x = offset; x < 128; x += 64) {
+      ctx.beginPath();
+      ctx.moveTo(x + 0.5, row * 32);
+      ctx.lineTo(x + 0.5, row * 32 + 32);
+      ctx.stroke();
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  texture.repeat.set(4, 4);
+  return texture;
+}
+
+function makeDuomoBrickTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = DUOMO_BRICK_DARK;
+  ctx.fillRect(0, 0, 256, 256);
+  const brickW = 42;
+  const brickH = 30;
+  let seed = 7331;
+  const rnd = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+  for (let row = 0; row < 9; row++) {
+    const offset = row % 2 ? -brickW / 2 : 0;
+    for (let col = -1; col < 7; col++) {
+      const x = offset + col * brickW + 2;
+      const y = row * brickH + 2;
+      const shade = 0.9 + rnd() * 0.2;
+      const r = Math.min(255, Math.round(0xc4 * shade));
+      const g = Math.min(255, Math.round(0x88 * shade));
+      const b = Math.min(255, Math.round(0x68 * shade));
+      ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+      ctx.fillRect(x, y, brickW - 4, brickH - 4);
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  texture.repeat.set(8, 2);
+  return texture;
+}
+
+function makeDuomoRoofTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = DUOMO_ROOF;
+  ctx.fillRect(0, 0, 128, 128);
+  for (let row = 0; row < 8; row++) {
+    const y = row * 16;
+    ctx.fillStyle = row % 2 ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.08)';
+    ctx.fillRect(0, y, 128, 16);
+    ctx.strokeStyle = 'rgba(50, 30, 22, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, y + 0.5);
+    ctx.lineTo(128, y + 0.5);
+    ctx.stroke();
+    const offset = row % 2 ? 8 : 0;
+    for (let x = offset; x < 128; x += 16) {
+      ctx.beginPath();
+      ctx.moveTo(x + 0.5, y);
+      ctx.lineTo(x + 0.5, y + 16);
+      ctx.stroke();
+    }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  texture.repeat.set(8, 3);
+  return texture;
+}
+
 function buildDuomo(g) {
+  const stoneTexture = makeDuomoStoneTexture();
+  const brickTexture = makeDuomoBrickTexture();
+  const roofTexture = makeDuomoRoofTexture();
+
+  const texturedBox = (w, h, d, surface, x, y, z) => {
+    let color = DUOMO_STONE;
+    let map = stoneTexture;
+    let roughness = 0.92;
+    if (surface === 'brick') {
+      color = '#ffffff';
+      map = brickTexture;
+    } else if (surface === 'roof') {
+      color = '#ffffff';
+      map = roofTexture;
+      roughness = 0.84;
+    } else if (surface === 'stone-light') {
+      color = DUOMO_STONE_LIGHT;
+    } else if (surface === 'stone-dark') {
+      color = DUOMO_STONE_DARK;
+      map = null;
+      roughness = 0.78;
+    }
+    const material = new THREE.MeshStandardMaterial({
+      color,
+      map,
+      roughness,
+      metalness: 0.02
+    });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
+    mesh.position.set(x, y, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    g.add(mesh);
+    return mesh;
+  };
+
   // navata
-  box(g, 46, 14, 24, STONE, 0, 7, 0);
-  box(g, 46, 2, 5.5, STONE_LIGHT, 0, 13.2, 11.8);
-  box(g, 46, 2, 5.5, STONE_LIGHT, 0, 13.2, -11.8);
+  texturedBox(46, 14, 24, 'stone', 0, 7, 0);
+  texturedBox(46, 2, 5.5, 'stone-light', 0, 13.2, 11.8);
+  texturedBox(46, 2, 5.5, 'stone-light', 0, 13.2, -11.8);
   // tetto a falde
-  const r1 = box(g, 46, 0.5, 13.6, ROOF, 0, 15.3, 6.2);
+  const r1 = texturedBox(46, 0.5, 13.6, 'roof', 0, 15.3, 6.2);
   r1.rotation.x = 0.56;
-  const r2 = box(g, 46, 0.5, 13.6, ROOF, 0, 15.3, -6.2);
+  const r2 = texturedBox(46, 0.5, 13.6, 'roof', 0, 15.3, -6.2);
   r2.rotation.x = -0.56;
-  // facciata
-  box(g, 2.4, 21, 29, STONE_LIGHT, 23, 10.5, 0);
-  box(g, 3.0, 1.1, 31, STONE_DARK, 23, 21, 0);
+  // facciata (parete di fondo): pietra in basso, mattoni nella parte alta
+  texturedBox(2.4, 12.2, 29, 'stone', 23, 6.1, 0);
+  texturedBox(2.4, 8.8, 29, 'brick', 23, 16.6, 0);
+  box(g, 3.0, 1.1, 31, DUOMO_STONE_DARK, 23, 21, 0);
   // lesene e portale
   for (const z of [-11, -5.5, 5.5, 11]) {
-    box(g, 0.55, 17, 0.8, STONE_DARK, 24.15, 8.5, z);
+    box(g, 0.55, 17, 0.8, DUOMO_STONE_DARK, 24.15, 8.5, z);
   }
-  box(g, 0.7, 7.4, 5.8, '#3a2e2a', 24.1, 3.9, 0);
-  box(g, 1.0, 0.8, 6.4, STONE_DARK, 24.2, 7.8, 0);
+  box(g, 0.7, 7.4, 5.8, DUOMO_DARK, 24.1, 3.9, 0);
+  box(g, 1.0, 0.8, 6.4, DUOMO_STONE_DARK, 24.2, 7.8, 0);
   for (const z of [-2.6, 2.6]) {
-    cyl(g, 0.22, 0.26, 7.0, STONE_DARK, 24.4, 3.8, z, 10);
+    cyl(g, 0.22, 0.26, 7.0, DUOMO_STONE_DARK, 24.4, 3.8, z, 10);
   }
   // arco del portale
-  const arch = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.32, 8, 18, Math.PI), lam(STONE_DARK));
+  const arch = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.32, 8, 18, Math.PI), lam(DUOMO_STONE_DARK));
   arch.rotation.y = Math.PI / 2;
   arch.position.set(24.35, 7.8, 0);
   arch.castShadow = true;
   g.add(arch);
   // gradini
-  box(g, 7.0, 0.25, 14, STONE_DARK, 26.2, 0.13, 0);
+  box(g, 7.0, 0.25, 14, DUOMO_STONE_DARK, 26.2, 0.13, 0);
   // rosone con raggi
-  circle(g, 2.45, '#2e4c5a', 24.25, 13.4, 0, Math.PI / 2);
-  ring(g, 2.65, 0.18, STONE_DARK, 24.3, 13.4, 0, 0, Math.PI / 2);
+  circle(g, 2.45, DUOMO_GLASS, 24.25, 13.4, 0, Math.PI / 2);
+  ring(g, 2.65, 0.18, DUOMO_STONE_DARK, 24.3, 13.4, 0, 0, Math.PI / 2);
   for (let i = 0; i < 8; i++) {
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 4.4, 0.12), lam(STONE_DARK));
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 4.4, 0.12), lam(DUOMO_STONE_DARK));
     bar.position.set(24.32, 13.4, 0);
     bar.rotation.x = i * Math.PI / 4;
     g.add(bar);
@@ -153,26 +311,42 @@ function buildDuomo(g) {
   // frontone centrale
   const gableShape = new THREE.Shape();
   gableShape.moveTo(-8, 0); gableShape.lineTo(8, 0); gableShape.lineTo(0, 5.2); gableShape.closePath();
-  const gable = new THREE.Mesh(new THREE.ShapeGeometry(gableShape), lam(STONE_LIGHT, { side: THREE.DoubleSide }));
+  const gable = new THREE.Mesh(new THREE.ShapeGeometry(gableShape), lam(DUOMO_BRICK, { side: THREE.DoubleSide }));
   gable.rotation.y = Math.PI / 2;
   gable.position.set(24.22, 21.0, 0);
   g.add(gable);
-  box(g, 0.18, 3.2, 0.18, '#5b4a37', 24.3, 27.0, 0);
-  box(g, 1.6, 0.18, 0.18, '#5b4a37', 24.3, 27.2, 0);
+  box(g, 0.18, 3.2, 0.18, DUOMO_DARK, 24.3, 27.0, 0);
+  box(g, 1.6, 0.18, 0.18, DUOMO_DARK, 24.3, 27.2, 0);
   // torri
   for (const z of [-11.5, 11.5]) {
-    box(g, 5.2, 23, 5.2, STONE, 21, 11.5, z);
-    box(g, 3.2, 1.0, 3.2, STONE_DARK, 21, 22.4, z);
-    box(g, 1.0, 1.8, 0.2, '#3a2e2a', 24.35, 19.0, z);
-    cone(g, 3.9, 5.5, ROOF_DARK, 21, 25.7, z, 4);
+    texturedBox(5.2, 23, 5.2, 'stone', 21, 11.5, z);
+    box(g, 3.2, 1.0, 3.2, DUOMO_STONE_DARK, 21, 22.4, z);
+    box(g, 1.0, 1.8, 0.2, DUOMO_DARK, 24.35, 19.0, z);
+    cone(g, 3.9, 5.5, DUOMO_ROOF_DARK, 21, 25.7, z, 4);
   }
   // campanile
-  box(g, 6.2, 30, 6.2, STONE, -17, 15, -13);
-  box(g, 6.6, 1.0, 6.6, STONE_DARK, -17, 30.2, -13);
-  cone(g, 4.5, 7, ROOF_DARK, -17, 34.2, -13, 4);
+  texturedBox(6.2, 30, 6.2, 'stone', -17, 15, -13);
+  box(g, 6.6, 1.0, 6.6, DUOMO_STONE_DARK, -17, 30.2, -13);
+  cone(g, 4.5, 7, DUOMO_ROOF_DARK, -17, 34.2, -13, 4);
   for (const [dx, dz] of [[0, 3.2], [0, -3.2], [3.2, 0], [-3.2, 0]]) {
-    box(g, 1.4, 4.2, 1.4, '#3a2e2a', -17 + dx, 27.2, -13 + dz);
+    box(g, 1.4, 4.2, 1.4, DUOMO_DARK, -17 + dx, 27.2, -13 + dz);
   }
+
+  // La facciata guarda a ovest: a mezzogiorno è spesso in ombra. Una piccola
+  // emissione calda mantiene leggibili i colori del modello 3D senza cambiare
+  // la luce del resto della scena.
+  g.traverse(object => {
+    if (!object.isMesh) return;
+    const material = object.material;
+    if (!material?.isMeshStandardMaterial) return;
+    const emissive = material.map
+      ? new THREE.Color('#8a6a52')
+      : (material.color?.clone() || new THREE.Color('#8a6a52'));
+    material.emissive = emissive.multiplyScalar(material.map ? 0.65 : 0.28);
+    material.emissiveIntensity = 1;
+    if (material.map) material.emissiveMap = material.map;
+    material.needsUpdate = true;
+  });
 }
 
 function buildPorta(g) {
@@ -415,14 +589,7 @@ export function buildLandmarks({ world, scene, landmarks, city }) {
     g.rotation.y = (l.rotation || 0) * Math.PI / 180;
     g.scale.setScalar(Number.isFinite(l.scale) ? l.scale : 1);
     g.name = `landmark-${l.id}`;
-    const isDuomo = model === 'duomo';
-    const content = isDuomo ? new THREE.Group() : g;
-    fn(content, world);
-    if (isDuomo) {
-      g.add(content);
-      world.duomoLandmarkGroup = g;
-      world.duomoLowGroup = content;
-    }
+    fn(g, world);
     scene.add(g);
     groups.set(l.id, g);
   }

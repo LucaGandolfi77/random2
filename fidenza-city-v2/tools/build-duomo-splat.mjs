@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /**
- * Converte il PLY Gaussian Splatting del Duomo in un asset compatto per il gioco.
+ * Converte il PLY Gaussian Splatting del Duomo in un asset compresso di
+ * riferimento per palette e texture.
  *
- * Il PLY originale resta un sorgente locale e non viene pubblicato nella PWA.
+ * L'asset non viene caricato dal gioco: il runtime usa il Duomo low-poly
+ * solido. Il PLY originale resta un sorgente locale e non viene pubblicato
+ * nella PWA.
  * Formato output (little endian, 20 byte per splat):
  *   float32 x, y, z   posizione normalizzata, con base a y=0
  *   uint8   r, g, b   colore SH DC convertito
@@ -111,9 +114,8 @@ for (let i = 0; i < count; i++) {
   });
 }
 
-// Il renderer usa alpha blending senza depth-write: l'ordine dei record è
-// back-to-front per la vista dalla piazza (lato +X del modello). Il fondo
-// della chiesa viene disegnato per primo, la facciata per ultima.
+// Ordine back-to-front per la vista dalla piazza (lato +X del modello),
+// conservato nel sorgente come metadato utile per eventuali bake futuri.
 splats.sort((a, b) => a.x - b.x);
 
 const recordSize = 20;

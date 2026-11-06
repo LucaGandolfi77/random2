@@ -18,10 +18,11 @@
 
 ## Modello 3D del Duomo
 
-- **Duomo HD**: rappresentazione 3D Gaussian Splatting del Duomo di San Donnino
-  fornita dall'autore del progetto per l'uso nel gioco. Il PLY sorgente non è
-  ridistribuito; viene pubblicato solo l'asset compresso
-  `assets/3d/duomo-hd.bin`. Formato e rigenerazione in `assets/3d/README.md`.
+- **Duomo 3D**: rappresentazione 3D del Duomo di San Donnino fornita
+  dall'autore del progetto. È usata come riferimento di colore e texture per il
+  Duomo low-poly solido; l'asset splat compresso `assets/3d/duomo-hd.bin` non
+  viene caricato dal gioco. Il PLY sorgente non è ridistribuito. Formato e
+  rigenerazione in `assets/3d/README.md`.
 
 ## Ispirazione
 

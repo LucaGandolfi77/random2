@@ -1,4 +1,4 @@
-const CACHE = 'fidenza-da-giocare-v2.19.0';
+const CACHE = 'fidenza-da-giocare-v2.19.1';
 const ASSETS = [
   './',
   './index.html',
@@ -27,8 +27,6 @@ const ASSETS = [
   './assets/img/og.jpg',
   './vendor/three.module.js',
   './vendor/BufferGeometryUtils.js',
-  './assets/3d/duomo-hd.bin',
-  './assets/3d/duomo-hd.json',
   './js/main.js',
   './js/config.js',
   './js/utils.js',
@@ -38,7 +36,6 @@ const ASSETS = [
   './js/hud.js',
   './js/models.js',
   './js/world.js',
-  './js/duomo-hd.js',
   './js/postfx.js',
   './js/transit.js',
   './js/building-geometry.js',

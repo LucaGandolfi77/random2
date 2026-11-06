@@ -8,7 +8,6 @@ import {
   groundHeightAt, hashString, formatNumber
 } from './utils.js';
 import { buildLandmarks, makeTextSprite } from './landmarks.js';
-import { createDuomoHD } from './duomo-hd.js';
 import { makeCar, makeBus, makeTrain, makePerson, makeBicycle, makeBench, makeTreeGeometry } from './models.js';
 import { hasStar, hasPlace, getStats } from './save.js';
 import { applyOverrides } from './map-overrides.js';
@@ -321,10 +320,9 @@ function makeRouteWalker(points, startT = 0, direction = 1, speed = 5) {
 }
 
 export class World {
-  constructor({ scene, renderer, city, terrain, map, quality = 'high', isMobile = false }) {
+  constructor({ scene, renderer, city, terrain, map, quality = 'high' }) {
     this.scene = scene;
     this.renderer = renderer;
-    this.isMobile = isMobile;
     this.rawCity = city;
     this.city = applyOverrides(city, map.overrides || {}, map.custom || {});
     this.districts = buildDistricts(map.districts || [], WORLD.bounds);
@@ -3996,29 +3994,6 @@ export class World {
     this.scene.add(this.playerLight);
   }
 
-  async loadDuomoHD() {
-    if (this.quality !== 'high' || this.isMobile || this.duomoHd || !this.duomoLandmarkGroup) return null;
-    try {
-      const hd = await createDuomoHD({
-        group: this.duomoLandmarkGroup,
-        lowGroup: this.duomoLowGroup,
-        renderer: this.renderer
-      });
-      this.duomoHd = hd;
-      hd.setAtmosphere({
-        night: this.ambientNight || 0,
-        day: 1 - (this.ambientNight || 0),
-        fogColor: this.scene.fog?.color,
-        fogNear: this.scene.fog?.near ?? 170,
-        fogFar: this.scene.fog?.far ?? 820
-      });
-      return hd;
-    } catch (error) {
-      console.warn('Duomo HD non disponibile, uso il modello low-poly.', error);
-      return null;
-    }
-  }
-
   addBoxCollider(x, z, w, d, name = '') {
     const hw = w / 2, hd = d / 2;
     const poly = [[x - hw, z - hd], [x + hw, z - hd], [x + hw, z + hd], [x - hw, z + hd]];
@@ -4396,7 +4371,6 @@ export class World {
     this._updateRain(dt, playerPos);
     this._updateSeasonParticles(dt, playerPos);
     this._updateClouds(dt);
-    this.duomoHd?.update(camera);
   }
 
   _updateSky(playerPos) {
@@ -4470,13 +4444,6 @@ export class World {
     }
     this.renderer.toneMappingExposure = (sl.exposure ?? 1.08) - night * 0.02;
     this.ambientNight = night;
-    this.duomoHd?.setAtmosphere({
-      night,
-      day,
-      fogColor: this.scene.fog.color,
-      fogNear: this.scene.fog.near,
-      fogFar: this.scene.fog.far
-    });
   }
 
   _updateStars() {

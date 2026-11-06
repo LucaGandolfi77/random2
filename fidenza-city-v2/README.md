@@ -1,11 +1,12 @@
-# Fidenza da Giocare v2.19
+# Fidenza da Giocare v2.19.1
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.19 porta il **Duomo di San Donnino in alta risoluzione**: il modello 3D
-fornito per il progetto viene renderizzato come nuvola di splat con alpha
-blending, tinta giorno/notte e fallback automatico al modello low-poly. Restano
+v2.19 porta il **Duomo di San Donnino** nello stile del gioco: un landmark
+low-poly solido, senza puntini, con colori e texture procedurali derivati dal
+modello 3D fornito per il progetto. L’asset splat compresso resta un riferimento
+offline e non viene più caricato né messo nella cache PWA. Restano
 la mappa estesa con **Coduro e il settimo quartiere** della v2.18, il **Visual
 Upgrade** della v2.17, l’**Editor Pro** della v2.16, la **città viva** della
 v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
@@ -21,7 +22,7 @@ v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
-- [Novità v2.19](#novità-v219--duomo-hd)
+- [Novità v2.19](#novità-v219--duomo-solido-con-palette-3d)
 - [Novità v2.18](#novità-v218--coduro-e-mappa-estesa)
 - [Novità precedenti](#novità-v217--visual-upgrade)
 - [Dati, rigenerazione ed editor](#dati-e-correzioni)
@@ -58,7 +59,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **Three.js r169** | Scena 3D, camera, materiali, luci, ombre, geometrie, `InstancedMesh`, `BufferGeometryUtils`. |
 | **WebGL** | Rendering accelerato di città, veicoli, alberi, particelle e cielo. |
 | **Post-processing custom** | Bloom, tone mapping, color grading, vignetta e DOF con render target HDR, senza addon esterni. |
-| **Gaussian Splatting custom** | Duomo HD: 260.305 splat compressi, alpha blending pre-ordinato e compensazione ACES/sRGB. |
+| **Palette 3D → materiali** | Colori e texture procedurali del Duomo derivati dal modello 3D, senza splat a runtime. |
 | **Canvas 2D** | Minimappa e mappa grande, texture procedurali, insegne delle attività, cattura foto. |
 | **Web Audio API** | Audio interamente sintetizzato: motori, campanello bici, clacson, ambiente, eventi e segnali. |
 | **Web Storage (`localStorage`)** | Salvataggio locale di nome, punti, stelle, luoghi, missioni, carriera, impostazioni e statistiche. |
@@ -92,8 +93,9 @@ self-hosted in `vendor/` e `assets/fonts/`.
   carico.
 - **Heightmap AWS**: il terreno usa i tile Terrarium AWS ad alta risoluzione,
   ricampionati in una griglia 512×512 e verificati con un audit dedicato.
-- **Duomo HD**: il PLY Gaussian Splatting del Duomo viene convertito offline in
-  un binario da 20 byte/splat; il PLY sorgente non entra nel deploy.
+- **Duomo solido**: colori e texture derivano dal modello 3D, ma il runtime usa
+  solo mesh e materiali del gioco; lo splat compresso resta un sorgente offline
+  e non entra nella PWA.
 - **Dati separati dal codice**: la città è editabile con manifest, schema,
   template e tool di validazione.
 - **Quartieri Voronoi**: i confini dei sette macro-quartieri sono calcolati da
@@ -499,23 +501,21 @@ all’URL per forzare il livello grafico.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
 
-## Novità v2.19 — Duomo HD
+## Novità v2.19 — Duomo solido con palette 3D
 
-- **Duomo in alta risoluzione**: 260.305 splat del modello 3D fornito per il
-  progetto, compressi in `assets/3d/duomo-hd.bin` (5,21 MB) con metadati in
-  `duomo-hd.json`.
-- **Renderer dedicato** (`js/duomo-hd.js`): point-splat con alpha blending
-  pre-ordinato, dimensione prospettica, correzione colori sRGB/ACES, tinta
-  giorno/notte e nebbia della scena.
-- **Facciata rivolta a Piazza Duomo**: modello ruotato e allineato al landmark
-  esistente, base appoggiata a terra e facciata sul lato ovest.
-- **Fallback sicuro**: l’HD si carica solo con qualità `high` su desktop; su
-  mobile, qualità media/bassa o errore di caricamento resta il Duomo low-poly.
-- **PWA offline**: `duomo-hd.bin`, `duomo-hd.json` e `js/duomo-hd.js` entrano
-  nella cache v2.19.0. Il PLY sorgente non viene pubblicato né messo in cache.
+- **Duomo solido in stile gioco**: il landmark è una mesh low-poly completa,
+  senza nuvola di punti e senza puntini.
+- **Colori dal modello 3D**: palette lit e texture procedurali (pietra, mattoni,
+  coppi) derivate dal modello 3D fornito per il progetto.
+- **Facciata in pietra e mattoni**, portale, rosone, lesene, torri e campanile
+  restano geometria low-poly coerente con il resto della città.
+- **Tutte le qualità**: il Duomo solido è sempre visibile, anche su mobile.
+- **PWA più leggera**: `duomo-hd.bin` e `duomo-hd.json` non vengono più caricati
+  né precachati; il binario splat (5,21 MB) resta nel repository come sorgente
+  di colore. Il PLY originale resta locale e ignorato.
 - **Fix edifici landmark**: finestre e persiane del building OSM del Duomo non
-  vengono più generate sotto il modello HD.
-- **Rigenerazione**: `node tools/build-duomo-splat.mjs`; dettagli in
+  vengono più generate sotto il landmark modellato.
+- **Rigenerazione sorgente**: `node tools/build-duomo-splat.mjs`; dettagli in
   `assets/3d/README.md`.
 
 ## Novità v2.18 — Coduro e mappa estesa
@@ -936,8 +936,7 @@ fidenza-city-v2/
     districts.js     macro-quartieri e confini Voronoi
     diary.js         Gazzetta, Passaporto, Radio e Taccuino
     schedules.js     turni NPC, orari locali e folle
-    landmarks.js     modelli dei luoghi simbolo
-    duomo-hd.js      loader e renderer splat del Duomo HD
+    landmarks.js     modelli dei luoghi simbolo (Duomo solido incluso)
     missions.js      missioni guidate dal manifest
     achievements.js  obiettivi e progresso locale
     daily.js         sfida del giorno deterministica
@@ -986,7 +985,7 @@ fidenza-city-v2/
     audit-districts.mjs
     audit-terrain.mjs
     merge-buildings.mjs
-    build-duomo-splat.mjs  PLY Gaussian Splatting → duomo-hd.bin
+    build-duomo-splat.mjs  PLY → asset sorgente per palette/texture
   data/
     city.json
     terrain.json
@@ -1004,7 +1003,7 @@ fidenza-city-v2/
     icons/
     img/
     3d/
-      duomo-hd.bin
+      duomo-hd.bin   asset sorgente (non caricato dal gioco)
       duomo-hd.json
       README.md
   vendor/

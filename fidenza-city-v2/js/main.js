@@ -355,12 +355,11 @@ async function init() {
   ]);
   mapData = mapJson;
   hud.setLoading(0.08, 'Preparo la città…');
-  world = new World({ scene, renderer, city, terrain, map: mapJson, quality, isMobile });
+  world = new World({ scene, renderer, city, terrain, map: mapJson, quality });
   await world.build((p, label) => {
     hud.setLoading(0.08 + p * 0.84, label);
   });
   world.onFirework = () => audio.firework();
-  world.loadDuomoHD();
 
   // Stili stagionali: li carichiamo tutti, sono piccoli e servono al selettore.
   const stylePairs = await Promise.all(
