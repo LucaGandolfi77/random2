@@ -1,15 +1,15 @@
-# Fidenza da Giocare v2.22
+# Fidenza da Giocare v2.23
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.22 rifinisce la periferia con **passaggi a livello**, **segnaletica dei
-parcheggi** e **nomi delle vie sulla mappa 2D**. Restano i **parchi giocabili**,
-i **campi sportivi**, i dettagli ferroviari e fluviali della v2.21, il **centro
-storico vivo** della v2.20, il **Duomo solido** della v2.19, la mappa estesa con
-**Coduro e il settimo quartiere** della v2.18, il **Visual Upgrade** della
-v2.17, l’**Editor Pro** della v2.16, la **città viva** della v2.15 e il terreno
-**AWS Terrain Tiles** della v2.14.
+v2.23 accende la **vita quotidiana** e l’**atmosfera**: persone sedute,
+**mercato in Piazza Garibaldi**, veicoli parcheggiati, cani e gatti, strade
+bagnate con increspature di pioggia e **più luce notturna** su tutta la città.
+Restano i **passaggi a livello**, la **mappa 2D con i nomi delle vie** e la
+**segnaletica dei parcheggi** della v2.22, i **parchi giocabili**, i **campi
+sportivi**, i dettagli ferroviari e fluviali della v2.21, il **centro storico
+vivo** della v2.20 e il **Duomo solido** della v2.19.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 > Nessun codice, asset, testo o audio di altri giochi è stato riutilizzato.
@@ -22,6 +22,7 @@ v2.17, l’**Editor Pro** della v2.16, la **città viva** della v2.15 e il terre
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
+- [Novità v2.23](#novità-v223--vita-atmosfera-e-notte)
 - [Novità v2.22](#novità-v222--passaggi-a-livello-e-mappa-2d)
 - [Novità v2.21](#novità-v221--parchi-ferrovia-e-periferia)
 - [Novità v2.20](#novità-v220--centro-storico-vivo)
@@ -65,6 +66,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **Palette 3D → materiali** | Colori e texture procedurali del Duomo derivati dal modello 3D, senza splat a runtime. |
 | **Layer OSM del centro** | Negozi, arredo urbano, alberi, barriere e segnaletica letti da `city.json`, con instancing e merge. |
 | **Dettagli periferia** | Parchi, campi sportivi, passaggi a livello, parcheggi, ferrovia, argini e colture, con instancing e limiti per qualità. |
+| **Vita e atmosfera** | Persone sedute, mercato, veicoli parcheggiati, animali, pioggia con increspature e pozze di luce notturna su tutta la città. |
 | **Canvas 2D** | Minimappa e mappa grande, texture procedurali, insegne delle attività, cattura foto. |
 | **Web Audio API** | Audio interamente sintetizzato: motori, campanello bici, clacson, ambiente, eventi e segnali. |
 | **Web Storage (`localStorage`)** | Salvataggio locale di nome, punti, stelle, luoghi, missioni, carriera, impostazioni e statistiche. |
@@ -510,6 +512,24 @@ all’URL per forzare il livello grafico.
   parcheggi sono sovrapposti in tempo reale solo sulla mappa grande.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
+
+## Novità v2.23 — Vita, atmosfera e notte
+
+- **Persone sedute**: 16 persone in qualità alta (10 media, 5 bassa) su
+  panchine di parchi e piazze, con gambe piegate e leggero movimento.
+- **Mercato in Piazza Garibaldi**: 5 banchi con tettoie a strisce, cassette di
+  frutta e verdura, venditori e avventori; luce calda e insegna **MERCATO**.
+- **Veicoli parcheggiati**: 18 auto (12 media, 6 bassa) tra strade e parcheggi
+  e 6 Vespe (4 media, 2 bassa), oltre alle bici già presenti.
+- **Animali**: 4 cani e 4 gatti (3+3 media, 2+2 bassa) con coda e testa
+  animate, distribuiti tra parchi, piazze e vicoli del centro.
+- **Strade bagnate**: con la pioggia le strade diventano più lucide, le
+  pozzanghere più visibili e 100 increspature animate compaiono sull’asfalto.
+- **Notte più viva**: pozze di luce per tutti i 260 lampioni (120 in bassa
+  qualità), luce calda sul mercato e finestre illuminate già esistenti.
+- **Prestazioni**: pozze di luce e increspature sono instanziate; persone,
+  animali e veicoli hanno limiti per qualità.
+- **PWA**: cache **v2.23.0**.
 
 ## Novità v2.22 — Passaggi a livello e mappa 2D
 

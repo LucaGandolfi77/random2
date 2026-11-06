@@ -375,3 +375,56 @@ export function makeTreeGeometry() {
   foliage.translate(0, 2.4, 0);
   return { trunk, foliage };
 }
+
+export function makeDog({ color = '#8a6a4a', collar = '#b83b32' } = {}) {
+  const g = new THREE.Group();
+  g.add(box(0.3, 0.3, 0.72, color, 0, 0.47, 0));
+  g.add(box(0.34, 0.34, 0.3, color, 0, 0.52, 0.24));
+  const head = box(0.28, 0.26, 0.3, color, 0, 0.7, 0.46);
+  g.add(head);
+  g.add(box(0.15, 0.12, 0.18, '#d9c9a8', 0, 0.66, 0.64));
+  g.add(box(0.07, 0.06, 0.06, '#2a2420', 0, 0.67, 0.74));
+  g.add(box(0.34, 0.06, 0.32, collar, 0, 0.61, 0.31));
+  for (const side of [-1, 1]) {
+    g.add(box(0.07, 0.15, 0.11, color, side * 0.1, 0.85, 0.4));
+    g.add(box(0.045, 0.045, 0.02, '#28231e', side * 0.075, 0.74, 0.61));
+    for (const z of [-0.25, 0.25]) {
+      g.add(box(0.09, 0.3, 0.09, color, side * 0.13, 0.17, z));
+    }
+  }
+  const tail = new THREE.Group();
+  tail.position.set(0, 0.55, -0.36);
+  tail.add(box(0.07, 0.07, 0.32, color, 0, 0, -0.16));
+  g.add(tail);
+  g.userData.animal = 'dog';
+  g.userData.tail = tail;
+  g.userData.head = head;
+  return g;
+}
+
+export function makeCat({ color = '#55504a' } = {}) {
+  const g = new THREE.Group();
+  g.add(box(0.2, 0.2, 0.5, color, 0, 0.31, 0));
+  const head = sphere(0.13, color, 0, 0.4, 0.29);
+  g.add(head);
+  for (const side of [-1, 1]) {
+    const ear = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.12, 4), mat(color));
+    ear.position.set(side * 0.075, 0.51, 0.27);
+    ear.rotation.z = side * 0.12;
+    ear.castShadow = true;
+    g.add(ear);
+    g.add(box(0.03, 0.035, 0.02, '#28231e', side * 0.055, 0.42, 0.41));
+    for (const z of [-0.17, 0.17]) {
+      g.add(box(0.06, 0.2, 0.06, color, side * 0.08, 0.11, z));
+    }
+  }
+  g.add(box(0.06, 0.045, 0.04, '#c98f87', 0, 0.37, 0.42));
+  const tail = new THREE.Group();
+  tail.position.set(0, 0.36, -0.25);
+  tail.add(box(0.05, 0.05, 0.34, color, 0, 0.04, -0.16));
+  g.add(tail);
+  g.userData.animal = 'cat';
+  g.userData.tail = tail;
+  g.userData.head = head;
+  return g;
+}
