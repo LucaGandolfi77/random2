@@ -1,4 +1,4 @@
-const CACHE = 'fidenza-da-giocare-v2.20.0';
+const CACHE = 'fidenza-da-giocare-v2.21.0';
 const ASSETS = [
   './',
   './index.html',

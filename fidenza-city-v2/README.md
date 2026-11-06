@@ -1,14 +1,14 @@
-# Fidenza da Giocare v2.20
+# Fidenza da Giocare v2.21
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.20 accende il **centro storico**: negozi reali con vetrine e insegne, arredo
-urbano, alberi singoli, barriere, segnaletica stop/dare precedenza, lampioni con
-pozze di luce e tavolini per bar e caffè. Restano il **Duomo solido** della
-v2.19, la mappa estesa con **Coduro e il settimo quartiere** della v2.18, il
-**Visual Upgrade** della v2.17, l’**Editor Pro** della v2.16, la **città viva**
-della v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
+v2.21 porta vita anche fuori dal centro: **parchi giocabili**, **campi
+sportivi**, dettagli ferroviari, canneti lungo lo Stirone, colture e container
+industriali. Restano il **centro storico vivo** della v2.20, il **Duomo solido**
+della v2.19, la mappa estesa con **Coduro e il settimo quartiere** della v2.18,
+il **Visual Upgrade** della v2.17, l’**Editor Pro** della v2.16, la **città
+viva** della v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 > Nessun codice, asset, testo o audio di altri giochi è stato riutilizzato.
@@ -21,6 +21,7 @@ della v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
+- [Novità v2.21](#novità-v221--parchi-ferrovia-e-periferia)
 - [Novità v2.20](#novità-v220--centro-storico-vivo)
 - [Novità v2.19](#novità-v219--duomo-solido-con-palette-3d)
 - [Novità v2.18](#novità-v218--coduro-e-mappa-estesa)
@@ -61,6 +62,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **Post-processing custom** | Bloom, tone mapping, color grading, vignetta e DOF con render target HDR, senza addon esterni. |
 | **Palette 3D → materiali** | Colori e texture procedurali del Duomo derivati dal modello 3D, senza splat a runtime. |
 | **Layer OSM del centro** | Negozi, arredo urbano, alberi, barriere e segnaletica letti da `city.json`, con instancing e merge. |
+| **Dettagli periferia** | Parchi, campi sportivi, ferrovia, argini e colture generati proceduralmente con instancing. |
 | **Canvas 2D** | Minimappa e mappa grande, texture procedurali, insegne delle attività, cattura foto. |
 | **Web Audio API** | Audio interamente sintetizzato: motori, campanello bici, clacson, ambiente, eventi e segnali. |
 | **Web Storage (`localStorage`)** | Salvataggio locale di nome, punti, stelle, luoghi, missioni, carriera, impostazioni e statistiche. |
@@ -99,6 +101,8 @@ self-hosted in `vendor/` e `assets/fonts/`.
   e non entra nella PWA.
 - **Centro storico vivo**: i micro-elementi OSM sono instanziati o uniti per
   materiale, con limiti per qualità, per non moltiplicare le draw call.
+- **Periferia viva**: traverse, canneti, colture e arredo sportivo sono
+  instanziati; i campi sportivi cercano rettangoli liberi da edifici e alberi.
 - **Dati separati dal codice**: la città è editabile con manifest, schema,
   template e tool di validazione.
 - **Quartieri Voronoi**: i confini dei sette macro-quartieri sono calcolati da
@@ -503,6 +507,23 @@ all’URL per forzare il livello grafico.
   poi ritagliata per minimappa e mappa grande.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
+
+## Novità v2.21 — Parchi, ferrovia e periferia
+
+- **Parchi giocabili**: 4 playground in alta qualità (3 media, 2 bassa) con
+  altalene, scivoli, sabbiera e panchine.
+- **Impianti sportivi**: fino a 12 campi in alta qualità (8 media, 4 bassa) con
+  porte da calcio, linee di campo, canestri e campi da basket.
+- **Ferrovia più realistica**: 7.000 traverse, catenarie con pali e fili e
+  segnali ferroviari sulle linee principali.
+- **Stazione**: strisce tattili di banchina, taxi, rastrelliera bici e orologio.
+- **Fiume Stirone**: 1.000 canneti e 200 sassi lungo gli argini; ringhiere sul
+  Ponte Romano.
+- **Periferia**: 2.400 file di colture nei campi e container nelle zone
+  industriali.
+- **Prestazioni**: dettagli instanziati e limitati per qualità, senza nuovi file
+  dati.
+- **PWA**: cache **v2.21.0**.
 
 ## Novità v2.20 — Centro storico vivo
 

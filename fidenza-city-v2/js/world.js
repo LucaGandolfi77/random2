@@ -406,12 +406,16 @@ export class World {
     await step(0.38, 'Semafori e attraversamenti…', () => this._buildTrafficFurniture());
     await step(0.39, 'Segnaletica stradale…', () => this._buildRoadSigns());
     await step(0.40, 'Poso i binari…', () => this._buildRailways());
+    await step(0.41, 'Dettagli ferroviari…', () => this._buildRailDetails());
     onProgress(0.45, 'Costruisco gli edifici…');
     await this._buildBuildings(onProgress);
     await step(0.64, 'Accendo le finestre…', () => this._buildWindows());
     await step(0.68, 'Appendo le insegne delle attività…', () => this._buildPoiSigns());
     await step(0.70, 'Pianto gli alberi…', () => this._buildProps());
+    await step(0.71, 'Canneti e argini…', () => this._buildRiverDetails());
     await step(0.72, 'Siepi e recinzioni…', () => this._buildCenterBarriers());
+    await step(0.73, 'Parchi e campi sportivi…', () => this._buildParksAndSports());
+    await step(0.74, 'Colture e zone industriali…', () => this._buildCountryside());
     await step(0.78, 'Metto i luoghi simbolo…', () => this._buildLandmarks());
     await step(0.82, 'Appendo insegne e arredi…', () => this._buildMapProps());
     await step(0.835, 'Apro il Bar Blu Piramide…', () => this._buildVenues());
@@ -2173,13 +2177,11 @@ export class World {
     // alberi nei parchi e nelle piazze
     for (const a of this.city.areas) {
       const isSquare = a.kind === 'square';
-      if (!['park', 'forest', 'grass', 'sport'].includes(a.kind) && !isSquare) continue;
+      if (!['park', 'forest', 'grass'].includes(a.kind) && !isSquare) continue;
       const bounds = polygonBounds(a.poly);
       const n = isSquare
         ? clamp(Math.round(a.area / 900), 1, 8)
-        : a.kind === 'sport'
-          ? clamp(Math.round(a.area / 900), 1, 10)
-          : clamp(Math.round(a.area / 160), 2, 55);
+        : clamp(Math.round(a.area / 160), 2, 55);
       for (let i = 0; i < n; i++) {
         const x = bounds.minX + rnd() * (bounds.maxX - bounds.minX);
         const z = bounds.minZ + rnd() * (bounds.maxZ - bounds.minZ);
@@ -2229,6 +2231,7 @@ export class World {
     for (const t of this.city.trees || []) {
       addTree(t.x, t.z, 0.85 + rnd() * 0.35, 0.32);
     }
+    this.treeSpots = treeMatrices;
     const treeLimit = this.quality === 'low' ? 460 : this.quality === 'medium' ? 840 : 1200;
     const trees = treeMatrices.slice(0, treeLimit);
     if (trees.length) {
@@ -3116,6 +3119,475 @@ export class World {
     }
   }
 
+  _findAreaSpot(area, radius = 4, avoidTrees = 3) {
+    const bounds = polygonBounds(area.poly);
+    const rnd = seededRandom(hashString(String(area.id)));
+    for (let i = 0; i < 80; i++) {
+      const x = bounds.minX + rnd() * (bounds.maxX - bounds.minX);
+      const z = bounds.minZ + rnd() * (bounds.maxZ - bounds.minZ);
+      if (!pointInPoly(x, z, area.poly)) continue;
+      if (!this.isFree(x, z, radius)) continue;
+      if (this.treeSpots?.some(tree => Math.hypot(tree.x - x, tree.z - z) < avoidTrees)) continue;
+      if (this._benchSpots?.some(bench => Math.hypot(bench.x - x, bench.z - z) < 2.5)) continue;
+      return { x, z };
+    }
+    return this.findFreeSpot(area.x, area.z, radius);
+  }
+
+  _buildPlayground(area, spot) {
+    const y = groundHeightAt(this.terrain, spot.x, spot.z, 0);
+    const group = new THREE.Group();
+    group.position.set(spot.x, y, spot.z);
+    group.rotation.y = (hashString(String(area.id)) % 628) / 100;
+    const metal = new THREE.MeshLambertMaterial({ color: '#3f4a42' });
+    const wood = new THREE.MeshLambertMaterial({ color: '#b07a4e' });
+    const red = new THREE.MeshLambertMaterial({ color: '#c2684b' });
+    const blue = new THREE.MeshLambertMaterial({ color: '#4f8fa8' });
+    const yellow = new THREE.MeshLambertMaterial({ color: '#d7b45a' });
+    const add = (mesh, x, py, z, ry = 0) => {
+      mesh.position.set(x, py, z);
+      mesh.rotation.y = ry;
+      mesh.castShadow = true;
+      group.add(mesh);
+      return mesh;
+    };
+
+    // Altalena a due posti.
+    for (const x of [-4.6, -0.6]) {
+      for (const z of [-1.35, 1.35]) add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.7, 0.12), metal), x, 1.35, z);
+    }
+    add(new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.14, 0.14), metal), -2.6, 2.66, 0);
+    for (const x of [-3.8, -1.4]) {
+      for (const z of [-0.55, 0.55]) add(new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.75, 0.04), metal), x, 1.78, z);
+      add(new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.08, 0.38), yellow), x, 0.86, 0);
+    }
+
+    // Scivolo con piattaforma e scaletta.
+    const platform = add(new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.16, 1.7), blue), 3.1, 1.65, 0);
+    platform.rotation.y = 0;
+    for (const x of [2.4, 3.8]) {
+      add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.65, 0.12), metal), x, 0.82, -0.75);
+      add(new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.65, 0.12), metal), x, 0.82, 0.75);
+    }
+    for (let i = 1; i <= 4; i++) {
+      add(new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.08, 0.08), metal), 3.1, i * 0.3, -1.05);
+    }
+    const slide = new THREE.Group();
+    slide.position.set(3.1, 0.98, 1.95);
+    slide.rotation.x = 0.42;
+    const board = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.12, 3.4), red);
+    board.castShadow = true;
+    slide.add(board);
+    for (const x of [-0.56, 0.56]) {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.24, 3.4), blue);
+      rail.position.set(x, 0.12, 0);
+      slide.add(rail);
+    }
+    group.add(slide);
+
+    // Sabbiera.
+    const sand = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 3.0), new THREE.MeshLambertMaterial({ color: '#d9c48f' }));
+    sand.rotation.x = -Math.PI / 2;
+    sand.position.set(-1.2, 0.12, 3.8);
+    group.add(sand);
+    for (const [w, d, x, z] of [[3.8, 0.24, -1.2, 2.2], [3.8, 0.24, -1.2, 5.4], [0.24, 3.2, -3.1, 3.8], [0.24, 3.2, 0.7, 3.8]]) {
+      add(new THREE.Mesh(new THREE.BoxGeometry(w, 0.28, d), wood), x, 0.14, z);
+    }
+
+    const bench = makeBench();
+    bench.position.set(6.1, 0, 0.5);
+    bench.rotation.y = -Math.PI / 2;
+    bench.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    group.add(bench);
+    group.name = `parco-giochi-${area.id}`;
+    this.scene.add(group);
+  }
+
+  _buildSportsFacility(area) {
+    const bounds = polygonBounds(area.poly);
+    const spanX = bounds.maxX - bounds.minX;
+    const spanZ = bounds.maxZ - bounds.minZ;
+    const longX = spanX >= spanZ;
+    let football = area.area > 5000;
+    let length = football
+      ? Math.min(85, Math.max(45, (longX ? spanX : spanZ) * 0.7))
+      : Math.min(28, Math.max(20, (longX ? spanX : spanZ) * 0.65));
+    let width = football
+      ? Math.min(55, Math.max(25, (longX ? spanZ : spanX) * 0.6))
+      : Math.min(16, Math.max(12, (longX ? spanZ : spanX) * 0.55));
+    const rotation = longX ? 0 : Math.PI / 2;
+    const rnd = seededRandom(hashString(String(area.id)) + 17);
+    const findClearSpot = (fieldLength, fieldWidth) => {
+      for (let i = 0; i < 140; i++) {
+        const x = bounds.minX + rnd() * (bounds.maxX - bounds.minX);
+        const z = bounds.minZ + rnd() * (bounds.maxZ - bounds.minZ);
+        if (!pointInPoly(x, z, area.poly)) continue;
+        if (!this.isFree(x, z, 3.2)) continue;
+        let clear = true;
+        for (let gx = -0.5; gx <= 0.5001 && clear; gx += 0.25) {
+          for (let gz = -0.5; gz <= 0.5001 && clear; gz += 0.25) {
+            const px = x + Math.cos(rotation) * fieldLength * gx + Math.sin(rotation) * fieldWidth * gz;
+            const pz = z - Math.sin(rotation) * fieldLength * gx + Math.cos(rotation) * fieldWidth * gz;
+            if (!pointInPoly(px, pz, area.poly) || !this.isFree(px, pz, 0.5)) clear = false;
+          }
+        }
+        if (clear) return { x, z };
+      }
+      return null;
+    };
+    let spot = findClearSpot(length, width);
+    if (!spot && football) {
+      football = false;
+      length = Math.min(28, Math.max(18, (longX ? spanX : spanZ) * 0.55));
+      width = Math.min(15, Math.max(10, (longX ? spanZ : spanX) * 0.5));
+      spot = findClearSpot(length, width);
+    }
+    if (!spot) return;
+    const y = groundHeightAt(this.terrain, spot.x, spot.z, 0);
+    const group = new THREE.Group();
+    group.position.set(spot.x, y, spot.z);
+    group.rotation.y = rotation;
+    const white = new THREE.MeshBasicMaterial({ color: '#e8e3d5' });
+    const line = (w, d, x, z) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, 0.035, d), white);
+      mesh.position.set(x, 0.08, z);
+      group.add(mesh);
+    };
+    const hx = length / 2;
+    const hz = width / 2;
+    line(length, 0.12, 0, -hz);
+    line(length, 0.12, 0, hz);
+    line(0.12, width, -hx, 0);
+    line(0.12, width, hx, 0);
+    line(0.12, width, 0, 0);
+    const circle = new THREE.Mesh(new THREE.RingGeometry(5.8, 6.05, 28), white);
+    circle.rotation.x = -Math.PI / 2;
+    circle.position.y = 0.09;
+    group.add(circle);
+    if (football) {
+      const pitch = new THREE.Mesh(
+        new THREE.PlaneGeometry(length + 2, width + 2),
+        new THREE.MeshLambertMaterial({ color: '#5d8850' })
+      );
+      pitch.rotation.x = -Math.PI / 2;
+      pitch.position.y = 0.035;
+      pitch.receiveShadow = true;
+      group.add(pitch);
+      for (const side of [-1, 1]) {
+        const goal = new THREE.Group();
+        for (const z of [-3.66, 3.66]) {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 2.44, 6), white);
+          post.position.set(0, 1.22, z);
+          post.castShadow = true;
+          goal.add(post);
+        }
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 7.4), white);
+        bar.position.y = 2.44;
+        bar.castShadow = true;
+        goal.add(bar);
+        goal.position.set(side * (hx - 0.6), 0, 0);
+        group.add(goal);
+      }
+    } else {
+      const court = new THREE.Mesh(
+        new THREE.PlaneGeometry(length, width),
+        new THREE.MeshLambertMaterial({ color: '#6f7a76' })
+      );
+      court.rotation.x = -Math.PI / 2;
+      court.position.y = 0.04;
+      court.receiveShadow = true;
+      group.add(court);
+      for (const side of [-1, 1]) {
+        const hoop = new THREE.Group();
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.2, 6), new THREE.MeshLambertMaterial({ color: '#3f4a42' }));
+        pole.position.set(side * (hx - 0.8), 1.6, 0);
+        const board = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.0, 1.8), white);
+        board.position.set(side * (hx - 0.95), 3.0, 0);
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.035, 6, 12), new THREE.MeshLambertMaterial({ color: '#c2684b' }));
+        rim.rotation.x = Math.PI / 2;
+        rim.position.set(side * (hx - 1.25), 2.85, 0);
+        hoop.add(pole, board, rim);
+        group.add(hoop);
+      }
+    }
+    const bench = makeBench();
+    bench.position.set(0, 0, hz + 2.2);
+    bench.rotation.y = Math.PI;
+    bench.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    group.add(bench);
+    group.name = `impianto-sportivo-${area.id}`;
+    this.scene.add(group);
+  }
+
+  _buildParksAndSports() {
+    const playgroundLimit = this.quality === 'low' ? 2 : this.quality === 'medium' ? 3 : 4;
+    const parks = this.city.areas
+      .filter(a => a.kind === 'park' && a.area > 2500)
+      .sort((a, b) => b.area - a.area)
+      .slice(0, playgroundLimit);
+    for (const area of parks) {
+      const spot = this._findAreaSpot(area, 5, 3);
+      if (spot) this._buildPlayground(area, spot);
+    }
+    const sportsLimit = this.quality === 'low' ? 4 : this.quality === 'medium' ? 8 : 12;
+    const sports = this.city.areas
+      .filter(a => a.kind === 'sport' && a.area > 1200)
+      .sort((a, b) => b.area - a.area)
+      .slice(0, sportsLimit);
+    for (const area of sports) this._buildSportsFacility(area);
+  }
+
+  _buildRailDetails() {
+    const railLines = this.city.railways
+      .map(r => {
+        let length = 0;
+        for (let i = 1; i < r.pts.length; i++) length += Math.hypot(r.pts[i][0] - r.pts[i - 1][0], r.pts[i][1] - r.pts[i - 1][1]);
+        return { r, length };
+      })
+      .filter(entry => entry.length > 12)
+      .sort((a, b) => b.length - a.length);
+    if (!railLines.length) return;
+
+    const sleeperLimit = this.quality === 'low' ? 0 : this.quality === 'medium' ? 3500 : 7000;
+    const sleepers = [];
+    for (const { r } of railLines) {
+      for (let i = 1; i < r.pts.length && sleepers.length < sleeperLimit; i++) {
+        const [ax, az] = r.pts[i - 1];
+        const [bx, bz] = r.pts[i];
+        const dx = bx - ax;
+        const dz = bz - az;
+        const len = Math.hypot(dx, dz);
+        if (len < 1) continue;
+        const ux = dx / len;
+        const uz = dz / len;
+        const rot = Math.atan2(ux, uz);
+        for (let d = 0.8; d < len && sleepers.length < sleeperLimit; d += 1.5) {
+          sleepers.push({ x: ax + ux * d, z: az + uz * d, y: 0.08, rot });
+        }
+      }
+    }
+    if (sleepers.length) {
+      this._addInstanced(
+        new THREE.BoxGeometry(2.3, 0.1, 0.24),
+        new THREE.MeshLambertMaterial({ color: '#6d675d' }),
+        sleepers,
+        { name: 'traverse-ferrovia' }
+      );
+    }
+
+    if (this.quality !== 'low') {
+      const poleLimit = this.quality === 'medium' ? 80 : 160;
+      const poles = [];
+      const arms = [];
+      const wireLines = [];
+      for (const { r, length } of railLines.filter(entry => entry.length > 200).slice(0, 6)) {
+        for (let i = 1; i < r.pts.length && poles.length < poleLimit; i++) {
+          const [ax, az] = r.pts[i - 1];
+          const [bx, bz] = r.pts[i];
+          const dx = bx - ax;
+          const dz = bz - az;
+          const len = Math.hypot(dx, dz);
+          if (len < 1) continue;
+          const ux = dx / len;
+          const uz = dz / len;
+          const nx = -uz;
+          const nz = ux;
+          const rot = Math.atan2(ux, uz);
+          for (let d = 12; d < len && poles.length < poleLimit; d += 35) {
+            const side = poles.length % 2 ? 1 : -1;
+            const x = ax + ux * d;
+            const z = az + uz * d;
+            poles.push({ x: x + nx * 2.2 * side, z: z + nz * 2.2 * side, y: 0, rot });
+            arms.push({ x: x + nx * 1.1 * side, z: z + nz * 1.1 * side, y: 6.0, rot });
+          }
+        }
+        if (length > 200) {
+          const pts = r.pts.map(([x, z]) => new THREE.Vector3(x, 6.15, z));
+          wireLines.push(new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(pts),
+            new THREE.LineBasicMaterial({ color: '#3a3f3a', transparent: true, opacity: 0.72 })
+          ));
+        }
+      }
+      if (poles.length) {
+        const poleGeo = new THREE.CylinderGeometry(0.09, 0.12, 6.3, 6);
+        poleGeo.translate(0, 3.15, 0);
+        this._addInstanced(poleGeo, new THREE.MeshLambertMaterial({ color: '#3f4a42' }), poles, { name: 'pali-catenaria' });
+        this._addInstanced(
+          new THREE.BoxGeometry(2.2, 0.08, 0.08),
+          new THREE.MeshLambertMaterial({ color: '#3f4a42' }),
+          arms,
+          { name: 'bracci-catenaria' }
+        );
+      }
+      for (const line of wireLines) {
+        line.name = 'fili-catenaria';
+        this.scene.add(line);
+      }
+
+      const signals = [];
+      const signalSource = railLines.slice(0, 2);
+      for (const { r } of signalSource) {
+        let travelled = 0;
+        for (let i = 1; i < r.pts.length && signals.length < 8; i++) {
+          const [ax, az] = r.pts[i - 1];
+          const [bx, bz] = r.pts[i];
+          const dx = bx - ax;
+          const dz = bz - az;
+          const len = Math.hypot(dx, dz);
+          if (len < 1) continue;
+          travelled += len;
+          if (travelled > 240) {
+            travelled = 0;
+            signals.push({ x: bx, z: bz, rot: Math.atan2(dx / len, dz / len) });
+          }
+        }
+      }
+      for (const signal of signals) {
+        const group = new THREE.Group();
+        group.position.set(signal.x, 0, signal.z);
+        group.rotation.y = signal.rot;
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 4.2, 6), new THREE.MeshLambertMaterial({ color: '#3f4a42' }));
+        pole.position.y = 2.1;
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.8, 0.25), new THREE.MeshLambertMaterial({ color: '#1d241f' }));
+        head.position.set(0, 4.0, 0.08);
+        const red = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 5), new THREE.MeshBasicMaterial({ color: '#ff5a4e' }));
+        red.position.set(0, 4.22, 0.22);
+        const green = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 5), new THREE.MeshBasicMaterial({ color: '#54e08a' }));
+        green.position.set(0, 3.94, 0.22);
+        group.add(pole, head, red, green);
+        this.scene.add(group);
+      }
+    }
+  }
+
+  _buildRiverDetails() {
+    if (this.quality === 'low') return;
+    const streams = (this.city.waterways || []).filter(w =>
+      ['stream', 'river'].includes(w.kind) && w.pts?.length >= 2
+    );
+    if (!streams.length) return;
+    const reedLimit = this.quality === 'medium' ? 520 : 1000;
+    const stoneLimit = this.quality === 'medium' ? 100 : 220;
+    const reeds = [];
+    const stones = [];
+    const rnd = seededRandom(737);
+    for (const water of streams) {
+      const width = Number(water.w) || (water.kind === 'river' ? 9.5 : 5.6);
+      const offset = width / 2 + 1.1;
+      for (let i = 1; i < water.pts.length && reeds.length < reedLimit; i++) {
+        const [ax, az] = water.pts[i - 1];
+        const [bx, bz] = water.pts[i];
+        const dx = bx - ax;
+        const dz = bz - az;
+        const len = Math.hypot(dx, dz);
+        if (len < 1) continue;
+        const ux = dx / len;
+        const uz = dz / len;
+        const nx = -uz;
+        const nz = ux;
+        for (let d = 4; d < len; d += 7) {
+          for (const side of [-1, 1]) {
+            if (reeds.length >= reedLimit) break;
+            const x = ax + ux * d + nx * offset * side;
+            const z = az + uz * d + nz * offset * side;
+            if (!this.isFree(x, z, 0.12)) continue;
+            reeds.push({
+              x, z,
+              y: groundHeightAt(this.terrain, x, z, 0) + 0.06,
+              rot: rnd() * Math.PI * 2,
+              scale: 0.7 + rnd() * 0.8
+            });
+          }
+          if (stones.length < stoneLimit && rnd() < 0.28) {
+            const side = rnd() > 0.5 ? 1 : -1;
+            const x = ax + ux * d + nx * (offset + 0.8) * side;
+            const z = az + uz * d + nz * (offset + 0.8) * side;
+            if (this.isFree(x, z, 0.18)) {
+              stones.push({
+                x, z,
+                y: groundHeightAt(this.terrain, x, z, 0) + 0.1,
+                rot: rnd() * Math.PI * 2,
+                scale: 0.6 + rnd() * 0.8
+              });
+            }
+          }
+        }
+      }
+    }
+    if (reeds.length) {
+      const reedGeo = new THREE.CylinderGeometry(0.025, 0.06, 0.95, 4);
+      reedGeo.translate(0, 0.475, 0);
+      this._addInstanced(reedGeo, new THREE.MeshLambertMaterial({ color: '#6f8b5f' }), reeds, {
+        name: 'canneti-stirone'
+      });
+    }
+    if (stones.length) {
+      const stoneGeo = new THREE.IcosahedronGeometry(0.35, 0);
+      this._addInstanced(stoneGeo, new THREE.MeshLambertMaterial({ color: '#8f9188' }), stones, {
+        name: 'sassi-argine'
+      });
+    }
+  }
+
+  _buildCountryside() {
+    const fields = (this.city.areas || [])
+      .filter(a => a.kind === 'farmland' && a.area > 15000)
+      .sort((a, b) => b.area - a.area)
+      .slice(0, 12);
+    const rowLimit = this.quality === 'low' ? 0 : this.quality === 'medium' ? 1200 : 2400;
+    const rows = [];
+    for (const field of fields) {
+      if (rows.length >= rowLimit) break;
+      const bounds = polygonBounds(field.poly);
+      const longX = bounds.width >= bounds.depth;
+      const rnd = seededRandom(hashString(String(field.id)));
+      const step = 6;
+      for (let z = bounds.minZ + 3; z < bounds.maxZ && rows.length < rowLimit; z += step) {
+        for (let x = bounds.minX + 3; x < bounds.maxX && rows.length < rowLimit; x += 9) {
+          if (!pointInPoly(x, z, field.poly)) continue;
+          rows.push({
+            x, z,
+            y: groundHeightAt(this.terrain, x, z, 0) + 0.045,
+            rot: longX ? 0 : Math.PI / 2,
+            scale: 0.9 + rnd() * 0.35
+          });
+        }
+      }
+    }
+    if (rows.length) {
+      this._addInstanced(
+        new THREE.BoxGeometry(4.2, 0.05, 0.24),
+        new THREE.MeshLambertMaterial({ color: '#87915a' }),
+        rows,
+        { name: 'colture-periferia' }
+      );
+    }
+
+    // Container e piazzali delle zone industriali.
+    const industrial = (this.city.areas || []).filter(a => a.kind === 'industrial');
+    const colors = ['#b5503f', '#3f748a', '#5d7a52', '#c99a3f'];
+    for (const area of industrial) {
+      const bounds = polygonBounds(area.poly);
+      const rnd = seededRandom(hashString(String(area.id)));
+      for (let i = 0; i < 2; i++) {
+        const x = bounds.minX + rnd() * (bounds.maxX - bounds.minX);
+        const z = bounds.minZ + rnd() * (bounds.maxZ - bounds.minZ);
+        if (!pointInPoly(x, z, area.poly) || !this.isFree(x, z, 3.5)) continue;
+        const y = groundHeightAt(this.terrain, x, z, 0);
+        const container = new THREE.Mesh(
+          new THREE.BoxGeometry(6, 2.5, 2.45),
+          new THREE.MeshLambertMaterial({ color: colors[Math.floor(rnd() * colors.length)] })
+        );
+        container.position.set(x, y + 1.25, z);
+        container.rotation.y = rnd() * Math.PI * 2;
+        container.castShadow = true;
+        container.receiveShadow = true;
+        this.scene.add(container);
+      }
+    }
+  }
+
   _buildLandmarks() {
     this.landmarkGroups = buildLandmarks({ world: this, scene: this.scene, landmarks: this.landmarks, city: this.city });
     // collider per obelisco
@@ -3879,6 +4351,60 @@ export class World {
     machine.position.set(base.x - 8.2, 0.9, base.z - 2.1);
     this.scene.add(machine);
     this._addSign(base.x + 7.8, base.z + 3.1, Math.PI, 'STAZIONE', 'Binario 1', { width: 3.4, height: 1.0 });
+
+    // Dettagli di banchina: strisce tattili, taxi, rastrelliera e orologio.
+    for (const z of [-2.95, 2.95]) {
+      const strip = new THREE.Mesh(
+        new THREE.BoxGeometry(18.6, 0.02, 0.3),
+        new THREE.MeshLambertMaterial({ color: '#d7b45a' })
+      );
+      strip.position.set(base.x, 0.23, base.z + z);
+      strip.receiveShadow = true;
+      this.scene.add(strip);
+    }
+    for (const [dx, dz] of [[-13, -3], [-13, 2]]) {
+      const spot = this.findFreeSpot(base.x + dx, base.z + dz, 2.2);
+      if (!spot) continue;
+      const taxi = makeCar({ taxi: true, parked: true });
+      taxi.position.set(spot.x, 0.05, spot.z);
+      taxi.rotation.y = Math.PI / 2;
+      taxi.scale.setScalar(0.94);
+      this.scene.add(taxi);
+    }
+    const rackSpot = this.findFreeSpot(base.x + 10.5, base.z - 4.5, 1.2);
+    if (rackSpot) {
+      const rack = new THREE.Group();
+      const metal = new THREE.MeshLambertMaterial({ color: '#3f4a42' });
+      for (const x of [-0.55, 0.55]) {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.75, 0.07), metal);
+        post.position.set(x, 0.38, 0);
+        rack.add(post);
+      }
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.07, 0.07), metal);
+      bar.position.y = 0.75;
+      rack.add(bar);
+      rack.position.set(rackSpot.x, 0, rackSpot.z);
+      rack.rotation.y = Math.PI / 2;
+      this.scene.add(rack);
+    }
+    const clockSpot = this.findFreeSpot(base.x + 8.5, base.z + 4.6, 0.8);
+    if (clockSpot) {
+      const clock = new THREE.Group();
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 3.4, 6), new THREE.MeshLambertMaterial({ color: '#2f3632' }));
+      pole.position.y = 1.7;
+      const face = new THREE.Mesh(new THREE.CircleGeometry(0.45, 18), new THREE.MeshBasicMaterial({ color: '#f4ebda' }));
+      face.position.set(0, 3.25, 0.04);
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(0.45, 0.05, 6, 18), new THREE.MeshLambertMaterial({ color: '#2f3632' }));
+      rim.position.set(0, 3.25, 0.05);
+      const handH = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.22, 0.02), new THREE.MeshBasicMaterial({ color: '#2f3632' }));
+      handH.position.set(0, 3.32, 0.07);
+      const handM = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.34, 0.02), new THREE.MeshBasicMaterial({ color: '#2f3632' }));
+      handM.position.set(0.1, 3.28, 0.07);
+      handM.rotation.z = -0.6;
+      clock.add(pole, face, rim, handH, handM);
+      clock.position.set(clockSpot.x, 0, clockSpot.z);
+      this.scene.add(clock);
+    }
   }
 
   _buildTransit() {

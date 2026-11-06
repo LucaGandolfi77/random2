@@ -364,6 +364,13 @@ function buildPonte(g) {
   box(g, 22, 1.1, 6.2, STONE, 0, 1.5, 0);
   box(g, 22, 1.2, 0.45, STONE_LIGHT, 0, 2.55, 3.0);
   box(g, 22, 1.2, 0.45, STONE_LIGHT, 0, 2.55, -3.0);
+  // ringhiere del ponte
+  for (const z of [-3.0, 3.0]) {
+    for (let x = -10; x <= 10; x += 1.35) {
+      box(g, 0.1, 0.9, 0.1, STONE_DARK, x, 2.95, z);
+    }
+    box(g, 22, 0.1, 0.14, STONE_DARK, 0, 3.42, z);
+  }
   for (const x of [-7.2, 0, 7.2]) {
     box(g, 2.2, 3.2, 6.4, STONE_DARK, x, 0.3, 0);
   }
