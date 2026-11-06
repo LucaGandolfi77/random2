@@ -216,7 +216,7 @@ export class Player {
     const { dx, dy } = this.input.consumeLook();
     if (!dx && !dy) return;
     const sens = this.input.isTouch() ? 0.0034 : 0.0022;
-    this.cameraYaw += dx * sens;
+    this.cameraYaw -= dx * sens;
     const minPitch = this.flyMode ? -1.1 : PLAYER.cameraMinPitch;
     const maxPitch = this.flyMode ? 1.1 : PLAYER.cameraMaxPitch;
     this.cameraPitch = clamp(this.cameraPitch + dy * (this.input.isTouch() ? 0.0026 : 0.0017), minPitch, maxPitch);

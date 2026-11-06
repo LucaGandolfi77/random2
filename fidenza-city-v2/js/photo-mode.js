@@ -101,12 +101,12 @@ export class PhotoMode {
     if (!this.active) return;
     const look = this.input.consumeLook();
     if (look.dx || look.dy) {
-      this.yaw += look.dx * 0.0022;
+      this.yaw -= look.dx * 0.0022;
       this.pitch = clamp(this.pitch - look.dy * 0.0017, -1.2, 1.2);
     }
     const touch = this.touchMove || { x: 0, y: 0 };
     const forward = (this.input.isDown('KeyW') || this.input.isDown('ArrowUp') ? 1 : 0) - (this.input.isDown('KeyS') || this.input.isDown('ArrowDown') ? 1 : 0) - touch.y;
-    const strafe = (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0) - (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0) + touch.x;
+    const strafe = (this.input.isDown('KeyA') || this.input.isDown('ArrowLeft') ? 1 : 0) - (this.input.isDown('KeyD') || this.input.isDown('ArrowRight') ? 1 : 0) - touch.x;
     const upDown = (this.input.isDown('KeyE') ? 1 : 0) - (this.input.isDown('KeyQ') ? 1 : 0);
     const speed = (this.input.isDown('ShiftLeft') || this.input.isDown('ShiftRight') ? 22 : 8) * dt;
     const cy = Math.cos(this.yaw), sy = Math.sin(this.yaw);

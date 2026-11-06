@@ -1,4 +1,4 @@
-# Fidenza da Giocare v2.23
+# Fidenza da Giocare v2.23.1
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
@@ -515,6 +515,9 @@ all’URL per forzare il livello grafico.
 
 ## Novità v2.23 — Vita, atmosfera e notte
 
+- **Fix telecamera v2.23.1**: il movimento orizzontale di mouse e trascinamento
+  ruota la visuale nella direzione attesa, sia in gioco sia in modalità foto;
+  corretto anche lo spostamento laterale A/D della modalità foto.
 - **Persone sedute**: 16 persone in qualità alta (10 media, 5 bassa) su
   panchine di parchi e piazze, con gambe piegate e leggero movimento.
 - **Mercato in Piazza Garibaldi**: 5 banchi con tettoie a strisce, cassette di
@@ -529,7 +532,7 @@ all’URL per forzare il livello grafico.
   qualità), luce calda sul mercato e finestre illuminate già esistenti.
 - **Prestazioni**: pozze di luce e increspature sono instanziate; persone,
   animali e veicoli hanno limiti per qualità.
-- **PWA**: cache **v2.23.0**.
+- **PWA**: cache **v2.23.1**.
 
 ## Novità v2.22 — Passaggi a livello e mappa 2D
 
