@@ -16,6 +16,13 @@
 - **Anton** e **Oswald** — font distribuiti con SIL Open Font License 1.1, self-hosted in `assets/fonts/`.
 - Il codice del gioco, l'interfaccia, i modelli 3D procedurali, i testi delle missioni e le schede dei luoghi sono originali.
 
+## Modello 3D del Duomo
+
+- **Duomo HD**: rappresentazione 3D Gaussian Splatting del Duomo di San Donnino
+  fornita dall'autore del progetto per l'uso nel gioco. Il PLY sorgente non è
+  ridistribuito; viene pubblicato solo l'asset compresso
+  `assets/3d/duomo-hd.bin`. Formato e rigenerazione in `assets/3d/README.md`.
+
 ## Ispirazione
 
 Il formato “città reale come open world nel browser” è ispirato a progetti come Naon City. Nessun codice, asset grafico, testo, audio o dato proprietario di Naon City è stato riutilizzato: il gioco è una ricostruzione originale con meccaniche analoghe.

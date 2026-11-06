@@ -415,7 +415,14 @@ export function buildLandmarks({ world, scene, landmarks, city }) {
     g.rotation.y = (l.rotation || 0) * Math.PI / 180;
     g.scale.setScalar(Number.isFinite(l.scale) ? l.scale : 1);
     g.name = `landmark-${l.id}`;
-    fn(g, world);
+    const isDuomo = model === 'duomo';
+    const content = isDuomo ? new THREE.Group() : g;
+    fn(content, world);
+    if (isDuomo) {
+      g.add(content);
+      world.duomoLandmarkGroup = g;
+      world.duomoLowGroup = content;
+    }
     scene.add(g);
     groups.set(l.id, g);
   }

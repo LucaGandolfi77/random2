@@ -1,3 +1,6 @@
 .cache/
 node_modules/
 .DS_Store
+
+# Sorgente locale del Duomo (17 MB): si pubblica solo l'asset compresso.
+assets/3d/*.ply
