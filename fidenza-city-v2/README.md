@@ -1,15 +1,14 @@
-# Fidenza da Giocare v2.19.1
+# Fidenza da Giocare v2.20
 
 ![Fidenza da Giocare v2](assets/img/corso.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-v2.19 porta il **Duomo di San Donnino** nello stile del gioco: un landmark
-low-poly solido, senza puntini, con colori e texture procedurali derivati dal
-modello 3D fornito per il progetto. L’asset splat compresso resta un riferimento
-offline e non viene più caricato né messo nella cache PWA. Restano
-la mappa estesa con **Coduro e il settimo quartiere** della v2.18, il **Visual
-Upgrade** della v2.17, l’**Editor Pro** della v2.16, la **città viva** della
-v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
+v2.20 accende il **centro storico**: negozi reali con vetrine e insegne, arredo
+urbano, alberi singoli, barriere, segnaletica stop/dare precedenza, lampioni con
+pozze di luce e tavolini per bar e caffè. Restano il **Duomo solido** della
+v2.19, la mappa estesa con **Coduro e il settimo quartiere** della v2.18, il
+**Visual Upgrade** della v2.17, l’**Editor Pro** della v2.16, la **città viva**
+della v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
 
 > Progetto indipendente e non ufficiale, non affiliato al Comune di Fidenza.
 > Nessun codice, asset, testo o audio di altri giochi è stato riutilizzato.
@@ -22,6 +21,7 @@ v2.15 e il terreno **AWS Terrain Tiles** della v2.14.
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
+- [Novità v2.20](#novità-v220--centro-storico-vivo)
 - [Novità v2.19](#novità-v219--duomo-solido-con-palette-3d)
 - [Novità v2.18](#novità-v218--coduro-e-mappa-estesa)
 - [Novità precedenti](#novità-v217--visual-upgrade)
@@ -60,6 +60,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **WebGL** | Rendering accelerato di città, veicoli, alberi, particelle e cielo. |
 | **Post-processing custom** | Bloom, tone mapping, color grading, vignetta e DOF con render target HDR, senza addon esterni. |
 | **Palette 3D → materiali** | Colori e texture procedurali del Duomo derivati dal modello 3D, senza splat a runtime. |
+| **Layer OSM del centro** | Negozi, arredo urbano, alberi, barriere e segnaletica letti da `city.json`, con instancing e merge. |
 | **Canvas 2D** | Minimappa e mappa grande, texture procedurali, insegne delle attività, cattura foto. |
 | **Web Audio API** | Audio interamente sintetizzato: motori, campanello bici, clacson, ambiente, eventi e segnali. |
 | **Web Storage (`localStorage`)** | Salvataggio locale di nome, punti, stelle, luoghi, missioni, carriera, impostazioni e statistiche. |
@@ -96,6 +97,8 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - **Duomo solido**: colori e texture derivano dal modello 3D, ma il runtime usa
   solo mesh e materiali del gioco; lo splat compresso resta un sorgente offline
   e non entra nella PWA.
+- **Centro storico vivo**: i micro-elementi OSM sono instanziati o uniti per
+  materiale, con limiti per qualità, per non moltiplicare le draw call.
 - **Dati separati dal codice**: la città è editabile con manifest, schema,
   template e tool di validazione.
 - **Quartieri Voronoi**: i confini dei sette macro-quartieri sono calcolati da
@@ -500,6 +503,26 @@ all’URL per forzare il livello grafico.
   poi ritagliata per minimappa e mappa grande.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
+
+## Novità v2.20 — Centro storico vivo
+
+- **67 negozi OSM** con vetrina al piano terra, insegna, tenda e categoria
+  (abbigliamento, ottica, profumeria, panificio, supermercato e altre).
+- **Arredo urbano reale**: 41 panchine, 27 cestini, 26 fermate bus con 4
+  pensiline, 4 rastrelliere bici, 6 fontanelle/fontane, 3 isole ecologiche,
+  11 dissuasori e 3 lampioni OSM.
+- **120 alberi singoli OSM** e **46 barriere** tra muri, recinzioni e siepi.
+- **Segnaletica stradale**: 46 segni stop/dare precedenza, linee di arresto e
+  segnaletica orizzontale ai semafori.
+- **72 lampioni del centro** (qualità alta, 48 media, 28 bassa) con pozze di
+  luce notturne lungo Via Cavour, Via Berenini e le vie pedonali.
+- **Tavolini e ombrelloni** per bar e caffè del centro, oltre alle quattro
+  venue già esistenti.
+- **Prestazioni**: arredo instanziato, vetrine/cornici/tende unite, limiti di
+  negozi e lampioni per qualità.
+- **Dati**: `tools/build-center-details.mjs` aggiunge i dettagli del centro a
+  `data/city.json` senza rigenerare edifici, strade o aree.
+- **PWA**: cache **v2.20.0**; il nuovo `city.json` pesa circa **2,37 MB**.
 
 ## Novità v2.19 — Duomo solido con palette 3D
 
@@ -986,6 +1009,7 @@ fidenza-city-v2/
     audit-terrain.mjs
     merge-buildings.mjs
     build-duomo-splat.mjs  PLY → asset sorgente per palette/texture
+    build-center-details.mjs  dettagli OSM del centro → city.json
   data/
     city.json
     terrain.json

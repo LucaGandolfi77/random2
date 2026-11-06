@@ -17,7 +17,36 @@ export const POI_SIGN_TYPES = {
   hotel: { label: 'HOTEL', color: '#7a5a8a', glyph: 'H' },
   museum: { label: 'MUSEO', color: '#5d7a52', glyph: 'M' },
   shop: { label: 'NEGOZIO', color: '#6b5a43', glyph: 'S' },
-  supermarket: { label: 'SUPERMERCATO', color: '#3f748a', glyph: 'S' }
+  supermarket: { label: 'SUPERMERCATO', color: '#3f748a', glyph: 'S' },
+  clothes: { label: 'ABBIGLIAMENTO', color: '#7a4f6a', glyph: 'A' },
+  shoes: { label: 'CALZATURE', color: '#7a4f3a', glyph: 'C' },
+  hairdresser: { label: 'PARRUCCHIERE', color: '#8a5a6a', glyph: 'P' },
+  beauty: { label: 'ESTETISTA', color: '#a86a7a', glyph: 'E' },
+  optician: { label: 'OTTICA', color: '#3f6b7a', glyph: 'O' },
+  perfumery: { label: 'PROFUMERIA', color: '#8a5a7a', glyph: 'P' },
+  cosmetics: { label: 'COSMETICI', color: '#a86a7a', glyph: 'C' },
+  stationery: { label: 'CARTOLERIA', color: '#5a6b8a', glyph: 'C' },
+  books: { label: 'LIBRERIA', color: '#5a6b8a', glyph: 'L' },
+  newsagent: { label: 'EDICOLA', color: '#5a6b8a', glyph: 'E' },
+  convenience: { label: 'MINIMARKET', color: '#3f748a', glyph: 'M' },
+  deli: { label: 'ALIMENTARI', color: '#7a6a3f', glyph: 'A' },
+  butcher: { label: 'MACELLERIA', color: '#8a3f3f', glyph: 'M' },
+  greengrocer: { label: 'ORTOFRUTTA', color: '#5a7a3f', glyph: 'O' },
+  pasta: { label: 'PASTA FRESCA', color: '#a8764f', glyph: 'P' },
+  pastry: { label: 'PASTICCERIA', color: '#a8764f', glyph: 'P' },
+  dairy: { label: 'LATTERIA', color: '#b9a06a', glyph: 'L' },
+  florist: { label: 'FIORAIO', color: '#4f7a52', glyph: 'F' },
+  jewelry: { label: 'GIOIELLERIA', color: '#8a7a3a', glyph: 'G' },
+  fabric: { label: 'TESSUTI', color: '#7a5a6a', glyph: 'T' },
+  furniture: { label: 'ARREDAMENTO', color: '#7a5a3a', glyph: 'A' },
+  electronics: { label: 'ELETTRONICA', color: '#4a5f6b', glyph: 'E' },
+  sports: { label: 'SPORT', color: '#4f6b8a', glyph: 'S' },
+  toys: { label: 'GIOCATTOLI', color: '#a86a4f', glyph: 'G' },
+  bicycle: { label: 'CICLI', color: '#4f6b7a', glyph: 'C' },
+  musical_instrument: { label: 'MUSICA', color: '#6b4a8a', glyph: 'M' },
+  hearing_aids: { label: 'AUSILI UDITO', color: '#4f6b7a', glyph: 'A' },
+  funeral_directors: { label: 'ONORANZE', color: '#4a4a4a', glyph: 'O' },
+  tobacco: { label: 'TABACCHERIA', color: '#8a7a3a', glyph: 'T' }
 };
 
 function pointInPoly(x, z, poly) {
@@ -90,7 +119,8 @@ export function planPoiSigns(city) {
   for (const poi of city.pois || []) {
     const type = findSignType(poi);
     if (!type) continue;
-    if (!poi.name) { skipped.push({ poi, reason: 'no-name' }); continue; }
+    if (!poi.name && poi.kind !== 'shop') { skipped.push({ poi, reason: 'no-name' }); continue; }
+    const title = poi.name || type.label;
     let best = null;
     for (const b of buildings) {
       if (!b.poly || b.poly.length < 3 || b.h < 4.2 || b.kind === 'roof') continue;
@@ -111,7 +141,7 @@ export function planPoiSigns(city) {
     for (const edge of edges) {
       const t = Math.max(0.25, Math.min(0.75, edge.t));
       const maxWidth = Math.max(0, 2 * Math.min(t * edge.len, (1 - t) * edge.len) - 0.35);
-      const desired = Math.min(4.8, Math.max(1.55, poi.name.length * 0.26 + 1.15));
+      const desired = Math.min(4.8, Math.max(1.55, title.length * 0.26 + 1.15));
       const width = Math.min(desired, maxWidth);
       if (width < 1.15) continue;
       const y = Math.min(3.45, best.b.h - 0.95);
@@ -124,6 +154,7 @@ export function planPoiSigns(city) {
       if (overlap) continue;
       placed = {
         poi,
+        title,
         building: best.b,
         type,
         x: +px.toFixed(2),
@@ -132,7 +163,7 @@ export function planPoiSigns(city) {
         width: +width.toFixed(2),
         height: 0.78,
         rotation: Math.atan2(edge.nx, edge.nz),
-        awning: ['restaurant', 'cafe', 'bar', 'pub', 'fast_food'].includes(poi.subtype)
+        awning: poi.kind === 'shop' || ['restaurant', 'cafe', 'bar', 'pub', 'fast_food'].includes(poi.subtype)
       };
       break;
     }

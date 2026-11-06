@@ -8,6 +8,7 @@
   - Il file `data/city.json` è un database derivato da OpenStreetMap e resta soggetto a ODbL.
   - Per usi che modificano o redistribuiscono il database, valgono gli obblighi di attribuzione e condivisione allo stesso modo previsti da ODbL.
 - **Rilievo fuori centro**: [AWS Open Data — Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) — Mapzen, con dati EU-DEM Copernicus. Il file `data/terrain.json` è derivato dai tile Terrarium AWS ad alta risoluzione.
+- **Dettagli del centro storico**: negozi, arredo urbano, alberi singoli, barriere e segnaletica sono derivati da OpenStreetMap (ODbL), tramite `tools/build-center-details.mjs`.
 - **Dati territoriali di riferimento**: © Regione Emilia-Romagna. Per Fidenza non vengono usati dati della Regione Friuli-Venezia Giulia: la riga FVG presente in altri progetti non è geograficamente valida per l'Emilia-Romagna.
 
 ## Software
