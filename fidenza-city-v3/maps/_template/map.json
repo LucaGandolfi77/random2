@@ -1,0 +1,81 @@
+{
+  "$schema": "../../schema/map.schema.json",
+  "id": "nuova-citta",
+  "name": "Nuova Città",
+  "version": "2.18.0",
+  "center": {
+    "lat": 44.8665,
+    "lon": 10.0612
+  },
+  "origin": {
+    "lat": 44.8665,
+    "lon": 10.0612
+  },
+  "bbox": {
+    "south": 44.85,
+    "west": 10.04,
+    "north": 44.882,
+    "east": 10.085
+  },
+  "projection": "local-tangent",
+  "sources": {
+    "cityData": "data/city.json",
+    "terrainData": "data/terrain.json",
+    "osm": "OpenStreetMap via Overpass",
+    "terrain": "Terrain Tiles (Mapzen, EU-DEM Copernicus)"
+  },
+  "attribution": {
+    "map": "© OpenStreetMap contributors (ODbL)",
+    "region": "© Regione Emilia-Romagna",
+    "terrain": "Terrain Tiles (Mapzen, EU-DEM Copernicus)"
+  },
+  "places": [
+    {
+      "id": "piazza-principale",
+      "name": "Piazza principale",
+      "short": "Piazza",
+      "category": "square",
+      "lat": 44.8665,
+      "lon": 10.0612,
+      "collectible": true,
+      "radius": 8,
+      "description": "Descrizione del luogo.",
+      "fact": "Un dettaglio curioso."
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "piazza-principale",
+      "place": "piazza-principale",
+      "model": "piazza-duomo",
+      "rotation": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "scale": 1,
+      "hidden": false
+    }
+  ],
+  "missions": [],
+  "seasons": {
+    "default": "auto",
+    "styles": {
+      "spring": "maps/nuova-citta/styles/spring.json",
+      "summer": "maps/nuova-citta/styles/summer.json",
+      "autumn": "maps/nuova-citta/styles/autumn.json",
+      "winter": "maps/nuova-citta/styles/winter.json"
+    }
+  },
+  "spawn": {
+    "x": 0,
+    "z": 0,
+    "yaw": 0
+  },
+  "missionBoard": {
+    "x": 0,
+    "z": 0
+  },
+  "vehicles": [],
+  "stars": [],
+  "overrides": {},
+  "props": []
+}

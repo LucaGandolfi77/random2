@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Fidenza da Giocare">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f4a3c"/>
+      <stop offset="1" stop-color="#1b241e"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6d48b"/>
+      <stop offset="1" stop-color="#e7b95a"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="368" cy="144" r="72" fill="url(#sun)"/>
+  <path d="M96 360V152h176v54H158v54h100v52H158v48H96z" fill="#f4ebda"/>
+  <path d="M300 162l22 56 60 4-46 38 15 59-51-31-51 31 15-59-46-38 60-4z" fill="#c2684b"/>
+  <path d="M96 392h320" stroke="#e7b95a" stroke-width="12" stroke-linecap="round"/>
+</svg>

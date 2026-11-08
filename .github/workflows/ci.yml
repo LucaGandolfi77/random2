@@ -93,6 +93,22 @@ jobs:
           [ "$fail" -eq 0 ] && echo "OK   shared/arcade.js is the only copy"
           exit $fail
 
+      - name: Fidenza v3 Arnis assets audit
+        run: node fidenza-city-v3/tools/audit-arnis.mjs
+
+      - name: Fidenza v3 map validation
+        run: node fidenza-city-v3/tools/validate-map.mjs
+
+      - name: Fidenza v3 visual detail budget
+        run: node fidenza-city-v3/tools/audit-visual-detail.mjs
+
+      - name: Fidenza v3 tool syntax
+        run: |
+          set -euo pipefail
+          for file in fidenza-city-v3/tools/*.mjs; do
+            node --check "$file"
+          done
+
       - name: Shared libraries and self-tests
         run: |
           set -euo pipefail

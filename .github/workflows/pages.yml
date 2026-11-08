@@ -55,12 +55,36 @@ jobs:
           # Everything except git metadata, CI config, analysis tooling and
           # the build-tool sources. `tools/` is dev-only (Python/Node) and has
           # no business being published to Pages.
-          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' ./ _site/
+          # Il save ArnisWorld3 (575 MB) resta sorgente locale: si pubblicano
+          # solo gli asset derivati in fidenza-city-v3/data/arnis/.
+          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' --exclude='hype-brawl-game' --exclude='hype-ko-game' --exclude='fidenza-city-v3/assets/ArnisWorld3' ./ _site/
           # Deploy the built app output under their own paths
           cp -R bucio/dist/ _site/bucio/
           cp -R new-star-soccer/dist/ _site/new-star-soccer/
           cp -R dottor-gelo-pwa/dist/ _site/dottor-gelo-pwa/
           touch _site/.nojekyll
+
+      - name: Stamp Fidenza build
+        run: |
+          set -euo pipefail
+          BUILD_ID="${GITHUB_SHA::12}"
+          BUILD_DIR="fidenza-city-v3"
+          python3 - "$BUILD_ID" <<'PY'
+          import json, os, sys, datetime
+          build_id = sys.argv[1]
+          target = os.path.join('_site', 'fidenza-city-v3', 'build-info.json')
+          os.makedirs(os.path.dirname(target), exist_ok=True)
+          with open(target, 'w', encoding='utf-8') as fh:
+              json.dump({
+                  'version': '3.0.4',
+                  'commit': os.environ.get('GITHUB_SHA', ''),
+                  'buildId': build_id,
+                  'builtAt': datetime.datetime.now(datetime.timezone.utc).isoformat()
+              }, fh, ensure_ascii=False, indent=2)
+          print('build-info.json', target)
+          PY
+          SW="_site/fidenza-city-v3/sw.js"
+          sed -i "s/fidenza-da-giocare-v3\.0\.4/fidenza-da-giocare-${BUILD_ID}/" "$SW"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

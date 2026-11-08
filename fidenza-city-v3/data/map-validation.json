@@ -1,0 +1,906 @@
+{
+  "generated": "2026-11-08T18:50:55.525Z",
+  "totals": {
+    "checks": 112,
+    "errors": 0,
+    "overrides": 0,
+    "absoluteOverrides": 0,
+    "customFeatures": 0
+  },
+  "rows": [
+    {
+      "kind": "beacon",
+      "id": "duomo",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": -296,
+      "z": 3
+    },
+    {
+      "kind": "beacon",
+      "id": "piazza-duomo",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": -296.74,
+      "z": -4.11
+    },
+    {
+      "kind": "beacon",
+      "id": "porta",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": -299.28,
+      "z": -36.86
+    },
+    {
+      "kind": "beacon",
+      "id": "ponte",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": -315.73,
+      "z": -68.96
+    },
+    {
+      "kind": "beacon",
+      "id": "teatro",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": -83.68,
+      "z": 64.51
+    },
+    {
+      "kind": "beacon",
+      "id": "comunale",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": -12.25,
+      "z": 56.77
+    },
+    {
+      "kind": "beacon",
+      "id": "granmadre",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": 391.43,
+      "z": 148.72
+    },
+    {
+      "kind": "beacon",
+      "id": "sanpietro",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": -269.75,
+      "z": 185.65
+    },
+    {
+      "kind": "beacon",
+      "id": "musini",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": 379.58,
+      "z": 185.59
+    },
+    {
+      "kind": "beacon",
+      "id": "stazione",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": 182.61,
+      "z": -112.64
+    },
+    {
+      "kind": "beacon",
+      "id": "stirone",
+      "ok": true,
+      "msg": "beacon accessibile",
+      "x": -1230.8,
+      "z": 0
+    },
+    {
+      "kind": "place",
+      "id": "coduro",
+      "ok": true,
+      "msg": "nessun ID OSM (solo avviso)"
+    },
+    {
+      "kind": "star",
+      "id": "star-0",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -878.1,
+      "z": -187.9
+    },
+    {
+      "kind": "star",
+      "id": "star-1",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -343.6,
+      "z": 857.9
+    },
+    {
+      "kind": "star",
+      "id": "star-2",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 1204.7,
+      "z": 394
+    },
+    {
+      "kind": "star",
+      "id": "star-3",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -736.9,
+      "z": 1043.1
+    },
+    {
+      "kind": "star",
+      "id": "star-4",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 1400.9,
+      "z": 555.4
+    },
+    {
+      "kind": "star",
+      "id": "star-5",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -484.9,
+      "z": 717.6
+    },
+    {
+      "kind": "star",
+      "id": "star-6",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -555.7,
+      "z": 1552.3
+    },
+    {
+      "kind": "star",
+      "id": "star-7",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -108.7,
+      "z": 165.5
+    },
+    {
+      "kind": "star",
+      "id": "star-8",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 175.3,
+      "z": 1187.2
+    },
+    {
+      "kind": "star",
+      "id": "star-9",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 673.3,
+      "z": 953.4
+    },
+    {
+      "kind": "star",
+      "id": "star-10",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 351.4,
+      "z": 989.9
+    },
+    {
+      "kind": "star",
+      "id": "star-11",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 899.3,
+      "z": 1064.8
+    },
+    {
+      "kind": "star",
+      "id": "star-12",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -309.2,
+      "z": 1344.4
+    },
+    {
+      "kind": "star",
+      "id": "star-13",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -457.6,
+      "z": -88.1
+    },
+    {
+      "kind": "star",
+      "id": "star-14",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 454.1,
+      "z": 897
+    },
+    {
+      "kind": "star",
+      "id": "star-15",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 335.4,
+      "z": 336.6
+    },
+    {
+      "kind": "star",
+      "id": "star-16",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -1445.6,
+      "z": -197.5
+    },
+    {
+      "kind": "star",
+      "id": "star-17",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -241.2,
+      "z": 200.4
+    },
+    {
+      "kind": "star",
+      "id": "star-18",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 396.6,
+      "z": 148.3
+    },
+    {
+      "kind": "star",
+      "id": "star-19",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 119.5,
+      "z": 213.6
+    },
+    {
+      "kind": "star",
+      "id": "star-20",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -469.2,
+      "z": 896.9
+    },
+    {
+      "kind": "star",
+      "id": "star-21",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -501.7,
+      "z": 1137.9
+    },
+    {
+      "kind": "star",
+      "id": "star-22",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": -766.5,
+      "z": -110.6
+    },
+    {
+      "kind": "star",
+      "id": "star-23",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 1341,
+      "z": 850
+    },
+    {
+      "kind": "star",
+      "id": "star-24",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 654.8,
+      "z": 272.8
+    },
+    {
+      "kind": "star",
+      "id": "star-25",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 133.1,
+      "z": 8.6
+    },
+    {
+      "kind": "star",
+      "id": "star-26",
+      "ok": true,
+      "msg": "stella accessibile",
+      "x": 799.2,
+      "z": 303.8
+    },
+    {
+      "kind": "vehicle",
+      "id": "car-Auto",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -343,
+      "z": 24
+    },
+    {
+      "kind": "vehicle",
+      "id": "vespa-Vespa",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -341.8,
+      "z": 21
+    },
+    {
+      "kind": "vehicle",
+      "id": "car-Taxi",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": 205,
+      "z": -100
+    },
+    {
+      "kind": "vehicle",
+      "id": "vespa-Vespa pizza",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -342.5,
+      "z": 28.9
+    },
+    {
+      "kind": "vehicle",
+      "id": "car-Auto",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -342.1,
+      "z": 17.8
+    },
+    {
+      "kind": "vehicle",
+      "id": "car-Ambulanza",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -302.6,
+      "z": 41.7
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici stazione",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": 210,
+      "z": -95
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici Piazza Duomo",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -314.8,
+      "z": 17.1
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici Teatro",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -76,
+      "z": 70.8
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici Gran Madre",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": 402,
+      "z": 145
+    },
+    {
+      "kind": "vehicle",
+      "id": "bike-Bici centro",
+      "ok": true,
+      "msg": "veicolo accessibile",
+      "x": -302.5,
+      "z": 38
+    },
+    {
+      "kind": "spawn",
+      "id": "spawn",
+      "ok": true,
+      "msg": "spawn accessibile",
+      "x": -312,
+      "z": 12
+    },
+    {
+      "kind": "missionBoard",
+      "id": "mission-board",
+      "ok": true,
+      "msg": "tabellone accessibile",
+      "x": -314,
+      "z": 6
+    },
+    {
+      "kind": "prop",
+      "id": "sign-duomo",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -291.5,
+      "z": 10
+    },
+    {
+      "kind": "prop",
+      "id": "sign-teatro",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -80,
+      "z": 68.5
+    },
+    {
+      "kind": "prop",
+      "id": "sign-comunale",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -16,
+      "z": 66
+    },
+    {
+      "kind": "prop",
+      "id": "sign-porta",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -297,
+      "z": -31
+    },
+    {
+      "kind": "prop",
+      "id": "sign-ponte",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -313,
+      "z": -64
+    },
+    {
+      "kind": "prop",
+      "id": "sign-stazione",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 184,
+      "z": -106
+    },
+    {
+      "kind": "prop",
+      "id": "sign-musini",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 381,
+      "z": 192
+    },
+    {
+      "kind": "prop",
+      "id": "sign-granmadre",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 395,
+      "z": 154
+    },
+    {
+      "kind": "prop",
+      "id": "street-via-emilia",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -300,
+      "z": 16
+    },
+    {
+      "kind": "prop",
+      "id": "street-piazza-duomo",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -300,
+      "z": -2
+    },
+    {
+      "kind": "prop",
+      "id": "street-piazza-garibaldi",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -20,
+      "z": 80
+    },
+    {
+      "kind": "prop",
+      "id": "street-piazza-verdi",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -90,
+      "z": 60
+    },
+    {
+      "kind": "prop",
+      "id": "bench-piazza-1",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -306,
+      "z": -10
+    },
+    {
+      "kind": "prop",
+      "id": "bench-piazza-2",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -289,
+      "z": -12
+    },
+    {
+      "kind": "prop",
+      "id": "bench-piazza-3",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -300,
+      "z": 12
+    },
+    {
+      "kind": "prop",
+      "id": "tree-piazza-1",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -312,
+      "z": 0
+    },
+    {
+      "kind": "prop",
+      "id": "tree-piazza-2",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -291,
+      "z": -2
+    },
+    {
+      "kind": "prop",
+      "id": "planter-piazza",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -303,
+      "z": 7
+    },
+    {
+      "kind": "prop",
+      "id": "stall-stazione",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 176,
+      "z": -102
+    },
+    {
+      "kind": "prop",
+      "id": "stall-granmadre",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": 403,
+      "z": 150
+    },
+    {
+      "kind": "prop",
+      "id": "bollard-1",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -304,
+      "z": -6
+    },
+    {
+      "kind": "prop",
+      "id": "bollard-2",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -296,
+      "z": -6
+    },
+    {
+      "kind": "prop",
+      "id": "bollard-3",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -304,
+      "z": 2
+    },
+    {
+      "kind": "prop",
+      "id": "bollard-4",
+      "ok": true,
+      "msg": "prop accessibile",
+      "x": -296,
+      "z": 2
+    },
+    {
+      "kind": "mission-step",
+      "id": "ambulance:0",
+      "ok": true,
+      "msg": "Paziente al Parco Vittorio Veneto",
+      "x": -234,
+      "z": 613
+    },
+    {
+      "kind": "mission-step",
+      "id": "ambulance:1",
+      "ok": true,
+      "msg": "Ospedale di Fidenza",
+      "x": -1450,
+      "z": 1710
+    },
+    {
+      "kind": "mission-step",
+      "id": "pizza:0",
+      "ok": true,
+      "msg": "Consegna in Piazza Duomo",
+      "x": -291.57,
+      "z": 4.72
+    },
+    {
+      "kind": "mission-step",
+      "id": "pizza:1",
+      "ok": true,
+      "msg": "Consegna al Teatro Magnani",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "pizza:2",
+      "ok": true,
+      "msg": "Consegna alla stazione",
+      "x": 174.61,
+      "z": -106.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "taxi:0",
+      "ok": true,
+      "msg": "Viaggiatore alla stazione",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "taxi:1",
+      "ok": true,
+      "msg": "Teatro Magnani",
+      "x": -77.62,
+      "z": 69.12
+    },
+    {
+      "kind": "mission-step",
+      "id": "photo:0",
+      "ok": true,
+      "msg": "Duomo di San Donnino",
+      "x": -301,
+      "z": 11
+    },
+    {
+      "kind": "mission-step",
+      "id": "photo:1",
+      "ok": true,
+      "msg": "Piazza Duomo",
+      "x": -296.74,
+      "z": 3.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "photo:2",
+      "ok": true,
+      "msg": "Porta San Donnino",
+      "x": -295.28,
+      "z": -26.86
+    },
+    {
+      "kind": "mission-step",
+      "id": "photo:3",
+      "ok": true,
+      "msg": "Teatro Magnani",
+      "x": -75.68,
+      "z": 70.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "photo:4",
+      "ok": true,
+      "msg": "Palazzo Comunale",
+      "x": -10.25,
+      "z": 66.77
+    },
+    {
+      "kind": "mission-step",
+      "id": "pilgrim:0",
+      "ok": true,
+      "msg": "Pellegrino alla stazione",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "pilgrim:1",
+      "ok": true,
+      "msg": "Duomo di San Donnino",
+      "x": -301,
+      "z": 11
+    },
+    {
+      "kind": "mission-step",
+      "id": "pilgrim:2",
+      "ok": true,
+      "msg": "Porta San Donnino",
+      "x": -295.28,
+      "z": -26.86
+    },
+    {
+      "kind": "mission-step",
+      "id": "delivery:0",
+      "ok": true,
+      "msg": "Farmacia Cavour",
+      "x": -54.25,
+      "z": -6.21
+    },
+    {
+      "kind": "mission-step",
+      "id": "delivery:1",
+      "ok": true,
+      "msg": "Ospedale di Fidenza",
+      "x": -1450,
+      "z": 1710
+    },
+    {
+      "kind": "mission-step",
+      "id": "tour:0",
+      "ok": true,
+      "msg": "Cliente alla stazione",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "tour:1",
+      "ok": true,
+      "msg": "Teatro Magnani",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "tour:2",
+      "ok": true,
+      "msg": "Piazza Duomo",
+      "x": -296.74,
+      "z": 3.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "tour:3",
+      "ok": true,
+      "msg": "Santuario della Gran Madre",
+      "x": 397.43,
+      "z": 156.72
+    },
+    {
+      "kind": "mission-step",
+      "id": "coincidenza:0",
+      "ok": true,
+      "msg": "Ritiro bagaglio al Teatro",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "coincidenza:1",
+      "ok": true,
+      "msg": "Stazione di Fidenza",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "ultimo-treno:0",
+      "ok": true,
+      "msg": "Viaggiatore notturno",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "ultimo-treno:1",
+      "ok": true,
+      "msg": "Gran Madre",
+      "x": 397.43,
+      "z": 156.72
+    },
+    {
+      "kind": "mission-step",
+      "id": "capolinea:0",
+      "ok": true,
+      "msg": "Capolinea stazione",
+      "x": 186.61,
+      "z": -102.64
+    },
+    {
+      "kind": "mission-step",
+      "id": "capolinea:1",
+      "ok": true,
+      "msg": "Fermata Teatro",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "capolinea:2",
+      "ok": true,
+      "msg": "Fermata Piazza Duomo",
+      "x": -296.74,
+      "z": 3.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-procession:0",
+      "ok": true,
+      "msg": "Partenza della processione",
+      "x": -300,
+      "z": 13
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-procession:1",
+      "ok": true,
+      "msg": "Piazza Duomo",
+      "x": -296.74,
+      "z": 5.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-procession:2",
+      "ok": true,
+      "msg": "Piazza Garibaldi",
+      "x": -7.1,
+      "z": 42
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-torta-fritta:0",
+      "ok": true,
+      "msg": "Cucina della festa",
+      "x": -73.68,
+      "z": 72.51
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-torta-fritta:1",
+      "ok": true,
+      "msg": "Bancarelle in festa",
+      "x": -296.74,
+      "z": 7.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-photo:0",
+      "ok": true,
+      "msg": "Foto alla festa",
+      "x": -296.74,
+      "z": 7.89
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-photo:1",
+      "ok": true,
+      "msg": "Foto al Duomo",
+      "x": -300,
+      "z": 15
+    },
+    {
+      "kind": "mission-step",
+      "id": "san-donnino-photo:2",
+      "ok": true,
+      "msg": "Foto al Teatro",
+      "x": -76.15,
+      "z": 70.81
+    }
+  ]
+}

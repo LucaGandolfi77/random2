@@ -1,0 +1,177 @@
+export const VERSION = '3.0.0';
+export const SAVE_KEY = 'fidenza-da-giocare-v1';
+
+export const COLORS = {
+  paper: '#f4ebda',
+  ink: '#1b241e',
+  green: '#2f4a3c',
+  terracotta: '#c2684b',
+  gold: '#e7b95a',
+  blue: '#4f8fa8'
+};
+
+export const WORLD = {
+  origin: { lat: 44.8665, lon: 10.0612 },
+  mPerDegLat: 111132.0,
+  mPerDegLon: 111320.0 * Math.cos(44.8665 * Math.PI / 180),
+  // Area giocabile: centro storico + espansione est/sud-est di Coduro.
+  bounds: { minX: -1870, maxX: 3730, minZ: -2040, maxZ: 3540 },
+  // Aree in cui il terreno viene appiattito sotto la città.
+  flat: { minX: -1550, maxX: 2100, minZ: -1650, maxZ: 1750 },
+  flatZones: [
+    // Tutta l'area giocabile resta a quota 0: case, strade e piazze non
+    // possono galleggiare sui rilievi fuori dal vecchio centro.
+    { minX: -1870, maxX: 3730, minZ: -2040, maxZ: 3540 }
+  ],
+  spawn: { x: -312, z: 12, yaw: 1.99 },
+  terrain: {
+    widthKm: 9.2,
+    segments: 260
+  },
+  sky: {
+    dayTop: '#3f7fe0',
+    dayBottom: '#bcd8ff',
+    nightTop: '#0b1320',
+    nightBottom: '#20303c',
+    sunsetTop: '#5e748e',
+    sunsetBottom: '#e8b27b'
+  }
+};
+
+export const ROAD_STYLE = {
+  motorway:      { color: '#5f6366', sidewalk: false },
+  trunk:         { color: '#5f6366', sidewalk: true },
+  primary:       { color: '#5f6366', sidewalk: true },
+  secondary:     { color: '#5f6366', sidewalk: true },
+  tertiary:      { color: '#5f6366', sidewalk: true },
+  residential:   { color: '#5f6366', sidewalk: true },
+  living_street: { color: '#8a8785', sidewalk: true },
+  unclassified:  { color: '#8a8785', sidewalk: true },
+  service:       { color: '#8a8785', sidewalk: false },
+  pedestrian:    { color: '#9a6b5a', sidewalk: false },
+  footway:       { color: '#8a8a86', sidewalk: false },
+  path:          { color: '#8a6b47', sidewalk: false },
+  cycleway:      { color: '#8f3e2f', sidewalk: false },
+  track:         { color: '#8a8785', sidewalk: false },
+  steps:         { color: '#9b9b9b', sidewalk: false }
+};
+
+export const AREA_STYLE = {
+  park:      { color: '#5d8f3f', edge: '#4c7a2e' },
+  grass:     { color: '#5d8f3f', edge: '#4c7a2e' },
+  forest:    { color: '#4f7a3a', edge: '#3d5c3a' },
+  farmland:  { color: '#4f3522', edge: '#6b4b33' },
+  cemetery:  { color: '#5a3d22', edge: '#6b4b33' },
+  industrial:{ color: '#7d7d7d', edge: '#6f6f6f' },
+  urban:     { color: '#7a7a7a', edge: '#6f6f6f' },
+  water:     { color: '#3f76e4', edge: '#2f5fb8' },
+  square:    { color: '#7a7a7a', edge: '#6f6f6f' },
+  parking:   { color: '#9a9d9b', edge: '#7d7f7d' },
+  school:    { color: '#7d7f7d', edge: '#6f6f6f' },
+  hospital:  { color: '#9b9b9b', edge: '#7d7d7d' },
+  platform:  { color: '#9b9b9b', edge: '#7d7d7d' },
+  sport:     { color: '#4c5a3a', edge: '#3d4a2e' }
+};
+
+export const BUILDING_DEFAULTS = {
+  wall: '#9c6047',
+  roof: '#9a6b5a',
+  church: '#7a7a7a',
+  churchRoof: '#9b5a47'
+};
+
+export const PLAYER = {
+  radius: 0.44,
+  height: 1.75,
+  walkSpeed: 4.4,
+  runSpeed: 8.2,
+  acceleration: 34,
+  deceleration: 22,
+  turnSpeed: 12,
+  cameraDistance: 7.8,
+  cameraHeight: 2.8,
+  cameraMinPitch: -0.05,
+  cameraMaxPitch: 0.85,
+  flySpeed: 13,
+  flyBoost: 30
+};
+
+export const VEHICLES = {
+  car: {
+    name: 'Auto',
+    maxSpeed: 24,
+    reverseSpeed: 6.5,
+    acceleration: 12,
+    brake: 20,
+    drag: 1.8,
+    steer: 1.65,
+    radius: 1.35,
+    length: 4.1,
+    width: 1.85,
+    enterRadius: 3.2,
+    horn: 392
+  },
+  vespa: {
+    name: 'Vespa',
+    maxSpeed: 12.2,
+    reverseSpeed: 3.2,
+    acceleration: 6.6,
+    brake: 12,
+    drag: 2.2,
+    steer: 2.3,
+    radius: 0.85,
+    length: 1.85,
+    width: 0.8,
+    enterRadius: 2.4,
+    horn: 523
+  },
+  bike: {
+    name: 'Bici',
+    maxSpeed: 8,
+    reverseSpeed: 2,
+    acceleration: 5.2,
+    brake: 10,
+    drag: 0.8,
+    steer: 2.9,
+    radius: 0.5,
+    length: 1.7,
+    width: 0.75,
+    enterRadius: 2.1,
+    horn: 880
+  }
+};
+
+export const SCORE = {
+  star: 100,
+  place: 250,
+  mission: 600,
+  missionTimeBonus: 3,
+  placeBonus: 100,
+  npc: 25
+};
+
+export const MISSION_TYPES = {
+  ambulance: { icon: '✚', label: 'Ambulanza', color: '#c2684b' },
+  chase:     { icon: '➤', label: 'Inseguimento', color: '#9a4a34' },
+  pizza:     { icon: '◕', label: 'Pizza in Vespa', color: '#c99a3f' },
+  taxi:      { icon: '◈', label: 'Taxi', color: '#3f748a' },
+  photo:     { icon: '▣', label: 'Fotografo', color: '#4f7748' },
+  pilgrim:   { icon: '✦', label: 'Pellegrino', color: '#8a6a3a' },
+  delivery:  { icon: '▤', label: 'Consegna', color: '#3f748a' },
+  tour:      { icon: '◈', label: 'Giro turistico', color: '#7a5a8a' },
+  train:     { icon: '⇄', label: 'Coincidenza', color: '#3f748a' },
+  night:     { icon: '☾', label: 'Notturna', color: '#3a4a6a' },
+  bus:       { icon: '▤', label: 'Navetta', color: '#2f6b4f' },
+  custom:    { icon: '★', label: 'Personalizzata', color: '#7a5a8a' }
+};
+
+export const CONTROLS = {
+  desktop: 'WASD muovi · Shift corri · Mouse guarda · E interagisci · F missioni · N mappa · M audio · Esc pausa',
+  mobile: 'Levetta per muoverti · trascina per guardare · ▶ per interagire'
+};
+
+export const ATTRIBUTION = {
+  map: '© OpenStreetMap contributors (ODbL)',
+  terrain: 'AWS Open Data — Terrain Tiles (Mapzen / EU-DEM Copernicus)',
+  region: '© Regione Emilia-Romagna'
+};

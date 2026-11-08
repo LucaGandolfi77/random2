@@ -1,0 +1,56 @@
+{
+  "name": "Fidenza da Giocare v3.0",
+  "short_name": "Fidenza",
+  "description": "Open world gratuito nel browser ambientato a Fidenza: un mondo a blocchi con i materiali reali di ArnisWorld3, sette quartieri, Duomo, missioni, carriera, eventi, trasporti, foto, bici, volo mobile, abitanti con dialoghi, Diario di Fidenza, Bar Blu Piramide, turni NPC, orari dei locali, editor Pro e 27 stelle nascoste.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1b241e",
+  "theme_color": "#1b241e",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "icons": [
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Gioca",
+      "short_name": "Gioca",
+      "url": "./",
+      "icons": [
+        {
+          "src": "assets/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

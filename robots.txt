@@ -7,5 +7,6 @@
 
 User-agent: *
 Allow: /
+Disallow: /fidenza-city-v3/fidenza-editor/
 
 Sitemap: https://lucagandolfi77.github.io/random2/sitemap.xml

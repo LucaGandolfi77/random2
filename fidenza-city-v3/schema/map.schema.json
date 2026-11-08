@@ -1,0 +1,1045 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fidenza-da-giocare.local/schema/map.schema.json",
+  "title": "Fidenza da Giocare — map manifest",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "bbox",
+    "center",
+    "places",
+    "landmarks"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "center": {
+      "$ref": "#/$defs/point"
+    },
+    "origin": {
+      "$ref": "#/$defs/point"
+    },
+    "bbox": {
+      "type": "object",
+      "required": [
+        "south",
+        "west",
+        "north",
+        "east"
+      ],
+      "properties": {
+        "south": {
+          "type": "number"
+        },
+        "west": {
+          "type": "number"
+        },
+        "north": {
+          "type": "number"
+        },
+        "east": {
+          "type": "number"
+        }
+      }
+    },
+    "projection": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "object"
+    },
+    "attribution": {
+      "type": "object"
+    },
+    "places": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "lat",
+          "lon"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "church",
+              "museum",
+              "theatre",
+              "square",
+              "monument",
+              "station",
+              "park",
+              "civic",
+              "nature",
+              "service",
+              "food",
+              "default"
+            ]
+          },
+          "osm": {
+            "type": "string",
+            "pattern": "^(node|way|relation)/[0-9]+$"
+          },
+          "aliases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "linear": {
+            "type": "boolean"
+          },
+          "lat": {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lon": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          "collectible": {
+            "type": "boolean"
+          },
+          "beacon": {
+            "type": "object",
+            "required": [
+              "x",
+              "z"
+            ],
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "z": {
+                "type": "number"
+              }
+            }
+          },
+          "radius": {
+            "type": "number",
+            "minimum": 2,
+            "maximum": 30
+          },
+          "description": {
+            "type": "string"
+          },
+          "fact": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "landmarks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "place",
+          "model"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "place": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string",
+            "enum": [
+              "duomo",
+              "piazza-duomo",
+              "porta",
+              "ponte",
+              "teatro",
+              "comunale",
+              "granmadre",
+              "sanpietro",
+              "musini",
+              "stazione",
+              "stirone",
+              "obelisco",
+              "piazza-garibaldi"
+            ]
+          },
+          "rotation": {
+            "type": "number"
+          },
+          "offsetX": {
+            "type": "number"
+          },
+          "offsetZ": {
+            "type": "number"
+          },
+          "scale": {
+            "type": "number",
+            "minimum": 0.1,
+            "maximum": 5
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "missions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ambulance",
+              "chase",
+              "pizza",
+              "taxi",
+              "photo",
+              "pilgrim",
+              "delivery",
+              "tour",
+              "custom",
+              "train",
+              "night",
+              "bus"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "time": {
+            "type": "number"
+          },
+          "reward": {
+            "type": "number"
+          },
+          "chase": {
+            "type": "boolean"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "z": {
+                  "type": "number"
+                },
+                "place": {
+                  "type": "string"
+                },
+                "offsetX": {
+                  "type": "number"
+                },
+                "offsetZ": {
+                  "type": "number"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "prompt": {
+                  "type": "string"
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "photo": {
+                  "type": "boolean"
+                },
+                "photoRequired": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "event": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "seasons": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "string"
+        },
+        "styles": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "spawn": {
+      "type": "object",
+      "required": [
+        "x",
+        "z"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        },
+        "yaw": {
+          "type": "number"
+        }
+      }
+    },
+    "missionBoard": {
+      "type": "object",
+      "required": [
+        "x",
+        "z"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      }
+    },
+    "vehicles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "x",
+          "z"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "car",
+              "vespa",
+              "bike"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "yaw": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          },
+          "taxi": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "stars": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "x",
+          "z"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "overrides": {
+      "type": "object",
+      "properties": {
+        "buildings": {
+          "$ref": "#/$defs/polygonOverrides"
+        },
+        "roads": {
+          "$ref": "#/$defs/roadOverrides"
+        },
+        "areas": {
+          "$ref": "#/$defs/polygonOverrides"
+        },
+        "waterways": {
+          "$ref": "#/$defs/lineOverrides"
+        },
+        "railways": {
+          "$ref": "#/$defs/lineOverrides"
+        }
+      }
+    },
+    "props": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "x",
+          "z"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "sign",
+              "street-sign",
+              "tree",
+              "bench",
+              "lamp",
+              "bollard",
+              "planter",
+              "stall",
+              "parked-car"
+            ]
+          },
+          "x": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "rotation": {
+            "type": "number"
+          },
+          "scale": {
+            "type": "number",
+            "minimum": 0.2,
+            "maximum": 4
+          },
+          "color": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "sub": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 8
+          },
+          "height": {
+            "type": "number",
+            "minimum": 0.2,
+            "maximum": 4
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "districts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "x",
+          "z"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          },
+          "ambience": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "venues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "x",
+          "z"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "color": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "hours": {
+            "type": "object",
+            "properties": {
+              "open": {
+                "type": "number"
+              },
+              "close": {
+                "type": "number"
+              },
+              "closedDays": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                }
+              }
+            }
+          },
+          "existing": {
+            "type": "boolean"
+          },
+          "custom": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "terrain": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string"
+        },
+        "zoom": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18
+        },
+        "grid": {
+          "type": "integer",
+          "minimum": 64
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tileUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "custom": {
+      "type": "object",
+      "properties": {
+        "buildings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customPolygon"
+          }
+        },
+        "areas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customPolygon"
+          }
+        },
+        "roads": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customLine"
+          }
+        },
+        "waterways": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customLine"
+          }
+        },
+        "railways": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/customLine"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "point": {
+      "type": "object",
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lon": {
+          "type": "number"
+        }
+      }
+    },
+    "polygonOverrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "hidden": {
+            "type": "boolean"
+          },
+          "moveX": {
+            "type": "number"
+          },
+          "moveZ": {
+            "type": "number"
+          },
+          "rotate": {
+            "type": "number"
+          },
+          "scale": {
+            "type": "number"
+          },
+          "height": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "width": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "poly": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "$ref": "#/$defs/coordinate"
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "levels": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 40
+          },
+          "roof": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "properties": {
+        "blocks": {
+          "$ref": "#/$defs/blocks"
+        }
+      }
+    },
+    "roadOverrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "hidden": {
+            "type": "boolean"
+          },
+          "moveX": {
+            "type": "number"
+          },
+          "moveZ": {
+            "type": "number"
+          },
+          "rotate": {
+            "type": "number"
+          },
+          "scale": {
+            "type": "number"
+          },
+          "width": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "surface": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pts": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/coordinate"
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "oneway": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "bridge": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "tunnel": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "sidewalk": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "properties": {
+        "blocks": {
+          "$ref": "#/$defs/blocks"
+        }
+      }
+    },
+    "lineOverrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "hidden": {
+            "type": "boolean"
+          },
+          "moveX": {
+            "type": "number"
+          },
+          "moveZ": {
+            "type": "number"
+          },
+          "rotate": {
+            "type": "number"
+          },
+          "scale": {
+            "type": "number"
+          },
+          "pts": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "$ref": "#/$defs/coordinate"
+            }
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "width": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      },
+      "properties": {
+        "blocks": {
+          "$ref": "#/$defs/blocks"
+        }
+      }
+    },
+    "coordinate": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "customPolygon": {
+      "type": "object",
+      "required": [
+        "poly"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "poly": {
+          "type": "array",
+          "minItems": 3,
+          "items": {
+            "$ref": "#/$defs/coordinate"
+          }
+        },
+        "h": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "height": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 300
+        },
+        "levels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "roof": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "blocks": {
+          "$ref": "#/$defs/blocks"
+        }
+      }
+    },
+    "customLine": {
+      "type": "object",
+      "required": [
+        "pts"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "pts": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/coordinate"
+          }
+        },
+        "w": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 80
+        },
+        "width": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 80
+        },
+        "surface": {
+          "type": "string"
+        },
+        "oneway": {
+          "type": "boolean"
+        },
+        "bridge": {
+          "type": "boolean"
+        },
+        "tunnel": {
+          "type": "boolean"
+        },
+        "sidewalk": {
+          "type": "boolean"
+        },
+        "hidden": {
+          "type": "boolean"
+        },
+        "blocks": {
+          "$ref": "#/$defs/blocks"
+        }
+      }
+    },
+    "blocks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "surface": {
+          "type": "string"
+        },
+        "side": {
+          "type": "string"
+        },
+        "wall": {
+          "type": "string"
+        },
+        "wallLower": {
+          "type": "string"
+        },
+        "wallUpper": {
+          "type": "string"
+        },
+        "roof": {
+          "type": "string"
+        },
+        "roofType": {
+          "type": "string",
+          "enum": [
+            "stairs",
+            "slab",
+            "flat"
+          ]
+        },
+        "glass": {
+          "type": "string"
+        },
+        "door": {
+          "type": "string"
+        },
+        "bank": {
+          "type": "string"
+        },
+        "crop": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

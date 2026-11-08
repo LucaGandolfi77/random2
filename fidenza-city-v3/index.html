@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Fidenza da Giocare v3.0 · open world gratis nel browser</title>
+  <meta name="description" content="Scorrazza per Fidenza, esplora sette quartieri, guida auto e bici, parla con gli abitanti, apri il Diario di Fidenza e fermati al Bar Blu Piramide. Scopri il Duomo, il Teatro Magnani e 27 stelle nascoste, in un mondo a blocchi ispirato ad ArnisWorld3. Un open world gratuito nel browser, ispirato alla città di Fidenza.">
+  <meta name="theme-color" content="#1d2620">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://lucagandolfi77.github.io/random2/fidenza-city-v3/">
+  <link rel="canonical" href="https://lucagandolfi77.github.io/random2/fidenza-city-v3/">
+  <meta property="og:site_name" content="Fidenza da Giocare">
+  <meta property="og:title" content="Fidenza da Giocare v3.0 · open world gratis nel browser">
+  <meta property="og:description" content="Fidenza vera, quartiere per quartiere, come open world: guida, parla con gli abitanti, esplora, completa missioni, apri il Diario di Fidenza e trova le 27 stelle. Con un mondo a blocchi ispirato ad ArnisWorld3.">
+  <meta property="og:locale" content="it_IT">
+  <meta property="og:image" content="https://lucagandolfi77.github.io/random2/fidenza-city-v3/assets/img/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Fidenza da Giocare — Mondo Arnis: la piazza del Duomo ricostruita a blocchi">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="geo.region" content="IT-PR">
+  <meta name="geo.placename" content="Fidenza">
+  <meta name="geo.position" content="44.8665;10.0612">
+  <meta name="ICBM" content="44.8665, 10.0612">
+  <meta name="author" content="Fidenza da Giocare">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icons/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="assets/icons/icon-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.js",
+        "three/addons/": "./vendor/"
+      }
+    }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Fidenza da Giocare",
+    "description": "Open world gratuito nel browser ambientato a Fidenza, Emilia-Romagna: esplorazione, quartieri, missioni, bici, volo, abitanti con dialoghi, Diario di Fidenza, Bar Blu Piramide, turni NPC, orari dei locali, terreno AWS, editor Pro con geometrie custom, grafica PBR, bloom e acqua animata.",
+    "inLanguage": "it-IT",
+    "genre": ["Open world", "Guida", "Esplorazione"],
+    "gamePlatform": ["Web browser", "PC", "Smartphone"],
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "playMode": "SinglePlayer",
+    "isAccessibleForFree": true,
+    "gameLocation": { "@type": "City", "name": "Fidenza", "containedInPlace": { "@type": "Country", "name": "Italia" } },
+    "about": { "@type": "City", "name": "Fidenza" }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="game" aria-label="Vista 3D di Fidenza"></canvas>
+
+  <div id="loading" aria-live="polite">
+    <div class="load-mark">F</div>
+    <p id="loading-text">Sto costruendo Fidenza…</p>
+    <div class="load-bar"><i id="load-progress"></i></div>
+    <small>Mappa © OpenStreetMap · Mondo a blocchi: ArnisWorld3</small>
+  </div>
+
+  <div id="hud" data-ui hidden>
+    <div id="top-left">
+      <button id="btn-audio" class="icon-btn" aria-label="Audio" title="Audio (M)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="spk" d="M3 9h4l5-4v14l-5-4H3z"/><path class="on" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="off" d="M16 9l6 6M22 9l-6 6"/></svg>
+      </button>
+      <div id="score">0</div>
+      <div id="pop"></div>
+      <div class="chips">
+        <span id="stars" title="Stelle trovate">★ 0/27</span>
+        <span id="places" title="Luoghi scoperti">◆ 0/11</span>
+        <span id="career-chip" title="Carriera">Lv 1 · 0 €</span>
+      </div>
+    </div>
+
+    <div id="mapbox">
+      <canvas id="minimap" width="260" height="170" title="Mappa (N)"></canvas>
+      <div class="bars">
+        <div class="bar lm" title="Luoghi visitati"><i id="bar-lm"></i></div>
+        <div class="bar st" title="Stelle trovate"><i id="bar-st"></i></div>
+      </div>
+    </div>
+
+    <div id="target" hidden>
+      <span id="arrow">▲</span>
+      <span id="target-name"></span>
+      <span id="target-dist"></span>
+    </div>
+
+    <div id="mission" hidden>
+      <div class="mission-top"><b id="mission-title"></b><span id="mission-timer"></span></div>
+      <p id="mission-text"></p>
+      <div class="mission-bar"><i id="mission-progress"></i></div>
+    </div>
+
+    <div id="toast" role="status"></div>
+    <div id="prompt" hidden></div>
+    <div id="big" aria-hidden="true"></div>
+
+    <div id="zone">
+      <div id="mode">A piedi</div>
+      <div id="zone-name">Fidenza</div>
+    </div>
+
+    <div id="speed" hidden><b>0</b><span>km/h</span></div>
+
+    <div id="hint">WASD muovi · Shift corri · E interagisci · V volo · F missioni · C carriera · N mappa · M audio · P foto · Esc pausa</div>
+
+    <div id="touch">
+      <div id="stick"><div id="knob"></div></div>
+      <div id="touch-quick" aria-label="Menu rapido">
+        <button type="button" data-touch-action="pause" aria-label="Pausa" title="Pausa">☰</button>
+        <button type="button" data-touch-action="map" aria-label="Mappa" title="Mappa">▦</button>
+        <button type="button" data-touch-action="missions" aria-label="Missioni" title="Missioni">☑</button>
+        <button type="button" data-touch-action="career" aria-label="Carriera" title="Carriera">▤</button>
+        <button type="button" data-touch-action="photo" aria-label="Modalità foto" title="Modalità foto">▣</button>
+        <button type="button" data-touch-action="fly" aria-label="Volo" title="Volo">✈</button>
+        <button type="button" data-touch-action="bike" aria-label="Bici" title="Bici">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="5.5" cy="17.5" r="3.5"/>
+            <circle cx="18.5" cy="17.5" r="3.5"/>
+            <path d="M5.5 17.5 9 10h5l4.5 7.5M9 10 7 7h3M14 10l2.5 2.5H9"/>
+          </svg>
+        </button>
+        <button type="button" data-touch-action="audio" aria-label="Audio" title="Audio">♪</button>
+      </div>
+      <div id="touch-drive">
+        <button type="button" id="btn-run">Corri</button>
+        <button type="button" id="btn-brake">Freno</button>
+        <button type="button" id="btn-horn">📯</button>
+      </div>
+      <div id="touch-fly" hidden>
+        <button type="button" id="btn-fly-up">▲ Sali</button>
+        <button type="button" id="btn-fly-down">▼ Scendi</button>
+      </div>
+      <button id="btn-act" hidden>▶</button>
+    </div>
+  </div>
+
+  <div id="bigmap" hidden>
+    <canvas id="bigmap-canvas"></canvas>
+    <div class="bigmap-bar">
+      <span>Mappa di Fidenza</span>
+      <button type="button" id="bigmap-close" class="icon-btn" aria-label="Chiudi la mappa">✕</button>
+    </div>
+    <div class="bigmap-zoom">
+      <button type="button" id="bigmap-in" aria-label="Avvicina">+</button>
+      <button type="button" id="bigmap-out" aria-label="Allontana">−</button>
+      <button type="button" id="bigmap-me" aria-label="Centra su di me">◎</button>
+    </div>
+    <div class="bigmap-legend">
+      <span><i class="dot star"></i> stelle</span>
+      <span><i class="dot place"></i> luoghi</span>
+      <span><i class="dot poi"></i> POI</span>
+      <span><i class="dot mission"></i> missioni</span>
+      <span><i class="dot bike"></i> bici</span>
+      <span><i class="dot bar"></i> bar</span>
+      <span><i class="dot parking"></i> parcheggi</span>
+    </div>
+  </div>
+
+  <div id="intro">
+    <main class="poster">
+      <section class="talk">
+        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v3.0.0</span></p>
+        <h1 class="wordmark" aria-label="Fidenza da Giocare">
+          <span>Fidenza</span>
+          <span>da Giocare</span>
+        </h1>
+        <p class="lede">Scorrazza per Fidenza in un open world a blocchi: la città vera, strada per strada, ricostruita con i materiali del mondo ArnisWorld3. Tutto gratis, dal browser.</p>
+        <button id="play" disabled>Caricamento…</button>
+
+        <section class="me" aria-label="I tuoi progressi">
+          <p id="who-shown" class="who-shown" hidden>Giochi come <b id="who-current"></b> · <button type="button" id="who-change" class="link-btn">Cambia</button></p>
+          <p id="progress" class="chips-line"></p>
+        </section>
+
+        <section class="today" aria-labelledby="today-title">
+          <div class="today-head">
+            <h2 id="today-title">Oggi a Fidenza</h2>
+            <p id="now" class="now">—</p>
+          </div>
+          <div class="today-row">
+            <div id="weather" class="weather"><span id="weather-icon">☀</span><b id="weather-temp">—</b><small id="weather-desc">cielo</small></div>
+            <button type="button" id="board-open" class="link-btn">I tuoi record →</button>
+          </div>
+          <div id="daily-card" class="daily-card">
+            <div class="daily-head"><span>⚑ Sfida del giorno</span><span id="daily-reward">+150</span></div>
+            <b id="daily-title">—</b>
+            <p id="daily-desc"></p>
+            <div class="daily-bar"><i id="daily-bar"></i></div>
+            <span id="daily-progress" class="daily-progress"></span>
+          </div>
+          <div id="event-card" class="event-card">
+            <div class="event-head"><span>⚑ Oggi in città</span><span id="event-time">—</span></div>
+            <b id="event-title">Nessun evento</b>
+            <p id="event-desc">Fidenza scorre tranquilla.</p>
+          </div>
+          <div class="season-row">
+            <label for="season-select-intro">Stagione</label>
+            <select id="season-select-intro">
+              <option value="auto">Automatica</option>
+              <option value="spring">Primavera</option>
+              <option value="summer">Estate</option>
+              <option value="autumn">Autunno</option>
+              <option value="winter">Inverno</option>
+            </select>
+            <span id="season-current" class="season-current">Automatica</span>
+          </div>
+        </section>
+
+        <div class="meta">
+          <span class="credit">Un progetto indipendente per Fidenza</span>
+          <a href="./fidenza-editor/" target="_blank" rel="noopener">Editor città ↗</a>
+          <a href="#" id="reset">Azzera progressi</a>
+        </div>
+      </section>
+
+      <section class="stage">
+        <div class="sticker s-back" aria-hidden="true"><img src="assets/img/duomo.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="sticker s-mid" aria-hidden="true"><img src="assets/img/citta.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="sticker s-front" aria-hidden="true"><img src="assets/img/corso.jpg" alt="" onerror="this.style.display='none'"></div>
+        <div class="stage-badge">Open world · gratis · nel browser</div>
+      </section>
+
+      <section class="manual">
+        <div class="feats">
+          <p class="tag"><b>Guida</b>auto e Vespa, prendile con E</p>
+          <p class="tag"><b>Missioni</b>ambulanza, inseguimenti, pizza, taxi, foto</p>
+          <p class="tag"><b>27 stelle</b>nascoste in città</p>
+          <p class="tag"><b>11 luoghi</b>segui la luce e scopri Fidenza</p>
+          <p class="tag"><b>Mobile</b>levetta e pulsanti sul telefono</p>
+        </div>
+        <p class="controls">WASD muovi · Shift corri · Mouse guarda · E interagisci · V volo · F missioni · N mappa · P foto · Esc pausa</p>
+      </section>
+
+      <footer class="road">
+        <small>Progetto non ufficiale, non affiliato al Comune di Fidenza · Mappa © OpenStreetMap contributors (ODbL) · Dati territoriali © Regione Emilia-Romagna · Mondo a blocchi derivato da ArnisWorld3 · Texture dei blocchi originali del progetto</small>
+      </footer>
+    </main>
+  </div>
+
+  <dialog id="name-dialog" class="dialog" aria-labelledby="name-title">
+    <form method="dialog" id="name-form" class="dialog-in" autocomplete="off">
+      <p class="eyebrow">Benvenuto in città</p>
+      <h2 id="name-title">Come ti chiami?</h2>
+      <p>Scegli il nome con cui giri per Fidenza. Resta solo sul tuo dispositivo.</p>
+      <label for="name-input" class="sr-only">Il tuo nome in città</label>
+      <div class="field-row"><input id="name-input" name="name" maxlength="20" placeholder="es. san_donnino" required spellcheck="false"><button type="submit">Gioca</button></div>
+      <p class="dialog-note">Nessuna registrazione. Nessun server. Solo tu e la città.</p>
+    </form>
+  </dialog>
+
+  <dialog id="mission-dialog" class="dialog" aria-labelledby="mission-title-dialog">
+    <div class="dialog-in wide">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Missioni</p><h2 id="mission-title-dialog">Scegli cosa fare</h2></div>
+        <button type="button" class="dialog-close" data-close="mission-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="mission-list" class="mission-list"></div>
+    </div>
+  </dialog>
+
+  <dialog id="info-dialog" class="dialog" aria-labelledby="info-title">
+    <div class="dialog-in wide info-card">
+      <div class="dialog-head">
+        <div><p class="eyebrow" id="info-eyebrow">Luogo scoperto</p><h2 id="info-title">—</h2></div>
+        <button type="button" class="dialog-close" data-close="info-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <p id="info-description"></p>
+      <p id="info-fact" class="fact"></p>
+      <div class="info-actions"><button type="button" id="info-close" class="primary">Torna in città</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="diary-dialog" class="dialog" aria-labelledby="diary-title">
+    <div class="dialog-in wide diary-card">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Diario di Fidenza</p><h2 id="diary-title">La città che racconta</h2></div>
+        <button type="button" class="dialog-close" data-close="diary-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="diary-tabs" class="diary-tabs" role="tablist" aria-label="Sezioni del diario">
+        <button type="button" class="diary-tab active" data-diary-tab="gazzetta" role="tab">Gazzetta</button>
+        <button type="button" class="diary-tab" data-diary-tab="passaporto" role="tab">Passaporto</button>
+        <button type="button" class="diary-tab" data-diary-tab="radio" role="tab">Radio</button>
+        <button type="button" class="diary-tab" data-diary-tab="taccuino" role="tab">Taccuino</button>
+      </div>
+      <div id="diary-content" class="diary-content"></div>
+    </div>
+  </dialog>
+
+  <dialog id="npc-dialog" class="dialog" aria-labelledby="npc-title">
+    <div class="dialog-in info-card">
+      <div class="dialog-head">
+        <div><p class="eyebrow" id="npc-eyebrow">Abitante di Fidenza</p><h2 id="npc-title">—</h2></div>
+        <button type="button" class="dialog-close" data-close="npc-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <p id="npc-role" class="npc-role"></p>
+      <p id="npc-text"></p>
+      <p id="npc-hint" class="fact"></p>
+      <div class="info-actions">
+        <button type="button" id="npc-next" class="primary">Parla ancora</button>
+        <button type="button" id="npc-close">Saluta</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="pause-dialog" class="dialog" aria-labelledby="pause-title">
+    <div class="dialog-in">
+      <p class="eyebrow">Pausa</p>
+      <h2 id="pause-title">Fidenza aspetta</h2>
+      <div id="pause-event" class="pause-event"></div>
+      <div id="pause-daily" class="pause-daily"></div>
+      <div class="pause-actions">
+        <button type="button" id="resume" class="primary">Continua</button>
+        <button type="button" id="pause-home">Torna alla schermata iniziale</button>
+        <button type="button" id="pause-map">Apri mappa</button>
+        <button type="button" id="pause-career">Carriera</button>
+        <button type="button" id="pause-missions">Missioni</button>
+        <button type="button" id="pause-board">Record</button>
+        <button type="button" id="pause-diary">Diario di Fidenza</button>
+        <button type="button" id="pause-achievements">Obiettivi e statistiche</button>
+        <button type="button" id="pause-fly">Volo on/off</button>
+        <button type="button" id="pause-photo">Modalità foto</button>
+        <button type="button" id="pause-export">Esporta salvataggio</button>
+        <button type="button" id="pause-import">Importa salvataggio</button>
+        <button type="button" id="pause-audio">Audio on/off</button>
+        <label class="season-row" for="season-select">Stagione
+          <select id="season-select">
+            <option value="auto">Automatica</option>
+            <option value="spring">Primavera</option>
+            <option value="summer">Estate</option>
+            <option value="autumn">Autunno</option>
+            <option value="winter">Inverno</option>
+          </select>
+        </label>
+        <label class="season-row" for="graphics-quality">Grafica
+          <select id="graphics-quality">
+            <option value="auto">Auto</option>
+            <option value="low">Bassa</option>
+            <option value="medium">Media</option>
+            <option value="high">Alta</option>
+          </select>
+        </label>
+        <button type="button" id="pause-reset" class="danger">Azzera progressi</button>
+      </div>
+      <p class="dialog-note">I progressi sono salvati in locale su questo dispositivo.</p>
+    </div>
+  </dialog>
+
+  <dialog id="board-dialog" class="dialog" aria-labelledby="board-title">
+    <div class="dialog-in wide">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Classifica locale</p><h2 id="board-title">I tuoi record</h2></div>
+        <button type="button" class="dialog-close" data-close="board-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="board-body"></div>
+      <p class="dialog-note">Classifica solo locale: nessun dato lascia il tuo dispositivo.</p>
+    </div>
+  </dialog>
+
+  <dialog id="achievements-dialog" class="dialog" aria-labelledby="achievements-title">
+    <div class="dialog-in wide">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Il tuo percorso</p><h2 id="achievements-title">Obiettivi e statistiche</h2></div>
+        <button type="button" class="dialog-close" data-close="achievements-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="stats-grid" class="stats-grid"></div>
+      <div id="achievement-summary" class="achievement-summary"></div>
+      <div id="achievement-list" class="achievement-list"></div>
+      <p class="dialog-note">Obiettivi e statistiche sono salvati solo su questo dispositivo.</p>
+    </div>
+  </dialog>
+
+  <dialog id="career-dialog" class="dialog" aria-labelledby="career-title">
+    <div class="dialog-in wide">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Fidenza Carriera</p><h2 id="career-title">Il tuo lavoro in città</h2></div>
+        <button type="button" class="dialog-close" data-close="career-dialog" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="career-summary" class="career-summary"></div>
+      <div id="career-license" class="career-license"></div>
+      <div id="career-tabs" class="career-tabs"></div>
+      <div id="career-jobs" class="career-jobs"></div>
+      <div class="career-section-title"><h3>Garage</h3><span>Migliora i tuoi veicoli</span></div>
+      <div id="career-garage" class="career-garage"></div>
+      <div id="career-history" class="career-history"></div>
+      <p class="dialog-note">Lavori, soldi e potenziamenti sono salvati solo su questo dispositivo.</p>
+    </div>
+  </dialog>
+
+  <dialog id="confirm-dialog" class="dialog" aria-labelledby="confirm-title">
+    <div class="dialog-in">
+      <h2 id="confirm-title">Azzerare tutto?</h2>
+      <p>Stelle, luoghi, missioni, carriera, record e foto della galleria verranno cancellati. L'operazione non si può annullare.</p>
+      <div class="field-row"><button type="button" id="confirm-yes" class="danger">Azzera</button><button type="button" id="confirm-no">Annulla</button></div>
+    </div>
+  </dialog>
+
+
+  <div id="photo-mode" hidden>
+    <div class="photo-top">
+      <div><span class="photo-kicker">Modalità foto</span><b id="photo-place">Fidenza</b><span id="photo-status" class="photo-status"></span></div>
+      <div class="photo-actions">
+        <button type="button" id="photo-gallery-open">Galleria</button>
+        <button type="button" id="photo-capture" class="primary">Scatta</button>
+        <button type="button" id="photo-exit">Esci</button>
+      </div>
+    </div>
+    <div id="photo-grid" hidden></div>
+    <div class="photo-bottom">
+      <label>Filtro
+        <select id="photo-filter">
+          <option value="natural">Naturale</option>
+          <option value="warm">Caldo</option>
+          <option value="mono">Bianco e nero</option>
+          <option value="vintage">Vintage</option>
+          <option value="fidenza">Fidenza</option>
+        </select>
+      </label>
+      <label>Cornice
+        <select id="photo-frame">
+          <option value="none">Nessuna</option>
+          <option value="cartolina">Cartolina</option>
+          <option value="fidenza">Fidenza</option>
+        </select>
+      </label>
+      <label>Ora
+        <input id="photo-hour" type="range" min="0" max="24" step="0.5">
+      </label>
+      <label>Stagione
+        <select id="photo-season">
+          <option value="spring">Primavera</option>
+          <option value="summer">Estate</option>
+          <option value="autumn">Autunno</option>
+          <option value="winter">Inverno</option>
+        </select>
+      </label>
+      <label class="check"><input id="photo-grid-toggle" type="checkbox"> Griglia</label>
+      <label class="check"><input id="photo-player-toggle" type="checkbox" checked> Giocatore</label>
+      <label class="check"><input id="photo-vehicles-toggle" type="checkbox" checked> Veicoli</label>
+      <span class="photo-help">WASD muovi · Q/E altezza · Shift veloce · [ ] FOV · P/Esc esci</span>
+    </div>
+    <div id="photo-stick" aria-hidden="true"><div id="photo-knob"></div></div>
+  </div>
+
+  <dialog id="photo-gallery" class="dialog">
+    <div class="dialog-in wide">
+      <div class="dialog-head">
+        <div><p class="eyebrow">Galleria locale</p><h2>Le tue cartoline</h2></div>
+        <button type="button" class="dialog-close" data-close="photo-gallery" aria-label="Chiudi">✕</button>
+      </div>
+      <div id="photo-gallery-grid" class="photo-gallery-grid"></div>
+      <p id="photo-gallery-empty" class="dialog-note">Nessuna foto ancora. Scatta la prima cartolina di Fidenza.</p>
+      <p class="dialog-note">Le foto restano in questo browser (IndexedDB). Puoi scaricarle o eliminarle.</p>
+    </div>
+  </dialog>
+
+  <input id="save-import" type="file" accept="application/json,.json" hidden>
+
+  <button type="button" id="pwa-update" hidden>Nuova versione disponibile · Aggiorna</button>
+
+  <div id="rotate-hint" hidden>Gira il telefono in orizzontale per giocare meglio</div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,1631 @@
+{
+  "generated": "2026-11-08T16:23:37.915Z",
+  "surface": {
+    "chunks": 30976,
+    "paletteColors": 114,
+    "minY": -62,
+    "maxY": -27,
+    "topBlocks": {
+      "grass_block": 1249375,
+      "wheat": 1201534,
+      "short_grass": 1134281,
+      "carrots": 518236,
+      "potatoes": 418749,
+      "stone_bricks": 336573,
+      "coarse_dirt": 271936,
+      "beetroots": 265512,
+      "cyan_terracotta": 197589,
+      "gray_concrete_powder": 190340,
+      "tall_grass": 177399,
+      "granite_stairs": 160921,
+      "brick_stairs": 149662,
+      "stone": 142273,
+      "oak_leaves": 132533,
+      "sunflower": 114837,
+      "water": 100456,
+      "birch_leaves": 93127,
+      "gray_concrete": 74561,
+      "polished_granite_stairs": 69095,
+      "cracked_stone_bricks": 62805,
+      "dark_oak_leaves": 54585,
+      "smooth_stone": 43671,
+      "fern": 36772,
+      "acacia_leaves": 34971,
+      "cobblestone": 33761,
+      "mud": 30247,
+      "light_gray_concrete": 28801,
+      "white_concrete": 28565,
+      "andesite": 25893,
+      "red_terracotta": 23668,
+      "chain": 23090,
+      "cobbled_deepslate": 22722,
+      "mud_brick_stairs": 22324,
+      "jungle_leaves": 15846,
+      "gray_wool": 15553,
+      "iron_chain": 15182,
+      "dandelion": 14231,
+      "poppy": 13109,
+      "terracotta": 12838
+    }
+  },
+  "buildings": {
+    "total": 4214,
+    "lowConfidence": 0,
+    "avgConfidence": 0.996,
+    "stairsRoofs": 3153,
+    "slabRoofs": 156,
+    "flatRoofs": 905,
+    "withGlass": 3957,
+    "withDoor": 1690,
+    "sample": [
+      {
+        "id": "179770500",
+        "wall": "andesite",
+        "wallLower": "smooth_stone",
+        "wallUpper": "andesite",
+        "roof": "andesite",
+        "roofType": "flat",
+        "roofHeight": 2.24,
+        "height": 16,
+        "glass": "gray_stained_glass",
+        "door": null,
+        "groundY": -57,
+        "topY": -50,
+        "confidence": 0.98,
+        "samples": 49
+      },
+      {
+        "id": "1214359844",
+        "wall": "birch_planks",
+        "wallLower": "birch_planks",
+        "wallUpper": "andesite",
+        "roof": "andesite",
+        "roofType": "flat",
+        "roofHeight": 2.24,
+        "height": 16,
+        "glass": "gray_stained_glass",
+        "door": null,
+        "groundY": -57,
+        "topY": -50,
+        "confidence": 0.59,
+        "samples": 136
+      },
+      {
+        "id": "179769100",
+        "wall": "white_concrete",
+        "wallLower": "stone_bricks",
+        "wallUpper": "gray_concrete",
+        "roof": "gray_concrete",
+        "roofType": "flat",
+        "roofHeight": 1.96,
+        "height": 14,
+        "glass": "gray_stained_glass",
+        "door": null,
+        "groundY": -57,
+        "topY": -51,
+        "confidence": 1,
+        "samples": 53
+      },
+      {
+        "id": "179764811",
+        "wall": "stone",
+        "wallLower": "stone_bricks",
+        "wallUpper": "stone",
+        "roof": "chiseled_stone_bricks",
+        "roofType": "flat",
+        "roofHeight": 1.4,
+        "height": 10,
+        "glass": "gray_stained_glass",
+        "door": null,
+        "groundY": -57,
+        "topY": -53,
+        "confidence": 0.91,
+        "samples": 115
+      },
+      {
+        "id": "179769771",
+        "wall": "stone",
+        "wallLower": "stone_bricks",
+        "wallUpper": "stone",
+        "roof": "gray_wool",
+        "roofType": "flat",
+        "roofHeight": 1.4,
+        "height": 10,
+        "glass": "light_gray_stained_glass",
+        "door": null,
+        "groundY": -57,
+        "topY": -53,
+        "confidence": 1,
+        "samples": 62
+      },
+      {
+        "id": "182268532",
+        "wall": "white_terracotta",
+        "wallLower": "white_terracotta",
+        "wallUpper": "white_terracotta",
+        "roof": "gray_concrete",
+        "roofType": "flat",
+        "roofHeight": 2.52,
+        "height": 18,
+        "glass": "light_gray_stained_glass",
+        "door": null,
+        "groundY": -56,
+        "topY": -48,
+        "confidence": 1,
+        "samples": 69
+      },
+      {
+        "id": "182267578",
+        "wall": "polished_granite",
+        "wallLower": "smooth_sandstone",
+        "wallUpper": "polished_granite",
+        "roof": "polished_granite_stairs",
+        "roofType": "stairs",
+        "roofHeight": 2.52,
+        "height": 18,
+        "glass": "gray_stained_glass",
+        "door": null,
+        "groundY": -56,
+        "topY": -48,
+        "confidence": 1,
+        "samples": 42
+      },
+      {
+        "id": "179764994",
+        "wall": "stone",
+        "wallLower": "stone_bricks",
+        "wallUpper": "gray_wool",
+        "roof": "gray_wool",
+        "roofType": "flat",
+        "roofHeight": 1.96,
+        "height": 14,
+        "glass": "glass",
+        "door": null,
+        "groundY": -57,
+        "topY": -51,
+        "confidence": 1,
+        "samples": 99
+      },
+      {
+        "id": "182266277",
+        "wall": "sandstone",
+        "wallLower": "stone_bricks",
+        "wallUpper": "sandstone",
+        "roof": "smooth_stone",
+        "roofType": "flat",
+        "roofHeight": 1.96,
+        "height": 14,
+        "glass": "gray_stained_glass",
+        "door": "dark_oak_door",
+        "groundY": -56,
+        "topY": -50,
+        "confidence": 1,
+        "samples": 12
+      },
+      {
+        "id": "182267637",
+        "wall": "terracotta",
+        "wallLower": "white_concrete",
+        "wallUpper": "terracotta",
+        "roof": "granite_stairs",
+        "roofType": "stairs",
+        "roofHeight": 3.64,
+        "height": 26,
+        "glass": "light_gray_stained_glass",
+        "door": null,
+        "groundY": -56,
+        "topY": -44,
+        "confidence": 1,
+        "samples": 61
+      },
+      {
+        "id": "179764843",
+        "wall": "stone_bricks",
+        "wallLower": "stone_bricks",
+        "wallUpper": "coarse_dirt",
+        "roof": "polished_diorite_slab",
+        "roofType": "slab",
+        "roofHeight": 1.96,
+        "height": 14,
+        "glass": "gray_stained_glass",
+        "door": null,
+        "groundY": -57,
+        "topY": -51,
+        "confidence": 1,
+        "samples": 101
+      },
+      {
+        "id": "182266630",
+        "wall": "terracotta",
+        "wallLower": "yellow_terracotta",
+        "wallUpper": "terracotta",
+        "roof": "granite_stairs",
+        "roofType": "stairs",
+        "roofHeight": 2.24,
+        "height": 16,
+        "glass": "light_gray_stained_glass",
+        "door": "oak_door",
+        "groundY": -56,
+        "topY": -49,
+        "confidence": 1,
+        "samples": 34
+      }
+    ]
+  },
+  "areas": {
+    "1929627": {
+      "kind": "urban",
+      "surface": "stone",
+      "crop": null,
+      "species": "birch",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 45
+    },
+    "27124221": {
+      "kind": "parking",
+      "surface": "white_concrete",
+      "crop": null,
+      "species": "oak",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 33
+    },
+    "27124257": {
+      "kind": "urban",
+      "surface": "grass_block",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 29
+    },
+    "28158356": {
+      "kind": "industrial",
+      "surface": "stone",
+      "crop": null,
+      "species": "dark_oak",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 56
+    },
+    "34828369": {
+      "kind": "urban",
+      "surface": "stone",
+      "crop": null,
+      "species": "oak",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 45
+    },
+    "34828419": {
+      "kind": "industrial",
+      "surface": "stone",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 33
+    },
+    "34828441": {
+      "kind": "industrial",
+      "surface": "stone",
+      "crop": null,
+      "species": "oak",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 34
+    },
+    "34828446": {
+      "kind": "industrial",
+      "surface": "stone",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 48
+    },
+    "60123550": {
+      "kind": "parking",
+      "surface": "stone_brick_slab",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 45
+    },
+    "94699066": {
+      "kind": "cemetery",
+      "surface": "podzol",
+      "crop": null,
+      "species": "birch",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 55
+    },
+    "103578343": {
+      "kind": "sport",
+      "surface": "grass_block",
+      "crop": null,
+      "species": "dark_oak",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 52
+    },
+    "104206891": {
+      "kind": "water",
+      "surface": "water",
+      "crop": null,
+      "species": "oak",
+      "bank": "dirt",
+      "waterLevel": -53,
+      "samples": 53
+    },
+    "104207211": {
+      "kind": "water",
+      "surface": "water",
+      "crop": null,
+      "species": null,
+      "bank": "clay",
+      "waterLevel": -52,
+      "samples": 27
+    },
+    "142429664": {
+      "kind": "sport",
+      "surface": "grass_block",
+      "crop": null,
+      "species": "birch",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 52
+    },
+    "142429665": {
+      "kind": "sport",
+      "surface": "green_terracotta",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 43
+    },
+    "142429666": {
+      "kind": "sport",
+      "surface": "green_terracotta",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 33
+    },
+    "142429667": {
+      "kind": "sport",
+      "surface": "green_terracotta",
+      "crop": null,
+      "species": "acacia",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 34
+    },
+    "142429668": {
+      "kind": "sport",
+      "surface": "grass_block",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 43
+    },
+    "142429669": {
+      "kind": "sport",
+      "surface": "green_terracotta",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 23
+    },
+    "142429670": {
+      "kind": "sport",
+      "surface": "white_concrete",
+      "crop": null,
+      "species": "acacia",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 38
+    },
+    "142429671": {
+      "kind": "sport",
+      "surface": "white_concrete",
+      "crop": null,
+      "species": "oak",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 42
+    },
+    "142429672": {
+      "kind": "sport",
+      "surface": "gray_concrete_powder",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 23
+    },
+    "142546181": {
+      "kind": "sport",
+      "surface": "white_concrete",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 36
+    },
+    "142583135": {
+      "kind": "cemetery",
+      "surface": "podzol",
+      "crop": null,
+      "species": "oak",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 33
+    },
+    "142583268": {
+      "kind": "sport",
+      "surface": "green_terracotta",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 28
+    },
+    "152974711": {
+      "kind": "parking",
+      "surface": "cyan_terracotta",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 34
+    },
+    "180916057": {
+      "kind": "parking",
+      "surface": "cyan_terracotta",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 21
+    },
+    "180916059": {
+      "kind": "industrial",
+      "surface": "stone",
+      "crop": null,
+      "species": null,
+      "bank": null,
+      "waterLevel": null,
+      "samples": 54
+    },
+    "180916061": {
+      "kind": "cemetery",
+      "surface": "podzol",
+      "crop": null,
+      "species": "birch",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 23
+    },
+    "202635423": {
+      "kind": "sport",
+      "surface": "grass_block",
+      "crop": null,
+      "species": "oak",
+      "bank": null,
+      "waterLevel": null,
+      "samples": 35
+    }
+  },
+  "roads": {
+    "25876239": {
+      "kind": "secondary",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
+      "samples": 40
+    },
+    "25876351": {
+      "kind": "secondary",
+      "surface": "cyan_terracotta",
+      "side": "gray_concrete_powder",
+      "samples": 40
+    },
+    "25876371": {
+      "kind": "secondary",
+      "surface": "cyan_terracotta",
+      "side": "gray_concrete_powder",
+      "samples": 30
+    },
+    "25876434": {
+      "kind": "secondary",
+      "surface": "cyan_terracotta",
+      "side": "cyan_terracotta",
+      "samples": 30
+    },
+    "25876477": {
+      "kind": "secondary",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
+      "samples": 20
+    },
+    "25876491": {
+      "kind": "secondary",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
+      "samples": 15
+    },
+    "25902951": {
+      "kind": "primary_link",
+      "surface": "cyan_terracotta",
+      "side": "cyan_terracotta",
+      "samples": 40
+    },
+    "25902990": {
+      "kind": "secondary",
+      "surface": "gray_concrete_powder",
+      "side": "cyan_terracotta",
+      "samples": 15
+    },
+    "26717424": {
+      "kind": "secondary",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
+      "samples": 20
+    },
+    "26717467": {
+      "kind": "primary",
+      "surface": "cyan_terracotta",
+      "side": "cyan_terracotta",
+      "samples": 20
+    },
+    "26717469": {
+      "kind": "secondary",
+      "surface": "white_concrete",
+      "side": "cyan_terracotta",
+      "samples": 10
+    },
+    "26717477": {
+      "kind": "primary_link",
+      "surface": "gray_concrete_powder",
+      "side": "grass_block",
+      "samples": 40
+    },
+    "27124066": {
+      "kind": "secondary",
+      "surface": "cyan_terracotta",
+      "side": "cyan_terracotta",
+      "samples": 40
+    },
+    "27124223": {
+      "kind": "primary_link",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
+      "samples": 40
+    },
+    "27129315": {
+      "kind": "secondary",
+      "surface": "cyan_terracotta",
+      "side": "gray_concrete_powder",
+      "samples": 40
+    },
+    "28157944": {
+      "kind": "residential",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
+      "samples": 18
+    },
+    "28158053": {
+      "kind": "secondary",
+      "surface": "gray_concrete_powder",
+      "side": "cyan_terracotta",
+      "samples": 10
+    },
+    "28158055": {
+      "kind": "secondary",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
+      "samples": 10
+    },
+    "28158134": {
+      "kind": "tertiary",
+      "surface": "gray_concrete_powder",
+      "side": "stone",
+      "samples": 30
+    },
+    "28158197": {
+      "kind": "tertiary",
+      "surface": "gray_concrete_powder",
+      "side": "red_terracotta",
+      "samples": 40
+    },
+    "28158200": {
+      "kind": "residential",
+      "surface": "gray_concrete_powder",
+      "side": "red_terracotta",
+      "samples": 25
+    },
+    "28158204": {
+      "kind": "residential",
+      "surface": "cyan_terracotta",
+      "side": "red_terracotta",
+      "samples": 15
+    },
+    "28158303": {
+      "kind": "tertiary",
+      "surface": "gray_concrete_powder",
+      "side": "stone",
+      "samples": 30
+    },
+    "28158304": {
+      "kind": "tertiary",
+      "surface": "gray_concrete_powder",
+      "side": "grass_block",
+      "samples": 20
+    },
+    "28158309": {
+      "kind": "tertiary",
+      "surface": "cyan_terracotta",
+      "side": "wheat",
+      "samples": 40
+    },
+    "28158331": {
+      "kind": "unclassified",
+      "surface": "cyan_terracotta",
+      "side": "cyan_terracotta",
+      "samples": 40
+    },
+    "28158333": {
+      "kind": "unclassified",
+      "surface": "cyan_terracotta",
+      "side": "cyan_terracotta",
+      "samples": 20
+    },
+    "28158343": {
+      "kind": "unclassified",
+      "surface": "cyan_terracotta",
+      "side": "gray_concrete_powder",
+      "samples": 20
+    },
+    "28158791": {
+      "kind": "residential",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
+      "samples": 25
+    },
+    "30663142": {
+      "kind": "primary",
+      "surface": "cyan_terracotta",
+      "side": "cyan_terracotta",
+      "samples": 20
+    }
+  },
+  "trees": {
+    "species": {
+      "oak": 29,
+      "acacia": 26,
+      "birch": 27,
+      "dark_oak": 25,
+      "spruce": 3,
+      "azalea": 9,
+      "jungle": 1
+    }
+  },
+  "water": {
+    "block": "water",
+    "level": -56,
+    "bank": "gravel"
+  },
+  "pool": {
+    "terracotta": {
+      "color": "#9c6047",
+      "count": 2588
+    },
+    "stone_bricks": {
+      "color": "#7a7a7a",
+      "count": 1860
+    },
+    "gray_concrete_powder": {
+      "color": "#9a9d9b",
+      "count": 1719
+    },
+    "bricks": {
+      "color": "#9b5a47",
+      "count": 1702
+    },
+    "gray_stained_glass": {
+      "color": "#4f5a5a",
+      "count": 1625
+    },
+    "cyan_terracotta": {
+      "color": "#575b5b",
+      "count": 1535
+    },
+    "light_gray_stained_glass": {
+      "color": "#b8c4c4",
+      "count": 1512
+    },
+    "granite_stairs": {
+      "color": "#9a6b5a",
+      "count": 1306
+    },
+    "brick_stairs": {
+      "color": "#9b5a47",
+      "count": 1270
+    },
+    "white_concrete": {
+      "color": "#e5e8e5",
+      "count": 1225
+    },
+    "gray_concrete": {
+      "color": "#7d7f7d",
+      "count": 1088
+    },
+    "red_terracotta": {
+      "color": "#8f3e2f",
+      "count": 956
+    },
+    "white_terracotta": {
+      "color": "#d7cdc0",
+      "count": 802
+    },
+    "polished_granite": {
+      "color": "#a06f5f",
+      "count": 799
+    },
+    "glass": {
+      "color": "#b7d8e0",
+      "count": 773
+    },
+    "dark_oak_door": {
+      "color": "#4a321f",
+      "count": 673
+    },
+    "birch_door": {
+      "color": "#d6c58f",
+      "count": 646
+    },
+    "smooth_sandstone": {
+      "color": "#d6c79c",
+      "count": 529
+    },
+    "smooth_stone": {
+      "color": "#9b9b9b",
+      "count": 475
+    },
+    "polished_granite_stairs": {
+      "color": "#a06f5f",
+      "count": 427
+    },
+    "mud_bricks": {
+      "color": "#8a6b53",
+      "count": 339
+    },
+    "light_gray_concrete": {
+      "color": "#b9bcb9",
+      "count": 334
+    },
+    "polished_andesite": {
+      "color": "#90908b",
+      "count": 321
+    },
+    "oak_door": {
+      "color": "#b28a54",
+      "count": 307
+    },
+    "andesite": {
+      "color": "#8a8a86",
+      "count": 274
+    },
+    "mushroom_stem": {
+      "color": "#c9c2b8",
+      "count": 260
+    },
+    "yellow_terracotta": {
+      "color": "#b08a3e",
+      "count": 231
+    },
+    "stone": {
+      "color": "#7d7d7d",
+      "count": 226
+    },
+    "mud_brick_stairs": {
+      "color": "#8a6b53",
+      "count": 173
+    },
+    "gray_wool": {
+      "color": "#4b4f50",
+      "count": 158
+    },
+    "grass_block": {
+      "color": "#5d8f3f",
+      "count": 140
+    },
+    "calcite": {
+      "color": "#dfdfd8",
+      "count": 135
+    },
+    "sandstone": {
+      "color": "#d9c89a",
+      "count": 131
+    },
+    "birch_planks": {
+      "color": "#d6c58f",
+      "count": 112
+    },
+    "red_concrete": {
+      "color": "#a63a32",
+      "count": 101
+    },
+    "orange_terracotta": {
+      "color": "#a86a3a",
+      "count": 71
+    },
+    "dirt_path": {
+      "color": "#8a6b47",
+      "count": 70
+    },
+    "cherry_planks": {
+      "color": "#d9a49a",
+      "count": 64
+    },
+    "iron_trapdoor": {
+      "color": "#b8b8b8",
+      "count": 60
+    },
+    "oak_leaves": {
+      "color": "#4c7a2e",
+      "count": 56
+    },
+    "deepslate_bricks": {
+      "color": "#3d3d42",
+      "count": 55
+    },
+    "birch_leaves": {
+      "color": "#6f8f4a",
+      "count": 44
+    },
+    "dark_oak_leaves": {
+      "color": "#33552a",
+      "count": 34
+    },
+    "acacia_leaves": {
+      "color": "#5c7a2e",
+      "count": 33
+    },
+    "stone_brick_slab": {
+      "color": "#7a7a7a",
+      "count": 32
+    },
+    "quartz_block": {
+      "color": "#e7e3da",
+      "count": 32
+    },
+    "farmland": {
+      "color": "#4f3522",
+      "count": 30
+    },
+    "black_stained_glass": {
+      "color": "#2f2f2f",
+      "count": 29
+    },
+    "wheat": {
+      "color": "#c8b33a",
+      "count": 28
+    },
+    "quartz_slab": {
+      "color": "#e7e3da",
+      "count": 26
+    },
+    "cobblestone_wall": {
+      "color": "#6f6f6f",
+      "count": 26
+    },
+    "deepslate_tiles": {
+      "color": "#37373d",
+      "count": 25
+    },
+    "smooth_stone_slab": {
+      "color": "#9b9b9b",
+      "count": 24
+    },
+    "tuff": {
+      "color": "#6d6d66",
+      "count": 22
+    },
+    "coarse_dirt": {
+      "color": "#6b4b33",
+      "count": 21
+    },
+    "polished_granite_slab": {
+      "color": "#a06f5f",
+      "count": 21
+    },
+    "green_terracotta": {
+      "color": "#4c5a3a",
+      "count": 21
+    },
+    "glowstone": {
+      "color": "#f3c96b",
+      "count": 21
+    },
+    "cut_sandstone_slab": {
+      "color": "#d7c79b",
+      "count": 19
+    },
+    "moss_block": {
+      "color": "#5f7a3a",
+      "count": 18
+    },
+    "polished_diorite_slab": {
+      "color": "#c9c9c5",
+      "count": 16
+    },
+    "gravel": {
+      "color": "#8a8785",
+      "count": 16
+    },
+    "smooth_quartz_slab": {
+      "color": "#e9e5dc",
+      "count": 15
+    },
+    "azalea_leaves": {
+      "color": "#4f7a3a",
+      "count": 15
+    },
+    "stone_button": {
+      "color": "#7d7d7d",
+      "count": 13
+    },
+    "cobblestone": {
+      "color": "#6f6f6f",
+      "count": 11
+    },
+    "dirt": {
+      "color": "#79553a",
+      "count": 10
+    },
+    "potatoes": {
+      "color": "#6f8f3a",
+      "count": 9
+    },
+    "brick_slab": {
+      "color": "#9b5a47",
+      "count": 9
+    },
+    "light": {
+      "color": "#d9d9d9",
+      "count": 9
+    },
+    "carrots": {
+      "color": "#d07a2e",
+      "count": 7
+    },
+    "gray_stained_glass_pane": {
+      "color": "#4f5a5a",
+      "count": 7
+    },
+    "smooth_quartz": {
+      "color": "#e9e5dc",
+      "count": 7
+    },
+    "cobbled_deepslate": {
+      "color": "#4a4a50",
+      "count": 7
+    },
+    "oak_planks": {
+      "color": "#b28a54",
+      "count": 7
+    },
+    "water": {
+      "color": "#3f76e4",
+      "count": 6
+    },
+    "spruce_leaves": {
+      "color": "#3d5c3a",
+      "count": 6
+    },
+    "podzol": {
+      "color": "#5a3d22",
+      "count": 6
+    },
+    "blue_concrete": {
+      "color": "#3a5a9a",
+      "count": 6
+    },
+    "cyan_stained_glass": {
+      "color": "#4e8f9a",
+      "count": 6
+    },
+    "light_blue_stained_glass": {
+      "color": "#76b8d8",
+      "count": 6
+    },
+    "white_carpet": {
+      "color": "#e9ecec",
+      "count": 5
+    },
+    "chiseled_stone_bricks": {
+      "color": "#77746d",
+      "count": 5
+    },
+    "deepslate_tile_stairs": {
+      "color": "#37373d",
+      "count": 5
+    },
+    "spruce_door": {
+      "color": "#6b4e33",
+      "count": 5
+    },
+    "brown_stained_glass": {
+      "color": "#6b4a2a",
+      "count": 5
+    },
+    "blue_stained_glass": {
+      "color": "#4763a8",
+      "count": 5
+    },
+    "beetroots": {
+      "color": "#8f3f2f",
+      "count": 4
+    },
+    "flowering_azalea_leaves": {
+      "color": "#6f8f4a",
+      "count": 4
+    },
+    "white_stained_glass": {
+      "color": "#e8f1f2",
+      "count": 4
+    },
+    "polished_andesite_slab": {
+      "color": "#90908b",
+      "count": 3
+    },
+    "light_gray_carpet": {
+      "color": "#b8bcbc",
+      "count": 3
+    },
+    "cyan_concrete": {
+      "color": "#4a8f9a",
+      "count": 3
+    },
+    "birch_trapdoor": {
+      "color": "#d6c58f",
+      "count": 3
+    },
+    "mud_brick_slab": {
+      "color": "#8a6b53",
+      "count": 3
+    },
+    "end_stone_bricks": {
+      "color": "#dfe0a1",
+      "count": 3
+    },
+    "polished_diorite": {
+      "color": "#c9c9c5",
+      "count": 3
+    },
+    "sea_lantern": {
+      "color": "#c9e0d5",
+      "count": 3
+    },
+    "orange_concrete": {
+      "color": "#d98a2e",
+      "count": 3
+    },
+    "short_grass": {
+      "color": "#6f9a4f",
+      "count": 2
+    },
+    "tall_grass": {
+      "color": "#6f9a4f",
+      "count": 2
+    },
+    "oxeye_daisy": {
+      "color": "#f0f0e0",
+      "count": 2
+    },
+    "poppy": {
+      "color": "#c23b32",
+      "count": 2
+    },
+    "fern": {
+      "color": "#5f7a3a",
+      "count": 2
+    },
+    "cornflower": {
+      "color": "#4a6fd0",
+      "count": 2
+    },
+    "dandelion": {
+      "color": "#f2d94b",
+      "count": 2
+    },
+    "sunflower": {
+      "color": "#f2c84b",
+      "count": 2
+    },
+    "jungle_leaves": {
+      "color": "#3f6f2a",
+      "count": 2
+    },
+    "polished_blackstone_slab": {
+      "color": "#3a3a3d",
+      "count": 2
+    },
+    "glass_pane": {
+      "color": "#b7d8e0",
+      "count": 2
+    },
+    "iron_bars": {
+      "color": "#4c4c4c",
+      "count": 2
+    },
+    "polished_blackstone": {
+      "color": "#3a3a3d",
+      "count": 2
+    },
+    "cherry_slab": {
+      "color": "#d9a49a",
+      "count": 2
+    },
+    "waxed_oxidized_cut_copper_stairs": {
+      "color": "#4f8a7a",
+      "count": 2
+    },
+    "tripwire_hook": {
+      "color": "#8a8a86",
+      "count": 2
+    },
+    "green_wool": {
+      "color": "#4f7a3a",
+      "count": 2
+    },
+    "green_concrete": {
+      "color": "#4f7a3a",
+      "count": 2
+    },
+    "chiseled_bookshelf": {
+      "color": "#8a6b47",
+      "count": 2
+    },
+    "clay": {
+      "color": "#a0a7b0",
+      "count": 2
+    },
+    "azure_bluet": {
+      "color": "#e8f1ff",
+      "count": 1
+    },
+    "pumpkin": {
+      "color": "#d98a2e",
+      "count": 1
+    },
+    "large_fern": {
+      "color": "#5f7a3a",
+      "count": 1
+    },
+    "cracked_stone_bricks": {
+      "color": "#746f68",
+      "count": 1
+    },
+    "chain": {
+      "color": "#4c4c4c",
+      "count": 1
+    },
+    "dead_bush": {
+      "color": "#8a6b3a",
+      "count": 1
+    },
+    "mangrove_leaves": {
+      "color": "#4f7a3a",
+      "count": 1
+    },
+    "red_tulip": {
+      "color": "#c23b32",
+      "count": 1
+    },
+    "warped_slab": {
+      "color": "#2c7a75",
+      "count": 1
+    },
+    "red_nether_brick_slab": {
+      "color": "#6b2a2a",
+      "count": 1
+    },
+    "polished_deepslate_stairs": {
+      "color": "#4a4a50",
+      "count": 1
+    },
+    "quartz_stairs": {
+      "color": "#e7e3da",
+      "count": 1
+    },
+    "cobblestone_slab": {
+      "color": "#6f6f6f",
+      "count": 1
+    },
+    "cobblestone_stairs": {
+      "color": "#6f6f6f",
+      "count": 1
+    },
+    "light_blue_carpet": {
+      "color": "#76b8d8",
+      "count": 1
+    },
+    "mossy_stone_brick_wall": {
+      "color": "#6d7a62",
+      "count": 1
+    },
+    "smooth_quartz_stairs": {
+      "color": "#e9e5dc",
+      "count": 1
+    },
+    "gray_wall_banner": {
+      "color": "#7d7f7d",
+      "count": 1
+    },
+    "iron_block": {
+      "color": "#d8d8d8",
+      "count": 1
+    },
+    "sugar_cane": {
+      "color": "#7fae5a",
+      "count": 1
+    },
+    "mud": {
+      "color": "#5b5b52",
+      "count": 1
+    },
+    "lily_of_the_valley": {
+      "color": "#f0f0e0",
+      "count": 1
+    },
+    "allium": {
+      "color": "#b07ad0",
+      "count": 1
+    },
+    "lightning_rod": {
+      "color": "#c98a4a",
+      "count": 1
+    },
+    "rose_bush": {
+      "color": "#c23b32",
+      "count": 1
+    },
+    "peony": {
+      "color": "#e8a7b8",
+      "count": 1
+    },
+    "lilac": {
+      "color": "#b18bd0",
+      "count": 1
+    },
+    "end_rod": {
+      "color": "#e8e0d0",
+      "count": 1
+    },
+    "deepslate_tile_slab": {
+      "color": "#37373d",
+      "count": 1
+    },
+    "dark_oak_trapdoor": {
+      "color": "#4a321f",
+      "count": 1
+    },
+    "warped_stairs": {
+      "color": "#2c7a75",
+      "count": 1
+    },
+    "cyan_carpet": {
+      "color": "#4a8f9a",
+      "count": 1
+    },
+    "birch_button": {
+      "color": "#d6c58f",
+      "count": 1
+    },
+    "quartz_bricks": {
+      "color": "#e7e3da",
+      "count": 1
+    },
+    "polished_deepslate_slab": {
+      "color": "#4a4a50",
+      "count": 1
+    },
+    "dark_oak_fence_gate": {
+      "color": "#4a321f",
+      "count": 1
+    },
+    "snow": {
+      "color": "#f0f5f5",
+      "count": 1
+    },
+    "polished_diorite_stairs": {
+      "color": "#c9c9c5",
+      "count": 1
+    },
+    "hay_block": {
+      "color": "#c9a83a",
+      "count": 1
+    },
+    "flower_pot": {
+      "color": "#c2684b",
+      "count": 1
+    },
+    "barrel": {
+      "color": "#8a6b47",
+      "count": 1
+    },
+    "grindstone": {
+      "color": "#7a7a7a",
+      "count": 1
+    },
+    "daylight_detector": {
+      "color": "#8a7a5a",
+      "count": 1
+    },
+    "white_tulip": {
+      "color": "#f0f0e0",
+      "count": 1
+    },
+    "pink_tulip": {
+      "color": "#e8a7b8",
+      "count": 1
+    },
+    "smoker": {
+      "color": "#5a5a5a",
+      "count": 1
+    },
+    "brick_wall": {
+      "color": "#9b5a47",
+      "count": 1
+    },
+    "orange_tulip": {
+      "color": "#d98a2e",
+      "count": 1
+    },
+    "stone_brick_wall": {
+      "color": "#7a7a7a",
+      "count": 1
+    },
+    "andesite_wall": {
+      "color": "#8a8a86",
+      "count": 1
+    },
+    "stone_stairs": {
+      "color": "#7d7d7d",
+      "count": 1
+    },
+    "stone_slab": {
+      "color": "#7d7d7d",
+      "count": 1
+    },
+    "spruce_stairs": {
+      "color": "#6b4e33",
+      "count": 1
+    },
+    "dark_oak_stairs": {
+      "color": "#4a321f",
+      "count": 1
+    },
+    "spruce_fence_gate": {
+      "color": "#6b4e33",
+      "count": 1
+    },
+    "spruce_trapdoor": {
+      "color": "#6b4e33",
+      "count": 1
+    },
+    "spruce_wall_sign": {
+      "color": "#6b4e33",
+      "count": 1
+    },
+    "spruce_slab": {
+      "color": "#6b4e33",
+      "count": 1
+    },
+    "sea_pickle": {
+      "color": "#5f8f5a",
+      "count": 1
+    },
+    "oak_trapdoor": {
+      "color": "#b28a54",
+      "count": 1
+    },
+    "spruce_button": {
+      "color": "#6b4e33",
+      "count": 1
+    },
+    "blast_furnace": {
+      "color": "#5a5a5a",
+      "count": 1
+    },
+    "acacia_trapdoor": {
+      "color": "#ad6b3f",
+      "count": 1
+    },
+    "spruce_log": {
+      "color": "#4a3523",
+      "count": 1
+    },
+    "polished_deepslate": {
+      "color": "#4a4a50",
+      "count": 1
+    },
+    "stone_brick_stairs": {
+      "color": "#7a7a7a",
+      "count": 1
+    },
+    "iron_chain": {
+      "color": "#4c4c4c",
+      "count": 1
+    },
+    "dark_oak_log": {
+      "color": "#3e2a18",
+      "count": 1
+    },
+    "jungle_trapdoor": {
+      "color": "#a57a50",
+      "count": 1
+    },
+    "light_gray_wall_banner": {
+      "color": "#b9bcb9",
+      "count": 1
+    },
+    "waxed_oxidized_cut_copper_slab": {
+      "color": "#4f8a7a",
+      "count": 1
+    },
+    "oak_log": {
+      "color": "#6b5030",
+      "count": 1
+    },
+    "cobbled_deepslate_stairs": {
+      "color": "#4a4a50",
+      "count": 1
+    },
+    "smooth_sandstone_stairs": {
+      "color": "#d6c79c",
+      "count": 1
+    },
+    "potted_poppy": {
+      "color": "#c2684b",
+      "count": 1
+    },
+    "mossy_stone_brick_stairs": {
+      "color": "#6d7a62",
+      "count": 1
+    },
+    "diorite_stairs": {
+      "color": "#bcbcb8",
+      "count": 1
+    },
+    "mossy_cobblestone_stairs": {
+      "color": "#66735a",
+      "count": 1
+    },
+    "cauldron": {
+      "color": "#5a5a5a",
+      "count": 1
+    },
+    "jungle_log": {
+      "color": "#5b472a",
+      "count": 1
+    },
+    "rail": {
+      "color": "#8a8a86",
+      "count": 1
+    },
+    "chiseled_deepslate": {
+      "color": "#36363b",
+      "count": 1
+    },
+    "white_wool": {
+      "color": "#e9ecec",
+      "count": 1
+    },
+    "oak_slab": {
+      "color": "#b28a54",
+      "count": 1
+    },
+    "oak_stairs": {
+      "color": "#b28a54",
+      "count": 1
+    },
+    "lever": {
+      "color": "#6b5030",
+      "count": 1
+    },
+    "black_wool": {
+      "color": "#252525",
+      "count": 1
+    },
+    "deepslate_brick_stairs": {
+      "color": "#3d3d42",
+      "count": 1
+    },
+    "exposed_lightning_rod": {
+      "color": "#8a8a86",
+      "count": 1
+    },
+    "oak_button": {
+      "color": "#b28a54",
+      "count": 1
+    },
+    "oak_fence": {
+      "color": "#b28a54",
+      "count": 1
+    },
+    "ladder": {
+      "color": "#8a6b47",
+      "count": 1
+    },
+    "dark_oak_planks": {
+      "color": "#4a321f",
+      "count": 1
+    },
+    "powered_rail": {
+      "color": "#8a8a86",
+      "count": 1
+    },
+    "redstone_block": {
+      "color": "#a63a32",
+      "count": 1
+    },
+    "scaffolding": {
+      "color": "#b28a54",
+      "count": 1
+    },
+    "spruce_planks": {
+      "color": "#6b4e33",
+      "count": 1
+    },
+    "yellow_concrete": {
+      "color": "#d9c94a",
+      "count": 1
+    },
+    "sweet_berry_bush": {
+      "color": "#4f7a3a",
+      "count": 1
+    },
+    "cherry_leaves": {
+      "color": "#e8a8b8",
+      "count": 1
+    },
+    "red_bed": {
+      "color": "#a63a32",
+      "count": 1
+    },
+    "black_concrete": {
+      "color": "#2a2a2a",
+      "count": 1
+    },
+    "crafting_table": {
+      "color": "#8a6b47",
+      "count": 1
+    },
+    "light_blue_concrete": {
+      "color": "#6ba8c9",
+      "count": 1
+    },
+    "granite": {
+      "color": "#9a6b5a",
+      "count": 1
+    },
+    "sand": {
+      "color": "#d9cf9a",
+      "count": 1
+    },
+    "snow_block": {
+      "color": "#f0f5f5",
+      "count": 1
+    }
+  }
+}
