@@ -63,6 +63,17 @@ class StrategyTests(unittest.TestCase):
         self.assertTrue(installed)
         self.assertIn(b"zz=Object['create'](null);window.__PS_BOT_G=zz;", patched)
 
+    def test_bundle_probe_supports_an_obfuscated_root_marker(self) -> None:
+        # Newer published builds obfuscate the marker property itself, so the
+        # anchor must accept any assignment that follows the object creation.
+        original = (
+            b"(()=>{var k9=Object['create'](null);k9['_4622423']=!0x0,"
+            b"k9['_70c2a99']=0x12;use(k9);})();"
+        )
+        patched, installed = patch_game_bundle(original)
+        self.assertTrue(installed)
+        self.assertIn(b"k9=Object['create'](null);window.__PS_BOT_G=k9;", patched)
+
     def test_moves_toward_a_safe_pickup_when_no_enemy_is_near(self) -> None:
         strategy = SurvivalStrategy()
         keys = strategy.choose(

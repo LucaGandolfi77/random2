@@ -93,17 +93,63 @@ SNAPSHOT_SCRIPT = r"""
   // `G` is a global lexical binding in some published builds and a window
   // property in others.  Both forms are read-only from this script.
   const root = typeof G !== "undefined" ? G : (window.G || window.__PS_BOT_G);
-  const game = root && root.Game;
+  // Recent builds obfuscate the module namespace keys (Game, World, EnemyMgr,
+  // ...), so locate each module by the shape of its public API instead of a
+  // fixed property name. Readable legacy names stay as the first choice.
+  const findModule = (predicate) => {
+    if (!root) return null;
+    for (const key of Object.keys(root)) {
+      const value = root[key];
+      if (!value || typeof value !== "object") continue;
+      try {
+        if (predicate(value)) return value;
+      } catch (error) {
+        // A getter can throw before the game boots; skip that candidate.
+      }
+    }
+    return null;
+  };
+  const game = (root && root.Game)
+    || findModule(value => typeof value.state === "string" && "player" in value);
   const player = game && game.player;
+  const world = (root && root.World)
+    || findModule(value => typeof value.kindAt === "function");
+  const enemyMgr = (root && root.EnemyMgr)
+    || findModule(value => typeof value.all === "function" && typeof value.bossAlive === "function");
+  const pickupMgr = (root && root.Pickups)
+    || findModule(value => typeof value.all === "function" && "KIND" in value);
+  const hazardMgr = (root && root.Hazards)
+    || findModule(value => Array.isArray(value.all) && typeof value.inside === "function");
+  const camera = (root && root.Camera)
+    || findModule(value => typeof value.follow === "function" && "zoom" in value);
+  const riftMgr = (root && root.Rift)
+    || findModule(value => "inArena" in value && "rift" in value && typeof value.reset === "function");
   // Slot 1 move: try multiple common slot structures and property names
   let slotOneMove = null;
   if (player && Array.isArray(player.slots) && player.slots.length > 0) {
     // Common structures:
-    // 1. slots[0][0] - nested array (current assumption)
+    // 1. slots[0][0] - nested array
     // 2. slots[0] - direct move object
     // 3. slots[0].move - move in a wrapper object
+    // 4. slots[0]["0"] - move keyed by numeric index
     const slot = player.slots[0];
-    const move = Array.isArray(slot) ? slot[0] : (slot?.move ?? slot);
+    const isMove = candidate => candidate && typeof candidate === "object"
+      && (candidate.name || candidate.id || candidate.kind
+        || candidate.moveName || candidate.skillId);
+    let move = null;
+    if (Array.isArray(slot)) {
+      move = slot[0];
+    } else if (isMove(slot)) {
+      move = slot;
+    } else if (slot && typeof slot === "object") {
+      move = slot.move ?? null;
+      if (!isMove(move)) {
+        move = null;
+        for (const value of Object.values(slot)) {
+          if (isMove(value)) { move = value; break; }
+        }
+      }
+    }
     if (move) {
       // Try multiple property names for move identification
       const name = move.name || move.id || move.moveName || move.skillId || move.displayName || move.key || move.species || "";
@@ -116,25 +162,27 @@ SNAPSHOT_SCRIPT = r"""
         .map(move => String(move.name || move.id || move.moveName || move.skillId || move.displayName || move.key || move.species || ""))
         .filter(Boolean)
     : [];
-  const enemies = root && root.EnemyMgr && root.EnemyMgr.all
-    ? root.EnemyMgr.all() : [];
-  const pickups = root && root.Pickups && root.Pickups.all
-    ? root.Pickups.all() : [];
-  const hazards = root && root.Hazards && Array.isArray(root.Hazards.all)
-    ? root.Hazards.all : [];
+  const enemies = enemyMgr && typeof enemyMgr.all === "function"
+    ? enemyMgr.all() : [];
+  const pickups = pickupMgr && typeof pickupMgr.all === "function"
+    ? pickupMgr.all() : [];
+  const hazards = hazardMgr
+    ? (Array.isArray(hazardMgr.all) ? hazardMgr.all
+      : typeof hazardMgr.all === "function" ? hazardMgr.all() : [])
+    : [];
   const terrain = [];
-  if (root && root.World && root.World.kindAt && player) {
+  if (world && typeof world.kindAt === "function" && player) {
     const step = 32;
     for (let gy = -4; gy <= 4; gy++) {
       for (let gx = -4; gx <= 4; gx++) {
         const x = player.x + gx * step;
         const y = player.y + gy * step;
-        terrain.push({ x, y, kind: String(root.World.kindAt(x, y)) });
+        terrain.push({ x, y, kind: String(world.kindAt(x, y)) });
       }
     }
   }
-  const props = root && root.World && root.Camera && root.World.visibleProps
-    ? root.World.visibleProps(root.Camera).map(prop => ({
+  const props = world && camera && typeof world.visibleProps === "function"
+    ? world.visibleProps(camera).map(prop => ({
         x: finite(prop.x), y: finite(prop.y), r: finite(prop.r, 12),
         type: String(prop.type || "tree"), solid: !!prop.solid, flat: !!prop.flat
       }))
@@ -148,7 +196,7 @@ SNAPSHOT_SCRIPT = r"""
     : [];
   // A rift is the timed gateway to a legendary boss arena.  `rift` holds its
   // world position while it is open; `inArena` is true during the boss fight.
-  const rift = root && root.Rift && root.Rift.rift ? root.Rift.rift : null;
+  const rift = riftMgr && riftMgr.rift ? riftMgr.rift : null;
   return {
     state: game ? game.state : "unknown",
     player: player ? {
@@ -162,7 +210,7 @@ SNAPSHOT_SCRIPT = r"""
       x: finite(rift.x), y: finite(rift.y),
       ttl: finite(rift.ttl), t: finite(rift.t)
     } : null,
-    inArena: !!(root && root.Rift && root.Rift.inArena),
+    inArena: !!(riftMgr && riftMgr.inArena),
     enemies: enemies.map(enemy => ({
       x: finite(enemy.x), y: finite(enemy.y), r: finite(enemy.r, 16),
       boss: !!enemy.boss, dead: !!enemy.dead
@@ -191,8 +239,10 @@ def patch_game_bundle(body: bytes) -> tuple[bytes, bool]:
     * older builds finish with a `Flow['boot']()` call, which lets the probe
       capture the root object before the game boots;
     * current builds never call boot from a named property, but they still
-      create the root object with `Object.create(null)` and mark it with a
-      `BUILT` property immediately afterwards.
+      create the root object with `Object.create(null)` and immediately start
+      assigning properties to it. That marker property is itself obfuscated
+      in newer builds, so the anchor only relies on the creation call followed
+      by an assignment on the same object.
 
     Both forms are detected without depending on one generated identifier.
     """
@@ -209,13 +259,14 @@ def patch_game_bundle(body: bytes) -> tuple[bytes, bool]:
         replacement = b"window.__PS_BOT_G=" + root + b"," + match.group(0)
         return body[: match.start()] + replacement + body[match.end() :], True
 
-    # Current builds: `var <root> = Object['create'](null); <root>['BUILT']=...`
+    # Current builds: `var <root> = Object['create'](null); <root>[...]=...`
     # Insert the global assignment *after* the object exists, otherwise the
-    # hoisted variable would still be undefined at that point.
+    # hoisted variable would still be undefined at that point. The property
+    # that follows is obfuscated, so only require any assignment on <root>.
     root_object = re.compile(
         rb"(?P<root>[A-Za-z_$][A-Za-z0-9_$]*)"
         rb"=Object\[(['\"])create\2\]\(null\)"
-        rb"(?=;(?P=root)\[(['\"])BUILT\3\]=)"
+        rb"(?=;(?P=root)\[)"
     )
     match = root_object.search(body)
     if not match:
