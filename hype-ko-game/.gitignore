@@ -1,0 +1,13 @@
+node_modules
+dist
+dist-server
+dev-dist
+coverage
+playwright-report
+test-results
+.env
+.env.local
+.DS_Store
+server/data/*.json
+server/leaderboard.json
+*.log

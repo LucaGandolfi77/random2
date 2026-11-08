@@ -1,0 +1,146 @@
+import { hit, makeProjectile, standardMoves } from '../moveFactory';
+import type { FighterDefinition, MoveData } from '../types';
+
+const neutralSpecial: MoveData = {
+  slot: 'neutralSpecial',
+  name: 'SAUCE TOSS',
+  kind: 'special',
+  totalFrames: 34,
+  hits: [],
+  effect: 'pan',
+  projectiles: [
+    makeProjectile({
+      atFrame: 14,
+      offsetX: 0.9,
+      offsetY: 1.05,
+      vx: 0.27,
+      vy: 0.05,
+      gravity: 0.004,
+      radius: 0.42,
+      damage: 9,
+      angle: 40,
+      baseKnockback: 20,
+      knockbackGrowth: 55,
+      life: 100,
+      visual: 'pan',
+      hitstop: 4,
+    }),
+  ],
+};
+
+const sideSpecial: MoveData = {
+  slot: 'sideSpecial',
+  name: 'ROLLING PIN',
+  kind: 'special',
+  totalFrames: 42,
+  hits: [],
+  effect: 'pan',
+  projectiles: [
+    makeProjectile({
+      atFrame: 17,
+      offsetX: 0.9,
+      offsetY: 0.9,
+      vx: 0.3,
+      vy: 0.01,
+      gravity: 0.006,
+      radius: 0.5,
+      damage: 12,
+      angle: 34,
+      baseKnockback: 30,
+      knockbackGrowth: 68,
+      life: 80,
+      visual: 'pan',
+      hitstop: 6,
+    }),
+  ],
+};
+
+const upSpecial: MoveData = {
+  slot: 'upSpecial',
+  name: 'PANIC PAN',
+  kind: 'special',
+  totalFrames: 40,
+  hits: [hit(8, 16, 0.2, 1.7, 0.9, 9, 84, 18, 48, 5, 'pan')],
+  impulses: [{ frame: 7, vy: 0.42, vx: 0.05 }],
+  intangibility: [1, 8],
+  effect: 'pan',
+};
+
+const downSpecial: MoveData = {
+  slot: 'downSpecial',
+  name: 'HOT PLATE',
+  kind: 'special',
+  totalFrames: 34,
+  hits: [],
+  effect: 'fire',
+  projectiles: [
+    makeProjectile({
+      atFrame: 16,
+      offsetX: 0.7,
+      offsetY: 0.15,
+      vx: 0.04,
+      vy: 0,
+      gravity: 0,
+      radius: 0.75,
+      damage: 10,
+      angle: 80,
+      baseKnockback: 20,
+      knockbackGrowth: 58,
+      life: 180,
+      visual: 'fire',
+      hitstop: 5,
+    }),
+  ],
+};
+
+export const ZIA: FighterDefinition = {
+  id: 'zia',
+  name: 'ZIA LIVE',
+  title: 'The Kitchen Boss',
+  archetype: 'Super-heavy zoner',
+  description:
+    'The kitchen is open and the specials are projectiles. Zia Live shrugs off launches, throws cookware across the stage and makes every approach feel like crossing a busy dining room.',
+  playable: true,
+  modelStyle: 'zia',
+  stats: {
+    weight: 132,
+    walkSpeed: 0.07,
+    runSpeed: 0.135,
+    airSpeed: 0.105,
+    airAcceleration: 0.009,
+    gravity: 0.021,
+    jumpVelocity: 0.4,
+    doubleJumpVelocity: 0.365,
+    maxFallSpeed: 0.6,
+    fastFallSpeed: 0.78,
+    groundAcceleration: 0.016,
+    groundFriction: 0.012,
+    airFriction: 0.002,
+    airJumps: 1,
+    knockbackResistance: 0.1,
+    attackPower: 1.14,
+    recoveryPower: 0.95,
+    width: 1.1,
+    height: 1.95,
+  },
+  palettes: [
+    { name: 'Sunday Sauce', skin: 0xc9835e, primary: 0xd94a35, secondary: 0xfff1d0, accent: 0xffc857, hair: 0x3d2314, dark: 0x2c1410 },
+    { name: 'Pesto Power', skin: 0xc9835e, primary: 0x2f7d4e, secondary: 0xf6ffe0, accent: 0xffd319, hair: 0x1f2a14, dark: 0x12200e },
+    { name: 'Hot Honey', skin: 0xa86642, primary: 0xff8c42, secondary: 0xfff1d0, accent: 0xd7263d, hair: 0x2a160c, dark: 0x241008 },
+    { name: 'Blue Plate', skin: 0xc9835e, primary: 0x2b4c7e, secondary: 0xeaf4ff, accent: 0x39f6ff, hair: 0x2b2b33, dark: 0x101a2a },
+  ],
+  moves: standardMoves({
+    power: 1.14,
+    speed: 0.86,
+    names: {
+      jab: 'Spatula Swat',
+      sideTilt: 'Sauce Splash',
+      downTilt: 'Mop Sweep',
+      upStrong: 'Pot Slam',
+      grab: 'Order Grab',
+    },
+    specials: { neutralSpecial, sideSpecial, upSpecial, downSpecial },
+  }),
+  moveHighlights: ['SAUCE TOSS: arcing projectile', 'ROLLING PIN: heavy straight shot', 'PANIC PAN: armored recovery', 'HOT PLATE: lingering stage trap'],
+  statsBars: { power: 5, speed: 2, weight: 5, recovery: 3 },
+};

@@ -58,7 +58,7 @@ pages.push({ file: "index.html", loc: BASE });
 
 /* One entry per project folder that is committed and has an index.html. */
 const dirs = readdirSync(root, { withFileTypes: true })
-  .filter((d) => d.isDirectory() && !d.name.startsWith(".") && d.name !== "EADS" && d.name !== "tools" && d.name !== "shared" && d.name !== "pokesurvivor-bot")
+  .filter((d) => d.isDirectory() && !d.name.startsWith(".") && d.name !== "EADS" && d.name !== "tools" && d.name !== "shared" && d.name !== "pokesurvivor-bot" && d.name !== "hype-brawl-game" && d.name !== "hype-ko-game")
   .map((d) => d.name)
   .sort();
 for (const dir of dirs) {
