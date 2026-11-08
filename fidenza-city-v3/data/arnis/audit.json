@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T16:23:37.915Z",
+  "generated": "2026-11-08T20:56:14.104Z",
   "surface": {
     "chunks": 30976,
     "paletteColors": 114,
@@ -528,26 +528,26 @@
     "25876239": {
       "kind": "secondary",
       "surface": "gray_concrete_powder",
-      "side": "gray_concrete_powder",
+      "side": "cyan_terracotta",
       "samples": 40
     },
     "25876351": {
       "kind": "secondary",
-      "surface": "cyan_terracotta",
+      "surface": "gray_concrete_powder",
       "side": "gray_concrete_powder",
       "samples": 40
     },
     "25876371": {
       "kind": "secondary",
       "surface": "cyan_terracotta",
-      "side": "gray_concrete_powder",
-      "samples": 30
+      "side": "cyan_terracotta",
+      "samples": 40
     },
     "25876434": {
       "kind": "secondary",
       "surface": "cyan_terracotta",
       "side": "cyan_terracotta",
-      "samples": 30
+      "samples": 35
     },
     "25876477": {
       "kind": "secondary",
@@ -563,8 +563,8 @@
     },
     "25902951": {
       "kind": "primary_link",
-      "surface": "cyan_terracotta",
-      "side": "cyan_terracotta",
+      "surface": "gray_concrete_powder",
+      "side": "gray_concrete_powder",
       "samples": 40
     },
     "25902990": {
@@ -600,7 +600,7 @@
     "27124066": {
       "kind": "secondary",
       "surface": "cyan_terracotta",
-      "side": "cyan_terracotta",
+      "side": "gray_concrete_powder",
       "samples": 40
     },
     "27124223": {
@@ -612,14 +612,14 @@
     "27129315": {
       "kind": "secondary",
       "surface": "cyan_terracotta",
-      "side": "gray_concrete_powder",
+      "side": "cyan_terracotta",
       "samples": 40
     },
     "28157944": {
       "kind": "residential",
       "surface": "gray_concrete_powder",
       "side": "gray_concrete_powder",
-      "samples": 18
+      "samples": 24
     },
     "28158053": {
       "kind": "secondary",
@@ -637,19 +637,19 @@
       "kind": "tertiary",
       "surface": "gray_concrete_powder",
       "side": "stone",
-      "samples": 30
+      "samples": 40
     },
     "28158197": {
       "kind": "tertiary",
       "surface": "gray_concrete_powder",
-      "side": "red_terracotta",
+      "side": "stone",
       "samples": 40
     },
     "28158200": {
       "kind": "residential",
       "surface": "gray_concrete_powder",
       "side": "red_terracotta",
-      "samples": 25
+      "samples": 30
     },
     "28158204": {
       "kind": "residential",
@@ -661,7 +661,7 @@
       "kind": "tertiary",
       "surface": "gray_concrete_powder",
       "side": "stone",
-      "samples": 30
+      "samples": 40
     },
     "28158304": {
       "kind": "tertiary",
@@ -671,8 +671,8 @@
     },
     "28158309": {
       "kind": "tertiary",
-      "surface": "cyan_terracotta",
-      "side": "wheat",
+      "surface": "gray_concrete_powder",
+      "side": "cyan_terracotta",
       "samples": 40
     },
     "28158331": {
@@ -691,13 +691,13 @@
       "kind": "unclassified",
       "surface": "cyan_terracotta",
       "side": "gray_concrete_powder",
-      "samples": 20
+      "samples": 25
     },
     "28158791": {
       "kind": "residential",
-      "surface": "gray_concrete_powder",
+      "surface": "cyan_terracotta",
       "side": "gray_concrete_powder",
-      "samples": 25
+      "samples": 30
     },
     "30663142": {
       "kind": "primary",
@@ -733,7 +733,7 @@
     },
     "gray_concrete_powder": {
       "color": "#9a9d9b",
-      "count": 1719
+      "count": 1724
     },
     "bricks": {
       "color": "#9b5a47",
@@ -745,7 +745,7 @@
     },
     "cyan_terracotta": {
       "color": "#575b5b",
-      "count": 1535
+      "count": 1554
     },
     "light_gray_stained_glass": {
       "color": "#b8c4c4",
@@ -761,15 +761,15 @@
     },
     "white_concrete": {
       "color": "#e5e8e5",
-      "count": 1225
+      "count": 1224
     },
     "gray_concrete": {
       "color": "#7d7f7d",
-      "count": 1088
+      "count": 1096
     },
     "red_terracotta": {
       "color": "#8f3e2f",
-      "count": 956
+      "count": 951
     },
     "white_terracotta": {
       "color": "#d7cdc0",
@@ -797,7 +797,7 @@
     },
     "smooth_stone": {
       "color": "#9b9b9b",
-      "count": 475
+      "count": 474
     },
     "polished_granite_stairs": {
       "color": "#a06f5f",
@@ -833,7 +833,7 @@
     },
     "stone": {
       "color": "#7d7d7d",
-      "count": 226
+      "count": 217
     },
     "mud_brick_stairs": {
       "color": "#8a6b53",
@@ -845,7 +845,7 @@
     },
     "grass_block": {
       "color": "#5d8f3f",
-      "count": 140
+      "count": 147
     },
     "calcite": {
       "color": "#dfdfd8",
@@ -861,7 +861,7 @@
     },
     "red_concrete": {
       "color": "#a63a32",
-      "count": 101
+      "count": 97
     },
     "orange_terracotta": {
       "color": "#a86a3a",
@@ -869,7 +869,7 @@
     },
     "dirt_path": {
       "color": "#8a6b47",
-      "count": 70
+      "count": 66
     },
     "cherry_planks": {
       "color": "#d9a49a",
@@ -917,7 +917,7 @@
     },
     "wheat": {
       "color": "#c8b33a",
-      "count": 28
+      "count": 27
     },
     "quartz_slab": {
       "color": "#e7e3da",
@@ -967,10 +967,6 @@
       "color": "#c9c9c5",
       "count": 16
     },
-    "gravel": {
-      "color": "#8a8785",
-      "count": 16
-    },
     "smooth_quartz_slab": {
       "color": "#e9e5dc",
       "count": 15
@@ -979,21 +975,21 @@
       "color": "#4f7a3a",
       "count": 15
     },
+    "gravel": {
+      "color": "#8a8785",
+      "count": 15
+    },
     "stone_button": {
       "color": "#7d7d7d",
       "count": 13
     },
     "cobblestone": {
       "color": "#6f6f6f",
-      "count": 11
+      "count": 12
     },
     "dirt": {
       "color": "#79553a",
       "count": 10
-    },
-    "potatoes": {
-      "color": "#6f8f3a",
-      "count": 9
     },
     "brick_slab": {
       "color": "#9b5a47",
@@ -1005,7 +1001,7 @@
     },
     "carrots": {
       "color": "#d07a2e",
-      "count": 7
+      "count": 8
     },
     "gray_stained_glass_pane": {
       "color": "#4f5a5a",
@@ -1022,6 +1018,10 @@
     "oak_planks": {
       "color": "#b28a54",
       "count": 7
+    },
+    "potatoes": {
+      "color": "#6f8f3a",
+      "count": 6
     },
     "water": {
       "color": "#3f76e4",

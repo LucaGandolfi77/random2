@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T18:50:55.525Z",
+  "generated": "2026-11-08T21:03:11.581Z",
   "totals": {
     "checks": 112,
     "errors": 0,
@@ -29,8 +29,8 @@
       "id": "porta",
       "ok": true,
       "msg": "beacon accessibile",
-      "x": -299.28,
-      "z": -36.86
+      "x": -294.46,
+      "z": -48.22
     },
     {
       "kind": "beacon",
@@ -61,8 +61,8 @@
       "id": "granmadre",
       "ok": true,
       "msg": "beacon accessibile",
-      "x": 391.43,
-      "z": 148.72
+      "x": 395.01,
+      "z": 152.94
     },
     {
       "kind": "beacon",
@@ -691,8 +691,8 @@
       "id": "photo:2",
       "ok": true,
       "msg": "Porta San Donnino",
-      "x": -295.28,
-      "z": -26.86
+      "x": -288.93,
+      "z": -34.52
     },
     {
       "kind": "mission-step",
@@ -731,8 +731,8 @@
       "id": "pilgrim:2",
       "ok": true,
       "msg": "Porta San Donnino",
-      "x": -295.28,
-      "z": -26.86
+      "x": -288.93,
+      "z": -34.52
     },
     {
       "kind": "mission-step",
@@ -779,8 +779,8 @@
       "id": "tour:3",
       "ok": true,
       "msg": "Santuario della Gran Madre",
-      "x": 397.43,
-      "z": 156.72
+      "x": 399.16,
+      "z": 161.71
     },
     {
       "kind": "mission-step",
@@ -811,8 +811,8 @@
       "id": "ultimo-treno:1",
       "ok": true,
       "msg": "Gran Madre",
-      "x": 397.43,
-      "z": 156.72
+      "x": 399.16,
+      "z": 161.71
     },
     {
       "kind": "mission-step",

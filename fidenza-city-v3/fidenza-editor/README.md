@@ -1,4 +1,4 @@
-# Fidenza Editor 3.0 — Tile Arnis
+# Fidenza Editor 3.1 — Tile Arnis
 
 Editor visuale 2D per la mappa di **Fidenza da Giocare v3**. Mostra la superficie
 reale del mondo Arnis come tile layer, usa il colore dei blocchi e permette di
@@ -34,7 +34,7 @@ python3 -m http.server 8081
 - **Navetta**: percorso e fermate calcolati dai POI, visibili nel layer Navetta.
 - **Edifici**: nascondi, sposta, ruota, scala, altezza, piani, tetto, colore,
   materiali dei blocchi (muro, tetto, vetro) e vertici.
-- **Strade**: nascondi, sposta, ruota, scala, larghezza, tipo, superficie,
+- **Strade**: nascondi, sposta, ruota, scala, larghezza normalizzata OSM, tipo, superficie,
   materiali dei blocchi (manto, marciapiede), senso unico, ponte, tunnel e vertici.
 - **Aree**: nascondi, sposta, ruota, scala, tipo, colore, materiale della
   superficie e vertici.

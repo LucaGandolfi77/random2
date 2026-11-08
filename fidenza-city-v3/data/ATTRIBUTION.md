@@ -6,6 +6,7 @@
 
 - **Mappa e dati vettoriali**: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), distribuiti con licenza [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
   - Il file `data/city.json` è un database derivato da OpenStreetMap e resta soggetto a ODbL.
+  - Lo snapshot `data/osm-roads.json` contiene i way `highway` con tag e geometria, usati per normalizzare larghezze e verificare i centerline; è anch'esso derivato da OpenStreetMap (ODbL).
   - Per usi che modificano o redistribuiscono il database, valgono gli obblighi di attribuzione e condivisione allo stesso modo previsti da ODbL.
 - **Rilievo fuori centro**: [AWS Open Data — Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) — Mapzen, con dati EU-DEM Copernicus. Il file `data/terrain.json` è derivato dai tile Terrarium AWS ad alta risoluzione.
 - **Dettagli del centro storico**: negozi, arredo urbano, alberi singoli, barriere e segnaletica sono derivati da OpenStreetMap (ODbL), tramite `tools/build-center-details.mjs`.

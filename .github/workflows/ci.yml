@@ -99,6 +99,9 @@ jobs:
       - name: Fidenza v3 map validation
         run: node fidenza-city-v3/tools/validate-map.mjs
 
+      - name: Fidenza v3 road width and alignment audit
+        run: node fidenza-city-v3/tools/audit-roads.mjs --check
+
       - name: Fidenza v3 visual detail budget
         run: node fidenza-city-v3/tools/audit-visual-detail.mjs
 

@@ -2,8 +2,8 @@
   "meta": {
     "id": "fidenza",
     "name": "Fidenza",
-    "version": "3.0.0",
-    "generated": "2026-11-05T21:16:15.176Z",
+    "version": "3.1.0",
+    "generated": "2026-11-08T20:56:24.264Z",
     "center": {
       "lat": 44.8665,
       "lon": 10.0612
@@ -35,7 +35,7 @@
       "districts": 7,
       "venues": 4,
       "buildings": 4214,
-      "roads": 2396,
+      "roads": 2402,
       "areas": 249,
       "waterways": 33,
       "railways": 68,
@@ -99,8 +99,8 @@
       "fact": "Fidenza si chiamava Borgo San Donnino: il nome attuale arrivò solo nel 1927.",
       "x": -305.18,
       "z": -47.79,
-      "beaconX": -299.28,
-      "beaconZ": -36.86
+      "beaconX": -294.46,
+      "beaconZ": -48.22
     },
     {
       "id": "ponte",
@@ -167,8 +167,8 @@
       "fact": "La sua cupola si vede da diversi punti della città.",
       "x": 415.56,
       "z": 147.81,
-      "beaconX": 391.43,
-      "beaconZ": 148.72
+      "beaconX": 395.01,
+      "beaconZ": 152.94
     },
     {
       "id": "sanpietro",
@@ -880,8 +880,8 @@
           "placeId": "piazza-duomo"
         },
         {
-          "x": -295.28,
-          "z": -26.86,
+          "x": -288.93,
+          "z": -34.52,
           "name": "Porta San Donnino",
           "prompt": "scatta la foto",
           "comment": "",
@@ -947,8 +947,8 @@
           "placeId": "duomo"
         },
         {
-          "x": -295.28,
-          "z": -26.86,
+          "x": -288.93,
+          "z": -34.52,
           "name": "Porta San Donnino",
           "prompt": "congeda il pellegrino",
           "comment": "La Via Francigena entrava in città da qui: buon cammino!",
@@ -1037,8 +1037,8 @@
           "placeId": "piazza-duomo"
         },
         {
-          "x": 397.43,
-          "z": 156.72,
+          "x": 399.16,
+          "z": 161.71,
           "name": "Santuario della Gran Madre",
           "prompt": "congeda il cliente",
           "comment": "La Gran Madre chiude il giro: il cliente è soddisfatto.",
@@ -1105,8 +1105,8 @@
           "placeId": "stazione"
         },
         {
-          "x": 397.43,
-          "z": 156.72,
+          "x": 399.16,
+          "z": 161.71,
           "name": "Gran Madre",
           "prompt": "accompagna il viaggiatore",
           "comment": "Il viaggiatore ti ringrazia e scompare nella notte.",

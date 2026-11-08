@@ -1,4 +1,4 @@
-export const VERSION = '3.0.0';
+export const VERSION = '3.1.0';
 export const SAVE_KEY = 'fidenza-da-giocare-v1';
 
 export const COLORS = {

@@ -1,4 +1,4 @@
-# Fidenza da Giocare v3.0.0 — Mondo Arnis
+# Fidenza da Giocare v3.1.0 — Mondo Arnis
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
@@ -24,6 +24,7 @@ quello della v2.23.
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
+- [Novità v3.1](#novità-v31--strade-osm-normalizzate)
 - [Novità v3.0](#novità-v30--mondo-arnis)
 - [Novità v2.23](#novità-v223--vita-atmosfera-e-notte)
 - [Novità v2.22](#novità-v222--passaggi-a-livello-e-mappa-2d)
@@ -121,7 +122,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 
 ### Città e mondo
 
-- **Fidenza ricostruita** da OpenStreetMap: **4.214 edifici**, **2.396 segmenti
+- **Fidenza ricostruita** da OpenStreetMap: **4.214 edifici**, **2.402 segmenti
   stradali**, **249 aree** (piazze, parchi, prato, sport, agricole),
   **33 corsi d’acqua** e **68 binari**.
 - **101 punti di interesse OSM** con icone e categorie, oltre a **24 luoghi**
@@ -519,6 +520,26 @@ all’URL per forzare il livello grafico.
 - La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
   risoluzione si abbassa automaticamente se il frame rate cala.
 
+## Novità v3.1 — Strade OSM normalizzate
+
+- **Una larghezza per via**: i segmenti della stessa strada non usano più
+  larghezze diverse da `lanes` o `width` isolati; la larghezza è la mediana
+  pesata della via, con fallback per classe.
+- **Carreggiate doppie**: le coppie di way `oneway` parallele e opposte vengono
+  riconosciute e dimensionate come singole carreggiate, non come una strada
+  larga il doppio.
+- **Centerline OSM esatto**: le strade usano la geometria OSM con
+  semplificazione massima 0,15 m; nessuno spostamento globale arbitrario.
+- **Snapshot riproducibile**: `data/osm-roads.json` contiene i 2.407 way
+  `highway` del bbox, con tag e geometria (© OpenStreetMap contributors,
+  ODbL). Il gioco usa 2.402 strade dopo il filtro di geometrie non valide o non costruite.
+- **Audit dedicato**: `node tools/audit-roads.mjs --check` controlla larghezze,
+  gruppi, carreggiate, deviazione dal centerline e produce
+  `data/road-audit.json` con la lista di ricontrollo.
+- **Allineamento**: deviazione massima dal centerline OSM 0,15 m; 456 gruppi
+  strada/classe/carreggiata, 214 segmenti di carreggiata doppia.
+- **PWA**: cache `v3.1.0`.
+
 ## Novità v3.0 — Mondo Arnis
 
 - **Import reale di ArnisWorld3**: un tool Node legge i 575 MB di region file
@@ -540,7 +561,7 @@ all’URL per forzare il livello grafico.
 - **Cielo Minecraft**: sole e luna quadrati, nuvole a blocchi, acqua animata,
   niente tone mapping cinematografico.
 - **Duomo e landmark** con la palette di blocchi del mondo Arnis.
-- **PWA**: cache `v3.0.4`; i region file non vengono pubblicati né precachati.
+- **PWA**: cache `v3.1.0`; i region file non vengono pubblicati né precachati.
 
 ## Dettaglio voxel 1 m — case e strade
 
@@ -654,7 +675,7 @@ all’URL per forzare il livello grafico.
   Tangenziale e la zona artigianale.
 - **Coduro è il settimo quartiere**, con seed Voronoi, descrizione, timbro nel
   Passaporto e achievement aggiornato.
-- **Mappa più grande**: 4.214 edifici, 2.396 strade, 249 aree, 33 corsi d’acqua
+- **Mappa più grande**: 4.214 edifici, 2.402 strade, 249 aree, 33 corsi d’acqua
   e 68 binari.
 - **Altezze più precise**: parsing di `height` e `building:levels`, inferenza
   per case rurali, villette, appartamenti, capannoni e edifici civici.
@@ -1134,6 +1155,10 @@ fidenza-city-v3/
     audit-buildings.mjs
     audit-poi-signs.mjs
     audit-traffic.mjs
+    audit-roads.mjs
+    osm-roads.mjs
+    normalize-roads.mjs
+    road-widths.mjs
     audit-districts.mjs
     audit-terrain.mjs
     merge-buildings.mjs
@@ -1141,6 +1166,8 @@ fidenza-city-v3/
     build-center-details.mjs  dettagli OSM del centro → city.json
   data/
     city.json
+    osm-roads.json
+    road-audit.json
     terrain.json
     map.json
     styles/

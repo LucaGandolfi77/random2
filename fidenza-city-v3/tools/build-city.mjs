@@ -11,6 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { EXCLUDED_HIGHWAYS, ROAD_WIDTHS, normalizeRoadWidths, osmRoadWidth, parseWidth, parseLanes } from './road-widths.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const CACHE = path.join(ROOT, '.cache');
@@ -302,23 +303,6 @@ function buildingColor(kind, id) {
   return BUILDING_COLORS[hashInt(id) % BUILDING_COLORS.length];
 }
 
-const ROAD_WIDTHS = {
-  motorway: 14, motorway_link: 7, trunk: 13, trunk_link: 7,
-  primary: 10, primary_link: 5.5, secondary: 8.5, secondary_link: 5,
-  tertiary: 7, tertiary_link: 4.5, unclassified: 5.5, residential: 6,
-  living_street: 5, service: 4, pedestrian: 6, footway: 2.1,
-  path: 1.9, cycleway: 2.4, track: 3, steps: 2.2
-};
-const WALKABLE = new Set(['footway', 'path', 'pedestrian', 'living_street', 'residential', 'service', 'cycleway', 'unclassified', 'track']);
-
-function roadWidth(tags, kind) {
-  const tagged = parseNumber(tags.width);
-  if (Number.isFinite(tagged) && tagged > 0.8) return +Math.min(40, tagged).toFixed(2);
-  const lanes = parseNumber(tags.lanes);
-  if (Number.isFinite(lanes) && lanes > 0) return +(lanes * 3.1 + 1.2).toFixed(2);
-  return ROAD_WIDTHS[kind] || 5.5;
-}
-
 const AREA_KINDS = {
   park: 'park', garden: 'park', playground: 'park', pitch: 'sport', sports_centre: 'sport',
   common: 'park', swimming_pool: 'water',
@@ -436,34 +420,41 @@ function build() {
     // Strade
     if (el.type === 'way' && tags.highway) {
       const kind = tags.highway;
+      if (EXCLUDED_HIGHWAYS.has(kind)) continue;
       const hasWidth = Number.isFinite(parseNumber(tags.width)) || Number.isFinite(parseNumber(tags.lanes));
       if (!ROAD_WIDTHS[kind] && !hasWidth) continue;
       if (tags.area === 'yes') continue;
       const pts = lineFromGeometry(el.geometry);
       if (!pts) continue;
-      const simplified = simplify(pts, 0.65);
+      const simplified = simplify(pts, 0.15);
       if (simplified.length < 2) continue;
       let length = 0;
       for (let i = 1; i < simplified.length; i++) length += Math.hypot(simplified[i][0] - simplified[i - 1][0], simplified[i][1] - simplified[i - 1][1]);
       if (length < 1.5) continue;
-      const lanes = Math.round(parseNumber(tags.lanes)) || 0;
+      const lanes = Math.round(parseLanes(tags.lanes)) || 0;
       const maxspeed = Math.round(parseNumber(tags.maxspeed)) || 0;
+      const widthTag = parseWidth(tags.width ?? tags['width:carriageway']);
+      const width = osmRoadWidth(tags, kind);
       roads.push({
         id: el.id,
         kind,
         name: tags.name || '',
-        w: roadWidth(tags, kind),
+        w: width,
+        wOsm: width,
+        widthTag,
         lanes,
         maxspeed,
         pts: simplified,
         length: +length.toFixed(1),
         bridge: tags.bridge && tags.bridge !== 'no',
         tunnel: tags.tunnel && tags.tunnel !== 'no',
-        oneway: tags.oneway === 'yes' || tags.oneway === '1' || tags.junction === 'roundabout',
+        oneway: tags.oneway === 'yes' || tags.oneway === '1' || tags.oneway === '-1' || tags.junction === 'roundabout',
         surface: tags.surface || '',
         sidewalk: tags.sidewalk == null ? undefined : !['no', 'separate'].includes(tags.sidewalk),
         cycleway: tags.cycleway || '',
-        layer: Number.isFinite(parseNumber(tags.layer)) ? parseNumber(tags.layer) : 0
+        layer: Number.isFinite(parseNumber(tags.layer)) ? parseNumber(tags.layer) : 0,
+        roundabout: tags.junction === 'roundabout',
+        dualCarriageway: tags.dual_carriageway === 'yes'
       });
       continue;
     }
@@ -536,6 +527,8 @@ function build() {
       }
     }
   }
+
+  const roadWidthReport = normalizeRoadWidths(roads);
 
   // Deduplica gli elementi relation ripetuti
   const uniqAreas = [];
@@ -630,6 +623,7 @@ function build() {
         trafficSignals: trafficSignals.length,
         crossings: crossings.length
       },
+      roadWidths: roadWidthReport,
       attribution: {
         map: '© OpenStreetMap contributors (ODbL)',
         terrain: 'AWS Open Data — Terrain Tiles (Mapzen / EU-DEM Copernicus)',

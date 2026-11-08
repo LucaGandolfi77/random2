@@ -76,7 +76,7 @@ jobs:
           os.makedirs(os.path.dirname(target), exist_ok=True)
           with open(target, 'w', encoding='utf-8') as fh:
               json.dump({
-                  'version': '3.0.4',
+                  'version': '3.1.0',
                   'commit': os.environ.get('GITHUB_SHA', ''),
                   'buildId': build_id,
                   'builtAt': datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -84,7 +84,7 @@ jobs:
           print('build-info.json', target)
           PY
           SW="_site/fidenza-city-v3/sw.js"
-          sed -i "s/fidenza-da-giocare-v3\.0\.4/fidenza-da-giocare-${BUILD_ID}/" "$SW"
+          sed -i "s/fidenza-da-giocare-v3\.1\.0/fidenza-da-giocare-${BUILD_ID}/" "$SW"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
