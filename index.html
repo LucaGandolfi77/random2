@@ -130,7 +130,7 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       color: var(--ok);
-      transition: color 0.3s ease, border-color 0.3s ease;
+      transition: color 0.3s ease, border-color 0.3s ease, opacity 0.25s ease, transform 0.25s ease;
       pointer-events: none;
     }
     .status .dot {
@@ -636,6 +636,624 @@
       .btn-src:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.25); }
     }
 
+    /* ---- Reading Room ---- */
+    .reading-room {
+      margin-top: 46px;
+      padding-top: 10px;
+    }
+    .reading-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .reading-head-copy { max-width: 640px; }
+    .reading-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .reading-kicker::before {
+      content: "";
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c9a878, #7c3aed);
+      box-shadow: 0 0 10px rgba(201, 168, 120, 0.8);
+    }
+    .reading-room h2 {
+      font-size: clamp(27px, 4.6vw, 40px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+    .reading-sub {
+      margin-top: 8px;
+      font-size: 14.5px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .reading-note {
+      flex: 0 0 auto;
+      max-width: 220px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--faint);
+      text-align: right;
+    }
+    .room-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 0 15px;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    @media (hover: hover) {
+      .room-link:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.25); background: var(--surface-strong); }
+    }
+    .book-shelf {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr));
+      gap: 18px;
+    }
+    #book-shelf[hidden] { display: none; }
+    .book-card {
+      display: flex;
+      gap: 18px;
+      padding: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+    }
+    @media (hover: hover) {
+      .book-card:hover { transform: translateY(-3px); border-color: rgba(255, 255, 255, 0.2); background: var(--surface-strong); }
+    }
+    .book-cover {
+      position: relative;
+      overflow: hidden;
+      flex: 0 0 132px;
+      aspect-ratio: 2 / 3;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px 12px 19px;
+      border-radius: 4px 11px 11px 4px;
+      color: #fff;
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.32) 0 7px, transparent 7px),
+        linear-gradient(160deg, rgba(12, 8, 20, 0.06), rgba(12, 8, 20, 0.52)),
+        linear-gradient(150deg, var(--book-accent, #c9a878), var(--book-accent2, #7c3aed));
+      box-shadow: 0 16px 28px -18px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+    .book-cover::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+      transform: translateX(-120%);
+      animation: shimmer 7s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .book-cover-kicker {
+      font-size: 7.5px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      opacity: 0.72;
+    }
+    .book-cover-title {
+      margin-top: auto;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      font-size: 18px;
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.28);
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+    .book-cover-rule {
+      width: 28px;
+      height: 1px;
+      margin: 10px 0 8px;
+      background: rgba(255, 255, 255, 0.6);
+    }
+    .book-cover-author {
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.82;
+    }
+    .book-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
+    }
+    .book-eyebrow {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+    .book-title {
+      margin-top: 5px;
+      font-size: 23px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    .book-subtitle {
+      margin-top: 3px;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--muted);
+    }
+    .book-blurb {
+      margin: 10px 0 12px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+    .book-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .book-chip {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--faint);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    .book-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: auto;
+    }
+    .book-open {
+      flex: 1;
+      min-height: 42px;
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--book-accent, #c9a878), var(--book-accent2, #7c3aed));
+      font: inherit;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.24);
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: filter 0.2s ease, transform 0.15s ease;
+    }
+    .book-open:active { transform: scale(0.97); }
+    @media (hover: hover) { .book-open:hover { filter: brightness(1.1); } }
+    .book-download {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    @media (hover: hover) { .book-download:hover { color: var(--text); border-color: rgba(255, 255, 255, 0.25); } }
+    .book-progress {
+      height: 3px;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--border);
+    }
+    .book-progress-fill {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--book-accent, #c9a878), var(--book-accent2, #7c3aed));
+      transition: width 0.25s ease;
+    }
+    .book-shelf-status {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--faint);
+    }
+    .book-shelf-status[hidden] { display: none; }
+    .book-shelf-error { margin-bottom: 8px; line-height: 1.5; }
+    .book-retry {
+      min-height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      background: var(--surface);
+      font: inherit;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ---- Reader (paper panel) ---- */
+    .reader {
+      --paper: #f6efe1;
+      --paper-2: #efe4cf;
+      --paper-ink: #2b241b;
+      --paper-muted: #6e6252;
+      --paper-line: rgba(83, 65, 40, 0.16);
+      position: relative;
+      color: var(--paper-ink);
+      background:
+        radial-gradient(1200px 500px at 50% -10%, rgba(255, 255, 255, 0.55), transparent 60%),
+        repeating-linear-gradient(0deg, rgba(90, 70, 40, 0.022) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(90, 70, 40, 0.016) 0 1px, transparent 1px 4px),
+        linear-gradient(180deg, var(--paper), var(--paper-2));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 26px;
+      box-shadow: 0 34px 90px -32px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      isolation: isolate;
+    }
+    .reader[hidden] { display: none; }
+    .reader-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(246, 239, 225, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--paper-line);
+      border-radius: 25px 25px 0 0;
+    }
+    .reader-bar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 11px clamp(14px, 4vw, 26px);
+    }
+    .reader-title-wrap {
+      flex: 1 1 160px;
+      min-width: 0;
+    }
+    .reader-kicker {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--paper-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .reader-title {
+      margin-top: 1px;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      font-size: 17px;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--paper-ink);
+    }
+    .reader-title:focus { outline: none; }
+    .reader-tools {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .reader-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-height: 36px;
+      padding: 0 11px;
+      border: 1px solid var(--paper-line);
+      border-radius: 10px;
+      color: var(--paper-ink);
+      background: rgba(255, 255, 255, 0.36);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    @media (hover: hover) { .reader-btn:hover { background: rgba(255, 255, 255, 0.62); } }
+    .reader-btn[aria-expanded="true"] { color: var(--paper); background: var(--paper-ink); border-color: var(--paper-ink); }
+    .reader-btn:disabled { opacity: 0.38; cursor: default; }
+    .reader-font {
+      display: inline-flex;
+      gap: 2px;
+      padding: 2px;
+      border: 1px solid var(--paper-line);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.24);
+    }
+    .reader-font .reader-btn {
+      min-height: 30px;
+      min-width: 32px;
+      padding: 0 6px;
+      border: 0;
+      background: transparent;
+      font-size: 12.5px;
+    }
+    .reader-font .reader-btn:hover { background: rgba(255, 255, 255, 0.5); }
+    .reader-chapter {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--paper-muted);
+      white-space: nowrap;
+    }
+    .reader-progress {
+      height: 3px;
+      overflow: hidden;
+      background: rgba(83, 65, 40, 0.12);
+    }
+    .reader-progress-bar {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #9b6b3f, #7c3aed);
+      transition: width 0.15s linear;
+    }
+    .reader-toc {
+      padding: 14px clamp(14px, 4vw, 26px) 16px;
+      border-bottom: 1px solid var(--paper-line);
+      background: rgba(255, 255, 255, 0.28);
+    }
+    .reader-toc[hidden] { display: none; }
+    .reader-toc ol {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 3px;
+      list-style: none;
+    }
+    .toc-link {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--paper-ink);
+      background: transparent;
+      font: inherit;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    @media (hover: hover) { .toc-link:hover { background: rgba(255, 255, 255, 0.5); } }
+    .toc-link[aria-current="true"] {
+      background: rgba(124, 58, 237, 0.1);
+      border-color: rgba(124, 58, 237, 0.22);
+      font-weight: 700;
+    }
+    .reader-page {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: clamp(28px, 6vw, 62px) clamp(20px, 5vw, 54px) 70px;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      font-size: 19px;
+      line-height: 1.72;
+      color: var(--paper-ink);
+    }
+    .reader-page p { margin: 0 0 1.05em; }
+    .reader-page em { font-style: italic; }
+    .reader-page strong { font-weight: 700; }
+    .reader-page a {
+      color: #6d3fc4;
+      text-decoration: underline;
+      text-decoration-color: rgba(109, 63, 196, 0.35);
+      text-underline-offset: 2px;
+    }
+    .reader-page code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.82em;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(83, 65, 40, 0.09);
+    }
+    .reader-page pre {
+      overflow-x: auto;
+      margin: 1.4em 0;
+      padding: 14px 16px;
+      border-radius: 8px;
+      background: rgba(43, 36, 27, 0.07);
+      font-size: 0.78em;
+      line-height: 1.5;
+    }
+    .reader-page pre code { padding: 0; background: transparent; font-size: 1em; }
+    .reader-page ul, .reader-page ol { margin: 0 0 1.1em 1.35em; }
+    .reader-page li { margin-bottom: 0.35em; }
+    .reader-page blockquote {
+      margin: 1.6em 0;
+      padding: 0.15em 0 0.15em 1.15em;
+      border-left: 3px solid rgba(124, 58, 237, 0.32);
+      color: #4a3d2d;
+      font-style: italic;
+    }
+    .reader-page blockquote p:last-child { margin-bottom: 0; }
+    .reader-page hr.scene-break {
+      height: auto;
+      margin: 2.3em 0;
+      border: 0;
+      text-align: center;
+    }
+    .reader-page hr.scene-break::after {
+      content: "· · ·";
+      color: var(--paper-muted);
+      letter-spacing: 0.55em;
+      font-size: 0.9em;
+    }
+    .book-front {
+      padding-bottom: 2.4em;
+      margin-bottom: 2.8em;
+      border-bottom: 1px solid var(--paper-line);
+      text-align: center;
+    }
+    .book-front h1 {
+      margin: 0 0 0.18em;
+      font-size: clamp(38px, 7vw, 62px);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+    }
+    .book-front h2 { margin: 0 0 0.35em; font-size: 1.5em; }
+    .book-front p { margin: 0 0 0.5em; font-size: 0.96em; }
+    .book-front em { color: var(--paper-muted); }
+    .book-front blockquote {
+      margin: 2.2em auto 0;
+      max-width: 30em;
+      padding: 0;
+      border: 0;
+      color: var(--paper-muted);
+      font-size: 0.92em;
+      text-align: center;
+    }
+    .book-front hr.scene-break { display: none; }
+    .book-chapter {
+      scroll-margin-top: 96px;
+      margin-top: 3.4em;
+    }
+    .book-front + .book-chapter { margin-top: 0; }
+    .book-chapter + .book-chapter {
+      padding-top: 3.4em;
+      border-top: 1px solid var(--paper-line);
+    }
+    .chapter-title {
+      margin: 0 0 1.15em;
+      font-size: clamp(27px, 4.4vw, 35px);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+    }
+    .chapter-num {
+      display: block;
+      margin-bottom: 0.45em;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Inter, sans-serif;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--paper-muted);
+    }
+    .chapter-body > p:first-of-type::first-letter {
+      float: left;
+      margin: 0.06em 0.12em 0 0;
+      font-size: 3.15em;
+      line-height: 0.82;
+      font-weight: 700;
+      color: #7c3aed;
+    }
+    .reader-end {
+      padding: 1.5em clamp(20px, 5vw, 54px) 4em;
+      text-align: center;
+      border-top: 1px solid var(--paper-line);
+    }
+    .reader-end[hidden] { display: none; }
+    .reader-end-mark {
+      display: block;
+      margin-bottom: 0.4em;
+      font-size: 26px;
+      color: var(--paper-muted);
+    }
+    .reader-end p {
+      margin: 0 0 1.1em;
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      font-size: 1.05em;
+      font-style: italic;
+      color: var(--paper-muted);
+    }
+    .reader-end .reader-btn { min-height: 42px; padding: 0 16px; }
+    .reader-loading, .reader-error {
+      padding: 4em 1em;
+      text-align: center;
+      color: var(--paper-muted);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Inter, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .reader-error-title {
+      font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+      font-size: 1.35em;
+      color: var(--paper-ink);
+    }
+    .reader-error .reader-btn { margin-top: 1em; }
+    .reader-loading::before {
+      content: "❦";
+      display: block;
+      margin-bottom: 0.5em;
+      font-size: 28px;
+      color: var(--paper-muted);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    body.is-reading-room .status {
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+    }
+    .reading-room.is-reading .reading-head { display: none; }
+    [data-theme="light"] .reader {
+      box-shadow: 0 30px 80px -36px rgba(40, 28, 14, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+    @media (hover: hover) {
+      [data-theme="light"] .book-card:hover { border-color: rgba(18, 20, 40, 0.22); }
+      [data-theme="light"] .book-download:hover { border-color: rgba(18, 20, 40, 0.25); }
+    }
+    @media (max-width: 700px) {
+      .reading-head { flex-direction: column; align-items: flex-start; }
+      .reading-note { max-width: none; text-align: left; }
+      .book-card { gap: 14px; padding: 14px; }
+      .book-cover { flex-basis: 112px; padding: 13px 10px 10px 16px; }
+      .book-cover-title { font-size: 15px; }
+      .book-cover-kicker, .book-cover-author { display: none; }
+      .book-title { font-size: 21px; }
+      .reader-bar-row { padding: 10px 14px; }
+      .reader-tools { flex: 1 1 100%; justify-content: flex-end; }
+      .reader-chapter { margin-right: auto; }
+      .book-chapter { scroll-margin-top: 132px; }
+      .reader-page { padding: 30px 20px 56px; }
+      .book-front h1 { font-size: 42px; }
+    }
+    @media (max-width: 400px) {
+      .book-cover { flex-basis: 100px; padding: 11px 8px 9px 14px; }
+      .book-cover-title { font-size: 14px; }
+      .book-open { font-size: 12.5px; }
+      .book-download { padding: 0 9px; font-size: 11.5px; }
+    }
+
     /* ---- Empty state ---- */
     .empty {
       display: none;
@@ -713,7 +1331,7 @@
 
     /* ---- Reduced motion ---- */
     @media (prefers-reduced-motion: reduce) {
-      .blob, .tile::after, .kicker::before { animation: none !important; }
+      .blob, .tile::after, .kicker::before, .book-cover::after, .reader-loading::before { animation: none !important; }
       .hero h1 .grad { animation: none !important; }
       .reveal { opacity: 1; transform: none; transition: none; }
       html { scroll-behavior: auto; }
@@ -775,7 +1393,7 @@
     <header class="hero">
       <p class="kicker">GitHub Pages · PWA Arcade</p>
       <h1>random<span class="grad">2</span></h1>
-      <p class="sub">A shelf of installable mini-games, a media player and one dev tool. Everything runs right in the browser — no accounts, no downloads.</p>
+      <p class="sub">A shelf of installable mini-games, a media player, one dev tool, and a reading room. Everything runs right in the browser — no accounts, no downloads.</p>
       <p class="hint">On iPhone: tap <strong>Share → Add to Home Screen</strong> inside a game for fullscreen, offline play.</p>
       <p class="hint">🐍 Snake daily challenge seed: <strong id="daily-seed">—</strong> · rolls over at midnight</p>
 
@@ -822,6 +1440,7 @@
           <button class="cat" data-cat="app" aria-pressed="false" type="button">Apps</button>
           <button class="cat" data-cat="tool" aria-pressed="false" type="button">Tools</button>
         </div>
+        <a class="room-link" href="#reading-room">📚 Reading room</a>
       </div>
 
       <p class="visually-hidden" id="filter-status" aria-live="polite"></p>
@@ -1568,16 +2187,62 @@
         <span class="big">🕳️</span>
         Nothing matches that filter.<br>Try clearing the search or picking <b>All</b>.
       </div>
+
+      <section class="reading-room" id="reading-room" aria-labelledby="reading-room-title">
+        <div class="reading-head">
+          <div class="reading-head-copy">
+            <p class="reading-kicker">New · The Reading Room</p>
+            <h2 id="reading-room-title">The Reading Room</h2>
+            <p class="reading-sub">Short books, read right here. Plain Markdown, no accounts, no app to install — open a cover and the page becomes a quiet place to read.</p>
+          </div>
+          <p class="reading-note">The first book is a novella in seven laps. More will arrive when they are ready.</p>
+        </div>
+
+        <p class="book-shelf-status" id="book-shelf-status" role="status">Warming up the reading lamp…</p>
+        <div class="book-shelf" id="book-shelf" aria-label="Books"></div>
+
+        <div class="reader" id="book-reader" aria-labelledby="reader-title" hidden>
+          <div class="reader-bar">
+            <div class="reader-bar-row">
+              <button class="reader-btn" id="reader-close" type="button" aria-label="Close the book and return to the shelf">← Shelf</button>
+              <div class="reader-title-wrap">
+                <p class="reader-kicker" id="reader-kicker">The Reading Room</p>
+                <h3 class="reader-title" id="reader-title" tabindex="-1">The Roundabout</h3>
+              </div>
+              <div class="reader-tools">
+                <span class="reader-chapter" id="reader-chapter"></span>
+                <button class="reader-btn" id="reader-toc-btn" type="button" aria-expanded="false" aria-controls="reader-toc">☰ Chapters</button>
+                <div class="reader-font" role="group" aria-label="Text size">
+                  <button class="reader-btn" id="reader-smaller" type="button" aria-label="Decrease text size">A−</button>
+                  <button class="reader-btn" id="reader-larger" type="button" aria-label="Increase text size">A+</button>
+                </div>
+                <a class="reader-btn" id="reader-download" href="#" download>↓ .md</a>
+              </div>
+            </div>
+            <div class="reader-progress" id="reader-progress" role="progressbar" aria-label="Reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="reader-progress-bar" id="reader-progress-bar"></span>
+            </div>
+          </div>
+          <nav class="reader-toc" id="reader-toc" aria-label="Chapters" hidden></nav>
+          <article class="reader-page" id="reader-content"></article>
+          <div class="reader-end" id="reader-end" hidden>
+            <span class="reader-end-mark" aria-hidden="true">❦</span>
+            <p>The End</p>
+            <button class="reader-btn" id="reader-end-close" type="button">← Back to the shelf</button>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
-      <p>Games are procedural; the player uses one cat photo as its background. No tracking, and everything works offline once installed.</p>
+      <p>Games are procedural; the player uses one cat photo as its background. The Reading Room is plain Markdown. No tracking, and everything works offline once installed.</p>
       <p><a href="https://github.com/LucaGandolfi77/random2">github.com/LucaGandolfi77/random2</a></p>
       <p><a href="portfolio/">Portfolio — the same work as six case studies ↗</a></p>
       <div class="foot-badges">
         <span class="foot-badge">HTML5 Canvas</span>
         <span class="foot-badge">WebAudio</span>
         <span class="foot-badge">Service Workers</span>
+        <span class="foot-badge">Markdown stories</span>
         <span class="foot-badge">iPhone-ready</span>
         <span class="foot-badge">Zero build*</span>
       </div>
@@ -1588,6 +2253,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="shared/arcade.js"></script>
+  <script src="shared/book-reader.js"></script>
   <script>
   (function () {
     "use strict";

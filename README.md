@@ -1556,9 +1556,17 @@ project. It is itself an installable PWA.
   browser offers installation)
 - **Online/offline pill** in the corner that flips to
   "Offline — games still work"
-- Hub service worker (`sw.js`, network-first for navigations,
-  stale-while-revalidate for the shell) — registered with **relative paths**, so
-  it works both at a domain root and under GitHub Pages' `/random2/` subpath
+- Hub service worker (`sw.js`, network-first for navigations and
+  `/books/`, stale-while-revalidate for the shell, precached shelf and first
+  book) — registered with **relative paths**, so it works both at a domain
+  root and under GitHub Pages' `/random2/` subpath
+- **📚 The Reading Room**: a shelf of Markdown books rendered in-page by a
+  dependency-free reader ([`shared/book-reader.js`](shared/book-reader.js)) —
+  chapter menu, per-book reading progress, A−/A+ type size and a download
+  link. The shelf is data-driven from
+  [`books/books.json`](books/books.json); drop a `.md` file in `books/` and add
+  one manifest entry to publish it. The first book is
+  [`The Roundabout`](books/the-roundabout.md), a novella in seven laps.
 - **🏆 Your records dashboard**: reads each game's high score from device
   storage and shows it on the hub, with a "last played" timestamp and a
   one-click reset (currently Snake, King Shot, Plane Shooter, Slot Machine and
@@ -1595,9 +1603,13 @@ project. It is itself an installable PWA.
 random2/
 ├── index.html              # hub/landing page (self-contained, own SW: sw.js)
 ├── manifest.webmanifest    # hub manifest
-├── sw.js                   # hub service worker (shell only, relative scope)
+├── sw.js                   # hub service worker (shell + Reading Room)
 ├── shared/
-│   └── arcade.js           # micro-library: audio, particles, storage, settings
+│   ├── arcade.js           # micro-library: audio, particles, storage, settings
+│   └── book-reader.js      # Reading Room: shelf, Markdown renderer, reader UI
+├── books/
+│   ├── books.json          # Reading Room shelf manifest
+│   └── the-roundabout.md   # first book (plain Markdown)
 ├── icons/                  # hub icons (PNG 192/512)
 ├── apple-touch-icon.png
 ├── .github/workflows/pages.yml   # build + deploy pipeline
@@ -1639,6 +1651,13 @@ Design rules that keep the repo boring (in a good way):
   the iOS install-coaching overlay. It is a plain script (no modules)
   exposing a single `window.R2` global, and each game's service worker
   precaches it so offline play keeps working.
+- **`shared/book-reader.js`** is the Reading Room's only engine: a small
+  Markdown parser/renderer (headings, emphasis, links, lists, blockquotes,
+  code fences, scene breaks; raw HTML is escaped), plus shelf rendering and
+  reader state. Books stay plain `.md` files, so adding one never touches the
+  hub's markup. Progress lives in `localStorage` under
+  `random2-reading-room-v1`, and the hub SW serves `/books/` network-first with
+  a cache fallback so the shelf keeps working offline.
 - **Relative paths everywhere** in the static games, so they run identically at
   a domain root, under `/random2/`, or from any subfolder.
 - **One service worker per game**, each with its own cache name; the hub SW

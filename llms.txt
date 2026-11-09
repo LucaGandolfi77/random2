@@ -1,10 +1,10 @@
 # random2
 
-A monorepo of installable mini-games, a media player (all PWAs) and two
-analysis tools. Every web project runs entirely in the browser, works offline
-once installed, and has zero trackers. The games use no binary art assets
-(everything is drawn procedurally); `purr-player-pwa/` adds one photo as its
-background and app icons.
+A monorepo of installable mini-games, a media player (all PWAs), two
+analysis tools and a small Markdown reading room. Every web project runs
+entirely in the browser, works offline once installed, and has zero trackers.
+The games use no binary art assets (everything is drawn procedurally);
+`purr-player-pwa/` adds one photo as its background and app icons.
 
 ## Portfolio
 
@@ -122,6 +122,10 @@ synthesised, so there is not one audio file in the folder.
 
 `shared/arcade.js` — WebAudio blips, particles, localStorage helpers, seeded
 RNG (`dailySeed`, `mulberry32`), playtime tracking, and the `R2.stats` run log.
+
+`shared/book-reader.js` — the hub's Reading Room: loads `books/books.json`,
+renders the shelf, parses Markdown (raw HTML escaped), and provides the inline
+reader with chapter menu, saved position and text-size controls.
 
 `shared/chart.js` — zero-dependency Canvas 2D charts: line, area, bar,
 histogram, scatter, boxplot, heatmap, sparkline. DPR-aware, honours
