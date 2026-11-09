@@ -52,5 +52,5 @@ test("the shell loads no remote resources", () => {
 
 test("the service worker cache name belongs to this app", () => {
   const sw = read("service-worker.js");
-  assert.match(sw, /const CACHE_NAME = "purr-player-v1"/);
+  assert.match(sw, /const CACHE_NAME = "purr-player-v\d+"/);
 });

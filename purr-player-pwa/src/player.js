@@ -1,6 +1,7 @@
 import { cleanName } from "./format.js";
 
 const REPEATS = ["off", "all", "one"];
+const DEFAULT_VOLUME = 0.9;
 
 export class Player {
   constructor({ video, audio, onTrack, onState, onError }) {
@@ -206,8 +207,13 @@ export class Player {
   }
 
   toggleMute() {
-    const muted = !(this.active ? this.active.muted : this.audio.muted);
-    [this.video, this.audio].forEach((el) => { el.muted = muted; });
+    /* The UI treats "muted" and "volume 0" as the same silent state, so the
+       button must too: if we're silent, this tap brings the sound back
+       (raising a zero volume, otherwise just unmuting); otherwise it mutes. */
+    const el = this.active || this.audio;
+    const silent = el.muted || !el.volume;
+    [this.video, this.audio].forEach((n) => { n.muted = !silent; });
+    if (silent && !el.volume) this.setVolume(DEFAULT_VOLUME);
     this.emit();
   }
 

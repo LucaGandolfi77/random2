@@ -3,7 +3,7 @@
    are never fetched from here: they live in IndexedDB as blobs and are played
    through object URLs, so they stay private to the device. */
 
-const CACHE_NAME = "purr-player-v1";
+const CACHE_NAME = "purr-player-v2";
 const ASSETS = [
   "./",
   "./index.html",

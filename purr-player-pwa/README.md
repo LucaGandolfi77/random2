@@ -108,4 +108,5 @@ Il service worker richiede un'origine sicura. Con `http://` su rete locale Andro
 - Gli object URL vengono revocati alla rimozione del file e alla chiusura della pagina.
 - `navigator.storage.persist()` chiede al browser di non svuotare la libreria per mancanza di spazio; il browser può comunque negarlo.
 - Su iOS l'installazione e la riproduzione in background hanno regole più restrittive; l'app è pensata per Android.
+- Su iOS il selettore file usa MIME ed estensioni esplicite al posto di `audio/*`: WebKit (bug 242110) tratta quel filtro come `video/*` e rende gli MP3 non selezionabili nella libreria file.
 - Il formato di un file può essere accettato per estensione ma non essere decodificabile: in quel caso compare un messaggio e la riproduzione non parte.

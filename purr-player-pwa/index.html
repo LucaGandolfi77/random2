@@ -155,7 +155,11 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <input id="fileInput" type="file" accept="audio/*,video/*" multiple hidden>
+  <!-- iOS WebKit bug 242110 treats accept="audio/*" as accept="video/*", which
+       grays out every MP3 in the picker. List explicit MIME types and
+       extensions instead (mirrors src/format.js) — iOS honours both. -->
+  <input id="fileInput" class="file-picker" type="file" multiple
+    accept="audio/mpeg,audio/mp3,audio/mp4,audio/aac,audio/ogg,audio/opus,audio/wav,audio/flac,audio/webm,video/mp4,video/webm,video/quicktime,.mp3,.m4a,.aac,.ogg,.oga,.opus,.wav,.flac,.weba,.mp4,.m4v,.webm,.ogv,.mov,.mkv,.avi">
 
   <script type="module" src="src/main.js"></script>
 </body>

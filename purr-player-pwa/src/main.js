@@ -528,8 +528,11 @@ async function restore() {
 
 function applySavedSettings() {
   try {
-    const volume = Number(localStorage.getItem("purr-player-volume"));
-    if (Number.isFinite(volume) && volume >= 0 && volume <= 1) state.volume = volume;
+    const stored = localStorage.getItem("purr-player-volume");
+    if (stored !== null && stored !== "") {
+      const volume = Number(stored);
+      if (Number.isFinite(volume) && volume >= 0 && volume <= 1) state.volume = volume;
+    }
     const repeat = localStorage.getItem("purr-player-repeat");
     if (["off", "all", "one"].includes(repeat)) state.player.setRepeat(repeat);
     const shuffle = localStorage.getItem("purr-player-shuffle");

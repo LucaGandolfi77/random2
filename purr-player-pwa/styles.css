@@ -48,6 +48,24 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 img { display: block; }
 .hidden { display: none !important; }
 
+/* The file input stays rendered: iOS Safari ignores .click() on inputs that
+   are not displayed (display:none / hidden). Invisible but present, and it
+   never receives taps itself — the buttons trigger it programmatically. */
+.file-picker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  pointer-events: none;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 /* ---------- background cat ---------- */
 
 .bg {
