@@ -1,0 +1,32 @@
+{
+  "name": "Ashen Crown",
+  "short_name": "Ashen Crown",
+  "description": "An original dark fantasy CRPG set in the broken world of Elarion.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0b0c",
+  "theme_color": "#0d0b0c",
+  "categories": ["games", "roleplaying"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

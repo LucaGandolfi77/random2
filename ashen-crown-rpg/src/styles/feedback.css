@@ -1,0 +1,219 @@
+.toast-stack {
+  position: fixed;
+  z-index: 85;
+  top: calc(4.4rem + var(--safe-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: none;
+  width: min(520px, 88vw);
+}
+
+.in-combat .toast-stack {
+  left: calc(1rem + var(--safe-left));
+  top: calc(4.35rem + var(--safe-top));
+  transform: none;
+  align-items: flex-start;
+  width: min(320px, 68vw);
+}
+
+.has-modal .toast-stack {
+  display: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.85rem;
+  background: linear-gradient(90deg, rgba(16, 13, 16, 0.97), rgba(11, 9, 12, 0.94));
+  border: 1px solid rgba(199, 167, 108, 0.24);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  text-align: left;
+  pointer-events: auto;
+  animation: fadeUp 220ms ease both;
+  backdrop-filter: blur(8px);
+}
+
+.toast-icon {
+  font-size: 0.72rem;
+  color: var(--gold);
+}
+
+.toast-success {
+  border-color: rgba(141, 162, 119, 0.36);
+  color: var(--green-bright);
+}
+
+.toast-success .toast-icon {
+  color: var(--green-bright);
+}
+
+.toast-warning {
+  border-color: rgba(216, 164, 110, 0.38);
+  color: #dfb483;
+}
+
+.toast-danger {
+  border-color: rgba(172, 91, 79, 0.42);
+  color: var(--red-bright);
+}
+
+.toast-danger .toast-icon {
+  color: var(--red-bright);
+}
+
+.toast-quest {
+  border-color: rgba(199, 167, 108, 0.46);
+  color: var(--gold-bright);
+  background: linear-gradient(90deg, rgba(32, 25, 18, 0.98), rgba(12, 10, 12, 0.95));
+}
+
+.check-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 88;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 3, 5, 0.5);
+  backdrop-filter: blur(2px);
+  animation: fadeIn 160ms ease both;
+  padding: 1rem;
+}
+
+.check-card {
+  width: min(380px, 92vw);
+  padding: 1.4rem 1.5rem 1.2rem;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 50% 24%, rgba(199, 167, 108, 0.14), transparent 52%),
+    linear-gradient(170deg, rgba(26, 21, 24, 0.98), rgba(9, 8, 10, 0.99));
+  border: 1px solid rgba(199, 167, 108, 0.38);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  animation: fadeUp 220ms ease both;
+}
+
+.check-card.is-failure {
+  background:
+    radial-gradient(ellipse at 50% 24%, rgba(172, 91, 79, 0.14), transparent 52%),
+    linear-gradient(170deg, rgba(26, 20, 22, 0.98), rgba(9, 8, 10, 0.99));
+  border-color: rgba(172, 91, 79, 0.4);
+}
+
+.check-kicker {
+  font-family: var(--font-display);
+  font-size: 0.56rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.check-die-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin: 0.7rem 0;
+}
+
+.check-die {
+  width: 64px;
+  height: 64px;
+  transform: rotate(45deg);
+  border: 1px solid rgba(199, 167, 108, 0.55);
+  background: linear-gradient(145deg, #2a2226, #100d10);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(199, 167, 108, 0.08);
+}
+
+.check-die span {
+  transform: rotate(-45deg);
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  color: var(--gold-bright);
+}
+
+.is-failure .check-die {
+  border-color: rgba(172, 91, 79, 0.58);
+}
+
+.is-failure .check-die span {
+  color: var(--red-bright);
+}
+
+.check-d20 {
+  font-family: var(--font-display);
+  font-size: 0.44rem;
+  letter-spacing: 0.15em;
+  color: var(--ink-faint);
+}
+
+.check-card h2 {
+  font-size: 1.35rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-bright);
+  margin-bottom: 0.35rem;
+}
+
+.check-card.is-failure h2 {
+  color: var(--red-bright);
+}
+
+.check-total {
+  font-size: 0.9rem;
+  color: var(--ink-dim);
+}
+
+.check-total strong {
+  color: var(--gold-bright);
+  font-family: var(--font-display);
+}
+
+.check-vs {
+  color: var(--ink-faint);
+}
+
+.check-crit {
+  margin-top: 0.4rem;
+  font-family: var(--font-display);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.check-flavor {
+  margin-top: 0.55rem;
+  font-style: italic;
+  font-size: 0.84rem;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 820px) {
+  .toast-stack {
+    top: calc(12.2rem + var(--safe-top));
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    width: min(360px, 88vw);
+  }
+
+  .in-combat .toast-stack {
+    top: calc(9.5rem + var(--safe-top));
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
+    width: min(360px, 88vw);
+  }
+
+  .toast {
+    font-size: 0.8rem;
+  }
+}
