@@ -1,0 +1,685 @@
+# Architectural grammars. Every parameter is a prior, not a measurement.
+# Values are calibrated on the Emilia-Romagna historic centre typology and are
+# always emitted with an explicit confidence tier by the pipeline.
+
+archetypes:
+  romanesque_church:
+    label: Romanico
+    category: religious
+    landmark: true
+    floor_height_m: 6.0
+    ground_floor_height_m: 7.0
+    bay_width_m: 4.2
+    window:
+      type: arched
+      width_ratio: 0.24
+      height_ratio: 0.55
+      frame_color: "#b9a184"
+      sill: false
+    balcony:
+      probability: 0.0
+    shutters:
+      probability: 0.0
+    roof:
+      shape: gabled
+      pitch_deg: 21
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.45
+    facade:
+      material: stone
+      primary: "#cbb79a"
+      secondary: ["#b9a184", "#d8c9ae"]
+      roughness: 0.92
+      metalness: 0.0
+    cornice_m: 0.35
+    pilasters: true
+    shopfront:
+      probability: 0.0
+    door:
+      type: portal
+      color: "#5b3a28"
+    notes: "Romanesque brick/stone church; portal, rose window, tall chancel windows."
+    procedural_flags:
+      - facade_window_layout
+      - portal_detail
+      - rose_window
+
+  church:
+    label: Chiesa
+    category: religious
+    landmark: true
+    floor_height_m: 5.5
+    ground_floor_height_m: 6.0
+    bay_width_m: 4.0
+    window:
+      type: arched
+      width_ratio: 0.26
+      height_ratio: 0.5
+      frame_color: "#b9a184"
+      sill: false
+    balcony:
+      probability: 0.0
+    shutters:
+      probability: 0.0
+    roof:
+      shape: gabled
+      pitch_deg: 20
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.4
+    facade:
+      material: plaster
+      primary: "#d8c9ae"
+      secondary: ["#cbb79a", "#b9a184"]
+      roughness: 0.9
+      metalness: 0.0
+    cornice_m: 0.3
+    pilasters: true
+    shopfront:
+      probability: 0.0
+    door:
+      type: portal
+      color: "#4f3324"
+    notes: "Minor church or oratory."
+    procedural_flags:
+      - facade_window_layout
+      - portal_detail
+
+  city_gate:
+    label: Porta storica
+    category: fortification
+    landmark: true
+    floor_height_m: 6.0
+    ground_floor_height_m: 7.0
+    bay_width_m: 4.0
+    window:
+      type: single
+      width_ratio: 0.18
+      height_ratio: 0.4
+      frame_color: "#9c8b72"
+      sill: false
+    balcony:
+      probability: 0.0
+    shutters:
+      probability: 0.0
+    roof:
+      shape: gabled
+      pitch_deg: 18
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.5
+    facade:
+      material: brick
+      primary: "#9e5b45"
+      secondary: ["#8b4e3b", "#b06a51"]
+      roughness: 0.95
+      metalness: 0.0
+    cornice_m: 0.2
+    pilasters: false
+    shopfront:
+      probability: 0.0
+    door:
+      type: archway
+      color: "#3f2a1d"
+    notes: "Medieval gate with a round archway."
+    procedural_flags:
+      - archway
+      - brick_detail
+
+  neoclassical_palazzo:
+    label: Neoclassico
+    category: residential_prestige
+    landmark: false
+    floor_height_m: 3.6
+    ground_floor_height_m: 4.4
+    bay_width_m: 3.1
+    window:
+      type: single
+      width_ratio: 0.42
+      height_ratio: 0.62
+      frame_color: "#e6dfd2"
+      sill: true
+      piano_nobile_arch: true
+    balcony:
+      probability: 0.55
+      depth_m: 1.0
+      type: stone
+      railing: stone
+      continuous: false
+      floors: [1]
+    shutters:
+      probability: 0.25
+      type: louvered
+    roof:
+      shape: hipped
+      pitch_deg: 20
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.6
+    facade:
+      material: plaster
+      primary: "#d8c9ae"
+      secondary: ["#c9a66b", "#cdb794", "#e0d5c1"]
+      roughness: 0.82
+      metalness: 0.0
+    cornice_m: 0.55
+    pilasters: true
+    shopfront:
+      probability: 0.35
+    door:
+      type: portal
+      color: "#4a3022"
+    notes: "Nineteenth-century palazzo: regular bays, tall piano nobile, stone cornice."
+    procedural_flags:
+      - facade_window_layout
+      - cornice
+      - pilasters
+
+  liberty_villa:
+    label: Liberty
+    category: residential
+    landmark: false
+    floor_height_m: 3.4
+    ground_floor_height_m: 4.0
+    bay_width_m: 2.9
+    window:
+      type: french
+      width_ratio: 0.46
+      height_ratio: 0.68
+      frame_color: "#efe8da"
+      sill: true
+    balcony:
+      probability: 0.65
+      depth_m: 0.9
+      type: wrought_iron
+      railing: iron
+      continuous: false
+      floors: [1]
+    shutters:
+      probability: 0.45
+      type: roller
+    roof:
+      shape: hipped
+      pitch_deg: 24
+      material: tiles
+      color: "#a8664d"
+      overhang_m: 0.75
+    facade:
+      material: plaster
+      primary: "#d9c48a"
+      secondary: ["#c9a66b", "#e0d5c1", "#c98f7a"]
+      roughness: 0.78
+      metalness: 0.0
+    cornice_m: 0.35
+    pilasters: false
+    shopfront:
+      probability: 0.05
+    door:
+      type: french_door
+      color: "#5b3a28"
+    notes: "Early-twentieth-century Liberty villa: asymmetric details, iron balconies."
+    procedural_flags:
+      - facade_window_layout
+      - balcony_ironwork
+
+  early_1900_apartment:
+    label: Primo Novecento
+    category: residential
+    landmark: false
+    floor_height_m: 3.3
+    ground_floor_height_m: 4.0
+    bay_width_m: 2.9
+    window:
+      type: single
+      width_ratio: 0.44
+      height_ratio: 0.6
+      frame_color: "#e6dfd2"
+      sill: true
+    balcony:
+      probability: 0.5
+      depth_m: 0.85
+      type: concrete
+      railing: iron
+      continuous: false
+      floors: [1, 2]
+    shutters:
+      probability: 0.6
+      type: louvered
+    roof:
+      shape: gabled
+      pitch_deg: 22
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.6
+    facade:
+      material: plaster
+      primary: "#c9a66b"
+      secondary: ["#d8c9ae", "#c98f7a", "#b9b3a7"]
+      roughness: 0.85
+      metalness: 0.0
+    cornice_m: 0.4
+    pilasters: false
+    shopfront:
+      probability: 0.4
+    door:
+      type: single
+      color: "#513524"
+    notes: "Early-twentieth-century apartment block with regular window grid."
+    procedural_flags:
+      - facade_window_layout
+      - shutters
+
+  post_war_apartment:
+    label: Dopoguerra
+    category: residential
+    landmark: false
+    floor_height_m: 3.0
+    ground_floor_height_m: 3.6
+    bay_width_m: 3.0
+    window:
+      type: sliding
+      width_ratio: 0.5
+      height_ratio: 0.52
+      frame_color: "#b9b3a7"
+      sill: true
+    balcony:
+      probability: 0.6
+      depth_m: 1.1
+      type: concrete
+      railing: concrete
+      continuous: true
+      floors: [1, 2, 3]
+    shutters:
+      probability: 0.35
+      type: roller
+    roof:
+      shape: flat
+      pitch_deg: 2
+      material: membrane
+      color: "#6a6862"
+      overhang_m: 0.15
+    facade:
+      material: plaster
+      primary: "#cdb794"
+      secondary: ["#b9b3a7", "#d8c9ae", "#c9a66b"]
+      roughness: 0.88
+      metalness: 0.0
+    cornice_m: 0.2
+    pilasters: false
+    shopfront:
+      probability: 0.5
+    door:
+      type: single
+      color: "#3f2a1d"
+    notes: "Post-war residential block; flat roof, continuous balconies."
+    procedural_flags:
+      - facade_window_layout
+      - continuous_balcony
+
+  1960s_concrete:
+    label: Anni Sessanta
+    category: residential
+    landmark: false
+    floor_height_m: 2.9
+    ground_floor_height_m: 3.4
+    bay_width_m: 3.2
+    window:
+      type: sliding
+      width_ratio: 0.62
+      height_ratio: 0.5
+      frame_color: "#8a8f8c"
+      sill: false
+    balcony:
+      probability: 0.7
+      depth_m: 1.3
+      type: concrete
+      railing: concrete
+      continuous: true
+      floors: [1, 2, 3, 4]
+    shutters:
+      probability: 0.15
+      type: roller
+    roof:
+      shape: flat
+      pitch_deg: 1
+      material: membrane
+      color: "#5a5a58"
+      overhang_m: 0.1
+    facade:
+      material: concrete
+      primary: "#b8b6ae"
+      secondary: ["#a5a39b", "#c3c1b9", "#9a978f"]
+      roughness: 0.94
+      metalness: 0.0
+    cornice_m: 0.15
+    pilasters: false
+    shopfront:
+      probability: 0.4
+    door:
+      type: single
+      color: "#333333"
+    notes: "1960s concrete apartment building."
+    procedural_flags:
+      - facade_window_layout
+      - continuous_balcony
+
+  historic_townhouse:
+    label: Casa storica
+    category: residential
+    landmark: false
+    floor_height_m: 3.2
+    ground_floor_height_m: 4.1
+    bay_width_m: 2.7
+    window:
+      type: single
+      width_ratio: 0.42
+      height_ratio: 0.6
+      frame_color: "#e6dfd2"
+      sill: true
+    balcony:
+      probability: 0.3
+      depth_m: 0.75
+      type: wrought_iron
+      railing: iron
+      continuous: false
+      floors: [1]
+    shutters:
+      probability: 0.55
+      type: louvered
+    roof:
+      shape: gabled
+      pitch_deg: 23
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.5
+    facade:
+      material: plaster
+      primary: "#c9a66b"
+      secondary: ["#d8c9ae", "#c98f7a", "#b5654a", "#b9b3a7"]
+      roughness: 0.88
+      metalness: 0.0
+    cornice_m: 0.25
+    pilasters: false
+    shopfront:
+      probability: 0.45
+    door:
+      type: single
+      color: "#4a3022"
+    notes: "Traditional townhouse on a narrow medieval lot."
+    procedural_flags:
+      - facade_window_layout
+      - shutters
+
+  mixed_use_shopfront:
+    label: Casa-bottega
+    category: mixed_use
+    landmark: false
+    floor_height_m: 3.2
+    ground_floor_height_m: 3.9
+    bay_width_m: 3.0
+    window:
+      type: single
+      width_ratio: 0.42
+      height_ratio: 0.58
+      frame_color: "#e6dfd2"
+      sill: true
+    balcony:
+      probability: 0.35
+      depth_m: 0.8
+      type: wrought_iron
+      railing: iron
+      continuous: false
+      floors: [1]
+    shutters:
+      probability: 0.4
+      type: louvered
+    roof:
+      shape: gabled
+      pitch_deg: 22
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.5
+    facade:
+      material: plaster
+      primary: "#cdb794"
+      secondary: ["#c9a66b", "#d8c9ae", "#c98f7a"]
+      roughness: 0.86
+      metalness: 0.0
+    cornice_m: 0.3
+    pilasters: false
+    shopfront:
+      probability: 0.85
+    door:
+      type: single
+      color: "#4a3022"
+    notes: "Ground-floor shops with residential floors above."
+    procedural_flags:
+      - facade_window_layout
+      - shopfront
+
+  modern_office:
+    label: Uffici contemporanei
+    category: commercial
+    landmark: false
+    floor_height_m: 3.4
+    ground_floor_height_m: 3.8
+    bay_width_m: 1.8
+    window:
+      type: sliding
+      width_ratio: 0.86
+      height_ratio: 0.78
+      frame_color: "#6f7a7d"
+      sill: false
+    balcony:
+      probability: 0.0
+    shutters:
+      probability: 0.0
+    roof:
+      shape: flat
+      pitch_deg: 1
+      material: membrane
+      color: "#5a5a58"
+      overhang_m: 0.1
+    facade:
+      material: glass
+      primary: "#5d7b86"
+      secondary: ["#7d9aa3", "#4b656f"]
+      roughness: 0.25
+      metalness: 0.35
+    cornice_m: 0.1
+    pilasters: false
+    shopfront:
+      probability: 0.2
+    door:
+      type: glass
+      color: "#2f3c40"
+    notes: "Contemporary glazed office infill."
+    procedural_flags:
+      - facade_window_layout
+
+  industrial:
+    label: Industriale
+    category: industrial
+    landmark: false
+    floor_height_m: 5.0
+    ground_floor_height_m: 6.0
+    bay_width_m: 5.0
+    window:
+      type: single
+      width_ratio: 0.55
+      height_ratio: 0.45
+      frame_color: "#6f7a7d"
+      sill: false
+    balcony:
+      probability: 0.0
+    shutters:
+      probability: 0.0
+    roof:
+      shape: gabled
+      pitch_deg: 14
+      material: metal
+      color: "#8a8f8c"
+      overhang_m: 0.3
+    facade:
+      material: brick
+      primary: "#9e5b45"
+      secondary: ["#8b4e3b", "#b06a51"]
+      roughness: 0.93
+      metalness: 0.0
+    cornice_m: 0.1
+    pilasters: false
+    shopfront:
+      probability: 0.0
+    door:
+      type: industrial
+      color: "#4a4a4a"
+    notes: "Industrial or warehouse building."
+    procedural_flags:
+      - facade_window_layout
+
+  theatre:
+    label: Teatro storico
+    category: public
+    landmark: true
+    floor_height_m: 4.0
+    ground_floor_height_m: 5.0
+    bay_width_m: 3.6
+    window:
+      type: arched
+      width_ratio: 0.3
+      height_ratio: 0.55
+      frame_color: "#e6dfd2"
+      sill: true
+    balcony:
+      probability: 0.0
+    shutters:
+      probability: 0.0
+    roof:
+      shape: gabled
+      pitch_deg: 18
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.6
+    facade:
+      material: plaster
+      primary: "#d8c9ae"
+      secondary: ["#c9a66b", "#cbb79a"]
+      roughness: 0.84
+      metalness: 0.0
+    cornice_m: 0.7
+    pilasters: true
+    shopfront:
+      probability: 0.0
+    door:
+      type: portal
+      color: "#4a3022"
+    notes: "Neoclassical theatre: tall arched openings, string courses, heavy cornice."
+    procedural_flags:
+      - facade_window_layout
+      - cornice
+      - pilasters
+
+  station_building:
+    label: Stazione
+    category: infrastructure
+    landmark: true
+    floor_height_m: 4.2
+    ground_floor_height_m: 5.0
+    bay_width_m: 4.0
+    window:
+      type: arched
+      width_ratio: 0.4
+      height_ratio: 0.62
+      frame_color: "#e6dfd2"
+      sill: true
+    balcony:
+      probability: 0.0
+    shutters:
+      probability: 0.0
+    roof:
+      shape: gabled
+      pitch_deg: 18
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.8
+    facade:
+      material: plaster
+      primary: "#d8c9ae"
+      secondary: ["#cbb79a", "#c9a66b"]
+      roughness: 0.86
+      metalness: 0.0
+    cornice_m: 0.5
+    pilasters: true
+    shopfront:
+      probability: 0.0
+    door:
+      type: portal
+      color: "#4a3022"
+    notes: "Historic railway station building."
+    procedural_flags:
+      - facade_window_layout
+      - cornice
+
+  generic:
+    label: Edilizia generica
+    category: generic
+    landmark: false
+    floor_height_m: 3.1
+    ground_floor_height_m: 3.8
+    bay_width_m: 2.9
+    window:
+      type: single
+      width_ratio: 0.44
+      height_ratio: 0.58
+      frame_color: "#d8d2c4"
+      sill: true
+    balcony:
+      probability: 0.25
+      depth_m: 0.8
+      type: concrete
+      railing: iron
+      continuous: false
+      floors: [1]
+    shutters:
+      probability: 0.3
+      type: roller
+    roof:
+      shape: gabled
+      pitch_deg: 20
+      material: tiles
+      color: "#9a5b45"
+      overhang_m: 0.4
+    facade:
+      material: plaster
+      primary: "#cdb794"
+      secondary: ["#d8c9ae", "#b9b3a7", "#c9a66b"]
+      roughness: 0.9
+      metalness: 0.0
+    cornice_m: 0.2
+    pilasters: false
+    shopfront:
+      probability: 0.2
+    door:
+      type: single
+      color: "#4a3022"
+    notes: "Fallback archetype when evidence is insufficient."
+    procedural_flags:
+      - facade_window_layout
+
+style_labels:
+  romanesque_church: Romanico
+  church: Chiesa
+  city_gate: Porta medievale
+  neoclassical_palazzo: Neoclassico
+  liberty_villa: Liberty
+  early_1900_apartment: Primo Novecento
+  post_war_apartment: Dopoguerra
+  1960s_concrete: Anni Sessanta
+  historic_townhouse: Casa storica
+  mixed_use_shopfront: Casa-bottega
+  modern_office: Uffici contemporanei
+  industrial: Industriale
+  station_building: Stazione
+  theatre: Teatro storico
+  generic: Edilizia generica

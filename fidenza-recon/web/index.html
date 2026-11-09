@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Ricostruzione 3D provenance-first dell'isolato di Piazza Duomo a Fidenza: edifici, altezze misurate, facciate procedurali e report di validazione."
+    />
+    <title>Fidenza · Ricostruzione 3D dell'isolato di Piazza Duomo</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="scene" aria-label="Modello 3D dell'isolato di Piazza Duomo a Fidenza"></div>
+
+      <header class="panel brand">
+        <div class="eyebrow">Open Data · Ricostruzione 3D</div>
+        <h1>Fidenza <span>Piazza Duomo</span></h1>
+        <p class="lede">
+          Isolato pilota con <strong id="brand-buildings">—</strong> edifici dettagliati; il
+          contesto urbano circostante è ricostruito a LOD1. Altezze misurate da DSM−DTM; tetti e
+          colori da ortofoto; facciate procedurali dichiarate come tali.
+        </p>
+        <div class="chips">
+          <span class="chip">OSM · ODbL</span>
+          <span class="chip">RER 2023‑24 · CC BY 4.0</span>
+          <span class="chip chip-warn">KartaView: 0 foto</span>
+        </div>
+      </header>
+
+      <section class="panel stats" aria-label="Statistiche di scena">
+        <div class="stat"><span id="stat-fps">—</span><label>fps</label></div>
+        <div class="stat"><span id="stat-calls">—</span><label>draw calls</label></div>
+        <div class="stat"><span id="stat-triangles">—</span><label>triangoli</label></div>
+        <div class="stat"><span id="stat-buildings">—</span><label>edifici</label></div>
+        <div class="stat"><span id="stat-windows">—</span><label>finestre</label></div>
+        <div class="stat"><span id="stat-confidence">—</span><label>conf. alt.</label></div>
+      </section>
+
+      <section class="panel controls" aria-label="Controlli">
+        <h2>Viste</h2>
+        <div class="view-grid">
+          <button type="button" data-view="duomo" class="primary">Duomo</button>
+          <button type="button" data-view="porta">Porta San Donnino</button>
+          <button type="button" data-view="overview">Veduta d'insieme</button>
+          <button type="button" data-view="street">Livello strada</button>
+        </div>
+        <h2>Lettura del modello</h2>
+        <label class="switch">
+          <input type="checkbox" id="toggle-footprints" />
+          <span>Impronte OSM</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggle-confidence" />
+          <span>Confidenza altezze</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggle-labels" checked />
+          <span>Etichette landmark</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="toggle-details" checked />
+          <span>Dettagli facciata (LOD3)</span>
+        </label>
+        <div class="actions">
+          <button type="button" id="export-glb">Esporta GLB</button>
+          <button type="button" id="reset-view">Reset camera</button>
+        </div>
+        <p class="hint">
+          Clicca un edificio per ispezionare fonte, confidenza e dettagli inventati.
+          Trascina per orbitare, rotella per zoom.
+        </p>
+      </section>
+
+      <aside id="inspector" class="panel inspector hidden" aria-live="polite">
+        <button type="button" class="close" id="close-inspector" aria-label="Chiudi">×</button>
+        <div id="inspector-content"></div>
+      </aside>
+
+      <div id="legend" class="panel legend hidden" aria-label="Legenda confidenza">
+        <h2>Confidenza delle altezze</h2>
+        <div class="legend-row"><span class="dot high"></span> DSM−DTM, misura diretta</div>
+        <div class="legend-row"><span class="dot medium"></span> misura con incertezza</div>
+        <div class="legend-row"><span class="dot low"></span> stima tipologica</div>
+        <p class="hint">Il colore è applicato alle impronte, non alle facciate.</p>
+      </div>
+
+      <footer class="attribution">
+        © OpenStreetMap contributors (ODbL 1.0) · Ortofoto/DTM RER 2023‑24 (CC BY 4.0) ·
+        DSM AGEA 2008 (licenza da verificare) · Facciate e arredi non OSM: procedurali
+      </footer>
+
+      <div id="loading" class="loading">
+        <div class="loading-card">
+          <div class="spinner"></div>
+          <h2>Costruzione dell'isolato</h2>
+          <p id="loading-stage">Caricamento del payload geografico…</p>
+          <div class="progress"><span id="loading-bar"></span></div>
+        </div>
+      </div>
+
+      <div id="error" class="error hidden">
+        <strong>Payload non trovato.</strong>
+        <p>
+          Esegui <code>python -m fidenza_recon.cli all</code> e poi
+          <code>npm run data:sync</code>, quindi ricarica.
+        </p>
+      </div>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

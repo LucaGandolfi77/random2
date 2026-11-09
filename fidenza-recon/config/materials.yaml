@@ -1,0 +1,82 @@
+# PBR descriptors used by the procedural material library in web/src/materials.
+# Procedural textures are generated at runtime; no unlicensed image textures.
+
+materials:
+  plaster:
+    roughness: 0.88
+    metalness: 0.0
+    noise_scale: 0.65
+    bump_strength: 0.08
+    palette: ["#d8c9ae", "#c9a66b", "#cdb794", "#c98f7a", "#b9b3a7", "#e0d5c1"]
+  brick:
+    roughness: 0.93
+    metalness: 0.0
+    noise_scale: 1.4
+    bump_strength: 0.22
+    palette: ["#9e5b45", "#8b4e3b", "#b06a51"]
+  stone:
+    roughness: 0.9
+    metalness: 0.0
+    noise_scale: 0.9
+    bump_strength: 0.12
+    palette: ["#cbb79a", "#b9a184", "#d8c9ae"]
+  concrete:
+    roughness: 0.94
+    metalness: 0.0
+    noise_scale: 0.4
+    bump_strength: 0.05
+    palette: ["#b8b6ae", "#a5a39b", "#c3c1b9"]
+  glass:
+    roughness: 0.22
+    metalness: 0.42
+    noise_scale: 0.1
+    bump_strength: 0.0
+    palette: ["#5d7b86", "#7d9aa3", "#4b656f"]
+  metal:
+    roughness: 0.42
+    metalness: 0.7
+    noise_scale: 0.2
+    bump_strength: 0.02
+    palette: ["#8a8f8c", "#6f7a7d", "#a7aba8"]
+  ceramic:
+    roughness: 0.35
+    metalness: 0.05
+    noise_scale: 0.15
+    bump_strength: 0.02
+    palette: ["#b5654a", "#c98f7a", "#d9c48a"]
+  roof_tiles:
+    roughness: 0.86
+    metalness: 0.0
+    noise_scale: 1.2
+    bump_strength: 0.18
+    palette: ["#9a5b45", "#a8664d", "#8b4e3b"]
+  roof_metal:
+    roughness: 0.48
+    metalness: 0.55
+    noise_scale: 0.25
+    bump_strength: 0.04
+    palette: ["#8a8f8c", "#6f7a7d"]
+  roof_membrane:
+    roughness: 0.92
+    metalness: 0.0
+    noise_scale: 0.3
+    bump_strength: 0.03
+    palette: ["#5a5a58", "#6a6862", "#4d4d4b"]
+  wood:
+    roughness: 0.7
+    metalness: 0.0
+    noise_scale: 0.5
+    bump_strength: 0.06
+    palette: ["#5b3a28", "#4a3022", "#6b4630"]
+  asphalt:
+    roughness: 0.96
+    metalness: 0.0
+    noise_scale: 0.8
+    bump_strength: 0.03
+    palette: ["#3f4142", "#4a4c4d", "#555759"]
+  sidewalk:
+    roughness: 0.92
+    metalness: 0.0
+    noise_scale: 0.4
+    bump_strength: 0.03
+    palette: ["#a8a49b", "#b8b4ab", "#98948b"]

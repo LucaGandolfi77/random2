@@ -1,0 +1,31 @@
+{
+  "browser": "Chrome headless (channel: chrome)",
+  "viewport": "1600x1000",
+  "captured_at": "2026-11-08T23:41:16.976Z",
+  "views": {
+    "duomo": {
+      "fps": "60",
+      "draw_calls": "368",
+      "triangles": "1587k"
+    },
+    "porta": {
+      "fps": "60",
+      "draw_calls": "336",
+      "triangles": "1556k"
+    },
+    "overview": {
+      "fps": "49",
+      "draw_calls": "526",
+      "triangles": "1661k"
+    },
+    "street": {
+      "fps": "59",
+      "draw_calls": "149",
+      "triangles": "1469k"
+    }
+  },
+  "glb_export": {
+    "path": "data/processed/export/fidenza-piazza-duomo.glb",
+    "bytes": 45018124
+  }
+}

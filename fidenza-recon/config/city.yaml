@@ -1,0 +1,79 @@
+city: Fidenza
+province: Parma
+region: Emilia-Romagna
+country: Italy
+
+crs:
+  geographic: EPSG:4326
+  metric: EPSG:7791
+
+origin:
+  name: Duomo di San Donnino
+  lat: 44.866476
+  lon: 10.0578098
+  note: >
+    Local ENU origin. All runtime geometry is expressed in metres relative to this
+    point: x = east, z = south, y = up. No global coordinates are sent to the GPU.
+
+pilot:
+  name: Isolato di Piazza Duomo
+  bbox_wgs84: [10.0562, 44.8652, 10.0603, 44.8676]
+  approx_size_m: [323, 265]
+  description: >
+    Piazza Duomo compartment: the Romanesque Cattedrale di San Donnino, the
+    medieval Porta di San Donnino, the Teatro Girolamo Magnani, 19th-century
+    palazzi along Via Bacchini and Via Marconi, mixed-use shopfronts and
+    post-war infill.
+  landmarks:
+    - Cattedrale di San Donnino
+    - Porta di San Donnino
+    - Teatro Girolamo Magnani
+
+context:
+  bbox_wgs84: [10.0544, 44.8636, 10.0621, 44.8692]
+  approx_size_m: [610, 620]
+  description: >
+    One-block-wide context ring rendered at LOD1 so the detailed pilot does
+    not float on an empty plane. Heights and footprints are still measured;
+    facades are not detailed outside the pilot.
+
+floor_heights:
+  default_m: 3.2
+  ground_floor_m: 4.0
+  historic_ground_floor_m: 4.3
+
+road_width_defaults_m:
+  motorway: 14.0
+  trunk: 12.0
+  primary: 10.0
+  secondary: 8.5
+  tertiary: 7.5
+  unclassified: 6.0
+  residential: 6.0
+  living_street: 5.0
+  pedestrian: 5.5
+  service: 4.0
+  footway: 2.0
+  cycleway: 2.5
+  path: 1.8
+
+sidewalk:
+  width_m: 1.8
+  height_m: 0.14
+  curb_height_m: 0.15
+
+rendering:
+  lod_distances_m:
+    lod0: 900
+    lod1: 420
+    lod2: 160
+    lod3: 0
+  chunk_size_m: 120
+  max_texture_size: 4096
+
+downloads:
+  ortho_resolution_m: 0.25
+  dtm_resolution_m: 0.5
+  dsm_resolution_m: 2.0
+  ground_texture_width_px: 2048
+  request_timeout_s: 180

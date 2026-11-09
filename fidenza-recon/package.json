@@ -1,0 +1,18 @@
+{
+  "name": "fidenza-recon",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Provenance-first 3D reconstruction of the historic centre of Fidenza",
+  "scripts": {
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "preview": "npm --prefix web run preview",
+    "test": "npm --prefix web run test",
+    "typecheck": "npm --prefix web run typecheck",
+    "data:sync": "node scripts/sync-data.mjs",
+    "screenshots": "npm run data:sync && npm --prefix web run build && node scripts/screenshots.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.0"
+  }
+}

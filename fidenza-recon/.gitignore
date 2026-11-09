@@ -1,0 +1,23 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+web/dist/
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+db/*.db
+.DS_Store
+db/*.db-*
+*.egg-info/
+
+# The repository-level .gitignore hides these by default; this project needs them.
+!package.json
+!package-lock.json
+!web/package.json
+!web/package-lock.json
+!web/src/tests/*.test.ts
+!db/city.db
