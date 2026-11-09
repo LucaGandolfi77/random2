@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dev-dist/
+smoke/
+coverage/
+*.local
+*.tsbuildinfo
+.DS_Store
