@@ -519,6 +519,8 @@
       .card:hover::before { opacity: 1; }
     }
     .card.hidden-card { display: none; }
+    .room-card { cursor: pointer; }
+    .room-card .tile { cursor: pointer; }
     .card-top {
       display: flex;
       align-items: center;
@@ -1447,6 +1449,18 @@
 
       <section class="grid" id="grid" aria-label="Projects">
 
+        <article class="card reveal room-card" data-tags="app books novel story reading" data-room="reading-room" style="--c1:#c9a878; --c2:#8b5e3c; --tile-glow:rgba(201,168,120,.55); --shimmer-delay:0s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#241a12,#c9a878)">📖</div>
+            <h2>THE READING ROOM</h2>
+          </div>
+          <p class="tagline">Short books, read right here. Open a cover and the page becomes a quiet place to read — starting with <em>The Roundabout</em>, a novella in seven laps.</p>
+          <div class="chips"><span class="chip">BOOKS</span><span class="chip">NOVELLA</span><span class="chip">MARKDOWN</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="#reading-room" data-room-link>📖&nbsp; Open the reading room</a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="open-world driving 3d arcade pwa offline" data-playable="fidenza-city-v3/" style="--c1:#c2684b; --c2:#2f4a3c; --tile-glow:rgba(194,104,75,.5); --shimmer-delay:.01s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#1b241e,#c2684b)">🏛️</div>
@@ -2192,7 +2206,7 @@
         <div class="reading-head">
           <div class="reading-head-copy">
             <p class="reading-kicker">New · The Reading Room</p>
-            <h2 id="reading-room-title">The Reading Room</h2>
+            <h2 id="reading-room-title" tabindex="-1">The Reading Room</h2>
             <p class="reading-sub">Short books, read right here. Plain Markdown, no accounts, no app to install — open a cover and the page becomes a quiet place to read.</p>
           </div>
           <p class="reading-note">The first book is a novella in seven laps. More will arrive when they are ready.</p>
@@ -3696,6 +3710,37 @@
       visible[next].focus();
     });
 
+    /* ---------- Reading Room card ----------
+     * The card is a shortcut to the Reading Room. The button inside is a real
+     * anchor, so keyboard and middle-click keep working; this only makes
+     * the rest of the card (tile, title, tagline) clickable too. */
+    function openReadingRoom(target, focusHeading) {
+      if (!target) return;
+      var hash = "#" + target.id;
+      if (window.history && history.pushState && location.hash !== hash) {
+        history.pushState(null, "", hash);
+      }
+      target.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start"
+      });
+      if (!focusHeading) return;
+      var heading = target.querySelector("h2");
+      if (heading) {
+        if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
+        heading.focus({ preventScroll: true });
+      }
+    }
+
+    document.querySelectorAll("[data-room]").forEach(function (card) {
+      card.addEventListener("click", function (e) {
+        if (e.target.closest("a, button")) return;
+        var selection = window.getSelection();
+        if (selection && selection.toString().length) return;
+        openReadingRoom(document.getElementById(card.getAttribute("data-room")), false);
+      });
+    });
+
     /* ---------- Surprise me ---------- */
     document.getElementById("random-btn").addEventListener("click", function () {
       var playables = Array.prototype.slice.call(document.querySelectorAll('[data-playable]'));
@@ -3717,6 +3762,13 @@
      * same transition as the mouse. */
     document.querySelectorAll(".btn-play").forEach(function (a) {
       a.addEventListener("click", function (e) {
+        /* The Reading Room card is an in-page shortcut, not a game launch:
+         * scroll to the shelf instead of running the warp. */
+        if (a.hasAttribute("data-room-link")) {
+          e.preventDefault();
+          openReadingRoom(document.querySelector(a.getAttribute("href")), e.detail === 0);
+          return;
+        }
         e.preventDefault();
         warpTo(a.getAttribute("href"));
       });
