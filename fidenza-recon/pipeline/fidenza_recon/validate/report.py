@@ -396,7 +396,7 @@ def generate() -> dict[str, Path]:
         "- `docs/screenshots/00-orthophoto-reference.jpg` — reference orthophoto crop.",
         "- `docs/screenshots/01-duomo.png` — west facade of the Cattedrale di San Donnino.",
         "- `docs/screenshots/02-porta-san-donnino.png` — medieval gate.",
-        "- `docs/screenshots/03-overview.png` — pilot + context massing.",
+        "- `docs/screenshots/03-overview.png` — extended urban area in LOD1 batch; LOD3 streams near the camera.",
         "- `docs/screenshots/04-height-confidence.png` — height confidence overlay.",
         "- `docs/screenshots/05-street-level.png` — street-level facade grammar.",
         "- `docs/screenshots/06-osm-footprints.png` — OSM footprints overlay.",
@@ -421,9 +421,9 @@ def generate() -> dict[str, Path]:
         validation += [
             "",
             f"Measured in {performance.get('browser', 'a browser')} at "
-            f"{performance.get('viewport', '1600x1000')}. The overview is the "
-            "heaviest view; values are hardware-dependent. The GLB export was "
-            "produced by the in-viewer GLTFExporter.",
+            f"{performance.get('viewport', '1600x1000')}. Values are "
+            "hardware-dependent; the detailed views are the heaviest. The GLB "
+            "export is intentionally LOD1 and is produced by the in-viewer GLTFExporter.",
             "",
         ]
     else:

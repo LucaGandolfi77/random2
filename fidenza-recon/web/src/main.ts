@@ -1,10 +1,10 @@
 import type { Building, CityData } from './types';
-import { DetailBatcher } from './city/facade';
-import { buildBuildingLODs, buildContextBatch } from './city/building';
 import { buildStreets } from './city/streets';
 import { buildProps } from './city/props';
 import { buildTerrain } from './city/terrain';
-import { Viewer } from './viewer/scene';
+import { Viewer, type ViewerMode } from './viewer/scene';
+import { TouchControls } from './ui/touch';
+import { CityLodManager } from './viewer/lod-manager';
 
 const dataBase = `${import.meta.env.BASE_URL}data/`;
 
@@ -72,6 +72,15 @@ function inspectorHtml(building: Building): string {
   `;
 }
 
+function isTypingTarget(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement ||
+    (target instanceof HTMLElement && target.isContentEditable)
+  );
+}
+
 async function boot(): Promise<void> {
   const loading = $('#loading');
   const error = $('#error');
@@ -86,26 +95,23 @@ async function boot(): Promise<void> {
     const terrain = buildTerrain(city, dataBase);
     viewer.scene.add(terrain.group);
 
-    setStage('Costruzione degli edifici e delle facciate LOD3…', 56);
-    const batcher = new DetailBatcher();
-    const contextBuildings: Building[] = [];
-    for (const building of city.buildings) {
-      if (building.detail === 'context') {
-        contextBuildings.push(building);
-      } else {
-        viewer.buildingRoot.add(
-          buildBuildingLODs(building, batcher, city.meta.lod_distances_m),
-        );
-      }
-    }
-    viewer.buildingRoot.add(buildContextBatch(contextBuildings));
-    setStage('Dettagli architettonici: finestre, balconi, cornici…', 76);
-    viewer.setDetailGroup(batcher.build());
-
-    setStage('Strade, marciapiedi e arredo urbano…', 88);
+    setStage('Strade, marciapiedi e arredo urbano…', 52);
     viewer.cityRoot.add(buildStreets(city.roads, city.props));
     viewer.cityRoot.add(buildProps(city.props));
-    viewer.load(city);
+    viewer.load(city, terrain.sample);
+
+    setStage('Streaming LOD3 e batch LOD1 per l’area estesa…', 82);
+    const coarsePointer = matchMedia('(pointer: coarse)').matches;
+    const lodManager = new CityLodManager(
+      viewer.buildingRoot,
+      city.buildings,
+      city.meta.lod_distances_m,
+      120,
+      coarsePointer ? 120 : 160,
+      coarsePointer ? 5 : 8,
+    );
+    viewer.setLodManager(lodManager);
+    lodManager.warmUp(viewer.camera, coarsePointer ? 2 : 3);
     viewer.requestShadowUpdate();
 
     viewer.setStatsElements({
@@ -137,10 +143,77 @@ async function boot(): Promise<void> {
       city.buildings.find((building) => /cattedrale|duomo/i.test(building.name ?? '')) ??
       city.buildings[0];
     const porta = city.buildings.find((building) => /porta/i.test(building.name ?? ''));
-    if (duomo) viewer.focusBuilding(duomo);
     const focus = (building: Building | undefined): void => {
       if (building) viewer.focusBuilding(building);
     };
+
+    const controlsPanel = $('.controls');
+    const menuToggle = $('#menu-toggle') as HTMLButtonElement;
+    const photoUi = $('#photo-ui');
+    const photoGrid = $('#photo-grid');
+    const photoGridToggle = $('#photo-grid-toggle') as HTMLInputElement;
+    const photoSubject = $('#photo-subject') as HTMLInputElement;
+    const photoFov = $('#photo-fov') as HTMLInputElement;
+    const photoExit = $('#photo-exit') as HTMLButtonElement;
+    const photoShoot = $('#photo-shoot') as HTMLButtonElement;
+    const photoFlash = $('#photo-flash');
+    const toast = $('#toast');
+    const playHint = $('#play-hint');
+    const fullscreenButton = $('#fullscreen-toggle') as HTMLButtonElement;
+
+    let toastTimer = 0;
+    const showToast = (text: string): void => {
+      toast.textContent = text;
+      toast.classList.add('visible');
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => toast.classList.remove('visible'), 1900);
+    };
+
+    const applyMode = (mode: ViewerMode): void => {
+      for (const name of ['walk', 'fly', 'photo', 'orbit'] as const) {
+        document.body.classList.toggle(`mode-${name}`, mode === name);
+      }
+      document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => {
+        const active = button.dataset.mode === mode;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      photoUi.setAttribute('aria-hidden', String(mode !== 'photo'));
+      if (mode !== 'orbit') inspector.classList.add('hidden');
+      controlsPanel.classList.remove('open');
+      document.body.classList.remove('menu-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      if (mode === 'photo') {
+        photoFov.value = String(Math.round(viewer.getPhotoFov()));
+        photoSubject.checked = viewer.getPhotoSubjectVisible();
+        photoGrid.classList.toggle('off', !photoGridToggle.checked);
+      }
+    };
+    viewer.onModeChange(applyMode);
+    applyMode(viewer.getMode());
+
+    const togglePhoto = (): void => {
+      if (viewer.getMode() === 'photo') viewer.exitPhoto();
+      else viewer.setMode('photo');
+    };
+
+    const takePhoto = (): void => {
+      if (!viewer.capturePhoto()) return;
+      photoFlash.classList.remove('on');
+      void photoFlash.offsetWidth;
+      photoFlash.classList.add('on');
+      window.setTimeout(() => photoFlash.classList.remove('on'), 360);
+      showToast('Foto salvata');
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('[data-mode]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const mode = button.dataset.mode as ViewerMode;
+        if (mode === 'photo') togglePhoto();
+        else viewer.setMode(mode);
+      });
+    });
+
     document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach((button) => {
       button.addEventListener('click', () => {
         const view = button.dataset.view;
@@ -149,12 +222,6 @@ async function boot(): Promise<void> {
         else if (view === 'overview') viewer.setOverview(city);
         else if (view === 'street') viewer.setStreetView();
       });
-    });
-    window.addEventListener('keydown', (event) => {
-      if (event.key === '1') focus(duomo);
-      if (event.key === '2') focus(porta ?? duomo);
-      if (event.key === '3') viewer.setOverview(city);
-      if (event.key === '4') viewer.setStreetView();
     });
 
     const footprints = $('#toggle-footprints') as HTMLInputElement;
@@ -194,6 +261,169 @@ async function boot(): Promise<void> {
         }, 1800);
       }
     });
+
+    $('#reset-view').addEventListener('click', () => viewer.resetView());
+
+    photoShoot.addEventListener('click', takePhoto);
+    photoExit.addEventListener('click', () => viewer.exitPhoto());
+    photoFov.addEventListener('input', () => viewer.setPhotoFov(Number(photoFov.value)));
+    photoGridToggle.addEventListener('change', () => {
+      photoGrid.classList.toggle('off', !photoGridToggle.checked);
+    });
+    photoSubject.addEventListener('change', () => {
+      viewer.setPhotoSubjectVisible(photoSubject.checked);
+    });
+
+    menuToggle.addEventListener('click', () => {
+      const open = controlsPanel.classList.toggle('open');
+      document.body.classList.toggle('menu-open', open);
+      menuToggle.setAttribute('aria-expanded', String(open));
+    });
+
+    if (!document.documentElement.requestFullscreen) {
+      fullscreenButton.style.display = 'none';
+    } else {
+      fullscreenButton.addEventListener('click', async () => {
+        try {
+          if (document.fullscreenElement) await document.exitFullscreen();
+          else await document.documentElement.requestFullscreen();
+        } catch {
+          showToast('Schermo intero non disponibile');
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        fullscreenButton.classList.toggle('active', Boolean(document.fullscreenElement));
+      });
+    }
+
+    const pressed = new Set<string>();
+    const movementKeys = new Set([
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'KeyW',
+      'KeyA',
+      'KeyS',
+      'KeyD',
+    ]);
+    const updateKeyboardMove = (): void => {
+      const forward =
+        (pressed.has('ArrowUp') || pressed.has('KeyW') ? 1 : 0) -
+        (pressed.has('ArrowDown') || pressed.has('KeyS') ? 1 : 0);
+      const strafe =
+        (pressed.has('ArrowRight') || pressed.has('KeyD') ? 1 : 0) -
+        (pressed.has('ArrowLeft') || pressed.has('KeyA') ? 1 : 0);
+      viewer.setKeyboardMove(strafe, forward);
+    };
+
+    window.addEventListener('keydown', (event) => {
+      if (isTypingTarget(event.target)) return;
+      if (movementKeys.has(event.code)) {
+        pressed.add(event.code);
+        updateKeyboardMove();
+        event.preventDefault();
+        return;
+      }
+      if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+        viewer.setRunHeld(true);
+        return;
+      }
+      if (event.code === 'Space') {
+        event.preventDefault();
+        if (viewer.getMode() === 'photo') {
+          if (!event.repeat) takePhoto();
+          return;
+        }
+        if (!event.repeat) {
+          viewer.setJumpHeld(true);
+          viewer.queueJump();
+        }
+        return;
+      }
+      if (event.code === 'KeyE') {
+        if (viewer.getMode() === 'photo') viewer.setJumpHeld(true);
+        return;
+      }
+      if (event.code === 'KeyC') {
+        viewer.setDescendHeld(true);
+        return;
+      }
+      if (event.code === 'KeyF' && !event.repeat) {
+        viewer.toggleFlight();
+        return;
+      }
+      if (event.code === 'KeyP' && !event.repeat) {
+        togglePhoto();
+        return;
+      }
+      if (event.code === 'KeyO' && !event.repeat) {
+        viewer.setMode('orbit');
+        return;
+      }
+      if (event.code === 'Escape') {
+        if (viewer.getMode() === 'photo') viewer.exitPhoto();
+        else inspector.classList.add('hidden');
+        return;
+      }
+      if (event.code === 'Enter' && viewer.getMode() === 'photo') {
+        event.preventDefault();
+        if (!event.repeat) takePhoto();
+        return;
+      }
+      if (event.code === 'Digit1') focus(duomo);
+      else if (event.code === 'Digit2') focus(porta ?? duomo);
+      else if (event.code === 'Digit3') viewer.setOverview(city);
+      else if (event.code === 'Digit4') viewer.setStreetView();
+    });
+
+    window.addEventListener('keyup', (event) => {
+      if (movementKeys.has(event.code)) {
+        pressed.delete(event.code);
+        updateKeyboardMove();
+        return;
+      }
+      if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+        viewer.setRunHeld(false);
+      } else if (event.code === 'Space') {
+        viewer.setJumpHeld(false);
+      } else if (event.code === 'KeyE') {
+        viewer.setJumpHeld(false);
+      } else if (event.code === 'KeyC') {
+        viewer.setDescendHeld(false);
+      }
+    });
+
+    window.addEventListener('blur', () => {
+      pressed.clear();
+      viewer.setKeyboardMove(0, 0);
+      viewer.setRunHeld(false);
+      viewer.setJumpHeld(false);
+      viewer.setDescendHeld(false);
+    });
+
+    const isTouch = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    document.body.classList.toggle('is-touch', isTouch);
+    new TouchControls({
+      onMove: (x, y, magnitude) => viewer.setJoystickMove(x, y, magnitude),
+      onJumpDown: () => {
+        viewer.setJumpHeld(true);
+        viewer.queueJump();
+      },
+      onJumpUp: () => viewer.setJumpHeld(false),
+      onDescendDown: () => viewer.setDescendHeld(true),
+      onDescendUp: () => viewer.setDescendHeld(false),
+      onFly: () => viewer.toggleFlight(),
+      onPhoto: () => togglePhoto(),
+    });
+
+    let hintTimer = window.setTimeout(() => playHint.classList.add('dismissed'), 12000);
+    const dismissHint = (): void => {
+      playHint.classList.add('dismissed');
+      window.clearTimeout(hintTimer);
+    };
+    window.addEventListener('keydown', dismissHint, { once: true });
+    window.addEventListener('pointerdown', dismissHint, { once: true });
 
     setStage('Pronto.', 100);
     window.setTimeout(() => loading.classList.add('done'), 350);

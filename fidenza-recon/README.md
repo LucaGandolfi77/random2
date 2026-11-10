@@ -1,14 +1,16 @@
 # Fidenza — ricostruzione 3D provenance-first
 
-Ricostruzione 3D dell'isolato di **Piazza Duomo a Fidenza (PR)**: 259 edifici
-dettagliati a LOD3, 379 edifici di contesto a LOD1, altezze misurate da
-DSM−DTM, tetti e colori campionati sull'ortofoto RER 2023‑24, facciate
-procedurali dichiarate come tali.
+Ricostruzione 3D dell'**area urbana di Fidenza (PR)**: circa 1.400 edifici
+ricostruiti da impronte OSM, altezze DSM−DTM, tetti e colori campionati
+sull'ortofoto RER 2023‑24, con facciate procedurali dichiarate come tali.
+L'area dettagliata è estesa a circa **1,2 × 1,23 km** e usa un **LOD3 dinamico
+a chunk**: il dettaglio viene costruito intorno alla posizione, mentre i chunk
+lontani restano in LOD1 batchato.
 
-![Veduta dell'isolato](docs/screenshots/01-duomo.png)
+![Veduta dell'area urbana](docs/screenshots/01-duomo.png)
 
 > **Onestà del dato.** Fidenza non ha copertura street-level nel servizio
-> pubblico KartaView (0 foto). Le facciate generiche sono quindi **ricostruite
+> pubblico KartaView (0 foto). Le facciate sono quindi **ricostruite
 > proceduralmente** a partire da morfologia, altezza, archetipo e orthophoto;
 > non sono spacciate per ricostruzioni fotografiche. Il report di validazione
 > elenca cosa è accurato, approssimato o da rivedere.
@@ -37,6 +39,17 @@ npm run dev
 
 Apri `http://127.0.0.1:5173`.
 
+Per giocare da telefono o tablet nella stessa rete Wi‑Fi:
+
+```bash
+npm run dev:lan
+```
+
+Apri sul telefono `http://<IP-del-PC>:5173` (l'IP locale del computer che esegue
+Vite). Su Windows il firewall può chiedere di consentire Node.js sulla rete
+privata. In alternativa, dopo `npm run build`, serve la versione di produzione
+con `npm run preview:lan`.
+
 Comandi utili:
 
 ```bash
@@ -60,11 +73,13 @@ I dati grezzi e i raster sono in `data/raw` (gitignored). Il payload del viewer
 
 | Area | Edifici | Dettaglio |
 |---|---:|---|
-| **Pilota** — Piazza Duomo, Duomo, Porta San Donnino, Teatro Magnani | 259 | LOD3: facciate con aperture, cornici, balconi, persiane, negozi, portali; tetti con falde, comignoli, paracarro |
-| **Contesto** — buffer urbano di ~600×620 m | 379 | LOD1: volumi e tetti misurati, nessuna facciata dettagliata |
+| **Pilota esteso** — centro storico e prima periferia, ~1.193×1.238 m | 1.367 | LOD3: facciate con aperture, cornici, balconi, persiane, negozi, portali; tetti con falde, comignoli, paracarro |
+| **Contesto residuo** — edifici con centroide a cavallo della bbox | 30 | LOD1 batchato per i chunk lontani; il LOD3 viene costruito dinamicamente quando la camera si avvicina |
 
-Il pilota non è un'isola: il contesto LOD1 evita che l'isolato galleggi sul
-vuoto e permette di confrontare il dettaglio con la città reale.
+Il pilot non è più limitato all’isolato di Piazza Duomo: l’area dettagliata è
+stata estesa a circa 1,2 km con dati OSM/RER reali. Il centro storico resta il
+nucleo con i landmark; la prima periferia usa la stessa grammatica di facciata
+procedurale, ma è caricata dinamicamente a chunk per non appesantire il viewer.
 
 ---
 
@@ -77,7 +92,7 @@ vuoto e permette di confrontare il dettaglio con la città reale.
 | [DTM RER 2023‑24](https://servizigis.regione.emilia-romagna.it/arcgis/rest/services/public/DtmRER2023_24/ImageServer) | Quota terreno, nDSM | **CC BY 4.0** |
 | [DSM AGEA 2008](https://servizigis.regione.emilia-romagna.it/arcgis/rest/services/public/DsmAgea2008/ImageServer) | Superficie edifici per le altezze | Servizio pubblico RER; **licenza da verificare prima della ridistribuzione** |
 | [KartaView](https://kartaview.org/) | Copertura street-level | Nessuna foto disponibile: 0 download |
-| [Wikimedia Commons](https://commons.wikimedia.org/) | 40 foto di riferimento per la validazione | Licenza per-file (CC BY, CC BY‑SA, pubblico dominio) |
+| [Wikimedia Commons](https://commons.wikimedia.org/) | 48 foto di riferimento per la validazione | Licenza per-file (CC BY, CC BY‑SA, pubblico dominio) |
 
 **Google Street View / Photorealistic 3D Tiles non sono usati.** Nessun asset
 derivato da Google è presente nel progetto.
@@ -139,9 +154,9 @@ Moduli principali:
 ## Viewer e generazione procedurale
 
 - **Three.js + Vite + TypeScript strict**.
-- `THREE.LOD` per edificio del pilota: LOD3 (dettaglio), LOD2 (involucro),
-  LOD1 (volumi), LOD0 (impronta).
-- Contesto: batch unico con vertex colors, 2 draw call per 379 edifici.
+- **LOD dinamico a chunk**: batch LOD1 per chunk da 120 m e `THREE.LOD` LOD3
+  costruito on demand intorno alla camera; cache limitata e rilascio dei chunk
+  lontani.
 - Dettagli di facciata: `InstancedMesh` globali (telai, vetri, persiane,
   balconi, cornici, lesene, archi) → poche draw call per migliaia di elementi.
 - Muri con **aperture reali** (ExtrudeGeometry con holes), telai, vetri,
@@ -153,14 +168,38 @@ Moduli principali:
   stradale usa l'ortofoto reale per evitare texture inventate.
 - Debug: impronte OSM, heatmap confidenza altezze, etichette landmark,
   ispettore provenienza al click.
-- Export **GLB** dal viewer (`GLTFExporter`), verificato a ~43 MB.
+- Export **GLB** dal viewer (`GLTFExporter`), in LOD1 completo dell’area estesa.
+- **LOD dinamico a chunk**: `web/src/viewer/lod-manager.ts` mantiene un batch
+  LOD1 per ogni chunk da 120 m e costruisce i LOD3 solo intorno alla camera;
+  i chunk lontani vengono rilasciati per contenere la memoria. Il toggle
+  “Dettagli facciata (LOD3)” controlla il dettaglio dinamico.
 
 ### Controlli
 
-- Trascina per orbitare, rotella per zoom, click su un edificio per ispezionare
-  fonte, confidenza, archetipo e dettagli procedurali.
-- Tasti `1`–`4`: Duomo, Porta San Donnino, veduta d'insieme, livello strada.
-- Pannello "Lettura del modello": impronte, confidenza, etichette, dettagli.
+Il viewer ha quattro modalità, selezionabili dalla barra in alto (o dai pulsanti
+a schermo su telefono e tablet):
+
+- **Esplora** (predefinita). Personaggio in terza persona davanti al Duomo.
+  - `Frecce` o `WASD`: movimento relativo alla camera.
+  - `Shift`: corsa. `Spazio`: salto.
+  - Trascina con il mouse per orbitare la camera, rotella per lo zoom.
+  - La camera segue da dietro e si accorcia quando un edificio si frappone.
+- **Volo**. `F` o il pulsante "Volo" attiva il volo del personaggio.
+  - `Spazio`: salita. `C`: discesa. `F`: atterra.
+  - Si può volare sopra i tetti e atterrarci; disattivando il volo si ricade.
+- **Foto**. `P` oppure il pulsante "Foto".
+  - Camera libera con `WASD`/frecce e trascinamento; `E`/`C` per salire e scendere.
+  - Griglia dei terzi, slider FOV, toggle personaggio, scatto in PNG.
+  - `Spazio` o `Invio` scatta, `Esc` esce.
+- **Osserva**. Mantiene l'orbit camera e l'ispettore dell'edificio (`O` o il pulsante "Osserva").
+  - Tasti `1`–`4`: Duomo, Porta San Donnino, veduta d'insieme, livello strada.
+  - Click su un edificio per ispezionare fonte, confidenza, archetipo e dettagli.
+
+Da telefono o tablet compare un joystick virtuale a sinistra, il trascinamento
+sulla scena per guardare e pulsanti a schermo per salto/salita, discesa, volo e
+foto. La corsa si attiva inclinando il joystick al massimo. Il pulsante menu
+apre i controlli avanzati, quello a schermo intero attiva il fullscreen quando
+supportato.
 
 ---
 
@@ -177,13 +216,14 @@ Report generati:
 
 Numeri chiave dell'ultima esecuzione:
 
-- 638 edifici totali: **259 pilota + 379 contesto**
-- 9.816 finestre e 1.449 balconi procedurali
-- 624 / 638 altezze misurate da DSM−DTM; 14 stime tipologiche dichiarate
+- **1.397 edifici reali**: 1.367 pilot LOD3 + 30 contesto
+- **44.751 finestre** e **6.286 balconi** procedurali
+- 1.380 / 1.397 altezze misurate da DSM−DTM; 17 stime tipologiche dichiarate
 - confidenza mediana delle altezze: **72%**
-- 40 foto di riferimento Wikimedia Commons; **0 foto KartaView**
-- 1.399 facciate registrate nel DB con layout e provenienza
-- 313 righe di validazione, di cui 309 edifici flaggati per review
+- 48 foto di riferimento Wikimedia Commons; **0 foto KartaView**
+- **7.756 facciate** registrate nel DB con layout e provenienza
+- 706 righe di validazione, di cui 702 edifici flaggati per review
+- bbox reale ~1.193×1.238 m, payload `city.json` ~20,8 MB, ortofoto 4096 px
 
 ### Tier di confidenza
 
@@ -199,9 +239,10 @@ Numeri chiave dell'ultima esecuzione:
    registrata per edificio. Il DSM AGEA 2008 ha licenza da verificare.
 3. **Colore dei tetti**: misurato sull'ortofoto, ma normalizzato per la
    visualizzazione; il valore misurato è conservato in `roof_colour_measured`.
-4. **Contesto LOD1**: i 379 edifici fuori dal pilota non hanno facciate
-   dettagliate. I landmark usano il livello massimo (LOD3+, equivalente a LOD4
-   nella terminologia della specifica).
+4. **LOD dinamico e contesto residuo**: 1.367 edifici sono pilot LOD3; 30
+   edifici con centroide a cavallo della bbox restano contesto. I chunk lontani
+   sono resi con batch LOD1; il LOD3 viene costruito proceduralmente intorno
+   alla camera e non è una ricostruzione fotografica delle facciate.
 5. **Texture di base**: l'ortofoto è color-graded solo per il display; i
    GeoTIFF usati per le misure sono intatti.
 6. **Tetti mansardati**: il tipo è conservato nel record, ma la geometria è
@@ -212,10 +253,11 @@ Numeri chiave dell'ultima esecuzione:
    2008 pubblico, con l'incertezza cross-epoch dichiarata.
 8. **Validazione manuale**: i landmark sono confrontati con Commons; non c'è
    un benchmark automatico di similarità fotografica.
-9. **Prestazioni**: la macchina di test riporta 49–60 fps a 1600×1000
-   (overview 49 fps, viste ravvicinate 59–60 fps), con 149–526 draw call e
-   ~1,5–1,7 M triangoli. Il GLB esportato è di ~43 MB. Le prestazioni vanno
-   riverificate sull'hardware target.
+9. **Prestazioni**: il test headless Chrome/SwiftShader a 1600×1000 riporta
+   23–40 fps con 229–416 draw call e 127k–2,2 M triangoli a seconda della vista;
+   il GLB LOD1 completo è di ~6,1 MB. Su GPU reale le prestazioni sono più alte,
+   ma vanno riverificate sull'hardware target. Il raggio LOD3 è adattivo:
+   ~160 m su desktop e ~120 m su puntatori coarse, con cache limitata.
 
 ---
 
@@ -227,6 +269,7 @@ fidenza-recon/
 ├── pipeline/fidenza_recon/ # fetch, analyze, generate, export, validate
 ├── web/                    # viewer Three.js + Vite
 │   └── src/city/           # generatori facciate, tetti, edifici, strade, props
+│       src/viewer/         # scena, camera, LOD manager, modalità foto
 ├── data/raw/               # cache OSM/RER/Commons (gitignored)
 ├── data/processed/         # city.json, descriptors, raster nDSM/NDVI, GLB
 ├── db/city.db              # provenienza, edifici, facciate, imagery, validazione
@@ -241,13 +284,13 @@ fidenza-recon/
 | # | Deliverable | Dove |
 |---|---|---|
 | 1 | Modello 3D aggiornato | `web/` + `data/processed/export/fidenza-piazza-duomo.glb` |
-| 2 | Database metadati edifici | `db/city.db` (638 edifici, 1.399 facciate, 40 imagery) |
+| 2 | Database metadati edifici | `db/city.db` (1.397 edifici, 7.756 facciate, 48 imagery) |
 | 3 | Inventario fonti e licenze | `docs/DATA_INVENTORY.md`, `docs/LICENSES.md` |
 | 4 | Report copertura imagery | `docs/IMAGERY_COVERAGE.md` |
 | 5 | Report classificazione architettonica | `docs/ARCHITECTURE_CLASSIFICATION.md` |
 | 6 | Generatore procedurale edifici | `pipeline/.../generate/descriptors.py`, `web/src/city/building.ts` |
 | 7 | Sistema di generazione facciate | `web/src/city/facade.ts`, `config/archetypes.yaml` |
-| 8 | Sistema LOD | `web/src/city/building.ts` (`THREE.LOD`), contesto batch LOD1 |
+| 8 | Sistema LOD | `web/src/city/building.ts` (`THREE.LOD`), `web/src/viewer/lod-manager.ts` (chunk dinamici) |
 | 9 | Screenshot di confronto | `docs/screenshots/` |
 | 10 | Report qualità e confidenza | `docs/CONFIDENCE_REPORT.md`, `docs/VALIDATION_REPORT.md` |
 

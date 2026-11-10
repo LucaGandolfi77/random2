@@ -121,20 +121,24 @@ def _feature(osm_type: str, osm_id: int, geometry: Any, tags: dict[str, Any]) ->
 
 def _download(query: str, timeout_s: int) -> dict[str, Any]:
     last_error: Exception | None = None
-    headers = {"User-Agent": "fidenza-recon/0.1 (research; OSM ODbL)"}
+    headers = {
+        "User-Agent": "fidenza-recon/0.1 (research; OSM ODbL)",
+        "Accept": "application/json",
+    }
     for endpoint in OVERPASS_ENDPOINTS:
-        try:
-            response = requests.get(
-                endpoint,
-                params={"data": query},
-                headers=headers,
-                timeout=timeout_s,
-            )
-            response.raise_for_status()
-            return response.json()
-        except Exception as exc:  # noqa: BLE001 - try the next mirror
-            last_error = exc
-            time.sleep(1.5)
+        for attempt in range(2):
+            try:
+                response = requests.post(
+                    endpoint,
+                    data={"data": query},
+                    headers=headers,
+                    timeout=timeout_s,
+                )
+                response.raise_for_status()
+                return response.json()
+            except Exception as exc:  # noqa: BLE001 - try the next mirror
+                last_error = exc
+                time.sleep(2.0 + attempt * 4.0)
     raise RuntimeError(f"All Overpass endpoints failed: {last_error}")
 
 
@@ -152,8 +156,8 @@ def fetch(config: AppConfig, force: bool = False) -> dict[str, Path]:
     if raw_path.exists() and not force:
         payload = json.loads(raw_path.read_text(encoding="utf-8"))
     else:
-        query = QUERY_TEMPLATE.format(bbox=bbox_str, timeout=120)
-        payload = _download(query, timeout_s=180)
+        query = QUERY_TEMPLATE.format(bbox=bbox_str, timeout=240)
+        payload = _download(query, timeout_s=360)
         raw_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 
     buildings: list[dict[str, Any]] = []

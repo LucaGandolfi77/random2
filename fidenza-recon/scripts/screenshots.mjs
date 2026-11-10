@@ -5,15 +5,21 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { chromium } from 'playwright';
 
 const root = resolve(import.meta.dirname, '..');
+const webRoot = resolve(root, 'web');
 const output = resolve(root, 'docs/screenshots');
 mkdirSync(output, { recursive: true });
 const port = 4173;
 const url = `http://127.0.0.1:${port}/`;
 
-const server = spawn('npm', ['--prefix', 'web', 'run', 'preview', '--', '--port', String(port)], {
-  cwd: root,
-  stdio: ['ignore', 'pipe', 'pipe'],
-});
+const server = spawn(
+  'npx',
+  ['vite', 'preview', '--host', '127.0.0.1', '--port', String(port)],
+  {
+    cwd: webRoot,
+    shell: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  },
+);
 server.stdout.on('data', (chunk) => process.stdout.write(`[preview] ${chunk}`));
 server.stderr.on('data', (chunk) => process.stderr.write(`[preview] ${chunk}`));
 
@@ -36,7 +42,7 @@ try {
   browser = await chromium.launch({
     channel: 'chrome',
     headless: true,
-    args: ['--ignore-gpu-blocklist', '--enable-webgl', '--use-angle=metal'],
+    args: ['--ignore-gpu-blocklist', '--enable-webgl', '--enable-unsafe-swiftshader'],
   });
   const page = await browser.newPage({
     viewport: { width: 1600, height: 1000 },
@@ -62,7 +68,7 @@ try {
   };
 
   await page.goto(url, { waitUntil: 'networkidle' });
-  await page.waitForSelector('.loading.done', { timeout: 60000 });
+  await page.waitForSelector('.loading.done', { timeout: 120000 });
   await sleep(1800);
   await page.screenshot({ path: resolve(output, '01-duomo.png') });
   await readStats('duomo');
@@ -115,5 +121,11 @@ try {
   }
 } finally {
   if (browser) await browser.close();
-  server.kill('SIGTERM');
+  if (process.platform === 'win32' && server.pid) {
+    spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], {
+      stdio: 'ignore',
+    });
+  } else {
+    server.kill('SIGTERM');
+  }
 }

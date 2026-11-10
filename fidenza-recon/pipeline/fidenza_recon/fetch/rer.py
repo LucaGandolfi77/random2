@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import time
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +28,9 @@ DEFAULT_SERVICES = {
     "dsm": "DsmAgea2008",
 }
 
+# The public Web Adaptor starts failing around 9 megapixels per export.
+MAX_EXPORT_PIXELS = 8_500_000
+
 
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -36,16 +40,15 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _export_image(
+def _request_image(
     service: str,
     bbox_metric: tuple[float, float, float, float],
     width: int,
     height: int,
-    out_path: Path,
     *,
     pixel_type: str | None = None,
-    timeout_s: int = 180,
-) -> dict[str, Any]:
+    timeout_s: int = 300,
+) -> tuple[bytes, str]:
     url = f"{ARCGIS_BASE}/{service}/ImageServer/exportImage"
     params = {
         "bbox": ",".join(f"{value:.3f}" for value in bbox_metric),
@@ -58,21 +61,120 @@ def _export_image(
     }
     if pixel_type:
         params["pixelType"] = pixel_type
-    response = requests.get(url, params=params, timeout=timeout_s)
-    response.raise_for_status()
-    content_type = response.headers.get("content-type", "")
-    if "image" not in content_type and "tiff" not in content_type:
-        raise RuntimeError(f"{service}: unexpected content type {content_type}")
+    last_error: Exception | None = None
+    for attempt in range(3):
+        try:
+            response = requests.get(url, params=params, timeout=timeout_s)
+            response.raise_for_status()
+            content_type = response.headers.get("content-type", "")
+            if "image" not in content_type and "tiff" not in content_type:
+                snippet = response.text[:240].replace("\n", " ")
+                raise RuntimeError(
+                    f"{service}: unexpected content type {content_type}: {snippet}"
+                )
+            return response.content, response.url
+        except Exception as exc:  # noqa: BLE001 - retry transient server errors
+            last_error = exc
+            time.sleep(2.0 + attempt * 3.0)
+    raise RuntimeError(f"{service}: export failed after retries: {last_error}")
+
+
+def _export_image(
+    service: str,
+    bbox_metric: tuple[float, float, float, float],
+    width: int,
+    height: int,
+    out_path: Path,
+    *,
+    pixel_type: str | None = None,
+    timeout_s: int = 300,
+) -> dict[str, Any]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_bytes(response.content)
+    if width * height <= MAX_EXPORT_PIXELS:
+        content, url = _request_image(
+            service,
+            bbox_metric,
+            width,
+            height,
+            pixel_type=pixel_type,
+            timeout_s=timeout_s,
+        )
+        out_path.write_bytes(content)
+        return {
+            "path": out_path,
+            "bytes": len(content),
+            "service": service,
+            "url": url,
+            "bbox_metric": bbox_metric,
+            "width": width,
+            "height": height,
+        }
+
+    # Export horizontal strips below the server limit and mosaic the
+    # georeferenced tiles into one GeoTIFF.
+    tile_count = max(1, math.ceil((width * height) / MAX_EXPORT_PIXELS))
+    while math.ceil(height / tile_count) * width > MAX_EXPORT_PIXELS:
+        tile_count += 1
+    tile_height = math.ceil(height / tile_count)
+    minx, miny, maxx, maxy = bbox_metric
+    span_y = maxy - miny
+    parts: list[Path] = []
+    last_url = ""
+    try:
+        for index in range(tile_count):
+            start_row = index * tile_height
+            end_row = min(height, start_row + tile_height)
+            if start_row >= end_row:
+                break
+            tile_bbox = (
+                minx,
+                miny + span_y * (start_row / height),
+                maxx,
+                miny + span_y * (end_row / height),
+            )
+            content, last_url = _request_image(
+                service,
+                tile_bbox,
+                width,
+                end_row - start_row,
+                pixel_type=pixel_type,
+                timeout_s=timeout_s,
+            )
+            part_path = out_path.with_name(f"{out_path.stem}.part{index}.tif")
+            part_path.write_bytes(content)
+            parts.append(part_path)
+
+        import rasterio
+        from rasterio.merge import merge
+
+        datasets = [rasterio.open(path) for path in parts]
+        try:
+            mosaic, transform = merge(datasets)
+            profile = datasets[0].profile.copy()
+            profile.update(
+                width=mosaic.shape[2],
+                height=mosaic.shape[1],
+                transform=transform,
+                compress="deflate",
+            )
+            with rasterio.open(out_path, "w", **profile) as sink:
+                sink.write(mosaic.astype(profile["dtype"]))
+        finally:
+            for dataset in datasets:
+                dataset.close()
+    finally:
+        for part in parts:
+            part.unlink(missing_ok=True)
+
     return {
         "path": out_path,
-        "bytes": len(response.content),
+        "bytes": out_path.stat().st_size,
         "service": service,
-        "url": response.url,
+        "url": last_url,
         "bbox_metric": bbox_metric,
         "width": width,
         "height": height,
+        "tiles": tile_count,
     }
 
 

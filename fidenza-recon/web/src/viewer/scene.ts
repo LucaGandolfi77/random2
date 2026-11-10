@@ -2,9 +2,19 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { Building, CityData } from '../types';
 import { flatFootprintGeometry } from '../city/roof';
 import { canvasLabel, formatNumber } from '../utils';
+import { CollisionWorld } from '../player/collision';
+import {
+  PlayerController,
+  type PlayerFrameInput,
+} from '../player/controller';
+import { PhotoCamera } from './photo';
+import type { CityLodManager } from './lod-manager';
+
+export type ViewerMode = 'walk' | 'fly' | 'photo' | 'orbit';
 
 export interface ViewerStatsElements {
   fps: HTMLElement;
@@ -30,15 +40,47 @@ export class Viewer {
   private readonly confidenceGroup = new THREE.Group();
   private readonly raycaster = new THREE.Raycaster();
   private readonly pointer = new THREE.Vector2();
-  private pointerDown = new THREE.Vector2();
+  private readonly pointerDown = new THREE.Vector2();
+  private readonly activePointers = new Map<number, { x: number; y: number }>();
+  private lookPointerId: number | null = null;
+  private lastPointerX = 0;
+  private lastPointerY = 0;
+  private pinchDistance = 0;
+  private mode: ViewerMode = 'orbit';
+  private collisionWorld: CollisionWorld | null = null;
+  private player: PlayerController | null = null;
+  private readonly photo = new PhotoCamera();
+  private modeHandler: ((mode: ViewerMode) => void) | null = null;
+  private readonly keyboardMove = new THREE.Vector2();
+  private readonly joystickMove = new THREE.Vector2();
+  private joystickMagnitude = 0;
+  private runHeld = false;
+  private jumpHeld = false;
+  private descendHeld = false;
+  private jumpQueued = false;
+  private readonly lookDelta = new THREE.Vector2();
+  private zoomDelta = 0;
+  private readonly frameInput: PlayerFrameInput = {
+    move: new THREE.Vector2(),
+    look: new THREE.Vector2(),
+    zoom: 0,
+    jump: false,
+    jumpHeld: false,
+    descend: false,
+    run: false,
+  };
+  private photoReturnMode: ViewerMode = 'walk';
+  private photoSubjectVisible = true;
+  private footprintsVisible = false;
+  private confidenceVisible = false;
+  private labelsVisible = true;
   private selectionHandler: ((building: Building | null) => void) | null = null;
   private city: CityData | null = null;
-  private detailGroup: THREE.Group | null = null;
+  private lodManager: CityLodManager | null = null;
   private lastTime = performance.now();
   private frames = 0;
   private fpsWindow = 0;
   private statsElements: ViewerStatsElements | null = null;
-  private readonly centre = new THREE.Vector3();
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -47,6 +89,7 @@ export class Viewer {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       powerPreference: 'high-performance',
+      preserveDrawingBuffer: true,
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -63,7 +106,7 @@ export class Viewer {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
     this.controls.minDistance = 4;
-    this.controls.maxDistance = 900;
+    this.controls.maxDistance = 2400;
     this.controls.maxPolarAngle = Math.PI * 0.495;
     this.controls.target.set(0, 9, 0);
     this.controls.screenSpacePanning = false;
@@ -75,7 +118,7 @@ export class Viewer {
     environment.dispose();
     pmrem.dispose();
 
-    this.scene.fog = new THREE.Fog(0xd3dcdf, 220, 1400);
+    this.scene.fog = new THREE.Fog(0xd3dcdf, 800, 3200);
     this.scene.background = new THREE.Color(0xd3dcdf);
 
     const skyGeometry = new THREE.SphereGeometry(2000, 32, 18);
@@ -138,25 +181,94 @@ export class Viewer {
     this.confidenceGroup.visible = false;
 
     window.addEventListener('resize', () => this.resize());
-    this.renderer.domElement.addEventListener('pointerdown', (event) => {
-      this.pointerDown.set(event.clientX, event.clientY);
-    });
-    this.renderer.domElement.addEventListener('pointerup', (event) => {
-      const moved = this.pointerDown.distanceTo(new THREE.Vector2(event.clientX, event.clientY));
-      if (moved > 5) return;
-      this.pick(event);
-    });
-    this.renderer.domElement.addEventListener('pointermove', (event) => {
-      this.pointer.set(
-        (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1,
-        -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1,
-      );
-      this.raycaster.setFromCamera(this.pointer, this.camera);
-      const hit = this.raycaster.intersectObjects(this.buildingRoot.children, true)[0];
-      this.renderer.domElement.style.cursor = hit ? 'pointer' : 'grab';
-    });
+    const canvas = this.renderer.domElement;
+    canvas.style.touchAction = 'none';
+    canvas.addEventListener('pointerdown', (event) => this.onPointerDown(event));
+    canvas.addEventListener('pointermove', (event) => this.onPointerMove(event));
+    canvas.addEventListener('pointerup', (event) => this.onPointerUp(event));
+    canvas.addEventListener('pointercancel', (event) => this.onPointerUp(event));
+    canvas.addEventListener('wheel', (event) => this.onWheel(event), { passive: false });
     this.resize();
     this.animate();
+  }
+
+  private onPointerDown(event: PointerEvent): void {
+    this.pointerDown.set(event.clientX, event.clientY);
+    this.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (this.activePointers.size === 2) {
+      this.pinchDistance = this.currentPinchDistance();
+      this.lookPointerId = null;
+      return;
+    }
+    if (this.mode !== 'orbit' && this.activePointers.size === 1) {
+      this.lookPointerId = event.pointerId;
+      this.lastPointerX = event.clientX;
+      this.lastPointerY = event.clientY;
+      this.renderer.domElement.setPointerCapture(event.pointerId);
+    }
+  }
+
+  private onPointerMove(event: PointerEvent): void {
+    if (this.activePointers.has(event.pointerId)) {
+      this.activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
+    if (this.activePointers.size >= 2) {
+      const distance = this.currentPinchDistance();
+      if (this.pinchDistance > 0 && distance > 0) {
+        this.addZoom((this.pinchDistance - distance) * 1.5);
+      }
+      this.pinchDistance = distance;
+      return;
+    }
+    if (this.lookPointerId === event.pointerId && this.mode !== 'orbit') {
+      const dx = event.clientX - this.lastPointerX;
+      const dy = event.clientY - this.lastPointerY;
+      this.lastPointerX = event.clientX;
+      this.lastPointerY = event.clientY;
+      this.addLookDelta(dx, dy);
+      return;
+    }
+    if (this.mode !== 'orbit') return;
+    this.pointer.set(
+      (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1,
+      -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1,
+    );
+    this.raycaster.setFromCamera(this.pointer, this.camera);
+    const hit = this.raycaster.intersectObjects(this.buildingRoot.children, true)[0];
+    this.renderer.domElement.style.cursor = hit ? 'pointer' : 'grab';
+  }
+
+  private onPointerUp(event: PointerEvent): void {
+    this.activePointers.delete(event.pointerId);
+    if (this.activePointers.size < 2) this.pinchDistance = 0;
+    if (this.lookPointerId === event.pointerId) {
+      this.lookPointerId = null;
+      if (this.renderer.domElement.hasPointerCapture(event.pointerId)) {
+        this.renderer.domElement.releasePointerCapture(event.pointerId);
+      }
+    }
+    if (this.mode !== 'orbit') return;
+    const moved = this.pointerDown.distanceTo(
+      new THREE.Vector2(event.clientX, event.clientY),
+    );
+    if (moved <= 5) this.pick(event);
+  }
+
+  private currentPinchDistance(): number {
+    const values = [...this.activePointers.values()];
+    if (values.length < 2) return 0;
+    return Math.hypot(values[0].x - values[1].x, values[0].y - values[1].y);
+  }
+
+  private onWheel(event: WheelEvent): void {
+    if (this.mode === 'orbit') return;
+    event.preventDefault();
+    this.addZoom(event.deltaY);
+  }
+
+  private setCanvasCursor(): void {
+    this.renderer.domElement.style.cursor =
+      this.mode === 'photo' ? 'crosshair' : 'grab';
   }
 
   resize(): void {
@@ -175,13 +287,19 @@ export class Viewer {
     this.statsElements = elements;
   }
 
-  load(city: CityData): void {
+  load(city: CityData, terrainSample: (x: number, z: number) => number): void {
     this.city = city;
-    const [minX, minZ, maxX, maxZ] = city.meta.bbox_local;
-    this.centre.set((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
     this.controls.target.set(0, Math.min(12, city.stats.height_confidence_median > 0 ? 10 : 8), 0);
     this.camera.position.set(46, 19, 62);
     this.controls.update();
+
+    this.collisionWorld = new CollisionWorld(city, terrainSample);
+    const spawn = PlayerController.spawnFor(city, this.collisionWorld);
+    this.player = new PlayerController(this.collisionWorld, spawn);
+    this.scene.add(this.player.character.root);
+    this.scene.add(this.player.character.shadow);
+    this.mode = 'orbit';
+    this.setMode('walk');
 
     for (const building of city.buildings) {
       if (!building.name && !building.landmark) continue;
@@ -207,6 +325,7 @@ export class Viewer {
       this.labelGroup.add(sprite);
     }
     this.labelGroup.visible = city.stats.landmarks > 0;
+    this.labelsVisible = city.stats.landmarks > 0;
 
     const footprintMaterial = new THREE.MeshBasicMaterial({
       color: 0x5ef2a0,
@@ -215,38 +334,272 @@ export class Viewer {
       depthWrite: false,
       side: THREE.DoubleSide,
     });
-    for (const building of city.buildings) {
-      const mesh = new THREE.Mesh(flatFootprintGeometry(building, 0.16), footprintMaterial);
-      mesh.renderOrder = 2;
-      this.footprintGroup.add(mesh);
-      const confidence = building.height_confidence ?? 0;
-      const colour =
-        confidence > 0.65 ? new THREE.Color('#4fd18b') : confidence > 0.45 ? new THREE.Color('#e7c45a') : new THREE.Color('#d75c4b');
-      const confidenceMaterial = new THREE.MeshBasicMaterial({
-        color: colour,
+    const confidenceMaterials = {
+      high: new THREE.MeshBasicMaterial({
+        color: new THREE.Color('#4fd18b'),
         transparent: true,
         opacity: 0.55,
         depthWrite: false,
         side: THREE.DoubleSide,
-      });
-      const confidenceMesh = new THREE.Mesh(flatFootprintGeometry(building, 0.18), confidenceMaterial);
-      confidenceMesh.renderOrder = 3;
-      this.confidenceGroup.add(confidenceMesh);
+      }),
+      medium: new THREE.MeshBasicMaterial({
+        color: new THREE.Color('#e7c45a'),
+        transparent: true,
+        opacity: 0.55,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      }),
+      low: new THREE.MeshBasicMaterial({
+        color: new THREE.Color('#d75c4b'),
+        transparent: true,
+        opacity: 0.55,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      }),
+    };
+    const footprintGeometries: THREE.BufferGeometry[] = [];
+    const confidenceGeometries: Record<'high' | 'medium' | 'low', THREE.BufferGeometry[]> = {
+      high: [],
+      medium: [],
+      low: [],
+    };
+    for (const building of city.buildings) {
+      footprintGeometries.push(flatFootprintGeometry(building, 0.16));
+      const confidence = building.height_confidence ?? 0;
+      const key = confidence > 0.65 ? 'high' : confidence > 0.45 ? 'medium' : 'low';
+      confidenceGeometries[key].push(flatFootprintGeometry(building, 0.18));
     }
+    const addMerged = (
+      geometries: THREE.BufferGeometry[],
+      material: THREE.Material,
+      target: THREE.Group,
+      renderOrder: number,
+    ): void => {
+      if (!geometries.length) return;
+      const merged = mergeGeometries(geometries, false);
+      if (merged) {
+        for (const geometry of geometries) geometry.dispose();
+        const mesh = new THREE.Mesh(merged, material);
+        mesh.renderOrder = renderOrder;
+        target.add(mesh);
+      } else {
+        for (const geometry of geometries) {
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.renderOrder = renderOrder;
+          target.add(mesh);
+        }
+      }
+    };
+    addMerged(footprintGeometries, footprintMaterial, this.footprintGroup, 2);
+    addMerged(confidenceGeometries.high, confidenceMaterials.high, this.confidenceGroup, 3);
+    addMerged(confidenceGeometries.medium, confidenceMaterials.medium, this.confidenceGroup, 3);
+    addMerged(confidenceGeometries.low, confidenceMaterials.low, this.confidenceGroup, 3);
     this.footprintGroup.visible = false;
     this.confidenceGroup.visible = false;
   }
 
-  setDetailGroup(group: THREE.Group): void {
-    this.detailGroup = group;
-    this.cityRoot.add(group);
+  setLodManager(manager: CityLodManager): void {
+    this.lodManager = manager;
   }
 
   setSelectionHandler(handler: (building: Building | null) => void): void {
     this.selectionHandler = handler;
   }
 
+  onModeChange(handler: (mode: ViewerMode) => void): void {
+    this.modeHandler = handler;
+  }
+
+  getMode(): ViewerMode {
+    return this.mode;
+  }
+
+  setMode(mode: ViewerMode): void {
+    if (mode === this.mode) {
+      if (this.player && (mode === 'walk' || mode === 'fly')) {
+        this.player.syncCamera(this.camera);
+      }
+      return;
+    }
+    const previous = this.mode;
+    if (previous === 'photo') this.leavePhoto();
+    this.mode = mode;
+    this.controls.enabled = mode === 'orbit';
+    this.setCanvasCursor();
+
+    if (this.player) {
+      if (mode === 'walk') {
+        this.player.setFlying(false);
+        this.player.character.setVisible(true);
+        this.player.syncCamera(this.camera);
+      } else if (mode === 'fly') {
+        this.player.setFlying(true);
+        this.player.character.setVisible(true);
+        this.player.syncCamera(this.camera);
+      }
+    }
+
+    if (mode === 'photo') {
+      this.photoReturnMode =
+        previous === 'orbit' ? 'orbit' : previous === 'fly' ? 'fly' : 'walk';
+      this.enterPhoto();
+    } else if (mode === 'orbit') {
+      this.controls.enabled = true;
+      if (previous === 'photo') {
+        const direction = this.camera.getWorldDirection(new THREE.Vector3());
+        this.controls.target
+          .copy(this.camera.position)
+          .addScaledVector(direction, 25);
+      } else if (this.player) {
+        const focus = new THREE.Vector3();
+        this.player.getFocusPoint(focus);
+        this.controls.target.copy(focus);
+      }
+      this.controls.update();
+    }
+    this.resetFrameInput();
+    this.modeHandler?.(mode);
+  }
+
+  togglePhoto(): void {
+    if (this.mode === 'photo') this.exitPhoto();
+    else this.setMode('photo');
+  }
+
+  exitPhoto(): void {
+    if (this.mode === 'photo') this.setMode(this.photoReturnMode);
+  }
+
+  toggleFlight(): void {
+    if (this.mode === 'photo') return;
+    this.setMode(this.mode === 'fly' ? 'walk' : 'fly');
+  }
+
+  getPhotoFov(): number {
+    return this.photo.getFov();
+  }
+
+  setPhotoFov(fov: number): void {
+    this.photo.setFov(fov);
+    if (this.mode === 'photo') {
+      this.camera.fov = this.photo.getFov();
+      this.camera.updateProjectionMatrix();
+    }
+  }
+
+  getPhotoSubjectVisible(): boolean {
+    return this.photoSubjectVisible;
+  }
+
+  setPhotoSubjectVisible(visible: boolean): void {
+    this.photoSubjectVisible = visible;
+    if (this.mode === 'photo') {
+      this.player?.character.setVisible(visible);
+    }
+  }
+
+  capturePhoto(): boolean {
+    if (this.mode !== 'photo') return false;
+    this.renderer.render(this.scene, this.camera);
+    const dataUrl = this.renderer.domElement.toDataURL('image/png');
+    const now = new Date();
+    const pad = (value: number): string => String(value).padStart(2, '0');
+    const stamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    const anchor = document.createElement('a');
+    anchor.href = dataUrl;
+    anchor.download = `fidenza-${stamp}.png`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    return true;
+  }
+
+  resetView(): void {
+    if (this.mode === 'orbit') {
+      if (this.city) this.setOverview(this.city);
+    } else if (this.mode === 'photo') {
+      this.photo.setFov(52);
+      this.photo.enter(this.camera);
+      this.camera.fov = 52;
+      this.camera.updateProjectionMatrix();
+    } else {
+      this.player?.resetCamera();
+    }
+  }
+
+  setKeyboardMove(x: number, y: number): void {
+    this.keyboardMove.set(x, y);
+  }
+
+  setJoystickMove(x: number, y: number, magnitude: number): void {
+    this.joystickMove.set(x, y);
+    this.joystickMagnitude = magnitude;
+  }
+
+  setRunHeld(held: boolean): void {
+    this.runHeld = held;
+  }
+
+  setJumpHeld(held: boolean): void {
+    this.jumpHeld = held;
+  }
+
+  setDescendHeld(held: boolean): void {
+    this.descendHeld = held;
+  }
+
+  queueJump(): void {
+    this.jumpQueued = true;
+  }
+
+  addLookDelta(dx: number, dy: number): void {
+    this.lookDelta.x += dx;
+    this.lookDelta.y += dy;
+  }
+
+  addZoom(delta: number): void {
+    this.zoomDelta += delta;
+  }
+
+  private enterPhoto(): void {
+    this.photo.enter(this.camera);
+    this.player?.character.setVisible(this.photoSubjectVisible);
+    this.labelGroup.visible = false;
+    this.footprintGroup.visible = false;
+    this.confidenceGroup.visible = false;
+  }
+
+  private leavePhoto(): void {
+    this.camera.fov = 52;
+    this.camera.updateProjectionMatrix();
+    this.labelGroup.visible = this.labelsVisible;
+    this.footprintGroup.visible = this.footprintsVisible;
+    this.confidenceGroup.visible = this.confidenceVisible;
+    this.player?.character.setVisible(true);
+  }
+
+  private buildFrameInput(): void {
+    const move = this.frameInput.move.set(
+      this.keyboardMove.x + this.joystickMove.x,
+      this.keyboardMove.y + this.joystickMove.y,
+    );
+    if (move.lengthSq() > 1) move.normalize();
+    this.frameInput.look.copy(this.lookDelta);
+    this.frameInput.zoom = this.zoomDelta;
+    this.frameInput.jump = this.jumpQueued;
+    this.frameInput.jumpHeld = this.jumpHeld;
+    this.frameInput.descend = this.descendHeld;
+    this.frameInput.run = this.runHeld || this.joystickMagnitude > 0.85;
+  }
+
+  private resetFrameInput(): void {
+    this.lookDelta.set(0, 0);
+    this.zoomDelta = 0;
+    this.jumpQueued = false;
+  }
+
   private pick(event: PointerEvent): void {
+    if (this.mode !== 'orbit') return;
     this.pointer.set(
       (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1,
       -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1,
@@ -267,19 +620,22 @@ export class Viewer {
   }
 
   setFootprints(visible: boolean): void {
-    this.footprintGroup.visible = visible;
+    this.footprintsVisible = visible;
+    if (this.mode !== 'photo') this.footprintGroup.visible = visible;
   }
 
   setConfidence(visible: boolean): void {
-    this.confidenceGroup.visible = visible;
+    this.confidenceVisible = visible;
+    if (this.mode !== 'photo') this.confidenceGroup.visible = visible;
   }
 
   setLabels(visible: boolean): void {
-    this.labelGroup.visible = visible;
+    this.labelsVisible = visible;
+    if (this.mode !== 'photo') this.labelGroup.visible = visible;
   }
 
   setDetailVisibility(visible: boolean): void {
-    if (this.detailGroup) this.detailGroup.visible = visible;
+    this.lodManager?.setDetailsVisible(visible);
   }
 
   private pointInRing(x: number, z: number, ring: [number, number][]): boolean {
@@ -368,6 +724,7 @@ export class Viewer {
   }
 
   focusBuilding(building: Building): void {
+    this.setMode('orbit');
     const side =
       building.sides.find((candidate) => candidate.main_facade) ??
       building.sides.find((candidate) => candidate.street_facing) ??
@@ -438,16 +795,24 @@ export class Viewer {
   }
 
   setOverview(city: CityData): void {
+    this.setMode('orbit');
     const [minX, minZ, maxX, maxZ] = city.meta.bbox_local;
     const centreX = (minX + maxX) / 2;
     const centreZ = (minZ + maxZ) / 2;
-    this.camera.position.set(centreX + 120, 150, centreZ + 150);
+    const size = Math.max(maxX - minX, maxZ - minZ);
+    const distance = Math.max(180, size * 0.62);
+    this.camera.position.set(
+      centreX + distance * 0.65,
+      distance * 0.82,
+      centreZ + distance * 0.65,
+    );
     this.controls.target.set(centreX, 8, centreZ);
     this.controls.update();
   }
 
   setStreetView(): void {
     if (!this.city) return;
+    this.setMode('orbit');
     const [minX, minZ, maxX, maxZ] = this.city.meta.pilot_bbox_local;
     const inside = (x: number, z: number): boolean =>
       x >= minX && x <= maxX && z >= minZ && z <= maxZ;
@@ -500,18 +865,23 @@ export class Viewer {
 
   async exportGLB(): Promise<Blob> {
     const exporter = new GLTFExporter();
-    const payload = await new Promise<ArrayBuffer>((resolve, reject) => {
-      exporter.parse(
-        this.cityRoot,
-        (result) => {
-          if (result instanceof ArrayBuffer) resolve(result);
-          else reject(new Error('Unexpected GLB output'));
-        },
-        (error) => reject(error),
-        { binary: true, onlyVisible: true, maxTextureSize: 2048 },
-      );
-    });
-    return new Blob([payload], { type: 'model/gltf-binary' });
+    this.lodManager?.beginExport();
+    try {
+      const payload = await new Promise<ArrayBuffer>((resolve, reject) => {
+        exporter.parse(
+          this.cityRoot,
+          (result) => {
+            if (result instanceof ArrayBuffer) resolve(result);
+            else reject(new Error('Unexpected GLB output'));
+          },
+          (error) => reject(error),
+          { binary: true, onlyVisible: true, maxTextureSize: 2048 },
+        );
+      });
+      return new Blob([payload], { type: 'model/gltf-binary' });
+    } finally {
+      this.lodManager?.endExport();
+    }
   }
 
   private animate = (): void => {
@@ -519,13 +889,23 @@ export class Viewer {
     const now = performance.now();
     const delta = now - this.lastTime;
     this.lastTime = now;
+    const step = Math.min(0.05, delta / 1000);
     this.frames += 1;
     this.fpsWindow += delta;
-    if (this.detailGroup) {
-      const distance = this.camera.position.distanceTo(new THREE.Vector3(this.centre.x, 0, this.centre.z));
-      this.detailGroup.visible = distance < 420;
+
+    if (this.collisionWorld && this.player) {
+      if (this.mode === 'walk' || this.mode === 'fly') {
+        this.buildFrameInput();
+        this.player.update(step, this.camera, this.frameInput);
+      } else if (this.mode === 'photo') {
+        this.buildFrameInput();
+        this.photo.update(step, this.camera, this.collisionWorld, this.frameInput);
+      }
     }
-    this.controls.update();
+    this.resetFrameInput();
+
+    if (this.lodManager) this.lodManager.update(this.camera);
+    if (this.mode === 'orbit') this.controls.update();
     this.renderer.render(this.scene, this.camera);
     if (this.fpsWindow > 500 && this.statsElements) {
       const fps = (this.frames * 1000) / this.fpsWindow;

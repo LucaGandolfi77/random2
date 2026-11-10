@@ -2,26 +2,41 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta
       name="description"
-      content="Ricostruzione 3D provenance-first dell'isolato di Piazza Duomo a Fidenza: edifici, altezze misurate, facciate procedurali e report di validazione."
+      content="Ricostruzione 3D provenance-first dell'area urbana di Fidenza: edifici, altezze misurate, facciate procedurali, LOD dinamico e report di validazione."
     />
-    <title>Fidenza · Ricostruzione 3D dell'isolato di Piazza Duomo</title>
+    <title>Fidenza · Ricostruzione 3D dell'area urbana</title>
     <link rel="icon" href="data:," />
     <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body>
     <div id="app">
-      <div id="scene" aria-label="Modello 3D dell'isolato di Piazza Duomo a Fidenza"></div>
+      <div id="scene" aria-label="Modello 3D dell'area urbana di Fidenza"></div>
+
+      <nav id="mode-bar" class="panel mode-bar" aria-label="Modalità di gioco">
+        <button type="button" data-mode="walk" class="active">Esplora</button>
+        <button type="button" data-mode="fly">Volo</button>
+        <button type="button" data-mode="photo">Foto</button>
+        <button type="button" data-mode="orbit">Osserva</button>
+      </nav>
+
+      <div class="mobile-tools">
+        <button type="button" id="fullscreen-toggle" aria-label="Schermo intero">⛶</button>
+        <button type="button" id="menu-toggle" aria-label="Menu controlli" aria-expanded="false">☰</button>
+      </div>
 
       <header class="panel brand">
         <div class="eyebrow">Open Data · Ricostruzione 3D</div>
-        <h1>Fidenza <span>Piazza Duomo</span></h1>
+        <h1>Fidenza <span>Centro urbano esteso</span></h1>
         <p class="lede">
-          Isolato pilota con <strong id="brand-buildings">—</strong> edifici dettagliati; il
-          contesto urbano circostante è ricostruito a LOD1. Altezze misurate da DSM−DTM; tetti e
-          colori da ortofoto; facciate procedurali dichiarate come tali.
+          Area urbana estesa con <strong id="brand-buildings">—</strong> edifici
+          dettagliati LOD3, ricostruiti da OSM e RER 2023‑24. Il dettaglio viene
+          caricato dinamicamente intorno alla posizione; i chunk lontani usano LOD1.
         </p>
         <div class="chips">
           <span class="chip">OSM · ODbL</span>
@@ -34,7 +49,7 @@
         <div class="stat"><span id="stat-fps">—</span><label>fps</label></div>
         <div class="stat"><span id="stat-calls">—</span><label>draw calls</label></div>
         <div class="stat"><span id="stat-triangles">—</span><label>triangoli</label></div>
-        <div class="stat"><span id="stat-buildings">—</span><label>edifici</label></div>
+        <div class="stat"><span id="stat-buildings">—</span><label>edifici misurati</label></div>
         <div class="stat"><span id="stat-windows">—</span><label>finestre</label></div>
         <div class="stat"><span id="stat-confidence">—</span><label>conf. alt.</label></div>
       </section>
@@ -69,8 +84,13 @@
           <button type="button" id="reset-view">Reset camera</button>
         </div>
         <p class="hint">
-          Clicca un edificio per ispezionare fonte, confidenza e dettagli inventati.
-          Trascina per orbitare, rotella per zoom.
+          Esplora: frecce/WASD, Shift per correre, Spazio per saltare, F per volare,
+          P per la modalità foto. In Osserva clicca un edificio per ispezionare fonte,
+          confidenza e dettagli procedurali.
+        </p>
+        <p class="hint mobile-credit">
+          © OpenStreetMap contributors (ODbL 1.0) · Ortofoto/DTM RER 2023‑24 (CC BY 4.0) ·
+          DSM AGEA 2008 · facciate e arredi non OSM: procedurali
         </p>
       </section>
 
@@ -86,6 +106,59 @@
         <div class="legend-row"><span class="dot low"></span> stima tipologica</div>
         <p class="hint">Il colore è applicato alle impronte, non alle facciate.</p>
       </div>
+
+      <div id="touch-ui" class="touch-ui">
+        <div id="joystick" class="joystick" aria-label="Joystick di movimento">
+          <div id="joystick-thumb" class="joystick-thumb"></div>
+        </div>
+        <div class="touch-actions">
+          <button type="button" id="touch-fly" class="touch-btn touch-btn-small" aria-label="Attiva o disattiva il volo">
+            <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+              <path d="M2.5 21 22 12 2.5 3l0 7 14 2-14 2z" fill="currentColor" />
+            </svg>
+          </button>
+          <button type="button" id="touch-photo" class="touch-btn touch-btn-small" aria-label="Modalità foto">
+            <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
+              <path
+                d="M4 7h3l1.4-2h7.2L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm8 2.6a4.4 4.4 0 1 0 0 8.8 4.4 4.4 0 0 0 0-8.8zm0 1.8a2.6 2.6 0 1 1 0 5.2 2.6 2.6 0 0 1 0-5.2z"
+                fill="currentColor"
+              />
+            </svg>
+          </button>
+          <button type="button" id="touch-jump" class="touch-btn touch-btn-large" aria-label="Salto o salita">▲</button>
+          <button type="button" id="touch-descend" class="touch-btn" aria-label="Discesa">▼</button>
+        </div>
+      </div>
+
+      <div id="play-hint" class="play-hint panel">
+        <strong>Esplora</strong>
+        <span>Frecce/WASD muoviti · Shift corri · Spazio salta · F volo · P foto</span>
+      </div>
+
+      <section id="photo-ui" class="photo-ui" aria-hidden="true">
+        <div id="photo-grid" class="photo-grid"></div>
+        <div class="photo-header panel">
+          <strong>Modalità foto</strong>
+          <button type="button" id="photo-exit">Esci</button>
+        </div>
+        <div class="photo-settings panel">
+          <label for="photo-fov">FOV <input type="range" id="photo-fov" min="18" max="78" step="1" value="52" /></label>
+          <label class="switch">
+            <input type="checkbox" id="photo-grid-toggle" checked />
+            <span>Griglia</span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="photo-subject" checked />
+            <span>Personaggio</span>
+          </label>
+        </div>
+        <button type="button" id="photo-shoot" class="photo-shutter" aria-label="Scatta foto">
+          <span></span>
+        </button>
+      </section>
+
+      <div id="photo-flash" class="photo-flash"></div>
+      <div id="toast" class="toast" role="status"></div>
 
       <footer class="attribution">
         © OpenStreetMap contributors (ODbL 1.0) · Ortofoto/DTM RER 2023‑24 (CC BY 4.0) ·

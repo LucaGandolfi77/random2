@@ -1,10 +1,10 @@
 # Street imagery coverage report
 
-Generated: 2026-11-08T23:46:25+00:00
+Generated: 2026-11-09T23:37:26+00:00
 
 ## KartaView
 
-- Sample points: 4
+- Sample points: 49
 - Points with photos: 0
 - Photos: 0
 - Sequence API: restricted without elevated access
@@ -15,7 +15,7 @@ and records that fact on every building.
 
 ## Wikimedia Commons references
 
-- Files inventoried: 40
+- Files inventoried: 48
 - Used for: landmark validation and colour/detail cross-checks.
 - Not used for: projecting photographs onto arbitrary facades.
 
@@ -39,25 +39,25 @@ and records that fact on every building.
 | File:Abbazia (Castione Marchesi, Fidenza) - facciata sud 2 2019-06-19.jpg | CC BY-SA 4.0 | Parma1983 |
 | File:Abbazia (Castione Marchesi, Fidenza) - facciata sud 1 2019-06-19.jpg | CC BY-SA 4.0 | Parma1983 |
 | File:Chiesa del Sacro Cuore (Fidenza) - facciata 2019-10-02.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa del Sacro Cuore (Fidenza) - facciata e lato nord 1 2019-10-02.jpg | CC BY-SA 4.0 | Parma1983 |
 | File:Brevi cenni biografici intorno l'altezza reale di Maria Beatrice Vittoria principessa di Savoja archiduchessa d'Austria duchessa di Modena Reggio Mirandola Massa Carrara ecc. ecc. ecc. - (IA brevicennibiogra00galv).pdf | Public domain | Galvani, Cesare |
-| File:Chiesa di San Tommaso Becket (Cabriolo) - facciata 2017-06-12.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Michele Arcangelo (Fidenza) - abside 2019-10-02.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Michele Arcangelo (Fidenza) - lato est 2019-10-02.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Michele Arcangelo (Fidenza) - facciata 2019-10-02.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Lorenzo (Fornio, Fidenza) - cappella cimiteriale 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Lorenzo (Fornio, Fidenza) - retro e campanile 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Lorenzo (Fornio, Fidenza) - retro e lato sud 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Lorenzo (Fornio, Fidenza) - facciata e lato sud 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Lorenzo (Fornio, Fidenza) - facciata 3 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Lorenzo (Fornio, Fidenza) - lato sud 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Lorenzo (Fornio, Fidenza) - facciata 2 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Lorenzo (Fornio, Fidenza) - facciata 1 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Giovanni Decollato (Siccomonte, Fidenza) - facciata 2 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Giovanni Decollato (Siccomonte, Fidenza) - campanile 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Giovanni Decollato (Siccomonte, Fidenza) - facciata 1 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Giovanni Battista (Pieve Cusignano, Fidenza) - lato nord 1 2022-05-22.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Giovanni Battista (Pieve Cusignano, Fidenza) - lato nord 2 2022-05-22.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Giovanni Battista (Pieve Cusignano, Fidenza) - facciata e lato nord 2 2022-05-22.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Giovanni Battista (Pieve Cusignano, Fidenza) - facciata 2022-05-22.jpg | CC BY-SA 4.0 | Parma1983 |
-| File:Chiesa di San Giovanni Battista (Pieve Cusignano, Fidenza) - facciata e lato nord 1 2022-05-22.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Campanile della chiesa di San Leonardo da Limoges a Coduro.jpg | CC BY-SA 4.0 | Basilicofresco |
+| File:Chiesa del Sacro Cuore (Fidenza) - facciata e lato nord 1 2019-10-02.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa del Sacro Cuore (Fidenza) - facciata e lato nord 2 2019-10-02.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giacomo Maggiore Apostolo (Rimale, Fidenza) - retro 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giacomo Maggiore Apostolo (Rimale, Fidenza) - facciata 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giacomo Maggiore Apostolo (Rimale, Fidenza) - facciata e lato est 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giacomo Maggiore Apostolo (Rimale, Fidenza) - facciata e lato ovest 2 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giacomo Maggiore Apostolo (Rimale, Fidenza) - facciata e lato ovest 1 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giovanni Apostolo ed Evangelista (Chiusa Ferranda, Fidenza) - facciata e lato nord 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giovanni Apostolo ed Evangelista (Chiusa Ferranda, Fidenza) - facciata 2 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giovanni Apostolo ed Evangelista (Chiusa Ferranda, Fidenza) - facciata 1 2022-06-17.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giorgio (Cogolonchio, Fidenza) - campanile e lato est 2023-03-29.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giorgio (Cogolonchio, Fidenza) - campanile 2023-03-29.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giorgio (Cogolonchio, Fidenza) - facciata 2023-03-29.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giorgio (Cogolonchio, Fidenza) - facciata e lato ovest 2023-03-29.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giorgio (Cogolonchio, Fidenza) - facciata e lato est 2023-03-29.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa del Santissimo Crocifisso (Ponte Ghiara, Fidenza) - facciata 1 2023-03-29.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa del Santissimo Crocifisso (Ponte Ghiara, Fidenza) - facciata e lato nord-est 2023-03-29.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa del Santissimo Crocifisso (Ponte Ghiara, Fidenza) - facciata 2 2023-03-29.jpg | CC BY-SA 4.0 | Parma1983 |
+| File:Chiesa di San Giorgio a Cogolonchio.jpg | CC BY-SA 4.0 | Basilicofresco |
+| File:Chiesa di San Giorgio, Cogolonchio.jpg | CC BY-SA 4.0 | Basilicofresco |

@@ -238,7 +238,11 @@ def build(config: AppConfig, force: bool = False) -> dict:
     bbox_local = ctx.bbox_local(config.context_bbox)
     pilot_bbox_local = ctx.bbox_local(config.pilot_bbox)
     dtm_path = RAW_DIR / "rer" / "dtm_rer2023_24.tif"
-    terrain = _sample_grid(dtm_path, ctx, bbox_local, nx=80, nz=72)
+    span_x = bbox_local[2] - bbox_local[0]
+    span_z = bbox_local[3] - bbox_local[1]
+    nx = max(80, math.ceil(span_x / 7.5))
+    nz = max(72, math.ceil(span_z / 8.75))
+    terrain = _sample_grid(dtm_path, ctx, bbox_local, nx=nx, nz=nz)
     sampler = _terrain_sampler(terrain)
     roads, plazas = _roads(config, base, sampler)
     props = _props(config, base, sampler)

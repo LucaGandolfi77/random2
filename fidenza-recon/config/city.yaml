@@ -16,26 +16,26 @@ origin:
     point: x = east, z = south, y = up. No global coordinates are sent to the GPU.
 
 pilot:
-  name: Isolato di Piazza Duomo
-  bbox_wgs84: [10.0562, 44.8652, 10.0603, 44.8676]
-  approx_size_m: [323, 265]
+  name: Centro urbano esteso di Fidenza
+  bbox_wgs84: [10.0506, 44.8609, 10.0659, 44.8719]
+  approx_size_m: [1200, 1230]
   description: >
-    Piazza Duomo compartment: the Romanesque Cattedrale di San Donnino, the
-    medieval Porta di San Donnino, the Teatro Girolamo Magnani, 19th-century
-    palazzi along Via Bacchini and Via Marconi, mixed-use shopfronts and
-    post-war infill.
+    Area dettagliata LOD3 estesa a circa 1,2 km: Cattedrale di San Donnino,
+    Porta di San Donnino, Teatro Girolamo Magnani, il centro storico e la
+    prima periferia. Impronte e strade da OSM; facciate generate
+    proceduralmente perché non esiste copertura street-level.
   landmarks:
     - Cattedrale di San Donnino
     - Porta di San Donnino
     - Teatro Girolamo Magnani
 
 context:
-  bbox_wgs84: [10.0544, 44.8636, 10.0621, 44.8692]
-  approx_size_m: [610, 620]
+  bbox_wgs84: [10.0506, 44.8609, 10.0659, 44.8719]
+  approx_size_m: [1200, 1230]
   description: >
-    One-block-wide context ring rendered at LOD1 so the detailed pilot does
-    not float on an empty plane. Heights and footprints are still measured;
-    facades are not detailed outside the pilot.
+    Area di fetch coincidente con il pilot esteso. Tutti gli edifici sono
+    trattati come dettagliati LOD3 nel viewer dinamico; il livello LOD1
+    viene generato a runtime per i chunk lontani.
 
 floor_heights:
   default_m: 3.2
@@ -75,5 +75,5 @@ downloads:
   ortho_resolution_m: 0.25
   dtm_resolution_m: 0.5
   dsm_resolution_m: 2.0
-  ground_texture_width_px: 2048
-  request_timeout_s: 180
+  ground_texture_width_px: 4096
+  request_timeout_s: 300

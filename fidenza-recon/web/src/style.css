@@ -26,6 +26,14 @@ body,
   margin: 0;
 }
 
+@supports (height: 100dvh) {
+  html,
+  body,
+  #app {
+    height: 100dvh;
+  }
+}
+
 body {
   background: #cfd8db;
   color: var(--paper);
@@ -561,6 +569,628 @@ button.primary {
     width: calc(100vw - 40px);
   }
   .legend {
+    display: none;
+  }
+}
+
+/* --- Modalità personaggio, volo, foto e telefono --- */
+
+#scene,
+.city-canvas {
+  touch-action: none;
+}
+
+.mode-bar {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+}
+
+.mode-bar button {
+  padding: 7px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.mode-bar button.active {
+  background: linear-gradient(180deg, rgba(217, 180, 106, 0.95), rgba(190, 150, 78, 0.95));
+  border-color: rgba(240, 199, 123, 0.7);
+  color: #221a0c;
+  font-weight: 600;
+}
+
+.mobile-tools {
+  display: none;
+}
+
+.mobile-credit {
+  display: none;
+}
+
+.play-hint {
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 11px;
+  color: rgba(242, 237, 226, 0.82);
+  transition: opacity 300ms ease, visibility 300ms ease;
+}
+
+.play-hint strong {
+  color: var(--accent-strong);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.play-hint.dismissed {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.touch-ui {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 14;
+  pointer-events: none;
+}
+
+body.is-touch .touch-ui {
+  display: block;
+}
+
+@media (pointer: coarse) {
+  .touch-ui {
+    display: block;
+  }
+  .attribution {
+    display: none;
+  }
+  .mobile-credit {
+    display: block;
+  }
+}
+
+.joystick {
+  position: absolute;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 1px solid rgba(235, 228, 214, 0.24);
+  background: rgba(17, 22, 26, 0.32);
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 0 34px rgba(0, 0, 0, 0.2);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+.joystick::before {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(235, 228, 214, 0.28);
+}
+
+.joystick-thumb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 30%, rgba(240, 199, 123, 0.98), rgba(179, 137, 68, 0.94));
+  border: 1px solid rgba(255, 240, 210, 0.62);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+  pointer-events: none;
+  transition: transform 50ms linear;
+}
+
+.joystick.active .joystick-thumb {
+  transition: none;
+}
+
+.touch-actions {
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-columns: 48px 66px;
+  grid-template-areas:
+    "fly jump"
+    "photo descend";
+  gap: 10px;
+  align-items: end;
+  pointer-events: none;
+}
+
+.touch-actions > button {
+  pointer-events: auto;
+}
+
+.touch-btn {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(235, 228, 214, 0.24);
+  background: rgba(17, 22, 26, 0.62);
+  color: var(--paper);
+  font-size: 16px;
+  line-height: 1;
+  touch-action: none;
+  user-select: none;
+  backdrop-filter: blur(8px);
+  transition: transform 100ms ease, background 120ms ease;
+}
+
+.touch-btn:active,
+.touch-btn.pressed {
+  transform: scale(0.93);
+  background: rgba(217, 180, 106, 0.35);
+}
+
+.touch-btn-small {
+  width: 48px;
+  height: 48px;
+}
+
+.touch-btn-large {
+  width: 66px;
+  height: 66px;
+  font-size: 20px;
+  color: #221a0c;
+  background: linear-gradient(180deg, rgba(217, 180, 106, 0.95), rgba(190, 150, 78, 0.95));
+  border-color: rgba(240, 199, 123, 0.7);
+}
+
+#touch-fly {
+  grid-area: fly;
+}
+
+#touch-photo {
+  grid-area: photo;
+}
+
+#touch-jump {
+  grid-area: jump;
+}
+
+#touch-descend {
+  grid-area: descend;
+}
+
+body.mode-walk #touch-descend {
+  opacity: 0.32;
+}
+
+body.mode-fly #touch-fly {
+  color: #221a0c;
+  background: linear-gradient(180deg, rgba(217, 180, 106, 0.95), rgba(190, 150, 78, 0.95));
+  border-color: rgba(240, 199, 123, 0.7);
+}
+
+body.mode-orbit .touch-ui {
+  display: none !important;
+}
+
+body.mode-photo #touch-fly,
+body.mode-photo #touch-photo {
+  display: none;
+}
+
+body.mode-photo .touch-actions {
+  grid-template-columns: 66px;
+  grid-template-areas:
+    "jump"
+    "descend";
+}
+
+body.menu-open .touch-ui {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.photo-ui {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+body.mode-photo .photo-ui {
+  display: block;
+}
+
+.photo-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+  background-size: 33.333% 33.333%;
+  opacity: 0.72;
+}
+
+.photo-grid.off {
+  display: none;
+}
+
+.photo-header {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  z-index: 16;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 10px 8px 16px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.photo-header strong {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.photo-header button {
+  padding: 6px 10px;
+  border-radius: 7px;
+}
+
+.photo-settings {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  z-index: 16;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 14px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.photo-settings label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(242, 237, 226, 0.82);
+}
+
+.photo-settings input[type="range"] {
+  width: 110px;
+  accent-color: var(--accent);
+}
+
+.photo-settings .switch {
+  padding: 0;
+  font-size: 11px;
+}
+
+.photo-shutter {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 16;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(242, 237, 226, 0.88);
+  background: rgba(17, 22, 26, 0.44);
+  box-shadow: 0 0 0 4px rgba(17, 22, 26, 0.38);
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.photo-shutter span {
+  display: block;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  transition: transform 120ms ease;
+}
+
+.photo-shutter:active span {
+  transform: scale(0.87);
+}
+
+.photo-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.photo-flash.on {
+  animation: photo-flash 280ms ease-out;
+}
+
+@keyframes photo-flash {
+  0% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 112px;
+  z-index: 31;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(13, 17, 20, 0.92);
+  font-size: 11.5px;
+  color: var(--paper);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%);
+  transition: opacity 200ms ease, visibility 200ms ease;
+  pointer-events: none;
+}
+
+.toast.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+body.mode-photo .brand,
+body.mode-photo .stats,
+body.mode-photo .controls,
+body.mode-photo .legend,
+body.mode-photo .attribution,
+body.mode-photo .mode-bar,
+body.mode-photo .play-hint,
+body.mode-photo .mobile-tools,
+body.mode-photo .inspector {
+  display: none !important;
+}
+
+@media (max-width: 1160px) {
+  .stats {
+    display: none;
+  }
+  .mode-bar {
+    top: 16px;
+  }
+  .brand {
+    width: auto;
+    max-width: calc(100vw - 320px);
+    padding: 10px 14px;
+  }
+  .brand .eyebrow,
+  .brand .lede,
+  .brand .chips {
+    display: none;
+  }
+  .brand h1 {
+    font-size: 20px;
+  }
+  .brand h1 span {
+    display: inline;
+    margin: 0 0 0 5px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 760px), (pointer: coarse) {
+  .brand {
+    top: calc(env(safe-area-inset-top) + 8px);
+    left: max(10px, env(safe-area-inset-left));
+    width: auto;
+    max-width: calc(100vw - 130px);
+    padding: 7px 10px;
+  }
+  .stats {
+    display: none;
+  }
+  .brand .eyebrow,
+  .brand .lede,
+  .brand .chips {
+    display: none;
+  }
+  .brand h1 {
+    font-size: 15px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .brand h1 span {
+    display: inline;
+    margin: 0 0 0 4px;
+    font-size: 11px;
+  }
+  .mobile-tools {
+    display: flex;
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 8px);
+    right: max(10px, env(safe-area-inset-right));
+    z-index: 10;
+    gap: 6px;
+  }
+  .mobile-tools button {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--paper);
+    font-size: 15px;
+    line-height: 1;
+    backdrop-filter: blur(14px);
+  }
+  .mobile-tools button.active {
+    color: #221a0c;
+    background: var(--accent);
+  }
+  .mode-bar {
+    top: calc(env(safe-area-inset-top) + 52px);
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    width: auto;
+    transform: none;
+    justify-content: space-between;
+    z-index: 9;
+  }
+  .mode-bar button {
+    flex: 1;
+    padding: 7px 4px;
+    font-size: 10.5px;
+  }
+  .controls {
+    display: none;
+    top: calc(env(safe-area-inset-top) + 98px);
+    bottom: auto;
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
+    width: auto;
+    max-height: min(58vh, 420px);
+    overflow: auto;
+    z-index: 12;
+  }
+  .controls.open {
+    display: block;
+  }
+  .play-hint {
+    display: none;
+  }
+  .attribution {
+    display: none;
+  }
+  .mobile-credit {
+    display: block;
+  }
+  .attribution {
+    padding: 5px 10px calc(5px + env(safe-area-inset-bottom));
+    font-size: 8px;
+  }
+  .legend {
+    display: none;
+  }
+  .inspector {
+    top: auto;
+    right: max(10px, env(safe-area-inset-right));
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: max(10px, env(safe-area-inset-left));
+    width: auto;
+    max-height: 35vh;
+  }
+  .joystick {
+    width: 108px;
+    height: 108px;
+  }
+  .joystick-thumb {
+    width: 46px;
+    height: 46px;
+  }
+  .touch-actions {
+    grid-template-columns: 44px 60px;
+    gap: 8px;
+  }
+  .touch-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .touch-btn-large {
+    width: 60px;
+    height: 60px;
+  }
+  .photo-header {
+    top: calc(env(safe-area-inset-top) + 8px);
+  }
+  .photo-settings {
+    top: calc(env(safe-area-inset-top) + 58px);
+    width: calc(100vw - 20px);
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 14px;
+    white-space: normal;
+  }
+  .photo-settings input[type="range"] {
+    width: 80px;
+  }
+  .photo-shutter {
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    width: 64px;
+    height: 64px;
+  }
+  .photo-shutter span {
+    width: 46px;
+    height: 46px;
+  }
+  .toast {
+    bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 420px) {
+  .brand h1 span {
+    display: none;
+  }
+  .mode-bar button {
+    font-size: 9.5px;
+  }
+}
+
+@media (max-height: 520px) and (pointer: coarse) {
+  .joystick {
+    width: 92px;
+    height: 92px;
+  }
+  .joystick-thumb {
+    width: 40px;
+    height: 40px;
+  }
+  .touch-actions {
+    grid-template-columns: 40px 54px;
+    gap: 6px;
+  }
+  .touch-btn {
+    width: 40px;
+    height: 40px;
+  }
+  .touch-btn-large {
+    width: 54px;
+    height: 54px;
+  }
+  .brand {
     display: none;
   }
 }

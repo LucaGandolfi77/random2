@@ -5,8 +5,10 @@
   "description": "Provenance-first 3D reconstruction of the historic centre of Fidenza",
   "scripts": {
     "dev": "npm --prefix web run dev",
+    "dev:lan": "npm --prefix web run dev:lan",
     "build": "npm --prefix web run build",
     "preview": "npm --prefix web run preview",
+    "preview:lan": "npm --prefix web run preview:lan",
     "test": "npm --prefix web run test",
     "typecheck": "npm --prefix web run typecheck",
     "data:sync": "node scripts/sync-data.mjs",
