@@ -90,7 +90,7 @@ export function buildTerrain(city: CityData, dataBase: string): TerrainBuild {
   skirt.receiveShadow = true;
   group.add(skirt);
 
-  const outer = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), materials.grass);
+  const outer = new THREE.Mesh(new THREE.PlaneGeometry(20000, 20000), materials.grass);
   outer.rotation.x = -Math.PI / 2;
   outer.position.set((minX + maxX) / 2, -7.2, (minZ + maxZ) / 2);
   outer.receiveShadow = true;

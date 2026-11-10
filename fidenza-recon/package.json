@@ -2,7 +2,7 @@
   "name": "fidenza-recon",
   "private": true,
   "version": "0.1.0",
-  "description": "Provenance-first 3D reconstruction of the historic centre of Fidenza",
+  "description": "Provenance-first 3D reconstruction of urban Fidenza with chunked LOD3",
   "scripts": {
     "dev": "npm --prefix web run dev",
     "dev:lan": "npm --prefix web run dev:lan",

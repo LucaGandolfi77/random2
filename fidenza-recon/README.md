@@ -1,16 +1,17 @@
 # Fidenza — ricostruzione 3D provenance-first
 
-Ricostruzione 3D dell'**area urbana di Fidenza (PR)**: circa 1.400 edifici
+Ricostruzione 3D dell'**area urbana di Fidenza (PR)**: oltre 4.000 edifici
 ricostruiti da impronte OSM, altezze DSM−DTM, tetti e colori campionati
 sull'ortofoto RER 2023‑24, con facciate procedurali dichiarate come tali.
-L'area dettagliata è estesa a circa **1,2 × 1,23 km** e usa un **LOD3 dinamico
-a chunk**: il dettaglio viene costruito intorno alla posizione, mentre i chunk
-lontani restano in LOD1 batchato.
+L'area copre circa **5,5 × 5,4 km** (10.038–10.108 E, 44.835–44.884 N) e usa un
+**LOD3 dinamico a chunk**: ogni edificio del pilot ha descrittori LOD3 completi,
+ma il viewer costruisce solo i chunk vicini e mantiene LOD1 batchato per quelli
+lontani.
 
 ![Veduta dell'area urbana](docs/screenshots/01-duomo.png)
 
-> **Onestà del dato.** Fidenza non ha copertura street-level nel servizio
-> pubblico KartaView (0 foto). Le facciate sono quindi **ricostruite
+> **Onestà del dato.** Fidenza non ha copertura street-level utilizzabile
+> dentro la bbox nel servizio pubblico KartaView. Le facciate sono quindi **ricostruite
 > proceduralmente** a partire da morfologia, altezza, archetipo e orthophoto;
 > non sono spacciate per ricostruzioni fotografiche. Il report di validazione
 > elenca cosa è accurato, approssimato o da rivedere.
@@ -55,8 +56,10 @@ Comandi utili:
 ```bash
 python -m fidenza_recon.cli fetch       # OSM + RER + KartaView + Commons
 python -m fidenza_recon.cli analyze     # impronte, altezze, tetti, archetipi
-python -m fidenza_recon.cli generate    # descrittori, city.json, database
+python -m fidenza_recon.cli generate    # descrittori LOD3, chunk, world, database
 python -m fidenza_recon.cli report      # report in docs/
+python -m fidenza_recon.cli audit       # audit fonti RER 2023-24/DBTR/street-level
+python -m fidenza_recon.cli export      # export JSON del database in db/exports/
 pytest                                  # test Python
 npm --prefix web test                   # test TypeScript
 ruff check pipeline                     # lint Python
@@ -65,7 +68,19 @@ npm run screenshots                     # screenshot + GLB + metriche
 ```
 
 I dati grezzi e i raster sono in `data/raw` (gitignored). Il payload del viewer
-è `data/processed/city.json`, copiato in `web/public/data/city.json`.
+è chunked: `data/processed/city/manifest.json`, `world.json`, `massing.json` e
+`detail/chunk_<x>_<z>.json`, copiati in `web/public/data/`. Il file
+`data/processed/city.json` resta solo come fallback monolitico. Vedi
+[`docs/CHUNKED_PAYLOAD.md`](docs/CHUNKED_PAYLOAD.md).
+
+Il database `db/city.db` può essere esportato in JSON, YAML, JSONL o CSV:
+
+```bash
+python -m fidenza_recon.cli export --format json
+```
+
+L'output predefinito è `db/exports/fidenza-city-db.json` (gitignored), con dati
+annidati, schema, conteggi e hash del database di origine.
 
 ---
 
@@ -73,13 +88,14 @@ I dati grezzi e i raster sono in `data/raw` (gitignored). Il payload del viewer
 
 | Area | Edifici | Dettaglio |
 |---|---:|---|
-| **Pilota esteso** — centro storico e prima periferia, ~1.193×1.238 m | 1.367 | LOD3: facciate con aperture, cornici, balconi, persiane, negozi, portali; tetti con falde, comignoli, paracarro |
-| **Contesto residuo** — edifici con centroide a cavallo della bbox | 30 | LOD1 batchato per i chunk lontani; il LOD3 viene costruito dinamicamente quando la camera si avvicina |
+| **Pilot urbano** — intera bbox 10.038–10.108 E / 44.835–44.884 N, ~5,6×5,4 km | 4.160 | LOD3 completo: facciate con aperture, cornici, balconi, persiane, negozi, portali; tetti con falde, comignoli, paracarro |
+| **Buffer di contesto** — ~250 m attorno alla bbox urbana | 425 | Solo LOD1 batchato; nessun descrittore di facciata |
 
-Il pilot non è più limitato all’isolato di Piazza Duomo: l’area dettagliata è
-stata estesa a circa 1,2 km con dati OSM/RER reali. Il centro storico resta il
-nucleo con i landmark; la prima periferia usa la stessa grammatica di facciata
-procedurale, ma è caricata dinamicamente a chunk per non appesantire il viewer.
+Il pilot copre l’intera area urbana (Centro, Monica, San Lazzaro, Le Azalee,
+Corea, Luce e Coduro), non più il solo centro storico. Tutti i 4.160 edifici
+pilot hanno descrittori LOD3 completi, ma il viewer li carica a chunk da 120 m:
+il dettaglio viene costruito solo intorno alla posizione e i chunk lontani
+restano in LOD1.
 
 ---
 
@@ -91,8 +107,9 @@ procedurale, ma è caricata dinamicamente a chunk per non appesantire il viewer.
 | [RER 2023‑24 ortofoto RGB/NIR](https://geoportale.regione.emilia-romagna.it/approfondimenti/rer23_24) | Colori tetti, NDVI, texture di base | **CC BY 4.0** |
 | [DTM RER 2023‑24](https://servizigis.regione.emilia-romagna.it/arcgis/rest/services/public/DtmRER2023_24/ImageServer) | Quota terreno, nDSM | **CC BY 4.0** |
 | [DSM AGEA 2008](https://servizigis.regione.emilia-romagna.it/arcgis/rest/services/public/DsmAgea2008/ImageServer) | Superficie edifici per le altezze | Servizio pubblico RER; **licenza da verificare prima della ridistribuzione** |
-| [KartaView](https://kartaview.org/) | Copertura street-level | Nessuna foto disponibile: 0 download |
-| [Wikimedia Commons](https://commons.wikimedia.org/) | 48 foto di riferimento per la validazione | Licenza per-file (CC BY, CC BY‑SA, pubblico dominio) |
+| [DBTR — Unità volumetrica](https://geoportale.regione.emilia-romagna.it/catalogo/dati-cartografici/cartografia-di-base/database-topografico-regionale) | Fallback qualitativo per edifici senza campioni DSM | **CC BY 4.0** |
+| [KartaView](https://kartaview.org/) | Copertura street-level | 5 foto appena fuori dalla bbox; **0 usate** |
+| [Wikimedia Commons](https://commons.wikimedia.org/) | Foto di riferimento per la validazione | Licenza per-file (CC BY, CC BY‑SA, pubblico dominio) |
 
 **Google Street View / Photorealistic 3D Tiles non sono usati.** Nessun asset
 derivato da Google è presente nel progetto.
@@ -113,7 +130,7 @@ Wikimedia ────> reference imagery                    v
                                               descriptors.json
                                                      │
                                                      v
-                                            city.json + city.db
+                                   manifest/world/massing + detail chunks
                                                      │
                                                      v
                                      Three.js viewer (procedural LOD3)
@@ -136,9 +153,12 @@ Moduli principali:
 - `analyze/classify.py` — archetipi con regole ed evidenze, tier A/B/C.
 - `generate/descriptors.py` — grammatica di facciata deterministica (seed =
   OSM ID): campate, finestre, porte, negozi, balconi, cornici, lesene.
-- `generate/city.py` — terreno, strade, arredo, payload runtime.
+- `generate/city.py` — terreno, strade, arredo, `manifest.json`, `world.json`,
+  `massing.json` e chunk LOD3 `detail/chunk_<x>_<z>.json`.
 - `export/db_export.py` — popola `db/city.db` (edifici, facciate, imagery,
   validazione).
+- `export/db_dump.py` — esporta `db/city.db` in JSON/YAML/JSONL/CSV con schema,
+  conteggi e metadati di provenienza.
 - `validate/report.py` — report di inventario, licenze, copertura, classificazione,
   confidenza e validazione.
 
@@ -154,9 +174,14 @@ Moduli principali:
 ## Viewer e generazione procedurale
 
 - **Three.js + Vite + TypeScript strict**.
-- **LOD dinamico a chunk**: batch LOD1 per chunk da 120 m e `THREE.LOD` LOD3
-  costruito on demand intorno alla camera; cache limitata e rilascio dei chunk
-  lontani.
+- **Materiali PBR procedurali**: albedo, normal, roughness e AO generati in
+  locale per intonaco, mattone, pietra, calcestruzzo, coppi, metallo, asfalto
+  e pavimentazione; normal scale e riflessioni distinte per materiale.
+- **Postprocessing su preset Alta**: SSAO, SMAA e output pass; preset Media/Bassa
+  usano il renderer diretto per mantenere la fluidità.
+- **LOD dinamico gerarchico**: batch LOD1 per chunk padre da 480 m; avvicinandosi
+  il padre è sostituito da chunk figli da 120 m, e i figli passano a LOD3 quando
+  il file di dettaglio è pronto. Cache limitata e rilascio dei chunk lontani.
 - Dettagli di facciata: `InstancedMesh` globali (telai, vetri, persiane,
   balconi, cornici, lesene, archi) → poche draw call per migliaia di elementi.
 - Muri con **aperture reali** (ExtrudeGeometry con holes), telai, vetri,
@@ -166,13 +191,16 @@ Moduli principali:
   camini, pluviali.
 - Strade: marciapiedi, cordoli, attraversamenti, segnaletica; la superficie
   stradale usa l'ortofoto reale per evitare texture inventate.
-- Debug: impronte OSM, heatmap confidenza altezze, etichette landmark,
+- **Ortofoto multi-risoluzione**: 1 m sull'intera bbox, **0,5 m sul pilot** e
+  **0,2 m sul centro storico** per colore tetti e NDVI.
+- Debug: impronte OSM, heatmap confidenza altezze, etichette landmark e
+  quartieri, mappa 2D dei quartieri con posizione del giocatore e teletrasporto,
   ispettore provenienza al click.
 - Export **GLB** dal viewer (`GLTFExporter`), in LOD1 completo dell’area estesa.
-- **LOD dinamico a chunk**: `web/src/viewer/lod-manager.ts` mantiene un batch
-  LOD1 per ogni chunk da 120 m e costruisce i LOD3 solo intorno alla camera;
-  i chunk lontani vengono rilasciati per contenere la memoria. Il toggle
-  “Dettagli facciata (LOD3)” controlla il dettaglio dinamico.
+- **Streaming LOD3**: `web/src/viewer/lod-manager.ts` scarica i chunk di dettaglio
+  vicini, mantiene visibile il LOD1 finché non sono pronti e rilascia i chunk
+  lontani per contenere la memoria. Il toggle “Dettagli facciata (LOD3)” e il
+  preset Alta/Media/Bassa controllano il dettaglio dinamico.
 
 ### Controlli
 
@@ -210,20 +238,27 @@ Report generati:
 - [`docs/VALIDATION_REPORT.md`](docs/VALIDATION_REPORT.md)
 - [`docs/CONFIDENCE_REPORT.md`](docs/CONFIDENCE_REPORT.md)
 - [`docs/ARCHITECTURE_CLASSIFICATION.md`](docs/ARCHITECTURE_CLASSIFICATION.md)
+- [`docs/DISTRICTS.md`](docs/DISTRICTS.md)
+- [`docs/CHUNKED_PAYLOAD.md`](docs/CHUNKED_PAYLOAD.md)
+- [`docs/DATA_AUDIT_2023_24.md`](docs/DATA_AUDIT_2023_24.md)
 - [`docs/IMAGERY_COVERAGE.md`](docs/IMAGERY_COVERAGE.md)
 - [`docs/DATA_INVENTORY.md`](docs/DATA_INVENTORY.md)
 - [`docs/LICENSES.md`](docs/LICENSES.md)
 
 Numeri chiave dell'ultima esecuzione:
 
-- **1.397 edifici reali**: 1.367 pilot LOD3 + 30 contesto
-- **44.751 finestre** e **6.286 balconi** procedurali
-- 1.380 / 1.397 altezze misurate da DSM−DTM; 17 stime tipologiche dichiarate
+- **4.585 edifici reali**: 4.160 pilot LOD3 + 425 contesto
+- **130.754 finestre** e **27.622 balconi** procedurali
+- 4.474 / 4.585 altezze misurate da DSM−DTM; 91 fallback DBTR UVL dichiarati
+  e 20 stime tipologiche residue
 - confidenza mediana delle altezze: **72%**
-- 48 foto di riferimento Wikimedia Commons; **0 foto KartaView**
-- **7.756 facciate** registrate nel DB con layout e provenienza
-- 706 righe di validazione, di cui 702 edifici flaggati per review
-- bbox reale ~1.193×1.238 m, payload `city.json` ~20,8 MB, ortofoto 4096 px
+- foto di riferimento Wikimedia Commons (licenza per-file); **0 foto KartaView
+  nella bbox** (5 appena fuori, non usate)
+- **25.372 facciate** registrate nel DB con layout e provenienza
+- **Ortofoto tetti**: 1.370 edifici a 0,2 m, 2.790 a 0,5 m, 425 a 1 m
+- 2.626 righe di validazione, di cui 2.622 edifici flaggati per review
+- bbox reale ~5,6×5,4 km; payload iniziale ~16,5 MB (manifest + world + massing,
+  ~2,4 MB gzip) e 864 chunk di dettaglio per ~56,5 MB totali; ortofoto 4096 px
 
 ### Tier di confidenza
 
@@ -233,16 +268,17 @@ Numeri chiave dell'ultima esecuzione:
 
 ### Limiti dichiarati
 
-1. **Nessuna street imagery**: KartaView non ha foto a Fidenza. Le facciate
+1. **Nessuna street imagery utilizzabile**: KartaView non ha foto dentro la
+   bbox di Fidenza (5 scatti appena fuori, non usati). Le facciate
    generiche non sono verificabili fotograficamente.
 2. **DSM 2008 vs DTM 2023‑24**: l'altezza è cross-epoch; l'incertezza è
    registrata per edificio. Il DSM AGEA 2008 ha licenza da verificare.
 3. **Colore dei tetti**: misurato sull'ortofoto, ma normalizzato per la
    visualizzazione; il valore misurato è conservato in `roof_colour_measured`.
-4. **LOD dinamico e contesto residuo**: 1.367 edifici sono pilot LOD3; 30
-   edifici con centroide a cavallo della bbox restano contesto. I chunk lontani
-   sono resi con batch LOD1; il LOD3 viene costruito proceduralmente intorno
-   alla camera e non è una ricostruzione fotografica delle facciate.
+4. **LOD dinamico e contesto residuo**: 4.160 edifici sono pilot LOD3; 425
+   edifici nel buffer di contesto restano LOD1. I chunk lontani sono resi con
+   batch LOD1; il LOD3 viene costruito proceduralmente intorno alla camera e
+   non è una ricostruzione fotografica delle facciate.
 5. **Texture di base**: l'ortofoto è color-graded solo per il display; i
    GeoTIFF usati per le misure sono intatti.
 6. **Tetti mansardati**: il tipo è conservato nel record, ma la geometria è
@@ -254,10 +290,11 @@ Numeri chiave dell'ultima esecuzione:
 8. **Validazione manuale**: i landmark sono confrontati con Commons; non c'è
    un benchmark automatico di similarità fotografica.
 9. **Prestazioni**: il test headless Chrome/SwiftShader a 1600×1000 riporta
-   23–40 fps con 229–416 draw call e 127k–2,2 M triangoli a seconda della vista;
-   il GLB LOD1 completo è di ~6,1 MB. Su GPU reale le prestazioni sono più alte,
+   50–60 fps con 348–809 draw call e 0,6–2,8 M triangoli a seconda della vista;
+   il GLB LOD1 completo è di ~23,7 MB. Su GPU reale le prestazioni sono più alte,
    ma vanno riverificate sull'hardware target. Il raggio LOD3 è adattivo:
-   ~160 m su desktop e ~120 m su puntatori coarse, con cache limitata.
+   200 m col preset Alta (desktop), 140 m col preset Media (mobile), 0 m col
+   preset Bassa (solo LOD1), con cache di 24/12 chunk dettagliati.
 
 ---
 
@@ -271,7 +308,7 @@ fidenza-recon/
 │   └── src/city/           # generatori facciate, tetti, edifici, strade, props
 │       src/viewer/         # scena, camera, LOD manager, modalità foto
 ├── data/raw/               # cache OSM/RER/Commons (gitignored)
-├── data/processed/         # city.json, descriptors, raster nDSM/NDVI, GLB
+├── data/processed/         # descriptors, raster nDSM/NDVI, city/ (manifest, world, massing, detail chunks), GLB
 ├── db/city.db              # provenienza, edifici, facciate, imagery, validazione
 ├── docs/                   # report + screenshots
 └── scripts/                # sync dati, screenshot/GLB
@@ -284,7 +321,7 @@ fidenza-recon/
 | # | Deliverable | Dove |
 |---|---|---|
 | 1 | Modello 3D aggiornato | `web/` + `data/processed/export/fidenza-piazza-duomo.glb` |
-| 2 | Database metadati edifici | `db/city.db` (1.397 edifici, 7.756 facciate, 48 imagery) |
+| 2 | Database metadati edifici | `db/city.db` (4.585 edifici, 25.372 facciate, imagery di riferimento) |
 | 3 | Inventario fonti e licenze | `docs/DATA_INVENTORY.md`, `docs/LICENSES.md` |
 | 4 | Report copertura imagery | `docs/IMAGERY_COVERAGE.md` |
 | 5 | Report classificazione architettonica | `docs/ARCHITECTURE_CLASSIFICATION.md` |

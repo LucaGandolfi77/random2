@@ -3,6 +3,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { Pass } from 'three/examples/jsm/postprocessing/Pass.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
+import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 import type { Building, CityData } from '../types';
 import { flatFootprintGeometry } from '../city/roof';
 import { canvasLabel, formatNumber } from '../utils';
@@ -15,6 +21,18 @@ import { PhotoCamera } from './photo';
 import type { CityLodManager } from './lod-manager';
 
 export type ViewerMode = 'walk' | 'fly' | 'photo' | 'orbit';
+
+class StatsCapturePass extends Pass {
+  constructor(private readonly stats: { calls: number; triangles: number }) {
+    super();
+    this.needsSwap = false;
+  }
+
+  render(renderer: THREE.WebGLRenderer): void {
+    this.stats.calls = renderer.info.render.calls;
+    this.stats.triangles = renderer.info.render.triangles;
+  }
+}
 
 export interface ViewerStatsElements {
   fps: HTMLElement;
@@ -34,7 +52,12 @@ export class Viewer {
   readonly cityRoot = new THREE.Group();
   private readonly container: HTMLElement;
   private readonly sun: THREE.DirectionalLight;
+  private readonly composer: EffectComposer;
+  private readonly ssaoPass: SSAOPass;
+  private readonly sunTarget = new THREE.Object3D();
   private readonly sky: THREE.Mesh;
+  private readonly districtLabels: THREE.Sprite[] = [];
+  private readonly shadowAnchor = new THREE.Vector2(Number.NaN, Number.NaN);
   private readonly labelGroup = new THREE.Group();
   private readonly footprintGroup = new THREE.Group();
   private readonly confidenceGroup = new THREE.Group();
@@ -81,10 +104,12 @@ export class Viewer {
   private frames = 0;
   private fpsWindow = 0;
   private statsElements: ViewerStatsElements | null = null;
+  private postprocessing = true;
+  private readonly sceneStats = { calls: 0, triangles: 0 };
 
   constructor(container: HTMLElement) {
     this.container = container;
-    this.camera = new THREE.PerspectiveCamera(52, 1, 0.1, 3000);
+    this.camera = new THREE.PerspectiveCamera(52, 1, 0.1, 26000);
     this.camera.position.set(42, 18, 58);
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -106,7 +131,7 @@ export class Viewer {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
     this.controls.minDistance = 4;
-    this.controls.maxDistance = 2400;
+    this.controls.maxDistance = 9000;
     this.controls.maxPolarAngle = Math.PI * 0.495;
     this.controls.target.set(0, 9, 0);
     this.controls.screenSpacePanning = false;
@@ -118,10 +143,10 @@ export class Viewer {
     environment.dispose();
     pmrem.dispose();
 
-    this.scene.fog = new THREE.Fog(0xd3dcdf, 800, 3200);
+    this.scene.fog = new THREE.Fog(0xd3dcdf, 1600, 14000);
     this.scene.background = new THREE.Color(0xd3dcdf);
 
-    const skyGeometry = new THREE.SphereGeometry(2000, 32, 18);
+    const skyGeometry = new THREE.SphereGeometry(16000, 32, 18);
     const skyMaterial = new THREE.ShaderMaterial({
       side: THREE.BackSide,
       depthWrite: false,
@@ -167,10 +192,21 @@ export class Viewer {
     this.sun.shadow.bias = -0.0005;
     this.sun.shadow.normalBias = 0.03;
     this.scene.add(this.sun);
-    const sunTarget = new THREE.Object3D();
-    sunTarget.position.set(0, 0, 0);
-    this.scene.add(sunTarget);
-    this.sun.target = sunTarget;
+    this.sunTarget.position.set(0, 0, 0);
+    this.scene.add(this.sunTarget);
+    this.sun.target = this.sunTarget;
+
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    this.composer.addPass(new StatsCapturePass(this.sceneStats));
+    this.ssaoPass = new SSAOPass(this.scene, this.camera, 1, 1);
+    this.ssaoPass.kernelRadius = 8;
+    this.ssaoPass.minDistance = 0.001;
+    this.ssaoPass.maxDistance = 0.12;
+    this.ssaoPass.output = SSAOPass.OUTPUT.Default;
+    this.composer.addPass(this.ssaoPass);
+    this.composer.addPass(new SMAAPass());
+    this.composer.addPass(new OutputPass());
 
     this.scene.add(this.cityRoot);
     this.scene.add(this.labelGroup);
@@ -277,10 +313,27 @@ export class Viewer {
     this.camera.aspect = width / Math.max(1, height);
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+    this.composer.setPixelRatio(this.renderer.getPixelRatio());
+    this.composer.setSize(width, height);
+  }
+
+  setPostprocessing(enabled: boolean): void {
+    this.postprocessing = enabled;
+    this.ssaoPass.enabled = enabled;
   }
 
   requestShadowUpdate(): void {
     this.renderer.shadowMap.needsUpdate = true;
+  }
+
+  private renderFrame(): void {
+    if (this.postprocessing) {
+      this.composer.render();
+    } else {
+      this.renderer.render(this.scene, this.camera);
+      this.sceneStats.calls = this.renderer.info.render.calls;
+      this.sceneStats.triangles = this.renderer.info.render.triangles;
+    }
   }
 
   setStatsElements(elements: ViewerStatsElements): void {
@@ -302,7 +355,7 @@ export class Viewer {
     this.setMode('walk');
 
     for (const building of city.buildings) {
-      if (!building.name && !building.landmark) continue;
+      if (!building.landmark) continue;
       const sprite = new THREE.Sprite(
         new THREE.SpriteMaterial({
           map: canvasLabel(
@@ -324,8 +377,26 @@ export class Viewer {
       sprite.userData.building = building;
       this.labelGroup.add(sprite);
     }
-    this.labelGroup.visible = city.stats.landmarks > 0;
-    this.labelsVisible = city.stats.landmarks > 0;
+    this.districtLabels.length = 0;
+    for (const district of city.districts ?? []) {
+      const sprite = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: canvasLabel(district.name, 'rgba(52,44,32,0.82)', district.color),
+          depthTest: false,
+          transparent: true,
+        }),
+      );
+      const [x, z] = district.local;
+      sprite.position.set(x, terrainSample(x, z) + 85, z);
+      sprite.scale.set(70, 14, 1);
+      sprite.renderOrder = 5;
+      sprite.userData.district = district.id;
+      this.districtLabels.push(sprite);
+      this.labelGroup.add(sprite);
+    }
+    this.labelGroup.visible =
+      city.stats.landmarks > 0 || this.districtLabels.length > 0;
+    this.labelsVisible = this.labelGroup.visible;
 
     const footprintMaterial = new THREE.MeshBasicMaterial({
       color: 0x5ef2a0,
@@ -414,6 +485,28 @@ export class Viewer {
     return this.mode;
   }
 
+  getPlayerPose(): { x: number; z: number; heading: number } {
+    if (this.player) {
+      return {
+        x: this.player.position.x,
+        z: this.player.position.z,
+        heading: this.player.heading,
+      };
+    }
+    return {
+      x: this.camera.position.x,
+      z: this.camera.position.z,
+      heading: 0,
+    };
+  }
+
+  teleportTo(x: number, z: number): void {
+    if (!this.player) return;
+    this.setMode('walk');
+    this.player.teleportTo(x, z);
+    this.player.syncCamera(this.camera);
+  }
+
   setMode(mode: ViewerMode): void {
     if (mode === this.mode) {
       if (this.player && (mode === 'walk' || mode === 'fly')) {
@@ -500,7 +593,7 @@ export class Viewer {
 
   capturePhoto(): boolean {
     if (this.mode !== 'photo') return false;
-    this.renderer.render(this.scene, this.camera);
+    this.renderFrame();
     const dataUrl = this.renderer.domElement.toDataURL('image/png');
     const now = new Date();
     const pad = (value: number): string => String(value).padStart(2, '0');
@@ -904,14 +997,34 @@ export class Viewer {
     }
     this.resetFrameInput();
 
+    const anchorX =
+      this.mode === 'orbit' ? this.controls.target.x : this.camera.position.x;
+    const anchorZ =
+      this.mode === 'orbit' ? this.controls.target.z : this.camera.position.z;
+    if (
+      !Number.isFinite(this.shadowAnchor.x) ||
+      Math.hypot(anchorX - this.shadowAnchor.x, anchorZ - this.shadowAnchor.y) > 8
+    ) {
+      this.shadowAnchor.set(anchorX, anchorZ);
+      this.sunTarget.position.set(anchorX, 0, anchorZ);
+      this.sun.position.set(anchorX + 120, 170, anchorZ + 80);
+      this.renderer.shadowMap.needsUpdate = true;
+    }
+    this.sky.position.set(this.camera.position.x, 0, this.camera.position.z);
+    for (const sprite of this.districtLabels) {
+      const distance = sprite.position.distanceTo(this.camera.position);
+      const scale = Math.max(18, Math.min(120, distance * 0.035));
+      sprite.scale.set(scale, scale / 5, 1);
+    }
+
     if (this.lodManager) this.lodManager.update(this.camera);
     if (this.mode === 'orbit') this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+    this.renderFrame();
     if (this.fpsWindow > 500 && this.statsElements) {
       const fps = (this.frames * 1000) / this.fpsWindow;
       this.statsElements.fps.textContent = formatNumber(fps, 0);
-      this.statsElements.calls.textContent = String(this.renderer.info.render.calls);
-      this.statsElements.triangles.textContent = formatNumber(this.renderer.info.render.triangles / 1000, 0) + 'k';
+      this.statsElements.calls.textContent = String(this.sceneStats.calls);
+      this.statsElements.triangles.textContent = formatNumber(this.sceneStats.triangles / 1000, 0) + 'k';
       this.frames = 0;
       this.fpsWindow = 0;
     }

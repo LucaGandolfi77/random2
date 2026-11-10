@@ -28,8 +28,10 @@ DEFAULT_SERVICES = {
     "dsm": "DsmAgea2008",
 }
 
-# The public Web Adaptor starts failing around 9 megapixels per export.
+# The public Web Adaptor starts failing around 9 megapixels per export and
+# above 4096 px per side. Larger products are mosaicked from a 2-D tile grid.
 MAX_EXPORT_PIXELS = 8_500_000
+MAX_EXPORT_DIMENSION = 4096
 
 
 def _sha256(path: Path) -> str:
@@ -88,9 +90,11 @@ def _export_image(
     *,
     pixel_type: str | None = None,
     timeout_s: int = 300,
+    max_pixels: int = MAX_EXPORT_PIXELS,
+    max_dimension: int = MAX_EXPORT_DIMENSION,
 ) -> dict[str, Any]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    if width * height <= MAX_EXPORT_PIXELS:
+    if width * height <= max_pixels and width <= max_dimension and height <= max_dimension:
         content, url = _request_image(
             service,
             bbox_metric,
@@ -110,39 +114,52 @@ def _export_image(
             "height": height,
         }
 
-    # Export horizontal strips below the server limit and mosaic the
+    # Export a rectangular tile grid below the server limits, then mosaic the
     # georeferenced tiles into one GeoTIFF.
-    tile_count = max(1, math.ceil((width * height) / MAX_EXPORT_PIXELS))
-    while math.ceil(height / tile_count) * width > MAX_EXPORT_PIXELS:
-        tile_count += 1
-    tile_height = math.ceil(height / tile_count)
+    tiles_x = max(1, math.ceil(width / max_dimension))
+    tiles_y = max(1, math.ceil(height / max_dimension))
+    while math.ceil(width / tiles_x) * math.ceil(height / tiles_y) > max_pixels:
+        if width / tiles_x >= height / tiles_y:
+            tiles_x += 1
+        else:
+            tiles_y += 1
+    tile_width = math.ceil(width / tiles_x)
+    tile_height = math.ceil(height / tiles_y)
     minx, miny, maxx, maxy = bbox_metric
+    span_x = maxx - minx
     span_y = maxy - miny
     parts: list[Path] = []
     last_url = ""
     try:
-        for index in range(tile_count):
-            start_row = index * tile_height
+        for row in range(tiles_y):
+            start_row = row * tile_height
             end_row = min(height, start_row + tile_height)
             if start_row >= end_row:
-                break
-            tile_bbox = (
-                minx,
-                miny + span_y * (start_row / height),
-                maxx,
-                miny + span_y * (end_row / height),
-            )
-            content, last_url = _request_image(
-                service,
-                tile_bbox,
-                width,
-                end_row - start_row,
-                pixel_type=pixel_type,
-                timeout_s=timeout_s,
-            )
-            part_path = out_path.with_name(f"{out_path.stem}.part{index}.tif")
-            part_path.write_bytes(content)
-            parts.append(part_path)
+                continue
+            for column in range(tiles_x):
+                start_col = column * tile_width
+                end_col = min(width, start_col + tile_width)
+                if start_col >= end_col:
+                    continue
+                tile_bbox = (
+                    minx + span_x * (start_col / width),
+                    miny + span_y * (start_row / height),
+                    minx + span_x * (end_col / width),
+                    miny + span_y * (end_row / height),
+                )
+                content, last_url = _request_image(
+                    service,
+                    tile_bbox,
+                    end_col - start_col,
+                    end_row - start_row,
+                    pixel_type=pixel_type,
+                    timeout_s=timeout_s,
+                )
+                part_path = out_path.with_name(
+                    f"{out_path.stem}.part{row}_{column}.tif"
+                )
+                part_path.write_bytes(content)
+                parts.append(part_path)
 
         import rasterio
         from rasterio.merge import merge
@@ -174,7 +191,8 @@ def _export_image(
         "bbox_metric": bbox_metric,
         "width": width,
         "height": height,
-        "tiles": tile_count,
+        "tiles": len(parts),
+        "grid": [tiles_x, tiles_y],
     }
 
 
@@ -243,40 +261,76 @@ def fetch(config: AppConfig, force: bool = False) -> dict[str, Any]:
     out_dir = RAW_DIR / "rer"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    ortho_res = float(config.city["downloads"]["ortho_resolution_m"])
-    dtm_res = float(config.city["downloads"]["dtm_resolution_m"])
-    dsm_res = float(config.city["downloads"]["dsm_resolution_m"])
-    ortho_size = (min(4096, math.ceil(span_x / ortho_res)), min(4096, math.ceil(span_y / ortho_res)))
+    downloads = config.downloads
+    ortho_res = float(downloads["ortho_resolution_m"])
+    dtm_res = float(downloads["dtm_resolution_m"])
+    dsm_res = float(downloads["dsm_resolution_m"])
+    max_pixels = int(downloads.get("max_export_pixels", MAX_EXPORT_PIXELS))
+    max_dimension = int(downloads.get("max_export_dimension", MAX_EXPORT_DIMENSION))
+    ortho_size = (math.ceil(span_x / ortho_res), math.ceil(span_y / ortho_res))
     dtm_size = (math.ceil(span_x / dtm_res), math.ceil(span_y / dtm_res))
     dsm_size = (math.ceil(span_x / dsm_res), math.ceil(span_y / dsm_res))
 
     products: dict[str, Any] = {}
+    pilot_bbox_metric = ctx.bbox_metric(config.pilot_bbox)
+    pilot_span_x = pilot_bbox_metric[2] - pilot_bbox_metric[0]
+    pilot_span_y = pilot_bbox_metric[3] - pilot_bbox_metric[1]
+    ortho05_res = float(downloads.get("ortho_pilot_resolution_m", 0.5))
+    ortho02_res = float(downloads.get("ortho_centro_resolution_m", 0.2))
+    centro_bbox_wgs84 = downloads.get("ortho_centro_bbox_wgs84")
+    centro_bbox_metric = (
+        ctx.bbox_metric(tuple(centro_bbox_wgs84))
+        if centro_bbox_wgs84
+        else pilot_bbox_metric
+    )
+    centro_span_x = centro_bbox_metric[2] - centro_bbox_metric[0]
+    centro_span_y = centro_bbox_metric[3] - centro_bbox_metric[1]
+    ortho05_size = (
+        math.ceil(pilot_span_x / ortho05_res),
+        math.ceil(pilot_span_y / ortho05_res),
+    )
+    ortho02_size = (
+        math.ceil(centro_span_x / ortho02_res),
+        math.ceil(centro_span_y / ortho02_res),
+    )
     specs = [
-        ("ortho_rgb", out_dir / "ortho_rgb.tif", ortho_size, None, "RGB orthophoto 2023-24", ortho_res),
-        ("ortho_nir", out_dir / "ortho_nir.tif", ortho_size, None, "NIR orthophoto 2023-24", ortho_res),
-        ("dtm", out_dir / "dtm_rer2023_24.tif", dtm_size, "F32", "DTM RER 2023-24", dtm_res),
-        ("dsm", out_dir / "dsm_agea2008.tif", dsm_size, "F32", "DSM AGEA 2008", dsm_res),
+        ("ortho_rgb", "RER2023_24_RGB", out_dir / "ortho_rgb.tif", ortho_size, None, "RGB orthophoto 2023-24", ortho_res, bbox_metric),
+        ("ortho_nir", "RER2023_24_NIR", out_dir / "ortho_nir.tif", ortho_size, None, "NIR orthophoto 2023-24", ortho_res, bbox_metric),
+        ("dtm", "DtmRER2023_24", out_dir / "dtm_rer2023_24.tif", dtm_size, "F32", "DTM RER 2023-24", dtm_res, bbox_metric),
+        ("dsm", "DsmAgea2008", out_dir / "dsm_agea2008.tif", dsm_size, "F32", "DSM AGEA 2008", dsm_res, bbox_metric),
+        ("ortho_rgb_05", "RER2023_24_RGB", out_dir / "ortho_rgb_05.tif", ortho05_size, None, "RGB orthophoto 2023-24 — pilot 0.5 m", ortho05_res, pilot_bbox_metric),
+        ("ortho_nir_05", "RER2023_24_NIR", out_dir / "ortho_nir_05.tif", ortho05_size, None, "NIR orthophoto 2023-24 — pilot 0.5 m", ortho05_res, pilot_bbox_metric),
+        ("ortho_rgb_02", "RER2023_24_RGB", out_dir / "ortho_rgb_02.tif", ortho02_size, None, "RGB orthophoto 2023-24 — centro 0.2 m", ortho02_res, centro_bbox_metric),
+        ("ortho_nir_02", "RER2023_24_NIR", out_dir / "ortho_nir_02.tif", ortho02_size, None, "NIR orthophoto 2023-24 — centro 0.2 m", ortho02_res, centro_bbox_metric),
     ]
     cached = not force
-    for key, path, size, pixel_type, label, resolution in specs:
+    for key, service, path, size, pixel_type, label, resolution, spec_bbox in specs:
         if cached and path.exists() and path.stat().st_size > 500:
             products[key] = {
                 "path": path,
-                "url": f"{ARCGIS_BASE}/{DEFAULT_SERVICES[key]}/ImageServer",
+                "url": f"{ARCGIS_BASE}/{service}/ImageServer",
                 "bytes": path.stat().st_size,
-                "bbox_metric": bbox_metric,
+                "bbox_metric": spec_bbox,
                 "width": size[0],
                 "height": size[1],
             }
             continue
         products[key] = _export_image(
-            DEFAULT_SERVICES[key],
-            bbox_metric,
+            service,
+            spec_bbox,
             size[0],
             size[1],
             path,
             pixel_type=pixel_type,
             timeout_s=timeout_s,
+            max_pixels=max_pixels,
+            max_dimension=max_dimension,
+        )
+        print(
+            f"  RER {key}: {size[0]}x{size[1]} px, "
+            f"{products[key]['bytes'] / 1e6:.1f} MB"
+            + (f" in {products[key]['tiles']} tiles" if products[key].get("tiles") else ""),
+            flush=True,
         )
         products[key]["label"] = label
         products[key]["resolution_m"] = resolution
@@ -297,8 +351,11 @@ def fetch(config: AppConfig, force: bool = False) -> dict[str, Any]:
         license="CC BY 4.0",
         license_url="https://creativecommons.org/licenses/by/4.0/",
         published_at="2024",
-        resolution="0.25 m",
-        notes="Orthophoto and NIR acquired by RER; ortho-derived ground texture.",
+        resolution="0.20 m native; 0.5 m pilot; 1 m context",
+        notes=(
+            "Orthophoto and NIR acquired by RER; 1 m ground texture, "
+            "0.5 m pilot and 0.2 m historic-centre analysis products."
+        ),
     )
     upsert_source(
         conn,
@@ -328,6 +385,10 @@ def fetch(config: AppConfig, force: bool = False) -> dict[str, Any]:
     for key, label, source_key in (
         ("ortho_rgb", "orthophoto RGB", "rer_ortho"),
         ("ortho_nir", "orthophoto NIR", "rer_ortho"),
+        ("ortho_rgb_05", "orthophoto RGB 0.5 m pilot", "rer_ortho"),
+        ("ortho_nir_05", "orthophoto NIR 0.5 m pilot", "rer_ortho"),
+        ("ortho_rgb_02", "orthophoto RGB 0.2 m centro", "rer_ortho"),
+        ("ortho_nir_02", "orthophoto NIR 0.2 m centro", "rer_ortho"),
         ("dtm", "DTM 0.5 m", "rer_dtm"),
         ("dsm", "DSM AGEA 2008", "rer_dsm_agea2008"),
     ):

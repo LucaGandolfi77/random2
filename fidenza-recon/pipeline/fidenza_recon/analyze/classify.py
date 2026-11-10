@@ -10,6 +10,10 @@ from ..config import PROCESSED_DIR, RAW_DIR, AppConfig
 
 RELIGIOUS = {"cattedrale", "duomo", "chiesa", "santuario", "oratorio", "abbazia"}
 PUBLIC = {"teatro", "municipio", "palazzo comunale", "stazione"}
+CENTRAL = {"centro"}
+STATION = {"monica"}
+RESIDENTIAL = {"sanlazzaro", "azalee", "corea", "luce"}
+RURAL = {"coduro"}
 
 
 def _centre_distance(record: dict) -> float:
@@ -49,8 +53,12 @@ def classify_one(config: AppConfig, record: dict, height_info: dict, roof_info: 
     height = float(height_info.get("height_m") or 8.0)
     roof_shape = roof_info.get("roof_shape") or "unknown"
     distance = _centre_distance(record)
+    district = record.get("district_id")
     evidence: list[str] = []
     confidence = 0.3
+    road_classes = _road_classes(record)
+    shopfront = _has_shopfront(record)
+    street = _street_facing(record)
 
     if any(word in name for word in RELIGIOUS):
         archetype = "romanesque_church" if ("cattedrale" in name or "duomo" in name) else "church"
@@ -72,41 +80,64 @@ def classify_one(config: AppConfig, record: dict, height_info: dict, roof_info: 
         archetype = "generic"
         evidence.append("volume accessorio")
         confidence = 0.5
-    elif building == "apartments":
-        if roof_shape == "flat":
-            archetype = "1960s_concrete" if height >= 17 else "post_war_apartment"
-            evidence.append("building=apartments + tetto piano")
-        else:
-            archetype = "early_1900_apartment"
-            evidence.append("building=apartments + tetto inclinato")
-        confidence = 0.6
-    elif building in {"industrial", "warehouse", "factory"}:
+    elif building in {"industrial", "warehouse", "factory", "greenhouse", "hangar"}:
         archetype = "industrial"
         evidence.append("building=industrial/warehouse")
         confidence = 0.75
-    elif area >= 300 and height >= 13 and roof_shape != "flat" and distance < 300:
+    elif area >= 600 and height <= 12.0 and roof_shape == "flat":
+        archetype = "industrial"
+        evidence.append("grande copertura piana: capannone o deposito")
+        confidence = 0.55
+    elif building == "apartments":
+        if roof_shape == "flat":
+            archetype = "1960s_concrete" if height >= 16.5 else "post_war_apartment"
+            evidence.append("building=apartments + tetto piano")
+        elif district in CENTRAL:
+            archetype = "early_1900_apartment"
+            evidence.append("building=apartments + centro storico")
+        else:
+            archetype = "post_war_apartment"
+            evidence.append("building=apartments + periferia")
+        confidence = 0.6
+    elif building in {"terrace", "residential"}:
+        archetype = "post_war_apartment" if height >= 10.5 else "historic_townhouse"
+        evidence.append("edilizia residenziale in serie")
+        confidence = 0.45
+    elif building in {"house", "detached", "semidetached_house", "villa", "farm", "bungalow"}:
+        if height >= 7.4 and area >= 90:
+            archetype = "liberty_villa"
+            evidence.append("villetta o casa unifamiliare con giardino")
+            confidence = 0.42
+        else:
+            archetype = "generic"
+            evidence.append("casa di piccola dimensione")
+            confidence = 0.35
+    elif district in CENTRAL and area >= 300 and height >= 13 and roof_shape != "flat":
         archetype = "neoclassical_palazzo"
-        evidence.append("grande impronta + altezza + tetto inclinato")
+        evidence.append("grande impronta + altezza + tetto inclinato nel centro")
         confidence = 0.5
     elif area >= 160 and height >= 12.5:
         if roof_shape == "flat":
-            archetype = "1960s_concrete" if height >= 17 else "post_war_apartment"
+            archetype = "1960s_concrete" if height >= 16.5 else "post_war_apartment"
             evidence.append("impronta ampia + altezza + tetto piano")
-        else:
+        elif district in CENTRAL:
             archetype = "early_1900_apartment"
             evidence.append("impronta ampia + altezza + tetto inclinato")
+        else:
+            archetype = "post_war_apartment"
+            evidence.append("impronta ampia + altezza in periferia")
         confidence = 0.45
     elif area >= 95 and height >= 12.0:
         archetype = "post_war_apartment" if roof_shape == "flat" else "early_1900_apartment"
         evidence.append("altezza superiore alla media del lotto")
         confidence = 0.4
-    elif _has_shopfront(record) and _street_facing(record):
+    elif shopfront and street:
         archetype = "mixed_use_shopfront"
         evidence.append("attività al piano terra su strada")
         confidence = 0.55
     elif (
-        _street_facing(record)
-        and ("pedestrian" in _road_classes(record) or "residential" in _road_classes(record))
+        street
+        and ("pedestrian" in road_classes or "residential" in road_classes)
         and area > 80
         and _ratio(record["osm_id"]) < 0.45
     ):
@@ -114,13 +145,29 @@ def classify_one(config: AppConfig, record: dict, height_info: dict, roof_info: 
         evidence.append("fronte su strada urbana con probabile piano terra commerciale")
         confidence = 0.32
     elif area < 110 and height <= 10.5 and roof_shape != "flat":
-        archetype = "historic_townhouse"
+        archetype = (
+            "liberty_villa"
+            if district in RURAL | RESIDENTIAL and area >= 70
+            else "historic_townhouse"
+        )
         evidence.append("lotto piccolo + altezza contenuta + tetto inclinato")
         confidence = 0.45
-    elif distance < 300:
+    elif district in CENTRAL:
         archetype = "historic_townhouse"
         evidence.append("contesto centro storico")
         confidence = 0.35
+    elif district in STATION:
+        archetype = "early_1900_apartment" if height >= 9.5 else "historic_townhouse"
+        evidence.append("contesto stazione / prima periferia")
+        confidence = 0.32
+    elif district in RESIDENTIAL:
+        archetype = "post_war_apartment" if height >= 9.0 else "generic"
+        evidence.append("contesto residenziale di periferia")
+        confidence = 0.3
+    elif district in RURAL:
+        archetype = "generic"
+        evidence.append("contesto rurale o frazione")
+        confidence = 0.25
     else:
         archetype = "generic"
         evidence.append("evidenza insufficiente")
@@ -159,6 +206,7 @@ def classify_one(config: AppConfig, record: dict, height_info: dict, roof_info: 
         "texture_confidence": 0.05,
         "procedural_flags": sorted(set(procedural_flags)),
         "centre_distance_m": round(distance, 1),
+        "district_id": district,
         "street_facing": _street_facing(record),
         "height_source": height_source,
     }

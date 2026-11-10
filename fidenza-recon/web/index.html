@@ -34,14 +34,15 @@
         <div class="eyebrow">Open Data · Ricostruzione 3D</div>
         <h1>Fidenza <span>Centro urbano esteso</span></h1>
         <p class="lede">
-          Area urbana estesa con <strong id="brand-buildings">—</strong> edifici
-          dettagliati LOD3, ricostruiti da OSM e RER 2023‑24. Il dettaglio viene
-          caricato dinamicamente intorno alla posizione; i chunk lontani usano LOD1.
+          L'intera area urbana di Fidenza — 5,5 × 5,4 km, 7 quartieri — con
+          <strong id="brand-buildings">—</strong> edifici dettagliati LOD3,
+          ricostruiti da OSM e RER 2023‑24. Il dettaglio viene caricato
+          dinamicamente intorno alla posizione; i chunk lontani usano LOD1.
         </p>
         <div class="chips">
           <span class="chip">OSM · ODbL</span>
           <span class="chip">RER 2023‑24 · CC BY 4.0</span>
-          <span class="chip chip-warn">KartaView: 0 foto</span>
+          <span class="chip chip-warn">KartaView: 0 foto in area</span>
         </div>
       </header>
 
@@ -62,6 +63,12 @@
           <button type="button" data-view="overview">Veduta d'insieme</button>
           <button type="button" data-view="street">Livello strada</button>
         </div>
+        <h2>Mappa dei quartieri</h2>
+        <div class="district-map">
+          <canvas id="district-map-canvas" width="480" height="466" aria-label="Mappa 2D dei quartieri"></canvas>
+          <span class="district-map-north">N</span>
+        </div>
+        <div id="district-list" class="district-list"></div>
         <h2>Lettura del modello</h2>
         <label class="switch">
           <input type="checkbox" id="toggle-footprints" />
@@ -73,11 +80,19 @@
         </label>
         <label class="switch">
           <input type="checkbox" id="toggle-labels" checked />
-          <span>Etichette landmark</span>
+          <span>Etichette landmark e quartieri</span>
         </label>
         <label class="switch">
           <input type="checkbox" id="toggle-details" checked />
           <span>Dettagli facciata (LOD3)</span>
+        </label>
+        <label class="field-row">
+          <span>Qualità LOD3</span>
+          <select id="quality-select">
+            <option value="high">Alta · 200 m</option>
+            <option value="medium">Media · 140 m</option>
+            <option value="low">Bassa · solo LOD1</option>
+          </select>
         </label>
         <div class="actions">
           <button type="button" id="export-glb">Esporta GLB</button>

@@ -32,6 +32,8 @@ def _table(headers: list[str], rows: list[list[object]]) -> str:
 def generate() -> dict[str, Path]:
     ensure_dirs()
     city = _load(PROCESSED_DIR / "city.json", {})
+    manifest = _load(PROCESSED_DIR / "city" / "manifest.json", {})
+    world = _load(PROCESSED_DIR / "city" / "world.json", {})
     roofs = _load(PROCESSED_DIR / "roofs.json", {})
     base = _load(PROCESSED_DIR / "buildings_base.json", {})
     kartaview = _load(RAW_DIR / "kartaview" / "coverage.json", {})
@@ -39,8 +41,11 @@ def generate() -> dict[str, Path]:
     performance = _load(DOCS_DIR / "performance.json", {})
 
     buildings = city.get("buildings", [])
-    meta = city.get("meta", {})
-    stats = city.get("stats", {})
+    meta = manifest.get("meta") or city.get("meta", {})
+    stats = manifest.get("stats") or city.get("stats", {})
+    roads = world.get("roads") or city.get("roads", [])
+    props = world.get("props") or city.get("props", [])
+    license_entries = manifest.get("licenses") or city.get("licenses", [])
     generated = datetime.now(UTC).replace(microsecond=0).isoformat()
 
     conn = connect()
@@ -99,8 +104,10 @@ def generate() -> dict[str, Path]:
         f"- Windows (procedural): {stats.get('windows', 0)}",
         f"- Balconies (procedural): {stats.get('balconies', 0)}",
         f"- Landmarks: {stats.get('landmarks', 0)}",
-        f"- Road segments: {len(city.get('roads', []))}",
-        f"- Street props: {len(city.get('props', []))}",
+        f"- Road segments: {len(roads)}",
+        f"- Street props: {len(props)}",
+        f"- Detail chunks: {stats.get('detail_chunks', 0)}",
+        f"- Districts: {_counts((item.get('district_id') or 'unknown') for item in buildings)}",
         "",
         "## Discovery notes",
         "",
@@ -117,6 +124,53 @@ def generate() -> dict[str, Path]:
     outputs["inventory"] = DOCS_DIR / "DATA_INVENTORY.md"
     outputs["inventory"].write_text("\n".join(inventory), encoding="utf-8")
 
+    districts = manifest.get("districts") or []
+    district_rows = []
+    for district in districts:
+        members = [
+            item for item in buildings if item.get("district_id") == district["id"]
+        ]
+        heights = [float(item.get("height_m") or 0.0) for item in members]
+        district_rows.append(
+            [
+                district.get("name"),
+                len(members),
+                sum(1 for item in members if item.get("detail") == "pilot"),
+                f"{sum(heights) / len(heights):.1f}" if heights else "—",
+                sum(1 for item in members if item.get("landmark")),
+                _counts(item.get("archetype") for item in members).split(", ")[0]
+                if members
+                else "—",
+            ]
+        )
+    district_report = [
+        "# Quartieri",
+        "",
+        f"Generated: {generated}",
+        "",
+        "Il quartiere è assegnato al centroide dell'edificio; è un'informazione",
+        "descrittiva, non un confine amministrativo.",
+        "",
+        _table(
+            ["Quartiere", "Edifici", "Pilot LOD3", "Altezza media (m)", "Landmark", "Archetipo principale"],
+            district_rows,
+        ),
+        "",
+        f"Chunk di dettaglio generati: **{stats.get('detail_chunks', 0)}**.",
+        "",
+        "## Descrizioni",
+        "",
+    ]
+    for district in districts:
+        district_report += [
+            f"### {district.get('name')}",
+            "",
+            district.get("description") or "",
+            "",
+        ]
+    outputs["districts"] = DOCS_DIR / "DISTRICTS.md"
+    outputs["districts"].write_text("\n".join(district_report), encoding="utf-8")
+
     licenses = [
         "# Licenses and attribution",
         "",
@@ -126,7 +180,7 @@ def generate() -> dict[str, Path]:
         "## Runtime data",
         "",
     ]
-    for item in city.get("licenses", []):
+    for item in license_entries:
         licenses += [
             f"### {item.get('source')}",
             "",
@@ -162,12 +216,14 @@ def generate() -> dict[str, Path]:
         "",
         f"- Sample points: {kartaview.get('sample_points', 0)}",
         f"- Points with photos: {kartaview.get('points_with_photos', 0)}",
-        f"- Photos: {kartaview.get('photo_count', 0)}",
+        f"- Photos: {kartaview.get('photo_count', 0)} "
+        f"({kartaview.get('photos_inside_bbox', 0)} inside the reconstructed bbox)",
         f"- Sequence API: {kartaview.get('sequence_api', 'n/a')}",
         "",
-        "**Result: no usable street-level imagery exists for Fidenza in the public",
-        "KartaView endpoint.** The pipeline therefore generates facades procedurally",
-        "and records that fact on every building.",
+        "**Result: no usable street-level imagery exists inside the reconstructed",
+        "bbox.** A handful of photos lies just outside the north-east edge; they",
+        "are not used for facades. The pipeline therefore generates facades",
+        "procedurally and records that fact on every building.",
         "",
         "## Wikimedia Commons references",
         "",
@@ -267,6 +323,8 @@ def generate() -> dict[str, Path]:
         "",
         f"- Roof shapes: {_counts(item.get('roof', {}).get('shape') for item in buildings)}",
         f"- Roof shape confidence median: {sorted([item.get('roof', {}).get('confidence', 0) for item in buildings])[len(buildings)//2] if buildings else 0}",
+        f"- Orthophoto sampling: {_counts(item.get('ortho_resolution_m') for item in roofs.values())}",
+        "  (0.2 m historic centre, 0.5 m pilot, 1.0 m context)",
         "",
         "## Buildings requiring manual review",
         "",
@@ -296,7 +354,7 @@ def generate() -> dict[str, Path]:
         "1. Window and shopfront positions are generated from facade width and an",
         "   architectural grammar; they are not observed measurements.",
         "2. Facade colours are typological palettes; roof colours are measured from",
-        "   the 2023-24 orthophoto.",
+        "   the 2023-24 orthophoto at 0.2 m (centre), 0.5 m (pilot) or 1.0 m (context).",
         "3. Heights use a 2008 DSM and a 2023-24 DTM; the cross-epoch difference is",
         "   included in the confidence value.",
         "4. No street-level photographs exist, so facade proportions cannot be",
@@ -351,8 +409,15 @@ def generate() -> dict[str, Path]:
                 [
                     "Street imagery",
                     "Licensed street-level coverage",
-                    "0 KartaView photos",
-                    "unavailable",
+                    (
+                        f"{kartaview.get('photos_inside_bbox', 0)} inside bbox "
+                        f"({kartaview.get('photo_count', 0)} nearby)"
+                    ),
+                    (
+                        "pass"
+                        if kartaview.get("photos_inside_bbox", 0)
+                        else "unavailable"
+                    ),
                 ],
                 [
                     "Reference photography",

@@ -16,26 +16,90 @@ origin:
     point: x = east, z = south, y = up. No global coordinates are sent to the GPU.
 
 pilot:
-  name: Centro urbano esteso di Fidenza
-  bbox_wgs84: [10.0506, 44.8609, 10.0659, 44.8719]
-  approx_size_m: [1200, 1230]
+  name: Fidenza urbana
+  bbox_wgs84: [10.038, 44.835, 10.108, 44.884]
+  approx_size_m: [5590, 5440]
   description: >
-    Area dettagliata LOD3 estesa a circa 1,2 km: Cattedrale di San Donnino,
-    Porta di San Donnino, Teatro Girolamo Magnani, il centro storico e la
-    prima periferia. Impronte e strade da OSM; facciate generate
-    proceduralmente perché non esiste copertura street-level.
+    Intera area urbana di Fidenza: centro storico, stazione e Monica, San
+    Lazzaro, Le Azalee, Corea, Luce e Coduro. Tutti gli edifici dentro questa
+    bbox ricevono descrittori LOD3 completi; il viewer li carica a chunk da
+    120 m e mantiene LOD1 per i chunk lontani.
+  districts:
+    - id: centro
+      name: Centro
+      lon: 10.059679
+      lat: 44.866319
+      color: "#c2684b"
+      description: Il cuore storico di Fidenza, tra il Duomo e Piazza Garibaldi.
+    - id: monica
+      name: Monica
+      lon: 10.065002
+      lat: 44.868128
+      color: "#4f8fa8"
+      description: La zona della stazione e di Piazza della Repubblica, sempre in movimento.
+    - id: sanlazzaro
+      name: San Lazzaro
+      lon: 10.068298
+      lat: 44.865053
+      color: "#5c8a5a"
+      description: Quartiere residenziale a est, con la chiesa di San Lazzaro e le vie del dopoguerra.
+    - id: azalee
+      name: Le Azalee
+      lon: 10.077043
+      lat: 44.861796
+      color: "#b86b8a"
+      description: Il quartiere verde a est, tra villette, giardini e nuovi servizi.
+    - id: corea
+      name: Corea
+      lon: 10.069058
+      lat: 44.858358
+      color: "#c99a3f"
+      description: Il quartiere residenziale a sud-est, tra via Baracca e i viali alberati.
+    - id: luce
+      name: Luce
+      lon: 10.050427
+      lat: 44.864148
+      color: "#7a5a8a"
+      description: Il quartiere a ovest, con i viali di via Tagliamento e la chiesa di San Paolo.
+    - id: coduro
+      name: Coduro
+      lon: 10.089084
+      lat: 44.849040
+      color: "#7e9158"
+      description: La frazione a sud-est tra Via Coduro, la campagna e le nuove vie residenziali.
   landmarks:
-    - Cattedrale di San Donnino
-    - Porta di San Donnino
-    - Teatro Girolamo Magnani
+    - name: Cattedrale di San Donnino
+      lon: 10.057810
+      lat: 44.866476
+      kind: duomo
+    - name: Porta di San Donnino
+      lon: 10.057332
+      lat: 44.866930
+      kind: porta
+    - name: Teatro Girolamo Magnani
+      lon: 10.060008
+      lat: 44.865852
+      kind: teatro
+    - name: Santuario della Gran Madre di Dio
+      lon: 10.066467
+      lat: 44.865170
+      kind: chiesa
+    - name: Chiesa di San Pietro
+      lon: 10.058580
+      lat: 44.866710
+      kind: chiesa
+    - name: Stazione di Fidenza
+      lon: 10.064200
+      lat: 44.867700
+      kind: stazione
 
 context:
-  bbox_wgs84: [10.0506, 44.8609, 10.0659, 44.8719]
-  approx_size_m: [1200, 1230]
+  bbox_wgs84: [10.0348, 44.8327, 10.1112, 44.8863]
+  approx_size_m: [6120, 5940]
   description: >
-    Area di fetch coincidente con il pilot esteso. Tutti gli edifici sono
-    trattati come dettagliati LOD3 nel viewer dinamico; il livello LOD1
-    viene generato a runtime per i chunk lontani.
+    Buffer di circa 250 m attorno alla bbox urbana. Serve a evitare edifici e
+    strade tagliati ai bordi; gli edifici del buffer restano in LOD1 e non
+    ricevono chunk di dettaglio.
 
 floor_heights:
   default_m: 3.2
@@ -64,16 +128,35 @@ sidewalk:
 
 rendering:
   lod_distances_m:
-    lod0: 900
-    lod1: 420
-    lod2: 160
+    lod0: 2400
+    lod1: 900
+    lod2: 320
     lod3: 0
   chunk_size_m: 120
+  parent_chunk_size_m: 480
+  detail_radius_m:
+    high: 200
+    medium: 140
+    low: 0
+  max_detail_chunks:
+    desktop: 24
+    mobile: 12
   max_texture_size: 4096
 
 downloads:
-  ortho_resolution_m: 0.25
-  dtm_resolution_m: 0.5
+  # 1 m for the whole city; the viewer downsamples to a 4096 px ground image.
+  ortho_resolution_m: 1.0
+  # 0.5 m for the pilot (roof colour / NDVI), 0.2 m for the historic centre.
+  ortho_pilot_resolution_m: 0.5
+  ortho_centro_resolution_m: 0.2
+  ortho_centro_bbox_wgs84: [10.0506, 44.8609, 10.0659, 44.8719]
+  dtm_resolution_m: 1.0
   dsm_resolution_m: 2.0
   ground_texture_width_px: 4096
+  max_export_pixels: 8500000
+  max_export_dimension: 4096
   request_timeout_s: 300
+
+tiling:
+  osm_tile_size_m: 2000
+  osm_tile_overlap_m: 150

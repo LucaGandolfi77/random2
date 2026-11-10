@@ -137,7 +137,9 @@ def analyze(config: AppConfig, force: bool = False) -> dict:
         results: dict[str, dict] = {}
         ndsm_ds = rasterio.open(PROCESSED_DIR / "ndsm.tif")
         ndvi_ds = rasterio.open(PROCESSED_DIR / "ndvi.tif")
-        for record in base["buildings"]:
+        for position, record in enumerate(base["buildings"], start=1):
+            if position % 250 == 0:
+                print(f"  heights {position}/{len(base['buildings'])}")
             poly = _polygon(record)
             eroded = _erode(poly, 0.7)
             values = np.array([])

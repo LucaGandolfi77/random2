@@ -1,4 +1,12 @@
-import type { Building, CityData } from './types';
+import type {
+  Building,
+  CityData,
+  DetailChunkPayload,
+  LandmarksPayload,
+  Manifest,
+  MassingPayload,
+  WorldPayload,
+} from './types';
 import { buildStreets } from './city/streets';
 import { buildProps } from './city/props';
 import { buildTerrain } from './city/terrain';
@@ -7,6 +15,12 @@ import { TouchControls } from './ui/touch';
 import { CityLodManager } from './viewer/lod-manager';
 
 const dataBase = `${import.meta.env.BASE_URL}data/`;
+
+async function fetchJson<T>(path: string): Promise<T> {
+  const response = await fetch(`${dataBase}${path}`);
+  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+  return (await response.json()) as T;
+}
 
 const $ = <T extends HTMLElement>(selector: string): T => {
   const element = document.querySelector<T>(selector);
@@ -81,14 +95,235 @@ function isTypingTarget(target: EventTarget | null): boolean {
   );
 }
 
+function setupDistrictMap(
+  canvas: HTMLCanvasElement,
+  city: CityData,
+  viewer: Viewer,
+): void {
+  const districts = city.districts ?? [];
+  if (!districts.length) return;
+  const context = canvas.getContext('2d');
+  if (!context) return;
+
+  const [minX, minZ, maxX, maxZ] = city.meta.pilot_bbox_local;
+  const width = canvas.width;
+  const height = canvas.height;
+  const padding = 16;
+  const scaleX = (width - padding * 2) / Math.max(1, maxX - minX);
+  const scaleZ = (height - padding * 2) / Math.max(1, maxZ - minZ);
+  const project = (x: number, z: number): [number, number] => [
+    padding + (x - minX) * scaleX,
+    padding + (z - minZ) * scaleZ,
+  ];
+
+  const roadTargets = new Map<string, [number, number]>();
+  for (const district of districts) {
+    let best: [number, number] | null = null;
+    let bestDistance = Infinity;
+    for (const road of city.roads) {
+      if (road.width_m < 5) continue;
+      for (const point of road.points) {
+        const distance = Math.hypot(
+          point[0] - district.local[0],
+          point[2] - district.local[1],
+        );
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = [point[0], point[2]];
+        }
+      }
+    }
+    roadTargets.set(district.id, best ?? district.local);
+  }
+
+  const list = $('#district-list');
+  const buttons = new Map<string, HTMLButtonElement>();
+  for (const district of districts) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = district.name;
+    button.title = district.description;
+    button.addEventListener('click', () => {
+      const target = roadTargets.get(district.id) ?? district.local;
+      viewer.teleportTo(target[0], target[1]);
+    });
+    buttons.set(district.id, button);
+    list.appendChild(button);
+  }
+
+  let activeId = '';
+
+  const base = document.createElement('canvas');
+  base.width = width;
+  base.height = height;
+  const baseContext = base.getContext('2d');
+  if (baseContext) {
+    baseContext.fillStyle = 'rgba(11, 16, 18, 0.92)';
+    baseContext.fillRect(0, 0, width, height);
+
+    baseContext.strokeStyle = 'rgba(235, 228, 214, 0.08)';
+    baseContext.lineWidth = 1;
+    for (let gx = 0; gx <= 8; gx += 1) {
+      const x = padding + ((width - padding * 2) * gx) / 8;
+      baseContext.beginPath();
+      baseContext.moveTo(x, padding);
+      baseContext.lineTo(x, height - padding);
+      baseContext.stroke();
+    }
+    for (let gz = 0; gz <= 8; gz += 1) {
+      const z = padding + ((height - padding * 2) * gz) / 8;
+      baseContext.beginPath();
+      baseContext.moveTo(padding, z);
+      baseContext.lineTo(width - padding, z);
+      baseContext.stroke();
+    }
+
+    baseContext.strokeStyle = 'rgba(217, 180, 106, 0.18)';
+    baseContext.lineWidth = 1;
+    for (const road of city.roads) {
+      if (road.width_m < 7 || road.points.length < 2) continue;
+      baseContext.beginPath();
+      const first = project(road.points[0][0], road.points[0][2]);
+      baseContext.moveTo(first[0], first[1]);
+      for (let index = 1; index < road.points.length; index += 1) {
+        const point = project(road.points[index][0], road.points[index][2]);
+        baseContext.lineTo(point[0], point[1]);
+      }
+      baseContext.stroke();
+    }
+  }
+
+  const draw = (): void => {
+    const pose = viewer.getPlayerPose();
+    const nearest = districts.reduce((best, district) => {
+      const distance = Math.hypot(
+        district.local[0] - pose.x,
+        district.local[1] - pose.z,
+      );
+      return distance < best.distance ? { id: district.id, distance } : best;
+    }, { id: '', distance: Infinity });
+    if (nearest.id !== activeId) {
+      activeId = nearest.id;
+      for (const [id, button] of buttons) {
+        button.classList.toggle('active', id === activeId);
+      }
+    }
+
+    context.drawImage(base, 0, 0);
+
+    for (const district of districts) {
+      const [x, y] = project(district.local[0], district.local[1]);
+      context.beginPath();
+      context.arc(x, y, 7, 0, Math.PI * 2);
+      context.fillStyle = district.color;
+      context.fill();
+      context.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      context.lineWidth = 1.5;
+      context.stroke();
+      if (district.id !== activeId) continue;
+      context.font = '600 15px system-ui, sans-serif';
+      context.textAlign = 'left';
+      context.lineWidth = 3;
+      context.strokeStyle = 'rgba(10, 14, 16, 0.85)';
+      const labelX = Math.min(width - 90, x + 14);
+      const labelY = y + 5;
+      context.strokeText(district.name, labelX, labelY);
+      context.fillStyle = '#f2ede2';
+      context.fillText(district.name, labelX, labelY);
+    }
+
+    let [px, py] = project(pose.x, pose.z);
+    px = Math.max(padding, Math.min(width - padding, px));
+    py = Math.max(padding, Math.min(height - padding, py));
+    context.save();
+    context.translate(px, py);
+    context.rotate(Math.PI - pose.heading);
+    context.beginPath();
+    context.moveTo(0, -11);
+    context.lineTo(7, 8);
+    context.lineTo(0, 4);
+    context.lineTo(-7, 8);
+    context.closePath();
+    context.fillStyle = '#5ef2a0';
+    context.fill();
+    context.strokeStyle = 'rgba(8, 12, 10, 0.9)';
+    context.lineWidth = 1.5;
+    context.stroke();
+    context.restore();
+  };
+
+  canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * width;
+    const y = ((event.clientY - rect.top) / rect.height) * height;
+    let nearest: { district: (typeof districts)[number]; distance: number } | null =
+      null;
+    for (const district of districts) {
+      const [dx, dy] = project(district.local[0], district.local[1]);
+      const distance = Math.hypot(dx - x, dy - y);
+      if (!nearest || distance < nearest.distance) nearest = { district, distance };
+    }
+    if (nearest && nearest.distance <= 26) {
+      const target = roadTargets.get(nearest.district.id) ?? nearest.district.local;
+      viewer.teleportTo(target[0], target[1]);
+    }
+  });
+
+  let lastDraw = 0;
+  const tick = (time: number): void => {
+    if (time - lastDraw > 80) {
+      lastDraw = time;
+      draw();
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
 async function boot(): Promise<void> {
   const loading = $('#loading');
   const error = $('#error');
   try {
-    setStage('Caricamento del payload geografico…', 18);
-    const response = await fetch(`${dataBase}city.json`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const city = (await response.json()) as CityData;
+    setStage('Caricamento dell’indice della città…', 10);
+    let manifest: Manifest | null = null;
+    let city: CityData;
+    try {
+      manifest = await fetchJson<Manifest>('manifest.json');
+      setStage('Caricamento di terreno, strade e masse edilizie…', 24);
+      const [world, massing, landmarkFile] = await Promise.all([
+        fetchJson<WorldPayload>(manifest.files.world),
+        fetchJson<MassingPayload>(manifest.files.massing),
+        fetchJson<LandmarksPayload>(manifest.files.landmarks).catch(() => ({
+          landmarks: [],
+        })),
+      ]);
+      const landmarkIds = new Set(
+        landmarkFile.landmarks.map((landmark) => landmark.osm_id),
+      );
+      if (landmarkIds.size) {
+        for (const building of massing.buildings) {
+          if (landmarkIds.has(building.osm_id)) building.landmark = true;
+        }
+      }
+      city = {
+        meta: manifest.meta,
+        terrain: world.terrain,
+        ground: world.ground,
+        buildings: massing.buildings,
+        roads: world.roads,
+        plazas: world.plazas,
+        props: world.props,
+        districts: manifest.districts,
+        stats: manifest.stats,
+        coverage: manifest.coverage,
+        licenses: manifest.licenses,
+        limits: manifest.limits,
+      };
+    } catch (chunkedError) {
+      console.warn('chunked payload unavailable, falling back to city.json', chunkedError);
+      setStage('Caricamento del payload monolitico di riserva…', 18);
+      city = await fetchJson<CityData>('city.json');
+    }
     setStage('Preparazione del terreno e dell’ortofoto…', 38);
 
     const viewer = new Viewer($('#scene'));
@@ -99,19 +334,40 @@ async function boot(): Promise<void> {
     viewer.cityRoot.add(buildStreets(city.roads, city.props));
     viewer.cityRoot.add(buildProps(city.props));
     viewer.load(city, terrain.sample);
+    const districtCanvas = document.querySelector<HTMLCanvasElement>(
+      '#district-map-canvas',
+    );
+    if (districtCanvas) setupDistrictMap(districtCanvas, city, viewer);
 
     setStage('Streaming LOD3 e batch LOD1 per l’area estesa…', 82);
     const coarsePointer = matchMedia('(pointer: coarse)').matches;
+    const quality = coarsePointer ? 'medium' : 'high';
+    viewer.setPostprocessing(quality === 'high');
+    const detailRadius =
+      city.meta.detail_radius_m?.[quality] ?? (coarsePointer ? 140 : 200);
+    const maxDetailChunks =
+      city.meta.max_detail_chunks?.[coarsePointer ? 'mobile' : 'desktop'] ??
+      (coarsePointer ? 12 : 24);
     const lodManager = new CityLodManager(
       viewer.buildingRoot,
       city.buildings,
       city.meta.lod_distances_m,
-      120,
-      coarsePointer ? 120 : 160,
-      coarsePointer ? 5 : 8,
+      {
+        chunkSize: city.meta.chunk_size_m ?? 120,
+        parentChunkSize: city.meta.parent_chunk_size_m ?? 480,
+        detailRadius,
+        maxDetailChunks,
+        chunks: manifest?.chunks,
+        maxConcurrentRequests: coarsePointer ? 1 : 2,
+        onDetailLoaded: () => viewer.requestShadowUpdate(),
+        loadChunk: manifest
+          ? async (key) =>
+              (await fetchJson<DetailChunkPayload>(`detail/chunk_${key}.json`)).buildings
+          : undefined,
+      },
     );
     viewer.setLodManager(lodManager);
-    lodManager.warmUp(viewer.camera, coarsePointer ? 2 : 3);
+    await lodManager.warmUp(viewer.camera, coarsePointer ? 2 : 4);
     viewer.requestShadowUpdate();
 
     viewer.setStatsElements({
@@ -236,6 +492,20 @@ async function boot(): Promise<void> {
     });
     labels.addEventListener('change', () => viewer.setLabels(labels.checked));
     details.addEventListener('change', () => viewer.setDetailVisibility(details.checked));
+
+    const qualitySelect = $('#quality-select') as HTMLSelectElement;
+    qualitySelect.value = quality;
+    qualitySelect.addEventListener('change', () => {
+      const selected = qualitySelect.value as 'high' | 'medium' | 'low';
+      const radius = city.meta.detail_radius_m?.[selected] ?? 0;
+      viewer.setPostprocessing(selected === 'high');
+      lodManager.setQuality(radius, selected === 'low' ? 0 : maxDetailChunks);
+      showToast(
+        selected === 'low'
+          ? 'Qualità bassa: solo LOD1'
+          : `Raggio LOD3: ${radius} m`,
+      );
+    });
 
     const exportButton = $('#export-glb') as HTMLButtonElement;
     exportButton.addEventListener('click', async () => {

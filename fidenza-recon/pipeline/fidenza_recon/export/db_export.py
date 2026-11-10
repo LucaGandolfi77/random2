@@ -26,6 +26,7 @@ def _load(path: Path, default=None):
 def export(config: AppConfig) -> dict:
     del config
     city = _load(PROCESSED_DIR / "city.json", {})
+    descriptors = _load(PROCESSED_DIR / "descriptors.json", {})
     base = _load(PROCESSED_DIR / "buildings_base.json", {})
     commons = _load(RAW_DIR / "commons" / "commons.json", {})
     kartaview = _load(RAW_DIR / "kartaview" / "coverage.json", {})
@@ -61,7 +62,7 @@ def export(config: AppConfig) -> dict:
     conn.execute("DELETE FROM imagery WHERE source_key = 'wikimedia_commons'")
     conn.execute("DELETE FROM validation")
 
-    buildings = city.get("buildings", [])
+    buildings = descriptors.get("buildings") or city.get("buildings", [])
     for building in buildings:
         record = base_by_id.get(building["osm_id"], {})
         upsert_building(
@@ -98,11 +99,12 @@ def export(config: AppConfig) -> dict:
                 "procedural_flags": building.get("procedural_flags"),
                 "tags_json": building.get("tags"),
                 "source_dataset": (
-                    "OSM footprints; RER 2023-24 orthophoto/DTM; DSM AGEA 2008"
+                    "OSM footprints; RER 2023-24 orthophoto/DTM; DSM AGEA 2008; "
+                    "DBTR UVL fallback where DSM is missing"
                 ),
                 "source_url": "https://www.openstreetmap.org/",
                 "license": (
-                    "ODbL 1.0 (OSM); CC BY 4.0 (RER); "
+                    "ODbL 1.0 (OSM); CC BY 4.0 (RER); CC BY 4.0 (DBTR); "
                     "DSM service license to verify"
                 ),
                 "image_reference": image_reference(building.get("name")),
@@ -173,8 +175,15 @@ def export(config: AppConfig) -> dict:
         conn,
         check_name="street_level_imagery",
         reference="KartaView public photo endpoint",
-        measured=f"{kartaview.get('photo_count', 0)} photos",
-        status="unavailable",
+        measured=(
+            f"{kartaview.get('photos_inside_bbox', 0)} photos inside bbox; "
+            f"{kartaview.get('photo_count', 0)} nearby"
+        ),
+        status=(
+            "pass"
+            if kartaview.get("photos_inside_bbox", 0)
+            else "unavailable"
+        ),
         checked_at=now_iso(),
     )
     add_validation(

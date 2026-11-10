@@ -9,6 +9,7 @@ from pathlib import Path
 from shapely.geometry import LineString, MultiLineString, Point, Polygon, shape
 from shapely.geometry import box as shapely_box
 from shapely.prepared import prep
+from shapely.strtree import STRtree
 
 from ..config import PROCESSED_DIR, RAW_DIR, AppConfig
 from ..geo import (
@@ -89,20 +90,24 @@ def _road_index(roads_path: Path, ctx: GeoContext) -> list[dict]:
 
 
 def _street_context(
-    side: dict, roads: list[dict], ctx: GeoContext
+    side: dict,
+    roads: list[dict],
+    road_tree: STRtree | None,
+    ctx: GeoContext,
 ) -> tuple[bool, str | None, str | None, float | None]:
+    if not roads:
+        return False, None, None, None
     p1 = tuple(side["p1"])
     p2 = tuple(side["p2"])
     mid_local = ((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2)
     mid_metric = ctx.local_to_metric(*mid_local)
-    best: tuple[float, dict] | None = None
-    for road in roads:
-        distance = road["metric"].distance(Point(mid_metric))
-        if best is None or distance < best[0]:
-            best = (distance, road)
-    if best is None:
-        return False, None, None, None
-    distance, road = best
+    point = Point(mid_metric)
+    if road_tree is not None:
+        index = int(road_tree.nearest(point))
+        road = roads[index]
+    else:  # pragma: no cover - STRtree is available on supported Shapely
+        road = min(roads, key=lambda candidate: candidate["metric"].distance(point))
+    distance = road["metric"].distance(point)
     try:
         width = float(str(road["width"]).replace(",", ".")) if road.get("width") else None
     except ValueError:
@@ -110,6 +115,31 @@ def _street_context(
     threshold = (width or 6.0) / 2.0 + 8.0
     street_facing = distance <= threshold
     return street_facing, road.get("name"), road.get("highway"), round(distance, 2)
+
+
+def _district_centres(config: AppConfig, ctx: GeoContext) -> list[dict]:
+    centres: list[dict] = []
+    for district in config.districts:
+        x, z = ctx.lonlat_to_local(float(district["lon"]), float(district["lat"]))
+        centres.append({**district, "local": (x, z)})
+    return centres
+
+
+def _district_for(
+    centroid: tuple[float, float], centres: list[dict]
+) -> tuple[str | None, float | None]:
+    if not centres:
+        return None, None
+    best = min(
+        centres,
+        key=lambda item: math.hypot(
+            centroid[0] - item["local"][0], centroid[1] - item["local"][1]
+        ),
+    )
+    distance = math.hypot(
+        centroid[0] - best["local"][0], centroid[1] - best["local"][1]
+    )
+    return str(best["id"]), round(distance, 1)
 
 
 def analyze(config: AppConfig, force: bool = False) -> dict:
@@ -122,6 +152,10 @@ def analyze(config: AppConfig, force: bool = False) -> dict:
     context_local = ctx.bbox_local(config.context_bbox)
     buildings_features = _load_features(RAW_DIR / "osm" / "buildings.geojson")
     roads = _road_index(RAW_DIR / "osm" / "roads.geojson", ctx)
+    road_tree = (
+        STRtree([road["metric"] for road in roads]) if roads else None
+    )
+    district_centres = _district_centres(config, ctx)
     props = json.loads((RAW_DIR / "osm" / "props.geojson").read_text(encoding="utf-8"))
 
     records: list[dict] = []
@@ -146,7 +180,9 @@ def analyze(config: AppConfig, force: bool = False) -> dict:
         outer, holes = polygon_rings(local)
         sides = facade_sides(local)
         for side in sides:
-            street, road_name, road_class, distance = _street_context(side, roads, ctx)
+            street, road_name, road_class, distance = _street_context(
+                side, roads, road_tree, ctx
+            )
             side["street_facing"] = street
             side["road_name"] = road_name
             side["road_class"] = road_class
@@ -158,6 +194,7 @@ def analyze(config: AppConfig, force: bool = False) -> dict:
             pilot_local[0] <= centroid[0] <= pilot_local[2]
             and pilot_local[1] <= centroid[1] <= pilot_local[3]
         )
+        district_id, district_distance = _district_for(centroid, district_centres)
         rect = min_rotated_rect(local)
         area = float(local.area)
         perimeter = float(local.length)
@@ -167,6 +204,8 @@ def analyze(config: AppConfig, force: bool = False) -> dict:
                 "osm_id": feature["properties"]["osm_id"],
                 "osm_type": feature["properties"].get("osm_type"),
                 "detail": "pilot" if in_pilot else "context",
+                "district_id": district_id,
+                "district_distance_m": district_distance,
                 "name": tags.get("name"),
                 "tags": tags,
                 "building": building_type,

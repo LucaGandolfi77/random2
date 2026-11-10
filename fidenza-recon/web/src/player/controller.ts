@@ -104,6 +104,23 @@ export class PlayerController {
     }
   }
 
+  /** Moves the player to a new local position, dropping any accumulated motion. */
+  teleportTo(x: number, z: number, heading?: number): void {
+    this.support = this.world.groundHeight(x, z);
+    this.position.set(x, this.support, z);
+    this.velocity.set(0, 0, 0);
+    this.verticalVelocity = 0;
+    this.jumpBuffer = 0;
+    this.coyote = 0;
+    this.grounded = true;
+    if (heading !== undefined) this.heading = heading;
+    this.cameraYaw = this.heading + Math.PI;
+    this.cameraReady = false;
+    this.character.root.position.copy(this.position);
+    this.character.root.rotation.y = this.heading;
+    this.character.shadow.position.set(x, this.support + 0.035, z);
+  }
+
   resetCamera(): void {
     this.cameraYaw = this.heading + Math.PI;
     this.cameraPitch = 0.34;

@@ -23,6 +23,12 @@ or any other source whose terms prohibit extraction of standalone 3D assets.
 - URL: https://geoportale.regione.emilia-romagna.it/
 - Attribution: Regione Emilia-Romagna / AGEA 2008
 
+### Regione Emilia-Romagna — DBTR Unità volumetrica (WMS)
+
+- License: **CC BY 4.0**
+- URL: https://geoportale.regione.emilia-romagna.it/catalogo/dati-cartografici/cartografia-di-base/database-topografico-regionale
+- Attribution: Regione Emilia-Romagna — Database Topografico Regionale
+
 ### Wikimedia Commons
 
 - License: **per-file (CC BY / CC BY-SA / public domain)**

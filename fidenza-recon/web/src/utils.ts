@@ -49,9 +49,93 @@ export function color(hex: string): THREE.Color {
 export interface TextureSet {
   map: THREE.CanvasTexture;
   bump: THREE.CanvasTexture;
+  normal: THREE.CanvasTexture;
+  roughness: THREE.CanvasTexture;
+  ao: THREE.CanvasTexture;
 }
 
 const textureCache = new Map<string, TextureSet>();
+
+function imageData(canvas: HTMLCanvasElement): ImageData {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('2D canvas unavailable');
+  return ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
+
+function luminance(data: ImageData, x: number, y: number): number {
+  const width = data.width;
+  const height = data.height;
+  const ix = ((x % width) + width) % width;
+  const iy = ((y % height) + height) % height;
+  const offset = (iy * width + ix) * 4;
+  return (
+    (data.data[offset] * 0.2126 +
+      data.data[offset + 1] * 0.7152 +
+      data.data[offset + 2] * 0.0722) /
+    255
+  );
+}
+
+function scalarTexture(
+  source: ImageData,
+  value: (luminance: number) => number,
+): { canvas: HTMLCanvasElement; texture: THREE.CanvasTexture } {
+  const canvas = document.createElement('canvas');
+  canvas.width = source.width;
+  canvas.height = source.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('2D canvas unavailable');
+  const output = ctx.createImageData(source.width, source.height);
+  for (let y = 0; y < source.height; y += 1) {
+    for (let x = 0; x < source.width; x += 1) {
+      const offset = (y * source.width + x) * 4;
+      const tone = Math.max(0, Math.min(255, Math.round(value(luminance(source, x, y)) * 255)));
+      output.data[offset] = tone;
+      output.data[offset + 1] = tone;
+      output.data[offset + 2] = tone;
+      output.data[offset + 3] = 255;
+    }
+  }
+  ctx.putImageData(output, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.anisotropy = 4;
+  return { canvas, texture };
+}
+
+function normalTexture(source: ImageData, strength: number): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = source.width;
+  canvas.height = source.height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('2D canvas unavailable');
+  const output = ctx.createImageData(source.width, source.height);
+  for (let y = 0; y < source.height; y += 1) {
+    for (let x = 0; x < source.width; x += 1) {
+      const left = luminance(source, x - 1, y);
+      const right = luminance(source, x + 1, y);
+      const top = luminance(source, x, y - 1);
+      const bottom = luminance(source, x, y + 1);
+      const nx = (left - right) * strength;
+      const ny = (top - bottom) * strength;
+      const length = Math.hypot(nx, ny, 1);
+      const offset = (y * source.width + x) * 4;
+      output.data[offset] = Math.round(((nx / length) * 0.5 + 0.5) * 255);
+      output.data[offset + 1] = Math.round(((ny / length) * 0.5 + 0.5) * 255);
+      output.data[offset + 2] = Math.round(((1 / length) * 0.5 + 0.5) * 255);
+      output.data[offset + 3] = 255;
+    }
+  }
+  ctx.putImageData(output, 0, 0);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.NoColorSpace;
+  texture.anisotropy = 4;
+  return texture;
+}
 
 function noise(ctx: CanvasRenderingContext2D, random: () => number, amount: number, alpha: number): void {
   ctx.save();
@@ -181,16 +265,50 @@ export function textureSet(kind: string, seed = 1): TextureSet {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('2D canvas unavailable');
   drawPattern(kind, ctx, mulberry32(seed));
+  const data = imageData(canvas);
+  const normalStrength: Record<string, number> = {
+    brick: 3.2,
+    stone: 2.6,
+    tiles: 2.8,
+    plaster: 0.8,
+    concrete: 1.0,
+    asphalt: 1.4,
+    paving: 1.8,
+    wood: 1.8,
+    metal: 0.7,
+  };
+  const roughnessBase: Record<string, number> = {
+    brick: 0.86,
+    stone: 0.88,
+    tiles: 0.9,
+    plaster: 0.92,
+    concrete: 0.95,
+    asphalt: 0.98,
+    paving: 0.94,
+    wood: 0.82,
+    metal: 0.52,
+  };
+  const roughBase = roughnessBase[kind] ?? 0.9;
   const map = new THREE.CanvasTexture(canvas);
   map.wrapS = THREE.RepeatWrapping;
   map.wrapT = THREE.RepeatWrapping;
   map.colorSpace = THREE.SRGBColorSpace;
-  map.anisotropy = 4;
+  map.anisotropy = 8;
   const bump = new THREE.CanvasTexture(canvas);
   bump.wrapS = THREE.RepeatWrapping;
   bump.wrapT = THREE.RepeatWrapping;
   bump.colorSpace = THREE.NoColorSpace;
-  const set = { map, bump };
+  bump.anisotropy = 4;
+  const normal = normalTexture(data, normalStrength[kind] ?? 1.2);
+  const roughness = scalarTexture(
+    data,
+    (tone) => Math.max(0.35, Math.min(1.0, roughBase + (tone - 0.75) * 0.18)),
+  ).texture;
+  const ao = scalarTexture(
+    data,
+    (tone) => Math.max(0.55, Math.min(1.0, 0.72 + tone * 0.28)),
+  ).texture;
+  const set = { map, bump, normal, roughness, ao };
   textureCache.set(key, set);
   return set;
 }

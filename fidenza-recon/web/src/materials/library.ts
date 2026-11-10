@@ -23,11 +23,18 @@ export function facadeMaterial(building: Building): THREE.MeshStandardMaterial {
   const textures = textureSet(kind, 1 + (hashString(building.id) % 4));
   const material = new THREE.MeshStandardMaterial({
     color: new THREE.Color(building.facade.primary),
-    roughness: building.facade.roughness,
+    roughness: 1.0,
     metalness: building.facade.metalness,
     map: textures.map,
-    bumpMap: textures.bump,
-    bumpScale: kind === 'brick' ? 0.035 : 0.015,
+    normalMap: textures.normal,
+    normalScale: new THREE.Vector2(
+      kind === 'brick' ? 1.15 : kind === 'stone' ? 0.95 : kind === 'plaster' ? 0.35 : 0.7,
+      kind === 'brick' ? 1.15 : kind === 'stone' ? 0.95 : kind === 'plaster' ? 0.35 : 0.7,
+    ),
+    roughnessMap: textures.roughness,
+    aoMap: textures.ao,
+    aoMapIntensity: kind === 'plaster' ? 0.38 : 0.55,
+    envMapIntensity: 0.45,
   });
   facadeCache.set(key, material);
   return material;
@@ -47,11 +54,15 @@ export function roofMaterial(building: Building): THREE.MeshStandardMaterial {
   const textures = textureSet(kind, 2 + (hashString(building.id) % 3));
   const material = new THREE.MeshStandardMaterial({
     color: new THREE.Color(building.roof.colour).multiplyScalar(building.roof.material === 'membrane' ? 1.0 : 0.94),
-    roughness: building.roof.material === 'metal' ? 0.45 : building.roof.material === 'membrane' ? 0.92 : 0.88,
-    metalness: building.roof.material === 'metal' ? 0.5 : 0.0,
+    roughness: building.roof.material === 'metal' ? 0.55 : 1.0,
+    metalness: building.roof.material === 'metal' ? 0.45 : 0.0,
     map: textures.map,
-    bumpMap: textures.bump,
-    bumpScale: kind === 'tiles' ? 0.03 : 0.01,
+    normalMap: textures.normal,
+    normalScale: new THREE.Vector2(kind === 'tiles' ? 1.2 : 0.6, kind === 'tiles' ? 1.2 : 0.6),
+    roughnessMap: textures.roughness,
+    aoMap: textures.ao,
+    aoMapIntensity: 0.5,
+    envMapIntensity: building.roof.material === 'metal' ? 0.85 : 0.35,
     side: THREE.DoubleSide,
   });
   roofCache.set(key, material);
@@ -110,8 +121,11 @@ export const materials = {
   asphalt: new THREE.MeshStandardMaterial({
     color: new THREE.Color('#d8d2c6'),
     map: textureSet('asphalt', 1).map,
-    bumpMap: textureSet('asphalt', 1).bump,
-    bumpScale: 0.012,
+    normalMap: textureSet('asphalt', 1).normal,
+    normalScale: new THREE.Vector2(0.6, 0.6),
+    roughnessMap: textureSet('asphalt', 1).roughness,
+    aoMap: textureSet('asphalt', 1).ao,
+    aoMapIntensity: 0.4,
     roughness: 1.0,
     metalness: 0.0,
     emissive: new THREE.Color('#342e26'),
@@ -120,8 +134,11 @@ export const materials = {
   paving: new THREE.MeshStandardMaterial({
     color: new THREE.Color('#e4ded2'),
     map: textureSet('paving', 2).map,
-    bumpMap: textureSet('paving', 2).bump,
-    bumpScale: 0.01,
+    normalMap: textureSet('paving', 2).normal,
+    normalScale: new THREE.Vector2(0.75, 0.75),
+    roughnessMap: textureSet('paving', 2).roughness,
+    aoMap: textureSet('paving', 2).ao,
+    aoMapIntensity: 0.45,
     roughness: 0.9,
     metalness: 0.0,
     emissive: new THREE.Color('#2e2a24'),

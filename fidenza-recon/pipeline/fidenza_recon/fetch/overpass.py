@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import time
 from pathlib import Path
 from typing import Any
@@ -142,12 +143,94 @@ def _download(query: str, timeout_s: int) -> dict[str, Any]:
     raise RuntimeError(f"All Overpass endpoints failed: {last_error}")
 
 
+def _tile_bboxes(
+    bbox: tuple[float, float, float, float],
+    size_m: float,
+    overlap_m: float,
+) -> list[tuple[float, float, float, float]]:
+    """Split a WGS84 bbox into a grid of approximately square tiles."""
+
+    minlon, minlat, maxlon, maxlat = bbox
+    lat0 = (minlat + maxlat) / 2.0
+    width_m = max(1.0, (maxlon - minlon) * 111_320.0 * math.cos(math.radians(lat0)))
+    height_m = max(1.0, (maxlat - minlat) * 110_540.0)
+    nx = max(1, math.ceil(width_m / max(200.0, size_m)))
+    nz = max(1, math.ceil(height_m / max(200.0, size_m)))
+    lon_step = (maxlon - minlon) / nx
+    lat_step = (maxlat - minlat) / nz
+    lon_overlap = overlap_m / (111_320.0 * math.cos(math.radians(lat0)))
+    lat_overlap = overlap_m / 110_540.0
+    tiles: list[tuple[float, float, float, float]] = []
+    for iz in range(nz):
+        for ix in range(nx):
+            tiles.append(
+                (
+                    max(minlon, minlon + ix * lon_step - lon_overlap),
+                    max(minlat, minlat + iz * lat_step - lat_overlap),
+                    min(maxlon, minlon + (ix + 1) * lon_step + lon_overlap),
+                    min(maxlat, minlat + (iz + 1) * lat_step + lat_overlap),
+                )
+            )
+    return tiles
+
+
+def _bbox_key(bbox: tuple[float, float, float, float]) -> str:
+    import hashlib
+
+    return hashlib.sha1(
+        ",".join(f"{value:.7f}" for value in bbox).encode()
+    ).hexdigest()[:12]
+
+
+def _fetch_tile(
+    bbox: tuple[float, float, float, float],
+    cache_dir: Path,
+    force: bool,
+    depth: int = 0,
+) -> list[dict[str, Any]]:
+    cache_path = cache_dir / f"tile_{_bbox_key(bbox)}.json"
+    if cache_path.exists() and not force:
+        payload = json.loads(cache_path.read_text(encoding="utf-8"))
+        return list(payload.get("elements") or [])
+
+    bbox_str = f"{bbox[1]:.6f},{bbox[0]:.6f},{bbox[3]:.6f},{bbox[2]:.6f}"
+    query = QUERY_TEMPLATE.format(bbox=bbox_str, timeout=150)
+    try:
+        payload = _download(query, timeout_s=210)
+        elements = list(payload.get("elements") or [])
+        cache_path.write_text(
+            json.dumps({"elements": elements}, ensure_ascii=False), encoding="utf-8"
+        )
+        return elements
+    except Exception as exc:  # noqa: BLE001 - split and retry smaller tiles
+        if depth >= 2:
+            raise RuntimeError(f"Overpass tile failed after splitting: {bbox}: {exc}") from exc
+        minlon, minlat, maxlon, maxlat = bbox
+        midlon = (minlon + maxlon) / 2.0
+        midlat = (minlat + maxlat) / 2.0
+        children = [
+            (minlon, minlat, midlon, midlat),
+            (midlon, minlat, maxlon, midlat),
+            (minlon, midlat, midlon, maxlat),
+            (midlon, midlat, maxlon, maxlat),
+        ]
+        print(
+            f"  overpass tile failed, splitting into {len(children)} sub-tiles",
+            flush=True,
+        )
+        elements: list[dict[str, Any]] = []
+        for child in children:
+            elements.extend(_fetch_tile(child, cache_dir, force, depth + 1))
+        return elements
+
+
 def fetch(config: AppConfig, force: bool = False) -> dict[str, Path]:
     ensure_dirs()
     bbox = config.context_bbox
-    bbox_str = f"{bbox[1]:.6f},{bbox[0]:.6f},{bbox[3]:.6f},{bbox[2]:.6f}"
     out_dir = RAW_DIR / "osm"
     out_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir = out_dir / "tiles"
+    cache_dir.mkdir(parents=True, exist_ok=True)
     raw_path = out_dir / "osm_raw.json"
     buildings_path = out_dir / "buildings.geojson"
     roads_path = out_dir / "roads.geojson"
@@ -156,8 +239,23 @@ def fetch(config: AppConfig, force: bool = False) -> dict[str, Path]:
     if raw_path.exists() and not force:
         payload = json.loads(raw_path.read_text(encoding="utf-8"))
     else:
-        query = QUERY_TEMPLATE.format(bbox=bbox_str, timeout=240)
-        payload = _download(query, timeout_s=360)
+        tiling = config.tiling
+        tiles = _tile_bboxes(
+            bbox,
+            float(tiling.get("osm_tile_size_m", 2000)),
+            float(tiling.get("osm_tile_overlap_m", 150)),
+        )
+        print(f"fetching OSM in {len(tiles)} tiles", flush=True)
+        combined: dict[tuple[str, int], dict[str, Any]] = {}
+        for index, tile in enumerate(tiles, start=1):
+            print(f"  OSM tile {index}/{len(tiles)} {tile}", flush=True)
+            for element in _fetch_tile(tile, cache_dir, force):
+                osm_type = str(element.get("type") or "")
+                osm_id = int(element.get("id") or 0)
+                if not osm_type or not osm_id:
+                    continue
+                combined.setdefault((osm_type, osm_id), element)
+        payload = {"elements": list(combined.values())}
         raw_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 
     buildings: list[dict[str, Any]] = []

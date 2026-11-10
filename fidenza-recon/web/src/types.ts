@@ -14,6 +14,20 @@ export interface CityMeta {
   pilot_bbox_local: [number, number, number, number];
   origin_ground_elevation_m: number;
   lod_distances_m: { lod0: number; lod1: number; lod2: number; lod3: number };
+  chunk_size_m?: number;
+  parent_chunk_size_m?: number;
+  detail_radius_m?: { high: number; medium: number; low: number };
+  max_detail_chunks?: { desktop: number; mobile: number };
+}
+
+export interface District {
+  id: string;
+  name: string;
+  color: string;
+  description: string;
+  lon: number;
+  lat: number;
+  local: Vec2;
 }
 
 export interface Terrain {
@@ -118,7 +132,7 @@ export interface Side {
   road_name: string | null;
   road_class: string | null;
   main_facade: boolean;
-  layout: SideLayout;
+  layout?: SideLayout;
 }
 
 export interface Roof {
@@ -143,6 +157,9 @@ export interface Building {
   id: string;
   osm_id: string;
   detail: 'pilot' | 'context';
+  district_id?: string | null;
+  chunk?: string | null;
+  parent_chunk?: string | null;
   name: string | null;
   archetype: string;
   style_label: string | null;
@@ -228,6 +245,75 @@ export interface Stats {
   archetypes: Record<string, number>;
   roof_shapes: Record<string, number>;
   height_confidence_median: number;
+  districts?: Record<string, number>;
+  detail_chunks?: number;
+}
+
+export interface ChunkEntry {
+  key: string;
+  url: string;
+  parent: string;
+  bbox_local: [number, number, number, number];
+  count: number;
+}
+
+export interface ParentChunkEntry {
+  key: string;
+  bbox_local: [number, number, number, number];
+  chunks: string[];
+}
+
+export interface Manifest {
+  meta: CityMeta;
+  stats: Stats;
+  districts: District[];
+  files: {
+    world: string;
+    massing: string;
+    landmarks: string;
+    detail_dir: string;
+    fallback: string;
+  };
+  chunks: Record<string, ChunkEntry>;
+  parents: Record<string, ParentChunkEntry>;
+  coverage: CityData['coverage'];
+  licenses: CityData['licenses'];
+  limits: string[];
+}
+
+export interface WorldPayload {
+  terrain: Terrain;
+  ground: Ground;
+  roads: Road[];
+  plazas: Plaza[];
+  props: Prop[];
+}
+
+export interface MassingPayload {
+  buildings: Building[];
+}
+
+export interface LandmarksPayload {
+  landmarks: {
+    id: string;
+    name: string;
+    kind: string;
+    osm_id: string;
+    local: Vec2;
+    lon: number;
+    lat: number;
+    height_m: number | null;
+    tier: string | null;
+    archetype: string | null;
+  }[];
+}
+
+export interface DetailChunkPayload {
+  key: string;
+  parent: string;
+  size_m: number;
+  bbox_local: [number, number, number, number];
+  buildings: Building[];
 }
 
 export interface CityData {
@@ -238,11 +324,13 @@ export interface CityData {
   roads: Road[];
   plazas: Plaza[];
   props: Prop[];
+  districts?: District[];
   stats: Stats;
   coverage: {
     street_level: {
       source: string;
       photo_count: number;
+      photo_count_nearby?: number;
       points_with_photos: number;
       available: boolean;
     };

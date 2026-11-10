@@ -72,35 +72,37 @@ function wallGeometry(building: Building, side: Side): THREE.BufferGeometry | nu
   shape.closePath();
 
   const layout = side.layout;
-  for (const window of layout.windows) {
-    addHole(shape, {
-      u: window.u,
-      v: window.v,
-      width: window.width,
-      height: window.height,
-      arched: window.type === 'arched',
-    });
-  }
-  for (const door of layout.doors) {
-    addHole(shape, {
-      u: door.u,
-      v: door.v,
-      width: door.width,
-      height: door.height,
-      arched: door.type === 'archway' || door.type === 'portal',
-    });
-  }
-  for (const shopfront of layout.shopfronts) {
-    addHole(shape, {
-      u: shopfront.u,
-      v: shopfront.v,
-      width: shopfront.width,
-      height: shopfront.height,
-      arched: false,
-    });
+  if (layout) {
+    for (const window of layout.windows) {
+      addHole(shape, {
+        u: window.u,
+        v: window.v,
+        width: window.width,
+        height: window.height,
+        arched: window.type === 'arched',
+      });
+    }
+    for (const door of layout.doors) {
+      addHole(shape, {
+        u: door.u,
+        v: door.v,
+        width: door.width,
+        height: door.height,
+        arched: door.type === 'archway' || door.type === 'portal',
+      });
+    }
+    for (const shopfront of layout.shopfronts) {
+      addHole(shape, {
+        u: shopfront.u,
+        v: shopfront.v,
+        width: shopfront.width,
+        height: shopfront.height,
+        arched: false,
+      });
+    }
   }
   if (
-    layout.ornaments.includes('rose_window') &&
+    layout?.ornaments.includes('rose_window') &&
     side.main_facade &&
     building.archetype === 'romanesque_church'
   ) {
@@ -309,6 +311,7 @@ function windowDetails(
   seed: number,
 ): void {
   const layout = side.layout;
+  if (!layout) return;
   const shuttersColour = ['#3f5a46', '#5b3a28', '#6d7068', '#2f4b52'][seed % 4];
   for (const window of layout.windows) {
     const isBay = window.type === 'bay';

@@ -68,8 +68,14 @@ try {
   };
 
   await page.goto(url, { waitUntil: 'networkidle' });
-  await page.waitForSelector('.loading.done', { timeout: 120000 });
+  await page.waitForFunction(
+    () => document.querySelector('.loading')?.classList.contains('done'),
+    null,
+    { timeout: 120000 },
+  );
   await sleep(1800);
+  await page.locator('[data-view="duomo"]').click();
+  await sleep(1600);
   await page.screenshot({ path: resolve(output, '01-duomo.png') });
   await readStats('duomo');
 

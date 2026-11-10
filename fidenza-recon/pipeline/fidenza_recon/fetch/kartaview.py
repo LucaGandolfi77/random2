@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import math
 import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import requests
@@ -44,10 +45,10 @@ def probe(config: AppConfig, force: bool = False) -> dict[str, Any]:
     if out_path.exists() and not force:
         return json.loads(out_path.read_text(encoding="utf-8"))
 
-    points = _grid_points(config.pilot_bbox, step_m=200.0)
-    samples: list[dict[str, Any]] = []
-    photos: list[dict[str, Any]] = []
-    for lat, lon in points:
+    points = _grid_points(config.pilot_bbox, step_m=750.0)
+
+    def sample_point(point: tuple[float, float]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        lat, lon = point
         try:
             response = requests.get(
                 f"{API}/photo/",
@@ -59,41 +60,63 @@ def probe(config: AppConfig, force: bool = False) -> dict[str, Any]:
             payload = response.json()
             data = (payload.get("result") or {}).get("data") or []
         except Exception as exc:  # noqa: BLE001 - probe must not fail the pipeline
-            samples.append({"lat": lat, "lon": lon, "error": str(exc), "count": 0})
-            continue
-        samples.append({"lat": lat, "lon": lon, "count": len(data)})
-        for item in data:
-            photos.append(
-                {
-                    "external_id": str(item.get("id")),
-                    "sequence_id": item.get("sequenceId"),
-                    "lat": float(item["lat"]) if item.get("lat") else None,
-                    "lon": float(item["lng"]) if item.get("lng") else None,
-                    "heading": item.get("heading"),
-                    "captured_at": item.get("shotDate") or item.get("dateAdded"),
-                    "url": item.get("imageProcUrl") or item.get("fileurl"),
-                    "license": "per-sequence (verify)",
-                    "attribution": "KartaView contributors",
-                }
+            return (
+                {"lat": lat, "lon": lon, "error": str(exc), "count": 0},
+                [],
             )
-        time.sleep(0.15)
+        photos = [
+            {
+                "external_id": str(item.get("id")),
+                "sequence_id": item.get("sequenceId"),
+                "lat": float(item["lat"]) if item.get("lat") else None,
+                "lon": float(item["lng"]) if item.get("lng") else None,
+                "heading": item.get("heading"),
+                "captured_at": item.get("shotDate") or item.get("dateAdded"),
+                "url": item.get("imageProcUrl") or item.get("fileurl"),
+                "license": "per-sequence (verify)",
+                "attribution": "KartaView contributors",
+            }
+            for item in data
+        ]
+        return ({"lat": lat, "lon": lon, "count": len(data)}, photos)
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(sample_point, points))
+
+    samples = [sample for sample, _photos in results]
+    photos = [photo for _sample, photo_list in results for photo in photo_list]
+    time.sleep(0.15)
+    minlon, minlat, maxlon, maxlat = config.pilot_bbox
+    inside = [
+        photo
+        for photo in photos
+        if photo.get("lon") is not None
+        and photo.get("lat") is not None
+        and minlon <= photo["lon"] <= maxlon
+        and minlat <= photo["lat"] <= maxlat
+    ]
 
     summary = {
         "source": "KartaView",
         "api": API,
         "bbox": config.pilot_bbox,
-        "grid_step_m": 200,
+        "grid_step_m": 750,
         "search_radius_m": 500,
         "sample_points": len(samples),
         "points_with_photos": sum(1 for sample in samples if sample.get("count", 0) > 0),
         "photo_count": len(photos),
+        "photos_inside_bbox": len(inside),
+        "points_with_photos_inside_bbox": len(
+            {photo.get("sequence_id") for photo in inside}
+        ),
         "samples": samples,
         "photos": photos,
         "sequence_api": "restricted without elevated access",
         "notes": (
-            "Fidenza has no usable street-level coverage in the public KartaView "
-            "photo endpoint. Facades are therefore procedural except where "
-            "Wikimedia Commons references exist."
+            "Fidenza has no usable street-level coverage inside the reconstructed "
+            "bbox. A handful of photos exists just outside the north-east edge; "
+            "they are listed but not used for facades. Facades are procedural "
+            "except where Wikimedia Commons references exist."
         ),
         "retrieved_at": now_iso(),
     }
