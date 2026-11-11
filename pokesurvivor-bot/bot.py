@@ -93,6 +93,18 @@ SNAPSHOT_SCRIPT = r"""
   // `G` is a global lexical binding in some published builds and a window
   // property in others.  Both forms are read-only from this script.
   const root = typeof G !== "undefined" ? G : (window.G || window.__PS_BOT_G);
+  // The game stores move names in Spanish and renders them in the player's
+  // locale, so the slot-1 upgrade card only matches after the same lookup the
+  // game itself uses. `T` is one of the few stable root properties.
+  const translateMove = value => {
+    const text = String(value || "");
+    if (!text || !root || typeof root.T !== "function") return text;
+    try {
+      return String(root.T(text, "move"));
+    } catch (error) {
+      return text;
+    }
+  };
   // Recent builds obfuscate the module namespace keys (Game, World, EnemyMgr,
   // ...), so locate each module by the shape of its public API instead of a
   // fixed property name. Readable legacy names stay as the first choice.
@@ -153,13 +165,13 @@ SNAPSHOT_SCRIPT = r"""
     if (move) {
       // Try multiple property names for move identification
       const name = move.name || move.id || move.moveName || move.skillId || move.displayName || move.key || move.species || "";
-      if (name) slotOneMove = String(name);
+      if (name) slotOneMove = translateMove(name);
     }
   }
   const attackMoves = player && Array.isArray(player.moves)
     ? player.moves
         .filter(move => move && move.kind !== "buff")
-        .map(move => String(move.name || move.id || move.moveName || move.skillId || move.displayName || move.key || move.species || ""))
+        .map(move => translateMove(move.name || move.id || move.moveName || move.skillId || move.displayName || move.key || move.species || ""))
         .filter(Boolean)
     : [];
   const enemies = enemyMgr && typeof enemyMgr.all === "function"
@@ -240,11 +252,9 @@ def patch_game_bundle(body: bytes) -> tuple[bytes, bool]:
       capture the root object before the game boots;
     * current builds never call boot from a named property, but they still
       create the root object with `Object.create(null)` and immediately start
-      assigning properties to it. That marker property is itself obfuscated
-      in newer builds, so the anchor only relies on the creation call followed
-      by an assignment on the same object.
-
-    Both forms are detected without depending on one generated identifier.
+      assigning properties to it. Both the property access and the marker
+      property are obfuscated in newer builds, so the anchor only relies on
+      the creation call followed by an assignment on the same object.
     """
 
     if b"window.__PS_BOT_G=" in body:
@@ -259,14 +269,15 @@ def patch_game_bundle(body: bytes) -> tuple[bytes, bool]:
         replacement = b"window.__PS_BOT_G=" + root + b"," + match.group(0)
         return body[: match.start()] + replacement + body[match.end() :], True
 
-    # Current builds: `var <root> = Object['create'](null); <root>[...]=...`
-    # Insert the global assignment *after* the object exists, otherwise the
-    # hoisted variable would still be undefined at that point. The property
-    # that follows is obfuscated, so only require any assignment on <root>.
+    # Current builds: `var <root> = Object['create'](null); <root>[...]=...`.
+    # `'create'` itself can be hidden behind the string decoder, hence the
+    # generic bracket expression. Insert the global assignment *after* the
+    # object exists, otherwise the hoisted variable would still be undefined
+    # at that point.
     root_object = re.compile(
         rb"(?P<root>[A-Za-z_$][A-Za-z0-9_$]*)"
-        rb"=Object\[(['\"])create\2\]\(null\)"
-        rb"(?=;(?P=root)\[)"
+        rb"=Object(?:\[[^\]]{1,80}\]|\.create)\(null\)"
+        rb"(?=;\s*(?P=root)\s*[\[.])"
     )
     match = root_object.search(body)
     if not match:
@@ -298,8 +309,9 @@ def _card_score(
         score += 1000
     if preferred_attack and _normalize(preferred_attack) in normalized:
         # The first slot is the bot's main attack. Its upgrades should win over
-        # generic stats and over upgrades for later attacks.
-        score += 850
+        # generic stats, over upgrades for later attacks, and over evolutions
+        # of other moves.
+        score += 1200
     elif any(_normalize(name) in normalized for name in attack_moves):
         score += 420
     if "new" in normalized or "nuevo" in normalized or "learn" in normalized or "aprende" in normalized:
@@ -321,6 +333,33 @@ def _card_score(
     if "heal" in normalized or "baya" in normalized:
         score += 35
     return score
+
+
+def _first_move_index(
+    texts: list[str],
+    scores: list[int],
+    preferred_attack: str | None,
+) -> int | None:
+    """Return the card that upgrades the slot-one move, if the screen has one.
+
+    The game renders move cards as `Move name <level chip>`, so the card's
+    first line starts with the move name (an evolution card starts with the
+    current name too). When such a card exists it must win regardless of any
+    other score, because slot 1 is the attack the bot always keeps active.
+    """
+
+    if not preferred_attack:
+        return None
+    needle = _normalize(preferred_attack)
+    matching = []
+    for index, text in enumerate(texts):
+        lines = text.splitlines()
+        title = _normalize(lines[0]) if lines else ""
+        if title.startswith(needle):
+            matching.append(index)
+    if not matching:
+        return None
+    return max(matching, key=lambda index: (scores[index], -index))
 
 
 class BotError(RuntimeError):
@@ -372,6 +411,33 @@ class PokéSurvivorBot:
 
         await self._wait_visible("#scr-menu")
         await self._dismiss_recovery_prompt()
+        await self._dismiss_video_prompt()
+
+    async def _dismiss_video_prompt(self) -> bool:
+        """Dismiss the optional "new video" promo shown on the main menu.
+
+        The game checks for the promo every couple of seconds while the menu
+        is open, so it can appear right before a Play or Save click and block
+        it. "Ahora no" (#video-close) closes it without opening YouTube.
+        Returns True when the prompt was visible and got dismissed.
+        """
+
+        if not await self._visible("#scr-video"):
+            return False
+        selector = None
+        deadline = time.monotonic() + 5.0
+        while time.monotonic() < deadline:
+            if await self._visible("#video-close"):
+                selector = "#video-close"
+                break
+            await asyncio.sleep(0.10)
+        if selector is None:
+            LOGGER.warning("video prompt visible but no close button found; leaving it alone")
+            return False
+        LOGGER.info("dismissing the channel-video prompt")
+        await self.frame.locator(selector).click()
+        await self._wait_hidden("#scr-video", timeout_ms=5_000)
+        return True
 
     async def _dismiss_recovery_prompt(self) -> bool:
         """Permanently dismiss the optional email-link prompt after login.
@@ -456,10 +522,21 @@ class PokéSurvivorBot:
 
     async def _start_run(self) -> None:
         await self._wait_visible("#scr-menu")
-        # The recovery prompt can reappear between runs (e.g. right after a
-        # cloud save); it overlays the menu and would block the play click.
+        # The recovery and video prompts can reappear between runs (e.g. right
+        # after a cloud save); they overlay the menu and block the play click.
         await self._dismiss_recovery_prompt()
-        await self.frame.locator('#scr-menu [data-go="play"]').click()
+        await self._dismiss_video_prompt()
+        play = self.frame.locator('#scr-menu [data-go="play"]')
+        for attempt in range(3):
+            try:
+                await play.click(timeout=5_000)
+                break
+            except Exception:
+                if attempt == 2:
+                    raise
+                LOGGER.info("play click was blocked; dismissing menu prompts and retrying")
+                await self._dismiss_recovery_prompt()
+                await self._dismiss_video_prompt()
         await self._wait_hidden("#scr-menu")
         self.strategy.reset()
         self._orb_pending.clear()
@@ -611,10 +688,20 @@ class PokéSurvivorBot:
             return
 
         previous = await self._toast_text()
-        try:
-            await self.frame.locator(SAVE_BUTTON_SELECTOR).click(timeout=5_000)
-        except Exception as exc:
-            LOGGER.warning("run %d: could not press the save button: %s", run_number, exc)
+        save = self.frame.locator(SAVE_BUTTON_SELECTOR)
+        clicked = False
+        for attempt in range(2):
+            await self._dismiss_video_prompt()
+            try:
+                await save.click(timeout=5_000)
+                clicked = True
+                break
+            except Exception:
+                if attempt == 1:
+                    break
+                LOGGER.info("save click was blocked; dismissing menu prompts and retrying")
+        if not clicked:
+            LOGGER.warning("run %d: could not press the save button", run_number)
             return
 
         LOGGER.info("run %d: pressed the save button", run_number)
@@ -627,6 +714,9 @@ class PokéSurvivorBot:
             # Only claim the overlay when a known dismissal button exists,
             # otherwise fall through so the run loop keeps making progress.
             if await self._dismiss_recovery_prompt():
+                return True
+        if await self._visible("#scr-video"):
+            if await self._dismiss_video_prompt():
                 return True
         if await self._visible("#scr-levelup"):
             await self._choose_level_up()
@@ -673,13 +763,16 @@ class PokéSurvivorBot:
             scores.append(score)
             first_line = text.splitlines()[0]
             LOGGER.debug("level-up card %d/%d score=%d evo=%s: %s", index + 1, count, score, is_evo, first_line)
-        index = max(range(count), key=lambda candidate: (scores[candidate], -candidate))
+        index = _first_move_index(texts, scores, preferred_attack)
+        slot_one_priority = index is not None
+        if index is None:
+            index = max(range(count), key=lambda candidate: (scores[candidate], -candidate))
         LOGGER.info(
             "choosing level-up card %d/%d: %s%s",
             index + 1,
             count,
             texts[index].splitlines()[0],
-            " (slot 1 priority)" if preferred_attack and preferred_attack.lower() in texts[index].lower() else "",
+            " (slot 1 priority)" if slot_one_priority else "",
         )
         await self._wait_for_cards("#cards")
         await cards.nth(index).click()
@@ -756,17 +849,25 @@ class PokéSurvivorBot:
         if await self._visible("#scr-over"):
             await self.frame.locator("#btn-again").click()
         await self._wait_visible("#scr-menu")
-        # Same overlay that can block the play click can also block the
+        # Same overlays that can block the play click can also block the
         # top-bar save button right after a run.
         await self._dismiss_recovery_prompt()
+        await self._dismiss_video_prompt()
 
     async def _focus_game(self) -> None:
+        """Give the game frame keyboard focus without clicking the canvas.
+
+        A pointer click in the middle of the canvas is unreliable: the game
+        can open an overlay (level-up, item, bond) right after a card choice,
+        and that overlay intercepts the click until Playwright times out. A
+        programmatic focus on the canvas cannot be blocked by overlays.
+        """
+
         canvas = self.frame.locator("#game")
         await canvas.wait_for(state="visible", timeout=self.config.timeout_ms)
-        box = await canvas.bounding_box()
-        if not box:
-            raise BotError("game canvas has no visible bounds")
-        await canvas.click(position={"x": box["width"] / 2, "y": box["height"] / 2})
+        await canvas.evaluate(
+            "el => { el.tabIndex = -1; el.focus({ preventScroll: true }); }"
+        )
 
     async def _set_keys(self, desired: frozenset[str]) -> None:
         for key in sorted(self.held_keys - set(desired)):
@@ -920,11 +1021,14 @@ async def run_bot(config: BotConfig) -> None:
         page = await context.new_page()
         page.on("pageerror", lambda error: LOGGER.warning("page error: %s", error))
 
+        probe = {"installed": False}
+
         async def expose_game_object(route: Any) -> None:
             response = await route.fetch()
             body = await response.body()
             body, installed = patch_game_bundle(body)
             if installed:
+                probe["installed"] = True
                 LOGGER.debug("installed the read-only game-state probe")
             else:
                 LOGGER.warning("could not find the current game bundle probe anchor")
@@ -938,6 +1042,11 @@ async def run_bot(config: BotConfig) -> None:
 
         await page.route("**/js/app.min.js*", expose_game_object)
         await page.goto(config.url, wait_until="domcontentloaded", timeout=config.timeout_ms)
+        if not probe["installed"]:
+            raise BotError(
+                "could not install the read-only game-state probe; "
+                "the published game bundle changed"
+            )
         frame = await _find_game_frame(page, config.timeout_ms)
         bot = PokéSurvivorBot(config, page, frame)
         try:

@@ -13,7 +13,7 @@ Il workflow `.github/workflows/pages.yml`:
 
 - esclude i sorgenti di sviluppo (`tools/`);
 - esclude il save Minecraft `assets/ArnisWorld3/` (circa 575 MB);
-- pubblica `data/arnis/` con superficie e materiali derivati;
+- pubblica `data/arnis/` con i materiali derivati, `data/ground/` con l'ortofoto RER e `data/ground/tiles/` con le 441 tessere da 0,5 m;
 - genera `fidenza-city-v3/build-info.json` con commit e data di build;
 - sostituisce l’ID cache del service worker con lo SHA del commit.
 
@@ -58,6 +58,7 @@ può essere fatto manualmente.
 - `sw.js` ha una cache versionata; in build l’ID viene sostituito con lo SHA.
 - `build-info.json` contiene versione, commit e data di build.
 - Dopo un deploy, il gioco mostra il pulsante di aggiornamento PWA.
+- Il prefetch delle tessere usa una cache dedicata (`fidenza-ground-tiles-v1`); la cache shell è `v3.3.0`.
 - L’editor non registra un service worker: un hard reload è sufficiente per
   aggiornare l’interfaccia.
 

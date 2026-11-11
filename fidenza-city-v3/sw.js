@@ -1,4 +1,5 @@
-const CACHE = 'fidenza-da-giocare-v3.1.0';
+const CACHE = 'fidenza-da-giocare-v3.3.0';
+const TILE_CACHE = 'fidenza-ground-tiles-v1';
 const ASSETS = [
   './',
   './index.html',
@@ -39,6 +40,9 @@ const ASSETS = [
   './js/postfx.js',
   './js/block-palette.js',
   './js/block-textures.js',
+  './js/ground-textures.js',
+  './js/ground-cache.js',
+  './js/ground-tiles.js',
   './js/mc-blocks.js',
   './js/voxel-details.js',
   './js/transit.js',
@@ -65,10 +69,13 @@ const ASSETS = [
   './data/terrain.json',
   './data/map.json',
   './data/arnis/arnis.json',
-  './data/arnis/surface.json',
-  './data/arnis/surface.png',
-  './data/arnis/surface-z1.png',
-  './data/arnis/surface-z2.png',
+  './data/ground/ground.json',
+  './data/ground/ortho-z0.jpg',
+  './data/ground/ortho-z1.jpg',
+  './data/ground/ortho-z2.jpg',
+  './data/ground/ortho-center-z0.jpg',
+  './data/ground/ortho-center-z1.jpg',
+  './data/ground/tiles/manifest.json',
   './data/styles/spring.json',
   './data/styles/summer.json',
   './data/styles/autumn.json',
@@ -92,7 +99,10 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => {
+        const keep = new Set([CACHE, TILE_CACHE]);
+        return Promise.all(keys.filter(k => !keep.has(k)).map(k => caches.delete(k)));
+      })
       .then(() => self.clients.claim())
   );
 });
@@ -102,6 +112,30 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+
+  // Le tessere del suolo vivono in una cache dedicata, senza limite: il
+  // prefetch completo del gioco le scarica tutte per l'uso offline.
+  if (url.pathname.includes('/data/ground/tiles/')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(TILE_CACHE);
+      let hit = await cache.match(req);
+      if (!hit && url.pathname.endsWith('/data/ground/tiles/manifest.json')) {
+        // Il manifest è già nel precache shell: rendilo disponibile anche
+        // prima che il prefetch completo delle tessere sia partito.
+        hit = await caches.match(req);
+        if (hit) cache.put(req, hit.clone()).catch(() => {});
+      }
+      if (hit) return hit;
+      try {
+        const res = await fetch(req);
+        if (res.ok) cache.put(req, res.clone()).catch(() => {});
+        return res;
+      } catch {
+        return new Response('', { status: 504 });
+      }
+    })());
+    return;
+  }
 
   const dynamicData = url.pathname.endsWith('/data/map.json') || url.pathname.includes('/data/styles/');
   if (dynamicData) {

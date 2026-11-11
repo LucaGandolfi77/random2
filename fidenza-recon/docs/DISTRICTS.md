@@ -1,21 +1,21 @@
 # Quartieri
 
-Generated: 2026-11-10T13:56:19+00:00
+Generated: 2026-11-10T18:33:49+00:00
 
 Il quartiere è assegnato al centroide dell'edificio; è un'informazione
 descrittiva, non un confine amministrativo.
 
 | Quartiere | Edifici | Pilot LOD3 | Altezza media (m) | Landmark | Archetipo principale |
 | --- | --- | --- | --- | --- | --- |
-| Centro | 895 | 892 | 12.9 | 6 | historic_townhouse: 398 |
-| Monica | 269 | 235 | 9.7 | 1 | historic_townhouse: 114 |
-| San Lazzaro | 302 | 302 | 12.4 | 2 | post_war_apartment: 170 |
-| Le Azalee | 657 | 616 | 9.4 | 0 | post_war_apartment: 232 |
-| Corea | 722 | 705 | 10.5 | 1 | post_war_apartment: 365 |
-| Luce | 1118 | 1024 | 9.7 | 3 | post_war_apartment: 476 |
-| Coduro | 622 | 386 | 8.5 | 0 | generic: 431 |
+| Centro | 0 | 0 | — | 0 | — |
+| Monica | 0 | 0 | — | 0 | — |
+| San Lazzaro | 0 | 0 | — | 0 | — |
+| Le Azalee | 0 | 0 | — | 0 | — |
+| Corea | 0 | 0 | — | 0 | — |
+| Luce | 0 | 0 | — | 0 | — |
+| Coduro | 0 | 0 | — | 0 | — |
 
-Chunk di dettaglio generati: **864**.
+Chunk di dettaglio generati: **13**.
 
 ## Descrizioni
 

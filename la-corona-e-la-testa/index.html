@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b111c" />
+    <meta
+      name="description"
+      content="LA CORONA E LA TESTA — Una passione cefalofora in sei atti. Cortometraggio animato low-poly sulla vita di San Donnino."
+    />
+    <title>LA CORONA E LA TESTA — Una passione cefalofora in sei atti</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23140d0a'/%3E%3Cpath d='M18 20l7 6 7-8 7 8 7-6-3 14H21z' fill='%23d9a441'/%3E%3Ccircle cx='32' cy='43' r='10' fill='%23f3e6cf'/%3E%3Cpath d='M26 46c2 3 10 3 12 0' fill='none' stroke='%237a2f2a' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="stage" aria-hidden="true">
+        <canvas id="film-canvas"></canvas>
+      </div>
+
+      <div id="vignette" aria-hidden="true"></div>
+      <div id="grain" aria-hidden="true"></div>
+      <div class="letterbox letterbox--top" aria-hidden="true"></div>
+      <div class="letterbox letterbox--bottom" aria-hidden="true"></div>
+
+      <div id="act-title" class="act-title" aria-hidden="true">
+        <span class="act-title__kicker"></span>
+        <span class="act-title__title"></span>
+      </div>
+
+      <div
+        id="subtitles"
+        class="subtitles"
+        role="region"
+        aria-live="polite"
+        aria-label="Sottotitoli"
+      >
+        <div class="subtitles__inner">
+          <span class="subtitles__speaker"></span>
+          <span class="subtitles__text"></span>
+        </div>
+      </div>
+
+      <div id="fade" class="fade" aria-hidden="true"></div>
+
+      <section id="menu" class="menu" aria-label="Menu principale">
+        <div class="menu__veil" aria-hidden="true"></div>
+        <div class="menu__grain" aria-hidden="true"></div>
+        <div class="menu__content">
+          <p class="menu__over">Cortometraggio animato low-poly</p>
+          <h1 class="menu__title">
+            <span class="menu__title-line">LA CORONA</span>
+            <span class="menu__title-line menu__title-line--big">E LA TESTA</span>
+          </h1>
+          <p class="menu__subtitle">Una passione cefalofora in sei atti.</p>
+          <div class="menu__rule" aria-hidden="true"></div>
+          <p class="menu__meta">Sei atti · Fidenza, 293 d.C. · 8 minuti circa</p>
+          <div class="menu__actions">
+            <button id="btn-watch" class="btn btn--primary" type="button">
+              <span>Guarda il film</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 4.5v15l13-7.5z" fill="currentColor" />
+              </svg>
+            </button>
+            <button id="btn-resume" class="btn btn--ghost" type="button" hidden>
+              Riprendi
+            </button>
+          </div>
+          <div class="menu__secondary">
+            <button id="btn-menu-settings" class="linkbtn" type="button">
+              Impostazioni
+            </button>
+            <span class="menu__dot" aria-hidden="true"></span>
+            <span id="menu-progress" class="menu__progress"></span>
+          </div>
+        </div>
+        <footer class="menu__footer">
+          <p>Scritto, animato e sonorizzato proceduralmente.</p>
+          <p class="menu__footer-note">La leggenda di San Donnino · voci sintetiche del browser</p>
+        </footer>
+      </section>
+
+      <div id="loading" class="loading" role="status" aria-live="polite">
+        <div class="loading__inner">
+          <p class="loading__kicker">LA CORONA E LA TESTA</p>
+          <p class="loading__label">Preparazione della scena</p>
+          <div class="loading__bar"><span id="loading-fill"></span></div>
+          <p id="loading-status" class="loading__status">Costruzione del diorama…</p>
+        </div>
+      </div>
+
+      <section id="hud" class="hud" aria-label="Controlli del film">
+        <div class="hud__vignette" aria-hidden="true"></div>
+        <header class="hud__top">
+          <div class="hud__brand">
+            <span class="hud__brand-mark" aria-hidden="true"></span>
+            <span>LA CORONA E LA TESTA</span>
+          </div>
+          <div class="hud__top-actions">
+            <button class="hud__textbtn" data-action="cinema" type="button">
+              Cinema
+            </button>
+            <button class="hud__textbtn" data-action="menu" type="button">
+              Menu
+            </button>
+          </div>
+        </header>
+
+        <div class="hud__bottom">
+          <div class="hud__progress">
+            <div id="chapter-marks" class="hud__chapters" aria-hidden="true"></div>
+            <input
+              id="timeline"
+              class="hud__range"
+              type="range"
+              min="0"
+              max="1000"
+              step="1"
+              value="0"
+              aria-label="Posizione nel film"
+            />
+          </div>
+
+          <div class="hud__controls">
+            <div class="hud__group">
+              <button
+                class="iconbtn"
+                data-action="prev-act"
+                type="button"
+                aria-label="Atto precedente"
+                title="Atto precedente"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 5h2v14H6zM19 5v14L9 12z" fill="currentColor" />
+                </svg>
+              </button>
+              <button
+                id="btn-play"
+                class="iconbtn iconbtn--play"
+                data-action="play"
+                type="button"
+                aria-label="Riproduci"
+                title="Riproduci / Pausa"
+              >
+                <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" fill="currentColor" />
+                </svg>
+                <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" />
+                </svg>
+              </button>
+              <button
+                class="iconbtn"
+                data-action="next-act"
+                type="button"
+                aria-label="Atto successivo"
+                title="Atto successivo"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M16 5h2v14h-2zM5 5v14l10-7z" fill="currentColor" />
+                </svg>
+              </button>
+              <button
+                class="iconbtn"
+                data-action="restart"
+                type="button"
+                aria-label="Ricomincia"
+                title="Ricomincia"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 5a7 7 0 1 1-6.6 4.7l1.9.7A5 5 0 1 0 12 7v3L7.5 6 12 2v3z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div class="hud__time" aria-label="Tempo">
+              <span id="time-current">00:00</span>
+              <span class="hud__time-sep">/</span>
+              <span id="time-total">00:00</span>
+            </div>
+
+            <div class="hud__group hud__group--right">
+              <button
+                id="btn-cc"
+                class="chipbtn"
+                data-action="cc"
+                type="button"
+                aria-label="Sottotitoli"
+                aria-pressed="true"
+                title="Sottotitoli (C)"
+              >
+                CC
+              </button>
+              <button
+                id="btn-voices"
+                class="chipbtn"
+                data-action="voices"
+                type="button"
+                aria-label="Voci"
+                aria-pressed="true"
+                title="Voci sintetiche (V)"
+              >
+                Voci
+              </button>
+              <div class="volume">
+                <button
+                  id="btn-mute"
+                  class="iconbtn iconbtn--small"
+                  data-action="mute"
+                  type="button"
+                  aria-label="Disattiva audio"
+                  title="Muto (M)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor" />
+                    <path
+                      d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </button>
+                <input
+                  id="volume"
+                  class="hud__range hud__range--volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="80"
+                  aria-label="Volume"
+                />
+              </div>
+              <label class="speed">
+                <span class="sr-only">Velocità</span>
+                <select id="speed-select" aria-label="Velocità di riproduzione">
+                  <option value="0.75">0.75×</option>
+                  <option value="1" selected>1×</option>
+                  <option value="1.25">1.25×</option>
+                  <option value="1.5">1.5×</option>
+                </select>
+              </label>
+              <button
+                class="iconbtn iconbtn--small"
+                data-action="settings"
+                type="button"
+                aria-label="Impostazioni"
+                title="Impostazioni"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4 7h10M18 7h2M4 17h2M10 17h10M4 12h16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                  />
+                  <circle cx="16" cy="7" r="2.2" fill="var(--ink, #0b111c)" stroke="currentColor" stroke-width="1.7" />
+                  <circle cx="8" cy="17" r="2.2" fill="var(--ink, #0b111c)" stroke="currentColor" stroke-width="1.7" />
+                </svg>
+              </button>
+              <button
+                class="iconbtn iconbtn--small"
+                data-action="fullscreen"
+                type="button"
+                aria-label="Schermo intero"
+                title="Schermo intero (F)"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside id="settings-panel" class="panel" aria-label="Impostazioni" hidden>
+        <div class="panel__head">
+          <h2>Impostazioni</h2>
+          <button id="btn-close-settings" class="iconbtn iconbtn--small" type="button" aria-label="Chiudi impostazioni">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="panel__body">
+          <label class="field">
+            <span class="field__label">Qualità grafica</span>
+            <select id="quality-select">
+              <option value="auto" selected>Automatica</option>
+              <option value="high">Alta</option>
+              <option value="low">Bassa</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field__label">Dimensione sottotitoli</span>
+            <select id="subtitle-size">
+              <option value="small">Piccola</option>
+              <option value="medium" selected>Media</option>
+              <option value="large">Grande</option>
+            </select>
+          </label>
+          <label class="switch">
+            <span>Sottotitoli</span>
+            <input id="toggle-subtitles" type="checkbox" checked />
+            <span class="switch__track" aria-hidden="true"></span>
+          </label>
+          <label class="switch">
+            <span>Voci sintetiche</span>
+            <input id="toggle-voices" type="checkbox" checked />
+            <span class="switch__track" aria-hidden="true"></span>
+          </label>
+          <label class="switch">
+            <span>Modalità cinema</span>
+            <input id="toggle-cinema" type="checkbox" />
+            <span class="switch__track" aria-hidden="true"></span>
+          </label>
+          <div class="panel__actions">
+            <button id="btn-download-srt" class="btn btn--small btn--ghost" type="button">
+              Scarica sottotitoli .srt
+            </button>
+            <button id="btn-panel-menu" class="btn btn--small btn--ghost" type="button">
+              Torna al menu
+            </button>
+          </div>
+          <p id="voice-status" class="panel__note"></p>
+        </div>
+      </aside>
+
+      <section id="end-card" class="end-card" hidden aria-label="Fine del film">
+        <div class="end-card__inner">
+          <p class="end-card__over">Fine</p>
+          <h2 class="end-card__title">LA CORONA E LA TESTA</h2>
+          <p class="end-card__sub">Una passione cefalofora in sei atti.</p>
+          <p class="end-card__quote">«La testa è questa. Il corpo, dove lo lasciate?»</p>
+          <div class="end-card__actions">
+            <button id="btn-replay" class="btn btn--primary" type="button">Rivedi il film</button>
+            <button id="btn-end-menu" class="btn btn--ghost" type="button">Torna al menu</button>
+          </div>
+          <p class="end-card__credit">Ispirato alla Passio di San Donnino e alla facciata del Duomo di Fidenza · Three.js</p>
+        </div>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      <div id="cinema-hint" class="cinema-hint" aria-hidden="true">
+        Muovi il mouse per i controlli · Esc per uscire
+      </div>
+    </div>
+
+    <noscript>
+      <div class="noscript">
+        <p>LA CORONA E LA TESTA richiede JavaScript e WebGL per essere proiettato.</p>
+      </div>
+    </noscript>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

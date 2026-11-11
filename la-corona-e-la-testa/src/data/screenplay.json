@@ -1,0 +1,2311 @@
+{
+  "title": "LA CORONA E LA TESTA",
+  "subtitle": "Una passione cefalofora in sei atti",
+  "acts": [
+    {
+      "id": "atto1",
+      "number": "ATTO I",
+      "title": "LA CORONA",
+      "scene": "court",
+      "beats": [
+        {
+          "id": "a1_01_establishing",
+          "camera": "court_est",
+          "duration": 4,
+          "sfx": [
+            {
+              "at": 1.2,
+              "name": "fire",
+              "gain": 0.5
+            }
+          ]
+        },
+        {
+          "id": "a1_02_ingresso",
+          "camera": "court_wide",
+          "duration": 9,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "walk",
+              "from": "court_enter",
+              "to": "court_donnino",
+              "duration": 7
+            },
+            {
+              "at": 0,
+              "character": "massimiano",
+              "action": "idle",
+              "mark": "court_throne",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "cortigiano",
+              "action": "idle",
+              "mark": "court_cortigiano",
+              "face": "massimiano"
+            },
+            {
+              "at": 0,
+              "character": "guardia1",
+              "action": "idle",
+              "mark": "court_guard1",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "guardia2",
+              "action": "idle",
+              "mark": "court_guard2",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.4,
+              "name": "gate",
+              "gain": 0.5
+            },
+            {
+              "at": 6.8,
+              "name": "chain",
+              "gain": 0.35
+            }
+          ]
+        },
+        {
+          "id": "a1_03_corona",
+          "camera": "court_crown_close",
+          "dialogueDelay": 1.2,
+          "dialogue": [
+            {
+              "speaker": "MASSIMIANO",
+              "text": "Donnino. La corona.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Eccola, Augusto.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "MASSIMIANO",
+              "text": "Oggi condanno uomini. Tu tieni la corona.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "La corona pesa, Augusto.",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "MASSIMIANO",
+              "text": "E gli uomini?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Gli uomini pesano di più.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0.2,
+              "character": "donnino",
+              "action": "crown",
+              "duration": 4,
+              "mark": "court_donnino",
+              "face": "massimiano"
+            },
+            {
+              "at": 0,
+              "character": "massimiano",
+              "action": "idle",
+              "mark": "court_throne",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "cortigiano",
+              "action": "idle",
+              "mark": "court_cortigiano",
+              "face": "massimiano"
+            }
+          ]
+        },
+        {
+          "id": "a1_04_prigionieri",
+          "camera": "court_prisoners",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "GUARDIA",
+              "text": "I cristiani, Augusto.",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "MASSIMIANO",
+              "text": "Sacrificano o muoiono.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "CRISTIANO",
+              "text": "Non sacrifico.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "MASSIMIANO",
+              "text": "Donnino, tu che dici?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Che non è giusto.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "MASSIMIANO",
+              "text": "Non ti ho chiesto se è giusto.",
+              "pauseAfter": 1.0
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "cristiano",
+              "action": "kneel",
+              "mark": "court_cristiano",
+              "face": "massimiano"
+            },
+            {
+              "at": 0.5,
+              "character": "guardia1",
+              "action": "bind",
+              "mark": "court_guard1",
+              "face": "cristiano"
+            },
+            {
+              "at": 2.2,
+              "character": "guardia2",
+              "action": "point",
+              "duration": 2,
+              "face": "cristiano"
+            },
+            {
+              "at": 0,
+              "character": "massimiano",
+              "action": "idle",
+              "mark": "court_throne",
+              "face": "cristiano"
+            },
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "court_donnino",
+              "face": "massimiano"
+            },
+            {
+              "at": 0,
+              "character": "cortigiano",
+              "action": "idle",
+              "mark": "court_cortigiano",
+              "face": "cristiano"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.8,
+              "name": "chain",
+              "gain": 0.45
+            }
+          ]
+        },
+        {
+          "id": "a1_05_confessione",
+          "camera": "court_two",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "MASSIMIANO",
+              "text": "Sei cristiano?",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Adesso sì.",
+              "pauseAfter": 2.0
+            },
+            {
+              "speaker": "MASSIMIANO",
+              "text": "Deponi la corona.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "La depongo.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "court_donnino",
+              "face": "massimiano"
+            },
+            {
+              "at": 3.4,
+              "character": "donnino",
+              "action": "crown",
+              "duration": 3,
+              "face": "massimiano"
+            },
+            {
+              "at": 1.6,
+              "character": "massimiano",
+              "action": "point",
+              "duration": 2.4,
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "cristiano",
+              "action": "kneel",
+              "mark": "court_cristiano",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "guardia1",
+              "action": "bind",
+              "mark": "court_guard1",
+              "face": "cristiano"
+            },
+            {
+              "at": 0,
+              "character": "guardia2",
+              "action": "idle",
+              "mark": "court_guard2",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "cortigiano",
+              "action": "idle",
+              "mark": "court_cortigiano",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 8.4,
+              "name": "crown_set",
+              "gain": 0.55
+            }
+          ]
+        },
+        {
+          "id": "a1_06_uscita",
+          "camera": "court_exit",
+          "duration": 8,
+          "actions": [
+            {
+              "at": 0.4,
+              "character": "donnino",
+              "action": "walk",
+              "from": "court_donnino",
+              "to": "court_exit",
+              "duration": 6.6
+            },
+            {
+              "at": 0,
+              "character": "massimiano",
+              "action": "idle",
+              "mark": "court_throne",
+              "face": "court_exit"
+            },
+            {
+              "at": 0,
+              "character": "cristiano",
+              "action": "kneel",
+              "mark": "court_cristiano",
+              "face": "court_exit"
+            },
+            {
+              "at": 0,
+              "character": "guardia1",
+              "action": "bind",
+              "mark": "court_guard1",
+              "face": "cristiano"
+            },
+            {
+              "at": 0,
+              "character": "guardia2",
+              "action": "idle",
+              "mark": "court_guard2",
+              "face": "court_exit"
+            },
+            {
+              "at": 0,
+              "character": "cortigiano",
+              "action": "cover_face",
+              "duration": 3.4
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.5,
+              "name": "chain",
+              "gain": 0.35
+            },
+            {
+              "at": 5.8,
+              "name": "gate",
+              "gain": 0.55
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto2",
+      "number": "ATTO II",
+      "title": "LE VIE CONSOLARI",
+      "scene": "crossroads",
+      "beats": [
+        {
+          "id": "a2_01_establishing",
+          "camera": "crossroads_est",
+          "duration": 4,
+          "sfx": [
+            {
+              "at": 0.8,
+              "name": "rain",
+              "gain": 0.45
+            },
+            {
+              "at": 2.2,
+              "name": "thunder",
+              "gain": 0.35
+            },
+            {
+              "at": 3.1,
+              "name": "wind_gust",
+              "gain": 0.3
+            }
+          ]
+        },
+        {
+          "id": "a2_02_arrivo",
+          "camera": "crossroads_walk",
+          "duration": 7,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "walk",
+              "from": "cross_enter",
+              "to": "cross_center",
+              "duration": 6.2
+            },
+            {
+              "at": 0,
+              "character": "oste",
+              "action": "idle",
+              "mark": "cross_oste",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 5.2,
+              "name": "rain",
+              "gain": 0.25
+            }
+          ]
+        },
+        {
+          "id": "a2_03_dialogo",
+          "camera": "cross_two",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "OSTE",
+              "text": "Cerchi Roma?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Cerco un posto dove non si adori nessuno.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "OSTE",
+              "text": "Allora hai sbagliato strada.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Perché?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "OSTE",
+              "text": "Roma è piena di dei.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Anche il mio è romano. È nato in una provincia.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "cross_center",
+              "face": "oste"
+            },
+            {
+              "at": 0,
+              "character": "oste",
+              "action": "idle",
+              "mark": "cross_oste",
+              "face": "donnino"
+            },
+            {
+              "at": 0.4,
+              "character": "donnino",
+              "action": "shiver",
+              "duration": 4
+            }
+          ]
+        },
+        {
+          "id": "a2_04_pattuglia",
+          "camera": "cross_road",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "CENTURIONE",
+              "text": "Chi va là?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "OSTE",
+              "text": "Un mercante.",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "CENTURIONE",
+              "text": "Cosa vende?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "OSTE",
+              "text": "Corone.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "CENTURIONE",
+              "text": "Le corone si comprano solo da un padrone.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Infatti non vendo più.",
+              "pauseAfter": 0.9
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "centurione",
+              "action": "show",
+              "mark": "cross_soldier_enter",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "soldato",
+              "action": "show",
+              "mark": "cross_soldier_enter2",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "centurione",
+              "action": "walk",
+              "from": "cross_soldier_enter",
+              "to": "cross_soldier",
+              "duration": 4.6
+            },
+            {
+              "at": 0.1,
+              "character": "soldato",
+              "action": "walk",
+              "from": "cross_soldier_enter2",
+              "to": "cross_soldier2",
+              "duration": 4.8
+            },
+            {
+              "at": 0,
+              "character": "oste",
+              "action": "idle",
+              "mark": "cross_oste",
+              "face": "centurione"
+            },
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "cross_center",
+              "face": "centurione"
+            },
+            {
+              "at": 7.8,
+              "character": "donnino",
+              "action": "cover_face",
+              "duration": 3
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.5,
+              "name": "horse",
+              "gain": 0.4
+            },
+            {
+              "at": 1.2,
+              "name": "horn",
+              "gain": 0.25
+            }
+          ]
+        },
+        {
+          "id": "a2_05_partenza",
+          "camera": "cross_road",
+          "duration": 6,
+          "actions": [
+            {
+              "at": 0,
+              "character": "centurione",
+              "action": "walk",
+              "from": "cross_soldier",
+              "to": "cross_exit",
+              "duration": 5
+            },
+            {
+              "at": 0.1,
+              "character": "soldato",
+              "action": "walk",
+              "from": "cross_soldier2",
+              "to": "cross_exit2",
+              "duration": 5.2
+            },
+            {
+              "at": 0,
+              "character": "oste",
+              "action": "idle",
+              "mark": "cross_oste",
+              "face": "cross_exit"
+            },
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "cross_center",
+              "face": "oste"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 3.2,
+              "name": "rain",
+              "gain": 0.2
+            }
+          ]
+        },
+        {
+          "id": "a2_06_scelta",
+          "camera": "cross_choose",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "OSTE",
+              "text": "La Via Claudia porta a Parma.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Cosa c'è a Parma?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "OSTE",
+              "text": "Una strada più stretta.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Allora è la mia.",
+              "pauseAfter": 1.0
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "cross_center",
+              "face": "oste"
+            },
+            {
+              "at": 0,
+              "character": "oste",
+              "action": "idle",
+              "mark": "cross_oste",
+              "face": "donnino"
+            },
+            {
+              "at": 2.4,
+              "character": "oste",
+              "action": "point",
+              "duration": 2.6,
+              "face": "cross_via"
+            },
+            {
+              "at": 6.2,
+              "character": "donnino",
+              "action": "walk",
+              "from": "cross_center",
+              "to": "cross_via",
+              "duration": 3.2
+            }
+          ]
+        },
+        {
+          "id": "a2_07_uscita",
+          "camera": "cross_exit",
+          "duration": 5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "walk",
+              "from": "cross_via",
+              "to": "cross_exit",
+              "duration": 4.4
+            },
+            {
+              "at": 0,
+              "character": "oste",
+              "action": "idle",
+              "mark": "cross_oste",
+              "face": "cross_exit"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 4.2,
+              "name": "wind_gust",
+              "gain": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto3",
+      "number": "ATTO III",
+      "title": "LA VIA EMILIA",
+      "scene": "viaEmilia",
+      "beats": [
+        {
+          "id": "a3_01_establishing",
+          "camera": "via_est",
+          "duration": 4,
+          "sfx": [
+            {
+              "at": 0.9,
+              "name": "wind_gust",
+              "gain": 0.35
+            }
+          ]
+        },
+        {
+          "id": "a3_02_cammino",
+          "camera": "via_walk",
+          "duration": 9,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "walk",
+              "from": "via_enter",
+              "to": "via_milestone",
+              "duration": 8
+            },
+            {
+              "at": 0,
+              "character": "contadino",
+              "action": "idle",
+              "mark": "via_farm",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "sit",
+              "mark": "via_child",
+              "face": "via_farm"
+            },
+            {
+              "at": 0,
+              "character": "cane",
+              "action": "idle",
+              "mark": "via_dog",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 5.2,
+              "name": "dog_growl",
+              "gain": 0.4
+            },
+            {
+              "at": 6.4,
+              "name": "wind_gust",
+              "gain": 0.2
+            }
+          ]
+        },
+        {
+          "id": "a3_03_bambino",
+          "camera": "via_farm",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "CONTADINO",
+              "text": "Fermati.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Non posso.",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "CONTADINO",
+              "text": "Il bambino ha la febbre.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Non sono un medico.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "CONTADINO",
+              "text": "Allora sei un uomo.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Questo sì.",
+              "pauseAfter": 1.0
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "walk",
+              "from": "via_milestone",
+              "to": "via_child",
+              "duration": 3
+            },
+            {
+              "at": 4.4,
+              "character": "donnino",
+              "action": "kneel",
+              "mark": "via_child",
+              "face": "bambino"
+            },
+            {
+              "at": 7.2,
+              "character": "donnino",
+              "action": "bless",
+              "duration": 3.2,
+              "face": "bambino"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "sit",
+              "mark": "via_child",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "contadino",
+              "action": "idle",
+              "mark": "via_farm",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "cane",
+              "action": "idle",
+              "mark": "via_dog",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 3.6,
+              "name": "cloth",
+              "gain": 0.3
+            }
+          ]
+        },
+        {
+          "id": "a3_04_cane",
+          "camera": "via_dog",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "BAMBINO",
+              "text": "Il cane ha paura.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Anch'io.",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "BAMBINO",
+              "text": "Di cosa?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Di non avere più tempo.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Il cane sente la febbre. Non la mia.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "kneel",
+              "mark": "via_child",
+              "face": "cane"
+            },
+            {
+              "at": 0.8,
+              "character": "cane",
+              "action": "bark",
+              "duration": 2.2,
+              "face": "donnino"
+            },
+            {
+              "at": 4.2,
+              "character": "cane",
+              "action": "idle",
+              "mark": "via_dog",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "cover_face",
+              "duration": 3.4
+            },
+            {
+              "at": 0,
+              "character": "contadino",
+              "action": "idle",
+              "mark": "via_farm",
+              "face": "cane"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 1.1,
+              "name": "dog_growl",
+              "gain": 0.5
+            },
+            {
+              "at": 4.2,
+              "name": "dog_calm",
+              "gain": 0.4
+            }
+          ]
+        },
+        {
+          "id": "a3_05_pattuglia",
+          "camera": "via_road",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "SOLDATO",
+              "text": "Ehi, tu.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Sì?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "SOLDATO",
+              "text": "Dove vai?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Dove il mio corpo non è più utile.",
+              "pauseAfter": 0.9
+            },
+            {
+              "speaker": "SOLDATO",
+              "text": "Non capisco.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Neanch'io. Ma vado.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "soldato",
+              "action": "show",
+              "mark": "via_soldier_enter",
+              "face": "donnino"
+            },
+            {
+              "at": 0.1,
+              "character": "soldato",
+              "action": "walk",
+              "from": "via_soldier_enter",
+              "to": "via_soldier",
+              "duration": 4.6
+            },
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "stand",
+              "mark": "via_child",
+              "face": "soldato"
+            },
+            {
+              "at": 0,
+              "character": "contadino",
+              "action": "cover_face",
+              "duration": 4.2
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "sit",
+              "mark": "via_child",
+              "face": "soldato"
+            },
+            {
+              "at": 0,
+              "character": "cane",
+              "action": "idle",
+              "mark": "via_dog",
+              "face": "soldato"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.4,
+              "name": "horn",
+              "gain": 0.3
+            },
+            {
+              "at": 2.8,
+              "name": "horse",
+              "gain": 0.3
+            }
+          ]
+        },
+        {
+          "id": "a3_06_miliario",
+          "camera": "via_milestone",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "DONNINO",
+              "text": "Quanto manca a Parma?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "CONTADINO",
+              "text": "Quindici miglia.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "E allo Stirone?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "CONTADINO",
+              "text": "Meno.",
+              "pauseAfter": 1.0
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "via_child",
+              "face": "contadino"
+            },
+            {
+              "at": 0,
+              "character": "contadino",
+              "action": "idle",
+              "mark": "via_farm",
+              "face": "donnino"
+            },
+            {
+              "at": 3.2,
+              "character": "contadino",
+              "action": "point",
+              "duration": 2.4,
+              "face": "via_far"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "sit",
+              "mark": "via_child",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "cane",
+              "action": "idle",
+              "mark": "via_dog",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.5,
+              "name": "horn",
+              "gain": 0.18
+            }
+          ]
+        },
+        {
+          "id": "a3_07_addio",
+          "camera": "via_farewell",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "BAMBINO",
+              "text": "Tornerai?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Qualcuno tornerà.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "BAMBINO",
+              "text": "Chi?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Non lo so ancora.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "raise_hand",
+              "duration": 2.8,
+              "face": "donnino"
+            },
+            {
+              "at": 3.8,
+              "character": "donnino",
+              "action": "bless",
+              "duration": 3.2,
+              "face": "bambino"
+            },
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "via_child",
+              "face": "bambino"
+            },
+            {
+              "at": 0,
+              "character": "contadino",
+              "action": "idle",
+              "mark": "via_farm",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "cane",
+              "action": "idle",
+              "mark": "via_dog",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 5.2,
+              "name": "wind_gust",
+              "gain": 0.25
+            }
+          ]
+        },
+        {
+          "id": "a3_08_uscita",
+          "camera": "via_exit",
+          "duration": 7,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "walk",
+              "from": "via_child",
+              "to": "via_exit",
+              "duration": 6.4
+            },
+            {
+              "at": 0,
+              "character": "contadino",
+              "action": "idle",
+              "mark": "via_farm",
+              "face": "via_exit"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "raise_hand",
+              "duration": 2.2,
+              "face": "via_exit"
+            },
+            {
+              "at": 0,
+              "character": "cane",
+              "action": "idle",
+              "mark": "via_dog",
+              "face": "via_exit"
+            },
+            {
+              "at": 0,
+              "character": "soldato",
+              "action": "idle",
+              "mark": "via_soldier",
+              "face": "via_exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto4",
+      "number": "ATTO IV",
+      "title": "LO STIRONE",
+      "scene": "stirone",
+      "beats": [
+        {
+          "id": "a4_01_establishing",
+          "camera": "stirone_est",
+          "duration": 4,
+          "sfx": [
+            {
+              "at": 0.6,
+              "name": "water_cross",
+              "gain": 0.18
+            },
+            {
+              "at": 1.6,
+              "name": "raven",
+              "gain": 0.4
+            },
+            {
+              "at": 2.8,
+              "name": "wind_gust",
+              "gain": 0.35
+            }
+          ]
+        },
+        {
+          "id": "a4_02_arrivo",
+          "camera": "stirone_walk",
+          "duration": 8,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "walk",
+              "from": "stirone_enter",
+              "to": "stirone_bank",
+              "duration": 7
+            },
+            {
+              "at": 0,
+              "character": "centurione",
+              "action": "idle",
+              "mark": "stirone_centurione",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "soldato",
+              "action": "idle",
+              "mark": "stirone_soldier",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "carnefice",
+              "action": "idle",
+              "mark": "stirone_carnefice",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 5.4,
+              "name": "raven",
+              "gain": 0.25
+            }
+          ]
+        },
+        {
+          "id": "a4_03_dialogo",
+          "camera": "stirone_two",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "CENTURIONE",
+              "text": "Donnino.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Centurione.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "CENTURIONE",
+              "text": "Ho ordini.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Anch'io.",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "CENTURIONE",
+              "text": "Quali?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Quelli che non si vedono.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "CENTURIONE",
+              "text": "Sacrifica. È solo un gesto.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "È solo una testa.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "CENTURIONE",
+              "text": "Non è la stessa cosa.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Lo so. Per questo non la do.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "stirone_bank",
+              "face": "centurione"
+            },
+            {
+              "at": 0,
+              "character": "centurione",
+              "action": "idle",
+              "mark": "stirone_centurione",
+              "face": "donnino"
+            },
+            {
+              "at": 7.4,
+              "character": "centurione",
+              "action": "point",
+              "duration": 2.6,
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "soldato",
+              "action": "idle",
+              "mark": "stirone_soldier",
+              "face": "donnino"
+            },
+            {
+              "at": 0,
+              "character": "carnefice",
+              "action": "idle",
+              "mark": "stirone_carnefice",
+              "face": "donnino"
+            }
+          ]
+        },
+        {
+          "id": "a4_04_perdono",
+          "camera": "stirone_close",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "CARNEFICE",
+              "text": "Chiudi gli occhi.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Li ho già chiusi.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "CARNEFICE",
+              "text": "Perché?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Per non vedervi mentre lo fate.",
+              "pauseAfter": 1.2
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Non guardate.",
+              "pauseAfter": 0.8
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "idle",
+              "mark": "stirone_bank",
+              "face": "carnefice"
+            },
+            {
+              "at": 3.2,
+              "character": "donnino",
+              "action": "kneel",
+              "mark": "stirone_bank",
+              "face": "carnefice"
+            },
+            {
+              "at": 3.8,
+              "character": "carnefice",
+              "action": "raise_arms",
+              "duration": 2.4,
+              "face": "donnino"
+            },
+            {
+              "at": 4.4,
+              "character": "soldato",
+              "action": "cover_face",
+              "duration": 3
+            },
+            {
+              "at": 4.4,
+              "character": "centurione",
+              "action": "look",
+              "duration": 3,
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 2.4,
+              "name": "cloth",
+              "gain": 0.3
+            }
+          ]
+        },
+        {
+          "id": "a4_05_colpo",
+          "camera": "stirone_river",
+          "duration": 7,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "kneel",
+              "mark": "stirone_bank",
+              "face": "stirone_river"
+            },
+            {
+              "at": 0.8,
+              "character": "carnefice",
+              "action": "strike",
+              "duration": 1.8,
+              "face": "donnino"
+            },
+            {
+              "at": 1.2,
+              "character": "soldato",
+              "action": "cover_face",
+              "duration": 3
+            },
+            {
+              "at": 1.2,
+              "character": "centurione",
+              "action": "cover_face",
+              "duration": 3
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.9,
+              "name": "axe",
+              "gain": 0.8
+            },
+            {
+              "at": 2.3,
+              "name": "body_fall",
+              "gain": 0.6
+            },
+            {
+              "at": 3.4,
+              "name": "raven",
+              "gain": 0.45
+            },
+            {
+              "at": 4.2,
+              "name": "wind_gust",
+              "gain": 0.4
+            }
+          ]
+        },
+        {
+          "id": "a4_06_silenzio",
+          "camera": "stirone_river",
+          "duration": 10,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "lie_headless",
+              "mark": "stirone_body",
+              "face": "camera"
+            },
+            {
+              "at": 0,
+              "character": "centurione",
+              "action": "hide"
+            },
+            {
+              "at": 0,
+              "character": "soldato",
+              "action": "hide"
+            },
+            {
+              "at": 0,
+              "character": "carnefice",
+              "action": "hide"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.4,
+              "name": "water_cross",
+              "gain": 0.2
+            },
+            {
+              "at": 4.2,
+              "name": "wind_gust",
+              "gain": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto5",
+      "number": "ATTO V",
+      "title": "IL MIRACOLO",
+      "scene": "stironeDawn",
+      "beats": [
+        {
+          "id": "a5_01_establishing",
+          "camera": "dawn_est",
+          "duration": 5,
+          "sfx": [
+            {
+              "at": 1.2,
+              "name": "water_cross",
+              "gain": 0.2
+            },
+            {
+              "at": 3.2,
+              "name": "bell_church",
+              "gain": 0.2
+            }
+          ]
+        },
+        {
+          "id": "a5_02_vedova",
+          "camera": "dawn_witness",
+          "duration": 7,
+          "actions": [
+            {
+              "at": 0,
+              "character": "vedova",
+              "action": "walk",
+              "from": "dawn_enter",
+              "to": "dawn_vedova",
+              "duration": 6
+            },
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "lie_headless",
+              "mark": "dawn_body",
+              "face": "camera"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 4.4,
+              "name": "raven",
+              "gain": 0.25
+            }
+          ]
+        },
+        {
+          "id": "a5_03_risveglio",
+          "camera": "dawn_body",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "VEDOVA",
+              "text": "Non è possibile.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Non lo so.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "VEDOVA",
+              "text": "Sei morto.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Forse.",
+              "pauseAfter": 1.0
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "lie_headless",
+              "mark": "dawn_body",
+              "face": "vedova"
+            },
+            {
+              "at": 2.6,
+              "character": "donnino",
+              "action": "carry_head",
+              "mark": "dawn_body",
+              "face": "vedova"
+            },
+            {
+              "at": 2.8,
+              "character": "vedova",
+              "action": "cover_face",
+              "duration": 3.2,
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 2.2,
+              "name": "cloth",
+              "gain": 0.4
+            },
+            {
+              "at": 2.6,
+              "name": "breath",
+              "gain": 0.35
+            }
+          ]
+        },
+        {
+          "id": "a5_04_cammina",
+          "camera": "dawn_walk",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "VEDOVA",
+              "text": "Non puoi camminare.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Sto camminando.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "VEDOVA",
+              "text": "Sei senza testa.",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Ho trovato quella giusta.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "VEDOVA",
+              "text": "Dove vai?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "DONNINO",
+              "text": "Dove ero già.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0.4,
+              "character": "donnino",
+              "action": "carry_head",
+              "from": "dawn_body",
+              "to": "dawn_spot",
+              "duration": 7.2
+            },
+            {
+              "at": 0,
+              "character": "vedova",
+              "action": "witness",
+              "mark": "dawn_vedova",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 0.6,
+              "name": "water_cross",
+              "gain": 0.2
+            }
+          ]
+        },
+        {
+          "id": "a5_05_traghetto",
+          "camera": "dawn_cross",
+          "duration": 9,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "carry_head",
+              "from": "dawn_spot",
+              "to": "dawn_far",
+              "duration": 8
+            },
+            {
+              "at": 0,
+              "character": "vedova",
+              "action": "witness",
+              "mark": "dawn_vedova",
+              "face": "donnino"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 3.0,
+              "name": "water_cross",
+              "gain": 0.4
+            },
+            {
+              "at": 6.4,
+              "name": "bell_church",
+              "gain": 0.25
+            }
+          ]
+        },
+        {
+          "id": "a5_06_deposizione",
+          "camera": "dawn_lie",
+          "duration": 9,
+          "actions": [
+            {
+              "at": 0,
+              "character": "donnino",
+              "action": "lie",
+              "mark": "dawn_grave",
+              "face": "camera"
+            },
+            {
+              "at": 1.2,
+              "character": "vedova",
+              "action": "kneel",
+              "mark": "dawn_vedova_grave",
+              "face": "dawn_grave"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 2.2,
+              "name": "wind_gust",
+              "gain": 0.3
+            },
+            {
+              "at": 5.2,
+              "name": "bell_church",
+              "gain": 0.35
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto6",
+      "number": "ATTO VI",
+      "title": "LA CITTÀ",
+      "scene": "fidenza",
+      "beats": [
+        {
+          "id": "a6_01_establishing",
+          "camera": "fidenza_est",
+          "duration": 5,
+          "sfx": [
+            {
+              "at": 0.8,
+              "name": "hammer_stone",
+              "gain": 0.45
+            },
+            {
+              "at": 2.2,
+              "name": "chisel",
+              "gain": 0.35
+            },
+            {
+              "at": 3.4,
+              "name": "crowd_prayer",
+              "gain": 0.25
+            }
+          ]
+        },
+        {
+          "id": "a6_02_cantiere",
+          "camera": "fidenza_wide",
+          "duration": 8,
+          "actions": [
+            {
+              "at": 0,
+              "character": "maestro",
+              "action": "idle",
+              "mark": "fidenza_master",
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 0,
+              "character": "apprendista",
+              "action": "idle",
+              "mark": "fidenza_apprentice",
+              "face": "maestro"
+            },
+            {
+              "at": 0,
+              "character": "pellegrino",
+              "action": "idle",
+              "mark": "fidenza_pellegrino",
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "idle",
+              "mark": "fidenza_child",
+              "face": "fidenza_facade"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 2.0,
+              "name": "hammer_stone",
+              "gain": 0.35
+            },
+            {
+              "at": 4.0,
+              "name": "chisel",
+              "gain": 0.3
+            }
+          ]
+        },
+        {
+          "id": "a6_03_dialogo",
+          "camera": "fidenza_two",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "APPRENDISTA",
+              "text": "Maestro, perché il santo porta la testa in mano?",
+              "pauseAfter": 1.2
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "Perché il corpo non sapeva dove andare.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "APPRENDISTA",
+              "text": "E la testa?",
+              "pauseAfter": 0.5
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "La testa sì.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "APPRENDISTA",
+              "text": "È una storia vera?",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "È una storia scolpita. Basta che qualcuno la guardi.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "maestro",
+              "action": "idle",
+              "mark": "fidenza_master",
+              "face": "apprendista"
+            },
+            {
+              "at": 0,
+              "character": "apprendista",
+              "action": "idle",
+              "mark": "fidenza_apprentice",
+              "face": "maestro"
+            },
+            {
+              "at": 0.5,
+              "character": "maestro",
+              "action": "point",
+              "duration": 3.2,
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 4.0,
+              "character": "apprendista",
+              "action": "look",
+              "duration": 3.2,
+              "face": "fidenza_facade"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 2.0,
+              "name": "chisel",
+              "gain": 0.3
+            }
+          ]
+        },
+        {
+          "id": "a6_04_pellegrino",
+          "camera": "fidenza_pilgrim",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "PELLEGRINO",
+              "text": "Maestro, è vero che guarisce dal morso dei cani?",
+              "pauseAfter": 1.2
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "Guarisce da quello che morde dentro.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "PELLEGRINO",
+              "text": "E dai morsi veri?",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "Per quelli ci sono i medici.",
+              "pauseAfter": 1.0
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "pellegrino",
+              "action": "kneel",
+              "mark": "fidenza_pellegrino",
+              "face": "maestro"
+            },
+            {
+              "at": 0,
+              "character": "maestro",
+              "action": "idle",
+              "mark": "fidenza_master",
+              "face": "pellegrino"
+            },
+            {
+              "at": 4.4,
+              "character": "maestro",
+              "action": "bless",
+              "duration": 3.2,
+              "face": "pellegrino"
+            },
+            {
+              "at": 0,
+              "character": "apprendista",
+              "action": "idle",
+              "mark": "fidenza_apprentice",
+              "face": "pellegrino"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "idle",
+              "mark": "fidenza_child",
+              "face": "pellegrino"
+            }
+          ]
+        },
+        {
+          "id": "a6_05_bambino",
+          "camera": "fidenza_child",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            {
+              "speaker": "BAMBINO",
+              "text": "Maestro, dov'è adesso?",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "Sotto i nostri piedi.",
+              "pauseAfter": 0.7
+            },
+            {
+              "speaker": "BAMBINO",
+              "text": "E sopra?",
+              "pauseAfter": 0.4
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "Sopra le nostre teste.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "idle",
+              "mark": "fidenza_child",
+              "face": "maestro"
+            },
+            {
+              "at": 0,
+              "character": "maestro",
+              "action": "idle",
+              "mark": "fidenza_master",
+              "face": "bambino"
+            },
+            {
+              "at": 0.5,
+              "character": "bambino",
+              "action": "point",
+              "duration": 2.2,
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 3.0,
+              "character": "maestro",
+              "action": "raise_hand",
+              "duration": 3.2,
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 0,
+              "character": "apprendista",
+              "action": "idle",
+              "mark": "fidenza_apprentice",
+              "face": "maestro"
+            },
+            {
+              "at": 0,
+              "character": "pellegrino",
+              "action": "idle",
+              "mark": "fidenza_pellegrino",
+              "face": "maestro"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 4.8,
+              "name": "bell_church",
+              "gain": 0.3
+            }
+          ]
+        },
+        {
+          "id": "a6_06_facciata",
+          "camera": "fidenza_facade",
+          "duration": 7,
+          "actions": [
+            {
+              "at": 0,
+              "character": "maestro",
+              "action": "idle",
+              "mark": "fidenza_master",
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 0,
+              "character": "apprendista",
+              "action": "idle",
+              "mark": "fidenza_apprentice",
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 0,
+              "character": "pellegrino",
+              "action": "idle",
+              "mark": "fidenza_pellegrino",
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "idle",
+              "mark": "fidenza_child",
+              "face": "fidenza_facade"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 1.2,
+              "name": "hammer_stone",
+              "gain": 0.35
+            },
+            {
+              "at": 3.4,
+              "name": "chisel",
+              "gain": 0.3
+            },
+            {
+              "at": 5.2,
+              "name": "crowd_prayer",
+              "gain": 0.25
+            }
+          ]
+        },
+        {
+          "id": "a6_07_ultima_pietra",
+          "camera": "fidenza_facade",
+          "dialogueDelay": 1.0,
+          "dialogue": [
+            {
+              "speaker": "MAESTRO",
+              "text": "Una testa sola non basta.",
+              "pauseAfter": 0.8
+            },
+            {
+              "speaker": "APPRENDISTA",
+              "text": "Quante ne servono?",
+              "pauseAfter": 0.6
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "Una per chi guarda.",
+              "pauseAfter": 1.2
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "maestro",
+              "action": "idle",
+              "mark": "fidenza_master",
+              "face": "apprendista"
+            },
+            {
+              "at": 0,
+              "character": "apprendista",
+              "action": "idle",
+              "mark": "fidenza_apprentice",
+              "face": "maestro"
+            },
+            {
+              "at": 0,
+              "character": "pellegrino",
+              "action": "idle",
+              "mark": "fidenza_pellegrino",
+              "face": "fidenza_facade"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "idle",
+              "mark": "fidenza_child",
+              "face": "fidenza_facade"
+            }
+          ]
+        },
+        {
+          "id": "a6_08_silenzio",
+          "camera": "fidenza_statue",
+          "duration": 15,
+          "actions": [
+            {
+              "at": 0,
+              "character": "maestro",
+              "action": "hide"
+            },
+            {
+              "at": 0,
+              "character": "apprendista",
+              "action": "hide"
+            },
+            {
+              "at": 0,
+              "character": "pellegrino",
+              "action": "hide"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "hide"
+            }
+          ],
+          "sfx": [
+            {
+              "at": 2.0,
+              "name": "wind_gust",
+              "gain": 0.22
+            },
+            {
+              "at": 6.0,
+              "name": "bell_church",
+              "gain": 0.2
+            }
+          ]
+        },
+        {
+          "id": "a6_09_sguardo",
+          "camera": "fidenza_statue",
+          "dialogueDelay": 3.6,
+          "dialogue": [
+            {
+              "speaker": "MAESTRO",
+              "text": "La testa è questa.",
+              "pauseAfter": 1.2
+            },
+            {
+              "speaker": "MAESTRO",
+              "text": "Il corpo, dove lo lasciate?",
+              "pauseAfter": 2.0
+            }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "maestro",
+              "action": "turn_camera",
+              "duration": 8,
+              "mark": "fidenza_master"
+            },
+            {
+              "at": 0,
+              "character": "apprendista",
+              "action": "idle",
+              "mark": "fidenza_apprentice",
+              "face": "fidenza_statue"
+            },
+            {
+              "at": 0,
+              "character": "pellegrino",
+              "action": "idle",
+              "mark": "fidenza_pellegrino",
+              "face": "fidenza_statue"
+            },
+            {
+              "at": 0,
+              "character": "bambino",
+              "action": "idle",
+              "mark": "fidenza_child",
+              "face": "fidenza_statue"
+            }
+          ]
+        },
+        {
+          "id": "a6_10_fine",
+          "camera": "fidenza_statue",
+          "duration": 3
+        }
+      ]
+    }
+  ]
+}

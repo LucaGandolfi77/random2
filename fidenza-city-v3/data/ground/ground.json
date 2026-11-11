@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "origin": {
+    "lat": 44.8665,
+    "lon": 10.0612
+  },
+  "license": "CC BY 4.0 \u2014 Regione Emilia-Romagna (RER 2023-24 orthophoto)",
+  "attribution": "Ortofoto RER 2023-24 \u2014 Regione Emilia-Romagna, CC BY 4.0 (ricampionata e color graded)",
+  "base": {
+    "bounds": {
+      "minX": -1830.4519027783128,
+      "maxX": 3692.5172675798226,
+      "minZ": -2017.0052525425658,
+      "maxZ": 3572.7292002424047
+    },
+    "sourceBoundsWgs84": [
+      10.037999862244664,
+      44.83435148111937,
+      10.108000961632358,
+      44.88464963514148
+    ],
+    "levels": [
+      {
+        "id": "z0",
+        "src": "ortho-z0.jpg",
+        "width": 4096,
+        "height": 4146,
+        "metersPerPixel": 1.348
+      },
+      {
+        "id": "z1",
+        "src": "ortho-z1.jpg",
+        "width": 2048,
+        "height": 2073,
+        "metersPerPixel": 2.697
+      },
+      {
+        "id": "z2",
+        "src": "ortho-z2.jpg",
+        "width": 1024,
+        "height": 1036,
+        "metersPerPixel": 5.394
+      }
+    ]
+  },
+  "tiles": {
+    "manifest": "tiles/manifest.json",
+    "level": "05",
+    "tilePixels": 512,
+    "borderPixels": 4,
+    "imagePixels": 520,
+    "metersPerPixel": 0.5,
+    "tileMeters": 256.0,
+    "bounds": {
+      "minX": -1766.4519027783128,
+      "minZ": -1953.0052525425658,
+      "maxX": 3609.5480972216874,
+      "maxZ": 3422.994747457434
+    },
+    "grid": {
+      "cols": 21,
+      "rows": 21
+    },
+    "count": 441,
+    "totalBytes": 30797021,
+    "precache": [
+      "05/4_6.jpg",
+      "05/5_6.jpg",
+      "05/6_6.jpg",
+      "05/4_7.jpg",
+      "05/5_7.jpg",
+      "05/6_7.jpg",
+      "05/4_8.jpg",
+      "05/5_8.jpg",
+      "05/6_8.jpg"
+    ]
+  },
+  "center": {
+    "bounds": {
+      "minX": -836.3226081297803,
+      "maxX": 370.82143130007165,
+      "minZ": -615.6738346724891,
+      "maxZ": 637.9365139941015
+    },
+    "levels": [
+      {
+        "id": "z0",
+        "src": "ortho-center-z0.jpg",
+        "width": 4096,
+        "height": 4254,
+        "metersPerPixel": 0.295
+      },
+      {
+        "id": "z1",
+        "src": "ortho-center-z1.jpg",
+        "width": 2048,
+        "height": 2127,
+        "metersPerPixel": 0.589
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # Visual validation report
 
-Generated: 2026-11-10T13:56:19+00:00
+Generated: 2026-11-10T18:33:49+00:00
 
 ## Method
 
@@ -17,30 +17,30 @@ Generated: 2026-11-10T13:56:19+00:00
 
 | Check | Target | Result | Status |
 | --- | --- | --- | --- |
-| Footprint source | OSM footprint per building | 4585 / 4585 | pass |
-| Height evidence | Measured where DSM exists | 4474 / 4585 | partial |
-| Roof evidence | Shape + colour per building | 4585 roof records | pass |
-| Street imagery | Licensed street-level coverage | 0 inside bbox (5 nearby) | unavailable |
-| Reference photography | Landmarks | 32 Commons files | partial |
+| Footprint source | OSM footprint per building | 638 / 638 | pass |
+| Height evidence | Measured where DSM exists | 624 / 638 | partial |
+| Roof evidence | Shape + colour per building | 638 roof records | pass |
+| Street imagery | Licensed street-level coverage | 0 inside bbox (0 nearby) | unavailable |
+| Reference photography | Landmarks | 40 Commons files | partial |
 
 ## Buildings reconstructed accurately
 
-Tier A pilot landmarks with a licensed reference image: Chiesa di San Tommaso Becket, Chiesa del Sacro Cuore, Chiesa di Sant'Antonio Abate, Fidenza, Chiesa di San Pietro, Santuario della Gran Madre di Dio, Oratorio di San Giorgio, ex Chiesa di San Michele Arcangelo, Cattedrale di San Donnino, Chiesa di Santa Maria Annunziata, Teatro Girolamo Magnani, Porta di San Donnino
+Tier A pilot landmarks with a licensed reference image: Oratorio di San Giorgio, Cattedrale di San Donnino, Teatro Girolamo Magnani, Porta di San Donnino
 
 Context landmarks (if any) are rendered at LOD1 and are not claimed as
 detailed facade reconstructions.
 
 ## Buildings approximated
 
-4462 buildings are Tier B: measured height and roof. Pilot buildings have procedural facades; context buildings are LOD1 massing only.
+619 buildings are Tier B: measured height and roof. Pilot buildings have procedural facades; context buildings are LOD1 massing only.
 
 ## Buildings with missing source imagery
 
-111 buildings are Tier C; no street-level photograph exists for them.
+14 buildings are Tier C; no street-level photograph exists for them.
 
 ## Uncertain dimensions
 
-2622 buildings are flagged for manual review (see CONFIDENCE_REPORT.md).
+309 buildings are flagged for manual review (see CONFIDENCE_REPORT.md).
 
 ## Visual comparison
 

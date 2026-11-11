@@ -18,6 +18,7 @@ import { PhotoMode, PHOTO_FILTERS } from './photo-mode.js';
 import { PostFX } from './postfx.js';
 import { buildDiary } from './diary.js';
 import { listPhotos, deletePhoto, downloadPhoto, clearPhotos } from './photo-store.js';
+import { prefetchTiles, storageEstimate, ensurePersistentStorage, shouldSkipPrefetch, hasTileCache } from './ground-cache.js';
 
 const canvas = document.getElementById('game');
 const clock = new THREE.Clock();
@@ -53,11 +54,12 @@ let adaptiveLast = performance.now();
 renderer.setPixelRatio(currentPixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight, false);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-// v3 è la variante "mondo Arnis": niente tone mapping cinematografico, così
-// i colori dei blocchi restano netti come in Minecraft.
-renderer.toneMapping = THREE.NoToneMapping;
-renderer.toneMappingExposure = 1;
-renderer.shadowMap.enabled = quality === 'high' && !isMobile;
+// L'ortofoto e i materiali PBR del suolo guadagnano da un tone mapping
+// filmico; i colori dei blocchi restano leggibili perché l'esposizione è
+// tarata sul palette Arnis.
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.toneMappingExposure = 1.08;
+renderer.shadowMap.enabled = quality !== 'low' && (!isMobile || quality === 'high');
 
 function applyRendererScale(ratio) {
   currentPixelRatio = clamp(ratio, 0.72, pixelRatioCap);
@@ -378,13 +380,36 @@ async function init() {
       return null;
     })
   ]);
-  let arnisSurfaceImage = null;
-  if (arnisJson) {
-    hud.setLoading(0.06, 'Leggo il mondo Arnis…');
-    const lods = arnisJson.meta?.surface?.lods || [];
-    const wanted = quality === 'high' ? 'z0' : quality === 'medium' ? 'z1' : 'z2';
-    const lod = lods.find(level => level.id === wanted) || lods[0];
-    arnisSurfaceImage = await loadImage(`./data/arnis/${lod?.src || 'surface.png'}`);
+  let ground = null;
+  try {
+    hud.setLoading(0.06, 'Leggo l’ortofoto di Fidenza…');
+    const groundMeta = await fetchJSON('./data/ground/ground.json');
+    const baseLevels = groundMeta.base?.levels || [];
+    const wantedBase = quality === 'high' ? 'z0' : quality === 'medium' ? 'z1' : 'z2';
+    const baseLevel = baseLevels.find(level => level.id === wantedBase) || baseLevels[baseLevels.length - 1];
+    const groundImage = await loadImage(`./data/ground/${baseLevel?.src || 'ortho-z0.jpg'}`);
+    let groundCenterImage = null;
+    if (quality !== 'low' && groundMeta.center?.levels?.length) {
+      const wantedCenter = quality === 'high' ? 'z0' : 'z1';
+      const centerLevel = groundMeta.center.levels.find(level => level.id === wantedCenter)
+        || groundMeta.center.levels[groundMeta.center.levels.length - 1];
+      groundCenterImage = await loadImage(`./data/ground/${centerLevel.src}`);
+    }
+    ground = { meta: groundMeta, image: groundImage, centerImage: groundCenterImage };
+  } catch (err) {
+    console.warn('Ortofoto non disponibile, uso la mappa dei blocchi Arnis', err);
+    if (arnisJson?.meta?.surface) {
+      const lods = arnisJson.meta.surface.lods || [];
+      const lod = lods.find(level => level.id === (quality === 'high' ? 'z0' : quality === 'medium' ? 'z1' : 'z2')) || lods[0];
+      const fallbackImage = await loadImage(`./data/arnis/${lod?.src || 'surface.png'}`);
+      ground = {
+        meta: {
+          base: { bounds: WORLD.bounds, levels: [] },
+          license: 'Mappa dei blocchi ArnisWorld3 (fallback)'
+        },
+        image: fallbackImage
+      };
+    }
   }
   mapData = mapJson;
   hud.setLoading(0.08, 'Preparo la città…');
@@ -395,11 +420,15 @@ async function init() {
     terrain,
     map: mapJson,
     quality,
-    arnis: arnisJson ? { ...arnisJson, surfaceImage: arnisSurfaceImage } : null
+    isMobile,
+    arnis: arnisJson,
+    ground
   });
   await world.build((p, label) => {
     hud.setLoading(0.08 + p * 0.84, label);
   });
+  const initialSpawn = mapJson.spawn || WORLD.spawn;
+  world.groundTiles?.preload(initialSpawn.x, initialSpawn.z);
   world.onFirework = () => audio.firework();
 
   // Stili stagionali: li carichiamo tutti, sono piccoli e servono al selettore.
@@ -525,7 +554,7 @@ async function init() {
   hud.setLoading(1, 'Fidenza è pronta');
   hud.setPlayReady(true, 'Gioca');
   hud.hideLoading();
-  window.__fidenza = { world, player, vehicles, missions, career, map, photoMode, hud, renderer, scene, camera, input, postfx, arnis: world.arnis, setHour: h => world.setHour(h), applySeason, enterPhoto, exitPhoto, freezeClock: (f = true) => { clockFrozen = !!f; } };
+  window.__fidenza = { world, player, vehicles, missions, career, map, photoMode, hud, renderer, scene, camera, input, postfx, arnis: world.arnis, groundTiles: world.groundTiles, startGame, getState: () => state, setHour: h => world.setHour(h), applySeason, enterPhoto, exitPhoto, freezeClock: (f = true) => { clockFrozen = !!f; } };
   camera.position.set(-40, 20, 100);
   camera.lookAt(-120, 8, 20);
   requestAnimationFrame(loop);
@@ -1324,6 +1353,55 @@ function startGame() {
   checkAchievements(false);
   requestPointerLock();
   refreshSaveUI();
+  if (!groundPrefetchStarted) {
+    groundPrefetchStarted = true;
+    setTimeout(prefetchGroundTiles, 3000);
+  }
+}
+
+let groundPrefetchStarted = false;
+const OFFLINE_TILES_KEY = 'fidenza-offline-tiles-v1';
+
+async function prefetchGroundTiles() {
+  const tilesMeta = world?.groundMeta?.tiles;
+  if (!tilesMeta?.manifest || quality === 'low') return;
+  if (shouldSkipPrefetch()) {
+    hud.setToast('Mappa offline non scaricata: risparmio dati attivo', 4200);
+    return;
+  }
+  if (!(await hasTileCache())) return;
+  const estimate = await storageEstimate();
+  const required = Math.max(96 * 1024 * 1024, (Number(tilesMeta.totalBytes) || 0) + 48 * 1024 * 1024);
+  if (estimate && estimate.available > 0 && estimate.available < required) {
+    hud.setToast('Spazio insufficiente per la mappa offline', 4200);
+    return;
+  }
+  await ensurePersistentStorage();
+  let manifest;
+  try {
+    manifest = await fetchJSON(`./data/ground/${tilesMeta.manifest}`);
+  } catch (err) {
+    console.warn('Manifest tessere non disponibile', err);
+    return;
+  }
+  const doneBefore = localStorage.getItem(OFFLINE_TILES_KEY) === 'done';
+  if (!doneBefore) hud.setToast('Preparo la mappa offline…', 3000);
+  try {
+    const result = await prefetchTiles(manifest, {
+      baseUrl: './data/ground/tiles/',
+      concurrency: isMobile ? 2 : 3,
+      onProgress: progress => {
+        if (world?.groundTiles) world.groundTiles.prefetchProgress = progress;
+      }
+    });
+    if (result.skipped) return;
+    if (!doneBefore || result.downloaded > 0) {
+      localStorage.setItem(OFFLINE_TILES_KEY, 'done');
+      hud.setToast('Mappa offline pronta', 3200);
+    }
+  } catch (err) {
+    console.warn('Prefetch mappa offline interrotto', err);
+  }
 }
 
 function requestPointerLock() {
@@ -2166,8 +2244,13 @@ function loop() {
   }
 
   if (state === 'playing') handleKeys(paused);
-  if (world?.arnis) renderer.render(scene, camera);
-  else postfx.render(scene, camera, { dof: photoActive ? (quality === 'high' && !isMobile ? 0.34 : 0.2) : 0 });
+  // Post-processing solo dove c'è margine (alta qualità desktop); la modalità
+  // foto usa comunque la pipeline completa tramite photoMode.renderFrame.
+  if (quality === 'high' && !isMobile) {
+    postfx.render(scene, camera, { dof: photoActive ? 0.34 : 0 });
+  } else {
+    renderer.render(scene, camera);
+  }
 }
 
 function handleKeys(paused) {

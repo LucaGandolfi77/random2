@@ -1,12 +1,14 @@
-# Fidenza da Giocare v3.1.0 — Mondo Arnis
+# Fidenza da Giocare v3.3.0 — Mondo Arnis, terreno reale e suolo in streaming
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-**v3.0** è la variante **Mondo Arnis**: la città viene ricostruita con i
-**materiali reali estratti da ArnisWorld3**, il save Minecraft generato da
-Arnis per Fidenza. Muri in mattoni, pietra, terracotta e cemento; tetti in
-granito e laterizio; strade in asfalto e cemento; campi con grano, patate,
+**v3.3** porta il **suolo in streaming**: l'ortofoto RER 2023-24 al posto
+della griglia di blocchi, con tessere da 0,5 m attorno al giocatore e prefetch
+completo della città per l'uso offline. La **v3.2** aveva introdotto il terreno
+reale e i materiali PBR per asfalto, cemento, porfido, erba e terra. Gli edifici restano la variante **Mondo Arnis** della v3.0, ricostruiti
+con i **materiali reali estratti da ArnisWorld3**: muri in mattoni, pietra,
+terracotta e cemento; tetti in granito e laterizio; campi con grano, patate,
 carote e barbabietole; alberi cubici per specie reale. Tutto il resto del gioco
 — missioni, quartieri, abitanti, carriera, eventi, volo, bici e Diario — resta
 quello della v2.23.
@@ -24,6 +26,8 @@ quello della v2.23.
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
+- [Novità v3.3](#novità-v33--suolo-in-streaming-e-offline)
+- [Novità v3.2](#novità-v32--terreno-reale)
 - [Novità v3.1](#novità-v31--strade-osm-normalizzate)
 - [Novità v3.0](#novità-v30--mondo-arnis)
 - [Novità v2.23](#novità-v223--vita-atmosfera-e-notte)
@@ -66,7 +70,11 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **JavaScript ES2022 (moduli ES)** | Tutto il codice del gioco, import/export tra moduli, nessun bundler a runtime. |
 | **Three.js r169** | Scena 3D, camera, materiali, luci, ombre, geometrie, `InstancedMesh`, `BufferGeometryUtils`. |
 | **WebGL** | Rendering accelerato di città, veicoli, alberi, particelle e cielo. |
-| **Materiali Minecraft** | Palette di blocchi, texture procedurali 16×16 e geometrie cubiche in stile Minecraft, tutte originali. |
+| **Materiali Minecraft** | Palette di blocchi, texture procedurali 16×16 e geometrie cubiche per edifici, tetti e arredi, tutte originali. |
+| **Ortofoto RER 2023-24** | Suolo realistico della città da GeoTIFF regionali a 0,5 m/px (centro a 0,2 m/px), ricampionati sulla griglia metrica locale. Licenza CC BY 4.0. |
+| **Materiali PBR del suolo** | Asfalto, cemento, porfido, erba, terra e ghiaia generati proceduralmente con normal map, variazioni di colore e UV lungo la strada. |
+| **Tessere ortofoto in streaming** | 441 tessere da 0,5 m/px (256 m) attorno alla camera, con bordo di 4 px, LOD 5×5/3×3 e fallback alla base. |
+| **Cache Storage + prefetch** | Prefetch completo della città (~31 MB) dopo il primo avvio, con ripresa, quota check, `storage.persist()` e rispetto di Data Saver. |
 | **Import ArnisWorld3** | Tool Node che legge i region file del save Minecraft e genera `data/arnis/arnis.json` e `data/arnis/surface.png`. |
 | **Palette 3D → materiali** | Il Duomo usa le texture dei blocchi Arnis (terracotta, end stone bricks, granito). |
 | **Layer OSM del centro** | Negozi, arredo urbano, alberi, barriere e segnaletica letti da `city.json`, con instancing e merge. |
@@ -133,20 +141,31 @@ self-hosted in `vendor/` e `assets/fonts/`.
   industriale, urbano, storico o civico, colori e tetti OSM quando presenti.
 - **51 insegne di attività** su ristoranti, bar, caffè, farmacie, banche, hotel
   e musei, montate sulla facciata più vicina.
-- **Materiali Arnis**: muri, tetti, strade, piazze, campi e alberi usano i
-  blocchi reali estratti da ArnisWorld3, con texture pixel 16×16 originali.
+- **Terreno realistico in streaming**: ortofoto RER 2023-24 sul suolo, con
+  tessere da 0,5 m attorno alla camera e centro storico a 0,295 m; niente più
+  griglia di blocchi o lastre quadrate.
+- **Offline completo**: prefetch automatico delle 441 tessere, cache dedicata,
+  ripresa dopo un'interruzione e fallback alla base se una tessera manca.
+- **Materiali Arnis per edifici e arredi**: muri, tetti, alberi e dettagli
+  usano i blocchi estratti da ArnisWorld3, con texture pixel 16×16 originali.
+- **Strade e piazze PBR**: asfalto, cemento e porfido con normal map, UV lungo
+  la strada, cordoli continui, segnaletica pulita e usura.
+- **Prati e campi reali**: l'ortofoto resta visibile sotto alberi, cespugli e
+  colture 3D, senza chiazze di erba finta.
 - **Tetti a gradoni** in stile Minecraft, alture reali dagli edifici Arnis e
   finestre raggruppate per vetro colorato.
-- **Selettore qualità** Auto/Bassa/Media/Alta; la modalità foto conserva la
-  pipeline post-processing classica.
+- **Selettore qualità** Auto/Bassa/Media/Alta; tone mapping, ombre e
+  post-processing attivi anche in gioco, con fallback leggero su mobile.
+- **Luce più naturale**: sole e luna sfumati, ombre più morbide, ambiente
+  leggibile e color grading neutro.
 - **Tetti 3D** a falde, padiglione e piano, con comignoli, abbaini, grondaie,
   cornici, persiane, balconi, gradini e vetrine.
 - **Vegetazione viva**: fino a **1.000 alberi**, cespugli, ciuffi d’erba e fiori
   distribuiti su parchi e prato.
 - **Quattro stagioni** con palette, particelle, nebbia, neve, luci natalizie e
   meteo; **ciclo giorno/notte** con finestre illuminate e lampioni.
-- **Strade realistiche** con asfalto procedurale, marciapiedi, linee, tombini,
-  attraversamenti e **7 semafori** funzionanti.
+- **Strade realistiche** con asfalto PBR, marciapiedi in cemento, cordoli
+  continui, linee, tombini, attraversamenti e **7 semafori** funzionanti.
 - **Vita urbana**: pedoni, ciclisti, auto ambientali, navetta, treno e bici
   parcheggiate.
 
@@ -517,8 +536,47 @@ all’URL per forzare il livello grafico.
 - La base della mappa 2D è disegnata **una sola volta** su un canvas offscreen
   da 2048 px, poi ritagliata per minimappa e mappa grande; nomi delle vie e
   parcheggi sono sovrapposti in tempo reale solo sulla mappa grande.
-- La qualità grafica è adattiva: su mobile le ombre sono disattivate e la
-  risoluzione si abbassa automaticamente se il frame rate cala.
+- La qualità grafica è adattiva: su mobile le ombre sono riservate alla qualità
+  alta e la risoluzione si abbassa automaticamente se il frame rate cala.
+
+## Novità v3.3 — Suolo in streaming e offline
+
+- **Tessere 0,5 m**: 441 tessere da 256 m con bordo di 4 px, generate dal
+  raster RER 0.5 m; la griglia è rientrata di 64 m dal bordo del raster per
+  evitare tessere parziali.
+- **Streaming attorno alla camera**: 5×5 tessere in alta qualità, 3×3 in media,
+  caricamento in priorità di distanza, sfratto e `dispose()` delle tessere
+  lontane; il centro storico resta coperto dalla patch a 0,295 m.
+- **Prefetch completo**: dopo il primo avvio il gioco scarica tutte le tessere
+  in background (~31 MB), con concorrenza, ripresa, controllo quota e
+  `navigator.storage.persist()`.
+- **Offline**: Cache Storage dedicata (`fidenza-ground-tiles-v1`), service
+  worker che serve le tessere dalla cache, fallback alla base se manca un file.
+- **Niente più chiazze piatte**: le superfici OSM non d'acqua non vengono più
+  coperte da materiali opachi; prati, campi, piazzali e parcheggi mostrano
+  l'ortofoto reale e le tessere.
+- **PWA**: cache `v3.3.0`; Data Saver rispettato; toast di avvio/completamento
+  del prefetch.
+- **Rigenerazione**: `../fidenza-recon/.venv/bin/python tools/build-ground.py --base ../fidenza-recon/data/raw/rer/ortho_rgb_05.tif --center ../fidenza-recon/data/raw/rer/ortho_rgb_02.tif` (aggiungi `--no-tiles` per saltare le tessere).
+
+## Novità v3.2 — Terreno reale
+
+- **Addio piastrelle**: rimossi la mappa dei blocchi di superficie, la lastra
+  di pietra 2600×2600 e la griglia di pavimentazione delle piazze. Il suolo non
+  è più una griglia 2×2 m.
+- **Ortofoto RER 2023-24**: il terreno usa l'ortofoto regionale a 0,5 m/px
+  (centro storico a 0,2 m/px), ricampionata sulla griglia locale di Fidenza.
+  Licenza CC BY 4.0, attribuzione in `data/ATTRIBUTION.md`.
+- **Texture PBR procedurali**: asfalto, cemento, porfido, erba, terra e ghiaia
+  con normal map, variazioni di colore e UV lungo la strada; niente più
+  texture 16×16 ripetute ogni 2 m sul suolo.
+- **Strade e piazze**: cordoli continui, segnaletica pulita, usura e pozzanghere
+  con materiali del suolo; prati e campi lasciano vedere l'ortofoto reale, con
+  alberi e colture 3D.
+- **Luce**: tone mapping neutro, ombre più morbide, sole e luna sfumati,
+  ambiente più leggibile e post-processing attivo anche in gioco.
+- **PWA**: cache `v3.2.0`; nuove texture in `data/ground/`.
+- **Rigenerazione**: `fidenza-recon/.venv/bin/python fidenza-city-v3/tools/build-ground.py --base fidenza-recon/data/raw/rer/ortho_rgb_05.tif --center fidenza-recon/data/raw/rer/ortho_rgb_02.tif`.
 
 ## Novità v3.1 — Strade OSM normalizzate
 
@@ -983,14 +1041,16 @@ all’URL per forzare il livello grafico.
   quartiere.
 - **Terreno AWS**: heightmap Terrarium zoom 15, griglia 512×512 e dati EU-DEM
   Copernicus per un rilievo più accurato.
+- **Terreno RER**: ortofoto 2023-24 a 0,5 m/px (centro a 0,2 m/px) per il
+  suolo realistico, con licenza CC BY 4.0 e attribuzione regionale.
 
 ## Dati e correzioni
 
-La mappa è costruita da **OpenStreetMap** e **AWS Terrain Tiles** (Terrarium,
-EU-DEM Copernicus). I POI sono
+La mappa è costruita da **OpenStreetMap**, **AWS Terrain Tiles** (Terrarium,
+EU-DEM Copernicus) e **ortofoto RER 2023-24** (CC BY 4.0). I POI sono
 confrontati con le feature OSM tramite `tools/audit-pois.mjs`. L’attribuzione
-del progetto include **© OpenStreetMap contributors (ODbL)** e
-**© Regione Emilia-Romagna** come riferimento territoriale.
+del progetto include **© OpenStreetMap contributors (ODbL)**, **© Regione
+Emilia-Romagna** e l’ortofoto regionale come texture del suolo.
 
 Correzioni principali rispetto alla v1:
 
@@ -1017,6 +1077,11 @@ node tools/audit-terrain.mjs
 # import del mondo Minecraft ArnisWorld3 (richiede assets/ArnisWorld3)
 node tools/import-arnis.mjs
 node tools/audit-arnis.mjs
+# suolo realistico + tessere 0,5 m (richiede i GeoTIFF RER in ../fidenza-recon/data/raw/rer)
+../fidenza-recon/.venv/bin/python tools/build-ground.py \
+  --base ../fidenza-recon/data/raw/rer/ortho_rgb_05.tif \
+  --center ../fidenza-recon/data/raw/rer/ortho_rgb_02.tif
+# usa --no-tiles per rigenerare solo base e centro
 # Il save sorgente assets/ArnisWorld3/ (circa 575 MB) non è versionato né
 # pubblicato: va copiato localmente prima di lanciare import-arnis.mjs.
 # opzionale: aggiorna altezze/tetti da un GeoJSON DBTR/Microsoft/Overture
@@ -1092,6 +1157,9 @@ fidenza-city-v3/
     postfx.js        bloom, tone mapping, color grading, vignetta e DOF
     block-palette.js colori e classificazione dei blocchi Minecraft
     mc-blocks.js     texture 16×16 e materiali dei blocchi
+    ground-textures.js texture PBR procedurali del suolo e materiali
+    ground-cache.js   Cache Storage, prefetch e quota delle tessere
+    ground-tiles.js   streaming 0,5 m attorno alla camera
     map-compiler.js   compilatore mappa condiviso
     map-overrides.js  override edifici/strade/aree
     map-validate.js   validazione condivisa
@@ -1131,6 +1199,15 @@ fidenza-city-v3/
     import-arnis.mjs import del save ArnisWorld3
     audit-arnis.mjs  audit degli asset derivati
     audit-visual-detail.mjs  budget dei dettagli 1 m
+    build-ground.py  ortofoto RER → data/ground/*.jpg
+  data/ground/
+    ground.json      bounds, LOD, tessere e attribuzione dell'ortofoto
+    ortho-z0.jpg     suolo 4096 px
+    ortho-z1.jpg     suolo 2048 px
+    ortho-z2.jpg     suolo 1024 px
+    ortho-center-z0.jpg  centro storico 4096 px
+    tiles/05/        441 tessere 0,5 m da 520 px
+    tiles/manifest.json  elenco, griglia e byte delle tessere
   data/arnis/
     arnis.json       materiali reali di edifici, aree, strade, alberi
     surface.png      mappa dei blocchi di superficie
@@ -1228,7 +1305,9 @@ report `data/building-audit.json` dopo l’import.
 - Dati OpenStreetMap: ODbL.
 - Mondo ArnisWorld3 e dati derivati: generati da Arnis a partire da OSM (ODbL).
 - Texture dei blocchi: pixel art originale del progetto, non asset Mojang.
-- Riferimento territoriale: © Regione Emilia-Romagna.
+- Riferimento territoriale e ortofoto RER 2023-24: © Regione Emilia-Romagna,
+  ortofoto **CC BY 4.0**, ricampionata, color graded e suddivisa in tessere
+  da 0,5 m per il gioco.
 - AWS Terrain Tiles: attribuzione Mapzen / EU-DEM Copernicus.
 - Three.js: MIT.
 - Font Anton e Oswald: SIL Open Font License 1.1.

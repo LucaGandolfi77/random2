@@ -9,6 +9,7 @@
   - Lo snapshot `data/osm-roads.json` contiene i way `highway` con tag e geometria, usati per normalizzare larghezze e verificare i centerline; è anch'esso derivato da OpenStreetMap (ODbL).
   - Per usi che modificano o redistribuiscono il database, valgono gli obblighi di attribuzione e condivisione allo stesso modo previsti da ODbL.
 - **Rilievo fuori centro**: [AWS Open Data — Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) — Mapzen, con dati EU-DEM Copernicus. Il file `data/terrain.json` è derivato dai tile Terrarium AWS ad alta risoluzione.
+- **Terreno realistico**: ortofoto RER 2023-24 della Regione Emilia-Romagna, licenza **CC BY 4.0**, usata in `data/ground/` come texture di base del suolo e suddivisa in tessere da 0,5 m (`data/ground/tiles/`). Le immagini sono state ricampionate sulla griglia metrica locale di Fidenza, con correzione colore e rimozione parziale delle ombre; i GeoTIFF originali non sono ridistribuiti. Le tessere vengono precaricate nel browser per l'uso offline. Rigenerazione: `tools/build-ground.py`.
 - **Dettagli del centro storico**: negozi, arredo urbano, alberi singoli, barriere e segnaletica sono derivati da OpenStreetMap (ODbL), tramite `tools/build-center-details.mjs`.
 - **Dati territoriali di riferimento**: © Regione Emilia-Romagna. Per Fidenza non vengono usati dati della Regione Friuli-Venezia Giulia: la riga FVG presente in altri progetti non è geograficamente valida per l'Emilia-Romagna.
 

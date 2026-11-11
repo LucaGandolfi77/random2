@@ -1,0 +1,154 @@
+{
+  "acts": {
+    "act1": {
+      "sky": "#8f99a6",
+      "ground": "#4a5158",
+      "fog": "#a8b0b9",
+      "fogNear": 24,
+      "fogFar": 120,
+      "hemi": 0.8,
+      "hemiColor": "#cbd5df",
+      "keyColor": "#dbe4ee",
+      "keyIntensity": 1.45,
+      "keyPos": [
+        -30,
+        45,
+        25
+      ],
+      "exposure": 1.08
+    },
+    "act2": {
+      "sky": "#9a9a98",
+      "ground": "#5a5148",
+      "fog": "#a8a7a2",
+      "fogNear": 22,
+      "fogFar": 100,
+      "hemi": 0.85,
+      "hemiColor": "#d6d1c7",
+      "keyColor": "#e0ddd6",
+      "keyIntensity": 1.35,
+      "keyPos": [
+        -25,
+        38,
+        22
+      ],
+      "exposure": 1.12
+    },
+    "act3": {
+      "sky": "#6a7480",
+      "ground": "#484c52",
+      "fog": "#7d8794",
+      "fogNear": 18,
+      "fogFar": 85,
+      "hemi": 0.7,
+      "hemiColor": "#b9c6d4",
+      "keyColor": "#c4d2e2",
+      "keyIntensity": 1.1,
+      "keyPos": [
+        -20,
+        35,
+        18
+      ],
+      "exposure": 1.15
+    },
+    "act4": {
+      "sky": "#33404f",
+      "ground": "#33373d",
+      "fog": "#45505e",
+      "fogNear": 16,
+      "fogFar": 75,
+      "hemi": 0.6,
+      "hemiColor": "#8fa0b4",
+      "keyColor": "#9aabc0",
+      "keyIntensity": 0.95,
+      "keyPos": [
+        -18,
+        30,
+        16
+      ],
+      "exposure": 1.25
+    },
+    "act5": {
+      "sky": "#c6ced5",
+      "ground": "#8f989e",
+      "fog": "#bfc7cc",
+      "fogNear": 14,
+      "fogFar": 55,
+      "hemi": 0.75,
+      "hemiColor": "#e6eef3",
+      "keyColor": "#eef4f8",
+      "keyIntensity": 1.15,
+      "keyPos": [
+        -15,
+        28,
+        20
+      ],
+      "exposure": 1.02
+    },
+    "act6": {
+      "sky": "#e8c7b6",
+      "ground": "#76685f",
+      "fog": "#d9b9a8",
+      "fogNear": 20,
+      "fogFar": 100,
+      "hemi": 0.85,
+      "hemiColor": "#ffe1cd",
+      "keyColor": "#ffddb8",
+      "keyIntensity": 1.35,
+      "keyPos": [
+        22,
+        26,
+        18
+      ],
+      "exposure": 1.12
+    }
+  },
+  "scenes": {
+    "bakery": {
+      "fogNear": 4,
+      "fogFar": 34,
+      "exposure": 1.08
+    },
+    "jobOffice": {
+      "fogNear": 6,
+      "fogFar": 42,
+      "exposure": 1.04
+    },
+    "belleville": {
+      "fogFar": 100
+    },
+    "gare": {
+      "fogNear": 12,
+      "fogFar": 78,
+      "exposure": 1.1
+    },
+    "phoneCorner": {
+      "fogFar": 45,
+      "exposure": 1.08
+    },
+    "nightAvenue": {
+      "fogFar": 65
+    },
+    "metroEntrance": {
+      "fogFar": 65
+    },
+    "hospitalCorridor": {
+      "fogNear": 9,
+      "fogFar": 44,
+      "hemi": 0.72,
+      "exposure": 1.0
+    },
+    "hospitalRoom": {
+      "fogFar": 38,
+      "exposure": 1.05
+    },
+    "laundrette": {
+      "fogFar": 46,
+      "exposure": 1.08
+    },
+    "dawnStreet": {
+      "fogFar": 110,
+      "exposure": 1.14
+    }
+  }
+}

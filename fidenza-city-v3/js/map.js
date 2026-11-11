@@ -202,8 +202,15 @@ export class GameMap {
     ctx.fillStyle = '#8fbc78';
     ctx.fillRect(0, 0, MAP_SIZE, MAP_SIZE);
 
-    // Sfondo: la mappa reale dei blocchi di ArnisWorld3.
-    if (arnis?.surfaceImage) {
+    // Sfondo: l'ortofoto reale di Fidenza, con fallback alla mappa dei blocchi.
+    const groundImage = this.world.groundImage;
+    const groundBounds = this.world.groundMeta?.base?.bounds || WORLD.bounds;
+    if (groundImage) {
+      const p0 = this.project(groundBounds.minX, groundBounds.minZ);
+      const p1 = this.project(groundBounds.maxX, groundBounds.maxZ);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(groundImage, p0.x, p0.y, p1.x - p0.x, p1.y - p0.y);
+    } else if (arnis?.surfaceImage) {
       const p0 = this.project(WORLD.bounds.minX, WORLD.bounds.minZ);
       const p1 = this.project(WORLD.bounds.maxX, WORLD.bounds.maxZ);
       ctx.imageSmoothingEnabled = false;

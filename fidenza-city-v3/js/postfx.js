@@ -147,9 +147,9 @@ export class PostFX {
         bloomStrength: { value: quality === 'high' ? 0.42 : 0.24 },
         dofStrength: { value: 0 },
         vignette: { value: quality === 'high' ? 0.16 : 0.1 },
-        saturation: { value: 1.045 },
-        contrast: { value: 1.035 },
-        warmth: { value: quality === 'high' ? 0.22 : 0.12 }
+        saturation: { value: 1.03 },
+        contrast: { value: 1.0 },
+        warmth: { value: quality === 'high' ? 0.14 : 0.09 }
       },
       vertexShader: FULLSCREEN_VERTEX,
       fragmentShader: COMPOSITE_FRAGMENT

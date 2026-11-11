@@ -1,0 +1,1880 @@
+{
+  "shots": [
+    {
+      "id": "p_open",
+      "env": "prison",
+      "from": [
+        14,
+        6,
+        22
+      ],
+      "to": [
+        13,
+        5.4,
+        20
+      ],
+      "lookFrom": [
+        0,
+        2.2,
+        5
+      ],
+      "lookTo": [
+        0,
+        2,
+        4.5
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "inOut",
+      "handheld": 0.05
+    },
+    {
+      "id": "p_gate",
+      "env": "prison",
+      "from": [
+        3.8,
+        2.3,
+        7.6
+      ],
+      "to": [
+        3.4,
+        2.2,
+        7.0
+      ],
+      "lookFrom": [
+        0,
+        1.5,
+        2.4
+      ],
+      "lookTo": [
+        0,
+        1.5,
+        2.4
+      ],
+      "fovFrom": 40,
+      "fovTo": 39,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "p_face",
+      "env": "prison",
+      "from": [
+        1.6,
+        1.78,
+        5.2
+      ],
+      "to": [
+        1.3,
+        1.74,
+        4.9
+      ],
+      "lookFrom": [
+        0,
+        1.6,
+        2.9
+      ],
+      "lookTo": [
+        0,
+        1.6,
+        2.9
+      ],
+      "fovFrom": 34,
+      "fovTo": 32,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "p_photo",
+      "env": "prison",
+      "from": [
+        0.9,
+        1.45,
+        4.8
+      ],
+      "to": [
+        0.7,
+        1.42,
+        4.5
+      ],
+      "lookFrom": [
+        0.1,
+        1.28,
+        2.9
+      ],
+      "lookTo": [
+        0.1,
+        1.26,
+        2.9
+      ],
+      "fovFrom": 30,
+      "fovTo": 28,
+      "ease": "linear",
+      "handheld": 0.015
+    },
+    {
+      "id": "p_bus",
+      "env": "prison",
+      "from": [
+        10,
+        5.2,
+        12
+      ],
+      "to": [
+        9,
+        4.8,
+        11
+      ],
+      "lookFrom": [
+        3,
+        1.6,
+        9
+      ],
+      "lookTo": [
+        4,
+        1.7,
+        9.5
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "b_wide",
+      "env": "bakery",
+      "from": [
+        3.4,
+        2.15,
+        4.4
+      ],
+      "to": [
+        3.0,
+        2.05,
+        4.0
+      ],
+      "lookFrom": [
+        0,
+        1.25,
+        0.2
+      ],
+      "lookTo": [
+        0,
+        1.23,
+        0.2
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "b_two",
+      "env": "bakery",
+      "from": [
+        2.7,
+        1.62,
+        3.5
+      ],
+      "to": [
+        2.5,
+        1.6,
+        3.2
+      ],
+      "lookFrom": [
+        0,
+        1.28,
+        0.15
+      ],
+      "lookTo": [
+        0,
+        1.26,
+        0.15
+      ],
+      "fovFrom": 38,
+      "fovTo": 36,
+      "ease": "linear",
+      "handheld": 0.018
+    },
+    {
+      "id": "b_docs",
+      "env": "bakery",
+      "from": [
+        1.1,
+        1.35,
+        1.1
+      ],
+      "to": [
+        1.0,
+        1.33,
+        1.0
+      ],
+      "lookFrom": [
+        0.9,
+        1.08,
+        0.1
+      ],
+      "lookTo": [
+        0.9,
+        1.07,
+        0.05
+      ],
+      "fovFrom": 30,
+      "fovTo": 29,
+      "ease": "linear",
+      "handheld": 0.012
+    },
+    {
+      "id": "b_close",
+      "env": "bakery",
+      "from": [
+        2.1,
+        1.56,
+        2.7
+      ],
+      "to": [
+        2.0,
+        1.54,
+        2.5
+      ],
+      "lookFrom": [
+        0,
+        1.5,
+        1.35
+      ],
+      "lookTo": [
+        0,
+        1.48,
+        1.35
+      ],
+      "fovFrom": 32,
+      "fovTo": 31,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "b_ots",
+      "env": "bakery",
+      "from": [
+        0.9,
+        1.66,
+        3.3
+      ],
+      "to": [
+        0.85,
+        1.64,
+        3.1
+      ],
+      "lookFrom": [
+        0,
+        1.38,
+        -0.9
+      ],
+      "lookTo": [
+        0,
+        1.36,
+        -0.9
+      ],
+      "fovFrom": 36,
+      "fovTo": 35,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "b_out",
+      "env": "bakery",
+      "from": [
+        3.2,
+        2.3,
+        4.8
+      ],
+      "to": [
+        2.9,
+        2.2,
+        4.4
+      ],
+      "lookFrom": [
+        0.2,
+        1.2,
+        1.8
+      ],
+      "lookTo": [
+        0.1,
+        1.15,
+        2.1
+      ],
+      "fovFrom": 42,
+      "fovTo": 40,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "j_wide",
+      "env": "jobOffice",
+      "from": [
+        3.8,
+        2.2,
+        4.4
+      ],
+      "to": [
+        3.5,
+        2.1,
+        4.0
+      ],
+      "lookFrom": [
+        0,
+        1.3,
+        0
+      ],
+      "lookTo": [
+        0,
+        1.28,
+        0
+      ],
+      "fovFrom": 44,
+      "fovTo": 42,
+      "ease": "out",
+      "handheld": 0.025
+    },
+    {
+      "id": "j_ots",
+      "env": "jobOffice",
+      "from": [
+        0.7,
+        1.66,
+        3.2
+      ],
+      "to": [
+        0.65,
+        1.64,
+        3.0
+      ],
+      "lookFrom": [
+        0,
+        1.25,
+        -0.9
+      ],
+      "lookTo": [
+        0,
+        1.24,
+        -0.9
+      ],
+      "fovFrom": 38,
+      "fovTo": 37,
+      "ease": "linear",
+      "handheld": 0.018
+    },
+    {
+      "id": "j_close",
+      "env": "jobOffice",
+      "from": [
+        0.8,
+        1.56,
+        0.2
+      ],
+      "to": [
+        0.76,
+        1.54,
+        0.15
+      ],
+      "lookFrom": [
+        0,
+        1.52,
+        1.5
+      ],
+      "lookTo": [
+        0,
+        1.5,
+        1.5
+      ],
+      "fovFrom": 30,
+      "fovTo": 29,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "j_leave",
+      "env": "jobOffice",
+      "from": [
+        3.3,
+        2.3,
+        4.8
+      ],
+      "to": [
+        3.0,
+        2.2,
+        4.4
+      ],
+      "lookFrom": [
+        0,
+        1.2,
+        2.2
+      ],
+      "lookTo": [
+        0,
+        1.15,
+        2.6
+      ],
+      "fovFrom": 42,
+      "fovTo": 40,
+      "ease": "out",
+      "handheld": 0.025
+    },
+    {
+      "id": "s_wide",
+      "env": "belleville",
+      "from": [
+        6.8,
+        5.6,
+        14
+      ],
+      "to": [
+        6.4,
+        5.2,
+        12.6
+      ],
+      "lookFrom": [
+        0,
+        2,
+        -3
+      ],
+      "lookTo": [
+        0,
+        1.9,
+        -4
+      ],
+      "fovFrom": 48,
+      "fovTo": 46,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "s_track",
+      "env": "belleville",
+      "from": [
+        3.6,
+        1.8,
+        9.2
+      ],
+      "to": [
+        2.8,
+        1.75,
+        7.4
+      ],
+      "lookFrom": [
+        0,
+        1.55,
+        2
+      ],
+      "lookTo": [
+        0,
+        1.5,
+        1
+      ],
+      "fovFrom": 42,
+      "fovTo": 40,
+      "ease": "linear",
+      "handheld": 0.035
+    },
+    {
+      "id": "s_market",
+      "env": "belleville",
+      "from": [
+        5.2,
+        2.6,
+        2.2
+      ],
+      "to": [
+        4.8,
+        2.5,
+        1.8
+      ],
+      "lookFrom": [
+        -2.2,
+        1.5,
+        -4
+      ],
+      "lookTo": [
+        -2.4,
+        1.45,
+        -4.4
+      ],
+      "fovFrom": 44,
+      "fovTo": 42,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "s_reflect",
+      "env": "belleville",
+      "from": [
+        1.5,
+        1.55,
+        1.0
+      ],
+      "to": [
+        1.3,
+        1.53,
+        0.7
+      ],
+      "lookFrom": [
+        0,
+        1.45,
+        4.2
+      ],
+      "lookTo": [
+        0,
+        1.45,
+        3.8
+      ],
+      "fovFrom": 34,
+      "fovTo": 33,
+      "ease": "linear",
+      "handheld": 0.025
+    },
+    {
+      "id": "s_wide2",
+      "env": "belleville",
+      "from": [
+        6.6,
+        5.8,
+        -12
+      ],
+      "to": [
+        6.2,
+        5.4,
+        -13
+      ],
+      "lookFrom": [
+        0,
+        1.8,
+        -6
+      ],
+      "lookTo": [
+        0,
+        1.7,
+        -8
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "g_hall",
+      "env": "gare",
+      "from": [
+        7.5,
+        5.0,
+        17
+      ],
+      "to": [
+        7.0,
+        4.6,
+        15.5
+      ],
+      "lookFrom": [
+        0,
+        1.6,
+        -2
+      ],
+      "lookTo": [
+        0,
+        1.5,
+        -3
+      ],
+      "fovFrom": 50,
+      "fovTo": 48,
+      "ease": "out",
+      "handheld": 0.04
+    },
+    {
+      "id": "g_bench",
+      "env": "gare",
+      "from": [
+        1.7,
+        1.5,
+        5.0
+      ],
+      "to": [
+        1.5,
+        1.48,
+        4.5
+      ],
+      "lookFrom": [
+        -0.55,
+        1.1,
+        0.4
+      ],
+      "lookTo": [
+        -0.55,
+        1.08,
+        0.35
+      ],
+      "fovFrom": 36,
+      "fovTo": 35,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "g_ots_e",
+      "env": "gare",
+      "from": [
+        1.7,
+        1.62,
+        2.8
+      ],
+      "to": [
+        1.55,
+        1.6,
+        2.5
+      ],
+      "lookFrom": [
+        -0.55,
+        1.12,
+        0.35
+      ],
+      "lookTo": [
+        -0.55,
+        1.1,
+        0.35
+      ],
+      "fovFrom": 38,
+      "fovTo": 37,
+      "ease": "out",
+      "handheld": 0.018
+    },
+    {
+      "id": "g_two",
+      "env": "gare",
+      "from": [
+        2.1,
+        1.5,
+        3.6
+      ],
+      "to": [
+        1.95,
+        1.48,
+        3.35
+      ],
+      "lookFrom": [
+        -0.1,
+        1.06,
+        0.5
+      ],
+      "lookTo": [
+        -0.1,
+        1.04,
+        0.5
+      ],
+      "fovFrom": 40,
+      "fovTo": 39,
+      "ease": "linear",
+      "handheld": 0.02
+    },
+    {
+      "id": "g_two2",
+      "env": "gare",
+      "from": [
+        1.9,
+        1.5,
+        3.4
+      ],
+      "to": [
+        1.75,
+        1.48,
+        3.2
+      ],
+      "lookFrom": [
+        -0.1,
+        1.04,
+        0.5
+      ],
+      "lookTo": [
+        -0.1,
+        1.02,
+        0.5
+      ],
+      "fovFrom": 38,
+      "fovTo": 37,
+      "ease": "linear",
+      "handheld": 0.02
+    },
+    {
+      "id": "g_close_m",
+      "env": "gare",
+      "from": [
+        -0.1,
+        1.5,
+        2.9
+      ],
+      "to": [
+        -0.05,
+        1.48,
+        2.6
+      ],
+      "lookFrom": [
+        -0.55,
+        1.1,
+        0.4
+      ],
+      "lookTo": [
+        -0.55,
+        1.08,
+        0.4
+      ],
+      "fovFrom": 32,
+      "fovTo": 31,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "g_tape",
+      "env": "gare",
+      "from": [
+        0.25,
+        1.32,
+        1.8
+      ],
+      "to": [
+        0.2,
+        1.3,
+        1.65
+      ],
+      "lookFrom": [
+        -0.2,
+        0.98,
+        0.35
+      ],
+      "lookTo": [
+        -0.2,
+        0.97,
+        0.35
+      ],
+      "fovFrom": 30,
+      "fovTo": 29,
+      "ease": "linear",
+      "handheld": 0.012
+    },
+    {
+      "id": "g_wide_end",
+      "env": "gare",
+      "from": [
+        5.8,
+        3.4,
+        12.5
+      ],
+      "to": [
+        5.0,
+        3.1,
+        10.5
+      ],
+      "lookFrom": [
+        1,
+        1.4,
+        4.2
+      ],
+      "lookTo": [
+        1.6,
+        1.35,
+        5
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.035
+    },
+    {
+      "id": "g_hall_end",
+      "env": "gare",
+      "from": [
+        8.2,
+        4.8,
+        18
+      ],
+      "to": [
+        7.6,
+        4.5,
+        16.8
+      ],
+      "lookFrom": [
+        0,
+        1.4,
+        2
+      ],
+      "lookTo": [
+        1,
+        1.4,
+        4
+      ],
+      "fovFrom": 50,
+      "fovTo": 48,
+      "ease": "out",
+      "handheld": 0.04
+    },
+    {
+      "id": "ph_wide",
+      "env": "phoneCorner",
+      "from": [
+        4.6,
+        2.6,
+        7.0
+      ],
+      "to": [
+        4.1,
+        2.5,
+        6.2
+      ],
+      "lookFrom": [
+        0,
+        1.35,
+        0
+      ],
+      "lookTo": [
+        0,
+        1.33,
+        0
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "ph_two",
+      "env": "phoneCorner",
+      "from": [
+        0.2,
+        1.6,
+        3.8
+      ],
+      "to": [
+        0.15,
+        1.58,
+        3.5
+      ],
+      "lookFrom": [
+        0,
+        1.25,
+        0
+      ],
+      "lookTo": [
+        0,
+        1.23,
+        0
+      ],
+      "fovFrom": 38,
+      "fovTo": 37,
+      "ease": "linear",
+      "handheld": 0.02
+    },
+    {
+      "id": "ph_close",
+      "env": "phoneCorner",
+      "from": [
+        0.2,
+        1.54,
+        2.5
+      ],
+      "to": [
+        0.15,
+        1.52,
+        2.35
+      ],
+      "lookFrom": [
+        -1.2,
+        1.47,
+        0
+      ],
+      "lookTo": [
+        -1.2,
+        1.45,
+        0
+      ],
+      "fovFrom": 34,
+      "fovTo": 33,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "ph_insert",
+      "env": "phoneCorner",
+      "from": [
+        -0.2,
+        1.35,
+        1.6
+      ],
+      "to": [
+        -0.15,
+        1.33,
+        1.5
+      ],
+      "lookFrom": [
+        -1.4,
+        1.15,
+        -0.3
+      ],
+      "lookTo": [
+        -1.4,
+        1.13,
+        -0.3
+      ],
+      "fovFrom": 32,
+      "fovTo": 30,
+      "ease": "linear",
+      "handheld": 0.012
+    },
+    {
+      "id": "ph_rain",
+      "env": "phoneCorner",
+      "from": [
+        2.8,
+        3.0,
+        7.4
+      ],
+      "to": [
+        2.4,
+        2.8,
+        6.6
+      ],
+      "lookFrom": [
+        -0.7,
+        1.5,
+        0
+      ],
+      "lookTo": [
+        -0.7,
+        1.48,
+        0
+      ],
+      "fovFrom": 40,
+      "fovTo": 38,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "n_track",
+      "env": "nightAvenue",
+      "from": [
+        3.4,
+        2.0,
+        8.0
+      ],
+      "to": [
+        2.6,
+        1.9,
+        6.4
+      ],
+      "lookFrom": [
+        0,
+        1.45,
+        1
+      ],
+      "lookTo": [
+        0,
+        1.42,
+        0.5
+      ],
+      "fovFrom": 42,
+      "fovTo": 40,
+      "ease": "linear",
+      "handheld": 0.04
+    },
+    {
+      "id": "n_far",
+      "env": "nightAvenue",
+      "from": [
+        6.8,
+        3.6,
+        9.5
+      ],
+      "to": [
+        6.0,
+        3.3,
+        8.2
+      ],
+      "lookFrom": [
+        1.4,
+        1.4,
+        -2.5
+      ],
+      "lookTo": [
+        1.2,
+        1.4,
+        -1.5
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.04
+    },
+    {
+      "id": "n_two",
+      "env": "nightAvenue",
+      "from": [
+        0,
+        1.66,
+        4.6
+      ],
+      "to": [
+        0,
+        1.64,
+        4.2
+      ],
+      "lookFrom": [
+        0,
+        1.3,
+        0
+      ],
+      "lookTo": [
+        0,
+        1.28,
+        0
+      ],
+      "fovFrom": 38,
+      "fovTo": 37,
+      "ease": "linear",
+      "handheld": 0.025
+    },
+    {
+      "id": "n_renaud",
+      "env": "nightAvenue",
+      "from": [
+        0.15,
+        1.56,
+        2.1
+      ],
+      "to": [
+        0.1,
+        1.54,
+        1.95
+      ],
+      "lookFrom": [
+        0.95,
+        1.55,
+        0
+      ],
+      "lookTo": [
+        0.95,
+        1.53,
+        0
+      ],
+      "fovFrom": 30,
+      "fovTo": 29,
+      "ease": "out",
+      "handheld": 0.018
+    },
+    {
+      "id": "n_close_e",
+      "env": "nightAvenue",
+      "from": [
+        -0.2,
+        1.52,
+        2.0
+      ],
+      "to": [
+        -0.15,
+        1.5,
+        1.9
+      ],
+      "lookFrom": [
+        -0.9,
+        1.5,
+        0
+      ],
+      "lookTo": [
+        -0.9,
+        1.48,
+        0
+      ],
+      "fovFrom": 30,
+      "fovTo": 29,
+      "ease": "out",
+      "handheld": 0.018
+    },
+    {
+      "id": "n_low",
+      "env": "nightAvenue",
+      "from": [
+        2.0,
+        0.9,
+        2.6
+      ],
+      "to": [
+        1.8,
+        0.86,
+        2.3
+      ],
+      "lookFrom": [
+        0.3,
+        1.35,
+        0
+      ],
+      "lookTo": [
+        0.3,
+        1.33,
+        0
+      ],
+      "fovFrom": 42,
+      "fovTo": 40,
+      "ease": "out",
+      "handheld": 0.025
+    },
+    {
+      "id": "n_away",
+      "env": "nightAvenue",
+      "from": [
+        5.4,
+        3.4,
+        7.4
+      ],
+      "to": [
+        4.8,
+        3.1,
+        6.6
+      ],
+      "lookFrom": [
+        -1,
+        1.3,
+        1
+      ],
+      "lookTo": [
+        -1.4,
+        1.3,
+        1.4
+      ],
+      "fovFrom": 44,
+      "fovTo": 42,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "m_wide",
+      "env": "metroEntrance",
+      "from": [
+        4.8,
+        3.2,
+        7.0
+      ],
+      "to": [
+        4.2,
+        3.0,
+        6.2
+      ],
+      "lookFrom": [
+        -1,
+        1.6,
+        -1
+      ],
+      "lookTo": [
+        -1,
+        1.55,
+        -1.4
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.035
+    },
+    {
+      "id": "m_two",
+      "env": "metroEntrance",
+      "from": [
+        0,
+        1.56,
+        3.2
+      ],
+      "to": [
+        0,
+        1.54,
+        3.0
+      ],
+      "lookFrom": [
+        0,
+        1.15,
+        0
+      ],
+      "lookTo": [
+        0,
+        1.13,
+        0
+      ],
+      "fovFrom": 36,
+      "fovTo": 35,
+      "ease": "linear",
+      "handheld": 0.02
+    },
+    {
+      "id": "m_close",
+      "env": "metroEntrance",
+      "from": [
+        0.4,
+        1.5,
+        1.8
+      ],
+      "to": [
+        0.35,
+        1.48,
+        1.7
+      ],
+      "lookFrom": [
+        0.6,
+        1.5,
+        0
+      ],
+      "lookTo": [
+        0.6,
+        1.48,
+        0
+      ],
+      "fovFrom": 30,
+      "fovTo": 29,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "m_arrive",
+      "env": "metroEntrance",
+      "from": [
+        5.6,
+        2.8,
+        -2.5
+      ],
+      "to": [
+        5.0,
+        2.6,
+        -1.8
+      ],
+      "lookFrom": [
+        0,
+        1.6,
+        4
+      ],
+      "lookTo": [
+        0,
+        1.55,
+        3.8
+      ],
+      "fovFrom": 42,
+      "fovTo": 40,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "h_wide",
+      "env": "hospitalCorridor",
+      "from": [
+        0.5,
+        2.1,
+        9.5
+      ],
+      "to": [
+        0.4,
+        2.0,
+        8.5
+      ],
+      "lookFrom": [
+        0,
+        1.4,
+        -3
+      ],
+      "lookTo": [
+        0,
+        1.38,
+        -3.5
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "h_nurse",
+      "env": "hospitalCorridor",
+      "from": [
+        0.9,
+        1.66,
+        -3.0
+      ],
+      "to": [
+        0.85,
+        1.64,
+        -3.2
+      ],
+      "lookFrom": [
+        -1.2,
+        1.4,
+        -6
+      ],
+      "lookTo": [
+        -1.2,
+        1.38,
+        -6
+      ],
+      "fovFrom": 36,
+      "fovTo": 35,
+      "ease": "out",
+      "handheld": 0.018
+    },
+    {
+      "id": "h_track",
+      "env": "hospitalCorridor",
+      "from": [
+        1.0,
+        1.66,
+        4.2
+      ],
+      "to": [
+        0.8,
+        1.64,
+        3.6
+      ],
+      "lookFrom": [
+        0,
+        1.35,
+        0
+      ],
+      "lookTo": [
+        0,
+        1.33,
+        0
+      ],
+      "fovFrom": 40,
+      "fovTo": 38,
+      "ease": "linear",
+      "handheld": 0.03
+    },
+    {
+      "id": "h_door",
+      "env": "hospitalCorridor",
+      "from": [
+        1.2,
+        1.7,
+        2.8
+      ],
+      "to": [
+        1.1,
+        1.68,
+        2.6
+      ],
+      "lookFrom": [
+        1.7,
+        1.5,
+        4
+      ],
+      "lookTo": [
+        1.7,
+        1.48,
+        4
+      ],
+      "fovFrom": 40,
+      "fovTo": 38,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "h_door2",
+      "env": "hospitalCorridor",
+      "from": [
+        2.6,
+        1.8,
+        5.2
+      ],
+      "to": [
+        2.4,
+        1.75,
+        4.8
+      ],
+      "lookFrom": [
+        1.3,
+        1.45,
+        3.8
+      ],
+      "lookTo": [
+        1.2,
+        1.43,
+        3.7
+      ],
+      "fovFrom": 36,
+      "fovTo": 35,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "r_wide",
+      "env": "hospitalRoom",
+      "from": [
+        3.0,
+        2.2,
+        4.8
+      ],
+      "to": [
+        2.7,
+        2.1,
+        4.3
+      ],
+      "lookFrom": [
+        -0.5,
+        1.2,
+        0.45
+      ],
+      "lookTo": [
+        -0.5,
+        1.18,
+        0.45
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.025
+    },
+    {
+      "id": "r_hug",
+      "env": "hospitalRoom",
+      "from": [
+        -2.85,
+        1.58,
+        2.15
+      ],
+      "to": [
+        -2.7,
+        1.55,
+        1.95
+      ],
+      "lookFrom": [
+        -0.2,
+        1.02,
+        0.8
+      ],
+      "lookTo": [
+        -0.15,
+        1.0,
+        0.8
+      ],
+      "fovFrom": 40,
+      "fovTo": 39,
+      "ease": "linear",
+      "handheld": 0.018
+    },
+    {
+      "id": "r_bed",
+      "env": "hospitalRoom",
+      "from": [
+        0.2,
+        1.6,
+        3.2
+      ],
+      "to": [
+        0.15,
+        1.58,
+        3.0
+      ],
+      "lookFrom": [
+        -0.7,
+        1.22,
+        0.6
+      ],
+      "lookTo": [
+        -0.7,
+        1.2,
+        0.6
+      ],
+      "fovFrom": 34,
+      "fovTo": 33,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "r_door_e",
+      "env": "hospitalRoom",
+      "from": [
+        1.5,
+        1.6,
+        2.6
+      ],
+      "to": [
+        1.4,
+        1.58,
+        2.4
+      ],
+      "lookFrom": [
+        1.1,
+        1.5,
+        1.5
+      ],
+      "lookTo": [
+        1.1,
+        1.48,
+        1.5
+      ],
+      "fovFrom": 32,
+      "fovTo": 31,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "r_corridor",
+      "env": "hospitalRoom",
+      "from": [
+        3.4,
+        1.7,
+        5.4
+      ],
+      "to": [
+        3.1,
+        1.68,
+        5.0
+      ],
+      "lookFrom": [
+        2.0,
+        1.5,
+        2.8
+      ],
+      "lookTo": [
+        2.0,
+        1.48,
+        2.8
+      ],
+      "fovFrom": 38,
+      "fovTo": 37,
+      "ease": "out",
+      "handheld": 0.02
+    },
+    {
+      "id": "r_renaud",
+      "env": "hospitalRoom",
+      "from": [
+        1.4,
+        1.58,
+        2.2
+      ],
+      "to": [
+        1.3,
+        1.56,
+        2.1
+      ],
+      "lookFrom": [
+        2.3,
+        1.55,
+        2.9
+      ],
+      "lookTo": [
+        2.3,
+        1.53,
+        2.9
+      ],
+      "fovFrom": 32,
+      "fovTo": 31,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "r_wide2",
+      "env": "hospitalRoom",
+      "from": [
+        3.2,
+        2.2,
+        5.0
+      ],
+      "to": [
+        2.9,
+        2.1,
+        4.5
+      ],
+      "lookFrom": [
+        0.6,
+        1.3,
+        1.2
+      ],
+      "lookTo": [
+        0.6,
+        1.28,
+        1.2
+      ],
+      "fovFrom": 44,
+      "fovTo": 42,
+      "ease": "out",
+      "handheld": 0.025
+    },
+    {
+      "id": "l_wide",
+      "env": "laundrette",
+      "from": [
+        3.8,
+        2.9,
+        7.0
+      ],
+      "to": [
+        3.4,
+        2.7,
+        6.3
+      ],
+      "lookFrom": [
+        -0.2,
+        1.4,
+        0
+      ],
+      "lookTo": [
+        -0.2,
+        1.38,
+        0
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.025
+    },
+    {
+      "id": "l_bench",
+      "env": "laundrette",
+      "from": [
+        0.5,
+        1.76,
+        4.3
+      ],
+      "to": [
+        0.4,
+        1.72,
+        4.0
+      ],
+      "lookFrom": [
+        -0.4,
+        1.15,
+        -0.2
+      ],
+      "lookTo": [
+        -0.4,
+        1.13,
+        -0.2
+      ],
+      "fovFrom": 40,
+      "fovTo": 39,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "l_two",
+      "env": "laundrette",
+      "from": [
+        1.2,
+        1.64,
+        3.9
+      ],
+      "to": [
+        1.1,
+        1.62,
+        3.6
+      ],
+      "lookFrom": [
+        0,
+        1.2,
+        -0.1
+      ],
+      "lookTo": [
+        0,
+        1.18,
+        -0.1
+      ],
+      "fovFrom": 40,
+      "fovTo": 39,
+      "ease": "linear",
+      "handheld": 0.02
+    },
+    {
+      "id": "l_close_e",
+      "env": "laundrette",
+      "from": [
+        -0.5,
+        1.52,
+        1.8
+      ],
+      "to": [
+        -0.45,
+        1.5,
+        1.7
+      ],
+      "lookFrom": [
+        -0.6,
+        1.5,
+        0
+      ],
+      "lookTo": [
+        -0.6,
+        1.48,
+        0
+      ],
+      "fovFrom": 30,
+      "fovTo": 29,
+      "ease": "out",
+      "handheld": 0.015
+    },
+    {
+      "id": "l_wide2",
+      "env": "laundrette",
+      "from": [
+        4.2,
+        2.8,
+        7.0
+      ],
+      "to": [
+        3.8,
+        2.6,
+        6.2
+      ],
+      "lookFrom": [
+        -0.2,
+        1.5,
+        0.4
+      ],
+      "lookTo": [
+        -0.2,
+        1.45,
+        0.6
+      ],
+      "fovFrom": 44,
+      "fovTo": 42,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "d_wide",
+      "env": "dawnStreet",
+      "from": [
+        0,
+        2.4,
+        11
+      ],
+      "to": [
+        -0.2,
+        2.3,
+        9.6
+      ],
+      "lookFrom": [
+        0,
+        1.8,
+        0
+      ],
+      "lookTo": [
+        0,
+        1.7,
+        -1
+      ],
+      "fovFrom": 48,
+      "fovTo": 46,
+      "ease": "out",
+      "handheld": 0.03
+    },
+    {
+      "id": "d_walk",
+      "env": "dawnStreet",
+      "from": [
+        2.6,
+        1.9,
+        5.3
+      ],
+      "to": [
+        2.2,
+        1.85,
+        4.4
+      ],
+      "lookFrom": [
+        0,
+        1.5,
+        1
+      ],
+      "lookTo": [
+        0.2,
+        1.48,
+        0.2
+      ],
+      "fovFrom": 40,
+      "fovTo": 38,
+      "ease": "linear",
+      "handheld": 0.03
+    },
+    {
+      "id": "d_close",
+      "env": "dawnStreet",
+      "from": [
+        1.1,
+        1.56,
+        0.0
+      ],
+      "to": [
+        1.0,
+        1.54,
+        -0.15
+      ],
+      "lookFrom": [
+        0.4,
+        1.5,
+        2.0
+      ],
+      "lookTo": [
+        0.4,
+        1.48,
+        2.0
+      ],
+      "fovFrom": 32,
+      "fovTo": 31,
+      "ease": "out",
+      "handheld": 0.018
+    },
+    {
+      "id": "d_wide2",
+      "env": "dawnStreet",
+      "from": [
+        3.2,
+        2.2,
+        4.8
+      ],
+      "to": [
+        2.7,
+        2.1,
+        3.8
+      ],
+      "lookFrom": [
+        0.4,
+        1.4,
+        -1
+      ],
+      "lookTo": [
+        0.4,
+        1.4,
+        -3
+      ],
+      "fovFrom": 44,
+      "fovTo": 42,
+      "ease": "linear",
+      "handheld": 0.03
+    },
+    {
+      "id": "d_end",
+      "env": "dawnStreet",
+      "from": [
+        6,
+        4,
+        12
+      ],
+      "to": [
+        5.4,
+        3.6,
+        10
+      ],
+      "lookFrom": [
+        0,
+        1.6,
+        -6
+      ],
+      "lookTo": [
+        0,
+        1.55,
+        -8
+      ],
+      "fovFrom": 46,
+      "fovTo": 44,
+      "ease": "out",
+      "handheld": 0.03
+    }
+  ]
+}

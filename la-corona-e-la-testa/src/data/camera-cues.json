@@ -1,0 +1,481 @@
+{
+  "shots": {
+    "court_est": {
+      "environment": "court",
+      "position": "cam_court_est",
+      "target": "court_center",
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "court_wide": {
+      "environment": "court",
+      "position": {
+        "character": "donnino",
+        "offset": [
+          4,
+          2.2,
+          6
+        ]
+      },
+      "target": {
+        "character": "donnino",
+        "offset": [
+          0,
+          1.1,
+          0
+        ]
+      },
+      "fov": 41,
+      "ease": "smooth"
+    },
+    "court_crown_close": {
+      "environment": "court",
+      "position": "cam_court_crown",
+      "target": {
+        "character": "donnino",
+        "offset": [
+          0,
+          1.3,
+          0
+        ]
+      },
+      "fov": 34,
+      "ease": "smooth"
+    },
+    "court_prisoners": {
+      "environment": "court",
+      "position": "cam_court_prisoners",
+      "target": "court_cristiano",
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "court_two": {
+      "environment": "court",
+      "position": "cam_court_two",
+      "target": {
+        "character": "donnino",
+        "offset": [
+          0,
+          1.35,
+          0
+        ]
+      },
+      "fov": 31,
+      "ease": "smooth"
+    },
+    "court_exit": {
+      "environment": "court",
+      "position": "cam_court_exit",
+      "target": "court_exit",
+      "fov": 43,
+      "ease": "smooth"
+    },
+    "crossroads_est": {
+      "environment": "crossroads",
+      "position": "cam_cross_est",
+      "target": "cross_center",
+      "fov": 45,
+      "ease": "smooth"
+    },
+    "crossroads_walk": {
+      "environment": "crossroads",
+      "position": {
+        "character": "donnino",
+        "offset": [
+          4,
+          2,
+          5
+        ]
+      },
+      "target": {
+        "character": "donnino",
+        "offset": [
+          0,
+          1.05,
+          0
+        ]
+      },
+      "fov": 41,
+      "ease": "smooth"
+    },
+    "cross_two": {
+      "environment": "crossroads",
+      "position": "cam_cross_two",
+      "target": [
+        0,
+        1.15,
+        1.5
+      ],
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "cross_road": {
+      "environment": "crossroads",
+      "position": "cam_cross_road",
+      "target": [
+        -1.5,
+        1.2,
+        -0.5
+      ],
+      "fov": 40,
+      "ease": "smooth"
+    },
+    "cross_choose": {
+      "environment": "crossroads",
+      "position": "cam_cross_choose",
+      "target": [
+        3,
+        1.15,
+        -2
+      ],
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "cross_exit": {
+      "environment": "crossroads",
+      "position": "cam_cross_exit",
+      "target": [
+        5,
+        1.1,
+        -6
+      ],
+      "fov": 44,
+      "ease": "smooth"
+    },
+    "via_est": {
+      "environment": "viaEmilia",
+      "position": "cam_via_est",
+      "target": [
+        2,
+        1.2,
+        0
+      ],
+      "fov": 45,
+      "ease": "smooth"
+    },
+    "via_walk": {
+      "environment": "viaEmilia",
+      "position": {
+        "character": "donnino",
+        "offset": [
+          4,
+          2,
+          6
+        ]
+      },
+      "target": {
+        "character": "donnino",
+        "offset": [
+          0,
+          1.05,
+          0
+        ]
+      },
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "via_farm": {
+      "environment": "viaEmilia",
+      "position": "cam_via_farm",
+      "target": [
+        7,
+        1.1,
+        0
+      ],
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "via_dog": {
+      "environment": "viaEmilia",
+      "position": "cam_via_dog",
+      "target": [
+        8.5,
+        0.72,
+        -1.2
+      ],
+      "fov": 30,
+      "ease": "smooth"
+    },
+    "via_road": {
+      "environment": "viaEmilia",
+      "position": "cam_via_road",
+      "target": [
+        8,
+        1.15,
+        -1
+      ],
+      "fov": 39,
+      "ease": "smooth"
+    },
+    "via_milestone": {
+      "environment": "viaEmilia",
+      "position": "cam_via_milestone",
+      "target": "via_milestone",
+      "fov": 32,
+      "ease": "smooth"
+    },
+    "via_farewell": {
+      "environment": "viaEmilia",
+      "position": "cam_via_farewell",
+      "target": [
+        6.5,
+        1.05,
+        0
+      ],
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "via_exit": {
+      "environment": "viaEmilia",
+      "position": "cam_via_exit",
+      "target": [
+        -8,
+        1.2,
+        0
+      ],
+      "fov": 45,
+      "ease": "smooth"
+    },
+    "stirone_est": {
+      "environment": "stirone",
+      "position": "cam_stirone_est",
+      "target": [
+        0,
+        1.1,
+        -2
+      ],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "stirone_walk": {
+      "environment": "stirone",
+      "position": {
+        "character": "donnino",
+        "offset": [
+          4,
+          2,
+          6
+        ]
+      },
+      "target": {
+        "character": "donnino",
+        "offset": [
+          0,
+          1.05,
+          0
+        ]
+      },
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "stirone_two": {
+      "environment": "stirone",
+      "position": "cam_stirone_two",
+      "target": [
+        0,
+        1.2,
+        2
+      ],
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "stirone_close": {
+      "environment": "stirone",
+      "position": "cam_stirone_close",
+      "target": {
+        "character": "donnino",
+        "offset": [
+          0,
+          1.2,
+          0
+        ]
+      },
+      "fov": 30,
+      "ease": "smooth"
+    },
+    "stirone_river": {
+      "environment": "stirone",
+      "position": "cam_stirone_river",
+      "target": [
+        0,
+        0.6,
+        -6
+      ],
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "stirone_body": {
+      "environment": "stirone",
+      "position": "cam_stirone_body",
+      "target": [
+        0,
+        0.35,
+        1.2
+      ],
+      "fov": 34,
+      "ease": "smooth"
+    },
+    "dawn_est": {
+      "environment": "stironeDawn",
+      "position": "cam_dawn_est",
+      "target": [
+        -1,
+        1.1,
+        -2
+      ],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "dawn_witness": {
+      "environment": "stironeDawn",
+      "position": "cam_dawn_witness",
+      "target": [
+        2,
+        1.15,
+        1
+      ],
+      "fov": 37,
+      "ease": "smooth"
+    },
+    "dawn_body": {
+      "environment": "stironeDawn",
+      "position": "cam_dawn_body",
+      "target": [
+        0,
+        0.55,
+        1
+      ],
+      "fov": 31,
+      "ease": "smooth"
+    },
+    "dawn_walk": {
+      "environment": "stironeDawn",
+      "position": {
+        "character": "donnino",
+        "offset": [
+          3.2,
+          1.8,
+          4.2
+        ]
+      },
+      "target": {
+        "character": "donnino",
+        "offset": [
+          0,
+          1.15,
+          0
+        ]
+      },
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "dawn_cross": {
+      "environment": "stironeDawn",
+      "position": "cam_dawn_cross",
+      "target": [
+        -3,
+        1.0,
+        -11
+      ],
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "dawn_lie": {
+      "environment": "stironeDawn",
+      "position": "cam_dawn_lie",
+      "target": [
+        -7,
+        0.65,
+        -15
+      ],
+      "fov": 34,
+      "ease": "smooth"
+    },
+    "fidenza_est": {
+      "environment": "fidenza",
+      "position": "cam_fidenza_est",
+      "target": [
+        0,
+        3.2,
+        -5
+      ],
+      "fov": 44,
+      "ease": "smooth"
+    },
+    "fidenza_wide": {
+      "environment": "fidenza",
+      "position": "cam_fidenza_wide",
+      "target": [
+        1,
+        2.4,
+        -2
+      ],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "fidenza_two": {
+      "environment": "fidenza",
+      "position": "cam_fidenza_two",
+      "target": [
+        3,
+        1.4,
+        2.8
+      ],
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "fidenza_pilgrim": {
+      "environment": "fidenza",
+      "position": "cam_fidenza_pilgrim",
+      "target": [
+        5,
+        1.4,
+        4
+      ],
+      "fov": 35,
+      "ease": "smooth"
+    },
+    "fidenza_child": {
+      "environment": "fidenza",
+      "position": "cam_fidenza_child",
+      "target": [
+        3.8,
+        1.15,
+        4.6
+      ],
+      "fov": 34,
+      "ease": "smooth"
+    },
+    "fidenza_facade": {
+      "environment": "fidenza",
+      "position": "cam_fidenza_facade",
+      "target": [
+        0,
+        4,
+        -6
+      ],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "fidenza_statue": {
+      "environment": "fidenza",
+      "position": [
+        0,
+        2.4,
+        3.6
+      ],
+      "positionTo": [
+        0,
+        2.1,
+        1.8
+      ],
+      "target": [
+        0,
+        2.2,
+        -4.2
+      ],
+      "fov": 38,
+      "ease": "smooth"
+    }
+  }
+}

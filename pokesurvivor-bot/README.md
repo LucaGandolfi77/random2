@@ -9,9 +9,10 @@ cards automatically.
 It reads the game's current player/enemy state without changing it, and sends
 movement through the same keyboard input path used by a human player.
 
-During level-ups it prioritizes the attack in slot 1, other attack moves, and
-the Power/damage upgrade before generic stats. After every level-up choice it
-presses `1` to reactivate attack slot 1. Movement avoids damaging liquid
+During level-ups it always takes an upgrade of the attack in slot 1 when one
+is offered; otherwise it prioritizes other attack moves and the Power/damage
+upgrade before generic stats. After every level-up choice it presses `1` to
+reactivate attack slot 1. Movement avoids damaging liquid
 (lava, swamp, poison, spark, ice), raised wall formations, trees, rocks,
 chests, and other solid terrain props. Plain **water** is harmless in the
 game, so it is only mildly unattractive: the bot prefers land but still
@@ -86,7 +87,10 @@ the guest flow.
 
 After account login, the bot automatically selects the optional email-link
 dialog's **Do not ask me again** action. It falls back to **Not now** on older
-game builds. It does not link or change the account email.
+game builds. It does not link or change the account email. The game's optional
+**new video** promo on the main menu is closed with its **Ahora no** button
+(never by opening YouTube); menu clicks are retried if such an overlay appears
+mid-click.
 
 Useful options:
 
@@ -172,7 +176,7 @@ quelle con classe CSS `evo`, e assegna un punteggio con `_card_score`:
 
 ```text
 evoluzione                        +1000
-upgrade dell'attacco in slot 1     +850   (letto dallo snapshot)
+upgrade dell'attacco in slot 1     +1200   (letto dallo snapshot)
 altri attacchi propri               +420
 nuova mossa ("new"/"aprende")      +300
 power / damage                     +240
@@ -185,7 +189,11 @@ experience                          +45
 heal / baya                         +35
 ```
 
-Vince la carta col punteggio più alto (parimerito: la prima in ordine). Dopo
+Se tra le carte c'è un upgrade (o un'evoluzione) della mossa in slot 1, quella
+carta vince sempre, qualunque sia il punteggio delle altre: la riga del titolo
+della carta deve iniziare con il nome localizzato della mossa (il bot lo legge
+dallo snapshot e lo traduce con la stessa tabella del gioco). Altrimenti vince
+la carta col punteggio più alto (parimerito: la prima in ordine). Dopo
 la scelta preme `1` per riattivare l'attacco dello slot 1. Per gli **item**
 sceglie sempre la seconda carta (il nuovo oggetto), così non resta una
 ricompensa obsoleta per sempre; per i **bond** clicca la prima carta,
@@ -195,9 +203,11 @@ gestendo sia i bond semplici sia quelli a doppia schermata.
 
 1. **Sessione**: boot → tap-start → login (guest o credenziali) → test di
    personalità (risposte in sequenza) → schermata result/starters → menu →
-   scarta il prompt di recupero email (`#rec-never`, fallback `#rec-later`).
-2. **Avvio run**: torna al menu, scarta nuovamente il prompt di recupero se
-   riapparso (es. dopo un salvataggio cloud), clicca Play.
+   scarta il prompt di recupero email (`#rec-never`, fallback `#rec-later`) e
+   il promo del nuovo video (`#video-close`, senza aprire YouTube).
+2. **Avvio run**: torna al menu, scarta nuovamente i prompt (recupero email e
+   video) se riapparsi (es. dopo un salvataggio cloud), clicca Play; se
+   un overlay blocca il click, lo scarta e riprova.
 3. **Run**: loop a tick finché non appare `#scr-over` (esito `died`) oppure
    si raggiunge `--duration` (esito `timeout` → `Escape` → pausa → Quit).
 4. **Chiusura**: `#btn-again` per tornare al menu, scarta il prompt di

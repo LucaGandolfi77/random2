@@ -1,0 +1,1845 @@
+{
+  "meta": {
+    "title": "IL PREZZO DELLA LIBERTÀ",
+    "subtitle": "PARIS, HIVER 2000",
+    "language": "it",
+    "year": 2000
+  },
+  "acts": [
+    {
+      "id": "act1",
+      "title": "LA LIBERTÀ NON HA UN INDIRIZZO",
+      "scenes": [
+        {
+          "id": "a1_prison",
+          "env": "prison",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 9,
+              "shot": "p_open",
+              "note": "Alba grigia. Il cancello del carcere."
+            },
+            {
+              "kind": "action",
+              "dur": 1.5,
+              "shot": "p_open",
+              "event": "a1_gate_open"
+            },
+            {
+              "kind": "hold",
+              "dur": 4.5,
+              "shot": "p_gate",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    0,
+                    3.3
+                  ],
+                  "dur": 4,
+                  "face": 0.1
+                }
+              ]
+            },
+            {
+              "kind": "line",
+              "dur": 3.6,
+              "shot": "p_gate",
+              "speaker": "GUARDIA",
+              "text": "Moreau. I tuoi documenti.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 0.8,
+              "shot": "p_gate"
+            },
+            {
+              "kind": "line",
+              "dur": 2.2,
+              "shot": "p_gate",
+              "speaker": "ETIENNE",
+              "text": "Grazie.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "p_gate",
+              "speaker": "GUARDIA",
+              "text": "Non tornare.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 3.6,
+              "shot": "p_gate",
+              "speaker": "ETIENNE",
+              "text": "Non era nei miei programmi.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.2,
+              "shot": "p_gate"
+            },
+            {
+              "kind": "action",
+              "dur": 1.5,
+              "shot": "p_face",
+              "event": "a1_gate_close"
+            },
+            {
+              "kind": "hold",
+              "dur": 4.1,
+              "shot": "p_face"
+            },
+            {
+              "kind": "line",
+              "dur": 4.6,
+              "shot": "p_face",
+              "speaker": "ETIENNE_VO",
+              "text": "Pensavo che la libertà avesse un rumore.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.2,
+              "shot": "p_face"
+            },
+            {
+              "kind": "line",
+              "dur": 3,
+              "shot": "p_face",
+              "speaker": "ETIENNE_VO",
+              "text": "Invece era silenziosa.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "hold",
+              "dur": 1,
+              "shot": "p_face"
+            },
+            {
+              "kind": "line",
+              "dur": 3.4,
+              "shot": "p_face",
+              "speaker": "ETIENNE_VO",
+              "text": "E non sapevo dove andare.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "action",
+              "dur": 2.5,
+              "shot": "p_photo",
+              "event": "a1_photo_out",
+              "poses": {
+                "etienne": "holdPhoto"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 7,
+              "shot": "p_photo"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "p_photo",
+              "event": "a1_photo_back",
+              "poses": {
+                "etienne": "idle"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "p_bus"
+            },
+            {
+              "kind": "action",
+              "dur": 4,
+              "shot": "p_bus",
+              "event": "a1_bus_arrive"
+            },
+            {
+              "kind": "hold",
+              "dur": 5,
+              "shot": "p_bus",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    5.4,
+                    10.6
+                  ],
+                  "dur": 3.5,
+                  "face": -1.1
+                }
+              ]
+            },
+            {
+              "kind": "action",
+              "dur": 2.5,
+              "shot": "p_bus",
+              "event": "a1_bus_leave"
+            },
+            {
+              "kind": "hold",
+              "dur": 4.5,
+              "shot": "p_bus"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "act2",
+      "title": "LA CITTÀ DEI GIUSTI",
+      "scenes": [
+        {
+          "id": "a2_bakery",
+          "env": "bakery",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "b_wide"
+            },
+            {
+              "kind": "action",
+              "dur": 1.5,
+              "shot": "b_wide",
+              "event": "a2_door_open"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "b_two"
+            },
+            {
+              "kind": "line",
+              "dur": 3,
+              "shot": "b_two",
+              "speaker": "PROPRIETARIO",
+              "text": "Hai esperienza?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 0.8,
+              "shot": "b_two"
+            },
+            {
+              "kind": "line",
+              "dur": 3.2,
+              "shot": "b_two",
+              "speaker": "ETIENNE",
+              "text": "Ho lavorato in fabbrica.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 2.4,
+              "shot": "b_two",
+              "speaker": "PROPRIETARIO",
+              "text": "Per quanto?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 2.4,
+              "shot": "b_two",
+              "speaker": "ETIENNE",
+              "text": "Abbastanza.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.2,
+              "shot": "b_two"
+            },
+            {
+              "kind": "line",
+              "dur": 2.6,
+              "shot": "b_two",
+              "speaker": "PROPRIETARIO",
+              "text": "Documenti?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "b_docs",
+              "event": "a2_docs_shown",
+              "poses": {
+                "etienne": "holdPaper"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "b_docs"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "b_two",
+              "speaker": "PROPRIETARIO",
+              "text": "Mi dispiace.",
+              "emotion": "confused"
+            },
+            {
+              "kind": "line",
+              "dur": 2.2,
+              "shot": "b_two",
+              "speaker": "ETIENNE",
+              "text": "Non ancora.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "line",
+              "dur": 1.8,
+              "shot": "b_two",
+              "speaker": "PROPRIETARIO",
+              "text": "Come?",
+              "emotion": "confused"
+            },
+            {
+              "kind": "line",
+              "dur": 4,
+              "shot": "b_two",
+              "speaker": "ETIENNE",
+              "text": "Non le ho ancora chiesto niente.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "b_close"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "b_ots",
+              "event": "a2_door_close",
+              "poses": {
+                "etienne": "idle"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "b_out"
+            }
+          ]
+        },
+        {
+          "id": "a2_office",
+          "env": "jobOffice",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "j_wide"
+            },
+            {
+              "kind": "line",
+              "dur": 3,
+              "shot": "j_ots",
+              "speaker": "IMPIEGATO",
+              "text": "Un indirizzo stabile.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.5,
+              "shot": "j_ots"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "j_ots",
+              "speaker": "ETIENNE",
+              "text": "Non ce l'ho.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "hold",
+              "dur": 1,
+              "shot": "j_ots"
+            },
+            {
+              "kind": "line",
+              "dur": 3.6,
+              "shot": "j_ots",
+              "speaker": "IMPIEGATO",
+              "text": "Senza indirizzo non possiamo.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "j_close"
+            },
+            {
+              "kind": "action",
+              "dur": 1.5,
+              "shot": "j_wide",
+              "event": "a2_paper_returned"
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "j_leave",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    0,
+                    3.6
+                  ],
+                  "dur": 3,
+                  "face": 0
+                }
+              ]
+            },
+            {
+              "kind": "action",
+              "dur": 1.5,
+              "shot": "j_leave",
+              "event": "a2_office_door"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "j_leave"
+            }
+          ]
+        },
+        {
+          "id": "a2_belleville",
+          "env": "belleville",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "s_wide"
+            },
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "s_track",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    0,
+                    -3
+                  ],
+                  "dur": 10,
+                  "face": 3.14159
+                }
+              ]
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "s_track"
+            },
+            {
+              "kind": "line",
+              "dur": 1.6,
+              "shot": "s_market",
+              "speaker": "PASSANTE",
+              "text": "Scusa.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "s_market"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "s_market"
+            },
+            {
+              "kind": "hold",
+              "dur": 5,
+              "shot": "s_reflect",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    0,
+                    -12
+                  ],
+                  "dur": 12,
+                  "face": 3.14159
+                }
+              ]
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "s_reflect"
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "s_wide2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "act3",
+      "title": "LA BAMBINA E LA CASSETTA",
+      "scenes": [
+        {
+          "id": "a3_gare",
+          "env": "gare",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 8,
+              "shot": "g_hall"
+            },
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "g_bench"
+            },
+            {
+              "kind": "line",
+              "dur": 2.2,
+              "shot": "g_bench",
+              "speaker": "MINA",
+              "text": "Scusi.",
+              "emotion": "afraid"
+            },
+            {
+              "kind": "hold",
+              "dur": 0.8,
+              "shot": "g_bench"
+            },
+            {
+              "kind": "line",
+              "dur": 1.6,
+              "shot": "g_ots_e",
+              "speaker": "ETIENNE",
+              "text": "Sì?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 3.4,
+              "shot": "g_bench",
+              "speaker": "MINA",
+              "text": "Lei sa leggere una cartina?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 2.4,
+              "shot": "g_ots_e",
+              "speaker": "ETIENNE",
+              "text": "Più o meno.",
+              "emotion": "confused"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "g_bench",
+              "speaker": "MINA",
+              "text": "È un bene.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 1.6,
+              "shot": "g_ots_e",
+              "speaker": "ETIENNE",
+              "text": "Perché?",
+              "emotion": "confused"
+            },
+            {
+              "kind": "line",
+              "dur": 3.6,
+              "shot": "g_bench",
+              "speaker": "MINA",
+              "text": "Perché io non so dove sono.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "g_two",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    0.55,
+                    0
+                  ],
+                  "dur": 2.6,
+                  "face": 0
+                }
+              ]
+            },
+            {
+              "kind": "action",
+              "dur": 0.8,
+              "shot": "g_two",
+              "poses": {
+                "etienne": "sit",
+                "mina": "sit"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 2.2,
+              "shot": "g_two"
+            },
+            {
+              "kind": "line",
+              "dur": 4.2,
+              "shot": "g_two",
+              "speaker": "MINA",
+              "text": "Mia madre lavora di notte. Non è tornata.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.2,
+              "shot": "g_two"
+            },
+            {
+              "kind": "line",
+              "dur": 4.6,
+              "shot": "g_two",
+              "speaker": "MINA",
+              "text": "Una signora ha chiamato. Dice che è in ospedale.",
+              "emotion": "afraid"
+            },
+            {
+              "kind": "line",
+              "dur": 2.2,
+              "shot": "g_two",
+              "speaker": "ETIENNE",
+              "text": "Quale ospedale?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 3.2,
+              "shot": "g_two",
+              "speaker": "MINA",
+              "text": "Non lo so. Ho solo questo.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "g_close_m",
+              "event": "a3_paper_out",
+              "poses": {
+                "mina": "holdPaper"
+              }
+            },
+            {
+              "kind": "line",
+              "dur": 3.8,
+              "shot": "g_close_m",
+              "speaker": "ETIENNE",
+              "text": "Saint-Louis. È scritto qui.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 4.4,
+              "shot": "g_close_m",
+              "speaker": "MINA",
+              "text": "Ci sono stata. Non mi hanno lasciata entrare.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "g_close_m"
+            },
+            {
+              "kind": "line",
+              "dur": 3,
+              "shot": "g_two2",
+              "speaker": "ETIENNE",
+              "text": "Chi ti ha dato il foglio?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 3.2,
+              "shot": "g_two2",
+              "speaker": "MINA",
+              "text": "Madame Rose. La lavanderia.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "g_two2"
+            },
+            {
+              "kind": "line",
+              "dur": 3.4,
+              "shot": "g_two2",
+              "speaker": "MINA",
+              "text": "Posso farle sentire una cosa?",
+              "emotion": "hopeful"
+            },
+            {
+              "kind": "action",
+              "dur": 1.2,
+              "shot": "g_tape",
+              "event": "a3_tape_out",
+              "poses": {
+                "mina": "holdTape"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "g_tape"
+            },
+            {
+              "kind": "line",
+              "dur": 3,
+              "shot": "g_tape",
+              "speaker": "AICHA_TAPE",
+              "text": "Mina, amore mio.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "line",
+              "dur": 5.4,
+              "shot": "g_tape",
+              "speaker": "AICHA_TAPE",
+              "text": "Se ascolti questo messaggio, sono ancora al lavoro.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "line",
+              "dur": 2.6,
+              "shot": "g_tape",
+              "speaker": "AICHA_TAPE",
+              "text": "Non preoccuparti.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "line",
+              "dur": 4.4,
+              "shot": "g_tape",
+              "speaker": "AICHA_TAPE",
+              "text": "Domani facciamo colazione insieme.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "action",
+              "dur": 1.5,
+              "shot": "g_two2",
+              "event": "a3_tape_stop",
+              "poses": {
+                "mina": "sit"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "g_two2"
+            },
+            {
+              "kind": "line",
+              "dur": 3.6,
+              "shot": "g_close_m",
+              "speaker": "MINA",
+              "text": "Mi aveva promesso le crêpes.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "g_close_m"
+            },
+            {
+              "kind": "line",
+              "dur": 3.4,
+              "shot": "g_two2",
+              "speaker": "ETIENNE",
+              "text": "Allora andiamo a prenderle.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "line",
+              "dur": 1.8,
+              "shot": "g_two2",
+              "speaker": "MINA",
+              "text": "Dove?",
+              "emotion": "surprised"
+            },
+            {
+              "kind": "line",
+              "dur": 2.6,
+              "shot": "g_two2",
+              "speaker": "ETIENNE",
+              "text": "Da tua madre.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "hold",
+              "dur": 5,
+              "shot": "g_wide_end",
+              "event": "a3_leaving",
+              "poses": {
+                "etienne": "stand",
+                "mina": "stand"
+              },
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    2.6,
+                    5.5
+                  ],
+                  "dur": 7,
+                  "face": 0.4
+                },
+                {
+                  "actor": "mina",
+                  "to": [
+                    1.9,
+                    5.8
+                  ],
+                  "dur": 7,
+                  "face": 0.4
+                }
+              ]
+            },
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "g_wide_end"
+            },
+            {
+              "kind": "action",
+              "dur": 4,
+              "shot": "g_hall_end",
+              "event": "a3_train_pass"
+            },
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "g_hall_end"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "act4",
+      "title": "LA LEGGE E LA MISERICORDIA",
+      "scenes": [
+        {
+          "id": "a4_phone",
+          "env": "phoneCorner",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "ph_wide"
+            },
+            {
+              "kind": "line",
+              "dur": 2.4,
+              "shot": "ph_wide",
+              "speaker": "ETIENNE",
+              "text": "Provo ancora.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "ph_insert",
+              "event": "a4_phone_dial"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "ph_close"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "ph_close",
+              "speaker": "ETIENNE",
+              "text": "Niente.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "ph_two",
+              "speaker": "MINA",
+              "text": "Magari è occupato.",
+              "emotion": "hopeful"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "ph_two",
+              "speaker": "ETIENNE",
+              "text": "Magari.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "ph_rain"
+            },
+            {
+              "kind": "line",
+              "dur": 3.6,
+              "shot": "ph_two",
+              "speaker": "MINA",
+              "text": "Lei è mai stato in prigione?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "ph_two"
+            },
+            {
+              "kind": "line",
+              "dur": 1.8,
+              "shot": "ph_close",
+              "speaker": "ETIENNE",
+              "text": "Sì.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "line",
+              "dur": 2.2,
+              "shot": "ph_two",
+              "speaker": "MINA",
+              "text": "E com'era?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 2.4,
+              "shot": "ph_close",
+              "speaker": "ETIENNE",
+              "text": "Silenzioso.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "ph_rain"
+            }
+          ]
+        },
+        {
+          "id": "a4_confrontation",
+          "env": "nightAvenue",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "n_track",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    -0.9,
+                    0
+                  ],
+                  "dur": 8,
+                  "face": 1.5708
+                },
+                {
+                  "actor": "mina",
+                  "to": [
+                    -0.15,
+                    0.5
+                  ],
+                  "dur": 8,
+                  "face": 0.4
+                },
+                {
+                  "actor": "renaud",
+                  "to": [
+                    0.95,
+                    0
+                  ],
+                  "dur": 10,
+                  "face": -1.5708
+                }
+              ]
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "n_far"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "n_far",
+              "speaker": "RENAUD",
+              "text": "Moreau!",
+              "emotion": "angry"
+            },
+            {
+              "kind": "hold",
+              "dur": 1,
+              "shot": "n_two"
+            },
+            {
+              "kind": "line",
+              "dur": 2.4,
+              "shot": "n_two",
+              "speaker": "RENAUD",
+              "text": "Sei tornato.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 2.2,
+              "shot": "n_two",
+              "speaker": "ETIENNE",
+              "text": "Pare di sì.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "line",
+              "dur": 4,
+              "shot": "n_two",
+              "speaker": "RENAUD",
+              "text": "Ti avevo detto di non creare problemi.",
+              "emotion": "angry"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "n_two",
+              "speaker": "ETIENNE",
+              "text": "Non ne sto creando.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "line",
+              "dur": 3.2,
+              "shot": "n_two",
+              "speaker": "RENAUD",
+              "text": "Che ci fai con la bambina?",
+              "emotion": "angry"
+            },
+            {
+              "kind": "line",
+              "dur": 3.4,
+              "shot": "n_two",
+              "speaker": "ETIENNE",
+              "text": "La accompagno da sua madre.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 2.2,
+              "shot": "n_two",
+              "speaker": "RENAUD",
+              "text": "Non ti credo.",
+              "emotion": "angry"
+            },
+            {
+              "kind": "hold",
+              "dur": 0.8,
+              "shot": "n_two"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "n_two",
+              "speaker": "MINA",
+              "text": "Lui mi sta aiutando.",
+              "emotion": "afraid"
+            },
+            {
+              "kind": "line",
+              "dur": 4.4,
+              "shot": "n_renaud",
+              "speaker": "RENAUD",
+              "text": "Non parlare quando parlano gli adulti.",
+              "emotion": "angry"
+            },
+            {
+              "kind": "hold",
+              "dur": 1,
+              "shot": "n_renaud"
+            },
+            {
+              "kind": "line",
+              "dur": 4.8,
+              "shot": "n_two",
+              "speaker": "MINA",
+              "text": "Allora gli adulti dovrebbero parlare meglio.",
+              "emotion": "angry"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.2,
+              "shot": "n_two"
+            },
+            {
+              "kind": "line",
+              "dur": 3.2,
+              "shot": "n_renaud",
+              "speaker": "RENAUD",
+              "text": "Devi venire con me.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "n_two",
+              "speaker": "ETIENNE",
+              "text": "Non posso.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "line",
+              "dur": 2.6,
+              "shot": "n_renaud",
+              "speaker": "RENAUD",
+              "text": "Non puoi scegliere.",
+              "emotion": "angry"
+            },
+            {
+              "kind": "line",
+              "dur": 5,
+              "shot": "n_close_e",
+              "speaker": "ETIENNE",
+              "text": "È quello che mi avete ripetuto per nove anni.",
+              "emotion": "angry"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.8,
+              "shot": "n_low"
+            },
+            {
+              "kind": "action",
+              "dur": 1.5,
+              "shot": "n_low",
+              "event": "a4_renaud_step"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.5,
+              "shot": "n_low"
+            },
+            {
+              "kind": "line",
+              "dur": 2.6,
+              "shot": "n_low",
+              "speaker": "MINA",
+              "text": "Deve aiutarmi.",
+              "emotion": "afraid",
+              "poses": {
+                "mina": "handInHand"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 3.2,
+              "shot": "n_two"
+            },
+            {
+              "kind": "line",
+              "dur": 1.6,
+              "shot": "n_renaud",
+              "speaker": "RENAUD",
+              "text": "Va'.",
+              "emotion": "confused"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.1,
+              "shot": "n_two"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "n_renaud",
+              "speaker": "RENAUD",
+              "text": "Ma non è finita.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.3,
+              "shot": "n_away"
+            }
+          ]
+        },
+        {
+          "id": "a4_metro",
+          "env": "metroEntrance",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "m_wide"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "m_two"
+            },
+            {
+              "kind": "line",
+              "dur": 3.2,
+              "shot": "m_two",
+              "speaker": "MINA",
+              "text": "Lei ha paura di lui?",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 1.8,
+              "shot": "m_two",
+              "speaker": "ETIENNE",
+              "text": "No.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 1.8,
+              "shot": "m_two",
+              "speaker": "MINA",
+              "text": "Mente.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "m_close"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "m_arrive"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "m_arrive",
+              "event": "a4_hospital_door"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "act5",
+      "title": "L'OSPEDALE",
+      "scenes": [
+        {
+          "id": "a5_corridor",
+          "env": "hospitalCorridor",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "h_wide"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "h_nurse",
+              "event": "a5_approach"
+            },
+            {
+              "kind": "line",
+              "dur": 3,
+              "shot": "h_nurse",
+              "speaker": "INFERMIERA",
+              "text": "Reparto. Terzo piano.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "h_nurse",
+              "speaker": "ETIENNE",
+              "text": "Grazie.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "h_nurse"
+            },
+            {
+              "kind": "line",
+              "dur": 3.6,
+              "shot": "h_nurse",
+              "speaker": "INFERMIERA",
+              "text": "Le visite finiscono alle otto.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "h_track",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    0.7,
+                    4.2
+                  ],
+                  "dur": 6,
+                  "face": 3.14159
+                },
+                {
+                  "actor": "mina",
+                  "to": [
+                    0,
+                    4.6
+                  ],
+                  "dur": 6,
+                  "face": 3.14159
+                }
+              ]
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "h_track"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "h_door"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "h_door",
+              "speaker": "MINA",
+              "text": "È qui.",
+              "emotion": "afraid"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "h_door"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "h_door",
+              "speaker": "ETIENNE",
+              "text": "Vai.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.5,
+              "shot": "h_door2"
+            }
+          ]
+        },
+        {
+          "id": "a5_room",
+          "env": "hospitalRoom",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "r_wide"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "r_wide",
+              "event": "a5_door_open"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "r_wide",
+              "speaker": "AICHA",
+              "text": "Mina!",
+              "emotion": "surprised"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "r_wide",
+              "speaker": "MINA",
+              "text": "Mamma!",
+              "emotion": "hopeful"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.6,
+              "shot": "r_hug",
+              "moves": [
+                {
+                  "actor": "mina",
+                  "to": [
+                    -0.15,
+                    1.35
+                  ],
+                  "dur": 2,
+                  "face": 3.14159
+                }
+              ]
+            },
+            {
+              "kind": "action",
+              "dur": 1.8,
+              "shot": "r_hug",
+              "poses": {
+                "mina": "hug",
+                "aicha": "embrace"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 1.5,
+              "shot": "r_hug"
+            },
+            {
+              "kind": "line",
+              "dur": 2.4,
+              "shot": "r_bed",
+              "speaker": "AICHA",
+              "text": "Grazie.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "r_wide",
+              "speaker": "ETIENNE",
+              "text": "Non ho fatto niente.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "line",
+              "dur": 3.2,
+              "shot": "r_bed",
+              "speaker": "AICHA",
+              "text": "Per lei ha fatto tutto.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "hold",
+              "dur": 2,
+              "shot": "r_door_e"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.8,
+              "shot": "r_hug",
+              "moves": [
+                {
+                  "actor": "mina",
+                  "to": [
+                    0.8,
+                    1.3
+                  ],
+                  "dur": 2.2,
+                  "face": 0.5
+                }
+              ]
+            },
+            {
+              "kind": "action",
+              "dur": 0.6,
+              "shot": "r_hug",
+              "poses": {
+                "mina": "hug"
+              }
+            },
+            {
+              "kind": "hold",
+              "dur": 2.2,
+              "shot": "r_hug"
+            },
+            {
+              "kind": "line",
+              "dur": 2.2,
+              "shot": "r_hug",
+              "speaker": "MINA",
+              "text": "Grazie.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.2,
+              "shot": "r_hug"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "r_corridor",
+              "event": "a5_renaud_arrives"
+            },
+            {
+              "kind": "line",
+              "dur": 1.8,
+              "shot": "r_corridor",
+              "speaker": "RENAUD",
+              "text": "Moreau.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 1.8,
+              "shot": "r_corridor",
+              "speaker": "ETIENNE",
+              "text": "Lo so.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.1,
+              "shot": "r_corridor"
+            },
+            {
+              "kind": "line",
+              "dur": 2.6,
+              "shot": "r_renaud",
+              "speaker": "RENAUD",
+              "text": "Non ti assolvo.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 3,
+              "shot": "r_renaud",
+              "speaker": "ETIENNE",
+              "text": "Non gliel'ho chiesto.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "line",
+              "dur": 3.4,
+              "shot": "r_renaud",
+              "speaker": "RENAUD",
+              "text": "Il passato non si cancella.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 5,
+              "shot": "r_renaud",
+              "speaker": "ETIENNE",
+              "text": "No. Ma il futuro non è ancora successo.",
+              "emotion": "hopeful"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.8,
+              "shot": "r_wide2"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "r_wide2",
+              "event": "a5_renaud_leaves",
+              "moves": [
+                {
+                  "actor": "renaud",
+                  "to": [
+                    4.4,
+                    4.2
+                  ],
+                  "dur": 4,
+                  "face": 0.6
+                }
+              ]
+            },
+            {
+              "kind": "hold",
+              "dur": 2.7,
+              "shot": "r_wide2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "act6",
+      "title": "LA LUCE DEL MATTINO",
+      "scenes": [
+        {
+          "id": "a6_laundrette",
+          "env": "laundrette",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "l_wide"
+            },
+            {
+              "kind": "hold",
+              "dur": 3,
+              "shot": "l_bench"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.6,
+              "shot": "l_two",
+              "moves": [
+                {
+                  "actor": "rose",
+                  "to": [
+                    0.85,
+                    0.1
+                  ],
+                  "dur": 2.6,
+                  "face": -1.5708
+                }
+              ]
+            },
+            {
+              "kind": "line",
+              "dur": 3.8,
+              "shot": "l_two",
+              "speaker": "ROSE",
+              "text": "Non hai un posto dove andare, vero?",
+              "emotion": "tender"
+            },
+            {
+              "kind": "line",
+              "dur": 1.6,
+              "shot": "l_bench",
+              "speaker": "ETIENNE",
+              "text": "No.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "line",
+              "dur": 3.6,
+              "shot": "l_two",
+              "speaker": "ROSE",
+              "text": "Da me serve una mano in lavanderia.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "line",
+              "dur": 3.2,
+              "shot": "l_bench",
+              "speaker": "ETIENNE",
+              "text": "Non sono bravo a lavorare.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "l_two",
+              "speaker": "ROSE",
+              "text": "Nessuno nasce bravo.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "line",
+              "dur": 2.6,
+              "shot": "l_bench",
+              "speaker": "ETIENNE",
+              "text": "Ho dei precedenti.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "line",
+              "dur": 4.4,
+              "shot": "l_two",
+              "speaker": "ROSE",
+              "text": "Anch'io. Una volta ho rubato una pianta.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "line",
+              "dur": 2,
+              "shot": "l_bench",
+              "speaker": "ETIENNE",
+              "text": "Una pianta?",
+              "emotion": "surprised"
+            },
+            {
+              "kind": "line",
+              "dur": 2.4,
+              "shot": "l_two",
+              "speaker": "ROSE",
+              "text": "Era bellissima.",
+              "emotion": "wry"
+            },
+            {
+              "kind": "hold",
+              "dur": 2.4,
+              "shot": "l_two"
+            },
+            {
+              "kind": "action",
+              "dur": 2,
+              "shot": "l_two",
+              "event": "a6_paper_handed",
+              "poses": {
+                "etienne": "holdPaper"
+              }
+            },
+            {
+              "kind": "line",
+              "dur": 2.6,
+              "shot": "l_two",
+              "speaker": "ROSE",
+              "text": "Domani alle sette.",
+              "emotion": "neutral"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.2,
+              "shot": "l_two"
+            },
+            {
+              "kind": "line",
+              "dur": 2.8,
+              "shot": "l_close_e",
+              "speaker": "ETIENNE",
+              "text": "Perché mi aiuta?",
+              "emotion": "confused"
+            },
+            {
+              "kind": "line",
+              "dur": 4.8,
+              "shot": "l_two",
+              "speaker": "ROSE",
+              "text": "Perché qualcuno, una volta, ha aiutato me.",
+              "emotion": "tender"
+            },
+            {
+              "kind": "hold",
+              "dur": 3.2,
+              "shot": "l_wide2"
+            }
+          ]
+        },
+        {
+          "id": "a6_dawn",
+          "env": "dawnStreet",
+          "beats": [
+            {
+              "kind": "hold",
+              "dur": 4,
+              "shot": "d_wide"
+            },
+            {
+              "kind": "line",
+              "dur": 4.2,
+              "shot": "d_walk",
+              "speaker": "ETIENNE_VO",
+              "text": "Non mi avevano restituito gli anni.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "hold",
+              "dur": 1,
+              "shot": "d_walk"
+            },
+            {
+              "kind": "line",
+              "dur": 3.8,
+              "shot": "d_walk",
+              "speaker": "ETIENNE_VO",
+              "text": "Non mi avevano restituito il nome.",
+              "emotion": "tired"
+            },
+            {
+              "kind": "hold",
+              "dur": 0.8,
+              "shot": "d_close"
+            },
+            {
+              "kind": "line",
+              "dur": 3.8,
+              "shot": "d_close",
+              "speaker": "ETIENNE_VO",
+              "text": "Non mi avevano restituito la vita.",
+              "emotion": "sad"
+            },
+            {
+              "kind": "hold",
+              "dur": 1.2,
+              "shot": "d_wide2"
+            },
+            {
+              "kind": "line",
+              "dur": 5.2,
+              "shot": "d_wide2",
+              "speaker": "ETIENNE_VO",
+              "text": "Ma qualcuno mi aveva lasciato una porta aperta.",
+              "emotion": "hopeful"
+            },
+            {
+              "kind": "action",
+              "dur": 6,
+              "shot": "d_wide2",
+              "event": "a6_window_open",
+              "moves": [
+                {
+                  "actor": "etienne",
+                  "to": [
+                    0.4,
+                    -20
+                  ],
+                  "dur": 20,
+                  "face": 3.14159
+                }
+              ]
+            },
+            {
+              "kind": "hold",
+              "dur": 2.6,
+              "shot": "d_wide2"
+            },
+            {
+              "kind": "hold",
+              "dur": 3.4,
+              "shot": "d_end"
+            },
+            {
+              "kind": "hold",
+              "dur": 3.2,
+              "shot": "d_end"
+            },
+            {
+              "kind": "action",
+              "dur": 3,
+              "shot": "d_end",
+              "event": "a6_end_card"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

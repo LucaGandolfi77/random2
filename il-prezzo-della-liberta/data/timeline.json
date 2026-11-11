@@ -1,0 +1,2155 @@
+{
+  "duration": 625.1,
+  "acts": [
+    {
+      "id": "act1",
+      "title": "LA LIBERTÀ NON HA UN INDIRIZZO",
+      "start": 0,
+      "end": 79.5
+    },
+    {
+      "id": "act2",
+      "title": "LA CITTÀ DEI GIUSTI",
+      "start": 79.5,
+      "end": 175.6
+    },
+    {
+      "id": "act3",
+      "title": "LA BAMBINA E LA CASSETTA",
+      "start": 175.6,
+      "end": 305.4
+    },
+    {
+      "id": "act4",
+      "title": "LA LEGGE E LA MISERICORDIA",
+      "start": 305.4,
+      "end": 432.8
+    },
+    {
+      "id": "act5",
+      "title": "L'OSPEDALE",
+      "start": 432.8,
+      "end": 527.9
+    },
+    {
+      "id": "act6",
+      "title": "LA LUCE DEL MATTINO",
+      "start": 527.9,
+      "end": 625.1
+    }
+  ],
+  "scenes": [
+    {
+      "id": "a1_prison",
+      "env": "prison",
+      "start": 0,
+      "end": 79.5
+    },
+    {
+      "id": "a2_bakery",
+      "env": "bakery",
+      "start": 79.5,
+      "end": 125.4
+    },
+    {
+      "id": "a2_office",
+      "env": "jobOffice",
+      "start": 125.4,
+      "end": 151
+    },
+    {
+      "id": "a2_belleville",
+      "env": "belleville",
+      "start": 151,
+      "end": 175.6
+    },
+    {
+      "id": "a3_gare",
+      "env": "gare",
+      "start": 175.6,
+      "end": 305.4
+    },
+    {
+      "id": "a4_phone",
+      "env": "phoneCorner",
+      "start": 305.4,
+      "end": 339.6
+    },
+    {
+      "id": "a4_confrontation",
+      "env": "nightAvenue",
+      "start": 339.6,
+      "end": 415
+    },
+    {
+      "id": "a4_metro",
+      "env": "metroEntrance",
+      "start": 415,
+      "end": 432.8
+    },
+    {
+      "id": "a5_corridor",
+      "env": "hospitalCorridor",
+      "start": 432.8,
+      "end": 466.4
+    },
+    {
+      "id": "a5_room",
+      "env": "hospitalRoom",
+      "start": 466.4,
+      "end": 527.9
+    },
+    {
+      "id": "a6_laundrette",
+      "env": "laundrette",
+      "start": 527.9,
+      "end": 582.9
+    },
+    {
+      "id": "a6_dawn",
+      "env": "dawnStreet",
+      "start": 582.9,
+      "end": 625.1
+    }
+  ],
+  "lines": [
+    {
+      "id": "a1_prison_b004_line",
+      "beatId": "a1_prison_b004",
+      "actId": "act1",
+      "sceneId": "a1_prison",
+      "shot": "p_gate",
+      "speaker": "GUARDIA",
+      "text": "Moreau. I tuoi documenti.",
+      "emotion": "neutral",
+      "start": 15,
+      "end": 18.6
+    },
+    {
+      "id": "a1_prison_b006_line",
+      "beatId": "a1_prison_b006",
+      "actId": "act1",
+      "sceneId": "a1_prison",
+      "shot": "p_gate",
+      "speaker": "ETIENNE",
+      "text": "Grazie.",
+      "emotion": "tired",
+      "start": 19.4,
+      "end": 21.6
+    },
+    {
+      "id": "a1_prison_b007_line",
+      "beatId": "a1_prison_b007",
+      "actId": "act1",
+      "sceneId": "a1_prison",
+      "shot": "p_gate",
+      "speaker": "GUARDIA",
+      "text": "Non tornare.",
+      "emotion": "neutral",
+      "start": 21.6,
+      "end": 24.4
+    },
+    {
+      "id": "a1_prison_b008_line",
+      "beatId": "a1_prison_b008",
+      "actId": "act1",
+      "sceneId": "a1_prison",
+      "shot": "p_gate",
+      "speaker": "ETIENNE",
+      "text": "Non era nei miei programmi.",
+      "emotion": "wry",
+      "start": 24.4,
+      "end": 28
+    },
+    {
+      "id": "a1_prison_b012_line",
+      "beatId": "a1_prison_b012",
+      "actId": "act1",
+      "sceneId": "a1_prison",
+      "shot": "p_face",
+      "speaker": "ETIENNE_VO",
+      "text": "Pensavo che la libertà avesse un rumore.",
+      "emotion": "tired",
+      "start": 35.8,
+      "end": 40.4
+    },
+    {
+      "id": "a1_prison_b014_line",
+      "beatId": "a1_prison_b014",
+      "actId": "act1",
+      "sceneId": "a1_prison",
+      "shot": "p_face",
+      "speaker": "ETIENNE_VO",
+      "text": "Invece era silenziosa.",
+      "emotion": "sad",
+      "start": 41.6,
+      "end": 44.6
+    },
+    {
+      "id": "a1_prison_b016_line",
+      "beatId": "a1_prison_b016",
+      "actId": "act1",
+      "sceneId": "a1_prison",
+      "shot": "p_face",
+      "speaker": "ETIENNE_VO",
+      "text": "E non sapevo dove andare.",
+      "emotion": "sad",
+      "start": 45.6,
+      "end": 49
+    },
+    {
+      "id": "a2_bakery_b004_line",
+      "beatId": "a2_bakery_b004",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "PROPRIETARIO",
+      "text": "Hai esperienza?",
+      "emotion": "neutral",
+      "start": 87.5,
+      "end": 90.5
+    },
+    {
+      "id": "a2_bakery_b006_line",
+      "beatId": "a2_bakery_b006",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "ETIENNE",
+      "text": "Ho lavorato in fabbrica.",
+      "emotion": "neutral",
+      "start": 91.3,
+      "end": 94.5
+    },
+    {
+      "id": "a2_bakery_b007_line",
+      "beatId": "a2_bakery_b007",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "PROPRIETARIO",
+      "text": "Per quanto?",
+      "emotion": "neutral",
+      "start": 94.5,
+      "end": 96.9
+    },
+    {
+      "id": "a2_bakery_b008_line",
+      "beatId": "a2_bakery_b008",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "ETIENNE",
+      "text": "Abbastanza.",
+      "emotion": "tired",
+      "start": 96.9,
+      "end": 99.3
+    },
+    {
+      "id": "a2_bakery_b010_line",
+      "beatId": "a2_bakery_b010",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "PROPRIETARIO",
+      "text": "Documenti?",
+      "emotion": "neutral",
+      "start": 100.5,
+      "end": 103.1
+    },
+    {
+      "id": "a2_bakery_b013_line",
+      "beatId": "a2_bakery_b013",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "PROPRIETARIO",
+      "text": "Mi dispiace.",
+      "emotion": "confused",
+      "start": 107.1,
+      "end": 109.9
+    },
+    {
+      "id": "a2_bakery_b014_line",
+      "beatId": "a2_bakery_b014",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "ETIENNE",
+      "text": "Non ancora.",
+      "emotion": "wry",
+      "start": 109.9,
+      "end": 112.1
+    },
+    {
+      "id": "a2_bakery_b015_line",
+      "beatId": "a2_bakery_b015",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "PROPRIETARIO",
+      "text": "Come?",
+      "emotion": "confused",
+      "start": 112.1,
+      "end": 113.9
+    },
+    {
+      "id": "a2_bakery_b016_line",
+      "beatId": "a2_bakery_b016",
+      "actId": "act2",
+      "sceneId": "a2_bakery",
+      "shot": "b_two",
+      "speaker": "ETIENNE",
+      "text": "Non le ho ancora chiesto niente.",
+      "emotion": "wry",
+      "start": 113.9,
+      "end": 117.9
+    },
+    {
+      "id": "a2_office_b002_line",
+      "beatId": "a2_office_b002",
+      "actId": "act2",
+      "sceneId": "a2_office",
+      "shot": "j_ots",
+      "speaker": "IMPIEGATO",
+      "text": "Un indirizzo stabile.",
+      "emotion": "neutral",
+      "start": 128.4,
+      "end": 131.4
+    },
+    {
+      "id": "a2_office_b004_line",
+      "beatId": "a2_office_b004",
+      "actId": "act2",
+      "sceneId": "a2_office",
+      "shot": "j_ots",
+      "speaker": "ETIENNE",
+      "text": "Non ce l'ho.",
+      "emotion": "tired",
+      "start": 132.9,
+      "end": 134.9
+    },
+    {
+      "id": "a2_office_b006_line",
+      "beatId": "a2_office_b006",
+      "actId": "act2",
+      "sceneId": "a2_office",
+      "shot": "j_ots",
+      "speaker": "IMPIEGATO",
+      "text": "Senza indirizzo non possiamo.",
+      "emotion": "neutral",
+      "start": 135.9,
+      "end": 139.5
+    },
+    {
+      "id": "a2_belleville_b004_line",
+      "beatId": "a2_belleville_b004",
+      "actId": "act2",
+      "sceneId": "a2_belleville",
+      "shot": "s_market",
+      "speaker": "PASSANTE",
+      "text": "Scusa.",
+      "emotion": "neutral",
+      "start": 160,
+      "end": 161.6
+    },
+    {
+      "id": "a3_gare_b003_line",
+      "beatId": "a3_gare_b003",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_bench",
+      "speaker": "MINA",
+      "text": "Scusi.",
+      "emotion": "afraid",
+      "start": 187.6,
+      "end": 189.8
+    },
+    {
+      "id": "a3_gare_b005_line",
+      "beatId": "a3_gare_b005",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_ots_e",
+      "speaker": "ETIENNE",
+      "text": "Sì?",
+      "emotion": "neutral",
+      "start": 190.6,
+      "end": 192.2
+    },
+    {
+      "id": "a3_gare_b006_line",
+      "beatId": "a3_gare_b006",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_bench",
+      "speaker": "MINA",
+      "text": "Lei sa leggere una cartina?",
+      "emotion": "neutral",
+      "start": 192.2,
+      "end": 195.6
+    },
+    {
+      "id": "a3_gare_b007_line",
+      "beatId": "a3_gare_b007",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_ots_e",
+      "speaker": "ETIENNE",
+      "text": "Più o meno.",
+      "emotion": "confused",
+      "start": 195.6,
+      "end": 198
+    },
+    {
+      "id": "a3_gare_b008_line",
+      "beatId": "a3_gare_b008",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_bench",
+      "speaker": "MINA",
+      "text": "È un bene.",
+      "emotion": "neutral",
+      "start": 198,
+      "end": 200
+    },
+    {
+      "id": "a3_gare_b009_line",
+      "beatId": "a3_gare_b009",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_ots_e",
+      "speaker": "ETIENNE",
+      "text": "Perché?",
+      "emotion": "confused",
+      "start": 200,
+      "end": 201.6
+    },
+    {
+      "id": "a3_gare_b010_line",
+      "beatId": "a3_gare_b010",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_bench",
+      "speaker": "MINA",
+      "text": "Perché io non so dove sono.",
+      "emotion": "sad",
+      "start": 201.6,
+      "end": 205.2
+    },
+    {
+      "id": "a3_gare_b014_line",
+      "beatId": "a3_gare_b014",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two",
+      "speaker": "MINA",
+      "text": "Mia madre lavora di notte. Non è tornata.",
+      "emotion": "sad",
+      "start": 211.2,
+      "end": 215.4
+    },
+    {
+      "id": "a3_gare_b016_line",
+      "beatId": "a3_gare_b016",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two",
+      "speaker": "MINA",
+      "text": "Una signora ha chiamato. Dice che è in ospedale.",
+      "emotion": "afraid",
+      "start": 216.6,
+      "end": 221.2
+    },
+    {
+      "id": "a3_gare_b017_line",
+      "beatId": "a3_gare_b017",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two",
+      "speaker": "ETIENNE",
+      "text": "Quale ospedale?",
+      "emotion": "neutral",
+      "start": 221.2,
+      "end": 223.4
+    },
+    {
+      "id": "a3_gare_b018_line",
+      "beatId": "a3_gare_b018",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two",
+      "speaker": "MINA",
+      "text": "Non lo so. Ho solo questo.",
+      "emotion": "sad",
+      "start": 223.4,
+      "end": 226.6
+    },
+    {
+      "id": "a3_gare_b020_line",
+      "beatId": "a3_gare_b020",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_close_m",
+      "speaker": "ETIENNE",
+      "text": "Saint-Louis. È scritto qui.",
+      "emotion": "neutral",
+      "start": 228.6,
+      "end": 232.4
+    },
+    {
+      "id": "a3_gare_b021_line",
+      "beatId": "a3_gare_b021",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_close_m",
+      "speaker": "MINA",
+      "text": "Ci sono stata. Non mi hanno lasciata entrare.",
+      "emotion": "sad",
+      "start": 232.4,
+      "end": 236.8
+    },
+    {
+      "id": "a3_gare_b023_line",
+      "beatId": "a3_gare_b023",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two2",
+      "speaker": "ETIENNE",
+      "text": "Chi ti ha dato il foglio?",
+      "emotion": "neutral",
+      "start": 238.8,
+      "end": 241.8
+    },
+    {
+      "id": "a3_gare_b024_line",
+      "beatId": "a3_gare_b024",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two2",
+      "speaker": "MINA",
+      "text": "Madame Rose. La lavanderia.",
+      "emotion": "neutral",
+      "start": 241.8,
+      "end": 245
+    },
+    {
+      "id": "a3_gare_b026_line",
+      "beatId": "a3_gare_b026",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two2",
+      "speaker": "MINA",
+      "text": "Posso farle sentire una cosa?",
+      "emotion": "hopeful",
+      "start": 247,
+      "end": 250.4
+    },
+    {
+      "id": "a3_gare_b029_line",
+      "beatId": "a3_gare_b029",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_tape",
+      "speaker": "AICHA_TAPE",
+      "text": "Mina, amore mio.",
+      "emotion": "tender",
+      "start": 253.6,
+      "end": 256.6
+    },
+    {
+      "id": "a3_gare_b030_line",
+      "beatId": "a3_gare_b030",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_tape",
+      "speaker": "AICHA_TAPE",
+      "text": "Se ascolti questo messaggio, sono ancora al lavoro.",
+      "emotion": "tender",
+      "start": 256.6,
+      "end": 262
+    },
+    {
+      "id": "a3_gare_b031_line",
+      "beatId": "a3_gare_b031",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_tape",
+      "speaker": "AICHA_TAPE",
+      "text": "Non preoccuparti.",
+      "emotion": "tender",
+      "start": 262,
+      "end": 264.6
+    },
+    {
+      "id": "a3_gare_b032_line",
+      "beatId": "a3_gare_b032",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_tape",
+      "speaker": "AICHA_TAPE",
+      "text": "Domani facciamo colazione insieme.",
+      "emotion": "tender",
+      "start": 264.6,
+      "end": 269
+    },
+    {
+      "id": "a3_gare_b035_line",
+      "beatId": "a3_gare_b035",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_close_m",
+      "speaker": "MINA",
+      "text": "Mi aveva promesso le crêpes.",
+      "emotion": "sad",
+      "start": 274.5,
+      "end": 278.1
+    },
+    {
+      "id": "a3_gare_b037_line",
+      "beatId": "a3_gare_b037",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two2",
+      "speaker": "ETIENNE",
+      "text": "Allora andiamo a prenderle.",
+      "emotion": "tender",
+      "start": 280.6,
+      "end": 284
+    },
+    {
+      "id": "a3_gare_b038_line",
+      "beatId": "a3_gare_b038",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two2",
+      "speaker": "MINA",
+      "text": "Dove?",
+      "emotion": "surprised",
+      "start": 284,
+      "end": 285.8
+    },
+    {
+      "id": "a3_gare_b039_line",
+      "beatId": "a3_gare_b039",
+      "actId": "act3",
+      "sceneId": "a3_gare",
+      "shot": "g_two2",
+      "speaker": "ETIENNE",
+      "text": "Da tua madre.",
+      "emotion": "tender",
+      "start": 285.8,
+      "end": 288.4
+    },
+    {
+      "id": "a4_phone_b002_line",
+      "beatId": "a4_phone_b002",
+      "actId": "act4",
+      "sceneId": "a4_phone",
+      "shot": "ph_wide",
+      "speaker": "ETIENNE",
+      "text": "Provo ancora.",
+      "emotion": "tired",
+      "start": 307.9,
+      "end": 310.3
+    },
+    {
+      "id": "a4_phone_b005_line",
+      "beatId": "a4_phone_b005",
+      "actId": "act4",
+      "sceneId": "a4_phone",
+      "shot": "ph_close",
+      "speaker": "ETIENNE",
+      "text": "Niente.",
+      "emotion": "sad",
+      "start": 314.8,
+      "end": 316.8
+    },
+    {
+      "id": "a4_phone_b006_line",
+      "beatId": "a4_phone_b006",
+      "actId": "act4",
+      "sceneId": "a4_phone",
+      "shot": "ph_two",
+      "speaker": "MINA",
+      "text": "Magari è occupato.",
+      "emotion": "hopeful",
+      "start": 316.8,
+      "end": 319.6
+    },
+    {
+      "id": "a4_phone_b007_line",
+      "beatId": "a4_phone_b007",
+      "actId": "act4",
+      "sceneId": "a4_phone",
+      "shot": "ph_two",
+      "speaker": "ETIENNE",
+      "text": "Magari.",
+      "emotion": "wry",
+      "start": 319.6,
+      "end": 321.6
+    },
+    {
+      "id": "a4_phone_b009_line",
+      "beatId": "a4_phone_b009",
+      "actId": "act4",
+      "sceneId": "a4_phone",
+      "shot": "ph_two",
+      "speaker": "MINA",
+      "text": "Lei è mai stato in prigione?",
+      "emotion": "neutral",
+      "start": 324.6,
+      "end": 328.2
+    },
+    {
+      "id": "a4_phone_b011_line",
+      "beatId": "a4_phone_b011",
+      "actId": "act4",
+      "sceneId": "a4_phone",
+      "shot": "ph_close",
+      "speaker": "ETIENNE",
+      "text": "Sì.",
+      "emotion": "tired",
+      "start": 330.7,
+      "end": 332.5
+    },
+    {
+      "id": "a4_phone_b012_line",
+      "beatId": "a4_phone_b012",
+      "actId": "act4",
+      "sceneId": "a4_phone",
+      "shot": "ph_two",
+      "speaker": "MINA",
+      "text": "E com'era?",
+      "emotion": "neutral",
+      "start": 332.5,
+      "end": 334.7
+    },
+    {
+      "id": "a4_phone_b013_line",
+      "beatId": "a4_phone_b013",
+      "actId": "act4",
+      "sceneId": "a4_phone",
+      "shot": "ph_close",
+      "speaker": "ETIENNE",
+      "text": "Silenzioso.",
+      "emotion": "sad",
+      "start": 334.7,
+      "end": 337.1
+    },
+    {
+      "id": "a4_confrontation_b003_line",
+      "beatId": "a4_confrontation_b003",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_far",
+      "speaker": "RENAUD",
+      "text": "Moreau!",
+      "emotion": "angry",
+      "start": 344.6,
+      "end": 346.6
+    },
+    {
+      "id": "a4_confrontation_b005_line",
+      "beatId": "a4_confrontation_b005",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "RENAUD",
+      "text": "Sei tornato.",
+      "emotion": "neutral",
+      "start": 347.6,
+      "end": 350
+    },
+    {
+      "id": "a4_confrontation_b006_line",
+      "beatId": "a4_confrontation_b006",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "ETIENNE",
+      "text": "Pare di sì.",
+      "emotion": "wry",
+      "start": 350,
+      "end": 352.2
+    },
+    {
+      "id": "a4_confrontation_b007_line",
+      "beatId": "a4_confrontation_b007",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "RENAUD",
+      "text": "Ti avevo detto di non creare problemi.",
+      "emotion": "angry",
+      "start": 352.2,
+      "end": 356.2
+    },
+    {
+      "id": "a4_confrontation_b008_line",
+      "beatId": "a4_confrontation_b008",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "ETIENNE",
+      "text": "Non ne sto creando.",
+      "emotion": "tired",
+      "start": 356.2,
+      "end": 359
+    },
+    {
+      "id": "a4_confrontation_b009_line",
+      "beatId": "a4_confrontation_b009",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "RENAUD",
+      "text": "Che ci fai con la bambina?",
+      "emotion": "angry",
+      "start": 359,
+      "end": 362.2
+    },
+    {
+      "id": "a4_confrontation_b010_line",
+      "beatId": "a4_confrontation_b010",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "ETIENNE",
+      "text": "La accompagno da sua madre.",
+      "emotion": "neutral",
+      "start": 362.2,
+      "end": 365.6
+    },
+    {
+      "id": "a4_confrontation_b011_line",
+      "beatId": "a4_confrontation_b011",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "RENAUD",
+      "text": "Non ti credo.",
+      "emotion": "angry",
+      "start": 365.6,
+      "end": 367.8
+    },
+    {
+      "id": "a4_confrontation_b013_line",
+      "beatId": "a4_confrontation_b013",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "MINA",
+      "text": "Lui mi sta aiutando.",
+      "emotion": "afraid",
+      "start": 368.6,
+      "end": 371.4
+    },
+    {
+      "id": "a4_confrontation_b014_line",
+      "beatId": "a4_confrontation_b014",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_renaud",
+      "speaker": "RENAUD",
+      "text": "Non parlare quando parlano gli adulti.",
+      "emotion": "angry",
+      "start": 371.4,
+      "end": 375.8
+    },
+    {
+      "id": "a4_confrontation_b016_line",
+      "beatId": "a4_confrontation_b016",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "MINA",
+      "text": "Allora gli adulti dovrebbero parlare meglio.",
+      "emotion": "angry",
+      "start": 376.8,
+      "end": 381.6
+    },
+    {
+      "id": "a4_confrontation_b018_line",
+      "beatId": "a4_confrontation_b018",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_renaud",
+      "speaker": "RENAUD",
+      "text": "Devi venire con me.",
+      "emotion": "neutral",
+      "start": 383.8,
+      "end": 387
+    },
+    {
+      "id": "a4_confrontation_b019_line",
+      "beatId": "a4_confrontation_b019",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_two",
+      "speaker": "ETIENNE",
+      "text": "Non posso.",
+      "emotion": "tired",
+      "start": 387,
+      "end": 389
+    },
+    {
+      "id": "a4_confrontation_b020_line",
+      "beatId": "a4_confrontation_b020",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_renaud",
+      "speaker": "RENAUD",
+      "text": "Non puoi scegliere.",
+      "emotion": "angry",
+      "start": 389,
+      "end": 391.6
+    },
+    {
+      "id": "a4_confrontation_b021_line",
+      "beatId": "a4_confrontation_b021",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_close_e",
+      "speaker": "ETIENNE",
+      "text": "È quello che mi avete ripetuto per nove anni.",
+      "emotion": "angry",
+      "start": 391.6,
+      "end": 396.6
+    },
+    {
+      "id": "a4_confrontation_b025_line",
+      "beatId": "a4_confrontation_b025",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_low",
+      "speaker": "MINA",
+      "text": "Deve aiutarmi.",
+      "emotion": "afraid",
+      "start": 401.4,
+      "end": 404
+    },
+    {
+      "id": "a4_confrontation_b027_line",
+      "beatId": "a4_confrontation_b027",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_renaud",
+      "speaker": "RENAUD",
+      "text": "Va'.",
+      "emotion": "confused",
+      "start": 407.2,
+      "end": 408.8
+    },
+    {
+      "id": "a4_confrontation_b029_line",
+      "beatId": "a4_confrontation_b029",
+      "actId": "act4",
+      "sceneId": "a4_confrontation",
+      "shot": "n_renaud",
+      "speaker": "RENAUD",
+      "text": "Ma non è finita.",
+      "emotion": "neutral",
+      "start": 409.9,
+      "end": 412.7
+    },
+    {
+      "id": "a4_metro_b003_line",
+      "beatId": "a4_metro_b003",
+      "actId": "act4",
+      "sceneId": "a4_metro",
+      "shot": "m_two",
+      "speaker": "MINA",
+      "text": "Lei ha paura di lui?",
+      "emotion": "neutral",
+      "start": 420,
+      "end": 423.2
+    },
+    {
+      "id": "a4_metro_b004_line",
+      "beatId": "a4_metro_b004",
+      "actId": "act4",
+      "sceneId": "a4_metro",
+      "shot": "m_two",
+      "speaker": "ETIENNE",
+      "text": "No.",
+      "emotion": "neutral",
+      "start": 423.2,
+      "end": 425
+    },
+    {
+      "id": "a4_metro_b005_line",
+      "beatId": "a4_metro_b005",
+      "actId": "act4",
+      "sceneId": "a4_metro",
+      "shot": "m_two",
+      "speaker": "MINA",
+      "text": "Mente.",
+      "emotion": "wry",
+      "start": 425,
+      "end": 426.8
+    },
+    {
+      "id": "a5_corridor_b003_line",
+      "beatId": "a5_corridor_b003",
+      "actId": "act5",
+      "sceneId": "a5_corridor",
+      "shot": "h_nurse",
+      "speaker": "INFERMIERA",
+      "text": "Reparto. Terzo piano.",
+      "emotion": "neutral",
+      "start": 438.8,
+      "end": 441.8
+    },
+    {
+      "id": "a5_corridor_b004_line",
+      "beatId": "a5_corridor_b004",
+      "actId": "act5",
+      "sceneId": "a5_corridor",
+      "shot": "h_nurse",
+      "speaker": "ETIENNE",
+      "text": "Grazie.",
+      "emotion": "neutral",
+      "start": 441.8,
+      "end": 443.8
+    },
+    {
+      "id": "a5_corridor_b006_line",
+      "beatId": "a5_corridor_b006",
+      "actId": "act5",
+      "sceneId": "a5_corridor",
+      "shot": "h_nurse",
+      "speaker": "INFERMIERA",
+      "text": "Le visite finiscono alle otto.",
+      "emotion": "neutral",
+      "start": 445.8,
+      "end": 449.4
+    },
+    {
+      "id": "a5_corridor_b010_line",
+      "beatId": "a5_corridor_b010",
+      "actId": "act5",
+      "sceneId": "a5_corridor",
+      "shot": "h_door",
+      "speaker": "MINA",
+      "text": "È qui.",
+      "emotion": "afraid",
+      "start": 457.4,
+      "end": 459.4
+    },
+    {
+      "id": "a5_corridor_b012_line",
+      "beatId": "a5_corridor_b012",
+      "actId": "act5",
+      "sceneId": "a5_corridor",
+      "shot": "h_door",
+      "speaker": "ETIENNE",
+      "text": "Vai.",
+      "emotion": "tender",
+      "start": 461.9,
+      "end": 463.9
+    },
+    {
+      "id": "a5_room_b003_line",
+      "beatId": "a5_room_b003",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_wide",
+      "speaker": "AICHA",
+      "text": "Mina!",
+      "emotion": "surprised",
+      "start": 472.4,
+      "end": 474.4
+    },
+    {
+      "id": "a5_room_b004_line",
+      "beatId": "a5_room_b004",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_wide",
+      "speaker": "MINA",
+      "text": "Mamma!",
+      "emotion": "hopeful",
+      "start": 474.4,
+      "end": 476.4
+    },
+    {
+      "id": "a5_room_b008_line",
+      "beatId": "a5_room_b008",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_bed",
+      "speaker": "AICHA",
+      "text": "Grazie.",
+      "emotion": "tender",
+      "start": 481.3,
+      "end": 483.7
+    },
+    {
+      "id": "a5_room_b009_line",
+      "beatId": "a5_room_b009",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_wide",
+      "speaker": "ETIENNE",
+      "text": "Non ho fatto niente.",
+      "emotion": "tired",
+      "start": 483.7,
+      "end": 486.5
+    },
+    {
+      "id": "a5_room_b010_line",
+      "beatId": "a5_room_b010",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_bed",
+      "speaker": "AICHA",
+      "text": "Per lei ha fatto tutto.",
+      "emotion": "tender",
+      "start": 486.5,
+      "end": 489.7
+    },
+    {
+      "id": "a5_room_b015_line",
+      "beatId": "a5_room_b015",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_hug",
+      "speaker": "MINA",
+      "text": "Grazie.",
+      "emotion": "tender",
+      "start": 496.3,
+      "end": 498.5
+    },
+    {
+      "id": "a5_room_b018_line",
+      "beatId": "a5_room_b018",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_corridor",
+      "speaker": "RENAUD",
+      "text": "Moreau.",
+      "emotion": "neutral",
+      "start": 502.7,
+      "end": 504.5
+    },
+    {
+      "id": "a5_room_b019_line",
+      "beatId": "a5_room_b019",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_corridor",
+      "speaker": "ETIENNE",
+      "text": "Lo so.",
+      "emotion": "tired",
+      "start": 504.5,
+      "end": 506.3
+    },
+    {
+      "id": "a5_room_b021_line",
+      "beatId": "a5_room_b021",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_renaud",
+      "speaker": "RENAUD",
+      "text": "Non ti assolvo.",
+      "emotion": "neutral",
+      "start": 507.4,
+      "end": 510
+    },
+    {
+      "id": "a5_room_b022_line",
+      "beatId": "a5_room_b022",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_renaud",
+      "speaker": "ETIENNE",
+      "text": "Non gliel'ho chiesto.",
+      "emotion": "tired",
+      "start": 510,
+      "end": 513
+    },
+    {
+      "id": "a5_room_b023_line",
+      "beatId": "a5_room_b023",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_renaud",
+      "speaker": "RENAUD",
+      "text": "Il passato non si cancella.",
+      "emotion": "neutral",
+      "start": 513,
+      "end": 516.4
+    },
+    {
+      "id": "a5_room_b024_line",
+      "beatId": "a5_room_b024",
+      "actId": "act5",
+      "sceneId": "a5_room",
+      "shot": "r_renaud",
+      "speaker": "ETIENNE",
+      "text": "No. Ma il futuro non è ancora successo.",
+      "emotion": "hopeful",
+      "start": 516.4,
+      "end": 521.4
+    },
+    {
+      "id": "a6_laundrette_b004_line",
+      "beatId": "a6_laundrette_b004",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_two",
+      "speaker": "ROSE",
+      "text": "Non hai un posto dove andare, vero?",
+      "emotion": "tender",
+      "start": 537.5,
+      "end": 541.3
+    },
+    {
+      "id": "a6_laundrette_b005_line",
+      "beatId": "a6_laundrette_b005",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_bench",
+      "speaker": "ETIENNE",
+      "text": "No.",
+      "emotion": "tired",
+      "start": 541.3,
+      "end": 542.9
+    },
+    {
+      "id": "a6_laundrette_b006_line",
+      "beatId": "a6_laundrette_b006",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_two",
+      "speaker": "ROSE",
+      "text": "Da me serve una mano in lavanderia.",
+      "emotion": "neutral",
+      "start": 542.9,
+      "end": 546.5
+    },
+    {
+      "id": "a6_laundrette_b007_line",
+      "beatId": "a6_laundrette_b007",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_bench",
+      "speaker": "ETIENNE",
+      "text": "Non sono bravo a lavorare.",
+      "emotion": "tired",
+      "start": 546.5,
+      "end": 549.7
+    },
+    {
+      "id": "a6_laundrette_b008_line",
+      "beatId": "a6_laundrette_b008",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_two",
+      "speaker": "ROSE",
+      "text": "Nessuno nasce bravo.",
+      "emotion": "wry",
+      "start": 549.7,
+      "end": 552.5
+    },
+    {
+      "id": "a6_laundrette_b009_line",
+      "beatId": "a6_laundrette_b009",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_bench",
+      "speaker": "ETIENNE",
+      "text": "Ho dei precedenti.",
+      "emotion": "sad",
+      "start": 552.5,
+      "end": 555.1
+    },
+    {
+      "id": "a6_laundrette_b010_line",
+      "beatId": "a6_laundrette_b010",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_two",
+      "speaker": "ROSE",
+      "text": "Anch'io. Una volta ho rubato una pianta.",
+      "emotion": "wry",
+      "start": 555.1,
+      "end": 559.5
+    },
+    {
+      "id": "a6_laundrette_b011_line",
+      "beatId": "a6_laundrette_b011",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_bench",
+      "speaker": "ETIENNE",
+      "text": "Una pianta?",
+      "emotion": "surprised",
+      "start": 559.5,
+      "end": 561.5
+    },
+    {
+      "id": "a6_laundrette_b012_line",
+      "beatId": "a6_laundrette_b012",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_two",
+      "speaker": "ROSE",
+      "text": "Era bellissima.",
+      "emotion": "wry",
+      "start": 561.5,
+      "end": 563.9
+    },
+    {
+      "id": "a6_laundrette_b015_line",
+      "beatId": "a6_laundrette_b015",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_two",
+      "speaker": "ROSE",
+      "text": "Domani alle sette.",
+      "emotion": "neutral",
+      "start": 568.3,
+      "end": 570.9
+    },
+    {
+      "id": "a6_laundrette_b017_line",
+      "beatId": "a6_laundrette_b017",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_close_e",
+      "speaker": "ETIENNE",
+      "text": "Perché mi aiuta?",
+      "emotion": "confused",
+      "start": 572.1,
+      "end": 574.9
+    },
+    {
+      "id": "a6_laundrette_b018_line",
+      "beatId": "a6_laundrette_b018",
+      "actId": "act6",
+      "sceneId": "a6_laundrette",
+      "shot": "l_two",
+      "speaker": "ROSE",
+      "text": "Perché qualcuno, una volta, ha aiutato me.",
+      "emotion": "tender",
+      "start": 574.9,
+      "end": 579.7
+    },
+    {
+      "id": "a6_dawn_b002_line",
+      "beatId": "a6_dawn_b002",
+      "actId": "act6",
+      "sceneId": "a6_dawn",
+      "shot": "d_walk",
+      "speaker": "ETIENNE_VO",
+      "text": "Non mi avevano restituito gli anni.",
+      "emotion": "tired",
+      "start": 586.9,
+      "end": 591.1
+    },
+    {
+      "id": "a6_dawn_b004_line",
+      "beatId": "a6_dawn_b004",
+      "actId": "act6",
+      "sceneId": "a6_dawn",
+      "shot": "d_walk",
+      "speaker": "ETIENNE_VO",
+      "text": "Non mi avevano restituito il nome.",
+      "emotion": "tired",
+      "start": 592.1,
+      "end": 595.9
+    },
+    {
+      "id": "a6_dawn_b006_line",
+      "beatId": "a6_dawn_b006",
+      "actId": "act6",
+      "sceneId": "a6_dawn",
+      "shot": "d_close",
+      "speaker": "ETIENNE_VO",
+      "text": "Non mi avevano restituito la vita.",
+      "emotion": "sad",
+      "start": 596.7,
+      "end": 600.5
+    },
+    {
+      "id": "a6_dawn_b008_line",
+      "beatId": "a6_dawn_b008",
+      "actId": "act6",
+      "sceneId": "a6_dawn",
+      "shot": "d_wide2",
+      "speaker": "ETIENNE_VO",
+      "text": "Ma qualcuno mi aveva lasciato una porta aperta.",
+      "emotion": "hopeful",
+      "start": 601.7,
+      "end": 606.9
+    }
+  ],
+  "shots": [
+    {
+      "shot": "p_open",
+      "sceneId": "a1_prison",
+      "start": 0,
+      "end": 10.5
+    },
+    {
+      "shot": "p_gate",
+      "sceneId": "a1_prison",
+      "start": 10.5,
+      "end": 30.2
+    },
+    {
+      "shot": "p_face",
+      "sceneId": "a1_prison",
+      "start": 30.2,
+      "end": 49
+    },
+    {
+      "shot": "p_photo",
+      "sceneId": "a1_prison",
+      "start": 49,
+      "end": 60.5
+    },
+    {
+      "shot": "p_bus",
+      "sceneId": "a1_prison",
+      "start": 60.5,
+      "end": 79.5
+    },
+    {
+      "shot": "b_wide",
+      "sceneId": "a2_bakery",
+      "start": 79.5,
+      "end": 85
+    },
+    {
+      "shot": "b_two",
+      "sceneId": "a2_bakery",
+      "start": 85,
+      "end": 103.1
+    },
+    {
+      "shot": "b_docs",
+      "sceneId": "a2_bakery",
+      "start": 103.1,
+      "end": 107.1
+    },
+    {
+      "shot": "b_two",
+      "sceneId": "a2_bakery",
+      "start": 107.1,
+      "end": 117.9
+    },
+    {
+      "shot": "b_close",
+      "sceneId": "a2_bakery",
+      "start": 117.9,
+      "end": 120.9
+    },
+    {
+      "shot": "b_ots",
+      "sceneId": "a2_bakery",
+      "start": 120.9,
+      "end": 122.9
+    },
+    {
+      "shot": "b_out",
+      "sceneId": "a2_bakery",
+      "start": 122.9,
+      "end": 125.4
+    },
+    {
+      "shot": "j_wide",
+      "sceneId": "a2_office",
+      "start": 125.4,
+      "end": 128.4
+    },
+    {
+      "shot": "j_ots",
+      "sceneId": "a2_office",
+      "start": 128.4,
+      "end": 139.5
+    },
+    {
+      "shot": "j_close",
+      "sceneId": "a2_office",
+      "start": 139.5,
+      "end": 142.5
+    },
+    {
+      "shot": "j_wide",
+      "sceneId": "a2_office",
+      "start": 142.5,
+      "end": 144
+    },
+    {
+      "shot": "j_leave",
+      "sceneId": "a2_office",
+      "start": 144,
+      "end": 151
+    },
+    {
+      "shot": "s_wide",
+      "sceneId": "a2_belleville",
+      "start": 151,
+      "end": 154
+    },
+    {
+      "shot": "s_track",
+      "sceneId": "a2_belleville",
+      "start": 154,
+      "end": 160
+    },
+    {
+      "shot": "s_market",
+      "sceneId": "a2_belleville",
+      "start": 160,
+      "end": 165.6
+    },
+    {
+      "shot": "s_reflect",
+      "sceneId": "a2_belleville",
+      "start": 165.6,
+      "end": 172.6
+    },
+    {
+      "shot": "s_wide2",
+      "sceneId": "a2_belleville",
+      "start": 172.6,
+      "end": 175.6
+    },
+    {
+      "shot": "g_hall",
+      "sceneId": "a3_gare",
+      "start": 175.6,
+      "end": 183.6
+    },
+    {
+      "shot": "g_bench",
+      "sceneId": "a3_gare",
+      "start": 183.6,
+      "end": 190.6
+    },
+    {
+      "shot": "g_ots_e",
+      "sceneId": "a3_gare",
+      "start": 190.6,
+      "end": 192.2
+    },
+    {
+      "shot": "g_bench",
+      "sceneId": "a3_gare",
+      "start": 192.2,
+      "end": 195.6
+    },
+    {
+      "shot": "g_ots_e",
+      "sceneId": "a3_gare",
+      "start": 195.6,
+      "end": 198
+    },
+    {
+      "shot": "g_bench",
+      "sceneId": "a3_gare",
+      "start": 198,
+      "end": 200
+    },
+    {
+      "shot": "g_ots_e",
+      "sceneId": "a3_gare",
+      "start": 200,
+      "end": 201.6
+    },
+    {
+      "shot": "g_bench",
+      "sceneId": "a3_gare",
+      "start": 201.6,
+      "end": 205.2
+    },
+    {
+      "shot": "g_two",
+      "sceneId": "a3_gare",
+      "start": 205.2,
+      "end": 226.6
+    },
+    {
+      "shot": "g_close_m",
+      "sceneId": "a3_gare",
+      "start": 226.6,
+      "end": 238.8
+    },
+    {
+      "shot": "g_two2",
+      "sceneId": "a3_gare",
+      "start": 238.8,
+      "end": 250.4
+    },
+    {
+      "shot": "g_tape",
+      "sceneId": "a3_gare",
+      "start": 250.4,
+      "end": 269
+    },
+    {
+      "shot": "g_two2",
+      "sceneId": "a3_gare",
+      "start": 269,
+      "end": 274.5
+    },
+    {
+      "shot": "g_close_m",
+      "sceneId": "a3_gare",
+      "start": 274.5,
+      "end": 280.6
+    },
+    {
+      "shot": "g_two2",
+      "sceneId": "a3_gare",
+      "start": 280.6,
+      "end": 288.4
+    },
+    {
+      "shot": "g_wide_end",
+      "sceneId": "a3_gare",
+      "start": 288.4,
+      "end": 297.4
+    },
+    {
+      "shot": "g_hall_end",
+      "sceneId": "a3_gare",
+      "start": 297.4,
+      "end": 305.4
+    },
+    {
+      "shot": "ph_wide",
+      "sceneId": "a4_phone",
+      "start": 305.4,
+      "end": 310.3
+    },
+    {
+      "shot": "ph_insert",
+      "sceneId": "a4_phone",
+      "start": 310.3,
+      "end": 312.3
+    },
+    {
+      "shot": "ph_close",
+      "sceneId": "a4_phone",
+      "start": 312.3,
+      "end": 316.8
+    },
+    {
+      "shot": "ph_two",
+      "sceneId": "a4_phone",
+      "start": 316.8,
+      "end": 321.6
+    },
+    {
+      "shot": "ph_rain",
+      "sceneId": "a4_phone",
+      "start": 321.6,
+      "end": 324.6
+    },
+    {
+      "shot": "ph_two",
+      "sceneId": "a4_phone",
+      "start": 324.6,
+      "end": 330.7
+    },
+    {
+      "shot": "ph_close",
+      "sceneId": "a4_phone",
+      "start": 330.7,
+      "end": 332.5
+    },
+    {
+      "shot": "ph_two",
+      "sceneId": "a4_phone",
+      "start": 332.5,
+      "end": 334.7
+    },
+    {
+      "shot": "ph_close",
+      "sceneId": "a4_phone",
+      "start": 334.7,
+      "end": 337.1
+    },
+    {
+      "shot": "ph_rain",
+      "sceneId": "a4_phone",
+      "start": 337.1,
+      "end": 339.6
+    },
+    {
+      "shot": "n_track",
+      "sceneId": "a4_confrontation",
+      "start": 339.6,
+      "end": 342.6
+    },
+    {
+      "shot": "n_far",
+      "sceneId": "a4_confrontation",
+      "start": 342.6,
+      "end": 346.6
+    },
+    {
+      "shot": "n_two",
+      "sceneId": "a4_confrontation",
+      "start": 346.6,
+      "end": 371.4
+    },
+    {
+      "shot": "n_renaud",
+      "sceneId": "a4_confrontation",
+      "start": 371.4,
+      "end": 376.8
+    },
+    {
+      "shot": "n_two",
+      "sceneId": "a4_confrontation",
+      "start": 376.8,
+      "end": 383.8
+    },
+    {
+      "shot": "n_renaud",
+      "sceneId": "a4_confrontation",
+      "start": 383.8,
+      "end": 387
+    },
+    {
+      "shot": "n_two",
+      "sceneId": "a4_confrontation",
+      "start": 387,
+      "end": 389
+    },
+    {
+      "shot": "n_renaud",
+      "sceneId": "a4_confrontation",
+      "start": 389,
+      "end": 391.6
+    },
+    {
+      "shot": "n_close_e",
+      "sceneId": "a4_confrontation",
+      "start": 391.6,
+      "end": 396.6
+    },
+    {
+      "shot": "n_low",
+      "sceneId": "a4_confrontation",
+      "start": 396.6,
+      "end": 404
+    },
+    {
+      "shot": "n_two",
+      "sceneId": "a4_confrontation",
+      "start": 404,
+      "end": 407.2
+    },
+    {
+      "shot": "n_renaud",
+      "sceneId": "a4_confrontation",
+      "start": 407.2,
+      "end": 408.8
+    },
+    {
+      "shot": "n_two",
+      "sceneId": "a4_confrontation",
+      "start": 408.8,
+      "end": 409.9
+    },
+    {
+      "shot": "n_renaud",
+      "sceneId": "a4_confrontation",
+      "start": 409.9,
+      "end": 412.7
+    },
+    {
+      "shot": "n_away",
+      "sceneId": "a4_confrontation",
+      "start": 412.7,
+      "end": 415
+    },
+    {
+      "shot": "m_wide",
+      "sceneId": "a4_metro",
+      "start": 415,
+      "end": 418
+    },
+    {
+      "shot": "m_two",
+      "sceneId": "a4_metro",
+      "start": 418,
+      "end": 426.8
+    },
+    {
+      "shot": "m_close",
+      "sceneId": "a4_metro",
+      "start": 426.8,
+      "end": 428.8
+    },
+    {
+      "shot": "m_arrive",
+      "sceneId": "a4_metro",
+      "start": 428.8,
+      "end": 432.8
+    },
+    {
+      "shot": "h_wide",
+      "sceneId": "a5_corridor",
+      "start": 432.8,
+      "end": 436.8
+    },
+    {
+      "shot": "h_nurse",
+      "sceneId": "a5_corridor",
+      "start": 436.8,
+      "end": 449.4
+    },
+    {
+      "shot": "h_track",
+      "sceneId": "a5_corridor",
+      "start": 449.4,
+      "end": 454.9
+    },
+    {
+      "shot": "h_door",
+      "sceneId": "a5_corridor",
+      "start": 454.9,
+      "end": 463.9
+    },
+    {
+      "shot": "h_door2",
+      "sceneId": "a5_corridor",
+      "start": 463.9,
+      "end": 466.4
+    },
+    {
+      "shot": "r_wide",
+      "sceneId": "a5_room",
+      "start": 466.4,
+      "end": 476.4
+    },
+    {
+      "shot": "r_hug",
+      "sceneId": "a5_room",
+      "start": 476.4,
+      "end": 481.3
+    },
+    {
+      "shot": "r_bed",
+      "sceneId": "a5_room",
+      "start": 481.3,
+      "end": 483.7
+    },
+    {
+      "shot": "r_wide",
+      "sceneId": "a5_room",
+      "start": 483.7,
+      "end": 486.5
+    },
+    {
+      "shot": "r_bed",
+      "sceneId": "a5_room",
+      "start": 486.5,
+      "end": 489.7
+    },
+    {
+      "shot": "r_door_e",
+      "sceneId": "a5_room",
+      "start": 489.7,
+      "end": 491.7
+    },
+    {
+      "shot": "r_hug",
+      "sceneId": "a5_room",
+      "start": 491.7,
+      "end": 500.7
+    },
+    {
+      "shot": "r_corridor",
+      "sceneId": "a5_room",
+      "start": 500.7,
+      "end": 507.4
+    },
+    {
+      "shot": "r_renaud",
+      "sceneId": "a5_room",
+      "start": 507.4,
+      "end": 521.4
+    },
+    {
+      "shot": "r_wide2",
+      "sceneId": "a5_room",
+      "start": 521.4,
+      "end": 527.9
+    },
+    {
+      "shot": "l_wide",
+      "sceneId": "a6_laundrette",
+      "start": 527.9,
+      "end": 531.9
+    },
+    {
+      "shot": "l_bench",
+      "sceneId": "a6_laundrette",
+      "start": 531.9,
+      "end": 534.9
+    },
+    {
+      "shot": "l_two",
+      "sceneId": "a6_laundrette",
+      "start": 534.9,
+      "end": 541.3
+    },
+    {
+      "shot": "l_bench",
+      "sceneId": "a6_laundrette",
+      "start": 541.3,
+      "end": 542.9
+    },
+    {
+      "shot": "l_two",
+      "sceneId": "a6_laundrette",
+      "start": 542.9,
+      "end": 546.5
+    },
+    {
+      "shot": "l_bench",
+      "sceneId": "a6_laundrette",
+      "start": 546.5,
+      "end": 549.7
+    },
+    {
+      "shot": "l_two",
+      "sceneId": "a6_laundrette",
+      "start": 549.7,
+      "end": 552.5
+    },
+    {
+      "shot": "l_bench",
+      "sceneId": "a6_laundrette",
+      "start": 552.5,
+      "end": 555.1
+    },
+    {
+      "shot": "l_two",
+      "sceneId": "a6_laundrette",
+      "start": 555.1,
+      "end": 559.5
+    },
+    {
+      "shot": "l_bench",
+      "sceneId": "a6_laundrette",
+      "start": 559.5,
+      "end": 561.5
+    },
+    {
+      "shot": "l_two",
+      "sceneId": "a6_laundrette",
+      "start": 561.5,
+      "end": 572.1
+    },
+    {
+      "shot": "l_close_e",
+      "sceneId": "a6_laundrette",
+      "start": 572.1,
+      "end": 574.9
+    },
+    {
+      "shot": "l_two",
+      "sceneId": "a6_laundrette",
+      "start": 574.9,
+      "end": 579.7
+    },
+    {
+      "shot": "l_wide2",
+      "sceneId": "a6_laundrette",
+      "start": 579.7,
+      "end": 582.9
+    },
+    {
+      "shot": "d_wide",
+      "sceneId": "a6_dawn",
+      "start": 582.9,
+      "end": 586.9
+    },
+    {
+      "shot": "d_walk",
+      "sceneId": "a6_dawn",
+      "start": 586.9,
+      "end": 595.9
+    },
+    {
+      "shot": "d_close",
+      "sceneId": "a6_dawn",
+      "start": 595.9,
+      "end": 600.5
+    },
+    {
+      "shot": "d_wide2",
+      "sceneId": "a6_dawn",
+      "start": 600.5,
+      "end": 615.5
+    },
+    {
+      "shot": "d_end",
+      "sceneId": "a6_dawn",
+      "start": 615.5,
+      "end": 625.1
+    }
+  ],
+  "events": [
+    {
+      "id": "a1_prison_b002_a1_gate_open",
+      "at": 9,
+      "type": "a1_gate_open",
+      "sceneId": "a1_prison"
+    },
+    {
+      "id": "a1_prison_b010_a1_gate_close",
+      "at": 30.2,
+      "type": "a1_gate_close",
+      "sceneId": "a1_prison"
+    },
+    {
+      "id": "a1_prison_b017_a1_photo_out",
+      "at": 49,
+      "type": "a1_photo_out",
+      "sceneId": "a1_prison"
+    },
+    {
+      "id": "a1_prison_b019_a1_photo_back",
+      "at": 58.5,
+      "type": "a1_photo_back",
+      "sceneId": "a1_prison"
+    },
+    {
+      "id": "a1_prison_b021_a1_bus_arrive",
+      "at": 63.5,
+      "type": "a1_bus_arrive",
+      "sceneId": "a1_prison"
+    },
+    {
+      "id": "a1_prison_b023_a1_bus_leave",
+      "at": 72.5,
+      "type": "a1_bus_leave",
+      "sceneId": "a1_prison"
+    },
+    {
+      "id": "a2_bakery_b002_a2_door_open",
+      "at": 83.5,
+      "type": "a2_door_open",
+      "sceneId": "a2_bakery"
+    },
+    {
+      "id": "a2_bakery_b011_a2_docs_shown",
+      "at": 103.1,
+      "type": "a2_docs_shown",
+      "sceneId": "a2_bakery"
+    },
+    {
+      "id": "a2_bakery_b018_a2_door_close",
+      "at": 120.9,
+      "type": "a2_door_close",
+      "sceneId": "a2_bakery"
+    },
+    {
+      "id": "a2_office_b008_a2_paper_returned",
+      "at": 142.5,
+      "type": "a2_paper_returned",
+      "sceneId": "a2_office"
+    },
+    {
+      "id": "a2_office_b010_a2_office_door",
+      "at": 147,
+      "type": "a2_office_door",
+      "sceneId": "a2_office"
+    },
+    {
+      "id": "a3_gare_b019_a3_paper_out",
+      "at": 226.6,
+      "type": "a3_paper_out",
+      "sceneId": "a3_gare"
+    },
+    {
+      "id": "a3_gare_b027_a3_tape_out",
+      "at": 250.4,
+      "type": "a3_tape_out",
+      "sceneId": "a3_gare"
+    },
+    {
+      "id": "a3_gare_b033_a3_tape_stop",
+      "at": 269,
+      "type": "a3_tape_stop",
+      "sceneId": "a3_gare"
+    },
+    {
+      "id": "a3_gare_b042_a3_train_pass",
+      "at": 297.4,
+      "type": "a3_train_pass",
+      "sceneId": "a3_gare"
+    },
+    {
+      "id": "a4_phone_b003_a4_phone_dial",
+      "at": 310.3,
+      "type": "a4_phone_dial",
+      "sceneId": "a4_phone"
+    },
+    {
+      "id": "a4_confrontation_b023_a4_renaud_step",
+      "at": 398.4,
+      "type": "a4_renaud_step",
+      "sceneId": "a4_confrontation"
+    },
+    {
+      "id": "a4_metro_b008_a4_hospital_door",
+      "at": 430.8,
+      "type": "a4_hospital_door",
+      "sceneId": "a4_metro"
+    },
+    {
+      "id": "a5_corridor_b002_a5_approach",
+      "at": 436.8,
+      "type": "a5_approach",
+      "sceneId": "a5_corridor"
+    },
+    {
+      "id": "a5_room_b002_a5_door_open",
+      "at": 470.4,
+      "type": "a5_door_open",
+      "sceneId": "a5_room"
+    },
+    {
+      "id": "a5_room_b017_a5_renaud_arrives",
+      "at": 500.7,
+      "type": "a5_renaud_arrives",
+      "sceneId": "a5_room"
+    },
+    {
+      "id": "a5_room_b026_a5_renaud_leaves",
+      "at": 523.2,
+      "type": "a5_renaud_leaves",
+      "sceneId": "a5_room"
+    },
+    {
+      "id": "a6_laundrette_b014_a6_paper_handed",
+      "at": 566.3,
+      "type": "a6_paper_handed",
+      "sceneId": "a6_laundrette"
+    },
+    {
+      "id": "a6_dawn_b009_a6_window_open",
+      "at": 606.9,
+      "type": "a6_window_open",
+      "sceneId": "a6_dawn"
+    },
+    {
+      "id": "a6_dawn_b013_a6_end_card",
+      "at": 622.1,
+      "type": "a6_end_card",
+      "sceneId": "a6_dawn"
+    }
+  ]
+}

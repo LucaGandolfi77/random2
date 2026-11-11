@@ -23,11 +23,13 @@ import { buildDistricts, getDistrictAt as findDistrictAt } from './districts.js'
 import { scheduleSlotFor, crowdVisible, isVenueOpen, venueLabel, venueStatus } from './schedules.js';
 import { BLOCK_SIZE, getBlockMaterial, animateWater } from './mc-blocks.js';
 import {
-  AREA_BLOCK_FALLBACK, DETAIL_SIZE,
-  blockKey, baseBlock, bump, detailPaletteFor, roadSurfaceBlock, sidewalkBlock,
+  DETAIL_SIZE,
+  blockKey, baseBlock, bump, detailPaletteFor,
   roofFallbackBlock, wallFallbackBlock
 } from './block-palette.js';
 import { roofStepBoxes, voxelBox, voxelGableEnd } from './voxel-details.js';
+import { getGroundMaterial, groundRepeat, paintGroundGeometry } from './ground-textures.js';
+import { GroundTileStreamer } from './ground-tiles.js';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 0));
 
@@ -134,13 +136,7 @@ function assignBlockUV(geom, size = BLOCK_SIZE) {
   return geom;
 }
 
-function usableSurfaceBlock(block, fallback) {
-  const key = baseBlock(blockKey(block));
-  if (!key || key === 'air' || key === 'water') return fallback;
-  return key;
-}
-
-function makeRibbon(pts, width, y, color, { roofColor = null } = {}) {
+function makeRibbon(pts, width, y, color, { roofColor = null, uv = null } = {}) {
   if (pts.length < 2) return null;
   const half = width / 2;
   const left = [], right = [];
@@ -184,11 +180,37 @@ function makeRibbon(pts, width, y, color, { roofColor = null } = {}) {
       positions[k++] = vz;
     }
   }
+  let uvs = null;
+  if (uv) {
+    const repeat = uv.repeat || 8;
+    const offset = uv.offset || 0;
+    uvs = new Float32Array((pts.length - 1) * 6 * 2);
+    let travelled = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [ax, az] = pts[i];
+      const [bx, bz] = pts[i + 1];
+      const len = Math.hypot(bx - ax, bz - az);
+      const u0 = (travelled + offset) / repeat;
+      const u1 = (travelled + len + offset) / repeat;
+      const v0 = -half / repeat + 0.5;
+      const v1 = half / repeat + 0.5;
+      const pairs = [
+        [u0, v0], [u1, v0], [u0, v1],
+        [u0, v1], [u1, v0], [u1, v1]
+      ];
+      for (let p = 0; p < 6; p++) {
+        uvs[(i * 6 + p) * 2] = pairs[p][0];
+        uvs[(i * 6 + p) * 2 + 1] = pairs[p][1];
+      }
+      travelled += len;
+    }
+  }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
   const normals = new Float32Array(positions.length);
   for (let i = 1; i < normals.length; i += 3) normals[i] = 1;
   g.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+  if (uvs) g.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
   return paintGeometry(g, color, { roofColor });
 }
 
@@ -226,9 +248,9 @@ function offsetPolyline(pts, distance) {
   return out;
 }
 
-function makeSideRibbon(pts, roadWidth, sideWidth, side, y, color) {
+function makeSideRibbon(pts, roadWidth, sideWidth, side, y, color, opts = {}) {
   const offset = side * (roadWidth / 2 + sideWidth / 2);
-  return makeRibbon(offsetPolyline(pts, offset), sideWidth, y, color);
+  return makeRibbon(offsetPolyline(pts, offset), sideWidth, y, color, opts);
 }
 
 function makePolygonGeometry(poly, y, color) {
@@ -255,14 +277,15 @@ function addQuad(positions, ax, ay, az, bx, by, bz, cx, cy, cz, dx, dy, dz) {
   positions.push(ax, ay, az, cx, cy, cz, dx, dy, dz);
 }
 
-function createGlowTexture(color = 'rgba(255,224,140,1)') {
+function createGlowTexture(color = 'rgba(255,224,140,1)', outer = 'rgba(255,220,120,0)') {
   const c = document.createElement('canvas');
   c.width = c.height = 64;
   const ctx = c.getContext('2d');
   const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
   g.addColorStop(0, color);
   g.addColorStop(0.35, color.replace(/[\d.]+\)$/, '0.55)'));
-  g.addColorStop(1, 'rgba(255,220,120,0)');
+  g.addColorStop(0.7, color.replace(/[\d.]+\)$/, '0.14)'));
+  g.addColorStop(1, outer);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 64, 64);
   const tex = new THREE.CanvasTexture(c);
@@ -284,25 +307,11 @@ function makeStarGeometry() {
   return g;
 }
 
-function makeGlowSprite(color) {
-  const tex = createGlowTexture(color);
+function makeGlowSprite(color, outer) {
+  const tex = createGlowTexture(color, outer);
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
   sp.scale.set(2.2, 2.2, 1);
   return sp;
-}
-
-function makeSquareSprite(color) {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 64;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, 64, 64);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.magFilter = THREE.NearestFilter;
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false }));
-  sprite.scale.set(2.2, 2.2, 1);
-  return sprite;
 }
 
 function makeSpeechBubble() {
@@ -379,7 +388,7 @@ function makeRouteWalker(points, startT = 0, direction = 1, speed = 5) {
 }
 
 export class World {
-  constructor({ scene, renderer, city, terrain, map, quality = 'high', arnis = null }) {
+  constructor({ scene, renderer, city, terrain, map, quality = 'high', isMobile = false, arnis = null, ground = null }) {
     this.scene = scene;
     this.renderer = renderer;
     this.rawCity = city;
@@ -393,9 +402,16 @@ export class World {
     this.arnisLandmarks = arnis?.landmarks || {};
     this.arnisWater = arnis?.water || {};
     this.arnisMeta = arnis?.meta || null;
-    this.arnisSurfaceImage = arnis?.surfaceImage || null;
-    this.arnisSurfaceTexture = null;
-    this.arnisSurfaceSample = null;
+    this.ground = ground;
+    this.groundMeta = ground?.meta || null;
+    this.groundImage = ground?.image || null;
+    this.groundCenterImage = ground?.centerImage || null;
+    this.groundTexture = null;
+    this.groundCenterTexture = null;
+    this.groundBaseMaterial = null;
+    this.groundCenterMaterial = null;
+    this.groundMeshes = [];
+    this.groundMaterialList = new Set();
     this.blockMeshes = [];
     this.roofMeshes = [];
     this.windowMeshes = [];
@@ -421,6 +437,7 @@ export class World {
     this.spawnDef = map.spawn || null;
     this.missionBoardDef = map.missionBoard || null;
     this.quality = quality;
+    this.isMobile = isMobile;
     this.time = 0;
     this.hour = 15;
     this.weather = { rain: 0, clouds: 0.2 };
@@ -544,6 +561,54 @@ export class World {
     return count;
   }
 
+  addGroundGeometry(buckets, style, geometry) {
+    if (!geometry) return;
+    const normalized = geometry.index ? geometry.toNonIndexed() : geometry;
+    normalized.clearGroups?.();
+    if (!buckets.has(style)) buckets.set(style, []);
+    buckets.get(style).push(normalized);
+  }
+
+  groundMaterial(style, opts = {}) {
+    const material = getGroundMaterial(style, {
+      quality: this.quality,
+      renderer: this.renderer,
+      ...opts
+    });
+    this.groundMaterialList.add(material);
+    return material;
+  }
+
+  flushGroundBuckets(buckets, {
+    name = 'suolo',
+    castShadow = false,
+    receiveShadow = true,
+    side = THREE.FrontSide,
+    preserveUV = false,
+    uvSize = null
+  } = {}) {
+    const meshes = [];
+    for (const [style, geometries] of buckets) {
+      const merged = mergeClean(geometries);
+      if (!merged) continue;
+      if (!preserveUV || !merged.attributes.uv) {
+        assignBlockUV(merged, uvSize ?? groundRepeat(style));
+      }
+      paintGroundGeometry(merged, {
+        variation: style === 'grass' ? 0.11 : style === 'soil' ? 0.09 : style === 'turf' ? 0.08 : 0.05
+      });
+      const material = this.groundMaterial(style, { side });
+      const mesh = new THREE.Mesh(merged, material);
+      mesh.castShadow = castShadow;
+      mesh.receiveShadow = receiveShadow;
+      mesh.name = `${name}-${style}`;
+      mesh.userData.groundStyle = style;
+      this.scene.add(mesh);
+      meshes.push(mesh);
+    }
+    return meshes;
+  }
+
   async build(onProgress = () => {}) {
     const step = async (p, label, fn) => {
       onProgress(p, label);
@@ -605,14 +670,14 @@ export class World {
     const hemi = new THREE.HemisphereLight('#cfe6ef', '#5b5a44', 1.15);
     this.scene.add(hemi);
     this.hemi = hemi;
-    const ambient = new THREE.AmbientLight('#8fa7bd', 0.12);
+    const ambient = new THREE.AmbientLight('#c9c0b0', 0.12);
     this.scene.add(ambient);
     this.ambient = ambient;
 
     const sun = new THREE.DirectionalLight('#fff1cf', 2.1);
     sun.position.set(120, 190, 80);
-    sun.castShadow = this.quality === 'high';
-    sun.shadow.mapSize.set(2048, 2048);
+    sun.castShadow = this.quality !== 'low';
+    sun.shadow.mapSize.set(this.quality === 'high' ? 4096 : 2048, this.quality === 'high' ? 4096 : 2048);
     sun.shadow.camera.near = 1;
     sun.shadow.camera.far = 460;
     sun.shadow.camera.left = -110;
@@ -622,6 +687,7 @@ export class World {
     sun.shadow.bias = -0.0006;
     sun.shadow.normalBias = 0.025;
     sun.shadow.radius = 2.5;
+    sun.shadow.intensity = 0.4;
     this.scene.add(sun);
     this.scene.add(sun.target);
     this.sunLight = sun;
@@ -677,12 +743,12 @@ export class World {
     this.skyDome.frustumCulled = false;
     this.scene.add(this.skyDome);
 
-    // Sole e luna quadrati, in stile Minecraft.
-    this.sunSprite = makeSquareSprite('#fff6c8');
-    this.sunSprite.scale.set(220, 220, 1);
+    // Sole e luna morbidi, non più quadrati.
+    this.sunSprite = makeGlowSprite('rgba(255,246,200,1)', 'rgba(255,220,120,0)');
+    this.sunSprite.scale.set(260, 260, 1);
     this.scene.add(this.sunSprite);
-    this.moonSprite = makeSquareSprite('#dfeaff');
-    this.moonSprite.scale.set(150, 150, 1);
+    this.moonSprite = makeGlowSprite('rgba(226,238,255,1)', 'rgba(180,210,255,0)');
+    this.moonSprite.scale.set(190, 190, 1);
     this.scene.add(this.moonSprite);
 
     // Stelle notturne
@@ -701,43 +767,6 @@ export class World {
     this.scene.add(this.stars);
   }
 
-  _buildSurfaceSampler() {
-    const image = this.arnisSurfaceImage;
-    const meta = this.arnisMeta;
-    if (!image || !meta?.surface) return null;
-    const width = 512;
-    const height = Math.max(1, Math.round(width * meta.surface.height / meta.surface.width));
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    try {
-      ctx.drawImage(image, 0, 0, width, height);
-    } catch {
-      return null;
-    }
-    const data = ctx.getImageData(0, 0, width, height).data;
-    return { data, width, height, meta };
-  }
-
-  _sampleSurfaceColor(x, z) {
-    const sampler = this.arnisSurfaceSample;
-    if (!sampler) return null;
-    const bounds = WORLD.bounds;
-    const u = clamp((x - bounds.minX) / (bounds.maxX - bounds.minX), 0, 0.999999);
-    const v = clamp((z - bounds.minZ) / (bounds.maxZ - bounds.minZ), 0, 0.999999);
-    const px = Math.floor(u * sampler.width);
-    const py = Math.floor(v * sampler.height);
-    const index = (py * sampler.width + px) * 4;
-    const data = sampler.data;
-    return new THREE.Color().setRGB(
-      data[index] / 255,
-      data[index + 1] / 255,
-      data[index + 2] / 255,
-      THREE.SRGBColorSpace
-    );
-  }
-
   _buildTerrain() {
     const { widthKm, segments } = WORLD.terrain;
     const size = widthKm * 1000;
@@ -745,166 +774,192 @@ export class World {
     geo.rotateX(-Math.PI / 2);
     const pos = geo.attributes.position;
     const colors = new Float32Array(pos.count * 3);
-    const cUrban = new THREE.Color('#8d967d');
-    const cGrass = new THREE.Color('#729c5c');
-    const cField = new THREE.Color('#b4a36e');
+    const cGrass = new THREE.Color('#6f8f56');
+    const cField = new THREE.Color('#9a9164');
     const cHigh = new THREE.Color('#5f7f4c');
     const cWater = new THREE.Color('#6c8d8b');
-    this.arnisSurfaceSample = this._buildSurfaceSampler();
-    const arnisBounds = WORLD.bounds;
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i), z = pos.getZ(i);
       const y = groundHeightAt(this.terrain, x, z, 0);
       pos.setY(i, y);
-      const inside = x > WORLD.flat.minX && x < WORLD.flat.maxX && z > WORLD.flat.minZ && z < WORLD.flat.maxZ;
-      let c;
-      if (inside) {
-        c = cUrban.clone();
-      } else {
-        const n = Math.sin(x * 0.013) * Math.cos(z * 0.017) + Math.sin((x + z) * 0.006) * 0.7;
-        c = cGrass.clone().lerp(cField, clamp(0.35 + n * 0.28, 0, 1));
-        if (y > 35) c.lerp(cHigh, clamp((y - 35) / 110, 0, 1));
-        if (y < -5) c.lerp(cWater, 0.25);
-      }
+      const n = Math.sin(x * 0.013) * Math.cos(z * 0.017) + Math.sin((x + z) * 0.006) * 0.7;
+      const c = cGrass.clone().lerp(cField, clamp(0.32 + n * 0.24, 0, 1));
+      if (y > 35) c.lerp(cHigh, clamp((y - 35) / 110, 0, 1));
+      if (y < -5) c.lerp(cWater, 0.25);
       const shade = 0.96 + 0.04 * Math.sin(x * 0.7 + z * 0.4);
-      const sampled = (x > arnisBounds.minX && x < arnisBounds.maxX && z > arnisBounds.minZ && z < arnisBounds.maxZ)
-        ? this._sampleSurfaceColor(x, z)
-        : null;
-      const color = sampled || c;
-      colors[i * 3] = color.r * shade;
-      colors[i * 3 + 1] = color.g * shade;
-      colors[i * 3 + 2] = color.b * shade;
+      colors[i * 3] = c.r * shade;
+      colors[i * 3 + 1] = c.g * shade;
+      colors[i * 3 + 2] = c.b * shade;
     }
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geo.computeVertexNormals();
-    const mat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
+    const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.receiveShadow = true;
     mesh.name = 'terreno';
     this.scene.add(mesh);
     this.terrainMesh = mesh;
 
-    // Superficie reale di ArnisWorld3: 1 pixel = 1 blocco (2 m).
-    if (this.arnisSurfaceImage && this.arnisMeta?.surface) {
-      let texture;
-      if (this.quality === 'high') {
-        texture = new THREE.Texture(this.arnisSurfaceImage);
-        texture.needsUpdate = true;
-      } else {
-        const source = this.arnisMeta.surface;
-        const scale = this.quality === 'medium' ? 0.5 : 0.25;
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(source.width * scale));
-        canvas.height = Math.max(1, Math.round(source.height * scale));
-        const ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(this.arnisSurfaceImage, 0, 0, canvas.width, canvas.height);
-        texture = new THREE.CanvasTexture(canvas);
+    this._buildGroundSurface();
+  }
+
+  _groundTexture(image, { anisotropy = 1 } = {}) {
+    const texture = new THREE.Texture(image);
+    texture.needsUpdate = true;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.magFilter = THREE.LinearFilter;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.generateMipmaps = true;
+    texture.anisotropy = anisotropy;
+    if (this.renderer?.capabilities?.isWebGL2 === false) {
+      // Le ortofoto non sono POT: senza WebGL2 niente mipmap.
+      texture.generateMipmaps = false;
+      texture.minFilter = THREE.LinearFilter;
+    }
+    return texture;
+  }
+
+  _featherTexture() {
+    const cacheKey = 'ground-feather';
+    if (this.textureCache[cacheKey]) return this.textureCache[cacheKey];
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const image = ctx.createImageData(size, size);
+    const fade = 0.09;
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        const edge = Math.min(x, y, size - 1 - x, size - 1 - y) / size;
+        const alpha = clamp(edge / fade, 0, 1);
+        const index = (y * size + x) * 4;
+        image.data[index] = 255;
+        image.data[index + 1] = 255;
+        image.data[index + 2] = 255;
+        image.data[index + 3] = Math.round(alpha * 255);
       }
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = this.quality === 'low' ? THREE.NearestFilter : THREE.NearestMipmapNearestFilter;
-      texture.generateMipmaps = this.quality !== 'low';
-      texture.anisotropy = this.quality === 'high'
-        ? Math.min(4, this.renderer?.capabilities?.getMaxAnisotropy?.() || 1)
-        : 1;
-      texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
-      const width = arnisBounds.maxX - arnisBounds.minX;
-      const depth = arnisBounds.maxZ - arnisBounds.minZ;
-      const overlayGeo = new THREE.PlaneGeometry(width, depth);
-      overlayGeo.rotateX(-Math.PI / 2);
-      const overlayMat = new THREE.MeshLambertMaterial({ map: texture });
-      const overlay = new THREE.Mesh(overlayGeo, overlayMat);
-      overlay.position.set(
-        (arnisBounds.minX + arnisBounds.maxX) / 2,
-        0.012,
-        (arnisBounds.minZ + arnisBounds.maxZ) / 2
-      );
-      overlay.receiveShadow = true;
-      overlay.name = 'superficie-arnis';
-      this.arnisSurfaceTexture = texture;
-      this.scene.add(overlay);
+    }
+    ctx.putImageData(image, 0, 0);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.NoColorSpace;
+    this.textureCache[cacheKey] = texture;
+    return texture;
+  }
+
+  _buildGroundSurface() {
+    const meta = this.groundMeta;
+    const image = this.groundImage;
+    if (!meta || !image) return;
+    const anisotropy = Math.min(
+      this.quality === 'low' ? 2 : 8,
+      this.renderer?.capabilities?.getMaxAnisotropy?.() || 1
+    );
+    const base = meta.base || meta;
+    const bounds = base.bounds || WORLD.bounds;
+    const width = bounds.maxX - bounds.minX;
+    const depth = bounds.maxZ - bounds.minZ;
+    const geo = new THREE.PlaneGeometry(width, depth);
+    geo.rotateX(-Math.PI / 2);
+    const texture = this._groundTexture(image, { anisotropy });
+    const mat = new THREE.MeshLambertMaterial({
+      map: texture,
+      color: '#ffffff',
+      polygonOffset: true,
+      polygonOffsetFactor: -2,
+      polygonOffsetUnits: -2
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set((bounds.minX + bounds.maxX) / 2, 0.012, (bounds.minZ + bounds.maxZ) / 2);
+    mesh.receiveShadow = true;
+    mesh.name = 'terreno-orto';
+    this.scene.add(mesh);
+    this.groundMeshes.push(mesh);
+    this.groundMesh = mesh;
+    this.groundBaseMaterial = mat;
+    this.groundTexture = texture;
+
+    if (this.groundCenterImage && meta.center && this.quality !== 'low') {
+      const cb = meta.center.bounds;
+      const cw = cb.maxX - cb.minX;
+      const cd = cb.maxZ - cb.minZ;
+      const cgeo = new THREE.PlaneGeometry(cw, cd);
+      cgeo.rotateX(-Math.PI / 2);
+      const ctexture = this._groundTexture(this.groundCenterImage, { anisotropy });
+      const cmat = new THREE.MeshLambertMaterial({
+        map: ctexture,
+        alphaMap: this._featherTexture(),
+        transparent: true,
+        depthWrite: false,
+        color: '#ffffff',
+        polygonOffset: true,
+        polygonOffsetFactor: -4,
+        polygonOffsetUnits: -4
+      });
+      const cmesh = new THREE.Mesh(cgeo, cmat);
+      cmesh.position.set((cb.minX + cb.maxX) / 2, 0.022, (cb.minZ + cb.maxZ) / 2);
+      cmesh.receiveShadow = true;
+      cmesh.renderOrder = 1;
+      cmesh.name = 'terreno-orto-centro';
+      this.scene.add(cmesh);
+      this.groundMeshes.push(cmesh);
+      this.groundCenterMesh = cmesh;
+      this.groundCenterMaterial = cmat;
+      this.groundCenterTexture = ctexture;
     }
 
-    // Dettaglio procedurale del suolo: solo senza la superficie Arnis.
-    if (!this.arnisSurfaceImage) {
-    const gc = document.createElement('canvas');
-    gc.width = gc.height = 256;
-    const gctx = gc.getContext('2d');
-    const grnd = seededRandom(2027);
-    // lastre di pietra
-    for (let ty = 0; ty < 4; ty++) {
-      for (let tx = 0; tx < 4; tx++) {
-        const shade = ty % 2 === tx % 2 ? 0.02 : 0.045;
-        gctx.fillStyle = `rgba(90,74,54,${shade})`;
-        gctx.fillRect(tx * 64 + 1, ty * 64 + 1, 62, 62);
-      }
-    }
-    gctx.strokeStyle = 'rgba(75,60,42,.20)';
-    gctx.lineWidth = 1.2;
-    for (let i = 0; i <= 4; i++) {
-      gctx.beginPath(); gctx.moveTo(i * 64, 0); gctx.lineTo(i * 64, 256); gctx.stroke();
-      gctx.beginPath(); gctx.moveTo(0, i * 64); gctx.lineTo(256, i * 64); gctx.stroke();
-    }
-    for (let i = 0; i < 2200; i++) {
-      const a = 0.01 + grnd() * 0.035;
-      gctx.fillStyle = grnd() > 0.5 ? `rgba(70,58,42,${a})` : `rgba(255,250,235,${a * 1.4})`;
-      const s = 1 + grnd() * 2.5;
-      gctx.fillRect(grnd() * 256, grnd() * 256, s, s);
-    }
-    for (let i = 0; i < 14; i++) {
-      gctx.strokeStyle = `rgba(80,66,50,${0.02 + grnd() * 0.03})`;
-      gctx.lineWidth = 0.7;
-      gctx.beginPath();
-      const y = grnd() * 256;
-      gctx.moveTo(0, y);
-      gctx.bezierCurveTo(80, y + grnd() * 20 - 10, 170, y + grnd() * 20 - 10, 256, y);
-      gctx.stroke();
-    }
-    const groundTex = new THREE.CanvasTexture(gc);
-    groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
-    groundTex.repeat.set(240, 240);
-    groundTex.colorSpace = THREE.SRGBColorSpace;
-    const detail = new THREE.Mesh(
-      new THREE.PlaneGeometry(2600, 2600),
-      new THREE.MeshBasicMaterial({ map: groundTex, transparent: true, opacity: 0.85, depthWrite: false })
-    );
-    detail.rotation.x = -Math.PI / 2;
-    detail.position.y = 0.041;
-    detail.name = 'dettaglio-suolo';
-    this.scene.add(detail);
+    if (meta.tiles && this.quality !== 'low') {
+      this.groundTiles = new GroundTileStreamer({
+        scene: this.scene,
+        renderer: this.renderer,
+        meta: meta.tiles,
+        quality: this.quality,
+        isMobile: this.isMobile,
+        centerBounds: meta.center?.bounds || null,
+        centerLoaded: !!this.groundCenterImage && this.quality !== 'low'
+      });
     }
   }
 
+  _areaGroundStyle(kind) {
+    if (kind === 'park' || kind === 'grass' || kind === 'forest') return 'grass';
+    if (kind === 'sport') return 'turf';
+    if (kind === 'farmland' || kind === 'cemetery') return 'soil';
+    if (kind === 'parking') return 'asphalt';
+    if (kind === 'square') return 'porphyry';
+    if (kind === 'industrial') return 'concrete';
+    return 'concrete';
+  }
+
   _buildAreas() {
-    const buckets = new Map();
+    const areaBuckets = new Map();
     const waterBuckets = new Map();
     const greenKinds = new Set(['park', 'grass', 'forest', 'sport']);
-    const areaStart = this.blockMeshes.length;
     for (const a of this.city.areas) {
-      const info = this.arnisAreas[String(a.id)];
-      // Le aree di zonizzazione urbana non sono una superficie: la mappa
-      // dei blocchi Arnis mostra già piazze, marciapiedi e cortili reali.
-      if (a.kind === 'urban' && this.arnisSurfaceImage) continue;
-      const y = a.kind === 'water' ? 0.018 : greenKinds.has(a.kind) ? 0.034 : 0.032;
-      const g = makePolygonGeometry(a.poly, y + (hashString(String(a.id)) % 5) * 0.0003, '#ffffff');
-      if (!g) continue;
       if (a.kind === 'water') {
-        this.addMaterialGeometry(waterBuckets, a.blocks?.surface || 'water', g);
+        const y = 0.018;
+        const g = makePolygonGeometry(a.poly, y + (hashString(String(a.id)) % 5) * 0.0003, '#ffffff');
+        if (g) this.addMaterialGeometry(waterBuckets, a.blocks?.surface || 'water', g);
         continue;
       }
-      const fallback = AREA_BLOCK_FALLBACK[a.kind] || 'grass_block';
-      const block = usableSurfaceBlock(a.blocks?.surface || info?.surface, fallback);
-      this.addMaterialGeometry(buckets, block, g);
+      // Con l'ortofoto e le tessere 0,5 m disponibili, TUTTE le superfici
+      // OSM non d'acqua restano la foto reale: prati, campi, piazzali,
+      // parcheggi e cortili industriali. Sovrapporre materiali opachi
+      // nasconderebbe l'ortofoto e creerebbe chiazze piatte.
+      if (this.groundImage) continue;
+      const y = greenKinds.has(a.kind) ? 0.034 : 0.032;
+      const g = makePolygonGeometry(a.poly, y + (hashString(String(a.id)) % 5) * 0.0003, '#ffffff');
+      if (!g) continue;
+      this.addGroundGeometry(areaBuckets, this._areaGroundStyle(a.kind), g);
     }
-    this.flushMaterialBuckets(buckets, {
+    const areaMeshes = this.flushGroundBuckets(areaBuckets, {
       name: 'aree',
       castShadow: false,
       receiveShadow: true
     });
-    this.areaMeshes = this.blockMeshes.slice(areaStart);
-    this.areaMesh = this.areaMeshes[0] || null;
-    this.piazzaMesh = this.areaMeshes.find(mesh => mesh.userData.arnisBlock?.includes('stone_brick')) || null;
+    this.areaMeshes = areaMeshes;
+    this.areaMesh = areaMeshes[0] || null;
+    this.piazzaMesh = areaMeshes.find(mesh => mesh.userData.groundStyle === 'porphyry') || null;
 
     if (waterBuckets.size) {
       const waterStart = this.blockMeshes.length;
@@ -950,34 +1005,12 @@ export class World {
       }
     }
 
-    // Paving delle piazze: una griglia sottile disegnata sopra la piazza.
-    const pavingPoints = [];
-    for (const a of this.city.areas) {
-      if (a.kind !== 'square' || a.area < 400) continue;
-      const b = polygonBounds(a.poly);
-      const step = 4.0;
-      let count = 0;
-      for (let x = Math.ceil(b.minX / step) * step; x < b.maxX; x += step) {
-        for (let z = Math.ceil(b.minZ / step) * step; z < b.maxZ; z += step) {
-          if (count > 520) break;
-          if (!pointInPoly(x, z, a.poly)) continue;
-          if (pointInPoly(Math.min(x + step * 0.78, b.maxX), z, a.poly)) {
-            pavingPoints.push(x, 0.037, z, Math.min(x + step * 0.78, b.maxX), 0.037, z);
-            count++;
-          }
-          if (pointInPoly(x, Math.min(z + step * 0.78, b.maxZ), a.poly)) {
-            pavingPoints.push(x, 0.037, z, x, 0.037, Math.min(z + step * 0.78, b.maxZ));
-            count++;
-          }
-        }
-      }
-    }
-    if (pavingPoints.length) {
-      const pg = new THREE.BufferGeometry();
-      pg.setAttribute('position', new THREE.Float32BufferAttribute(pavingPoints, 3));
-      const pl = new THREE.LineSegments(pg, new THREE.LineBasicMaterial({ color: '#c5b294', transparent: true, opacity: 0.55 }));
-      pl.name = 'pavimentazione';
-      this.scene.add(pl);
+    // I corsi d'acqua lineari restano nel blocco dedicato qui sotto.
+    if (this.waterMaterial) {
+      this.waterMaterial.normalMap = this._waterNormalTexture();
+      this.waterMaterial.normalScale.set(0.85, 0.85);
+      this.waterMaterial.opacity = 0.86;
+      this.waterMaterial.needsUpdate = true;
     }
   }
 
@@ -1264,8 +1297,8 @@ export class World {
   _buildRoads() {
     const roadBuckets = new Map();
     const sidewalkBuckets = new Map();
+    const curbBuckets = new Map();
     const roadDetailBuckets = new Map();
-    const curbGeoms = [];
     const markGeoms = [];
     const edgePositions = [];
     const manholeGeoms = [];
@@ -1273,26 +1306,18 @@ export class World {
     const puddleGeoms = [];
     const labels = [];
     const rnd = seededRandom(19);
-    const roadStart = this.blockMeshes.length;
     const pedestrianKinds = new Set(['pedestrian', 'footway', 'living_street', 'path', 'cycleway', 'track', 'steps']);
+    const pedestrianStyle = kind => {
+      if (kind === 'pedestrian' || kind === 'living_street') return 'porphyry';
+      if (kind === 'path' || kind === 'track') return 'gravel';
+      if (kind === 'cycleway') return 'cycleway';
+      return 'concrete';
+    };
     for (const r of this.city.roads) {
       if (r.tunnel) continue;
       const style = ROAD_STYLE[r.kind] || ROAD_STYLE.residential;
-      const info = this.arnisRoads[String(r.id)];
       const roadSeed = hashString(String(r.id));
-      const surfaceBlock = roadSurfaceBlock({
-        kind: r.kind,
-        source: info?.surface,
-        override: r.blocks?.surface,
-        seed: roadSeed
-      });
-      const sideBlock = sidewalkBlock({
-        kind: r.kind,
-        source: info?.side,
-        override: r.blocks?.side,
-        seed: roadSeed
-      });
-      const baseY = 0.085 + (hashString(String(r.id)) % 9) * 0.0007;
+      const baseY = 0.085 + (roadSeed % 9) * 0.0007;
       const isBridge = r.bridge;
       const y = baseY + (isBridge ? 0.38 : 0);
       const pedestrian = pedestrianKinds.has(r.kind);
@@ -1300,11 +1325,11 @@ export class World {
       if (!pedestrian && hasSidewalk && r.w >= 4.5) {
         const sidewalkY = y + (this.quality === 'low' ? 0.08 : 0.18);
         const curbHeight = sidewalkY - y + 0.02;
-        const curbBlock = hashString(String(r.id)) % 2 ? 'smooth_stone' : 'andesite';
+        const sideUv = { repeat: groundRepeat('concrete'), offset: roadSeed % 997 };
         for (const side of [-1, 1]) {
-          const sw = makeSideRibbon(r.pts, r.w, 1.35, side, sidewalkY, '#ffffff');
-          if (sw) this.addMaterialGeometry(sidewalkBuckets, sideBlock, sw);
-          // Cordolo 3D a moduli da 1 m: la strada non è più un nastro piatto.
+          const sw = makeSideRibbon(r.pts, r.w, 1.35, side, sidewalkY, '#ffffff', { uv: sideUv });
+          if (sw) this.addGroundGeometry(sidewalkBuckets, 'concrete', sw);
+          // Cordolo 3D continuo, con la stessa texture del marciapiede.
           for (let i = 1; i < r.pts.length; i++) {
             const [ax, az] = r.pts[i - 1];
             const [bx, bz] = r.pts[i];
@@ -1318,20 +1343,20 @@ export class World {
             const nz = ux;
             const angle = Math.atan2(ux, uz);
             const offset = side * (r.w / 2 + 0.09);
-            this.addMaterialGeometry(
-              roadDetailBuckets,
-              curbBlock,
+            this.addGroundGeometry(
+              curbBuckets,
+              'concrete',
               voxelBox(0.18, curbHeight, len + 0.04, (ax + bx) / 2 + nx * offset, y + curbHeight / 2, (az + bz) / 2 + nz * offset, angle)
             );
             // Bordo esterno del marciapiede, per non lasciarlo sospeso.
             const outerOffset = side * (r.w / 2 + 1.44);
-            this.addMaterialGeometry(
-              roadDetailBuckets,
-              curbBlock,
+            this.addGroundGeometry(
+              curbBuckets,
+              'concrete',
               voxelBox(0.16, curbHeight, len + 0.04, (ax + bx) / 2 + nx * outerOffset, y + curbHeight / 2, (az + bz) / 2 + nz * outerOffset, angle)
             );
           }
-          // Angoli smussati a blocchi da 1 m.
+          // Angoli smussati.
           if (this.quality !== 'low') {
             for (let i = 1; i < r.pts.length - 1; i++) {
               const [px, pz] = r.pts[i - 1];
@@ -1355,9 +1380,9 @@ export class World {
               cx /= cl;
               cz /= cl;
               const off = side * (r.w / 2 + 0.42);
-              this.addMaterialGeometry(
-                roadDetailBuckets,
-                curbBlock,
+              this.addGroundGeometry(
+                curbBuckets,
+                'concrete',
                 voxelBox(0.82, curbHeight, 0.82, vx + cx * off, y + curbHeight / 2, vz + cz * off)
               );
             }
@@ -1365,30 +1390,17 @@ export class World {
         }
       }
       if (pedestrian) {
-        const paving = makeRibbon(r.pts, r.w, y, '#ffffff');
-        if (paving) this.addMaterialGeometry(roadBuckets, surfaceBlock, paving);
+        const pavingStyle = pedestrianStyle(r.kind);
+        const paving = makeRibbon(r.pts, r.w, y, '#ffffff', {
+          uv: { repeat: groundRepeat(pavingStyle), offset: roadSeed % 997 }
+        });
+        if (paving) this.addGroundGeometry(roadBuckets, pavingStyle, paving);
         continue;
       }
-      const road = makeRibbon(r.pts, r.w, y, '#ffffff');
-      if (road) this.addMaterialGeometry(roadBuckets, surfaceBlock, road);
-      if (this.quality === 'high' && r.length > 12) {
-        const patches = Math.min(4, Math.floor(r.length / 28));
-        for (let p = 0; p < patches; p++) {
-          if (rnd() > 0.55) continue;
-          const i = 1 + Math.floor(rnd() * Math.max(1, r.pts.length - 1));
-          const [ax, az] = r.pts[i - 1];
-          const [bx, bz] = r.pts[i];
-          const t = rnd();
-          const x = ax + (bx - ax) * t + (rnd() - 0.5) * r.w * 0.5;
-          const z = az + (bz - az) * t + (rnd() - 0.5) * r.w * 0.5;
-          const dx = bx - ax;
-          const dz = bz - az;
-          const len = Math.hypot(dx, dz) || 1;
-          const angle = Math.atan2(dx / len, dz / len);
-          const block = ['cobblestone', 'andesite', 'gray_concrete_powder'][Math.floor(rnd() * 3)];
-          this.addMaterialGeometry(roadDetailBuckets, block, voxelBox(1.1, 0.035, 1.1, x, y + 0.014, z, angle));
-        }
-      }
+      const road = makeRibbon(r.pts, r.w, y, '#ffffff', {
+        uv: { repeat: groundRepeat('asphalt'), offset: roadSeed % 997 }
+      });
+      if (road) this.addGroundGeometry(roadBuckets, 'asphalt', road);
       if (this.quality === 'high' && ['primary', 'secondary', 'tertiary'].includes(r.kind) && r.length > 30) {
         for (let i = 1; i < r.pts.length; i++) {
           const [ax, az] = r.pts[i - 1];
@@ -1505,17 +1517,25 @@ export class World {
       eg.computeVertexNormals();
       markGeoms.push(paintGeometry(eg, '#d9d3c2'));
     }
-    this.flushMaterialBuckets(roadBuckets, {
+    this.roadMeshes = this.flushGroundBuckets(roadBuckets, {
       name: 'strade',
       castShadow: false,
-      receiveShadow: true
+      receiveShadow: true,
+      preserveUV: true
     });
-    this.roadMeshes = this.blockMeshes.slice(roadStart);
     this.roadMaterial = this.roadMeshes[0]?.material || null;
-    this.flushMaterialBuckets(sidewalkBuckets, {
+    this.sidewalkMeshes = this.flushGroundBuckets(sidewalkBuckets, {
       name: 'marciapiedi',
       castShadow: false,
-      receiveShadow: true
+      receiveShadow: true,
+      preserveUV: true
+    });
+    this.sidewalkMaterial = this.sidewalkMeshes[0]?.material || null;
+    this.flushGroundBuckets(curbBuckets, {
+      name: 'cordoli',
+      castShadow: false,
+      receiveShadow: true,
+      uvSize: 2
     });
     this.flushMaterialBuckets(roadDetailBuckets, {
       name: 'dettagli-strade',
@@ -1523,18 +1543,24 @@ export class World {
       receiveShadow: true,
       uvSize: DETAIL_SIZE
     });
-    const markBuckets = new Map();
     if (markGeoms.length) {
       const marks = mergeClean(markGeoms);
-      if (marks) this.addMaterialGeometry(markBuckets, 'white_concrete', marks);
-    }
-    if (markBuckets.size) {
-      this.flushMaterialBuckets(markBuckets, {
-        name: 'segnaletica',
-        castShadow: false,
-        receiveShadow: false,
-        side: THREE.DoubleSide
-      });
+      if (marks) {
+        const material = new THREE.MeshLambertMaterial({
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.92,
+          depthWrite: false,
+          polygonOffset: true,
+          polygonOffsetFactor: -2,
+          polygonOffsetUnits: -2
+        });
+        const mesh = new THREE.Mesh(marks, material);
+        mesh.name = 'segnaletica';
+        mesh.receiveShadow = true;
+        this.scene.add(mesh);
+        this.markingMesh = mesh;
+      }
     }
     if (manholeGeoms.length) {
       const manholes = mergeClean(manholeGeoms);
@@ -6698,14 +6724,16 @@ export class World {
     this.weather = { rain: weather.rain || 0, clouds: weather.clouds ?? 0.2 };
     if (this.rainPoints) this.rainPoints.visible = this.weather.rain > 0.15;
     const wet = clamp(this.weather.rain * 1.4, 0, 1);
+    const tint = this.seasonStyle?.palette?.terrainTint || '#ffffff';
     if (this.roadMaterial?.isMeshStandardMaterial) {
-      this.roadMaterial.roughness = 0.72 - wet * 0.58;
-      this.roadMaterial.metalness = 0.025 + wet * 0.22;
-      this.roadMaterial.color.setRGB(1 - wet * 0.24, 1 - wet * 0.22, 1 - wet * 0.19);
+      this.roadMaterial.roughness = 0.78 - wet * 0.42;
+      this.roadMaterial.metalness = wet * 0.06;
+      this.roadMaterial.color.set(tint).multiplyScalar(1 - wet * 0.2);
     }
     if (this.sidewalkMaterial?.isMeshStandardMaterial) {
-      this.sidewalkMaterial.roughness = 0.9 - wet * 0.5;
-      this.sidewalkMaterial.color.setRGB(1 - wet * 0.15, 1 - wet * 0.15, 1 - wet * 0.12);
+      this.sidewalkMaterial.roughness = 0.9 - wet * 0.35;
+      this.sidewalkMaterial.metalness = wet * 0.03;
+      this.sidewalkMaterial.color.set(tint).multiplyScalar(1 - wet * 0.12);
     }
     if (this.waterMaterial) this.waterMaterial.opacity = 0.88 + wet * 0.04;
     if (this.puddleMaterial) {
@@ -6724,6 +6752,13 @@ export class World {
     this.seasonId = id;
     const palette = style?.palette || {};
     if (this.terrainMesh) this.terrainMesh.material.color.set(palette.terrainTint || '#ffffff');
+    for (const mesh of this.groundMeshes || []) {
+      mesh.material.color.set(palette.terrainTint || '#ffffff');
+    }
+    for (const material of this.groundMaterialList || []) {
+      material.color.set(palette.terrainTint || '#ffffff');
+    }
+    this.groundTiles?.setTint(palette.terrainTint || '#ffffff');
     if (!this.arnis) {
       for (const mesh of this.areaMeshes || (this.areaMesh ? [this.areaMesh] : [])) {
         // Il prato mantiene il suo verde: il tint autunnale serve ad aree e piazze.
@@ -6902,6 +6937,7 @@ export class World {
     this._updateRainRipples();
     this._updateSeasonParticles(dt, playerPos);
     this._updateClouds(dt);
+    if (camera) this.groundTiles?.update(camera.position);
   }
 
   _updateSky(playerPos) {
@@ -6943,10 +6979,11 @@ export class World {
     this.sunLight.target.position.copy(playerPos);
     this.sunLight.intensity = (day * 2.1 + sunset * 0.45 + night * 0.32) * (sl.sunIntensity ?? 1);
     this.sunLight.color.set(day > 0.25 ? (sl.sunColor || '#fff1cf') : '#ffc98e');
-    this.hemi.intensity = (0.5 + day * 0.75) * (sl.hemi ?? 1);
-    this.hemi.color.copy(bottom).lerp(new THREE.Color('#cfe6ef'), 0.4);
-    this.hemi.groundColor.set(night > 0.6 ? '#2b3830' : '#5b5a44');
-    if (this.ambient) this.ambient.intensity = (0.12 + night * 0.34) * (sl.ambient ?? 1);
+    this.hemi.intensity = (1.0 + day * 0.9) * (sl.hemi ?? 1);
+    if (night > 0.55) this.hemi.color.set('#7f93a8');
+    else this.hemi.color.set('#fff3df');
+    this.hemi.groundColor.set(night > 0.6 ? '#2b3830' : '#7a725c');
+    if (this.ambient) this.ambient.intensity = (0.45 + night * 0.34) * (sl.ambient ?? 1);
 
     if (this.skyDome) this.skyDome.position.set(playerPos.x, 0, playerPos.z);
     if (this.stars) this.stars.position.set(playerPos.x, 0, playerPos.z);

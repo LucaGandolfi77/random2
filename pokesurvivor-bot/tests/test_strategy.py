@@ -16,6 +16,7 @@ from bot import (  # noqa: E402
     BotError,
     PokéSurvivorBot,
     _card_score,
+    _first_move_index,
     parse_args,
     patch_game_bundle,
 )
@@ -36,6 +37,35 @@ class StrategyTests(unittest.TestCase):
         attack_power = _card_score("Power +10% damage", False)
         health = _card_score("Vigor +20 max health", False)
         self.assertGreater(attack_power, health)
+
+    def test_first_move_upgrade_is_chosen_whenever_it_is_offered(self) -> None:
+        texts = [
+            "Power +10% damage\nGeneric stat card",
+            "Confusion Nv.3 > Nv.4\nHits harder",
+            "Tackle → Body Slam\nEvolution: power, damage, speed, cooldown, "
+            "shield, health, magnet, experience, heal",
+        ]
+        scores = [
+            _card_score(texts[0], False, preferred_attack="Confusion"),
+            _card_score(texts[1], False, preferred_attack="Confusion"),
+            _card_score(texts[2], True, preferred_attack="Confusion"),
+        ]
+        # The unrelated evolution still outscores the slot-1 upgrade, so only
+        # the explicit first-move preference can keep the guarantee.
+        self.assertGreater(scores[2], scores[1])
+        self.assertEqual(_first_move_index(texts, scores, "Confusion"), 1)
+        self.assertIsNone(_first_move_index(texts, scores, None))
+
+    def test_first_move_prefers_its_evolution_over_a_plain_upgrade(self) -> None:
+        texts = [
+            "Confusion Nv.3 > Nv.4\nHits harder",
+            "Confusion → Psychic\nEvolución",
+        ]
+        scores = [
+            _card_score(texts[0], False, preferred_attack="Confusion"),
+            _card_score(texts[1], True, preferred_attack="Confusion"),
+        ]
+        self.assertEqual(_first_move_index(texts, scores, "Confusion"), 1)
 
     def test_username_mode_prompts_for_a_hidden_password(self) -> None:
         config = parse_args(
@@ -73,6 +103,17 @@ class StrategyTests(unittest.TestCase):
         patched, installed = patch_game_bundle(original)
         self.assertTrue(installed)
         self.assertIn(b"k9=Object['create'](null);window.__PS_BOT_G=k9;", patched)
+
+    def test_bundle_probe_supports_a_decoded_create_call(self) -> None:
+        # The latest build also hides 'create' behind the obfuscated string
+        # decoder, so the anchor cannot look for the literal property name.
+        original = (
+            b"(()=>{const d=x=>'create';var q=Object[d](null);q['_1']=!0x0;"
+            b"q['_2']=0x12;use(q);})();"
+        )
+        patched, installed = patch_game_bundle(original)
+        self.assertTrue(installed)
+        self.assertIn(b"q=Object[d](null);window.__PS_BOT_G=q;", patched)
 
     def test_moves_toward_a_safe_pickup_when_no_enemy_is_near(self) -> None:
         strategy = SurvivalStrategy()
@@ -393,6 +434,81 @@ class FakeKeyboard:
 
     async def press(self, key: str) -> None:
         self.pressed.append(key)
+
+
+class FakeFocusLocator:
+    def __init__(self, frame: "FakeFocusFrame") -> None:
+        self.frame = frame
+
+    async def wait_for(self, state: str, timeout: int) -> None:
+        return None
+
+    async def evaluate(self, script: str) -> None:
+        self.frame.focused = True
+
+    async def click(self, **kwargs) -> None:
+        self.frame.clicked = True
+
+
+class FakeFocusFrame:
+    def __init__(self) -> None:
+        self.focused = False
+        self.clicked = False
+
+    def locator(self, selector: str) -> FakeFocusLocator:
+        return FakeFocusLocator(self)
+
+
+class FocusTests(unittest.IsolatedAsyncioTestCase):
+    async def test_focus_game_never_clicks_through_an_overlay(self) -> None:
+        # A pointer click on the canvas is intercepted by level-up/item
+        # overlays and blocks the bot for the whole Playwright timeout.
+        frame = FakeFocusFrame()
+        bot = PokéSurvivorBot(BotConfig(), page=None, frame=frame)
+
+        await bot._focus_game()
+
+        self.assertTrue(frame.focused)
+        self.assertFalse(frame.clicked)
+
+
+class FakeVideoLocator:
+    def __init__(self, frame: "FakeVideoFrame", selector: str) -> None:
+        self.frame = frame
+        self.selector = selector
+
+    async def is_visible(self) -> bool:
+        return self.frame.visible.get(self.selector, False)
+
+    async def click(self) -> None:
+        self.frame.clicked.append(self.selector)
+        if self.selector == "#video-close":
+            self.frame.visible["#scr-video"] = False
+
+    async def wait_for(self, state: str, timeout: int) -> None:
+        if state == "hidden" and self.frame.visible.get(self.selector, False):
+            raise RuntimeError(f"{self.selector} is still visible")
+
+
+class FakeVideoFrame:
+    def __init__(self) -> None:
+        self.visible = {"#scr-video": True, "#video-close": True}
+        self.clicked: list[str] = []
+
+    def locator(self, selector: str) -> FakeVideoLocator:
+        return FakeVideoLocator(self, selector)
+
+
+class VideoPromptTests(unittest.IsolatedAsyncioTestCase):
+    async def test_dismisses_the_video_prompt_without_opening_youtube(self) -> None:
+        frame = FakeVideoFrame()
+        bot = PokéSurvivorBot(BotConfig(timeout_ms=500), page=None, frame=frame)
+
+        dismissed = await bot._dismiss_video_prompt()
+
+        self.assertTrue(dismissed)
+        self.assertEqual(frame.clicked, ["#video-close"])
+        self.assertFalse(frame.visible["#scr-video"])
 
 
 class FakeOrbPage:

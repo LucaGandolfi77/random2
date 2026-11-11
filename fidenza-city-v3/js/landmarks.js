@@ -507,9 +507,25 @@ function buildMuseo(g) {
   box(g, 3.4, 0.5, 0.6, STONE_DARK, 0, 4.1, 7.9);
 }
 
-function buildPiazzaDuomo(g) {
-  // platea della piazza
-  box(g, 34, 0.08, 28, '#d9c9ad', 0, 0.04, 0);
+function buildPiazzaDuomo(g, world) {
+  // Platea in porfido PBR: il vecchio box beige copriva l'ortofoto e
+  // spezzava il suolo della piazza.
+  const material = world?.groundMaterial?.('porphyry');
+  if (material) {
+    const geometry = new THREE.PlaneGeometry(34, 28);
+    geometry.rotateX(-Math.PI / 2);
+    const uv = geometry.attributes.uv;
+    for (let i = 0; i < uv.count; i++) {
+      uv.setXY(i, uv.getX(i) * 34 / 5, uv.getY(i) * 28 / 5);
+    }
+    const colors = new Float32Array(geometry.attributes.position.count * 3).fill(1);
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const platea = new THREE.Mesh(geometry, material);
+    platea.position.y = 0.036;
+    platea.receiveShadow = true;
+    platea.name = 'platea-piazza-duomo';
+    g.add(platea);
+  }
   // aiuole, panchine e lampioni
   for (const [x, z] of [[-11, 8], [11, -7], [-12, -8], [12, 9]]) {
     box(g, 3.2, 0.3, 1.6, '#6f9a5a', x, 0.16, z);

@@ -1,0 +1,918 @@
+{
+  "language": "it",
+  "title": "LA CORONA E LA TESTA",
+  "subtitle": "Una passione cefalofora in sei atti",
+  "generatedFrom": "src/data/screenplay.json",
+  "duration": 442.86,
+  "captions": [
+    {
+      "start": 14.2,
+      "end": 15.935,
+      "speaker": "MASSIMIANO",
+      "text": "Donnino. La corona.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_03_corona"
+    },
+    {
+      "start": 16.535,
+      "end": 17.915,
+      "speaker": "DONNINO",
+      "text": "Eccola, Augusto.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_03_corona"
+    },
+    {
+      "start": 18.415,
+      "end": 21.57,
+      "speaker": "MASSIMIANO",
+      "text": "Oggi condanno uomini. Tu tieni la corona.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_03_corona"
+    },
+    {
+      "start": 22.17,
+      "end": 24.26,
+      "speaker": "DONNINO",
+      "text": "La corona pesa, Augusto.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_03_corona"
+    },
+    {
+      "start": 24.66,
+      "end": 26.235,
+      "speaker": "MASSIMIANO",
+      "text": "E gli uomini?",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_03_corona"
+    },
+    {
+      "start": 26.735,
+      "end": 29.02,
+      "speaker": "DONNINO",
+      "text": "Gli uomini pesano di più.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_03_corona"
+    },
+    {
+      "start": 31.42,
+      "end": 33.155,
+      "speaker": "GUARDIA",
+      "text": "I cristiani, Augusto.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_04_prigionieri"
+    },
+    {
+      "start": 33.555,
+      "end": 35.13,
+      "speaker": "MASSIMIANO",
+      "text": "Sacrificano o muoiono.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_04_prigionieri"
+    },
+    {
+      "start": 35.63,
+      "end": 36.85,
+      "speaker": "CRISTIANO",
+      "text": "Non sacrifico.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_04_prigionieri"
+    },
+    {
+      "start": 37.55,
+      "end": 39.64,
+      "speaker": "MASSIMIANO",
+      "text": "Donnino, tu che dici?",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_04_prigionieri"
+    },
+    {
+      "start": 40.14,
+      "end": 42.07,
+      "speaker": "DONNINO",
+      "text": "Che non è giusto.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_04_prigionieri"
+    },
+    {
+      "start": 42.87,
+      "end": 45.865,
+      "speaker": "MASSIMIANO",
+      "text": "Non ti ho chiesto se è giusto.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_04_prigionieri"
+    },
+    {
+      "start": 48.065,
+      "end": 49.285,
+      "speaker": "MASSIMIANO",
+      "text": "Sei cristiano?",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_05_confessione"
+    },
+    {
+      "start": 49.985,
+      "end": 51.205,
+      "speaker": "DONNINO",
+      "text": "Adesso sì.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_05_confessione"
+    },
+    {
+      "start": 53.205,
+      "end": 54.78,
+      "speaker": "MASSIMIANO",
+      "text": "Deponi la corona.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_05_confessione"
+    },
+    {
+      "start": 55.58,
+      "end": 56.8,
+      "speaker": "DONNINO",
+      "text": "La depongo.",
+      "scene": "court",
+      "actId": "atto1",
+      "beatId": "a1_05_confessione"
+    },
+    {
+      "start": 78.2,
+      "end": 79.42,
+      "speaker": "OSTE",
+      "text": "Cerchi Roma?",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_03_dialogo"
+    },
+    {
+      "start": 79.92,
+      "end": 83.27,
+      "speaker": "DONNINO",
+      "text": "Cerco un posto dove non si adori nessuno.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_03_dialogo"
+    },
+    {
+      "start": 84.07,
+      "end": 86,
+      "speaker": "OSTE",
+      "text": "Allora hai sbagliato strada.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_03_dialogo"
+    },
+    {
+      "start": 86.5,
+      "end": 87.365,
+      "speaker": "DONNINO",
+      "text": "Perché?",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_03_dialogo"
+    },
+    {
+      "start": 87.765,
+      "end": 90.05,
+      "speaker": "OSTE",
+      "text": "Roma è piena di dei.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_03_dialogo"
+    },
+    {
+      "start": 90.65,
+      "end": 94.87,
+      "speaker": "DONNINO",
+      "text": "Anche il mio è romano. È nato in una provincia.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_03_dialogo"
+    },
+    {
+      "start": 97.07,
+      "end": 98.645,
+      "speaker": "CENTURIONE",
+      "text": "Chi va là?",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_04_pattuglia"
+    },
+    {
+      "start": 99.145,
+      "end": 100.365,
+      "speaker": "OSTE",
+      "text": "Un mercante.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_04_pattuglia"
+    },
+    {
+      "start": 100.765,
+      "end": 101.985,
+      "speaker": "CENTURIONE",
+      "text": "Cosa vende?",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_04_pattuglia"
+    },
+    {
+      "start": 102.385,
+      "end": 103.25,
+      "speaker": "OSTE",
+      "text": "Corone.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_04_pattuglia"
+    },
+    {
+      "start": 103.75,
+      "end": 107.1,
+      "speaker": "CENTURIONE",
+      "text": "Le corone si comprano solo da un padrone.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_04_pattuglia"
+    },
+    {
+      "start": 107.8,
+      "end": 109.73,
+      "speaker": "DONNINO",
+      "text": "Infatti non vendo più.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_04_pattuglia"
+    },
+    {
+      "start": 117.63,
+      "end": 120.27,
+      "speaker": "OSTE",
+      "text": "La Via Claudia porta a Parma.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_06_scelta"
+    },
+    {
+      "start": 120.87,
+      "end": 122.8,
+      "speaker": "DONNINO",
+      "text": "Cosa c'è a Parma?",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_06_scelta"
+    },
+    {
+      "start": 123.2,
+      "end": 125.13,
+      "speaker": "OSTE",
+      "text": "Una strada più stretta.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_06_scelta"
+    },
+    {
+      "start": 125.73,
+      "end": 127.66,
+      "speaker": "DONNINO",
+      "text": "Allora è la mia.",
+      "scene": "crossroads",
+      "actId": "atto2",
+      "beatId": "a2_06_scelta"
+    },
+    {
+      "start": 147.66,
+      "end": 148.525,
+      "speaker": "CONTADINO",
+      "text": "Fermati.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_03_bambino"
+    },
+    {
+      "start": 149.025,
+      "end": 150.245,
+      "speaker": "DONNINO",
+      "text": "Non posso.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_03_bambino"
+    },
+    {
+      "start": 150.645,
+      "end": 152.93,
+      "speaker": "CONTADINO",
+      "text": "Il bambino ha la febbre.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_03_bambino"
+    },
+    {
+      "start": 153.53,
+      "end": 155.46,
+      "speaker": "DONNINO",
+      "text": "Non sono un medico.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_03_bambino"
+    },
+    {
+      "start": 155.96,
+      "end": 157.89,
+      "speaker": "CONTADINO",
+      "text": "Allora sei un uomo.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_03_bambino"
+    },
+    {
+      "start": 158.49,
+      "end": 159.71,
+      "speaker": "DONNINO",
+      "text": "Questo sì.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_03_bambino"
+    },
+    {
+      "start": 161.91,
+      "end": 163.84,
+      "speaker": "BAMBINO",
+      "text": "Il cane ha paura.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_04_cane"
+    },
+    {
+      "start": 164.34,
+      "end": 165.205,
+      "speaker": "DONNINO",
+      "text": "Anch'io.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_04_cane"
+    },
+    {
+      "start": 165.605,
+      "end": 166.825,
+      "speaker": "BAMBINO",
+      "text": "Di cosa?",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_04_cane"
+    },
+    {
+      "start": 167.225,
+      "end": 169.51,
+      "speaker": "DONNINO",
+      "text": "Di non avere più tempo.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_04_cane"
+    },
+    {
+      "start": 170.31,
+      "end": 173.82,
+      "speaker": "DONNINO",
+      "text": "Il cane sente la febbre. Non la mia.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_04_cane"
+    },
+    {
+      "start": 176.22,
+      "end": 177.6,
+      "speaker": "SOLDATO",
+      "text": "Ehi, tu.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_05_pattuglia"
+    },
+    {
+      "start": 178.1,
+      "end": 178.965,
+      "speaker": "DONNINO",
+      "text": "Sì?",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_05_pattuglia"
+    },
+    {
+      "start": 179.365,
+      "end": 180.585,
+      "speaker": "SOLDATO",
+      "text": "Dove vai?",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_05_pattuglia"
+    },
+    {
+      "start": 180.985,
+      "end": 184.335,
+      "speaker": "DONNINO",
+      "text": "Dove il mio corpo non è più utile.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_05_pattuglia"
+    },
+    {
+      "start": 185.235,
+      "end": 186.455,
+      "speaker": "SOLDATO",
+      "text": "Non capisco.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_05_pattuglia"
+    },
+    {
+      "start": 186.955,
+      "end": 188.69,
+      "speaker": "DONNINO",
+      "text": "Neanch'io. Ma vado.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_05_pattuglia"
+    },
+    {
+      "start": 190.89,
+      "end": 192.82,
+      "speaker": "DONNINO",
+      "text": "Quanto manca a Parma?",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_06_miliario"
+    },
+    {
+      "start": 193.32,
+      "end": 194.54,
+      "speaker": "CONTADINO",
+      "text": "Quindici miglia.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_06_miliario"
+    },
+    {
+      "start": 195.04,
+      "end": 196.615,
+      "speaker": "DONNINO",
+      "text": "E allo Stirone?",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_06_miliario"
+    },
+    {
+      "start": 197.115,
+      "end": 197.98,
+      "speaker": "CONTADINO",
+      "text": "Meno.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_06_miliario"
+    },
+    {
+      "start": 199.98,
+      "end": 200.845,
+      "speaker": "BAMBINO",
+      "text": "Tornerai?",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_07_addio"
+    },
+    {
+      "start": 201.345,
+      "end": 202.565,
+      "speaker": "DONNINO",
+      "text": "Qualcuno tornerà.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_07_addio"
+    },
+    {
+      "start": 203.265,
+      "end": 204.13,
+      "speaker": "BAMBINO",
+      "text": "Chi?",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_07_addio"
+    },
+    {
+      "start": 204.53,
+      "end": 206.46,
+      "speaker": "DONNINO",
+      "text": "Non lo so ancora.",
+      "scene": "viaEmilia",
+      "actId": "atto3",
+      "beatId": "a3_07_addio"
+    },
+    {
+      "start": 227.86,
+      "end": 228.725,
+      "speaker": "CENTURIONE",
+      "text": "Donnino.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 229.225,
+      "end": 230.09,
+      "speaker": "DONNINO",
+      "text": "Centurione.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 230.59,
+      "end": 231.81,
+      "speaker": "CENTURIONE",
+      "text": "Ho ordini.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 232.31,
+      "end": 233.175,
+      "speaker": "DONNINO",
+      "text": "Anch'io.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 233.675,
+      "end": 234.54,
+      "speaker": "CENTURIONE",
+      "text": "Quali?",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 234.94,
+      "end": 237.225,
+      "speaker": "DONNINO",
+      "text": "Quelli che non si vedono.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 238.025,
+      "end": 240.47,
+      "speaker": "CENTURIONE",
+      "text": "Sacrifica. È solo un gesto.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 241.17,
+      "end": 243.1,
+      "speaker": "DONNINO",
+      "text": "È solo una testa.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 243.8,
+      "end": 246.085,
+      "speaker": "CENTURIONE",
+      "text": "Non è la stessa cosa.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 246.785,
+      "end": 249.94,
+      "speaker": "DONNINO",
+      "text": "Lo so. Per questo non la do.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_03_dialogo"
+    },
+    {
+      "start": 252.14,
+      "end": 253.715,
+      "speaker": "CARNEFICE",
+      "text": "Chiudi gli occhi.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_04_perdono"
+    },
+    {
+      "start": 254.315,
+      "end": 256.245,
+      "speaker": "DONNINO",
+      "text": "Li ho già chiusi.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_04_perdono"
+    },
+    {
+      "start": 256.945,
+      "end": 257.81,
+      "speaker": "CARNEFICE",
+      "text": "Perché?",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_04_perdono"
+    },
+    {
+      "start": 258.21,
+      "end": 260.85,
+      "speaker": "DONNINO",
+      "text": "Per non vedervi mentre lo fate.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_04_perdono"
+    },
+    {
+      "start": 262.05,
+      "end": 263.27,
+      "speaker": "DONNINO",
+      "text": "Non guardate.",
+      "scene": "stirone",
+      "actId": "atto4",
+      "beatId": "a4_04_perdono"
+    },
+    {
+      "start": 294.27,
+      "end": 295.845,
+      "speaker": "VEDOVA",
+      "text": "Non è possibile.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_03_risveglio"
+    },
+    {
+      "start": 296.545,
+      "end": 298.12,
+      "speaker": "DONNINO",
+      "text": "Non lo so.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_03_risveglio"
+    },
+    {
+      "start": 298.72,
+      "end": 299.94,
+      "speaker": "VEDOVA",
+      "text": "Sei morto.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_03_risveglio"
+    },
+    {
+      "start": 300.74,
+      "end": 301.605,
+      "speaker": "DONNINO",
+      "text": "Forse.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_03_risveglio"
+    },
+    {
+      "start": 303.605,
+      "end": 305.18,
+      "speaker": "VEDOVA",
+      "text": "Non puoi camminare.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_04_cammina"
+    },
+    {
+      "start": 305.78,
+      "end": 307,
+      "speaker": "DONNINO",
+      "text": "Sto camminando.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_04_cammina"
+    },
+    {
+      "start": 307.6,
+      "end": 309.175,
+      "speaker": "VEDOVA",
+      "text": "Sei senza testa.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_04_cammina"
+    },
+    {
+      "start": 309.775,
+      "end": 311.705,
+      "speaker": "DONNINO",
+      "text": "Ho trovato quella giusta.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_04_cammina"
+    },
+    {
+      "start": 312.505,
+      "end": 313.725,
+      "speaker": "VEDOVA",
+      "text": "Dove vai?",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_04_cammina"
+    },
+    {
+      "start": 314.225,
+      "end": 315.8,
+      "speaker": "DONNINO",
+      "text": "Dove ero già.",
+      "scene": "stironeDawn",
+      "actId": "atto5",
+      "beatId": "a5_04_cammina"
+    },
+    {
+      "start": 349.2,
+      "end": 353.065,
+      "speaker": "APPRENDISTA",
+      "text": "Maestro, perché il santo porta la testa in mano?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_03_dialogo"
+    },
+    {
+      "start": 354.265,
+      "end": 357.26,
+      "speaker": "MAESTRO",
+      "text": "Perché il corpo non sapeva dove andare.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_03_dialogo"
+    },
+    {
+      "start": 358.06,
+      "end": 359.635,
+      "speaker": "APPRENDISTA",
+      "text": "E la testa?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_03_dialogo"
+    },
+    {
+      "start": 360.135,
+      "end": 361.71,
+      "speaker": "MAESTRO",
+      "text": "La testa sì.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_03_dialogo"
+    },
+    {
+      "start": 362.51,
+      "end": 364.44,
+      "speaker": "APPRENDISTA",
+      "text": "È una storia vera?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_03_dialogo"
+    },
+    {
+      "start": 365.14,
+      "end": 369.005,
+      "speaker": "MAESTRO",
+      "text": "È una storia scolpita. Basta che qualcuno la guardi.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_03_dialogo"
+    },
+    {
+      "start": 371.205,
+      "end": 375.07,
+      "speaker": "PELLEGRINO",
+      "text": "Maestro, è vero che guarisce dal morso dei cani?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_04_pellegrino"
+    },
+    {
+      "start": 376.27,
+      "end": 378.91,
+      "speaker": "MAESTRO",
+      "text": "Guarisce da quello che morde dentro.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_04_pellegrino"
+    },
+    {
+      "start": 379.71,
+      "end": 381.64,
+      "speaker": "PELLEGRINO",
+      "text": "E dai morsi veri?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_04_pellegrino"
+    },
+    {
+      "start": 382.24,
+      "end": 384.88,
+      "speaker": "MAESTRO",
+      "text": "Per quelli ci sono i medici.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_04_pellegrino"
+    },
+    {
+      "start": 386.88,
+      "end": 388.615,
+      "speaker": "BAMBINO",
+      "text": "Maestro, dov'è adesso?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_05_bambino"
+    },
+    {
+      "start": 389.315,
+      "end": 391.245,
+      "speaker": "MAESTRO",
+      "text": "Sotto i nostri piedi.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_05_bambino"
+    },
+    {
+      "start": 391.945,
+      "end": 393.165,
+      "speaker": "BAMBINO",
+      "text": "E sopra?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_05_bambino"
+    },
+    {
+      "start": 393.565,
+      "end": 395.495,
+      "speaker": "MAESTRO",
+      "text": "Sopra le nostre teste.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_05_bambino"
+    },
+    {
+      "start": 404.895,
+      "end": 407.18,
+      "speaker": "MAESTRO",
+      "text": "Una testa sola non basta.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_07_ultima_pietra"
+    },
+    {
+      "start": 407.98,
+      "end": 409.555,
+      "speaker": "APPRENDISTA",
+      "text": "Quante ne servono?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_07_ultima_pietra"
+    },
+    {
+      "start": 410.155,
+      "end": 412.085,
+      "speaker": "MAESTRO",
+      "text": "Una per chi guarda.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_07_ultima_pietra"
+    },
+    {
+      "start": 432.085,
+      "end": 434.015,
+      "speaker": "MAESTRO",
+      "text": "La testa è questa.",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_09_sguardo"
+    },
+    {
+      "start": 435.215,
+      "end": 437.66,
+      "speaker": "MAESTRO",
+      "text": "Il corpo, dove lo lasciate?",
+      "scene": "fidenza",
+      "actId": "atto6",
+      "beatId": "a6_09_sguardo"
+    }
+  ]
+}
