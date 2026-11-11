@@ -1,0 +1,383 @@
+{
+  "shots": {
+    "piazza_est": {
+      "environment": "piazza",
+      "position": "cam_wide_a",
+      "positionTo": "cam_wide_b",
+      "target": "piazza_center",
+      "fov": 40,
+      "ease": "smooth"
+    },
+    "piazza_walk": {
+      "environment": "piazza",
+      "position": { "character": "arturo", "offset": [3.8, 2.0, 6.2] },
+      "target": { "character": "arturo", "offset": [0, 1.05, 0] },
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "piazza_two": {
+      "environment": "piazza",
+      "position": "cam_two",
+      "target": [-2.4, 1.12, 2.5],
+      "fov": 37,
+      "ease": "smooth"
+    },
+    "piazza_arturo_close": {
+      "environment": "piazza",
+      "position": "cam_close_arturo",
+      "target": { "character": "arturo", "offset": [0, 1.42, 0] },
+      "fov": 28,
+      "ease": "smooth"
+    },
+    "piazza_run": {
+      "environment": "piazza",
+      "position": { "character": "arturo", "offset": [2.4, 1.8, 4.4] },
+      "target": { "character": "arturo", "offset": [0, 1.1, 0] },
+      "fov": 43,
+      "ease": "smooth"
+    },
+    "piazza_bar_close": {
+      "environment": "piazza",
+      "position": "cam_sign_close",
+      "target": "sign_bagno",
+      "fov": 30,
+      "ease": "smooth"
+    },
+    "piazza_bar": {
+      "environment": "piazza",
+      "position": "cam_bar",
+      "target": "bar_door",
+      "fov": 37,
+      "ease": "smooth"
+    },
+    "piazza_bar_two": {
+      "environment": "piazza",
+      "position": "cam_bar_two",
+      "target": [-7.4, 1.15, 2.2],
+      "fov": 39,
+      "ease": "smooth"
+    },
+    "piazza_exit": {
+      "environment": "piazza",
+      "position": "cam_exit",
+      "target": [0, 1.05, 3],
+      "fov": 42,
+      "ease": "smooth"
+    },
+
+    "alley_est": {
+      "environment": "alley",
+      "position": "cam_alley_high",
+      "positionTo": "cam_alley_high_b",
+      "target": "alley_mid",
+      "fov": 45,
+      "ease": "smooth"
+    },
+    "alley_walk": {
+      "environment": "alley",
+      "position": { "character": "arturo", "offset": [2.1, 1.8, 5.0] },
+      "target": { "character": "arturo", "offset": [0, 1.05, 0] },
+      "fov": 41,
+      "ease": "smooth"
+    },
+    "alley_corner": {
+      "environment": "alley",
+      "position": [3.2, 1.5, 4.2],
+      "target": [2.4, 1.2, 1.8],
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "alley_kiss": {
+      "environment": "alley",
+      "position": [2.2, 2.6, 10.5],
+      "target": [0.3, 1.2, 1.8],
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "alley_cyclist": {
+      "environment": "alley",
+      "position": [3.2, 1.8, -0.8],
+      "target": [0.6, 1.1, -0.2],
+      "fov": 50,
+      "ease": "smooth"
+    },
+    "alley_reaction": {
+      "environment": "alley",
+      "position": [2.4, 1.5, -0.6],
+      "target": { "character": "arturo", "offset": [0, 1.4, 0] },
+      "fov": 30,
+      "ease": "smooth"
+    },
+    "alley_dog": {
+      "environment": "alley",
+      "position": [3.0, 2.2, 4.0],
+      "target": [0.2, 0.9, -4.2],
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "alley_exit": {
+      "environment": "alley",
+      "position": "cam_alley_exit",
+      "target": [0.7, 1.05, -3.5],
+      "fov": 44,
+      "ease": "smooth"
+    },
+
+    "park_est": {
+      "environment": "park",
+      "position": "cam_park_wide",
+      "target": [0, 1.2, 1],
+      "fov": 44,
+      "ease": "smooth"
+    },
+    "park_walk": {
+      "environment": "park",
+      "position": { "character": "arturo", "offset": [3.4, 1.9, 5.2] },
+      "target": { "character": "arturo", "offset": [0, 1.05, 0] },
+      "fov": 41,
+      "ease": "smooth"
+    },
+    "park_yoga_wide": {
+      "environment": "park",
+      "position": "cam_yoga_wide",
+      "target": [4, 0.9, 0],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "park_instructor": {
+      "environment": "park",
+      "position": "cam_instructor",
+      "target": { "character": "instructor", "offset": [0, 1.35, 0] },
+      "fov": 33,
+      "ease": "smooth"
+    },
+    "park_arturo_close": {
+      "environment": "park",
+      "position": "cam_park_arturo_close",
+      "target": { "character": "arturo", "offset": [0, 1.4, 0] },
+      "fov": 29,
+      "ease": "smooth"
+    },
+    "park_gino_sit": {
+      "environment": "park",
+      "position": "cam_park_gino",
+      "target": { "character": "gino", "offset": [0, 1.0, 0] },
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "park_wide": {
+      "environment": "park",
+      "position": "cam_park_wide2",
+      "target": [1, 1.0, 0],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "park_exit": {
+      "environment": "park",
+      "position": "cam_park_exit",
+      "target": [-2, 1, 0],
+      "fov": 44,
+      "ease": "smooth"
+    },
+
+    "road_est": {
+      "environment": "road",
+      "position": "cam_road_wide",
+      "target": [2, 1.2, 3],
+      "fov": 45,
+      "ease": "smooth"
+    },
+    "road_walk": {
+      "environment": "road",
+      "position": { "character": "arturo", "offset": [-3.8, 2.2, -5.6] },
+      "target": { "character": "arturo", "offset": [0, 1.05, 0] },
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "road_two": {
+      "environment": "road",
+      "position": "cam_road_two",
+      "target": [2.8, 1.1, -3],
+      "fov": 39,
+      "ease": "smooth"
+    },
+    "road_astro_wide": {
+      "environment": "road",
+      "position": "cam_astro_wide",
+      "target": [-4.5, 1.3, -7.0],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "road_astro_medium": {
+      "environment": "road",
+      "position": "cam_astro_medium",
+      "target": "astro_target",
+      "fov": 32,
+      "ease": "smooth"
+    },
+    "road_depart": {
+      "environment": "road",
+      "position": { "character": "arturo", "offset": [-4.5, 2.2, 5.0] },
+      "target": { "character": "arturo", "offset": [0, 1.05, 0] },
+      "fov": 43,
+      "ease": "smooth"
+    },
+
+    "country_est": {
+      "environment": "countryside",
+      "position": "cam_country_wide",
+      "target": [-1, 1.1, -1],
+      "fov": 44,
+      "ease": "smooth"
+    },
+    "country_walk": {
+      "environment": "countryside",
+      "position": { "character": "arturo", "offset": [4, 2, 5.4] },
+      "target": { "character": "arturo", "offset": [0, 1.05, 0] },
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "country_two": {
+      "environment": "countryside",
+      "position": "cam_country_two",
+      "target": [2.4, 1.1, 2.2],
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "country_shepherd": {
+      "environment": "countryside",
+      "position": "cam_shepherd",
+      "target": { "character": "shepherd", "offset": [0, 1.2, 0] },
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "country_sheep": {
+      "environment": "countryside",
+      "position": "cam_sheep",
+      "target": [0.6, 0.7, -0.4],
+      "fov": 32,
+      "ease": "smooth"
+    },
+    "country_sign": {
+      "environment": "countryside",
+      "position": "cam_country_sign",
+      "target": [5.4, 1.4, 1.5],
+      "fov": 32,
+      "ease": "smooth"
+    },
+    "country_exit": {
+      "environment": "countryside",
+      "position": [13, 4.5, 14],
+      "target": [3, 1.1, 2],
+      "fov": 45,
+      "ease": "smooth"
+    },
+
+    "hill_est": {
+      "environment": "hill",
+      "position": "cam_hill_wide",
+      "target": [0, 1.3, 0],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "hill_walk": {
+      "environment": "hill",
+      "position": { "character": "arturo", "offset": [4, 2.2, 6] },
+      "target": { "character": "arturo", "offset": [0, 1.05, 0] },
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "hill_empty": {
+      "environment": "hill",
+      "position": "cam_hill_empty",
+      "target": [-0.5, 1.0, 0],
+      "fov": 39,
+      "ease": "smooth"
+    },
+    "hill_arturo_close": {
+      "environment": "hill",
+      "position": "cam_hill_arturo",
+      "target": { "character": "arturo", "offset": [0, 1.35, 0] },
+      "fov": 29,
+      "ease": "smooth"
+    },
+    "hill_sign_view": {
+      "environment": "hill",
+      "position": "cam_hill_sign",
+      "target": [0.1, 1.5, -1.9],
+      "fov": 34,
+      "ease": "smooth"
+    },
+    "hill_crew": {
+      "environment": "hill",
+      "position": "cam_hill_crew",
+      "target": [8, 1.3, -4],
+      "fov": 40,
+      "ease": "smooth"
+    },
+    "hill_shout": {
+      "environment": "hill",
+      "position": "cam_hill_shout",
+      "target": { "character": "arturo", "offset": [0, 1.45, 0] },
+      "fov": 33,
+      "ease": "smooth"
+    },
+    "hill_cry": {
+      "environment": "hill",
+      "position": "cam_hill_cry",
+      "target": { "character": "arturo", "offset": [0, 1.15, 0] },
+      "fov": 32,
+      "ease": "smooth"
+    },
+
+    "dawn_est": {
+      "environment": "hillDawn",
+      "position": "cam_dawn_wide",
+      "target": [0, 1.1, 0],
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "dawn_two_sit": {
+      "environment": "hillDawn",
+      "position": "cam_dawn_two",
+      "target": [0, 0.85, 0.6],
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "dawn_walk": {
+      "environment": "hillDawn",
+      "position": { "character": "arturo", "offset": [4, 2.1, 6] },
+      "target": { "character": "arturo", "offset": [0, 1.05, 0] },
+      "fov": 42,
+      "ease": "smooth"
+    },
+    "dawn_bar_far": {
+      "environment": "hillDawn",
+      "position": "cam_dawn_bar_far",
+      "target": [-9, 1.2, -14],
+      "fov": 34,
+      "ease": "smooth"
+    },
+    "dawn_bar_door": {
+      "environment": "hillDawn",
+      "position": "cam_dawn_bar_door",
+      "target": [-14, 1.35, -16.4],
+      "fov": 36,
+      "ease": "smooth"
+    },
+    "dawn_sign": {
+      "environment": "hillDawn",
+      "position": "cam_dawn_sign",
+      "target": [-14, 1.75, -16.4],
+      "fov": 38,
+      "ease": "smooth"
+    },
+    "dawn_final": {
+      "environment": "hillDawn",
+      "position": "cam_dawn_final",
+      "target": [-11.4, 1.1, -14.6],
+      "fov": 38,
+      "ease": "smooth"
+    }
+  }
+}

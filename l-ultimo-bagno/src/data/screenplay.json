@@ -1,0 +1,1452 @@
+{
+  "title": "L'ULTIMO BAGNO",
+  "subtitle": "Una tragedia idraulica in sei atti",
+  "acts": [
+    {
+      "id": "atto1",
+      "number": "ATTO I",
+      "title": "LA PIAZZA, ORE 02:17",
+      "scene": "piazza",
+      "beats": [
+        {
+          "id": "a1_01_establishing",
+          "camera": "piazza_est",
+          "duration": 3,
+          "sfx": [{ "at": 1.6, "name": "wind_gust", "gain": 0.45 }]
+        },
+        {
+          "id": "a1_02_ingresso",
+          "camera": "piazza_walk",
+          "duration": 6,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "piazza_enter_arturo",
+              "to": "piazza_mid_arturo",
+              "duration": 5.4
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "piazza_enter_gino",
+              "to": "piazza_mid_gino",
+              "duration": 5.8
+            },
+            { "at": 5.45, "character": "arturo", "action": "idle", "face": "gino" },
+            { "at": 5.85, "character": "gino", "action": "idle", "face": "arturo" }
+          ]
+        },
+        {
+          "id": "a1_03_dialogo",
+          "camera": "piazza_two",
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Gino.", "pauseAfter": 0.8 },
+            { "speaker": "GINO", "text": "Dimmi.", "pauseAfter": 0.6 },
+            { "speaker": "ARTURO", "text": "Devo fare pipì.", "pauseAfter": 0.9 },
+            { "speaker": "GINO", "text": "Lo sapevo." },
+            { "speaker": "ARTURO", "text": "Da quanto?", "pauseAfter": 0.7 },
+            { "speaker": "GINO", "text": "Da quando hai smesso di parlare delle tasse." },
+            { "speaker": "ARTURO", "text": "Ho bevuto sette bicchieri." },
+            { "speaker": "GINO", "text": "Sette?", "pauseAfter": 0.5 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "piazza_mid_arturo",
+              "face": "gino"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "piazza_mid_gino",
+              "face": "arturo"
+            },
+            { "at": 3.6, "character": "arturo", "action": "nervous", "duration": 5 },
+            { "at": 9, "character": "gino", "action": "look", "duration": 2.6 }
+          ]
+        },
+        {
+          "id": "a1_04_dialogo",
+          "camera": "piazza_two",
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Forse otto. Il settimo era più piccolo." },
+            { "speaker": "GINO", "text": "Allora sono sette e mezzo." },
+            { "speaker": "ARTURO", "text": "Non è questo il problema.", "pauseAfter": 1.8 },
+            { "speaker": "GINO", "text": "Qual è il problema?" },
+            { "speaker": "ARTURO", "text": "Devo fare pipì.", "pauseAfter": 0.8 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "piazza_mid_arturo",
+              "face": "gino"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "piazza_mid_gino",
+              "face": "arturo"
+            },
+            { "at": 0.4, "character": "arturo", "action": "nervous", "duration": 5 },
+            { "at": 8.6, "character": "arturo", "action": "shiver", "duration": 2.4 }
+          ]
+        },
+        {
+          "id": "a1_05_bar_scoperta",
+          "camera": "piazza_arturo_close",
+          "duration": 6,
+          "dialogueDelay": 2.4,
+          "dialogue": [{ "speaker": "ARTURO", "text": "Un bar!", "pauseAfter": 0.9 }],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "piazza_mid_arturo",
+              "face": "bar_door"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "piazza_mid_gino",
+              "face": "arturo"
+            },
+            { "at": 0.2, "character": "arturo", "action": "look", "duration": 1.8 },
+            { "at": 2.3, "character": "arturo", "action": "relief", "duration": 2.4 },
+            { "at": 3, "character": "gino", "action": "look", "duration": 2 }
+          ],
+          "sfx": [{ "at": 2.19, "name": "whoosh", "gain": 0.55 }]
+        },
+        {
+          "id": "a1_06_corsa",
+          "camera": "piazza_run",
+          "duration": 5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "run",
+              "from": "piazza_mid_arturo",
+              "to": "piazza_bar_arturo",
+              "duration": 4.4
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "piazza_mid_gino",
+              "to": "piazza_bar_gino",
+              "duration": 4.8
+            }
+          ]
+        },
+        {
+          "id": "a1_07_cartello",
+          "camera": "piazza_bar_close",
+          "duration": 7,
+          "dialogueDelay": 1.5,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Per apertura?" },
+            { "speaker": "GINO", "text": "Magari aprono domani.", "pauseAfter": 0.7 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "piazza_bar_arturo",
+              "face": "bar_door"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "piazza_bar_gino",
+              "face": "bar_door"
+            }
+          ]
+        },
+        {
+          "id": "a1_08_chiuso_per_apertura",
+          "camera": "piazza_bar_two",
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Ma sono già chiusi." },
+            { "speaker": "GINO", "text": "Devono prepararsi.", "pauseAfter": 0.9 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "piazza_bar_arturo",
+              "face": "gino"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "piazza_bar_gino",
+              "face": "arturo"
+            },
+            { "at": 2.8, "character": "arturo", "action": "point", "duration": 2.2 }
+          ]
+        },
+        {
+          "id": "a1_09_barista",
+          "camera": "piazza_bar",
+          "duration": 19,
+          "dialogueDelay": 4.8,
+          "dialogue": [
+            { "speaker": "BARISTA", "text": "È chiuso!", "pauseAfter": 0.7 },
+            { "speaker": "ARTURO", "text": "Devo soltanto usare il bagno!" },
+            { "speaker": "BARISTA", "text": "Il bagno è chiuso." },
+            { "speaker": "ARTURO", "text": "Ma è un bagno!" },
+            { "speaker": "BARISTA", "text": "Anche i bagni hanno bisogno di riposo." },
+            { "speaker": "GINO", "text": "Ha ragione.", "pauseAfter": 1.1 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "piazza_bar_arturo",
+              "face": "bar_door"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "piazza_bar_gino",
+              "face": "bar_door"
+            },
+            { "at": 4.8, "character": "arturo", "action": "nervous", "duration": 6 },
+            { "at": 16.8, "character": "arturo", "action": "look", "duration": 2.4, "face": "gino" }
+          ],
+          "sfx": [
+            { "at": 0.4, "name": "knock", "gain": 0.9 },
+            { "at": 1.3, "name": "knock", "gain": 0.9 },
+            { "at": 2.2, "name": "knock", "gain": 0.9 },
+            { "at": 3.1, "name": "shutter_metal", "gain": 0.5 },
+            { "at": 4.1, "name": "shutter", "gain": 0.45 }
+          ]
+        },
+        {
+          "id": "a1_10_uscita",
+          "camera": "piazza_exit",
+          "duration": 6,
+          "actions": [
+            {
+              "at": 0.4,
+              "character": "arturo",
+              "action": "walk",
+              "from": "piazza_bar_arturo",
+              "to": "piazza_exit_arturo",
+              "duration": 5.2
+            },
+            {
+              "at": 0.6,
+              "character": "gino",
+              "action": "walk",
+              "from": "piazza_bar_gino",
+              "to": "piazza_exit_gino",
+              "duration": 5.3
+            },
+            { "at": 1.2, "character": "arturo", "action": "look", "duration": 2.2, "face": "bar_door" }
+          ],
+          "sfx": [{ "at": 3.8, "name": "sigh", "gain": 0.55 }]
+        }
+      ]
+    },
+    {
+      "id": "atto2",
+      "number": "ATTO II",
+      "title": "LA CITTÀ NON DORME MAI",
+      "scene": "alley",
+      "beats": [
+        {
+          "id": "a2_01_establishing",
+          "camera": "alley_est",
+          "duration": 3,
+          "sfx": [{ "at": 1.2, "name": "wind_gust", "gain": 0.35 }]
+        },
+        {
+          "id": "a2_02_ingresso",
+          "camera": "alley_walk",
+          "duration": 4.5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "alley_enter_arturo",
+              "to": "alley_walk_arturo",
+              "duration": 4.2
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "alley_enter_gino",
+              "to": "alley_walk_gino",
+              "duration": 4.5
+            }
+          ]
+        },
+        {
+          "id": "a2_03_sposi",
+          "camera": "alley_kiss",
+          "dialogueDelay": 1.5,
+          "dialogue": [
+            { "speaker": "FOTOGRAFO", "text": "Fermi! Il bacio! Il bacio spontaneo!", "pauseAfter": 0.8 },
+            { "speaker": "ARTURO", "text": "Sono tutti qui." },
+            { "speaker": "GINO", "text": "È una bella città." },
+            { "speaker": "ARTURO", "text": "È una città troppo bella.", "pauseAfter": 0.8 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "alley_walk_arturo",
+              "to": "alley_corner_arturo",
+              "duration": 2
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "alley_walk_gino",
+              "face": "arturo"
+            },
+            {
+              "at": 0.25,
+              "character": "photographer",
+              "action": "show",
+              "mark": "alley_photographer",
+              "face": "bride"
+            },
+            {
+              "at": 0.35,
+              "character": "bride",
+              "action": "show",
+              "mark": "alley_bride",
+              "face": "groom"
+            },
+            {
+              "at": 0.35,
+              "character": "groom",
+              "action": "show",
+              "mark": "alley_groom",
+              "face": "bride"
+            },
+            { "at": 0.55, "character": "bride", "action": "kiss" },
+            { "at": 0.55, "character": "groom", "action": "kiss" },
+            {
+              "at": 0.75,
+              "character": "photographer",
+              "action": "photo",
+              "duration": 3.4
+            },
+            { "at": 2.2, "character": "arturo", "action": "nervous", "duration": 4 }
+          ],
+          "sfx": [
+            { "at": 0.7, "name": "camera_motor", "gain": 0.5 },
+            { "at": 1.25, "name": "flash", "gain": 0.6 },
+            { "at": 2.7, "name": "flash", "gain": 0.4 }
+          ]
+        },
+        {
+          "id": "a2_04_ciclista",
+          "camera": "alley_cyclist",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Scusa, amico. C'è un bagno qui vicino?" },
+            { "speaker": "CICLISTA", "text": "Dipende." },
+            { "speaker": "ARTURO", "text": "Da cosa?" },
+            { "speaker": "CICLISTA", "text": "Da quanto sei disposto a spendere." },
+            { "speaker": "ARTURO", "text": "Quanto?" },
+            { "speaker": "CICLISTA", "text": "Non lo so. Non sono un bagno.", "pauseAfter": 0.9 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "alley_cyclist_talk_arturo",
+              "face": "cyclist"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "alley_cyclist_talk_gino",
+              "face": "cyclist"
+            },
+            { "at": 0, "character": "bride", "action": "hide" },
+            { "at": 0, "character": "groom", "action": "hide" },
+            { "at": 0, "character": "photographer", "action": "hide" },
+            { "at": 0, "character": "cyclist", "action": "show" },
+            {
+              "at": 0,
+              "character": "cyclist",
+              "action": "cycle",
+              "mark": "alley_cyclist",
+              "face": "arturo"
+            }
+          ],
+          "sfx": [{ "at": 0.4, "name": "bell", "gain": 0.5 }]
+        },
+        {
+          "id": "a2_05_ciclista_parte",
+          "camera": "alley_cyclist",
+          "duration": 4,
+          "actions": [
+            {
+              "at": 0.3,
+              "character": "cyclist",
+              "action": "cycle",
+              "from": "alley_cyclist",
+              "to": "alley_cyclist_exit",
+              "duration": 3.2
+            },
+            { "at": 3.8, "character": "cyclist", "action": "hide" }
+          ],
+          "sfx": [{ "at": 0.6, "name": "cycle_freewheel", "gain": 0.5 }]
+        },
+        {
+          "id": "a2_06_camminano",
+          "camera": "alley_walk",
+          "duration": 4.5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "alley_cyclist_talk_arturo",
+              "to": "alley_stop_arturo",
+              "duration": 2.0
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "alley_cyclist_talk_gino",
+              "to": "alley_stop_gino",
+              "duration": 2.2
+            }
+          ]
+        },
+        {
+          "id": "a2_07_sconforto",
+          "camera": "alley_reaction",
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Gino, non ce la faccio." },
+            { "speaker": "GINO", "text": "Certo che ce la fai." },
+            { "speaker": "ARTURO", "text": "Come fai a saperlo?" },
+            { "speaker": "GINO", "text": "Non lo so. Ma lo dico sempre.", "pauseAfter": 0.8 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "alley_stop_arturo",
+              "face": "gino"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "alley_stop_gino",
+              "face": "arturo"
+            },
+            { "at": 0.5, "character": "arturo", "action": "bend", "duration": 5 }
+          ]
+        },
+        {
+          "id": "a2_08_cane",
+          "camera": "alley_dog",
+          "dialogueDelay": 1.1,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Anche tu?" },
+            { "speaker": "GINO", "text": "Ti ha riconosciuto." },
+            { "speaker": "ARTURO", "text": "Da cosa?" },
+            { "speaker": "GINO", "text": "Dalla disperazione.", "pauseAfter": 0.9 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "dogman",
+              "action": "show",
+              "mark": "alley_dogman",
+              "face": "arturo"
+            },
+            {
+              "at": 0.15,
+              "character": "dog",
+              "action": "show",
+              "mark": "alley_dog",
+              "face": "arturo"
+            },
+            { "at": 1, "character": "dog", "action": "bark", "duration": 1.2 },
+            { "at": 2.4, "character": "dog", "action": "bark", "duration": 1.2 },
+            { "at": 0.4, "character": "arturo", "action": "shiver", "duration": 2.4 },
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "alley_stop_arturo",
+              "face": "dog"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "alley_dog_gino",
+              "face": "dog"
+            }
+          ],
+          "sfx": [
+            { "at": 1.05, "name": "bark", "gain": 0.55 },
+            { "at": 2.45, "name": "bark", "gain": 0.55 }
+          ]
+        },
+        {
+          "id": "a2_09_uscita",
+          "camera": "alley_exit",
+          "duration": 4.5,
+          "actions": [
+            { "at": 0, "character": "dogman", "action": "hide" },
+            { "at": 0, "character": "dog", "action": "hide" },
+            {
+              "at": 0.2,
+              "character": "arturo",
+              "action": "walk",
+              "from": "alley_stop_arturo",
+              "to": "alley_exit_arturo",
+              "duration": 3.9
+            },
+            {
+              "at": 0.35,
+              "character": "gino",
+              "action": "walk",
+              "from": "alley_dog_gino",
+              "to": "alley_exit_gino",
+              "duration": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto3",
+      "number": "ATTO III",
+      "title": "IL PARCO DEL TRATTENIMENTO",
+      "scene": "park",
+      "beats": [
+        {
+          "id": "a3_01_establishing",
+          "camera": "park_est",
+          "duration": 3,
+          "sfx": [{ "at": 1.1, "name": "wind_gust", "gain": 0.3 }]
+        },
+        {
+          "id": "a3_02_ingresso",
+          "camera": "park_walk",
+          "duration": 3.5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "park_enter_arturo",
+              "to": "park_arturo",
+              "duration": 3.2
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "park_enter_gino",
+              "to": "park_gino",
+              "duration": 3.3
+            }
+          ]
+        },
+        {
+          "id": "a3_03_yoga",
+          "camera": "park_yoga_wide",
+          "dialogueDelay": 1,
+          "dialogue": [
+            { "speaker": "ISTRUTTRICE", "text": "Inspirate profondamente.", "pauseAfter": 1 },
+            { "speaker": "ISTRUTTRICE", "text": "Trattenete.", "pauseAfter": 0.9 },
+            { "speaker": "ARTURO", "text": "No.", "pauseAfter": 0.5 },
+            { "speaker": "GINO", "text": "Che c'è?" },
+            { "speaker": "ARTURO", "text": "Non posso più sentire questa parola.", "pauseAfter": 0.9 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "park_arturo",
+              "face": "instructor"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "park_gino",
+              "face": "instructor"
+            },
+            { "at": 0, "character": "instructor", "action": "yoga", "mark": "park_instructor" },
+            { "at": 0, "character": "yogi1", "action": "yoga", "mark": "park_yogi1" },
+            { "at": 0, "character": "yogi2", "action": "yoga", "mark": "park_yogi2" },
+            { "at": 0, "character": "yogi3", "action": "yoga", "mark": "park_yogi3" }
+          ],
+          "sfx": [{ "at": 0.5, "name": "breath", "gain": 0.35 }]
+        },
+        {
+          "id": "a3_04_tempio",
+          "camera": "park_instructor",
+          "dialogue": [
+            { "speaker": "ISTRUTTRICE", "text": "Trattenete ancora.", "pauseAfter": 0.7 },
+            { "speaker": "ARTURO", "text": "Signora, la prego." },
+            { "speaker": "ISTRUTTRICE", "text": "Il corpo è un tempio." },
+            { "speaker": "ARTURO", "text": "Il mio tempio è allagato." },
+            { "speaker": "ISTRUTTRICE", "text": "Cosa cerca?" },
+            { "speaker": "ARTURO", "text": "Un bagno." },
+            { "speaker": "ISTRUTTRICE", "text": "La risposta è dentro di te." },
+            { "speaker": "ARTURO", "text": "È proprio quello il problema.", "pauseAfter": 1 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "park_arturo",
+              "face": "instructor"
+            },
+            { "at": 0.3, "character": "arturo", "action": "bend", "duration": 6 },
+            { "at": 12.5, "character": "arturo", "action": "nervous", "duration": 4 },
+            { "at": 0, "character": "instructor", "action": "yoga", "mark": "park_instructor" }
+          ]
+        },
+        {
+          "id": "a3_05_gino_siede",
+          "camera": "park_gino_sit",
+          "dialogue": [
+            { "speaker": "GINO", "text": "Possiamo rimanere qui?" },
+            { "speaker": "ARTURO", "text": "Perché?" },
+            { "speaker": "GINO", "text": "Mi sento in pace." },
+            { "speaker": "ARTURO", "text": "Tu hai la vescica vuota." },
+            { "speaker": "GINO", "text": "Non giudicare il mio percorso spirituale.", "pauseAfter": 1 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "sit",
+              "mark": "park_gino_mat",
+              "face": "arturo"
+            },
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "park_arturo",
+              "face": "gino"
+            },
+            { "at": 2, "character": "arturo", "action": "point", "duration": 2 }
+          ]
+        },
+        {
+          "id": "a3_06_lasciate_andare",
+          "camera": "park_wide",
+          "dialogue": [
+            { "speaker": "ISTRUTTRICE", "text": "Lasciate andare.", "pauseAfter": 1 },
+            { "speaker": "ARTURO", "text": "Finalmente!", "pauseAfter": 0.6 },
+            { "speaker": "ISTRUTTRICE", "text": "Lasciate andare i vostri pensieri." },
+            { "speaker": "ARTURO", "text": "Io vorrei lasciare andare qualcosa di più concreto.", "pauseAfter": 1 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "park_arturo",
+              "face": "instructor"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "sit",
+              "mark": "park_gino_mat",
+              "face": "instructor"
+            },
+            { "at": 0, "character": "instructor", "action": "yoga", "mark": "park_instructor" },
+            { "at": 1.4, "character": "arturo", "action": "relief", "duration": 3 }
+          ]
+        },
+        {
+          "id": "a3_07_uscita",
+          "camera": "park_exit",
+          "duration": 5.2,
+          "actions": [
+            { "at": 0.2, "character": "gino", "action": "stand" },
+            {
+              "at": 0.2,
+              "character": "arturo",
+              "action": "walk",
+              "from": "park_arturo",
+              "to": "park_exit_arturo",
+              "duration": 4.6
+            },
+            {
+              "at": 1.1,
+              "character": "gino",
+              "action": "walk",
+              "from": "park_gino_mat",
+              "to": "park_exit_gino",
+              "duration": 4.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto4",
+      "number": "ATTO IV",
+      "title": "FUORI CITTÀ",
+      "scene": "road",
+      "beats": [
+        {
+          "id": "a4_01_natura_vuota",
+          "camera": "road_walk",
+          "duration": 12.5,
+          "dialogueDelay": 1,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "In campagna non ci sarà nessuno." },
+            { "speaker": "GINO", "text": "La natura è vuota." },
+            { "speaker": "ARTURO", "text": "Esatto." },
+            { "speaker": "GINO", "text": "Piena di cose, ma vuota." },
+            { "speaker": "ARTURO", "text": "Non iniziare.", "pauseAfter": 0.9 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "road_enter_arturo",
+              "to": "road_stop_arturo",
+              "duration": 10.8
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "road_enter_gino",
+              "to": "road_stop_gino",
+              "duration": 11.2
+            }
+          ]
+        },
+        {
+          "id": "a4_02_astronomi",
+          "camera": "road_astro_wide",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Ma cosa fanno qui?" },
+            { "speaker": "GINO", "text": "Guardano le stelle." },
+            { "speaker": "ARTURO", "text": "Di notte?" },
+            { "speaker": "GINO", "text": "È il momento migliore." },
+            { "speaker": "ARTURO", "text": "Anche le stelle potrebbero guardare altrove.", "pauseAfter": 0.9 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "road_stop_arturo",
+              "face": "astro_target"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "road_stop_gino",
+              "face": "astro_target"
+            },
+            { "at": 0.2, "character": "arturo", "action": "point", "duration": 2.4 },
+            { "at": 0, "character": "astronomer1", "action": "telescope", "mark": "astro1", "face": "sky" },
+            { "at": 0, "character": "astronomer2", "action": "telescope", "mark": "astro2", "face": "sky" }
+          ],
+          "sfx": [{ "at": 0.5, "name": "tripod", "gain": 0.4 }]
+        },
+        {
+          "id": "a4_03_partenza",
+          "camera": "road_depart",
+          "duration": 3.5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "road_stop_arturo",
+              "to": "road_exit_arturo",
+              "duration": 3
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "road_stop_gino",
+              "to": "road_exit_gino",
+              "duration": 3.1
+            }
+          ]
+        },
+        {
+          "id": "a4_04_campagna",
+          "scene": "countryside",
+          "camera": "country_walk",
+          "duration": 4.5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "country_enter_arturo",
+              "to": "country_arturo",
+              "duration": 4
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "country_enter_gino",
+              "to": "country_gino",
+              "duration": 4.2
+            },
+            { "at": 0, "character": "shepherd", "action": "idle", "mark": "country_shepherd", "face": "arturo" },
+            { "at": 2.6, "character": "sheep1", "action": "idle", "mark": "country_sheep1" },
+            { "at": 0.8, "character": "sheep2", "action": "idle", "mark": "country_sheep2" }
+          ],
+          "sfx": [{ "at": 3.2, "name": "bleat", "gain": 0.35 }]
+        },
+        {
+          "id": "a4_05_pastore",
+          "scene": "countryside",
+          "camera": "country_shepherd",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Buonasera. C'è qualcuno nei dintorni?" },
+            { "speaker": "PASTORE", "text": "Diciassette." },
+            { "speaker": "ARTURO", "text": "Cosa?" },
+            { "speaker": "PASTORE", "text": "Pecore." },
+            { "speaker": "ARTURO", "text": "Cercavo un posto dove stare solo." },
+            { "speaker": "PASTORE", "text": "Anch'io." },
+            { "speaker": "ARTURO", "text": "Ma lei è qui." },
+            { "speaker": "PASTORE", "text": "È il problema." }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "country_arturo",
+              "face": "shepherd"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "country_gino",
+              "face": "shepherd"
+            },
+            {
+              "at": 0,
+              "character": "shepherd",
+              "action": "idle",
+              "mark": "country_shepherd",
+              "face": "arturo"
+            },
+            { "at": 3.2, "character": "shepherd", "action": "look", "duration": 3 },
+            { "at": 1, "character": "arturo", "action": "look", "duration": 2.2, "face": "country_tree" }
+          ]
+        },
+        {
+          "id": "a4_06_ventunesima_pecora",
+          "scene": "countryside",
+          "camera": "country_two",
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Posso andare dietro quell'albero?" },
+            { "speaker": "PASTORE", "text": "No." },
+            { "speaker": "ARTURO", "text": "Perché?" },
+            { "speaker": "PASTORE", "text": "La ventunesima pecora non è ancora arrivata." },
+            { "speaker": "ARTURO", "text": "Ma sono diciassette!" },
+            { "speaker": "PASTORE", "text": "Appunto. Mancano quattro." },
+            { "speaker": "GINO", "text": "Interessante." },
+            { "speaker": "ARTURO", "text": "Non è interessante!", "pauseAfter": 0.9 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "country_arturo",
+              "face": "shepherd"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "country_gino",
+              "face": "shepherd"
+            },
+            {
+              "at": 0,
+              "character": "shepherd",
+              "action": "idle",
+              "mark": "country_shepherd",
+              "face": "arturo"
+            },
+            { "at": 2.2, "character": "arturo", "action": "point", "duration": 2.4, "face": "country_tree" }
+          ]
+        },
+        {
+          "id": "a4_07_pecora",
+          "scene": "countryside",
+          "camera": "country_sheep",
+          "dialogueDelay": 1,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Ti prego.", "pauseAfter": 0.8 },
+            { "speaker": "PASTORE", "text": "È curiosa.", "pauseAfter": 0.7 },
+            { "speaker": "ARTURO", "text": "Anch'io, ma non faccio domande!", "pauseAfter": 1 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "country_arturo",
+              "face": "sheep1"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "country_gino",
+              "face": "sheep1"
+            },
+            { "at": 0.2, "character": "sheep1", "action": "walk", "from": "country_sheep1", "to": "country_sheep_near", "duration": 3.2 },
+            { "at": 0.4, "character": "arturo", "action": "shiver", "duration": 2.2 }
+          ],
+          "sfx": [{ "at": 1.1, "name": "bleat", "gain": 0.55 }]
+        },
+        {
+          "id": "a4_08_cartello",
+          "scene": "countryside",
+          "camera": "country_sign",
+          "duration": 3,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "country_arturo",
+              "face": "country_sign"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "country_gino",
+              "face": "country_sign"
+            },
+            { "at": 0.8, "character": "arturo", "action": "sigh", "duration": 2.2 }
+          ]
+        },
+        {
+          "id": "a4_09_uscita",
+          "scene": "countryside",
+          "camera": "country_exit",
+          "duration": 3.5,
+          "actions": [
+            {
+              "at": 0.2,
+              "character": "arturo",
+              "action": "walk",
+              "from": "country_arturo",
+              "to": "country_exit_arturo",
+              "duration": 3.1
+            },
+            {
+              "at": 0.3,
+              "character": "gino",
+              "action": "walk",
+              "from": "country_gino",
+              "to": "country_exit_gino",
+              "duration": 3.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto5",
+      "number": "ATTO V",
+      "title": "IL LUOGO PIÙ LONTANO DAL MONDO",
+      "scene": "hill",
+      "beats": [
+        {
+          "id": "a5_01_establishing",
+          "camera": "hill_est",
+          "duration": 3,
+          "sfx": [{ "at": 1.4, "name": "wind_gust", "gain": 0.45 }]
+        },
+        {
+          "id": "a5_02_arrivo",
+          "camera": "hill_walk",
+          "duration": 3.5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "walk",
+              "from": "hill_enter_arturo",
+              "to": "hill_arturo",
+              "duration": 3.1
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "walk",
+              "from": "hill_enter_gino",
+              "to": "hill_gino",
+              "duration": 3.3
+            }
+          ]
+        },
+        {
+          "id": "a5_03_nessuno",
+          "camera": "hill_empty",
+          "dialogueDelay": 0.8,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Ecco." },
+            { "speaker": "GINO", "text": "Ecco cosa?" },
+            { "speaker": "ARTURO", "text": "Il posto." },
+            { "speaker": "GINO", "text": "Non c'è nessuno." },
+            { "speaker": "ARTURO", "text": "Lo vedo." },
+            { "speaker": "GINO", "text": "Non sento nessuno." },
+            { "speaker": "ARTURO", "text": "Lo sento." },
+            { "speaker": "GINO", "text": "Non vedo nessuno." }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "hill_arturo",
+              "face": "gino"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "hill_gino",
+              "face": "arturo"
+            },
+            { "at": 4.5, "character": "arturo", "action": "look", "duration": 3 }
+          ]
+        },
+        {
+          "id": "a5_04_sfortuna",
+          "camera": "hill_arturo_close",
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Gino." },
+            { "speaker": "GINO", "text": "Sì?" },
+            { "speaker": "ARTURO", "text": "Non dire che non c'è nessuno. Porta sfortuna.", "pauseAfter": 1.1 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "hill_arturo",
+              "face": "gino"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "hill_gino",
+              "face": "arturo"
+            }
+          ]
+        },
+        {
+          "id": "a5_05_solo",
+          "camera": "hill_sign_view",
+          "duration": 5,
+          "actions": [
+            {
+              "at": 0.3,
+              "character": "arturo",
+              "action": "walk",
+              "from": "hill_arturo",
+              "to": "hill_alone",
+              "duration": 2.5
+            },
+            { "at": 2.9, "character": "arturo", "action": "relief", "duration": 2.4 },
+            { "at": 2.9, "character": "arturo", "action": "look", "duration": 2.2, "face": "hill_sign" },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "hill_gino",
+              "face": "arturo"
+            }
+          ],
+          "sfx": [{ "at": 4.6, "name": "whoosh", "gain": 0.35 }]
+        },
+        {
+          "id": "a5_06_troupe",
+          "camera": "hill_crew",
+          "dialogueDelay": 1.2,
+          "dialogue": [
+            { "speaker": "REGISTA", "text": "Ehi!", "pauseAfter": 0.8 },
+            { "speaker": "REGISTA", "text": "Perfetto! Abbiamo trovato la location!", "pauseAfter": 0.6 },
+            { "speaker": "ARTURO", "text": "No.", "pauseAfter": 0.5 },
+            { "speaker": "REGISTA", "text": "Sì! Proprio qui!", "pauseAfter": 0.5 },
+            { "speaker": "ARTURO", "text": "No, no, no.", "pauseAfter": 0.5 },
+            { "speaker": "REGISTA", "text": "È perfetta per la scena dell'uomo solo!" },
+            { "speaker": "ARTURO", "text": "Io non sono una comparsa." },
+            { "speaker": "REGISTA", "text": "Allora è il protagonista." },
+            { "speaker": "ARTURO", "text": "Portami via." },
+            { "speaker": "GINO", "text": "Dove?" },
+            { "speaker": "ARTURO", "text": "Non lo so." },
+            { "speaker": "GINO", "text": "Allora restiamo.", "pauseAfter": 1 }
+          ],
+          "actions": [
+            { "at": 0, "character": "director", "action": "show", "mark": "hill_director", "face": "arturo" },
+            { "at": 0.1, "character": "cameraman", "action": "show", "mark": "hill_cameraman", "face": "arturo" },
+            { "at": 0.2, "character": "boom", "action": "show", "mark": "hill_boom", "face": "arturo" },
+            { "at": 0.3, "character": "pa", "action": "show", "mark": "hill_pa", "face": "arturo" },
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "hill_alone",
+              "face": "director"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "hill_gino",
+              "face": "director"
+            },
+            { "at": 4.5, "character": "arturo", "action": "raise_arms", "duration": 3 },
+            { "at": 11, "character": "arturo", "action": "nervous", "duration": 4 },
+            { "at": 3, "character": "director", "action": "point", "duration": 2.5 },
+            { "at": 0.5, "character": "cameraman", "action": "photo", "duration": 4 }
+          ],
+          "sfx": [
+            { "at": 0.4, "name": "clapper", "gain": 0.5 },
+            { "at": 1.5, "name": "camera_motor", "gain": 0.4 },
+            { "at": 6.5, "name": "crowd_murmur", "gain": 0.35 }
+          ]
+        },
+        {
+          "id": "a5_07_urlo",
+          "camera": "hill_shout",
+          "dialogueDelay": 1.2,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "VOGLIO UN MINUTO SENZA ESSERI UMANI!", "pauseAfter": 2.6 },
+            { "speaker": "REGISTA", "text": "Bellissimo. Lo riprendiamo.", "pauseAfter": 1.4 }
+          ],
+          "actions": [
+            { "at": 0.3, "character": "arturo", "action": "raise_arms", "duration": 3.2 },
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "hill_alone",
+              "face": "director"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "hill_gino_side",
+              "face": "arturo"
+            },
+            { "at": 0, "character": "director", "action": "idle", "mark": "hill_director", "face": "arturo" }
+          ],
+          "sfx": [{ "at": 0.2, "name": "wind_gust", "gain": 0.35 }]
+        },
+        {
+          "id": "a5_08_pianto",
+          "camera": "hill_cry",
+          "duration": 3.5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "cry",
+              "mark": "hill_alone",
+              "face": "camera"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "hill_gino_side",
+              "face": "arturo"
+            },
+            { "at": 0, "character": "director", "action": "idle", "mark": "hill_director", "face": "arturo" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "atto6",
+      "number": "ATTO VI",
+      "title": "L'ALBA E LA FINE DI TUTTO",
+      "scene": "hillDawn",
+      "beats": [
+        {
+          "id": "a6_01_alba",
+          "camera": "dawn_est",
+          "duration": 3,
+          "sfx": [{ "at": 1.2, "name": "wind_gust", "gain": 0.3 }]
+        },
+        {
+          "id": "a6_02_seduti",
+          "camera": "dawn_two_sit",
+          "dialogueDelay": 1,
+          "dialogue": [
+            { "speaker": "GINO", "text": "Come ti senti?" },
+            { "speaker": "ARTURO", "text": "Non lo so." },
+            { "speaker": "GINO", "text": "Hai ancora bisogno?" },
+            { "speaker": "ARTURO", "text": "Credo di no." },
+            { "speaker": "GINO", "text": "Allora è finita." },
+            { "speaker": "ARTURO", "text": "Sì.", "pauseAfter": 0.9 },
+            { "speaker": "GINO", "text": "Possiamo tornare." },
+            { "speaker": "ARTURO", "text": "Certo.", "pauseAfter": 0.8 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "sit",
+              "mark": "dawn_sit_arturo",
+              "face": "gino"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "sit",
+              "mark": "dawn_sit_gino",
+              "face": "arturo"
+            },
+            { "at": 5.5, "character": "arturo", "action": "sigh", "duration": 2.4 }
+          ]
+        },
+        {
+          "id": "a6_03_tre_passi",
+          "camera": "dawn_walk",
+          "dialogueDelay": 2.4,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Gino." },
+            { "speaker": "GINO", "text": "Dimmi." },
+            { "speaker": "ARTURO", "text": "Adesso devo." },
+            { "speaker": "GINO", "text": "Ah.", "pauseAfter": 0.6 },
+            { "speaker": "ARTURO", "text": "Già." },
+            { "speaker": "GINO", "text": "E dove andiamo?", "pauseAfter": 0.8 }
+          ],
+          "actions": [
+            { "at": 0.2, "character": "gino", "action": "stand", "mark": "dawn_sit_gino" },
+            { "at": 0.3, "character": "arturo", "action": "stand", "mark": "dawn_sit_arturo" },
+            {
+              "at": 1.1,
+              "character": "arturo",
+              "action": "walk",
+              "from": "dawn_sit_arturo",
+              "to": "dawn_stand_arturo",
+              "duration": 2.2
+            },
+            {
+              "at": 1.2,
+              "character": "gino",
+              "action": "walk",
+              "from": "dawn_sit_gino",
+              "to": "dawn_stand_gino",
+              "duration": 2.2
+            },
+            { "at": 3.5, "character": "arturo", "action": "look", "duration": 2, "face": "dawn_bar_far" }
+          ]
+        },
+        {
+          "id": "a6_04_bar_lontano",
+          "camera": "dawn_bar_far",
+          "duration": 4,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "dawn_stand_arturo",
+              "face": "dawn_bar_far"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "dawn_stand_gino",
+              "face": "dawn_bar_far"
+            },
+            { "at": 0.5, "character": "arturo", "action": "relief", "duration": 2.6 }
+          ]
+        },
+        {
+          "id": "a6_05_porta",
+          "camera": "dawn_bar_door",
+          "duration": 4.5,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "bar_patio_arturo",
+              "face": "dawn_bar_door"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "bar_patio_gino",
+              "face": "dawn_bar_door"
+            },
+            { "at": 3.6, "character": "arturo", "action": "sigh", "duration": 2.2 }
+          ],
+          "sfx": [
+            { "at": 0.4, "name": "sign_buzz", "gain": 0.35 },
+            { "at": 4.2, "name": "knock", "gain": 0.35 }
+          ]
+        },
+        {
+          "id": "a6_06_fuori_servizio",
+          "camera": "dawn_sign",
+          "duration": 4,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "bar_patio_arturo",
+              "face": "dawn_bar_door"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "bar_patio_gino",
+              "face": "dawn_bar_door"
+            }
+          ],
+          "sfx": [{ "at": 3.5, "name": "sign_off", "gain": 0.6 }]
+        },
+        {
+          "id": "a6_07_nero",
+          "camera": "dawn_final",
+          "duration": 18,
+          "dialogueDelay": 1.4,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Gino?", "pauseAfter": 1 },
+            { "speaker": "GINO", "text": "Sì?" },
+            { "speaker": "ARTURO", "text": "Mi sa che devo di nuovo.", "pauseAfter": 5.2 },
+            { "speaker": "GINO", "text": "Aspettiamo.", "pauseAfter": 2.2 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "bar_patio_arturo",
+              "face": "dawn_bar_door"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "bar_patio_gino",
+              "face": "dawn_bar_door"
+            }
+          ]
+        },
+        {
+          "id": "a6_08_silenzio",
+          "camera": "dawn_final",
+          "duration": 15,
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "idle",
+              "mark": "bar_patio_arturo",
+              "face": "dawn_bar_door"
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "bar_patio_gino",
+              "face": "dawn_bar_door"
+            }
+          ]
+        },
+        {
+          "id": "a6_09_sguardo",
+          "camera": "dawn_final",
+          "dialogueDelay": 3.6,
+          "dialogue": [
+            { "speaker": "ARTURO", "text": "Anche voi siete ancora qui?", "pauseAfter": 1.6 }
+          ],
+          "actions": [
+            {
+              "at": 0,
+              "character": "arturo",
+              "action": "turn_camera",
+              "mark": "bar_patio_arturo",
+              "duration": 8
+            },
+            {
+              "at": 0,
+              "character": "gino",
+              "action": "idle",
+              "mark": "bar_patio_gino",
+              "face": "dawn_bar_door"
+            }
+          ]
+        },
+        {
+          "id": "a6_10_fine",
+          "camera": "dawn_final",
+          "duration": 1.5
+        }
+      ]
+    }
+  ]
+}

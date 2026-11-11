@@ -1,0 +1,1242 @@
+{
+  "language": "it",
+  "title": "L'ULTIMO BAGNO",
+  "subtitle": "Una tragedia idraulica in sei atti",
+  "generatedFrom": "src/data/screenplay.json",
+  "duration": 475.82,
+  "captions": [
+    {
+      "start": 9.2,
+      "end": 10.065,
+      "speaker": "ARTURO",
+      "text": "Gino.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_03_dialogo"
+    },
+    {
+      "start": 10.865,
+      "end": 11.73,
+      "speaker": "GINO",
+      "text": "Dimmi.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_03_dialogo"
+    },
+    {
+      "start": 12.33,
+      "end": 13.905,
+      "speaker": "ARTURO",
+      "text": "Devo fare pipì.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_03_dialogo"
+    },
+    {
+      "start": 14.805,
+      "end": 16.025,
+      "speaker": "GINO",
+      "text": "Lo sapevo.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_03_dialogo"
+    },
+    {
+      "start": 16.425,
+      "end": 17.645,
+      "speaker": "ARTURO",
+      "text": "Da quanto?",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_03_dialogo"
+    },
+    {
+      "start": 18.345,
+      "end": 21.695,
+      "speaker": "GINO",
+      "text": "Da quando hai smesso di parlare delle tasse.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_03_dialogo"
+    },
+    {
+      "start": 22.095,
+      "end": 24.025,
+      "speaker": "ARTURO",
+      "text": "Ho bevuto sette bicchieri.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_03_dialogo"
+    },
+    {
+      "start": 24.425,
+      "end": 25.29,
+      "speaker": "GINO",
+      "text": "Sette?",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_03_dialogo"
+    },
+    {
+      "start": 26.19,
+      "end": 29.345,
+      "speaker": "ARTURO",
+      "text": "Forse otto. Il settimo era più piccolo.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_04_dialogo"
+    },
+    {
+      "start": 29.745,
+      "end": 32.03,
+      "speaker": "GINO",
+      "text": "Allora sono sette e mezzo.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_04_dialogo"
+    },
+    {
+      "start": 32.43,
+      "end": 34.715,
+      "speaker": "ARTURO",
+      "text": "Non è questo il problema.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_04_dialogo"
+    },
+    {
+      "start": 36.515,
+      "end": 38.445,
+      "speaker": "GINO",
+      "text": "Qual è il problema?",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_04_dialogo"
+    },
+    {
+      "start": 38.845,
+      "end": 40.42,
+      "speaker": "ARTURO",
+      "text": "Devo fare pipì.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_04_dialogo"
+    },
+    {
+      "start": 43.82,
+      "end": 45.04,
+      "speaker": "ARTURO",
+      "text": "Un bar!",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_05_bar_scoperta"
+    },
+    {
+      "start": 53.92,
+      "end": 55.14,
+      "speaker": "ARTURO",
+      "text": "Per apertura?",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_07_cartello"
+    },
+    {
+      "start": 55.54,
+      "end": 57.115,
+      "speaker": "GINO",
+      "text": "Magari aprono domani.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_07_cartello"
+    },
+    {
+      "start": 59.62,
+      "end": 61.55,
+      "speaker": "ARTURO",
+      "text": "Ma sono già chiusi.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_08_chiuso_per_apertura"
+    },
+    {
+      "start": 61.95,
+      "end": 63.17,
+      "speaker": "GINO",
+      "text": "Devono prepararsi.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_08_chiuso_per_apertura"
+    },
+    {
+      "start": 69.42,
+      "end": 70.64,
+      "speaker": "BARISTA",
+      "text": "È chiuso!",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_09_barista"
+    },
+    {
+      "start": 71.34,
+      "end": 73.625,
+      "speaker": "ARTURO",
+      "text": "Devo soltanto usare il bagno!",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_09_barista"
+    },
+    {
+      "start": 74.025,
+      "end": 75.955,
+      "speaker": "BARISTA",
+      "text": "Il bagno è chiuso.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_09_barista"
+    },
+    {
+      "start": 76.355,
+      "end": 78.285,
+      "speaker": "ARTURO",
+      "text": "Ma è un bagno!",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_09_barista"
+    },
+    {
+      "start": 78.685,
+      "end": 81.68,
+      "speaker": "BARISTA",
+      "text": "Anche i bagni hanno bisogno di riposo.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_09_barista"
+    },
+    {
+      "start": 82.08,
+      "end": 83.3,
+      "speaker": "GINO",
+      "text": "Ha ragione.",
+      "scene": "piazza",
+      "actId": "atto1",
+      "beatId": "a1_09_barista"
+    },
+    {
+      "start": 99.9,
+      "end": 102.86,
+      "speaker": "FOTOGRAFO",
+      "text": "Fermi! Il bacio! Il bacio spontaneo!",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_03_sposi"
+    },
+    {
+      "start": 103.66,
+      "end": 105.235,
+      "speaker": "ARTURO",
+      "text": "Sono tutti qui.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_03_sposi"
+    },
+    {
+      "start": 105.635,
+      "end": 107.565,
+      "speaker": "GINO",
+      "text": "È una bella città.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_03_sposi"
+    },
+    {
+      "start": 107.965,
+      "end": 110.25,
+      "speaker": "ARTURO",
+      "text": "È una città troppo bella.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_03_sposi"
+    },
+    {
+      "start": 112.05,
+      "end": 115.365,
+      "speaker": "ARTURO",
+      "text": "Scusa, amico. C'è un bagno qui vicino?",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_04_ciclista"
+    },
+    {
+      "start": 115.765,
+      "end": 116.63,
+      "speaker": "CICLISTA",
+      "text": "Dipende.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_04_ciclista"
+    },
+    {
+      "start": 117.03,
+      "end": 118.25,
+      "speaker": "ARTURO",
+      "text": "Da cosa?",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_04_ciclista"
+    },
+    {
+      "start": 118.65,
+      "end": 121.29,
+      "speaker": "CICLISTA",
+      "text": "Da quanto sei disposto a spendere.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_04_ciclista"
+    },
+    {
+      "start": 121.69,
+      "end": 122.555,
+      "speaker": "ARTURO",
+      "text": "Quanto?",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_04_ciclista"
+    },
+    {
+      "start": 122.955,
+      "end": 126.11,
+      "speaker": "CICLISTA",
+      "text": "Non lo so. Non sono un bagno.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_04_ciclista"
+    },
+    {
+      "start": 135.91,
+      "end": 138.355,
+      "speaker": "ARTURO",
+      "text": "Gino, non ce la faccio.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_07_sconforto"
+    },
+    {
+      "start": 138.755,
+      "end": 141.04,
+      "speaker": "GINO",
+      "text": "Certo che ce la fai.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_07_sconforto"
+    },
+    {
+      "start": 141.44,
+      "end": 143.37,
+      "speaker": "ARTURO",
+      "text": "Come fai a saperlo?",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_07_sconforto"
+    },
+    {
+      "start": 143.77,
+      "end": 146.925,
+      "speaker": "GINO",
+      "text": "Non lo so. Ma lo dico sempre.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_07_sconforto"
+    },
+    {
+      "start": 149.025,
+      "end": 150.245,
+      "speaker": "ARTURO",
+      "text": "Anche tu?",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_08_cane"
+    },
+    {
+      "start": 150.645,
+      "end": 152.22,
+      "speaker": "GINO",
+      "text": "Ti ha riconosciuto.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_08_cane"
+    },
+    {
+      "start": 152.62,
+      "end": 153.84,
+      "speaker": "ARTURO",
+      "text": "Da cosa?",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_08_cane"
+    },
+    {
+      "start": 154.24,
+      "end": 155.46,
+      "speaker": "GINO",
+      "text": "Dalla disperazione.",
+      "scene": "alley",
+      "actId": "atto2",
+      "beatId": "a2_08_cane"
+    },
+    {
+      "start": 168.61,
+      "end": 169.83,
+      "speaker": "ISTRUTTRICE",
+      "text": "Inspirate profondamente.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_03_yoga"
+    },
+    {
+      "start": 170.83,
+      "end": 171.695,
+      "speaker": "ISTRUTTRICE",
+      "text": "Trattenete.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_03_yoga"
+    },
+    {
+      "start": 172.595,
+      "end": 173.46,
+      "speaker": "ARTURO",
+      "text": "No.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_03_yoga"
+    },
+    {
+      "start": 173.96,
+      "end": 175.18,
+      "speaker": "GINO",
+      "text": "Che c'è?",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_03_yoga"
+    },
+    {
+      "start": 175.58,
+      "end": 178.22,
+      "speaker": "ARTURO",
+      "text": "Non posso più sentire questa parola.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_03_yoga"
+    },
+    {
+      "start": 179.52,
+      "end": 180.74,
+      "speaker": "ISTRUTTRICE",
+      "text": "Trattenete ancora.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_04_tempio"
+    },
+    {
+      "start": 181.44,
+      "end": 183.175,
+      "speaker": "ARTURO",
+      "text": "Signora, la prego.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_04_tempio"
+    },
+    {
+      "start": 183.575,
+      "end": 185.86,
+      "speaker": "ISTRUTTRICE",
+      "text": "Il corpo è un tempio.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_04_tempio"
+    },
+    {
+      "start": 186.26,
+      "end": 188.545,
+      "speaker": "ARTURO",
+      "text": "Il mio tempio è allagato.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_04_tempio"
+    },
+    {
+      "start": 188.945,
+      "end": 190.165,
+      "speaker": "ISTRUTTRICE",
+      "text": "Cosa cerca?",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_04_tempio"
+    },
+    {
+      "start": 190.565,
+      "end": 191.785,
+      "speaker": "ARTURO",
+      "text": "Un bagno.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_04_tempio"
+    },
+    {
+      "start": 192.185,
+      "end": 194.825,
+      "speaker": "ISTRUTTRICE",
+      "text": "La risposta è dentro di te.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_04_tempio"
+    },
+    {
+      "start": 195.225,
+      "end": 197.51,
+      "speaker": "ARTURO",
+      "text": "È proprio quello il problema.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_04_tempio"
+    },
+    {
+      "start": 198.91,
+      "end": 200.485,
+      "speaker": "GINO",
+      "text": "Possiamo rimanere qui?",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_05_gino_siede"
+    },
+    {
+      "start": 200.885,
+      "end": 201.75,
+      "speaker": "ARTURO",
+      "text": "Perché?",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_05_gino_siede"
+    },
+    {
+      "start": 202.15,
+      "end": 204.08,
+      "speaker": "GINO",
+      "text": "Mi sento in pace.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_05_gino_siede"
+    },
+    {
+      "start": 204.48,
+      "end": 206.765,
+      "speaker": "ARTURO",
+      "text": "Tu hai la vescica vuota.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_05_gino_siede"
+    },
+    {
+      "start": 207.165,
+      "end": 209.805,
+      "speaker": "GINO",
+      "text": "Non giudicare il mio percorso spirituale.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_05_gino_siede"
+    },
+    {
+      "start": 211.205,
+      "end": 212.425,
+      "speaker": "ISTRUTTRICE",
+      "text": "Lasciate andare.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_06_lasciate_andare"
+    },
+    {
+      "start": 213.425,
+      "end": 214.29,
+      "speaker": "ARTURO",
+      "text": "Finalmente!",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_06_lasciate_andare"
+    },
+    {
+      "start": 214.89,
+      "end": 217.175,
+      "speaker": "ISTRUTTRICE",
+      "text": "Lasciate andare i vostri pensieri.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_06_lasciate_andare"
+    },
+    {
+      "start": 217.575,
+      "end": 220.925,
+      "speaker": "ARTURO",
+      "text": "Io vorrei lasciare andare qualcosa di più concreto.",
+      "scene": "park",
+      "actId": "atto3",
+      "beatId": "a3_06_lasciate_andare"
+    },
+    {
+      "start": 228.625,
+      "end": 231.265,
+      "speaker": "ARTURO",
+      "text": "In campagna non ci sarà nessuno.",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_01_natura_vuota"
+    },
+    {
+      "start": 231.665,
+      "end": 233.595,
+      "speaker": "GINO",
+      "text": "La natura è vuota.",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_01_natura_vuota"
+    },
+    {
+      "start": 233.995,
+      "end": 234.86,
+      "speaker": "ARTURO",
+      "text": "Esatto.",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_01_natura_vuota"
+    },
+    {
+      "start": 235.26,
+      "end": 237.705,
+      "speaker": "GINO",
+      "text": "Piena di cose, ma vuota.",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_01_natura_vuota"
+    },
+    {
+      "start": 238.105,
+      "end": 239.325,
+      "speaker": "ARTURO",
+      "text": "Non iniziare.",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_01_natura_vuota"
+    },
+    {
+      "start": 241.225,
+      "end": 243.155,
+      "speaker": "ARTURO",
+      "text": "Ma cosa fanno qui?",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_02_astronomi"
+    },
+    {
+      "start": 243.555,
+      "end": 245.13,
+      "speaker": "GINO",
+      "text": "Guardano le stelle.",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_02_astronomi"
+    },
+    {
+      "start": 245.53,
+      "end": 246.75,
+      "speaker": "ARTURO",
+      "text": "Di notte?",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_02_astronomi"
+    },
+    {
+      "start": 247.15,
+      "end": 249.08,
+      "speaker": "GINO",
+      "text": "È il momento migliore.",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_02_astronomi"
+    },
+    {
+      "start": 249.48,
+      "end": 252.12,
+      "speaker": "ARTURO",
+      "text": "Anche le stelle potrebbero guardare altrove.",
+      "scene": "road",
+      "actId": "atto4",
+      "beatId": "a4_02_astronomi"
+    },
+    {
+      "start": 262.02,
+      "end": 264.465,
+      "speaker": "ARTURO",
+      "text": "Buonasera. C'è qualcuno nei dintorni?",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_05_pastore"
+    },
+    {
+      "start": 264.865,
+      "end": 265.73,
+      "speaker": "PASTORE",
+      "text": "Diciassette.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_05_pastore"
+    },
+    {
+      "start": 266.13,
+      "end": 266.995,
+      "speaker": "ARTURO",
+      "text": "Cosa?",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_05_pastore"
+    },
+    {
+      "start": 267.395,
+      "end": 268.26,
+      "speaker": "PASTORE",
+      "text": "Pecore.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_05_pastore"
+    },
+    {
+      "start": 268.66,
+      "end": 271.3,
+      "speaker": "ARTURO",
+      "text": "Cercavo un posto dove stare solo.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_05_pastore"
+    },
+    {
+      "start": 271.7,
+      "end": 272.565,
+      "speaker": "PASTORE",
+      "text": "Anch'io.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_05_pastore"
+    },
+    {
+      "start": 272.965,
+      "end": 274.895,
+      "speaker": "ARTURO",
+      "text": "Ma lei è qui.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_05_pastore"
+    },
+    {
+      "start": 275.295,
+      "end": 276.87,
+      "speaker": "PASTORE",
+      "text": "È il problema.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_05_pastore"
+    },
+    {
+      "start": 277.62,
+      "end": 279.55,
+      "speaker": "ARTURO",
+      "text": "Posso andare dietro quell'albero?",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_06_ventunesima_pecora"
+    },
+    {
+      "start": 279.95,
+      "end": 280.815,
+      "speaker": "PASTORE",
+      "text": "No.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_06_ventunesima_pecora"
+    },
+    {
+      "start": 281.215,
+      "end": 282.08,
+      "speaker": "ARTURO",
+      "text": "Perché?",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_06_ventunesima_pecora"
+    },
+    {
+      "start": 282.48,
+      "end": 285.475,
+      "speaker": "PASTORE",
+      "text": "La ventunesima pecora non è ancora arrivata.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_06_ventunesima_pecora"
+    },
+    {
+      "start": 285.875,
+      "end": 287.45,
+      "speaker": "ARTURO",
+      "text": "Ma sono diciassette!",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_06_ventunesima_pecora"
+    },
+    {
+      "start": 287.85,
+      "end": 289.585,
+      "speaker": "PASTORE",
+      "text": "Appunto. Mancano quattro.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_06_ventunesima_pecora"
+    },
+    {
+      "start": 289.985,
+      "end": 290.85,
+      "speaker": "GINO",
+      "text": "Interessante.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_06_ventunesima_pecora"
+    },
+    {
+      "start": 291.25,
+      "end": 292.825,
+      "speaker": "ARTURO",
+      "text": "Non è interessante!",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_06_ventunesima_pecora"
+    },
+    {
+      "start": 294.925,
+      "end": 296.145,
+      "speaker": "ARTURO",
+      "text": "Ti prego.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_07_pecora"
+    },
+    {
+      "start": 296.945,
+      "end": 298.165,
+      "speaker": "PASTORE",
+      "text": "È curiosa.",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_07_pecora"
+    },
+    {
+      "start": 298.865,
+      "end": 301.31,
+      "speaker": "ARTURO",
+      "text": "Anch'io, ma non faccio domande!",
+      "scene": "countryside",
+      "actId": "atto4",
+      "beatId": "a4_07_pecora"
+    },
+    {
+      "start": 316.71,
+      "end": 317.575,
+      "speaker": "ARTURO",
+      "text": "Ecco.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_03_nessuno"
+    },
+    {
+      "start": 317.975,
+      "end": 319.195,
+      "speaker": "GINO",
+      "text": "Ecco cosa?",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_03_nessuno"
+    },
+    {
+      "start": 319.595,
+      "end": 320.815,
+      "speaker": "ARTURO",
+      "text": "Il posto.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_03_nessuno"
+    },
+    {
+      "start": 321.215,
+      "end": 322.79,
+      "speaker": "GINO",
+      "text": "Non c'è nessuno.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_03_nessuno"
+    },
+    {
+      "start": 323.19,
+      "end": 324.41,
+      "speaker": "ARTURO",
+      "text": "Lo vedo.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_03_nessuno"
+    },
+    {
+      "start": 324.81,
+      "end": 326.385,
+      "speaker": "GINO",
+      "text": "Non sento nessuno.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_03_nessuno"
+    },
+    {
+      "start": 326.785,
+      "end": 328.005,
+      "speaker": "ARTURO",
+      "text": "Lo sento.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_03_nessuno"
+    },
+    {
+      "start": 328.405,
+      "end": 329.98,
+      "speaker": "GINO",
+      "text": "Non vedo nessuno.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_03_nessuno"
+    },
+    {
+      "start": 330.73,
+      "end": 331.595,
+      "speaker": "ARTURO",
+      "text": "Gino.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_04_sfortuna"
+    },
+    {
+      "start": 331.995,
+      "end": 332.86,
+      "speaker": "GINO",
+      "text": "Sì?",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_04_sfortuna"
+    },
+    {
+      "start": 333.26,
+      "end": 336.77,
+      "speaker": "ARTURO",
+      "text": "Non dire che non c'è nessuno. Porta sfortuna.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_04_sfortuna"
+    },
+    {
+      "start": 344.77,
+      "end": 345.635,
+      "speaker": "REGISTA",
+      "text": "Ehi!",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 346.435,
+      "end": 348.88,
+      "speaker": "REGISTA",
+      "text": "Perfetto! Abbiamo trovato la location!",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 349.48,
+      "end": 350.345,
+      "speaker": "ARTURO",
+      "text": "No.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 350.845,
+      "end": 352.58,
+      "speaker": "REGISTA",
+      "text": "Sì! Proprio qui!",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 353.08,
+      "end": 354.975,
+      "speaker": "ARTURO",
+      "text": "No, no, no.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 355.475,
+      "end": 358.47,
+      "speaker": "REGISTA",
+      "text": "È perfetta per la scena dell'uomo solo!",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 358.87,
+      "end": 361.155,
+      "speaker": "ARTURO",
+      "text": "Io non sono una comparsa.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 361.555,
+      "end": 363.485,
+      "speaker": "REGISTA",
+      "text": "Allora è il protagonista.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 363.885,
+      "end": 365.105,
+      "speaker": "ARTURO",
+      "text": "Portami via.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 365.505,
+      "end": 366.37,
+      "speaker": "GINO",
+      "text": "Dove?",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 366.77,
+      "end": 368.345,
+      "speaker": "ARTURO",
+      "text": "Non lo so.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 368.745,
+      "end": 369.965,
+      "speaker": "GINO",
+      "text": "Allora restiamo.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_06_troupe"
+    },
+    {
+      "start": 372.365,
+      "end": 375.005,
+      "speaker": "ARTURO",
+      "text": "VOGLIO UN MINUTO SENZA ESSERI UMANI!",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_07_urlo"
+    },
+    {
+      "start": 377.605,
+      "end": 379.34,
+      "speaker": "REGISTA",
+      "text": "Bellissimo. Lo riprendiamo.",
+      "scene": "hill",
+      "actId": "atto5",
+      "beatId": "a5_07_urlo"
+    },
+    {
+      "start": 392.14,
+      "end": 393.715,
+      "speaker": "GINO",
+      "text": "Come ti senti?",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_02_seduti"
+    },
+    {
+      "start": 394.115,
+      "end": 395.69,
+      "speaker": "ARTURO",
+      "text": "Non lo so.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_02_seduti"
+    },
+    {
+      "start": 396.09,
+      "end": 397.665,
+      "speaker": "GINO",
+      "text": "Hai ancora bisogno?",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_02_seduti"
+    },
+    {
+      "start": 398.065,
+      "end": 399.64,
+      "speaker": "ARTURO",
+      "text": "Credo di no.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_02_seduti"
+    },
+    {
+      "start": 400.04,
+      "end": 401.615,
+      "speaker": "GINO",
+      "text": "Allora è finita.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_02_seduti"
+    },
+    {
+      "start": 402.015,
+      "end": 402.88,
+      "speaker": "ARTURO",
+      "text": "Sì.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_02_seduti"
+    },
+    {
+      "start": 403.78,
+      "end": 405,
+      "speaker": "GINO",
+      "text": "Possiamo tornare.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_02_seduti"
+    },
+    {
+      "start": 405.4,
+      "end": 406.265,
+      "speaker": "ARTURO",
+      "text": "Certo.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_02_seduti"
+    },
+    {
+      "start": 409.665,
+      "end": 410.53,
+      "speaker": "ARTURO",
+      "text": "Gino.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_03_tre_passi"
+    },
+    {
+      "start": 410.93,
+      "end": 411.795,
+      "speaker": "GINO",
+      "text": "Dimmi.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_03_tre_passi"
+    },
+    {
+      "start": 412.195,
+      "end": 413.415,
+      "speaker": "ARTURO",
+      "text": "Adesso devo.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_03_tre_passi"
+    },
+    {
+      "start": 413.815,
+      "end": 414.68,
+      "speaker": "GINO",
+      "text": "Ah.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_03_tre_passi"
+    },
+    {
+      "start": 415.28,
+      "end": 416.145,
+      "speaker": "ARTURO",
+      "text": "Già.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_03_tre_passi"
+    },
+    {
+      "start": 416.545,
+      "end": 418.12,
+      "speaker": "GINO",
+      "text": "E dove andiamo?",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_03_tre_passi"
+    },
+    {
+      "start": 434.52,
+      "end": 435.385,
+      "speaker": "ARTURO",
+      "text": "Gino?",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_07_nero"
+    },
+    {
+      "start": 436.385,
+      "end": 437.25,
+      "speaker": "GINO",
+      "text": "Sì?",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_07_nero"
+    },
+    {
+      "start": 437.65,
+      "end": 440.29,
+      "speaker": "ARTURO",
+      "text": "Mi sa che devo di nuovo.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_07_nero"
+    },
+    {
+      "start": 445.49,
+      "end": 446.355,
+      "speaker": "GINO",
+      "text": "Aspettiamo.",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_07_nero"
+    },
+    {
+      "start": 469.72,
+      "end": 472.005,
+      "speaker": "ARTURO",
+      "text": "Anche voi siete ancora qui?",
+      "scene": "hillDawn",
+      "actId": "atto6",
+      "beatId": "a6_09_sguardo"
+    }
+  ]
+}

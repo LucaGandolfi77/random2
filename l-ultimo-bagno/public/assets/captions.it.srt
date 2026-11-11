@@ -1,0 +1,548 @@
+1
+00:00:09,200 --> 00:00:10,065
+ARTURO: Gino.
+
+2
+00:00:10,865 --> 00:00:11,730
+GINO: Dimmi.
+
+3
+00:00:12,330 --> 00:00:13,905
+ARTURO: Devo fare pipì.
+
+4
+00:00:14,805 --> 00:00:16,025
+GINO: Lo sapevo.
+
+5
+00:00:16,425 --> 00:00:17,645
+ARTURO: Da quanto?
+
+6
+00:00:18,345 --> 00:00:21,695
+GINO: Da quando hai smesso di parlare delle tasse.
+
+7
+00:00:22,095 --> 00:00:24,025
+ARTURO: Ho bevuto sette bicchieri.
+
+8
+00:00:24,425 --> 00:00:25,290
+GINO: Sette?
+
+9
+00:00:26,190 --> 00:00:29,345
+ARTURO: Forse otto. Il settimo era più piccolo.
+
+10
+00:00:29,745 --> 00:00:32,030
+GINO: Allora sono sette e mezzo.
+
+11
+00:00:32,430 --> 00:00:34,715
+ARTURO: Non è questo il problema.
+
+12
+00:00:36,515 --> 00:00:38,445
+GINO: Qual è il problema?
+
+13
+00:00:38,845 --> 00:00:40,420
+ARTURO: Devo fare pipì.
+
+14
+00:00:43,820 --> 00:00:45,040
+ARTURO: Un bar!
+
+15
+00:00:53,920 --> 00:00:55,140
+ARTURO: Per apertura?
+
+16
+00:00:55,540 --> 00:00:57,115
+GINO: Magari aprono domani.
+
+17
+00:00:59,620 --> 00:01:01,550
+ARTURO: Ma sono già chiusi.
+
+18
+00:01:01,950 --> 00:01:03,170
+GINO: Devono prepararsi.
+
+19
+00:01:09,420 --> 00:01:10,640
+BARISTA: È chiuso!
+
+20
+00:01:11,340 --> 00:01:13,625
+ARTURO: Devo soltanto usare il bagno!
+
+21
+00:01:14,025 --> 00:01:15,955
+BARISTA: Il bagno è chiuso.
+
+22
+00:01:16,355 --> 00:01:18,285
+ARTURO: Ma è un bagno!
+
+23
+00:01:18,685 --> 00:01:21,680
+BARISTA: Anche i bagni hanno bisogno di riposo.
+
+24
+00:01:22,080 --> 00:01:23,300
+GINO: Ha ragione.
+
+25
+00:01:39,900 --> 00:01:42,860
+FOTOGRAFO: Fermi! Il bacio! Il bacio spontaneo!
+
+26
+00:01:43,660 --> 00:01:45,235
+ARTURO: Sono tutti qui.
+
+27
+00:01:45,635 --> 00:01:47,565
+GINO: È una bella città.
+
+28
+00:01:47,965 --> 00:01:50,250
+ARTURO: È una città troppo bella.
+
+29
+00:01:52,050 --> 00:01:55,365
+ARTURO: Scusa, amico. C'è un bagno qui vicino?
+
+30
+00:01:55,765 --> 00:01:56,630
+CICLISTA: Dipende.
+
+31
+00:01:57,030 --> 00:01:58,250
+ARTURO: Da cosa?
+
+32
+00:01:58,650 --> 00:02:01,290
+CICLISTA: Da quanto sei disposto a spendere.
+
+33
+00:02:01,690 --> 00:02:02,555
+ARTURO: Quanto?
+
+34
+00:02:02,955 --> 00:02:06,110
+CICLISTA: Non lo so. Non sono un bagno.
+
+35
+00:02:15,910 --> 00:02:18,355
+ARTURO: Gino, non ce la faccio.
+
+36
+00:02:18,755 --> 00:02:21,040
+GINO: Certo che ce la fai.
+
+37
+00:02:21,440 --> 00:02:23,370
+ARTURO: Come fai a saperlo?
+
+38
+00:02:23,770 --> 00:02:26,925
+GINO: Non lo so. Ma lo dico sempre.
+
+39
+00:02:29,025 --> 00:02:30,245
+ARTURO: Anche tu?
+
+40
+00:02:30,645 --> 00:02:32,220
+GINO: Ti ha riconosciuto.
+
+41
+00:02:32,620 --> 00:02:33,840
+ARTURO: Da cosa?
+
+42
+00:02:34,240 --> 00:02:35,460
+GINO: Dalla disperazione.
+
+43
+00:02:48,610 --> 00:02:49,830
+ISTRUTTRICE: Inspirate profondamente.
+
+44
+00:02:50,830 --> 00:02:51,695
+ISTRUTTRICE: Trattenete.
+
+45
+00:02:52,595 --> 00:02:53,460
+ARTURO: No.
+
+46
+00:02:53,960 --> 00:02:55,180
+GINO: Che c'è?
+
+47
+00:02:55,580 --> 00:02:58,220
+ARTURO: Non posso più sentire questa parola.
+
+48
+00:02:59,520 --> 00:03:00,740
+ISTRUTTRICE: Trattenete ancora.
+
+49
+00:03:01,440 --> 00:03:03,175
+ARTURO: Signora, la prego.
+
+50
+00:03:03,575 --> 00:03:05,860
+ISTRUTTRICE: Il corpo è un tempio.
+
+51
+00:03:06,260 --> 00:03:08,545
+ARTURO: Il mio tempio è allagato.
+
+52
+00:03:08,945 --> 00:03:10,165
+ISTRUTTRICE: Cosa cerca?
+
+53
+00:03:10,565 --> 00:03:11,785
+ARTURO: Un bagno.
+
+54
+00:03:12,185 --> 00:03:14,825
+ISTRUTTRICE: La risposta è dentro di te.
+
+55
+00:03:15,225 --> 00:03:17,510
+ARTURO: È proprio quello il problema.
+
+56
+00:03:18,910 --> 00:03:20,485
+GINO: Possiamo rimanere qui?
+
+57
+00:03:20,885 --> 00:03:21,750
+ARTURO: Perché?
+
+58
+00:03:22,150 --> 00:03:24,080
+GINO: Mi sento in pace.
+
+59
+00:03:24,480 --> 00:03:26,765
+ARTURO: Tu hai la vescica vuota.
+
+60
+00:03:27,165 --> 00:03:29,805
+GINO: Non giudicare il mio percorso spirituale.
+
+61
+00:03:31,205 --> 00:03:32,425
+ISTRUTTRICE: Lasciate andare.
+
+62
+00:03:33,425 --> 00:03:34,290
+ARTURO: Finalmente!
+
+63
+00:03:34,890 --> 00:03:37,175
+ISTRUTTRICE: Lasciate andare i vostri pensieri.
+
+64
+00:03:37,575 --> 00:03:40,925
+ARTURO: Io vorrei lasciare andare qualcosa di più concreto.
+
+65
+00:03:48,625 --> 00:03:51,265
+ARTURO: In campagna non ci sarà nessuno.
+
+66
+00:03:51,665 --> 00:03:53,595
+GINO: La natura è vuota.
+
+67
+00:03:53,995 --> 00:03:54,860
+ARTURO: Esatto.
+
+68
+00:03:55,260 --> 00:03:57,705
+GINO: Piena di cose, ma vuota.
+
+69
+00:03:58,105 --> 00:03:59,325
+ARTURO: Non iniziare.
+
+70
+00:04:01,225 --> 00:04:03,155
+ARTURO: Ma cosa fanno qui?
+
+71
+00:04:03,555 --> 00:04:05,130
+GINO: Guardano le stelle.
+
+72
+00:04:05,530 --> 00:04:06,750
+ARTURO: Di notte?
+
+73
+00:04:07,150 --> 00:04:09,080
+GINO: È il momento migliore.
+
+74
+00:04:09,480 --> 00:04:12,120
+ARTURO: Anche le stelle potrebbero guardare altrove.
+
+75
+00:04:22,020 --> 00:04:24,465
+ARTURO: Buonasera. C'è qualcuno nei dintorni?
+
+76
+00:04:24,865 --> 00:04:25,730
+PASTORE: Diciassette.
+
+77
+00:04:26,130 --> 00:04:26,995
+ARTURO: Cosa?
+
+78
+00:04:27,395 --> 00:04:28,260
+PASTORE: Pecore.
+
+79
+00:04:28,660 --> 00:04:31,300
+ARTURO: Cercavo un posto dove stare solo.
+
+80
+00:04:31,700 --> 00:04:32,565
+PASTORE: Anch'io.
+
+81
+00:04:32,965 --> 00:04:34,895
+ARTURO: Ma lei è qui.
+
+82
+00:04:35,295 --> 00:04:36,870
+PASTORE: È il problema.
+
+83
+00:04:37,620 --> 00:04:39,550
+ARTURO: Posso andare dietro quell'albero?
+
+84
+00:04:39,950 --> 00:04:40,815
+PASTORE: No.
+
+85
+00:04:41,215 --> 00:04:42,080
+ARTURO: Perché?
+
+86
+00:04:42,480 --> 00:04:45,475
+PASTORE: La ventunesima pecora non è ancora arrivata.
+
+87
+00:04:45,875 --> 00:04:47,450
+ARTURO: Ma sono diciassette!
+
+88
+00:04:47,850 --> 00:04:49,585
+PASTORE: Appunto. Mancano quattro.
+
+89
+00:04:49,985 --> 00:04:50,850
+GINO: Interessante.
+
+90
+00:04:51,250 --> 00:04:52,825
+ARTURO: Non è interessante!
+
+91
+00:04:54,925 --> 00:04:56,145
+ARTURO: Ti prego.
+
+92
+00:04:56,945 --> 00:04:58,165
+PASTORE: È curiosa.
+
+93
+00:04:58,865 --> 00:05:01,310
+ARTURO: Anch'io, ma non faccio domande!
+
+94
+00:05:16,710 --> 00:05:17,575
+ARTURO: Ecco.
+
+95
+00:05:17,975 --> 00:05:19,195
+GINO: Ecco cosa?
+
+96
+00:05:19,595 --> 00:05:20,815
+ARTURO: Il posto.
+
+97
+00:05:21,215 --> 00:05:22,790
+GINO: Non c'è nessuno.
+
+98
+00:05:23,190 --> 00:05:24,410
+ARTURO: Lo vedo.
+
+99
+00:05:24,810 --> 00:05:26,385
+GINO: Non sento nessuno.
+
+100
+00:05:26,785 --> 00:05:28,005
+ARTURO: Lo sento.
+
+101
+00:05:28,405 --> 00:05:29,980
+GINO: Non vedo nessuno.
+
+102
+00:05:30,730 --> 00:05:31,595
+ARTURO: Gino.
+
+103
+00:05:31,995 --> 00:05:32,860
+GINO: Sì?
+
+104
+00:05:33,260 --> 00:05:36,770
+ARTURO: Non dire che non c'è nessuno. Porta sfortuna.
+
+105
+00:05:44,770 --> 00:05:45,635
+REGISTA: Ehi!
+
+106
+00:05:46,435 --> 00:05:48,880
+REGISTA: Perfetto! Abbiamo trovato la location!
+
+107
+00:05:49,480 --> 00:05:50,345
+ARTURO: No.
+
+108
+00:05:50,845 --> 00:05:52,580
+REGISTA: Sì! Proprio qui!
+
+109
+00:05:53,080 --> 00:05:54,975
+ARTURO: No, no, no.
+
+110
+00:05:55,475 --> 00:05:58,470
+REGISTA: È perfetta per la scena dell'uomo solo!
+
+111
+00:05:58,870 --> 00:06:01,155
+ARTURO: Io non sono una comparsa.
+
+112
+00:06:01,555 --> 00:06:03,485
+REGISTA: Allora è il protagonista.
+
+113
+00:06:03,885 --> 00:06:05,105
+ARTURO: Portami via.
+
+114
+00:06:05,505 --> 00:06:06,370
+GINO: Dove?
+
+115
+00:06:06,770 --> 00:06:08,345
+ARTURO: Non lo so.
+
+116
+00:06:08,745 --> 00:06:09,965
+GINO: Allora restiamo.
+
+117
+00:06:12,365 --> 00:06:15,005
+ARTURO: VOGLIO UN MINUTO SENZA ESSERI UMANI!
+
+118
+00:06:17,605 --> 00:06:19,340
+REGISTA: Bellissimo. Lo riprendiamo.
+
+119
+00:06:32,140 --> 00:06:33,715
+GINO: Come ti senti?
+
+120
+00:06:34,115 --> 00:06:35,690
+ARTURO: Non lo so.
+
+121
+00:06:36,090 --> 00:06:37,665
+GINO: Hai ancora bisogno?
+
+122
+00:06:38,065 --> 00:06:39,640
+ARTURO: Credo di no.
+
+123
+00:06:40,040 --> 00:06:41,615
+GINO: Allora è finita.
+
+124
+00:06:42,015 --> 00:06:42,880
+ARTURO: Sì.
+
+125
+00:06:43,780 --> 00:06:45,000
+GINO: Possiamo tornare.
+
+126
+00:06:45,400 --> 00:06:46,265
+ARTURO: Certo.
+
+127
+00:06:49,665 --> 00:06:50,530
+ARTURO: Gino.
+
+128
+00:06:50,930 --> 00:06:51,795
+GINO: Dimmi.
+
+129
+00:06:52,195 --> 00:06:53,415
+ARTURO: Adesso devo.
+
+130
+00:06:53,815 --> 00:06:54,680
+GINO: Ah.
+
+131
+00:06:55,280 --> 00:06:56,145
+ARTURO: Già.
+
+132
+00:06:56,545 --> 00:06:58,120
+GINO: E dove andiamo?
+
+133
+00:07:14,520 --> 00:07:15,385
+ARTURO: Gino?
+
+134
+00:07:16,385 --> 00:07:17,250
+GINO: Sì?
+
+135
+00:07:17,650 --> 00:07:20,290
+ARTURO: Mi sa che devo di nuovo.
+
+136
+00:07:25,490 --> 00:07:26,355
+GINO: Aspettiamo.
+
+137
+00:07:49,720 --> 00:07:52,005
+ARTURO: Anche voi siete ancora qui?
+

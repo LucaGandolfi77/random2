@@ -1,0 +1,32 @@
+{
+  "name": "l-ultimo-bagno",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "L'ULTIMO BAGNO — Una tragedia idraulica in sei atti. Cortometraggio animato low-poly per browser.",
+  "scripts": {
+    "predev": "npm run captions",
+    "dev": "vite",
+    "prebuild": "npm run captions",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "captions": "tsx scripts/export-captions.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "tsx scripts/smoke.ts",
+    "check": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/three": "^0.187.0",
+    "playwright-core": "^1.65.0",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3",
+    "vite": "^8.3.8",
+    "vitest": "^4.1.12"
+  }
+}
