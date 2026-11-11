@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F7F1E5" />
+    <meta name="description" content="Nori Nook - a cozy sushi restaurant game. Little sushi, big dreams." />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Nori Nook" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>Nori Nook - Little Sushi, Big Dreams</title>
+  </head>
+  <body>
+    <div id="root">
+      <div class="boot-splash">
+        <div class="boot-mark">の</div>
+        <p>Nori Nook</p>
+        <span>Little Sushi, Big Dreams</span>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+    <style>
+      .boot-splash {
+        min-height: 100vh;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 10px;
+        background: #f7f1e5;
+        color: #393a36;
+        font-family: ui-rounded, "Hiragino Maru Gothic ProN", system-ui, sans-serif;
+      }
+      .boot-mark {
+        width: 84px;
+        height: 84px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #607b62;
+        color: #fffdf7;
+        font-size: 42px;
+        box-shadow: 0 10px 30px rgba(57, 58, 54, 0.16);
+      }
+      .boot-splash p {
+        margin: 8px 0 0;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+      }
+      .boot-splash span {
+        font-size: 13px;
+        color: #80614e;
+        letter-spacing: 0.06em;
+      }
+    </style>
+  </body>
+</html>

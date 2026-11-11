@@ -1,0 +1,123 @@
+import type { Upgrade } from '@/types/game';
+
+export const UPGRADES: Upgrade[] = [
+  {
+    id: 'rice_cooker',
+    name: 'Rice Cooker',
+    description: 'A gentle cooker with a warmer hum and a friendlier timing zone.',
+    art: 'rice_cooker',
+    maxLevel: 3,
+    costs: [70, 150, 300],
+    effect: 'mini_game_bonus',
+    effectPerLevel: 8,
+    effectLabel: '+8% timing window per level',
+  },
+  {
+    id: 'knives',
+    name: 'Knife Set',
+    description: 'Sharper, lighter, happier knives. Slices become smoother.',
+    art: 'knife',
+    maxLevel: 3,
+    costs: [90, 190, 380],
+    effect: 'slice_bonus',
+    effectPerLevel: 5,
+    effectLabel: '+5 slice score per level',
+  },
+  {
+    id: 'cutting_board',
+    name: 'Hinoki Board',
+    description: 'A soft cypress board that keeps ingredients fresh a little longer.',
+    art: 'board',
+    maxLevel: 3,
+    costs: [55, 120, 240],
+    effect: 'freshness_protection',
+    effectPerLevel: 1,
+    effectLabel: '-1 freshness loss per level',
+  },
+  {
+    id: 'fridge',
+    name: 'Fridge',
+    description: 'More shelves, more little ingredient homes.',
+    art: 'fridge',
+    maxLevel: 3,
+    costs: [80, 170, 340],
+    effect: 'inventory_capacity',
+    effectPerLevel: 4,
+    effectLabel: '+4 inventory stacks per level',
+  },
+  {
+    id: 'worktop',
+    name: 'Prep Worktop',
+    description: 'A roomy worktop with a calm little prep corner.',
+    art: 'worktop',
+    maxLevel: 3,
+    costs: [85, 180, 360],
+    effect: 'ambiance',
+    effectPerLevel: 4,
+    effectLabel: '+4 ambiance per level',
+  },
+  {
+    id: 'conveyor',
+    name: 'Conveyor Belt',
+    description: 'A slow, friendly belt that gives you a few more seconds in Rush.',
+    art: 'conveyor',
+    maxLevel: 3,
+    costs: [130, 270, 520],
+    effect: 'rush_seconds',
+    effectPerLevel: 10,
+    effectLabel: '+10 seconds in Lunch Rush per level',
+  },
+  {
+    id: 'tables',
+    name: 'Window Tables',
+    description: 'Two more seats by the window. More guests can wait happily.',
+    art: 'table',
+    maxLevel: 3,
+    costs: [110, 230, 460],
+    effect: 'rush_slots',
+    effectPerLevel: 1,
+    effectLabel: '+1 Rush order slot per level',
+  },
+  {
+    id: 'seating',
+    name: 'Cushioned Seating',
+    description: 'Soft cushions make waiting feel like a tiny holiday.',
+    art: 'cushion',
+    maxLevel: 3,
+    costs: [95, 200, 400],
+    effect: 'patience_bonus',
+    effectPerLevel: 12,
+    effectLabel: '+12% patience per level',
+  },
+  {
+    id: 'storage',
+    name: 'Pantry Shelves',
+    description: 'A tidy pantry for jars, boxes and emergency sesame.',
+    art: 'shelf',
+    maxLevel: 3,
+    costs: [75, 160, 320],
+    effect: 'inventory_capacity',
+    effectPerLevel: 3,
+    effectLabel: '+3 inventory stacks per level',
+  },
+  {
+    id: 'takeaway',
+    name: 'Bento Station',
+    description: 'A neat little bento station with ribbons and compartments.',
+    art: 'bento',
+    maxLevel: 3,
+    costs: [120, 250, 500],
+    effect: 'delivery_bonus',
+    effectPerLevel: 8,
+    effectLabel: '+8 Delivery score per level',
+  },
+];
+
+export const UPGRADE_BY_ID = new Map(UPGRADES.map((upgrade) => [upgrade.id, upgrade]));
+
+export const upgradeById = (id: string): Upgrade | undefined => UPGRADE_BY_ID.get(id);
+
+export const upgradeCost = (upgrade: Upgrade, currentLevel: number): number | null => {
+  if (currentLevel >= upgrade.maxLevel) return null;
+  return upgrade.costs[currentLevel] ?? null;
+};

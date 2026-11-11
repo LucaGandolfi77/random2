@@ -1,0 +1,40 @@
+:root {
+  --cream: #f7f1e5;
+  --rice: #fffdf7;
+  --matcha: #a7b99a;
+  --matcha-deep: #607b62;
+  --salmon: #ef9d91;
+  --peach: #f4c3a5;
+  --soy: #80614e;
+  --charcoal: #393a36;
+  --sakura: #ebc6cb;
+  --gold: #f4c36b;
+  --sky: #a7c7d9;
+  --paper: #fffaf0;
+  --paper-deep: #f0e6d5;
+  --shadow-soft: 0 10px 30px rgba(80, 64, 48, 0.1);
+  --shadow-card: 0 5px 0 rgba(128, 97, 78, 0.12), 0 14px 30px rgba(80, 64, 48, 0.09);
+  --shadow-button: 0 4px 0 var(--soy), 0 9px 22px rgba(80, 64, 48, 0.16);
+  --radius-xs: 10px;
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
+  --font-ui: 'Nunito Variable', 'Nunito', ui-rounded, 'Hiragino Maru Gothic ProN', system-ui, sans-serif;
+  --font-display: 'Zen Maru Gothic', 'Nunito Variable', ui-rounded, sans-serif;
+  --border: 1.5px solid rgba(128, 97, 78, 0.16);
+  --border-strong: 2px solid rgba(128, 97, 78, 0.24);
+  --focus: 0 0 0 3px var(--cream), 0 0 0 6px var(--matcha-deep);
+  --nav-height: 74px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+[data-theme='midnight'] {
+  --cream: #2e2f2b;
+  --rice: #f7f1e5;
+  --paper: #3a3b36;
+  --paper-deep: #45463f;
+  --charcoal: #f7f1e5;
+  --seafood: #a7c7d9;
+}
