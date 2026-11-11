@@ -9,5 +9,7 @@ test-expanded.js
 
 __pycache__/
 *.pyc
+
+fidenza-recon/db/city.db
 !cinder-belt-pwa/tests/*.test.js
 !tidefall-pwa/tests/*.test.js

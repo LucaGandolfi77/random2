@@ -21,4 +21,3 @@ db/exports/
 !web/package.json
 !web/package-lock.json
 !web/src/tests/*.test.ts
-!db/city.db
