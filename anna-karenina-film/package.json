@@ -1,0 +1,36 @@
+{
+  "name": "neve-e-ferro",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "NEVE E FERRO — un film d'animazione originale ispirato ad Anna Karenina",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build && node scripts/build-sw.mjs",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "generate:icons": "node scripts/generate-icons.mjs",
+    "validate": "tsx scripts/validate-film.ts",
+    "docs": "tsx scripts/generate-docs.ts",
+    "subtitles": "tsx scripts/generate-subtitles.ts",
+    "serve:pages": "node scripts/serve-pages.mjs"
+  },
+  "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.1.1",
+    "@fontsource/inter": "^5.1.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "@types/node": "^22.10.5",
+    "sharp": "^0.33.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vitest": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}
