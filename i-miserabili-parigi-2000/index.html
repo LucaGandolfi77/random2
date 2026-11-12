@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="I Miserabili — Parigi 2000. Un cortometraggio animato in tre dimensioni, tra carcere, perdono e barricate."
+    />
+    <meta name="theme-color" content="#08090b" />
+    <title>I Miserabili — Parigi 2000</title>
+  </head>
+  <body>
+    <main id="app">
+      <canvas id="stage" aria-label="Scena tridimensionale del film"></canvas>
+
+      <div class="cinema-shade" aria-hidden="true"></div>
+      <div class="film-grain" aria-hidden="true"></div>
+      <div class="letterbox letterbox-top" aria-hidden="true"></div>
+      <div class="letterbox letterbox-bottom" aria-hidden="true"></div>
+
+      <div id="chapter-card" class="chapter-card" aria-live="polite">
+        <span id="chapter-card-kicker" class="chapter-card-kicker">Capitolo</span>
+        <strong id="chapter-card-title"></strong>
+        <span id="chapter-card-subtitle"></span>
+      </div>
+
+      <div id="quote-card" class="quote-card" hidden>
+        <span class="quote-rule" aria-hidden="true"></span>
+        <blockquote id="quote-original"></blockquote>
+        <p id="quote-translation"></p>
+        <cite>Victor Hugo, <em>Les Misérables</em></cite>
+      </div>
+
+      <div id="subtitles" class="subtitles" aria-live="polite"></div>
+
+      <section id="start-screen" class="screen start-screen">
+        <div class="start-inner">
+          <p class="eyebrow">Un film animato in tre dimensioni</p>
+          <h1><span>I</span> MISERABILI</h1>
+          <p class="year">PARIGI <em>2000</em></p>
+          <p class="lede">
+            Diciannove anni di carcere. Una porta che si apre. Una luce da portare
+            più lontano di se stessi.
+          </p>
+          <div class="start-actions">
+            <button id="start-button" class="primary-button" type="button">
+              Inizia la proiezione
+            </button>
+          </div>
+          <label class="start-voice">
+            <input id="start-voice" type="checkbox" />
+            <span>Voci sintetiche italiane <small>opzionali, spente di default</small></span>
+          </label>
+          <p class="start-meta">22 minuti · 13 capitoli · adattamento originale</p>
+          <p class="start-warning">
+            La barricata è una finzione narrativa ambientata nel 2000 e non
+            ricostruisce l’insurrezione del 1832. Nel 2000 in Francia circolavano
+            franchi; l’euro è entrato in circolazione fisica nel 2002.
+          </p>
+        </div>
+        <div class="start-credit">Liberamente ispirato a <em>Les Misérables</em> di Victor Hugo</div>
+      </section>
+
+      <section id="loading" class="loading" hidden>
+        <div class="loading-inner">
+          <p>Si accendono le luci di Parigi</p>
+          <div class="loading-track"><span id="loading-bar"></span></div>
+        </div>
+      </section>
+
+      <section id="error-screen" class="screen error-screen" hidden>
+        <div class="error-inner">
+          <p class="eyebrow">Proiezione interrotta</p>
+          <h2>Il proiettore non risponde</h2>
+          <p id="error-message">
+            Il browser non riesce ad avviare la scena tridimensionale. Prova ad
+            aggiornare la pagina o a usare un browser con WebGL attivo.
+          </p>
+        </div>
+      </section>
+
+      <div id="controls" class="controls" hidden>
+        <div class="control-row">
+          <button id="play-button" class="control control-play" type="button" aria-label="Play">
+            <span id="play-label">Play</span>
+          </button>
+          <button id="restart-button" class="control" type="button">Ricomincia</button>
+          <span class="timecode">
+            <span id="current-time">00:00</span>
+            <span class="timecode-slash">/</span>
+            <span id="total-time">22:00</span>
+          </span>
+          <input
+            id="seek"
+            class="seek"
+            type="range"
+            min="0"
+            max="1320"
+            step="0.1"
+            value="0"
+            aria-label="Posizione nel film"
+          />
+          <select id="chapter-select" class="select chapter-select" aria-label="Capitolo"></select>
+          <button id="subtitles-button" class="control toggle is-active" type="button" aria-pressed="true">
+            Sottotitoli
+          </button>
+          <button id="voice-button" class="control toggle" type="button" aria-pressed="false">
+            Voci
+          </button>
+          <button id="mute-button" class="control toggle" type="button" aria-pressed="false">
+            Audio
+          </button>
+          <label class="speed-control">
+            <span>Velocità</span>
+            <select id="speed-select" class="select" aria-label="Velocità di riproduzione">
+              <option value="0.75">0.75×</option>
+              <option value="1" selected>1×</option>
+              <option value="1.25">1.25×</option>
+              <option value="1.5">1.5×</option>
+            </select>
+          </label>
+          <label class="speed-control">
+            <span>Qualità</span>
+            <select id="quality-select" class="select" aria-label="Qualità grafica">
+              <option value="high" selected>Alta</option>
+              <option value="low">Bassa</option>
+            </select>
+          </label>
+          <button id="info-button" class="control" type="button">Note</button>
+          <button id="fullscreen-button" class="control" type="button">Schermo</button>
+        </div>
+        <div id="speed-note" class="speed-note" hidden>
+          A velocità diversa da 1× la colonna sonora resta in sottofondo.
+        </div>
+      </div>
+
+      <aside id="info-panel" class="info-panel" hidden aria-label="Note sul film">
+        <div class="info-head">
+          <p class="eyebrow">Note di regia</p>
+          <button id="info-close" class="icon-button" type="button" aria-label="Chiudi">Chiudi</button>
+        </div>
+        <div class="info-body">
+          <p>
+            <strong>Un 2000 narrativo.</strong> La vicenda conserva la cultura
+            materiale dell’anno 2000: franchi, cabine telefoniche, televisioni a
+            tubo catodico, cybercafè, cassette e primi telefoni cellulari. Gli anni
+            della storia sono resi attraverso stagioni, corpi e montaggio, non
+            attraverso didascalie anacronistiche.
+          </p>
+          <p>
+            <strong>La barricata.</strong> La protesta che compare nel film è
+            immaginaria. Non ricostruisce l’insurrezione parigina del giugno 1832,
+            né alcun evento reale. È il luogo morale in cui la violenza della
+            storia incontra la scelta individuale.
+          </p>
+          <p>
+            <strong>Le voci.</strong> La proiezione nasce con sottotitoli e
+            colonna sonora originale. Le voci sintetiche sono un supporto
+            opzionale, disponibile solo se il browser espone la sintesi vocale.
+          </p>
+          <p>
+            <strong>Le citazioni.</strong> I testi francesi sono quelli di Victor
+            Hugo, <em>Les Misérables</em>, 1862. Le traduzioni italiane sono
+            realizzate per questo film.
+          </p>
+          <div class="info-actions">
+            <button id="download-srt" class="secondary-button" type="button">
+              Scarica i sottotitoli .srt
+            </button>
+            <button id="credits-button" class="secondary-button" type="button">
+              Titoli di coda
+            </button>
+          </div>
+          <p class="info-tiny">
+            Scorciatoie: Spazio play/pausa · ← → dieci secondi · R ricomincia ·
+            S sottotitoli · V voci · M audio · F schermo intero · I note.
+          </p>
+        </div>
+      </aside>
+
+      <section id="credits" class="screen credits" hidden>
+        <div class="credits-inner">
+          <p class="eyebrow">Fine della proiezione</p>
+          <h2>I MISERABILI</h2>
+          <p class="credits-year">PARIGI 2000</p>
+          <blockquote>
+            «Tant qu’il y aura sur la terre ignorance et misère, des livres de la
+            nature de celui-ci pourront ne pas être inutiles.»
+          </blockquote>
+          <p class="credits-translation">
+            «Finché sulla terra esisteranno ignoranza e miseria, libri come questo
+            potranno non essere inutili.»
+          </p>
+          <div class="credits-grid">
+            <div>
+              <h3>Adattamento e regia</h3>
+              <p>Un film originale in tre dimensioni</p>
+            </div>
+            <div>
+              <h3>Testi</h3>
+              <p>Liberamente ispirato a Victor Hugo, <em>Les Misérables</em>, 1862</p>
+            </div>
+            <div>
+              <h3>Scene e animazione</h3>
+              <p>Ambienti, personaggi e oggetti procedurali in Three.js</p>
+            </div>
+            <div>
+              <h3>Musica</h3>
+              <p>Colonna sonora originale generata con Web Audio API</p>
+            </div>
+          </div>
+          <p class="credits-note">
+            La barricata è una finzione narrativa ambientata nel 2000. Nessun
+            riferimento a fatti o persone reali. Nel 2000 in Francia la moneta
+            corrente era il franco; l’euro è entrato in circolazione fisica il 1º
+            gennaio 2002.
+          </p>
+          <div class="credits-actions">
+            <button id="replay-button" class="primary-button" type="button">
+              Rivedi dall’inizio
+            </button>
+            <button id="credits-close" class="secondary-button" type="button">
+              Torna al film
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

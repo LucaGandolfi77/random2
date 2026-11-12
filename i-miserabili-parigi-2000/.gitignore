@@ -1,0 +1,7 @@
+node_modules
+dist
+.DS_Store
+*.local
+!package.json
+!package-lock.json
+!src/tests/*.test.ts
