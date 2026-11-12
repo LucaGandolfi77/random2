@@ -210,8 +210,10 @@ Vedi `docs/qa.md` per la matrice completa. In sintesi:
 - Test sotto `/random2/anna-karenina-film/` con manifest, scope SW, cache, icone, font, offline e ripresa della riproduzione.
 - Verifica del livello audio > 0 durante la riproduzione.
 - Screenshot di controllo delle scene chiave.
+- Passata integrale a velocità reale: fine film raggiunta, 0 errori.
+- Deploy live verificato su **https://lucagandolfi77.github.io/random2/anna-karenina-film/**, con player, audio, service worker e offline funzionanti.
 
-Non dichiaro verificati soggettivamente il missaggio audio finale, l'installazione su un iPhone/iPad fisico o il deploy live se il push/Pages non è disponibile.
+Non dichiaro verificati soggettivamente il missaggio audio finale e l'installazione su un iPhone/iPad fisico. Il workflow CI del portfolio ha un check preesistente rosso su un altro progetto; il workflow Pages del film è verde.
 
 ---
 
