@@ -1,0 +1,328 @@
+:root {
+  --bg: #05070b;
+  --bg-deep: #030406;
+  --ivory: #efe9dd;
+  --ivory-dim: #c8c0b2;
+  --dim: #8f8a81;
+  --gold: #c9a15c;
+  --gold-soft: #8f7448;
+  --bordeaux: #6b1c29;
+  --line: rgba(230, 218, 200, 0.18);
+  --line-soft: rgba(230, 218, 200, 0.09);
+  --serif: 'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
+  --ui: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ivory);
+  font-family: var(--ui);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  overscroll-behavior: none;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+::selection {
+  background: rgba(201, 161, 92, 0.35);
+  color: var(--ivory);
+}
+
+.screen {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 650ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--bg);
+}
+
+.screen.is-ready {
+  opacity: 1;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.btn {
+  appearance: none;
+  border: 0;
+  border-radius: 1px;
+  padding: 15px 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 220ms ease, color 220ms ease, border-color 220ms ease, transform 220ms ease, filter 220ms ease;
+  white-space: nowrap;
+}
+
+.btn .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-primary {
+  color: #17110a;
+  background: linear-gradient(105deg, #d8b36e 0%, #c9a15c 45%, #a97f45 100%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.07);
+}
+
+.btn-ghost {
+  color: var(--ivory);
+  background: rgba(240, 232, 218, 0.035);
+  border: 1px solid var(--line);
+}
+
+.btn-ghost:hover {
+  border-color: rgba(201, 161, 92, 0.65);
+  background: rgba(201, 161, 92, 0.08);
+}
+
+.btn-meta {
+  display: block;
+  margin-left: 4px;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--dim);
+}
+
+.text-link {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold-soft);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+.text-link .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.text-link:hover {
+  color: var(--gold);
+}
+
+.icon-button {
+  appearance: none;
+  border: 0;
+  background: none;
+  color: var(--ivory);
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 180ms ease, color 180ms ease;
+}
+
+.icon-button:hover {
+  opacity: 1;
+  color: var(--gold);
+}
+
+.noscript {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 30px;
+  background: var(--bg);
+  color: var(--ivory);
+  z-index: 100;
+}
+
+.app-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(24px, calc(20px + var(--safe-bottom)));
+  transform: translate(-50%, 18px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 13px 18px;
+  background: rgba(8, 10, 15, 0.94);
+  border: 1px solid var(--line);
+  color: var(--ivory-dim);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 300ms ease, transform 300ms ease;
+  max-width: min(92vw, 560px);
+}
+
+.app-toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.update-toast .text-link {
+  flex: 0 0 auto;
+}
+
+.install-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(2, 3, 5, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.install-card {
+  width: min(480px, 100%);
+  padding: 30px;
+  background: #0a0d13;
+  border: 1px solid var(--line);
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.6);
+}
+
+.install-card h3 {
+  margin: 0 0 12px;
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 400;
+  color: var(--ivory);
+}
+
+.install-card p {
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ivory-dim);
+}
+
+.install-card .install-steps {
+  color: var(--dim);
+}
+
+.install-card .install-steps strong {
+  color: var(--ivory-dim);
+  font-weight: 500;
+}
+
+.install-card .btn {
+  margin-top: 10px;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes soft-flicker {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+  48% {
+    opacity: 0.7;
+  }
+  52% {
+    opacity: 0.58;
+  }
+}
+
+@media (max-width: 760px) {
+  .btn {
+    padding: 13px 18px;
+    font-size: 9.5px;
+  }
+
+  .app-toast {
+    font-size: 10.5px;
+    padding: 12px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
