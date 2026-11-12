@@ -1,0 +1,30 @@
+{
+  "name": "il-prezzo-della-liberta",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Il Prezzo della Libertà — cortometraggio animato 3D low-poly per browser",
+  "scripts": {
+    "data": "tsx tools/emit-timeline.ts",
+    "predev": "npm run data",
+    "dev": "vite",
+    "prebuild": "npm run data",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/three": "^0.187.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3",
+    "vitest": "^3.2.4"
+  }
+}

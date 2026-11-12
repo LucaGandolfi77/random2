@@ -30,6 +30,10 @@ jobs:
             bucio/package-lock.json
             new-star-soccer/package-lock.json
             dottor-gelo-pwa/package-lock.json
+            i-miserabili-parigi-2000/package-lock.json
+            l-ultimo-bagno/package-lock.json
+            il-prezzo-della-liberta/package-lock.json
+            la-corona-e-la-testa/package-lock.json
 
       - name: Build BUCIO (Vite + PWA)
         working-directory: bucio
@@ -49,6 +53,30 @@ jobs:
           npm ci
           npm run build
 
+      - name: Build I Miserabili — Parigi 2000
+        working-directory: i-miserabili-parigi-2000
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build L'Ultimo Bagno
+        working-directory: l-ultimo-bagno
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build Il Prezzo della Libertà
+        working-directory: il-prezzo-della-liberta
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build La Corona e la Testa
+        working-directory: la-corona-e-la-testa
+        run: |
+          npm ci
+          npm run build
+
       - name: Assemble site
         run: |
           mkdir -p _site
@@ -57,11 +85,15 @@ jobs:
           # no business being published to Pages.
           # Il save ArnisWorld3 (575 MB) resta sorgente locale: si pubblicano
           # solo gli asset derivati in fidenza-city-v3/data/arnis/.
-          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' --exclude='hype-brawl-game' --exclude='hype-ko-game' --exclude='fidenza-city-v3/assets/ArnisWorld3' ./ _site/
+          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' --exclude='hype-brawl-game' --exclude='hype-ko-game' --exclude='i-miserabili-parigi-2000' --exclude='l-ultimo-bagno' --exclude='il-prezzo-della-liberta' --exclude='la-corona-e-la-testa' --exclude='fidenza-city-v3/assets/ArnisWorld3' ./ _site/
           # Deploy the built app output under their own paths
           cp -R bucio/dist/ _site/bucio/
           cp -R new-star-soccer/dist/ _site/new-star-soccer/
           cp -R dottor-gelo-pwa/dist/ _site/dottor-gelo-pwa/
+          cp -R i-miserabili-parigi-2000/dist/ _site/i-miserabili-parigi-2000/
+          cp -R l-ultimo-bagno/dist/ _site/l-ultimo-bagno/
+          cp -R il-prezzo-della-liberta/dist/ _site/il-prezzo-della-liberta/
+          cp -R la-corona-e-la-testa/dist/ _site/la-corona-e-la-testa/
           touch _site/.nojekyll
 
       - name: Stamp Fidenza build

@@ -4,3 +4,6 @@ tests/artifacts/
 .DS_Store
 *.local
 npm-debug.log*
+
+!package.json
+!package-lock.json
