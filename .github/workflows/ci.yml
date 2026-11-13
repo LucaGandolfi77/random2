@@ -24,6 +24,29 @@ jobs:
         with:
           node-version: 20
 
+      - name: Briscola PWA (engine tests + build)
+        working-directory: briscola-pwa
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Les Misérables — Le Fil d'Or (typecheck, tests, build)
+        working-directory: les-miserables-film
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
+
+      - name: SELF / NON-SELF (typecheck, tests, build)
+        working-directory: self-non-self
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
+
       - name: JavaScript syntax check (ESM-aware)
         run: |
           set -euo pipefail

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="SELF / NON-SELF">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="52%" r="62%">
+      <stop offset="0" stop-color="#3a0d14"/>
+      <stop offset="0.55" stop-color="#12080b"/>
+      <stop offset="1" stop-color="#050405"/>
+    </radialGradient>
+    <radialGradient id="cell" cx="42%" cy="38%" r="62%">
+      <stop offset="0" stop-color="#f6d28a"/>
+      <stop offset="0.32" stop-color="#e8b46a"/>
+      <stop offset="0.68" stop-color="#b7353f"/>
+      <stop offset="1" stop-color="#3a0d14"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#e8b46a" stop-opacity="0.55"/>
+      <stop offset="0.6" stop-color="#b7353f" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#b7353f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="272" r="210" fill="url(#glow)"/>
+  <g fill="none" stroke-linecap="round">
+    <g stroke="#e8898a" stroke-opacity="0.55">
+      <path d="M256 270 C236 220 210 200 176 166" stroke-width="8"/>
+      <path d="M260 266 C286 214 316 198 350 166" stroke-width="8"/>
+      <path d="M250 280 C210 270 174 286 146 314" stroke-width="7"/>
+      <path d="M264 282 C306 276 342 294 370 322" stroke-width="7"/>
+      <path d="M256 288 C248 326 250 350 260 382" stroke-width="6"/>
+      <path d="M176 166 C164 150 150 146 136 142" stroke-width="3"/>
+      <path d="M350 166 C362 150 376 146 390 142" stroke-width="3"/>
+      <path d="M146 314 C130 320 118 332 112 346" stroke-width="3"/>
+      <path d="M370 322 C386 328 398 340 404 354" stroke-width="3"/>
+      <path d="M260 382 C268 398 266 410 256 422" stroke-width="2.4"/>
+    </g>
+    <g stroke="#f6d28a" stroke-opacity="0.9" stroke-width="2">
+      <path d="M176 166 C164 150 150 146 136 142"/>
+      <path d="M350 166 C362 150 376 146 390 142"/>
+      <path d="M146 314 C130 320 118 332 112 346"/>
+      <path d="M370 322 C386 328 398 340 404 354"/>
+      <path d="M260 382 C268 398 266 410 256 422"/>
+    </g>
+  </g>
+  <path
+    d="M256 196 C300 190 326 216 330 258 C334 300 312 338 274 350 C236 362 200 342 190 306 C180 270 198 226 232 208 C240 203 248 198 256 196 Z"
+    fill="url(#cell)"
+    stroke="#f6d28a"
+    stroke-opacity="0.5"
+    stroke-width="1.5"
+  />
+  <circle cx="266" cy="272" r="34" fill="#3a0d14" fill-opacity="0.9" stroke="#f6d28a" stroke-opacity="0.35"/>
+  <circle cx="266" cy="272" r="14" fill="#e8b46a" fill-opacity="0.45"/>
+  <g fill="#f6d28a">
+    <circle cx="310" cy="236" r="3"/>
+    <circle cx="226" cy="300" r="2.4"/>
+    <circle cx="292" cy="316" r="2"/>
+    <circle cx="238" cy="236" r="1.8"/>
+  </g>
+  <g transform="rotate(-24 348 350)">
+    <rect x="322" y="340" width="52" height="15" rx="7.5" fill="#6fb7a8" fill-opacity="0.85"/>
+    <circle cx="340" cy="347" r="3.4" fill="#f6d28a"/>
+    <path d="M322 347 C310 342 304 350 296 344" fill="none" stroke="#6fb7a8" stroke-opacity="0.5" stroke-width="1.5"/>
+  </g>
+  <g fill="#f6d28a" font-family="Georgia, serif" text-anchor="middle">
+    <text x="256" y="70" font-size="15" letter-spacing="7" fill-opacity="0.55">SELF</text>
+    <text x="256" y="466" font-size="15" letter-spacing="7" fill-opacity="0.55">NON-SELF</text>
+  </g>
+</svg>

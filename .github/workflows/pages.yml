@@ -35,6 +35,9 @@ jobs:
             il-prezzo-della-liberta/package-lock.json
             la-corona-e-la-testa/package-lock.json
             anna-karenina-film/package-lock.json
+            briscola-pwa/package-lock.json
+            les-miserables-film/package-lock.json
+            self-non-self/package-lock.json
 
       - name: Build BUCIO (Vite + PWA)
         working-directory: bucio
@@ -78,10 +81,36 @@ jobs:
           npm ci
           npm run build
 
+      - name: Build Briscola 1v1 (Vite + PWA + Supabase)
+        working-directory: briscola-pwa
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Build LES MISÉRABLES — Le Fil d'Or
+        working-directory: les-miserables-film
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
+
       - name: Build NEVE E FERRO
         working-directory: anna-karenina-film
         env:
           BASE_PATH: /${{ github.event.repository.name }}/anna-karenina-film/
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
+
+      - name: Build SELF / NON-SELF
+        working-directory: self-non-self
         run: |
           npm ci
           npm run typecheck
@@ -96,7 +125,7 @@ jobs:
           # no business being published to Pages.
           # Il save ArnisWorld3 (575 MB) resta sorgente locale: si pubblicano
           # solo gli asset derivati in fidenza-city-v3/data/arnis/.
-          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' --exclude='hype-brawl-game' --exclude='hype-ko-game' --exclude='i-miserabili-parigi-2000' --exclude='l-ultimo-bagno' --exclude='il-prezzo-della-liberta' --exclude='la-corona-e-la-testa' --exclude='anna-karenina-film' --exclude='fidenza-city-v3/assets/ArnisWorld3' ./ _site/
+          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' --exclude='hype-brawl-game' --exclude='hype-ko-game' --exclude='i-miserabili-parigi-2000' --exclude='l-ultimo-bagno' --exclude='il-prezzo-della-liberta' --exclude='la-corona-e-la-testa' --exclude='briscola-pwa' --exclude='les-miserables-film' --exclude='anna-karenina-film' --exclude='self-non-self' --exclude='fidenza-city-v3/assets/ArnisWorld3' ./ _site/
           # Deploy the built app output under their own paths
           cp -R bucio/dist/ _site/bucio/
           cp -R new-star-soccer/dist/ _site/new-star-soccer/
@@ -105,7 +134,10 @@ jobs:
           cp -R l-ultimo-bagno/dist/ _site/l-ultimo-bagno/
           cp -R il-prezzo-della-liberta/dist/ _site/il-prezzo-della-liberta/
           cp -R la-corona-e-la-testa/dist/ _site/la-corona-e-la-testa/
+          cp -R briscola-pwa/dist/ _site/briscola-pwa/
+          cp -R les-miserables-film/dist/ _site/les-miserables-film/
           cp -R anna-karenina-film/dist/ _site/anna-karenina-film/
+          cp -R self-non-self/dist/ _site/self-non-self/
           touch _site/.nojekyll
 
       - name: Stamp Fidenza build

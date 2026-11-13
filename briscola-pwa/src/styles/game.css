@@ -1,0 +1,739 @@
+.play-screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at 18% 32%, rgba(33, 92, 66, 0.2), transparent 42%),
+    radial-gradient(ellipse at 82% 90%, rgba(130, 88, 34, 0.09), transparent 42%),
+    linear-gradient(180deg, #06100b, #030805 72%);
+}
+
+.game-shell {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.game-scroller {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 272px;
+  align-items: start;
+  gap: 0.9rem;
+  width: min(1370px, 100%);
+  margin: 0 auto;
+  padding: 0.15rem clamp(0.55rem, 1.6vw, 1.2rem) calc(0.8rem + var(--safe-bottom));
+}
+
+.table-frame {
+  position: relative;
+  width: 100%;
+  max-width: 1010px;
+  margin: 0 auto;
+  padding: clamp(5px, 0.7vw, 9px);
+  border-radius: 23px;
+  background:
+    linear-gradient(135deg, #473216, #171008 38%, #5a421e 54%, #1c1309 70%, #4a3518);
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.52),
+    inset 0 0 0 1px rgba(244, 222, 172, 0.22),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.35);
+}
+
+.table-rail {
+  position: absolute;
+  inset: 7px;
+  border-radius: 17px;
+  border: 1px solid rgba(14, 9, 4, 0.9);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.table-felt {
+  position: relative;
+  border-radius: 16px;
+  padding: clamp(0.65rem, 1.5vw, 1rem) clamp(0.7rem, 2vw, 1.5rem) clamp(0.75rem, 1.6vw, 1.1rem);
+  background:
+    radial-gradient(ellipse at 50% 44%, rgba(38, 103, 75, 0.42), transparent 58%),
+    radial-gradient(ellipse at 50% 50%, #11402e 0%, #0b2b1f 53%, #071b13 100%);
+  box-shadow:
+    inset 0 0 70px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(214, 179, 106, 0.16);
+  overflow: hidden;
+}
+
+.table-felt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image:
+    repeating-linear-gradient(25deg, transparent 0 4px, rgba(255, 255, 255, 0.22) 5px, transparent 6px);
+  background-size: 18px 18px;
+  mix-blend-mode: soft-light;
+}
+
+.table-head {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  min-height: 22px;
+}
+
+.round-chip {
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(214, 179, 106, 0.6);
+}
+
+.turn-chip {
+  padding: 0.24rem 0.5rem;
+  border: 1px solid rgba(214, 179, 106, 0.16);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.16);
+  color: rgba(242, 234, 217, 0.5);
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  letter-spacing: 0.05em;
+}
+
+.turn-chip.is-mine {
+  border-color: rgba(214, 179, 106, 0.5);
+  background: rgba(214, 179, 106, 0.12);
+  color: var(--gold-bright);
+  box-shadow: 0 0 20px rgba(214, 179, 106, 0.1);
+}
+
+.turn-chip.is-done {
+  border-color: rgba(132, 179, 155, 0.32);
+  color: var(--green);
+}
+
+.score-strip {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 0.35rem 0 0.2rem;
+  color: rgba(242, 234, 217, 0.6);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.03em;
+}
+
+.score-side {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.score-side span {
+  max-width: 26vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-side strong {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.score-side.is-you strong {
+  color: var(--gold-bright);
+}
+
+.score-divider {
+  color: rgba(214, 179, 106, 0.3);
+}
+
+.opponent-area,
+.player-area {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.player-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: rgba(242, 234, 217, 0.65);
+}
+
+.player-line strong {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.player-line small {
+  font-family: var(--font-mono);
+  font-size: 0.44rem;
+  color: rgba(242, 234, 217, 0.35);
+}
+
+.player-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(214, 179, 106, 0.55);
+}
+
+.player-dot.is-you {
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(132, 179, 155, 0.6);
+}
+
+.opponent-hand {
+  display: flex;
+  gap: 0.3rem;
+  min-height: 39px;
+  align-items: center;
+}
+
+.opponent-hand .playing-card {
+  transform: rotate(-2deg);
+}
+
+.opponent-hand .playing-card:nth-child(2) {
+  transform: translateY(-3px) rotate(1deg);
+}
+
+.opponent-hand .playing-card:nth-child(3) {
+  transform: rotate(3deg);
+}
+
+.trick-area {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 0.8fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem;
+  min-height: clamp(140px, 20vh, 195px);
+  width: min(690px, 100%);
+  margin: 0.15rem auto;
+}
+
+.trick-side {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 110px;
+}
+
+.trick-side .playing-card {
+  --card-width: clamp(66px, 7vw, 92px);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(214, 179, 106, 0.08);
+  animation: card-land 220ms ease both;
+}
+
+.trick-side.opponent {
+  justify-content: flex-end;
+}
+
+.trick-side.self {
+  justify-content: flex-start;
+}
+
+.trick-side.opponent .playing-card {
+  transform: rotate(2deg);
+}
+
+.trick-side.self .playing-card {
+  transform: rotate(-2deg);
+}
+
+@keyframes card-land {
+  from { opacity: 0; transform: translateY(-9px) scale(0.96); }
+  to { opacity: 1; }
+}
+
+.empty-slot {
+  width: clamp(62px, 6.5vw, 86px);
+  aspect-ratio: 5 / 7;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(214, 179, 106, 0.16);
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.empty-slot span {
+  font-family: var(--font-mono);
+  font-size: 0.36rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(242, 234, 217, 0.18);
+}
+
+.table-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.briscola-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.22rem;
+  padding: 0.5rem 0.7rem 0.4rem;
+  border: 1px solid rgba(214, 179, 106, 0.16);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.16);
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.18);
+}
+
+.briscola-widget .eyebrow {
+  font-size: 0.44rem;
+  color: rgba(214, 179, 106, 0.75);
+}
+
+.briscola-widget small {
+  font-family: var(--font-mono);
+  font-size: 0.38rem;
+  color: rgba(242, 234, 217, 0.34);
+  white-space: nowrap;
+}
+
+.briscola-widget .playing-card {
+  --card-width: 42px;
+  transform: rotate(-5deg);
+}
+
+.last-trick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(214, 179, 106, 0.1);
+}
+
+.last-trick > span {
+  font-family: var(--font-mono);
+  font-size: 0.36rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(242, 234, 217, 0.3);
+}
+
+.last-trick-cards {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.last-trick-cards .playing-card {
+  --card-width: 28px;
+  border-radius: 3px;
+}
+
+.last-trick small {
+  font-family: var(--font-mono);
+  font-size: 0.36rem;
+  color: rgba(214, 179, 106, 0.6);
+}
+
+.hand-row {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(0.3rem, 1vw, 0.7rem);
+  min-height: clamp(98px, 13vh, 142px);
+  padding-top: 0.35rem;
+}
+
+.hand-row .playing-card {
+  --card-width: clamp(54px, 6.6vw, 82px);
+}
+
+.hand-row .playing-card:nth-child(2) {
+  transform: translateY(-5px);
+}
+
+.hand-row .playing-card:nth-child(2).is-playable:hover {
+  transform: translateY(-17px) rotate(-1deg);
+}
+
+.turn-hint {
+  font-family: var(--font-mono);
+  font-size: 0.42rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(214, 179, 106, 0.6);
+  animation: hint-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+.table-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 0.1rem;
+}
+
+.aside-card {
+  padding: 0.75rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.028), transparent 40%),
+    rgba(6, 15, 11, 0.62);
+}
+
+.aside-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.45rem;
+  margin-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(214, 179, 106, 0.1);
+}
+
+.aside-title > span {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.aside-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.28rem 0;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+}
+
+.aside-stat strong {
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.log-card {
+  max-height: 220px;
+  overflow: hidden;
+}
+
+.game-log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.game-log li {
+  font-size: 0.66rem;
+  line-height: 1.4;
+  color: rgba(242, 234, 217, 0.45);
+  padding-left: 0.5rem;
+  border-left: 1px solid rgba(214, 179, 106, 0.14);
+}
+
+.game-log li:first-child {
+  color: var(--text-soft);
+}
+
+.cpu-card-aside {
+  text-align: center;
+}
+
+.cpu-face {
+  width: 50px;
+  height: 50px;
+  margin: 0.35rem auto 0.5rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(214, 179, 106, 0.28);
+  border-radius: 50%;
+  color: var(--gold);
+  font-size: 1.3rem;
+  background: rgba(214, 179, 106, 0.06);
+}
+
+.cpu-card-aside p {
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.aside-note {
+  display: block;
+  margin-top: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.42rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.cpu-thinking .turn-chip.is-mine {
+  opacity: 0.5;
+}
+
+.result-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background:
+    radial-gradient(ellipse at 50% 36%, rgba(52, 98, 75, 0.22), transparent 48%),
+    rgba(2, 6, 4, 0.84);
+  backdrop-filter: blur(6px);
+}
+
+.result-card {
+  width: min(480px, 94vw);
+  padding: 1.5rem 1.4rem;
+  border: 1px solid rgba(214, 179, 106, 0.4);
+  border-radius: 11px;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(214, 179, 106, 0.1), transparent 50%),
+    linear-gradient(160deg, #12211a, #06100b);
+  text-align: center;
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.65);
+  animation: rise-in 300ms ease both;
+}
+
+.result-card h2 {
+  margin: 0.4rem 0 0.8rem;
+  font-size: clamp(2.2rem, 7vw, 3.4rem);
+  color: var(--gold-bright);
+}
+
+.result-card > p:not(.eyebrow) {
+  max-width: 360px;
+  margin: 0.8rem auto;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.result-score {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.1rem;
+  margin: 1rem 0;
+}
+
+.result-score > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.result-score span {
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.48rem;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.result-score strong {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--text);
+}
+
+.result-score i {
+  color: var(--text-faint);
+  font-style: normal;
+}
+
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 1.1rem;
+}
+
+@media (max-width: 1120px) {
+  .game-scroller {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .table-aside {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(1010px, 100%);
+    margin: 0 auto;
+  }
+
+  .log-card {
+    max-height: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .game-scroller {
+    padding: 0.1rem 0.4rem calc(0.5rem + var(--safe-bottom));
+  }
+
+  .table-frame {
+    border-radius: 15px;
+    padding: 5px;
+  }
+
+  .table-rail {
+    inset: 4px;
+    border-radius: 12px;
+  }
+
+  .table-felt {
+    border-radius: 11px;
+    padding: 0.55rem 0.55rem 0.6rem;
+  }
+
+  .score-strip {
+    gap: 0.5rem;
+    font-size: 0.48rem;
+    margin-top: 0.25rem;
+  }
+
+  .score-side strong {
+    font-size: 0.86rem;
+  }
+
+  .opponent-hand {
+    min-height: 32px;
+  }
+
+  .opponent-hand .playing-card {
+    --card-width: 30px;
+  }
+
+  .trick-area {
+    min-height: 126px;
+    grid-template-columns: minmax(0, 1fr) 105px minmax(0, 1fr);
+    gap: 0.25rem;
+  }
+
+  .trick-side {
+    min-height: 92px;
+  }
+
+  .trick-side .playing-card {
+    --card-width: clamp(52px, 15vw, 66px);
+  }
+
+  .empty-slot {
+    width: 52px;
+  }
+
+  .briscola-widget {
+    padding: 0.35rem 0.4rem;
+  }
+
+  .briscola-widget .playing-card {
+    --card-width: 34px;
+  }
+
+  .last-trick {
+    display: none;
+  }
+
+  .hand-row {
+    min-height: 92px;
+    gap: 0.25rem;
+  }
+
+  .hand-row .playing-card {
+    --card-width: clamp(54px, 18vw, 68px);
+  }
+
+  .hand-row .playing-card:nth-child(2) {
+    transform: translateY(-3px);
+  }
+
+  .turn-hint {
+    font-size: 0.36rem;
+  }
+
+  .table-aside {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+
+  .log-card {
+    display: none;
+  }
+
+  .aside-card {
+    padding: 0.55rem 0.65rem;
+  }
+
+  .aside-stat {
+    font-size: 0.64rem;
+    padding: 0.2rem 0;
+  }
+
+  .turn-chip {
+    font-size: 0.4rem;
+    padding: 0.18rem 0.35rem;
+  }
+
+  .round-chip {
+    font-size: 0.38rem;
+  }
+
+  .player-line strong {
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-height: 690px) and (max-width: 720px) {
+  .opponent-area {
+    display: none;
+  }
+
+  .trick-area {
+    min-height: 104px;
+  }
+
+  .last-trick {
+    display: none;
+  }
+
+  .hand-row {
+    min-height: 82px;
+  }
+
+  .hand-row .playing-card {
+    --card-width: clamp(48px, 16vw, 60px);
+  }
+}

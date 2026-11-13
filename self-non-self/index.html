@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
+    />
+    <meta name="theme-color" content="#070609" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SELF / NON-SELF" />
+    <meta
+      name="description"
+      content="SELF / NON-SELF — a 13-minute procedural film about the last immune cell of a dying body. Drawn live in TypeScript. No video, no images, no recorded sound."
+    />
+    <meta property="og:type" content="video.other" />
+    <meta property="og:title" content="SELF / NON-SELF" />
+    <meta
+      property="og:description"
+      content="A requiem for the body’s last witness. 13 minutes, drawn live in TypeScript."
+    />
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/self-non-self/icon-512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>SELF / NON-SELF</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
+  </head>
+  <body>
+    <div id="app">
+      <div id="film-frame" class="film-frame">
+        <canvas id="film" width="720" height="1280" aria-hidden="true"></canvas>
+
+        <div id="ui" class="ui is-hidden" inert>
+          <header class="topbar">
+            <button id="chapter-pill" class="chapter-pill" type="button">
+              <span id="chapter-roman" class="chapter-roman">PROLOGUE</span>
+              <span id="chapter-name" class="chapter-name">The Country</span>
+            </button>
+            <div class="top-actions">
+              <button id="player-lang" class="pill" type="button" aria-label="Change language">EN</button>
+              <button id="btn-info" class="icon-btn" type="button" aria-label="About the film">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4" />
+                  <path d="M12 10.8v6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                  <circle cx="12" cy="7.6" r="0.9" fill="currentColor" />
+                </svg>
+              </button>
+            </div>
+          </header>
+
+          <div id="chapter-card" class="chapter-card is-hidden" aria-hidden="true">
+            <span id="card-roman" class="card-roman"></span>
+            <em id="card-title" class="card-title"></em>
+          </div>
+
+          <div id="film-title" class="film-title is-hidden" aria-hidden="true">
+            <span>SELF</span>
+            <i>/</i>
+            <span>NON-SELF</span>
+            <p>A REQUIEM FOR THE BODY’S LAST WITNESS</p>
+          </div>
+
+          <div id="clinical" class="clinical is-hidden" aria-hidden="true">
+            <span id="clinical-label"></span>
+            <b id="clinical-value"></b>
+          </div>
+
+          <div id="captions" class="captions" aria-live="polite" aria-atomic="true">
+            <span id="speaker" class="speaker"></span>
+            <p id="caption"></p>
+          </div>
+
+          <div class="hud-bottom">
+            <div class="seek-wrap">
+              <div id="seek-ticks" class="seek-ticks" aria-hidden="true"></div>
+              <div class="seek-track" aria-hidden="true"><div id="seek-fill" class="seek-fill"></div></div>
+              <input
+                id="seek"
+                class="seek"
+                type="range"
+                min="0"
+                max="780"
+                step="0.1"
+                value="0"
+                aria-label="Film position"
+              />
+            </div>
+            <div class="control-row">
+              <button id="btn-play" class="icon-btn play-btn" type="button" aria-label="Pause">
+                <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 5.5 19 12 8 18.5Z" fill="currentColor" stroke="none" />
+                </svg>
+                <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8.5 6v12M15.5 6v12" stroke-width="2.4" stroke-linecap="round" />
+                </svg>
+              </button>
+              <button id="btn-back" class="icon-btn" type="button" aria-label="Back 10 seconds">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 8.5h5.5M5 8.5V3.5" stroke-linecap="round" />
+                  <path d="M5.4 8.2A8 8 0 1 1 4 14.4" stroke-linecap="round" />
+                  <text x="12" y="16.2" text-anchor="middle" font-size="7.8" font-family="Inter, sans-serif" fill="currentColor" stroke="none">10</text>
+                </svg>
+              </button>
+              <button id="btn-forward" class="icon-btn" type="button" aria-label="Forward 10 seconds">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19 8.5h-5.5M19 8.5V3.5" stroke-linecap="round" />
+                  <path d="M18.6 8.2A8 8 0 1 0 20 14.4" stroke-linecap="round" />
+                  <text x="12" y="16.2" text-anchor="middle" font-size="7.8" font-family="Inter, sans-serif" fill="currentColor" stroke="none">10</text>
+                </svg>
+              </button>
+              <div id="timecode" class="timecode">00:00 <span>/ 13:00</span></div>
+              <div class="control-spacer"></div>
+              <button id="btn-chapters" class="icon-btn" type="button" aria-label="Chapters">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 6.5h16M4 12h16M4 17.5h10" stroke-linecap="round" />
+                </svg>
+              </button>
+              <button id="btn-captions" class="icon-btn caption-btn" type="button" aria-label="Toggle captions" aria-pressed="true">
+                <span class="cc-mark">CC</span>
+              </button>
+              <button id="btn-mute" class="icon-btn" type="button" aria-label="Mute">
+                <svg class="icon-sound" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 9.5v5h3.2l4 3.2V6.3l-4 3.2Z" />
+                  <path d="M15.2 9a4.5 4.5 0 0 1 0 6" stroke-linecap="round" />
+                  <path d="M17.7 6.5a8 8 0 0 1 0 11" stroke-linecap="round" />
+                </svg>
+                <svg class="icon-muted" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 9.5v5h3.2l4 3.2V6.3l-4 3.2Z" />
+                  <path d="m16 9.5 5 5m0-5-5 5" stroke-linecap="round" />
+                </svg>
+              </button>
+              <button id="btn-fullscreen" class="icon-btn" type="button" aria-label="Fullscreen">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <section id="poster" class="poster" aria-labelledby="poster-title">
+          <div class="poster-scrim" aria-hidden="true"></div>
+          <div class="poster-content">
+            <p class="eyebrow" data-i18n="posterEyebrow"></p>
+            <h1 id="poster-title" class="poster-title">
+              <span>SELF</span>
+              <i aria-hidden="true">/</i>
+              <span>NON-SELF</span>
+            </h1>
+            <p class="poster-subtitle">A REQUIEM FOR THE BODY’S LAST WITNESS</p>
+            <p class="tagline" data-i18n="tagline"></p>
+            <p class="meta" data-i18n="meta"></p>
+            <div class="poster-actions">
+              <button id="start-sound" class="btn btn-primary" type="button" data-i18n="begin"></button>
+              <button id="start-silent" class="btn btn-ghost" type="button" data-i18n="beginSilent"></button>
+              <button id="resume" class="btn btn-ghost is-hidden" type="button" data-i18n="resume"></button>
+            </div>
+            <div class="poster-links">
+              <button id="poster-about" class="text-btn" type="button" data-i18n="about"></button>
+              <button id="poster-chapters" class="text-btn" type="button" data-i18n="chapters"></button>
+            </div>
+            <p class="content-inline">
+              <strong data-i18n="contentNote"></strong>
+              <span data-i18n="contentBody"></span>
+            </p>
+          </div>
+          <div class="poster-footer">
+            <button id="poster-lang" class="pill" type="button" aria-label="Change language">EN</button>
+            <span class="poster-credit">CANVAS 2D · WEB AUDIO · NO ASSETS</span>
+          </div>
+        </section>
+
+        <section id="end" class="end is-hidden" aria-labelledby="end-line">
+          <div class="end-inner">
+            <p class="end-kicker">SELF / NON-SELF</p>
+            <p id="end-line" class="end-line" data-i18n="endLine"></p>
+            <div class="end-actions">
+              <button id="btn-replay" class="btn btn-primary" type="button" data-i18n="watchAgain"></button>
+              <button id="btn-end-chapters" class="btn btn-ghost" type="button" data-i18n="chapters"></button>
+              <button id="btn-share" class="text-btn" type="button" data-i18n="share"></button>
+              <button id="btn-end-about" class="text-btn" type="button" data-i18n="about"></button>
+              <button id="btn-poster" class="text-btn" type="button" data-i18n="backToPoster"></button>
+            </div>
+            <p class="end-credit" data-i18n="creditsLine"></p>
+          </div>
+        </section>
+
+        <div id="modal-info" class="modal is-hidden" role="dialog" aria-modal="true" aria-labelledby="info-title">
+          <div class="modal-backdrop" data-close="info"></div>
+          <div class="modal-panel">
+            <button class="modal-close" type="button" data-close="info" aria-label="Close">×</button>
+            <h2 id="info-title" data-i18n="aboutTitle"></h2>
+            <p data-i18n="aboutP1"></p>
+            <p data-i18n="aboutP2"></p>
+            <h3 data-i18n="science"></h3>
+            <p data-i18n="scienceP1"></p>
+            <p data-i18n="scienceP2"></p>
+            <h3 data-i18n="credits"></h3>
+            <p data-i18n="creditsLine"></p>
+            <p class="modal-note" data-i18n="contentBody"></p>
+          </div>
+        </div>
+
+        <div id="modal-chapters" class="modal is-hidden" role="dialog" aria-modal="true" aria-labelledby="chapters-title">
+          <div class="modal-backdrop" data-close="chapters"></div>
+          <div class="modal-panel chapters-panel">
+            <button class="modal-close" type="button" data-close="chapters" aria-label="Close">×</button>
+            <h2 id="chapters-title" data-i18n="chaptersTitle"></h2>
+            <div id="chapter-list" class="chapter-list"></div>
+            <p class="modal-foot" data-i18n="chaptersFoot"></p>
+          </div>
+        </div>
+
+        <div id="rotate" class="rotate is-hidden">
+          <p data-i18n="rotate"></p>
+          <button id="rotate-dismiss" class="btn btn-ghost" type="button" data-i18n="watchAnyway"></button>
+        </div>
+
+        <div id="loader" class="loader">
+          <p class="loader-title">SELF <i>/</i> NON-SELF</p>
+          <div class="loader-line" aria-hidden="true"><span></span></div>
+          <small data-i18n="loading"></small>
+        </div>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+    <noscript>
+      <p style="color: #e9ddc7; font-family: Georgia, serif; padding: 2rem">
+        This film needs JavaScript. It is drawn live in the browser; there is no video file to fall back to.
+      </p>
+    </noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

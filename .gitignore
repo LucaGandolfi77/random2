@@ -13,3 +13,15 @@ __pycache__/
 fidenza-recon/db/city.db
 !cinder-belt-pwa/tests/*.test.js
 !tidefall-pwa/tests/*.test.js
+
+# Briscola PWA needs its build manifest, lockfile and tests in CI.
+!briscola-pwa/package.json
+!briscola-pwa/package-lock.json
+!briscola-pwa/tests/
+!briscola-pwa/tests/**
+
+# SELF / NON-SELF needs its build manifest, lockfile and tests in CI.
+!self-non-self/package.json
+!self-non-self/package-lock.json
+!self-non-self/tests/
+!self-non-self/tests/**
