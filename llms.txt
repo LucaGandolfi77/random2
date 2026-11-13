@@ -103,6 +103,8 @@ seeds in Node.
 
 `cinder-belt-pwa/` is a single-player .io salvage war in four concentric zones: a safe Anchorage bubble, the PvE Verdant Drift, the open-PvP Scab and the black-hole hazard of the Maw. A 15-minute run asks you to mine, bank, upgrade one of three hull doctrines, hold two of three relays to drop a Nexus shield, or kill the Leviathan and carry its Singularity Core into the Nexus. The zone law is real — firing on a pilot in the Drift marks you OUTLAW and the Anchorage turrets answer — and the AI pilots run the same mining, banking and upgrading economy you do. Canvas 2D procedural ships and rocks, synthesised WebAudio, no build step, offline PWA. Three headless suites cover the simulation, content/PWA wiring and a fake-DOM boot that drives launch to victory.
 
+`last-call-pwa/` is a real-time lane card battler in a neon art-deco bar: 24 drinks across cocktails, wine, beer and spirits; two lane Taps and one Cellar per side; a Buzz resource that refills over time and doubles in the final Happy Hour; an eight-venue Bar Tour against bartender AIs whose card levels, think time and aggression rise venue by venue; a deck builder with three saved decks and five upgrade levels per card. The simulation is fixed-step at 60 Hz and DOM-free, the AI acts only through the same `Sim.playCard` as the player, and the arena, glasses and portraits are drawn procedurally in Canvas 2D with synthesised WebAudio. Single-player, offline PWA, no build step, no binary art beyond the generated icons. A 571-check headless suite covers the roster, economy, storage, deployment, spells, overtime and PWA contract; a 77-check Chrome smoke test plays a match, the tour, the deck builder and an offline reload.
+
 `pixel-cup-pwa/` is a low-poly arcade football game whose picture is neither
 WebGL nor images: the pitch, the players, the ball, the goal and the crowd are
 triangles drawn by hand into a 320x180 byte buffer that the browser scales up
@@ -151,6 +153,8 @@ node pixel-cup-pwa/smoke.mjs      # in-browser (skips if no playwright)
 node cinder-belt-pwa/tests/sim.test.js     # CINDER BELT simulation/economy
 node cinder-belt-pwa/tests/content.test.js # CINDER BELT content + PWA wiring
 node cinder-belt-pwa/tests/boot.test.js    # CINDER BELT, the whole game on a fake DOM
+node last-call-pwa/tests/run.mjs           # LAST CALL simulation, content + PWA contract
+node last-call-pwa/tests/smoke.mjs         # LAST CALL in-browser match, tour, deck, offline
 ```
 
 ## Layout

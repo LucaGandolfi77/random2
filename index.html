@@ -1569,6 +1569,21 @@
           </div>
         </article>
 
+        <article class="card reveal" data-tags="card battler deck builder drinks cocktails wine beer spirits pwa offline" data-playable="last-call-pwa/" style="--c1:#ff5fa8; --c2:#5ef2d6; --tile-glow:rgba(255,95,168,.5); --shimmer-delay:.04s">
+          <div class="card-top">
+            <div class="tile" style="background:linear-gradient(135deg,#1a0620,#7a1d4e)">🍸</div>
+            <h2>LAST CALL</h2>
+          </div>
+          <p class="tagline">A neon art-deco lane card battler. Build a deck of cocktails, wine, beer and spirits, defend your taps and cellar, and win the eight-venue Bar Tour.</p>
+          <div class="chips"><span class="chip">CARD BATTLER</span><span class="chip">DECK BUILDER</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <div class="actions">
+            <a class="btn btn-play" href="last-call-pwa/">▶&nbsp; Play</a>
+            <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/last-call-pwa" aria-label="LAST CALL source code">
+              <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+            </a>
+          </div>
+        </article>
+
         <article class="card reveal" data-tags="shooter space arcade" data-playable="sector7-pwa/" style="--c1:#0ea5e9; --c2:#5eead4; --tile-glow:rgba(94,234,212,.5); --shimmer-delay:.05s">
           <div class="card-top">
             <div class="tile" style="background:linear-gradient(135deg,#020617,#0f766e)">🛰️</div>
@@ -3445,6 +3460,72 @@
         g.lineWidth = 1;
         g.beginPath(); g.moveTo(w * 0.16, h * 0.84); g.lineTo(w * 0.84, h * 0.84); g.stroke();
       },
+
+      /* LAST CALL: a neon coupe, lit from below, bubbles rising through it. */
+      coupe: function (g, w, h, t, u) {
+        var period = (u && u.period) || 3.6;
+        var pulse = 0.5 + 0.5 * Math.sin((t / period) * TAU);
+        var cx = w * 0.5;
+        var rim = w * 0.36;
+        var top = h * 0.24;
+        var bowl = h * 0.55;
+        var foot = h * 0.85;
+
+        var glow = g.createRadialGradient(cx, h * 0.58, 0, cx, h * 0.58, w * 0.52);
+        glow.addColorStop(0, rgba(P1, 0.28 + pulse * 0.18));
+        glow.addColorStop(1, rgba(P2, 0));
+        g.fillStyle = glow;
+        g.beginPath(); g.arc(cx, h * 0.58, w * 0.52, 0, TAU); g.fill();
+
+        g.fillStyle = rgba(P1, 0.55);
+        g.beginPath();
+        g.moveTo(cx - rim * 0.88, top + 2);
+        g.quadraticCurveTo(cx, top + h * 0.10, cx + rim * 0.88, top + 2);
+        g.quadraticCurveTo(cx + rim * 0.56, bowl - h * 0.06, cx, bowl - 1);
+        g.quadraticCurveTo(cx - rim * 0.56, bowl - h * 0.06, cx - rim * 0.88, top + 2);
+        g.fill();
+
+        g.strokeStyle = rgba(P2, 0.95);
+        g.lineWidth = 2.2;
+        g.lineJoin = "round";
+        g.beginPath();
+        g.moveTo(cx - rim, top);
+        g.quadraticCurveTo(cx, top + h * 0.09, cx + rim, top);
+        g.quadraticCurveTo(cx + rim * 0.72, bowl, cx, bowl);
+        g.quadraticCurveTo(cx - rim * 0.72, bowl, cx - rim, top);
+        g.stroke();
+
+        g.strokeStyle = "rgba(255,255,255,0.75)";
+        g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo(cx - rim * 0.88, top + 1); g.lineTo(cx + rim * 0.88, top + 1); g.stroke();
+
+        g.strokeStyle = rgba(P2, 0.95);
+        g.lineWidth = 2.2;
+        g.lineCap = "round";
+        g.beginPath(); g.moveTo(cx, bowl); g.lineTo(cx, foot); g.stroke();
+        g.beginPath(); g.moveTo(cx - w * 0.17, foot + 1); g.lineTo(cx + w * 0.17, foot + 1); g.stroke();
+        g.lineCap = "butt";
+
+        for (var i = 0; i < 4; i++) {
+          var q = (t * 0.34 + i * 0.25) % 1;
+          g.fillStyle = rgba([255, 255, 255], (1 - q) * 0.8);
+          g.beginPath();
+          g.arc(cx + Math.sin(i * 2.1 + t * 0.8) * w * 0.09,
+                bowl - q * (bowl - top) * 0.78,
+                1 + (i % 2) * 0.7, 0, TAU);
+          g.fill();
+        }
+
+        var sx = cx + rim * 0.74, sy = top + h * 0.17;
+        var spark = 3.4 + pulse * 1.2;
+        g.fillStyle = rgba(P1, 0.95);
+        g.beginPath();
+        g.moveTo(sx, sy - spark); g.lineTo(sx + 1.2, sy - 1.2);
+        g.lineTo(sx + spark, sy); g.lineTo(sx + 1.2, sy + 1.2);
+        g.lineTo(sx, sy + spark); g.lineTo(sx - 1.2, sy + 1.2);
+        g.lineTo(sx - spark, sy); g.lineTo(sx - 1.2, sy - 1.2);
+        g.closePath(); g.fill();
+      },
     };
 
     var SKETCH_BY_SLUG = {
@@ -3454,6 +3535,7 @@
       "purr-player-pwa": ["pulse",   { period: 3.4 }],
       "sector7-pwa":     ["orbit",   null],
       "cinder-belt-pwa": ["vortex",  { period: 4.8 }],
+      "last-call-pwa":   ["coupe",   { period: 3.6 }],
       "bucio":           ["vortex",  null],
       "territorio-pwa":  ["grid",    { period: 5.5 }],
       "formica-pwa":     ["grid",    { period: 3.2 }],
@@ -3956,6 +4038,7 @@
       { slug: "pixel-ants-pwa/", name: "Pixel Ants",   emoji: "🐜", key: "pixel-ants-pwa" },
       { slug: "inner-circle-pwa/", name: "Inner Circle", emoji: "🫂", key: "inner-circle-pwa" },
       { slug: "cinder-belt-pwa/", name: "CINDER BELT", emoji: "☄️", key: "cinder-belt-pwa" },
+      { slug: "last-call-pwa/",  name: "LAST CALL",   emoji: "🍸", key: "last-call-pwa" },
       { slug: "plane-pwa/",      name: "Plane Shooter", emoji: "✈️", key: "plane-pwa" },
       { slug: "plane-arcade-pwa/", name: "Plane Arcade",  emoji: "🛩️", key: "plane-arcade-pwa" },
       { slug: "slot-pwa/",       name: "Slot Machine", emoji: "🎰", key: "slot-pwa" },

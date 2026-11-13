@@ -203,6 +203,10 @@ jobs:
           # cyborg training/incubation, campaign progression, story flags,
           # prestige and save sanitising.
           node --test dottor-gelo-pwa/tests/*.test.js
+          # LAST CALL: the 24-card roster, eight venue decks, seeded RNG,
+          # profile sanitising, upgrades, rewards, deployment, spells,
+          # overtime, AI legality and the PWA precache contract.
+          node last-call-pwa/tests/run.mjs
 
       - name: Analysis tooling tests
         run: |
@@ -327,6 +331,15 @@ jobs:
           out=$(node inner-circle-pwa/smoke.mjs http://localhost:8099/inner-circle-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  inner-circle-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # LAST CALL plays a Quick Match, deploys a card, pauses, finishes
+          # the match, opens the tour and the deck builder, upgrades a drink,
+          # then reloads with the network off and starts another match.
+          out=$(node last-call-pwa/tests/smoke.mjs http://localhost:8099/last-call-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  last-call-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3

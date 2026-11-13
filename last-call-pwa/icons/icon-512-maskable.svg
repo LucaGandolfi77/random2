@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+
+    <defs>
+      <radialGradient id="bg" cx="50%" cy="42%" r="78%">
+        <stop offset="0" stop-color="#32123d"/>
+        <stop offset="0.46" stop-color="#170a24"/>
+        <stop offset="1" stop-color="#05030a"/>
+      </radialGradient>
+      <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff4c9"/>
+        <stop offset="0.45" stop-color="#e7bd6b"/>
+        <stop offset="1" stop-color="#a86f28"/>
+      </linearGradient>
+      <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffb3dd"/>
+        <stop offset="0.48" stop-color="#ff5fa8"/>
+        <stop offset="1" stop-color="#d61f72"/>
+      </linearGradient>
+      <linearGradient id="cyan" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f5ffff"/>
+        <stop offset="0.55" stop-color="#a9f6ff"/>
+        <stop offset="1" stop-color="#37c8df"/>
+      </linearGradient>
+      <linearGradient id="liquid" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ff9bcf"/>
+        <stop offset="0.65" stop-color="#ff4b99"/>
+        <stop offset="1" stop-color="#9b1d5c"/>
+      </linearGradient>
+      <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="8" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="softglow" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="16"/>
+      </filter>
+      <clipPath id="bowl">
+        <path d="M146 188 L366 188 L276 306 Q256 324 236 306 Z"/>
+      </clipPath>
+    </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  
+  <g transform="translate(256 256) scale(0.78) translate(-256 -256)">
+    <g><line x1="350.0" y1="238.0" x2="464.0" y2="238.0" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="342.8" y1="274.0" x2="448.2" y2="317.6" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="322.5" y1="304.5" x2="403.1" y2="385.1" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="292.0" y1="324.8" x2="335.6" y2="430.2" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="256.0" y1="332.0" x2="256.0" y2="446.0" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="220.0" y1="324.8" x2="176.4" y2="430.2" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="189.5" y1="304.5" x2="108.9" y2="385.1" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="169.2" y1="274.0" x2="63.8" y2="317.6" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="162.0" y1="238.0" x2="48.0" y2="238.0" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="169.2" y1="202.0" x2="63.8" y2="158.4" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="189.5" y1="171.5" x2="108.9" y2="90.9" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="220.0" y1="151.2" x2="176.4" y2="45.8" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="256.0" y1="144.0" x2="256.0" y2="30.0" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="292.0" y1="151.2" x2="335.6" y2="45.8" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="322.5" y1="171.5" x2="403.1" y2="90.9" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/><line x1="342.8" y1="202.0" x2="448.2" y2="158.4" stroke="url(#gold)" stroke-opacity=".17" stroke-width="2"/></g>
+
+    <!-- deco arch -->
+    <path d="M88 414 L88 252 A168 168 0 0 1 424 252 L424 414"
+          fill="none" stroke="url(#gold)" stroke-width="6" stroke-linecap="square"/>
+    <path d="M114 402 L114 256 A142 142 0 0 1 398 256 L398 402"
+          fill="none" stroke="url(#gold)" stroke-opacity=".52" stroke-width="2"/>
+    <path d="M134 392 L134 260 A122 122 0 0 1 378 260 L378 392"
+          fill="none" stroke="url(#gold)" stroke-opacity=".22" stroke-width="1.5"
+          stroke-dasharray="3 9"/>
+
+    <!-- deco base -->
+    <path d="M148 424 L364 424" stroke="url(#gold)" stroke-width="4"/>
+    <path d="M180 436 L332 436" stroke="url(#gold)" stroke-opacity=".55" stroke-width="2"/>
+    <path d="M256 411 L266 421 L256 431 L246 421 Z" fill="url(#gold)" opacity=".9"/>
+
+    <!-- sparkles -->
+    <g fill="url(#cyan)" filter="url(#glow)">
+      <path d="M126 138 L130 151 L143 155 L130 159 L126 172 L122 159 L109 155 L122 151 Z" opacity=".9"/>
+      <path d="M388 166 L391 175 L400 178 L391 181 L388 190 L385 181 L376 178 L385 175 Z" opacity=".75"/>
+    </g>
+    <circle cx="150" cy="108" r="2.6" fill="#ffe9a8" opacity=".8"/>
+    <circle cx="360" cy="112" r="2" fill="#ffe9a8" opacity=".65"/>
+    <circle cx="304" cy="96" r="1.6" fill="#ffb6dc" opacity=".8"/>
+
+    <!-- glass body -->
+    <g filter="url(#glow)">
+      <path d="M146 188 L366 188 L276 306 Q256 324 236 306 Z"
+            fill="#0c2630" fill-opacity=".38" stroke="url(#cyan)" stroke-width="5"
+            stroke-linejoin="round"/>
+    </g>
+    <path d="M146 188 L366 188 L276 306 Q256 324 236 306 Z"
+          fill="none" stroke="url(#cyan)" stroke-opacity=".42" stroke-width="12"/>
+
+    <!-- drink -->
+    <g clip-path="url(#bowl)">
+      <path d="M162 198 L350 198 L266 300 Q256 310 246 300 Z"
+            fill="url(#liquid)" opacity=".96"/>
+      <path d="M176 202 L248 202 L238 286 Q232 296 226 286 Z"
+            fill="#ffffff" opacity=".18"/>
+      <path d="M174 206 L338 206" stroke="#ffd8ec" stroke-opacity=".55" stroke-width="2"/>
+    </g>
+
+    <!-- rim -->
+    <path d="M142 185 L370 185" stroke="url(#cyan)" stroke-width="8" stroke-linecap="round"/>
+    <path d="M150 181 L362 181" stroke="#ffffff" stroke-opacity=".7" stroke-width="2"/>
+
+    <!-- stem + foot -->
+    <path d="M256 309 L256 385" stroke="url(#cyan)" stroke-width="7" stroke-linecap="round"/>
+    <path d="M205 400 L307 400" stroke="url(#cyan)" stroke-width="8" stroke-linecap="round"/>
+    <path d="M219 389 Q256 377 293 389" fill="none" stroke="url(#gold)"
+          stroke-opacity=".65" stroke-width="2"/>
+
+    <!-- garnish: lime wheel on a gold pick -->
+    <path d="M292 231 L345 170" stroke="url(#gold)" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="293" cy="231" r="22" fill="#0e2d1d" stroke="#baff77" stroke-width="4"/>
+    <circle cx="293" cy="231" r="13" fill="none" stroke="#baff77" stroke-opacity=".7" stroke-width="2"/>
+    <path d="M293 209 L293 253 M271 231 L315 231" stroke="#baff77" stroke-opacity=".42" stroke-width="1.6"/>
+    <circle cx="293" cy="231" r="4" fill="#f5ffd8"/>
+
+    <!-- bubbles -->
+    <g fill="none" stroke="#c9fbff" stroke-width="2" opacity=".8">
+      <circle cx="232" cy="248" r="4"/>
+      <circle cx="278" cy="266" r="3"/>
+      <circle cx="254" cy="280" r="2.4"/>
+      <circle cx="214" cy="222" r="2"/>
+    </g>
+
+    <!-- two neon side ticks -->
+    <path d="M104 330 L104 380" stroke="url(#pink)" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+    <path d="M408 330 L408 380" stroke="url(#pink)" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+  </g>
+</svg>

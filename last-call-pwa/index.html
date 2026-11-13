@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LAST CALL — a neon drink deck battler</title>
+    <meta name="description" content="LAST CALL is a free offline PWA card battler: build a deck of cocktails, wine, beers and spirits, defend your taps and cellar, and fight through eight neon bar venues. No accounts, no trackers, no downloads.">
+    <meta name="keywords" content="card battler, deck builder, lane battle, cocktails, wine, beer, PWA, offline game, free browser game">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="Luca Gandolfi">
+    <meta name="theme-color" content="#0b0610">
+    <meta name="color-scheme" content="dark">
+    <link rel="canonical" href="https://lucagandolfi77.github.io/random2/last-call-pwa/">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LAST CALL">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="LAST CALL — pour, push, prevail">
+    <meta property="og:description" content="A real-time drink deck battler in a neon bar. Defend your taps, break the rival cellar, and win the city circuit. Free, offline, no trackers.">
+    <meta property="og:url" content="https://lucagandolfi77.github.io/random2/last-call-pwa/">
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/last-call-pwa/icons/og-cover.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LAST CALL — a neon drink deck battler">
+    <meta name="twitter:description" content="Cocktails, wine, beer and spirits as cards. Two lanes, one cellar, three minutes. Free offline PWA.">
+    <meta name="twitter:image" content="https://lucagandolfi77.github.io/random2/last-call-pwa/icons/og-cover.png">
+</head>
+<body>
+    <div class="scene-bg" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+
+    <main id="app">
+        <!-- ===== main menu ===== -->
+        <section id="screen-menu" class="screen active" aria-labelledby="game-title">
+            <div class="menu-shell">
+                <header class="brand">
+                    <p class="eyebrow">A NEON BAR TOUR · CARD BATTLER</p>
+                    <h1 id="game-title">LAST<span>CALL</span></h1>
+                    <p class="tagline">Pour. Push. Prevail.</p>
+                    <div class="deco-line" aria-hidden="true"><i></i><b>◆</b><i></i></div>
+                </header>
+
+                <div class="menu-profile" aria-label="Profile">
+                    <div><b id="menu-tips">0</b><span>TIPS</span></div>
+                    <div><b id="menu-stars">0/24</b><span>STARS</span></div>
+                    <div><b id="menu-wins">0</b><span>WINS</span></div>
+                    <div><b id="menu-deck">—</b><span>DECK AVG</span></div>
+                </div>
+
+                <div class="menu-actions">
+                    <button id="btn-play" class="btn primary big" type="button">
+                        <span>Continue the tour</span>
+                        <small id="play-sub">The Rusty Tap · first round</small>
+                    </button>
+                    <div class="menu-row">
+                        <button id="btn-tour" class="btn" type="button">Bar Tour</button>
+                        <button id="btn-practice" class="btn" type="button">Quick Match</button>
+                    </div>
+                    <div class="menu-row three">
+                        <button id="btn-deck" class="btn" type="button">Deck</button>
+                        <button id="btn-how" class="btn" type="button">How to play</button>
+                        <button id="btn-settings" class="btn" type="button">Settings</button>
+                    </div>
+                </div>
+
+                <button id="btn-install" class="btn install-btn" type="button" hidden>Install LAST CALL</button>
+                <p id="install-hint" class="install-hint">On iPhone: Share → Add to Home Screen.</p>
+                <p class="menu-foot">3-minute matches · 24 cards · 8 venues<br>Offline after first load · no accounts · no trackers</p>
+            </div>
+        </section>
+
+        <!-- ===== bar tour ===== -->
+        <section id="screen-tour" class="screen" aria-labelledby="tour-title">
+            <header class="screen-head">
+                <button class="back-btn" data-back="menu" type="button" aria-label="Back to menu">←</button>
+                <div>
+                    <p class="eyebrow">THE CIRCUIT</p>
+                    <h2 id="tour-title">Bar Tour</h2>
+                </div>
+                <div class="tips-chip"><b id="tour-tips">0</b> tips</div>
+            </header>
+            <div id="tour-list" class="tour-list"></div>
+            <p class="tour-note">Clear a venue to open the next. Stars come from keeping your own bar intact.</p>
+        </section>
+
+        <!-- ===== deck builder ===== -->
+        <section id="screen-deck" class="screen" aria-labelledby="deck-title">
+            <header class="screen-head">
+                <button class="back-btn" data-back="menu" type="button" aria-label="Back to menu">←</button>
+                <div>
+                    <p class="eyebrow">YOUR SHELF</p>
+                    <h2 id="deck-title">Deck</h2>
+                </div>
+                <div class="tips-chip"><b id="deck-tips">0</b> tips</div>
+            </header>
+
+            <div class="deck-tabs" id="deck-tabs" role="tablist" aria-label="Deck slots"></div>
+            <div class="deck-slots" id="deck-slots" aria-label="Current deck"></div>
+            <div class="deck-meta">
+                <span id="deck-cost">AVG BUZZ —</span>
+                <div class="deck-meta-actions">
+                    <button id="btn-deck-auto" class="btn tiny" type="button">Starter</button>
+                    <button id="btn-deck-save" class="btn tiny primary" type="button">Save deck</button>
+                </div>
+            </div>
+            <div class="filter-row" id="deck-filters" role="group" aria-label="Card family filter">
+                <button class="filter active" data-family="all" type="button">All</button>
+                <button class="filter" data-family="cocktails" type="button">Cocktails</button>
+                <button class="filter" data-family="wine" type="button">Wine</button>
+                <button class="filter" data-family="beer" type="button">Beer</button>
+                <button class="filter" data-family="spirits" type="button">Spirits</button>
+            </div>
+            <div id="collection" class="collection"></div>
+            <p class="deck-hint">Tap a card for stats, upgrades and deck changes.</p>
+        </section>
+
+        <!-- ===== match ===== -->
+        <section id="screen-game" class="screen game-screen" aria-label="Match">
+            <header class="match-hud">
+                <div class="match-top">
+                    <button id="btn-pause" class="icon-btn" type="button" aria-label="Pause">II</button>
+                    <div class="match-center">
+                        <div id="match-timer" class="match-timer">3:00</div>
+                        <div id="match-phase" class="phase-label">REGULATION</div>
+                    </div>
+                    <div class="crowns" aria-label="Crowns">
+                        <span class="crown player" id="crown-player">0</span>
+                        <span class="crown-sep">–</span>
+                        <span class="crown enemy" id="crown-enemy">0</span>
+                    </div>
+                </div>
+                <div class="buzz-wrap">
+                    <div class="buzz-label"><span>BUZZ</span><b id="buzz-value">5</b></div>
+                    <div class="buzz-bar" id="buzz-bar"><i id="buzz-fill"></i></div>
+                </div>
+                <div class="match-sub">
+                    <span id="venue-name">THE RUSTY TAP</span>
+                    <span id="happy-badge" class="happy-badge" hidden>HAPPY HOUR ×2</span>
+                </div>
+            </header>
+
+            <div id="tutorial-banner" class="tutorial" hidden>
+                <p id="tutorial-text"></p>
+                <button id="tutorial-close" type="button" aria-label="Dismiss tip">×</button>
+            </div>
+
+            <div id="arena-wrap" class="arena-wrap">
+                <canvas id="arena" tabindex="0" aria-label="LAST CALL battle arena. Select a card with 1 to 4, move with the arrow keys, deploy with Enter."></canvas>
+                <div id="arena-toast" class="arena-toast" hidden></div>
+                <div id="selected-hint" class="selected-hint" hidden></div>
+            </div>
+
+            <footer class="hand-bar">
+                <div class="next-card" aria-label="Next card">
+                    <span>NEXT</span>
+                    <img id="next-card-img" alt="">
+                    <b id="next-card-cost"></b>
+                </div>
+                <div id="hand" class="hand" role="group" aria-label="Your hand"></div>
+            </footer>
+            <div id="drag-ghost" class="drag-ghost" hidden aria-hidden="true"></div>
+        </section>
+    </main>
+
+    <!-- ===== overlays ===== -->
+    <div id="overlay-settings" class="overlay" hidden>
+        <div class="panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <p class="eyebrow">THE BACK OFFICE</p>
+            <h2 id="settings-title">Settings</h2>
+            <div class="settings-list">
+                <div class="setting-row"><div><b>Sound</b><small>Pour, pop, clink.</small></div><button class="toggle" id="set-sound" type="button" aria-pressed="true">ON</button></div>
+                <div class="setting-row"><div><b>Music</b><small>Low lounge loop.</small></div><button class="toggle" id="set-music" type="button" aria-pressed="true">ON</button></div>
+                <div class="setting-row"><div><b>Haptics</b><small>Where supported.</small></div><button class="toggle" id="set-haptics" type="button" aria-pressed="true">ON</button></div>
+                <div class="setting-row"><div><b>Reduced motion</b><small>Less shake and drift.</small></div><button class="toggle" id="set-motion" type="button" aria-pressed="false">OFF</button></div>
+            </div>
+            <div class="panel-actions">
+                <button id="btn-reset" class="btn danger" type="button">Reset progress</button>
+                <button class="btn primary" data-close="overlay-settings" type="button">Done</button>
+            </div>
+            <p class="panel-note">Local save only. No account, no cloud, no telemetry.</p>
+        </div>
+    </div>
+
+    <div id="overlay-how" class="overlay" hidden>
+        <div class="panel wide" role="dialog" aria-modal="true" aria-labelledby="how-title">
+            <p class="eyebrow">READ THE ROOM</p>
+            <h2 id="how-title">How to play</h2>
+            <ol class="how-list">
+                <li><b>Buzz is your pour.</b> It fills over time to 10 and doubles in the last minute. Cards cost 1–6 Buzz.</li>
+                <li><b>Drag a card</b> onto your half of the bar (or tap a card, then the bar). Spells can land anywhere; everything else goes on your side.</li>
+                <li><b>Your drinks walk themselves</b> to the nearest coaster bridge, then attack the nearest tap or the Cellar. Destroy the Cellar to win.</li>
+                <li><b>Protect your taps.</b> Lose one and the rival unlocks a forward deploy zone. Lose the Cellar and the match is over.</li>
+                <li><b>Three minutes, then Happy Hour.</b> If the crowns are level, overtime starts: the first tower to fall wins.</li>
+                <li><b>Upgrade what you use.</b> Tips come from every match; card levels are permanent and local.</li>
+            </ol>
+            <div class="panel-actions">
+                <button class="btn primary" data-close="overlay-how" type="button">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay-practice" class="overlay" hidden>
+        <div class="panel" role="dialog" aria-modal="true" aria-labelledby="practice-title">
+            <p class="eyebrow">NO STAKES, ALL SPILLS</p>
+            <h2 id="practice-title">Quick Match</h2>
+            <p class="panel-copy">A random rival deck, your active deck, no tour stars. You still earn tips.</p>
+            <div class="difficulty-row" id="difficulty-row">
+                <button class="diff" data-diff="easy" type="button"><b>Easy</b><span>Warm-up pour</span></button>
+                <button class="diff active" data-diff="normal" type="button"><b>Normal</b><span>House rules</span></button>
+                <button class="diff" data-diff="hard" type="button"><b>Hard</b><span>Last orders</span></button>
+            </div>
+            <div class="panel-actions">
+                <button class="btn" data-close="overlay-practice" type="button">Cancel</button>
+                <button id="btn-practice-start" class="btn primary" type="button">Start match</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay-pause" class="overlay" hidden>
+        <div class="panel small" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+            <p class="eyebrow">GLASS DOWN</p>
+            <h2 id="pause-title">Paused</h2>
+            <p class="panel-copy">The other bar can wait. Your Buzz does not.</p>
+            <div class="panel-actions stack">
+                <button id="btn-resume" class="btn primary" type="button">Resume</button>
+                <button id="btn-pause-settings" class="btn" type="button">Settings</button>
+                <button id="btn-quit" class="btn danger" type="button">Leave match</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay-card" class="overlay" hidden>
+        <div class="panel card-panel" role="dialog" aria-modal="true" aria-labelledby="card-name">
+            <button class="close-x" data-close="overlay-card" type="button" aria-label="Close card">×</button>
+            <div class="card-detail">
+                <div class="card-detail-art">
+                    <img id="card-art" alt="">
+                    <b id="card-cost" class="cost-gem">0</b>
+                </div>
+                <div class="card-detail-copy">
+                    <p class="eyebrow" id="card-family">COCKTAILS · COMMON</p>
+                    <h2 id="card-name">Mojito Mob</h2>
+                    <p id="card-role" class="card-role">Swarm</p>
+                    <p id="card-desc" class="card-desc"></p>
+                    <p id="card-flavor" class="card-flavor"></p>
+                    <div id="card-stats" class="card-stats"></div>
+                    <div class="level-line">
+                        <span>LEVEL <b id="card-level">1</b></span>
+                        <button id="btn-upgrade" class="btn tiny primary" type="button">Upgrade</button>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-actions">
+                <button id="btn-card-deck" class="btn" type="button">Remove from deck</button>
+                <button id="btn-card-close" class="btn primary" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay-result" class="overlay" hidden>
+        <div class="panel result-panel" role="dialog" aria-modal="true" aria-labelledby="result-title">
+            <p class="eyebrow" id="result-kicker">MATCH COMPLETE</p>
+            <h2 id="result-title">Last call.</h2>
+            <p id="result-sub" class="result-sub"></p>
+            <div class="result-crowns" id="result-crowns">0 — 0</div>
+            <div class="result-stars" id="result-stars" aria-label="Stars earned"></div>
+            <div class="result-grid">
+                <div><b id="result-tips">0</b><span>TIPS</span></div>
+                <div><b id="result-damage">0</b><span>DAMAGE</span></div>
+                <div><b id="result-cards">0</b><span>CARDS</span></div>
+            </div>
+            <p id="result-unlocks" class="result-unlocks"></p>
+            <div class="panel-actions stack">
+                <button id="btn-result-continue" class="btn primary" type="button">Back to the tour</button>
+                <button id="btn-rematch" class="btn" type="button">Rematch</button>
+                <button id="btn-result-menu" class="btn" type="button">Main menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="overlay-confirm" class="overlay" hidden>
+        <div class="panel small" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+            <p class="eyebrow">ONE MORE THING</p>
+            <h2 id="confirm-title">Leave the match?</h2>
+            <p id="confirm-text" class="panel-copy">You will forfeit the round and earn no tips.</p>
+            <div class="panel-actions">
+                <button id="btn-confirm-no" class="btn" type="button">Stay</button>
+                <button id="btn-confirm-yes" class="btn danger" type="button">Leave</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" hidden role="status" aria-live="polite"></div>
+    <noscript><p class="noscript">LAST CALL needs JavaScript to pour.</p></noscript>
+
+    <script src="../shared/arcade.js"></script>
+    <script src="src/config.js"></script>
+    <script src="src/util.js"></script>
+    <script src="src/rng.js"></script>
+    <script src="src/cards.js"></script>
+    <script src="src/storage.js"></script>
+    <script src="src/sim.js"></script>
+    <script src="src/ai.js"></script>
+    <script src="src/audio.js"></script>
+    <script src="src/render.js"></script>
+    <script src="src/input.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>

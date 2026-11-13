@@ -63,7 +63,17 @@ const dirs = readdirSync(root, { withFileTypes: true })
   .sort();
 for (const dir of dirs) {
   if (!existsSync(join(root, dir, "index.html"))) continue;
-  if (!git("ls-files", "--error-unmatch", `${dir}/index.html`)) continue;
+  let tracked = false;
+  try {
+    tracked = !!execFileSync(
+      "git",
+      ["ls-files", "--error-unmatch", `${dir}/index.html`],
+      { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }
+    ).trim();
+  } catch {
+    tracked = false;
+  }
+  if (!tracked) continue;
   pages.push({ file: `${dir}/index.html`, loc: BASE + dir + "/" });
 }
 

@@ -49,6 +49,7 @@
   - [CORE 9](#core-9)
   - [Dottor Gelo](#dottor-gelo)
   - [CINDER BELT](#cinder-belt)
+  - [LAST CALL](#last-call)
   - [Purr Player](#purr-player)
   - [Briscola Online](#briscola-online)
 - [The tools](#the-tools)
@@ -119,9 +120,10 @@
 | 46 | **CORE 9: NETWORK** | Three-site low-poly nuclear idle tycoon with crew and choice events | Canvas 2D (software renderer) + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/core9-pwa/) |
 | 47 | **Dottor Gelo** | 3D low-poly idle tycoon: build androids, train cyborgs, a sad story | three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/dottor-gelo-pwa/) |
 | 48 | **CINDER BELT** | Single-player .io salvage war: PvE/PvP zones, relays, Leviathan | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/cinder-belt-pwa/) |
-| 49 | **Briscola Online** | Briscola 1v1: stanze con codice, Supabase, CPU locale e PWA | React + Supabase + Vite | Locale ✅ · online config. | [▶ Play](https://lucagandolfi77.github.io/random2/briscola-pwa/) |
-| 50 | **SELF / NON-SELF** | 13-minute procedural film: the last immune cell of a dying body | TypeScript + Canvas 2D + Web Audio (Vite) | ✅ | [▶ Watch](https://lucagandolfi77.github.io/random2/self-non-self/) |
-| 51 | **Les Misérables — Le Fil d'Or** | 20-minute procedural film drawn in ink and candlelight | TypeScript + Canvas 2D + Web Audio (Vite) | ✅ | [▶ Watch](https://lucagandolfi77.github.io/random2/les-miserables-film/) |
+| 49 | **LAST CALL** | Neon art-deco lane card battler: 24 drinks, 8 venues, deck builder | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/last-call-pwa/) |
+| 50 | **Briscola Online** | Briscola 1v1: stanze con codice, Supabase, CPU locale e PWA | React + Supabase + Vite | Locale ✅ · online config. | [▶ Play](https://lucagandolfi77.github.io/random2/briscola-pwa/) |
+| 51 | **SELF / NON-SELF** | 13-minute procedural film: the last immune cell of a dying body | TypeScript + Canvas 2D + Web Audio (Vite) | ✅ | [▶ Watch](https://lucagandolfi77.github.io/random2/self-non-self/) |
+| 52 | **Les Misérables — Le Fil d'Or** | 20-minute procedural film drawn in ink and candlelight | TypeScript + Canvas 2D + Web Audio (Vite) | ✅ | [▶ Watch](https://lucagandolfi77.github.io/random2/les-miserables-film/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -1319,6 +1321,39 @@ collapses.
 [▶ Play](https://lucagandolfi77.github.io/random2/cinder-belt-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/cinder-belt-pwa) ·
 [README](cinder-belt-pwa/README.md)
+
+### LAST CALL
+
+*A neon art-deco drink deck battler. Pour. Push. Prevail.* 🍸
+
+A real-time lane card battle for one player against a bartender AI. Build an
+eight-card deck of **cocktails, wine, beer and spirits**, defend two **Taps**
+and your **Cellar**, and break the rival bar before the clock runs out.
+
+- **Two lanes, three towers, one cellar.** Destroy a Tap for a crown and open
+  the lane; destroy the Cellar to end the match immediately.
+- **Buzz, not mana.** It starts at 5, caps at 10, refills over time and doubles
+  during the last minute's **Happy Hour**. Four cards in hand, eight in the
+  deck, no card you cannot afford.
+- **24 drinks, six per family.** Cocktails swarm and splash, wine controls
+  range and heals, beer brings cheap bodies and buildings, spirits bring burst
+  damage and utility. Troops, buildings and spells across five upgrade levels.
+- **The Bar Tour.** Eight venues with rising AI levels, reaction time and
+  aggression, from The Rusty Tap to the boss bar. Clearing one unlocks the next
+  and two new drinks; stars come from how many of your own towers survive.
+- **Quick Match.** Easy, Normal or Hard AI with a random two-cards-per-family
+  deck, for testing a build without touching tour progress.
+- **Built for a phone.** Canvas 2D procedural arena and drinks, synthesised
+  WebAudio, fixed 60 Hz simulation, seeded AI, mouse/touch/keyboard, no build
+  step and no binary art beyond the generated PWA icons.
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`icons/`, `src/` (12 modules), `tests/` (headless + browser). See
+[`last-call-pwa/README.md`](last-call-pwa/README.md).
+
+[▶ Play](https://lucagandolfi77.github.io/random2/last-call-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/last-call-pwa) ·
+[README](last-call-pwa/README.md)
 
 ### Briscola Online
 
