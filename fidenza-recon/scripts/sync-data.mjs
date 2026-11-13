@@ -18,9 +18,11 @@ for (const file of files) {
   cpSync(from, resolve(target, file));
 }
 
-if (existsSync(resolve(chunked, 'detail'))) {
-  rmSync(resolve(target, 'detail'), { recursive: true, force: true });
-  cpSync(resolve(chunked, 'detail'), resolve(target, 'detail'), { recursive: true });
+for (const dir of ['detail', 'ground_tiles']) {
+  if (existsSync(resolve(chunked, dir))) {
+    rmSync(resolve(target, dir), { recursive: true, force: true });
+    cpSync(resolve(chunked, dir), resolve(target, dir), { recursive: true });
+  }
 }
 
 const ground = resolve(source, 'ground/ortho.jpg');

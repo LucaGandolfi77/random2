@@ -31,6 +31,14 @@ jobs:
           npm test
           npm run build
 
+      - name: Les Misérables — Le Fil d'Or (typecheck, tests, build)
+        working-directory: les-miserables-film
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
+
       - name: SELF / NON-SELF (typecheck, tests, build)
         working-directory: self-non-self
         run: |

@@ -49,7 +49,13 @@ summary        text scraped from the result screen (best effort)
 
 At startup, the browser response for the published game bundle is given a
 read-only probe name so the bot can access the existing game object. The bot
-does not replace gameplay methods or write player state.
+does not replace gameplay methods or write player state. The bundle is
+obfuscated and its root keys change on every rebuild, so `patch_game_bundle`
+recognises the game root by shape (`Flow['boot']()`, otherwise
+`Object['create'](null)` plus its first assigned property, whatever that
+property is called) and `SNAPSHOT_SCRIPT` locates every subsystem by its
+public shape, using the readable names (`Game`, `EnemyMgr`, …) only as a
+shortcut for older builds.
 
 ## Setup
 
@@ -118,6 +124,13 @@ vita dei run e l'input da tastiera; **`strategy.py`** prende le decisioni di
 movimento ed è testabile senza browser. Lo stato di gioco viene letto con una
 sonda *read-only* iniettata nel bundle (`SNAPSHOT_SCRIPT`) e non viene mai
 modificato: il bot gioca con i soli eventi tastiera, come un umano.
+
+Le chiavi della root vengono **rinominate a ogni ricostruzione del bundle**
+(nomi obfuscati come `_1972fd2`), quindi la sonda localizza ogni sottosistema
+*per forma* — `all` + `queryCircle` per i nemici, `all` + `nearest` per i
+pickup, `Array.isArray(all)` per gli hazard, `kindAt` + `visibleProps` per il
+mondo, `sees` per la camera, `inArena` + `rift` per la grieta — e usa i nomi
+leggibili (`Game`, `EnemyMgr`, …) solo come scorciatoia per le build vecchie.
 
 ### Il ciclo di gioco (loop a tick)
 

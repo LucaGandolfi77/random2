@@ -11,6 +11,7 @@ import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass.js';
 import type { Building, CityData } from '../types';
 import { flatFootprintGeometry } from '../city/roof';
+import { materials } from '../materials/library';
 import { canvasLabel, formatNumber } from '../utils';
 import { CollisionWorld } from '../player/collision';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../player/controller';
 import { PhotoCamera } from './photo';
 import type { CityLodManager } from './lod-manager';
+import type { GroundTileManager } from '../city/ground-tiles';
 
 export type ViewerMode = 'walk' | 'fly' | 'photo' | 'orbit';
 
@@ -52,6 +54,9 @@ export class Viewer {
   readonly cityRoot = new THREE.Group();
   private readonly container: HTMLElement;
   private readonly sun: THREE.DirectionalLight;
+  private readonly sunOffset = new THREE.Vector3(120, 170, 80);
+  private readonly hemisphere: THREE.HemisphereLight;
+  private readonly skyMaterial: THREE.ShaderMaterial;
   private readonly composer: EffectComposer;
   private readonly ssaoPass: SSAOPass;
   private readonly sunTarget = new THREE.Object3D();
@@ -100,11 +105,13 @@ export class Viewer {
   private selectionHandler: ((building: Building | null) => void) | null = null;
   private city: CityData | null = null;
   private lodManager: CityLodManager | null = null;
+  private groundTiles: GroundTileManager | null = null;
   private lastTime = performance.now();
   private frames = 0;
   private fpsWindow = 0;
   private statsElements: ViewerStatsElements | null = null;
   private postprocessing = true;
+  private timeOfDay = 13;
   private readonly sceneStats = { calls: 0, triangles: 0 };
 
   constructor(container: HTMLElement) {
@@ -143,11 +150,11 @@ export class Viewer {
     environment.dispose();
     pmrem.dispose();
 
-    this.scene.fog = new THREE.Fog(0xd3dcdf, 1600, 14000);
+    this.scene.fog = new THREE.Fog(0xd3dcdf, 2200, 16000);
     this.scene.background = new THREE.Color(0xd3dcdf);
 
     const skyGeometry = new THREE.SphereGeometry(16000, 32, 18);
-    const skyMaterial = new THREE.ShaderMaterial({
+    this.skyMaterial = new THREE.ShaderMaterial({
       side: THREE.BackSide,
       depthWrite: false,
       uniforms: {
@@ -173,12 +180,12 @@ export class Viewer {
         }
       `,
     });
-    this.sky = new THREE.Mesh(skyGeometry, skyMaterial);
+    this.sky = new THREE.Mesh(skyGeometry, this.skyMaterial);
     this.sky.frustumCulled = false;
     this.scene.add(this.sky);
 
-    const hemisphere = new THREE.HemisphereLight(0xdbe6ea, 0x8a7b66, 0.95);
-    this.scene.add(hemisphere);
+    this.hemisphere = new THREE.HemisphereLight(0xdbe6ea, 0x8a7b66, 0.95);
+    this.scene.add(this.hemisphere);
     this.sun = new THREE.DirectionalLight(0xfff0d8, 1.55);
     this.sun.position.set(120, 170, 80);
     this.sun.castShadow = true;
@@ -320,6 +327,50 @@ export class Viewer {
   setPostprocessing(enabled: boolean): void {
     this.postprocessing = enabled;
     this.ssaoPass.enabled = enabled;
+  }
+
+  setTimeOfDay(hours: number): void {
+    this.timeOfDay = THREE.MathUtils.clamp(hours, 0, 24);
+    const solar = ((this.timeOfDay - 6) / 12) * Math.PI;
+    const elevation = Math.sin(solar);
+    const daylight = THREE.MathUtils.clamp(elevation * 2.2, 0, 1);
+    const sunset = THREE.MathUtils.clamp(1 - Math.abs(elevation) * 3.2, 0, 1);
+    this.sunOffset.set(
+      Math.cos(solar) * 220,
+      35 + Math.max(0, elevation) * 230,
+      Math.sin(solar) * 220,
+    );
+    this.sun.intensity = 0.05 + 1.55 * Math.max(0, elevation);
+    this.sun.color
+      .copy(new THREE.Color('#ffad69'))
+      .lerp(new THREE.Color('#fff0d8'), THREE.MathUtils.clamp(elevation * 2, 0, 1));
+    this.hemisphere.intensity = 0.18 + 0.82 * Math.max(0, elevation);
+    this.hemisphere.color.set(daylight > 0.35 ? '#dbe6ea' : '#65758a');
+    this.hemisphere.groundColor.set(daylight > 0.35 ? '#8a7b66' : '#242a32');
+
+    const nightTop = new THREE.Color('#0a1424');
+    const nightBottom = new THREE.Color('#263246');
+    const dayTop = new THREE.Color('#7fa6c0');
+    const dayBottom = new THREE.Color('#e4e9e8');
+    const sunsetTop = new THREE.Color('#b46a5a');
+    const sunsetBottom = new THREE.Color('#f2c08a');
+    const top = nightTop.clone().lerp(dayTop, daylight);
+    const bottom = nightBottom.clone().lerp(dayBottom, daylight);
+    top.lerp(sunsetTop, sunset * 0.65);
+    bottom.lerp(sunsetBottom, sunset * 0.65);
+    this.skyMaterial.uniforms.top.value.copy(top);
+    this.skyMaterial.uniforms.bottom.value.copy(bottom);
+    if (this.scene.fog) this.scene.fog.color.copy(bottom);
+    this.scene.background = bottom.clone();
+    this.renderer.toneMappingExposure = 0.68 + 0.30 * daylight;
+    this.scene.environmentIntensity = 0.12 + 0.15 * daylight;
+
+    const glow = 1 - daylight;
+    materials.glass.emissive.set(glow > 0.4 ? '#ffb46a' : '#16262b');
+    materials.glass.emissiveIntensity = 0.2 + glow * 1.1;
+    materials.shopGlass.emissive.set(glow > 0.4 ? '#ffd39a' : '#000000');
+    materials.shopGlass.emissiveIntensity = glow * 0.9;
+    this.requestShadowUpdate();
   }
 
   requestShadowUpdate(): void {
@@ -471,6 +522,10 @@ export class Viewer {
 
   setLodManager(manager: CityLodManager): void {
     this.lodManager = manager;
+  }
+
+  setGroundTiles(manager: GroundTileManager): void {
+    this.groundTiles = manager;
   }
 
   setSelectionHandler(handler: (building: Building | null) => void): void {
@@ -1007,7 +1062,11 @@ export class Viewer {
     ) {
       this.shadowAnchor.set(anchorX, anchorZ);
       this.sunTarget.position.set(anchorX, 0, anchorZ);
-      this.sun.position.set(anchorX + 120, 170, anchorZ + 80);
+      this.sun.position.set(
+        anchorX + this.sunOffset.x,
+        this.sunOffset.y,
+        anchorZ + this.sunOffset.z,
+      );
       this.renderer.shadowMap.needsUpdate = true;
     }
     this.sky.position.set(this.camera.position.x, 0, this.camera.position.z);
@@ -1017,6 +1076,7 @@ export class Viewer {
       sprite.scale.set(scale, scale / 5, 1);
     }
 
+    if (this.groundTiles) this.groundTiles.update(this.camera);
     if (this.lodManager) this.lodManager.update(this.camera);
     if (this.mode === 'orbit') this.controls.update();
     this.renderFrame();

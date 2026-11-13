@@ -7,6 +7,7 @@ import type {
   MassingPayload,
   WorldPayload,
 } from './types';
+import { GroundTileManager, type GroundTileIndex } from './city/ground-tiles';
 import { buildStreets } from './city/streets';
 import { buildProps } from './city/props';
 import { buildTerrain } from './city/terrain';
@@ -286,6 +287,7 @@ async function boot(): Promise<void> {
   try {
     setStage('Caricamento dell’indice della città…', 10);
     let manifest: Manifest | null = null;
+    let groundTileIndex: GroundTileIndex | null = null;
     let city: CityData;
     try {
       manifest = await fetchJson<Manifest>('manifest.json');
@@ -305,6 +307,9 @@ async function boot(): Promise<void> {
           if (landmarkIds.has(building.osm_id)) building.landmark = true;
         }
       }
+      groundTileIndex = await fetchJson<GroundTileIndex>(
+        'ground_tiles/index.json',
+      ).catch(() => null);
       city = {
         meta: manifest.meta,
         terrain: world.terrain,
@@ -334,6 +339,17 @@ async function boot(): Promise<void> {
     viewer.cityRoot.add(buildStreets(city.roads, city.props));
     viewer.cityRoot.add(buildProps(city.props));
     viewer.load(city, terrain.sample);
+    const timeInput = $('#time-of-day') as HTMLInputElement;
+    const timeValue = $('#time-of-day-value');
+    const applyTimeOfDay = (): void => {
+      const hours = Number(timeInput.value);
+      const whole = Math.floor(hours);
+      const minutes = Math.round((hours - whole) * 60);
+      timeValue.textContent = `${String(whole).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      viewer.setTimeOfDay(hours);
+    };
+    timeInput.addEventListener('input', applyTimeOfDay);
+    applyTimeOfDay();
     const districtCanvas = document.querySelector<HTMLCanvasElement>(
       '#district-map-canvas',
     );
@@ -343,6 +359,17 @@ async function boot(): Promise<void> {
     const coarsePointer = matchMedia('(pointer: coarse)').matches;
     const quality = coarsePointer ? 'medium' : 'high';
     viewer.setPostprocessing(quality === 'high');
+    const groundTiles =
+      groundTileIndex && groundTileIndex.tiles.length
+        ? new GroundTileManager(
+            viewer.scene,
+            dataBase,
+            groundTileIndex,
+            terrain.sample,
+            { radius: coarsePointer ? 1 : 2 },
+          )
+        : null;
+    if (groundTiles) viewer.setGroundTiles(groundTiles);
     const detailRadius =
       city.meta.detail_radius_m?.[quality] ?? (coarsePointer ? 140 : 200);
     const maxDetailChunks =
@@ -499,6 +526,8 @@ async function boot(): Promise<void> {
       const selected = qualitySelect.value as 'high' | 'medium' | 'low';
       const radius = city.meta.detail_radius_m?.[selected] ?? 0;
       viewer.setPostprocessing(selected === 'high');
+      groundTiles?.setEnabled(selected !== 'low');
+      groundTiles?.setRadius(selected === 'high' ? 2 : 1);
       lodManager.setQuality(radius, selected === 'low' ? 0 : maxDetailChunks);
       showToast(
         selected === 'low'

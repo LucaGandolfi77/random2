@@ -121,6 +121,7 @@
 | 48 | **CINDER BELT** | Single-player .io salvage war: PvE/PvP zones, relays, Leviathan | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/cinder-belt-pwa/) |
 | 49 | **Briscola Online** | Briscola 1v1: stanze con codice, Supabase, CPU locale e PWA | React + Supabase + Vite | Locale ✅ · online config. | [▶ Play](https://lucagandolfi77.github.io/random2/briscola-pwa/) |
 | 50 | **SELF / NON-SELF** | 13-minute procedural film: the last immune cell of a dying body | TypeScript + Canvas 2D + Web Audio (Vite) | ✅ | [▶ Watch](https://lucagandolfi77.github.io/random2/self-non-self/) |
+| 51 | **Les Misérables — Le Fil d'Or** | 20-minute procedural film drawn in ink and candlelight | TypeScript + Canvas 2D + Web Audio (Vite) | ✅ | [▶ Watch](https://lucagandolfi77.github.io/random2/les-miserables-film/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -1356,6 +1357,19 @@ python3 -m http.server 8080
 [source](https://github.com/LucaGandolfi77/random2/tree/main/purr-player-pwa) ·
 [README](purr-player-pwa/README.md)
 
+### Les Misérables — Le Fil d'Or
+
+*Twenty years of Victor Hugo in one drawn film.* 🕯️
+
+A 20-minute animated film drawn live in TypeScript: ink, paper, candlelight
+and one golden thread from the first night to the last dawn. Ten acts, a
+bilingual soundtrack of intertitles and captions, and a procedural score.
+No video files, no images, no recorded music.
+
+[▶ Watch](https://lucagandolfi77.github.io/random2/les-miserables-film/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/les-miserables-film) ·
+[README](les-miserables-film/README.md)
+
 ### SELF / NON-SELF
 
 *The last immune cell of a dying body carries one final message through the ruins.* 🧫
@@ -1728,6 +1742,8 @@ races — the newest deploy wins. The published URL is
 | Dottor Gelo (dev) | `cd dottor-gelo-pwa && npm install && npm run dev` | Vite dev server |
 | Dottor Gelo (test) | `cd dottor-gelo-pwa && npm test` | Node test runner |
 | Dottor Gelo (prod) | `cd dottor-gelo-pwa && npm run build` | serves `dottor-gelo-pwa/dist/` |
+| Les Misérables (dev) | `cd les-miserables-film && npm install && npm run dev` | Vite dev server |
+| Les Misérables (test/build) | `cd les-miserables-film && npm test && npm run build` | serves `les-miserables-film/dist/` |
 | SELF / NON-SELF (dev) | `cd self-non-self && npm install && npm run dev` | Vite dev server |
 | SELF / NON-SELF (test/build) | `cd self-non-self && npm test && npm run build` | serves `self-non-self/dist/` |
 | EADS | `cd EADS && pip install -r requirements*.txt && python app.py` | Flask UI |

@@ -11,6 +11,7 @@ Il viewer non carica un unico `city.json` da decine di MB. La pipeline
 | `massing.json` | massa LOD1 di tutti gli edifici (tetti compresi) | subito |
 | `landmarks.json` | landmark per etichette e schede | subito |
 | `detail/chunk_<x>_<z>.json` | descrittori LOD3 completi del chunk | su richiesta |
+| `ground_tiles/index.json` + `*.jpg` | ortofoto 0,2/0,5 m a tile da 250 m | intorno al giocatore |
 | `city.json` | fallback monolitico compatto | solo se il chunked payload manca |
 
 Payload dell'ultima esecuzione: 4.585 edifici (4.160 pilot LOD3 + 425

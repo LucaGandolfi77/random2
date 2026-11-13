@@ -1,6 +1,6 @@
 # Visual validation report
 
-Generated: 2026-11-10T18:33:49+00:00
+Generated: 2026-11-10T16:07:58+00:00
 
 ## Method
 
@@ -17,30 +17,30 @@ Generated: 2026-11-10T18:33:49+00:00
 
 | Check | Target | Result | Status |
 | --- | --- | --- | --- |
-| Footprint source | OSM footprint per building | 638 / 638 | pass |
-| Height evidence | Measured where DSM exists | 624 / 638 | partial |
-| Roof evidence | Shape + colour per building | 638 roof records | pass |
-| Street imagery | Licensed street-level coverage | 0 inside bbox (0 nearby) | unavailable |
-| Reference photography | Landmarks | 40 Commons files | partial |
+| Footprint source | OSM footprint per building | 4585 / 4585 | pass |
+| Height evidence | Measured where DSM exists | 4474 / 4585 | partial |
+| Roof evidence | Shape + colour per building | 4585 roof records | pass |
+| Street imagery | Licensed street-level coverage | 0 inside bbox (5 nearby) | unavailable |
+| Reference photography | Landmarks | 32 Commons files | partial |
 
 ## Buildings reconstructed accurately
 
-Tier A pilot landmarks with a licensed reference image: Oratorio di San Giorgio, Cattedrale di San Donnino, Teatro Girolamo Magnani, Porta di San Donnino
+Tier A pilot landmarks with a licensed reference image: Chiesa di San Tommaso Becket, Chiesa del Sacro Cuore, Chiesa di Sant'Antonio Abate, Fidenza, Chiesa di San Pietro, Santuario della Gran Madre di Dio, Oratorio di San Giorgio, ex Chiesa di San Michele Arcangelo, Cattedrale di San Donnino, Chiesa di Santa Maria Annunziata, Teatro Girolamo Magnani, Porta di San Donnino
 
 Context landmarks (if any) are rendered at LOD1 and are not claimed as
 detailed facade reconstructions.
 
 ## Buildings approximated
 
-619 buildings are Tier B: measured height and roof. Pilot buildings have procedural facades; context buildings are LOD1 massing only.
+4462 buildings are Tier B: measured height and roof. Pilot buildings have procedural facades; context buildings are LOD1 massing only.
 
 ## Buildings with missing source imagery
 
-14 buildings are Tier C; no street-level photograph exists for them.
+111 buildings are Tier C; no street-level photograph exists for them.
 
 ## Uncertain dimensions
 
-309 buildings are flagged for manual review (see CONFIDENCE_REPORT.md).
+2622 buildings are flagged for manual review (see CONFIDENCE_REPORT.md).
 
 ## Visual comparison
 
@@ -55,10 +55,10 @@ detailed facade reconstructions.
 
 ## Viewer performance and export
 
-- **duomo**: 50 fps, 711 draw calls, 2730k triangles
-- **porta**: 51 fps, 809 draw calls, 2827k triangles
+- **duomo**: 51 fps, 720 draw calls, 2732k triangles
+- **porta**: 49 fps, 817 draw calls, 2829k triangles
 - **overview**: 60 fps, 348 draw calls, 600k triangles
-- **street**: 60 fps, 411 draw calls, 2707k triangles
+- **street**: 56 fps, 418 draw calls, 2709k triangles
 - **GLB export**: `data/processed/export/fidenza-piazza-duomo.glb` (23.7 MB)
 
 Measured in Chrome headless (channel: chrome) at 1600x1000. Values are hardware-dependent; the detailed views are the heaviest. The GLB export is intentionally LOD1 and is produced by the in-viewer GLTFExporter.

@@ -1,17 +1,17 @@
 {
   "browser": "Chrome headless (channel: chrome)",
   "viewport": "1600x1000",
-  "captured_at": "2026-11-10T13:54:52.210Z",
+  "captured_at": "2026-11-10T16:06:27.295Z",
   "views": {
     "duomo": {
-      "fps": "50",
-      "draw_calls": "711",
-      "triangles": "2730k"
+      "fps": "51",
+      "draw_calls": "720",
+      "triangles": "2732k"
     },
     "porta": {
-      "fps": "51",
-      "draw_calls": "809",
-      "triangles": "2827k"
+      "fps": "49",
+      "draw_calls": "817",
+      "triangles": "2829k"
     },
     "overview": {
       "fps": "60",
@@ -19,9 +19,9 @@
       "triangles": "600k"
     },
     "street": {
-      "fps": "60",
-      "draw_calls": "411",
-      "triangles": "2707k"
+      "fps": "56",
+      "draw_calls": "418",
+      "triangles": "2709k"
     }
   },
   "glb_export": {

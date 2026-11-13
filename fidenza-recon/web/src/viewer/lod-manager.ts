@@ -37,6 +37,7 @@ interface Chunk {
   detail: THREE.Group | null;
   lastUsed: number;
   failed: boolean;
+  fade: number;
 }
 
 function distanceToBox(point: THREE.Vector3, box: THREE.Box3): number {
@@ -187,6 +188,7 @@ export class CityLodManager {
         detail: null,
         lastUsed: 0,
         failed: false,
+        fade: 1,
       });
     }
   }
@@ -264,8 +266,26 @@ export class CityLodManager {
       }
       if (chunk.detail) {
         chunk.detail.visible = isNear;
-        if (chunk.context) chunk.context.visible = !isNear;
+        if (isNear) {
+          if (chunk.fade > 0) {
+            chunk.fade = Math.max(0, chunk.fade - 0.075);
+            this.setContextOpacity(chunk, chunk.fade);
+            if (chunk.context) chunk.context.visible = chunk.fade > 0.01;
+          } else if (chunk.context) {
+            chunk.context.visible = false;
+          }
+        } else {
+          if (chunk.fade !== 1) {
+            chunk.fade = 1;
+            this.setContextOpacity(chunk, 1);
+          }
+          if (chunk.context) chunk.context.visible = true;
+        }
       } else {
+        if (chunk.fade !== 1) {
+          chunk.fade = 1;
+          this.setContextOpacity(chunk, 1);
+        }
         if (chunk.context) chunk.context.visible = true;
         if (isNear && this.detailAvailable(chunk.key)) {
           candidates.push({ chunk, distance });
@@ -317,6 +337,8 @@ export class CityLodManager {
       }
       if (!this.detailsVisible || this.exporting) return;
       this.buildDetail(chunk, buildings);
+      chunk.fade = 1;
+      if (chunk.context) chunk.context.visible = true;
       this.onDetailLoaded?.();
       const near = this.lastCamera
         ? distanceToBox(this.lastCamera.position, chunk.bounds) <= this.detailRadius
@@ -369,7 +391,29 @@ export class CityLodManager {
     });
     chunk.detail.removeFromParent();
     chunk.detail = null;
+    chunk.fade = 1;
+    this.setContextOpacity(chunk, 1);
     if (chunk.context) chunk.context.visible = true;
+  }
+
+  private setContextOpacity(chunk: Chunk, opacity: number): void {
+    if (!chunk.context) return;
+    const transparent = opacity < 0.999;
+    chunk.context.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      const materials = Array.isArray(object.material)
+        ? object.material
+        : [object.material];
+      for (const material of materials) {
+        if (!(material instanceof THREE.MeshStandardMaterial)) continue;
+        if (material.transparent !== transparent) {
+          material.transparent = transparent;
+          material.needsUpdate = true;
+        }
+        material.opacity = opacity;
+        material.depthWrite = !transparent;
+      }
+    });
   }
 
   private hideDetailsShowContext(): void {
@@ -378,6 +422,10 @@ export class CityLodManager {
     }
     for (const chunk of this.chunks.values()) {
       if (chunk.detail) chunk.detail.visible = false;
+      if (chunk.fade !== 1) {
+        chunk.fade = 1;
+        this.setContextOpacity(chunk, 1);
+      }
       if (chunk.context) chunk.context.visible = false;
     }
   }

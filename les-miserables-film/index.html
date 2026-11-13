@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+    <meta name="theme-color" content="#0a0806" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Le Fil d'Or" />
+    <meta name="description" content="Les Misérables — Le Fil d'Or. A 20-minute animated film drawn live in TypeScript. After Victor Hugo." />
+    <meta property="og:type" content="video.other" />
+    <meta property="og:title" content="Les Misérables — Le Fil d'Or" />
+    <meta property="og:description" content="A 20-minute animated film drawn live in TypeScript. Ink, paper, candlelight, and one golden thread." />
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/les-miserables-film/icon-512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <title>Les Misérables — Le Fil d'Or</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
+    <link rel="preload" href="./icon.svg" as="image" type="image/svg+xml" />
+  </head>
+  <body>
+    <main id="app">
+      <div id="film-frame">
+        <canvas id="film" width="720" height="1280" aria-hidden="true"></canvas>
+        <div id="paper-overlay" aria-hidden="true"></div>
+        <div id="caption-live" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+        <div id="ui" class="ui is-hidden" aria-hidden="true" inert>
+          <header class="topbar">
+            <button id="btn-chapter" class="chapter-pill" type="button">
+              <span id="chapter-roman" class="chapter-roman">PROLOGUE</span>
+              <span id="chapter-name" class="chapter-name">Le Fil d'Or</span>
+            </button>
+            <div class="top-actions">
+              <button id="btn-lang" class="pill" type="button" aria-label="Change language">EN</button>
+              <button id="btn-info" class="icon-btn" type="button" aria-label="About the film">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2"/><path d="M12 7.7v.1"/></svg>
+              </button>
+            </div>
+          </header>
+
+          <div class="hud-bottom">
+            <div class="seek-wrap">
+              <div id="seek-ticks" class="seek-ticks" aria-hidden="true"></div>
+              <input id="seek" class="seek" type="range" min="0" max="1200" step="0.05" value="0" aria-label="Film position" />
+            </div>
+            <div class="control-row">
+              <button id="btn-play" class="icon-btn play-btn" type="button" aria-label="Pause">
+                <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5 19 12 8 18.5Z" fill="currentColor" stroke="none"/></svg>
+                <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6v12M15.5 6v12" stroke-width="2.4"/></svg>
+              </button>
+              <button id="btn-back" class="icon-btn" type="button" aria-label="Back 10 seconds">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h5.5M5 8.5V3.5"/><path d="M5.4 8.2A8 8 0 1 1 4 14.4"/><text x="12" y="16.2" text-anchor="middle" font-size="7.8" font-family="Inter, sans-serif" fill="currentColor" stroke="none">10</text></svg>
+              </button>
+              <div id="timecode" class="timecode">00:00 <span>/ 20:00</span></div>
+              <div class="control-spacer"></div>
+              <button id="btn-captions" class="icon-btn caption-btn" type="button" aria-label="Toggle captions" aria-pressed="true">
+                <span class="cc-mark">CC</span>
+              </button>
+              <button id="btn-sound" class="icon-btn" type="button" aria-label="Mute">
+                <svg class="icon-sound" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2l4 3.2V6.3l-4 3.2Z"/><path d="M15.2 9a4.5 4.5 0 0 1 0 6"/><path d="M17.7 6.5a8 8 0 0 1 0 11"/></svg>
+                <svg class="icon-muted" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.2l4 3.2V6.3l-4 3.2Z"/><path d="m16 9.5 5 5m0-5-5 5"/></svg>
+              </button>
+              <button id="btn-fullscreen" class="icon-btn" type="button" aria-label="Fullscreen">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <section id="poster" class="poster" aria-labelledby="poster-title">
+          <div class="poster-shade"></div>
+          <div class="poster-content">
+            <p class="eyebrow">D'APRÈS VICTOR HUGO</p>
+            <h1 id="poster-title" class="poster-title"><span>LES</span><span>MISÉRABLES</span></h1>
+            <div class="gold-rule"><span></span><i></i><span></span></div>
+            <p class="poster-subtitle">LE FIL D'OR</p>
+            <p class="poster-tagline" data-i18n="tagline">A film drawn in ink and candlelight. One golden thread from the first night to the last dawn.</p>
+            <div class="lang-switch" role="group" aria-label="Language">
+              <button class="lang-btn" data-set-lang="en" type="button">EN</button>
+              <button class="lang-btn" data-set-lang="it" type="button">IT</button>
+            </div>
+            <div class="poster-meta">
+              <span>20:00</span><span data-i18n="acts">10 ACTES</span><span data-i18n="originalScore">ORIGINAL SCORE</span>
+            </div>
+            <button id="btn-begin" class="primary-btn" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5 19 12 8 18.5Z" fill="currentColor" stroke="none"/></svg>
+              <span data-i18n="begin">Begin with sound</span>
+            </button>
+            <button id="btn-resume" class="resume-btn" type="button" hidden>
+              <span data-i18n="resume">Resume</span>
+              <span id="resume-time">00:00</span>
+            </button>
+            <button id="btn-begin-silent" class="text-btn" type="button" data-i18n="beginSilent">Watch in silence</button>
+            <p class="poster-note" data-i18n="posterNote">20 minutes · drawn live in TypeScript · no video files</p>
+            <button id="btn-content-note" class="content-note" type="button" data-i18n="contentNote">Content note</button>
+          </div>
+        </section>
+
+        <section id="chapter-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="chapters-heading" hidden>
+          <div class="sheet-backdrop" data-close-sheet></div>
+          <div class="sheet-panel">
+            <div class="sheet-head">
+              <div>
+                <p class="eyebrow" data-i18n="chapters">CHAPTERS</p>
+                <h2 id="chapters-heading" data-i18n="chaptersTitle">The ten acts</h2>
+              </div>
+              <button class="icon-btn close-btn" type="button" data-close-sheet aria-label="Close">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+            <ol id="chapter-list" class="chapter-list"></ol>
+            <p class="sheet-foot" data-i18n="chaptersFoot">Scrub the golden thread to move through the film.</p>
+          </div>
+        </section>
+
+        <section id="info-sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="info-heading" hidden>
+          <div class="sheet-backdrop" data-close-sheet></div>
+          <div class="sheet-panel info-panel">
+            <div class="sheet-head">
+              <div>
+                <p class="eyebrow" data-i18n="about">ABOUT</p>
+                <h2 id="info-heading">Le Fil d'Or</h2>
+              </div>
+              <button class="icon-btn close-btn" type="button" data-close-sheet aria-label="Close">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+            <div class="info-copy">
+              <p data-i18n="aboutP1">A twenty-minute animated adaptation of Victor Hugo's Les Misérables, composed entirely of code: ink, paper, candlelight and one continuous golden thread.</p>
+              <p data-i18n="aboutP2">Every frame is drawn live at 30 frames per second. Scrub, pause, switch language, or save a frame — the clock always returns the same image.</p>
+              <p class="content-warning" data-i18n="contentWarning"><strong>Content note.</strong> The film depicts poverty, child labour, war, death and suicide. There is no graphic violence, and no rapid flashing.</p>
+              <p class="credit-line">After Victor Hugo · 1862</p>
+              <p class="credit-line" data-i18n="creditsLine">Written, drawn and scored in TypeScript. No images, footage or recorded music.</p>
+              <p class="credit-line small">D'après <em>Les Misérables</em> de Victor Hugo — domaine public.<br />Typeface: Cormorant Garamond &amp; Inter (OFL).</p>
+            </div>
+            <div class="info-actions">
+              <button id="btn-save-frame" class="text-btn" type="button" data-i18n="saveFrame">Save this frame</button>
+              <button id="btn-share" class="text-btn" type="button" data-i18n="shareMoment">Share this moment</button>
+            </div>
+            <label class="volume-row">
+              <span data-i18n="volume">Volume</span>
+              <input id="volume" type="range" min="0" max="1" step="0.01" value="0.62" aria-label="Volume" />
+            </label>
+          </div>
+        </section>
+
+        <section id="end-screen" class="end-screen" hidden>
+          <div class="end-inner">
+            <p class="eyebrow">VICTOR HUGO · 1862</p>
+            <p class="fin">FIN</p>
+            <div class="gold-rule"><span></span><i></i><span></span></div>
+            <p class="end-line" data-i18n="endLine">The thread does not end. It only changes hands.</p>
+            <div class="end-actions">
+              <button id="btn-replay" class="primary-btn" type="button">
+                <svg class="icon-stroke" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"/></svg>
+                <span data-i18n="replay">Watch again</span>
+              </button>
+              <button id="btn-end-chapters" class="text-btn" type="button" data-i18n="chooseChapter">Choose a chapter</button>
+              <button id="btn-end-share" class="text-btn" type="button" data-i18n="shareFilm">Share the film</button>
+            </div>
+            <p class="end-credit" data-i18n="endCredit">Drawn live in TypeScript · after Victor Hugo</p>
+          </div>
+        </section>
+
+        <div id="rotate-hint" class="rotate-hint" hidden>
+          <div class="rotate-phone" aria-hidden="true"></div>
+          <p data-i18n="rotate">Turn your phone upright to watch the film.</p>
+          <button id="btn-watch-anyway" class="text-btn" type="button" data-i18n="watchAnyway">Watch anyway</button>
+        </div>
+
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      </div>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

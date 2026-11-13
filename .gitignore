@@ -25,3 +25,13 @@ fidenza-recon/db/city.db
 !self-non-self/package-lock.json
 !self-non-self/tests/
 !self-non-self/tests/**
+
+# Les Misérables needs its build manifest, lockfile and tests in CI.
+!les-miserables-film/package.json
+!les-miserables-film/package-lock.json
+!les-miserables-film/tests/
+!les-miserables-film/tests/**
+
+# Last Dawn is a local work-in-progress: icons/ and several tool scripts are
+# still missing, so it is not ready to be published as a PWA.
+last-dawn-rpg/

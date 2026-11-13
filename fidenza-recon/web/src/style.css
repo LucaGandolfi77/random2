@@ -329,6 +329,19 @@ button.primary {
   padding: 4px 6px;
 }
 
+.field-row input[type="range"] {
+  width: 92px;
+  accent-color: var(--accent-strong);
+}
+
+.field-value {
+  min-width: 34px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+  color: var(--paper-dim);
+}
+
 .actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

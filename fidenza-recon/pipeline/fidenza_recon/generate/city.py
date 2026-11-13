@@ -10,6 +10,7 @@ from pathlib import Path
 
 import numpy as np
 import rasterio
+from PIL import Image
 from shapely.geometry import Polygon
 
 from ..config import PROCESSED_DIR, RAW_DIR, WEB_DATA_DIR, AppConfig
@@ -510,6 +511,122 @@ def _limits() -> list[str]:
     ]
 
 
+def _display_grade(rgb: np.ndarray) -> np.ndarray:
+    """Match the warm display grade used by the global ground texture."""
+    pixels = rgb.astype("float32")
+    luminance = pixels.mean(axis=2, keepdims=True)
+    shadow = np.clip(1.0 - luminance / 150.0, 0.0, 1.0)
+    blend = 0.85 * shadow
+    pixels = pixels * (1.0 - blend) + luminance * blend
+    pixels[..., 0] *= 1.05
+    pixels[..., 2] *= 0.90
+    pixels += shadow * np.array([16.0, 14.0, 12.0], dtype="float32")
+    return np.clip(pixels, 0, 255).astype("uint8")
+
+
+def _ground_tiles(config: AppConfig, ctx: GeoContext, out_dir: Path) -> dict:
+    """Cut the high-res orthophoto into runtime ground tiles.
+
+    The 0.2 m product is used over the historic centre, the 0.5 m product over
+    the pilot and the base 1 m texture covers the context. Only the pilot and
+    centre are pre-cut; the viewer keeps the global texture outside.
+    """
+
+    from rasterio.enums import Resampling
+    from rasterio.windows import Window, from_bounds
+
+    downloads = config.downloads
+    tile_size = float(downloads.get("ground_tile_size_m", 250))
+    pilot_local = ctx.bbox_local(config.pilot_bbox)
+    centro_bbox = downloads.get("ortho_centro_bbox_wgs84")
+    centro_local = (
+        ctx.bbox_local(tuple(centro_bbox)) if centro_bbox else None
+    )
+    sources: dict[str, tuple[float, Path]] = {}
+    centro_path = RAW_DIR / "rer" / "ortho_rgb_02.tif"
+    pilot_path = RAW_DIR / "rer" / "ortho_rgb_05.tif"
+    if centro_local and centro_path.exists():
+        sources["02"] = (0.2, centro_path)
+    if pilot_path.exists():
+        sources["05"] = (0.5, pilot_path)
+    if not sources:
+        return {"tile_size_m": tile_size, "tiles": []}
+
+    target = out_dir / "ground_tiles"
+    if target.exists():
+        shutil.rmtree(target)
+    target.mkdir(parents=True, exist_ok=True)
+    index: list[dict] = []
+
+    def contains(a: tuple[float, ...], b: tuple[float, ...]) -> bool:
+        return a[0] >= b[0] and a[1] >= b[1] and a[2] <= b[2] and a[3] <= b[3]
+
+    ix_min = math.floor(pilot_local[0] / tile_size)
+    ix_max = math.floor((pilot_local[2] - 1e-6) / tile_size)
+    iz_min = math.floor(pilot_local[1] / tile_size)
+    iz_max = math.floor((pilot_local[3] - 1e-6) / tile_size)
+    for iz in range(iz_min, iz_max + 1):
+        for ix in range(ix_min, ix_max + 1):
+            bbox = (
+                ix * tile_size,
+                iz * tile_size,
+                (ix + 1) * tile_size,
+                (iz + 1) * tile_size,
+            )
+            level = "05"
+            if centro_local and contains(bbox, centro_local) and "02" in sources:
+                level = "02"
+            elif "05" not in sources:
+                continue
+            resolution, path = sources[level]
+            x0, y0 = ctx.local_to_metric(bbox[0], bbox[1])
+            x1, y1 = ctx.local_to_metric(bbox[2], bbox[3])
+            left, right = min(x0, x1), max(x0, x1)
+            bottom, top = min(y0, y1), max(y0, y1)
+            with rasterio.open(path) as source:
+                window = from_bounds(left, bottom, right, top, source.transform)
+                window = window.intersection(
+                    Window(0, 0, source.width, source.height)
+                )
+                if window.width <= 0 or window.height <= 0:
+                    continue
+                pixels = 1024 if level == "02" else 512
+                data = source.read(
+                    [1, 2, 3],
+                    window=window,
+                    out_shape=(3, pixels, pixels),
+                    resampling=Resampling.bilinear,
+                )
+            rgb = _display_grade(np.moveaxis(data, 0, -1))
+            image = Image.fromarray(rgb, mode="RGB")
+            filename = f"{ix}_{iz}.jpg"
+            image.save(
+                target / filename,
+                quality=84,
+                optimize=True,
+                progressive=True,
+            )
+            index.append(
+                {
+                    "key": f"{ix}_{iz}",
+                    "url": f"ground_tiles/{filename}",
+                    "resolution_m": resolution,
+                    "bbox_local": [round(value, 2) for value in bbox],
+                    "pixels": pixels,
+                }
+            )
+
+    payload = {
+        "tile_size_m": tile_size,
+        "tiles": sorted(index, key=lambda item: item["key"]),
+    }
+    (target / "index.json").write_text(
+        json.dumps(payload, separators=(",", ":")), encoding="utf-8"
+    )
+    print(f"ground tiles: {len(index)} tiles, {tile_size:.0f} m")
+    return payload
+
+
 def build(config: AppConfig, force: bool = False) -> dict:
     """Write the chunked runtime payload.
 
@@ -664,6 +781,7 @@ def build(config: AppConfig, force: bool = False) -> dict:
     _write_json(out_dir / "world.json", world)
     _write_json(out_dir / "massing.json", {"buildings": massing})
     _write_json(out_dir / "landmarks.json", {"landmarks": landmarks})
+    _ground_tiles(config, ctx, out_dir)
 
     manifest = {
         "meta": meta,
@@ -707,6 +825,12 @@ def build(config: AppConfig, force: bool = False) -> dict:
     if detail_target.exists():
         shutil.rmtree(detail_target)
     shutil.copytree(out_dir / "detail", detail_target)
+    tiles_source = out_dir / "ground_tiles"
+    tiles_target = WEB_DATA_DIR / "ground_tiles"
+    if tiles_source.exists():
+        if tiles_target.exists():
+            shutil.rmtree(tiles_target)
+        shutil.copytree(tiles_source, tiles_target)
     ground_source = PROCESSED_DIR / "ground" / "ortho.jpg"
     if ground_source.exists():
         shutil.copy2(ground_source, WEB_DATA_DIR / "ortho.jpg")

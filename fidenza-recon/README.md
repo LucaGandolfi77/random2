@@ -59,6 +59,7 @@ python -m fidenza_recon.cli analyze     # impronte, altezze, tetti, archetipi
 python -m fidenza_recon.cli generate    # descrittori LOD3, chunk, world, database
 python -m fidenza_recon.cli report      # report in docs/
 python -m fidenza_recon.cli audit       # audit fonti RER 2023-24/DBTR/street-level
+python -m fidenza_recon.cli coverage    # audit copertura OSM vs edificato DSM 2008
 python -m fidenza_recon.cli export      # export JSON del database in db/exports/
 pytest                                  # test Python
 npm --prefix web test                   # test TypeScript
@@ -181,7 +182,8 @@ Moduli principali:
   usano il renderer diretto per mantenere la fluidità.
 - **LOD dinamico gerarchico**: batch LOD1 per chunk padre da 480 m; avvicinandosi
   il padre è sostituito da chunk figli da 120 m, e i figli passano a LOD3 quando
-  il file di dettaglio è pronto. Cache limitata e rilascio dei chunk lontani.
+  il file di dettaglio è pronto. Il passaggio LOD1→LOD3 usa un breve crossfade.
+  Cache limitata e rilascio dei chunk lontani.
 - Dettagli di facciata: `InstancedMesh` globali (telai, vetri, persiane,
   balconi, cornici, lesene, archi) → poche draw call per migliaia di elementi.
 - Muri con **aperture reali** (ExtrudeGeometry con holes), telai, vetri,
@@ -193,6 +195,10 @@ Moduli principali:
   stradale usa l'ortofoto reale per evitare texture inventate.
 - **Ortofoto multi-risoluzione**: 1 m sull'intera bbox, **0,5 m sul pilot** e
   **0,2 m sul centro storico** per colore tetti e NDVI.
+- **Ground streaming**: 529 tile da 250 m (513 a 0,5 m, 16 a 0,2 m) caricate
+  in un intorno del giocatore, con LRU e fallback alla texture globale.
+- **Ora del giorno**: slider 0–24 h con sole, cielo, nebbia, esposizione e
+  finestre emissive coerenti; preset Alta/Media/Bassa.
 - Debug: impronte OSM, heatmap confidenza altezze, etichette landmark e
   quartieri, mappa 2D dei quartieri con posizione del giocatore e teletrasporto,
   ispettore provenienza al click.
@@ -241,6 +247,8 @@ Report generati:
 - [`docs/DISTRICTS.md`](docs/DISTRICTS.md)
 - [`docs/CHUNKED_PAYLOAD.md`](docs/CHUNKED_PAYLOAD.md)
 - [`docs/DATA_AUDIT_2023_24.md`](docs/DATA_AUDIT_2023_24.md)
+- [`docs/COVERAGE_AUDIT.md`](docs/COVERAGE_AUDIT.md)
+- [`docs/OSM2WORLD_SPIKE.md`](docs/OSM2WORLD_SPIKE.md)
 - [`docs/IMAGERY_COVERAGE.md`](docs/IMAGERY_COVERAGE.md)
 - [`docs/DATA_INVENTORY.md`](docs/DATA_INVENTORY.md)
 - [`docs/LICENSES.md`](docs/LICENSES.md)
@@ -290,7 +298,7 @@ Numeri chiave dell'ultima esecuzione:
 8. **Validazione manuale**: i landmark sono confrontati con Commons; non c'è
    un benchmark automatico di similarità fotografica.
 9. **Prestazioni**: il test headless Chrome/SwiftShader a 1600×1000 riporta
-   50–60 fps con 348–809 draw call e 0,6–2,8 M triangoli a seconda della vista;
+   49–60 fps con 348–817 draw call e 0,6–2,8 M triangoli a seconda della vista;
    il GLB LOD1 completo è di ~23,7 MB. Su GPU reale le prestazioni sono più alte,
    ma vanno riverificate sull'hardware target. Il raggio LOD3 è adattivo:
    200 m col preset Alta (desktop), 140 m col preset Media (mobile), 0 m col

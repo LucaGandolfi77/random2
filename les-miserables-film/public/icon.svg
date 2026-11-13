@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="72%">
+      <stop offset="0" stop-color="#21170e"/>
+      <stop offset="0.65" stop-color="#0b0806"/>
+      <stop offset="1" stop-color="#050403"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="1" x2="0.8" y2="0">
+      <stop offset="0" stop-color="#8c622a"/>
+      <stop offset="0.45" stop-color="#d9ad5b"/>
+      <stop offset="1" stop-color="#f4d997"/>
+    </linearGradient>
+    <radialGradient id="flame" cx="50%" cy="65%" r="60%">
+      <stop offset="0" stop-color="#fff2c4"/>
+      <stop offset="0.45" stop-color="#f0c477"/>
+      <stop offset="1" stop-color="#c98a3d" stop-opacity="0.1"/>
+    </radialGradient>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <circle cx="256" cy="234" r="152" fill="none" stroke="#d9ad5b" stroke-opacity="0.14"/>
+  <circle cx="256" cy="234" r="118" fill="none" stroke="#d9ad5b" stroke-opacity="0.1"/>
+  <ellipse cx="256" cy="253" rx="74" ry="96" fill="#f0c477" opacity="0.16" filter="url(#glow)"/>
+  <path d="M256 142c30 48 46 78 46 108 0 40-28 68-46 76-18-8-46-36-46-76 0-30 16-60 46-108z" fill="url(#flame)"/>
+  <path d="M256 190c16 28 24 47 24 65 0 25-15 43-24 49-9-6-24-24-24-49 0-18 8-37 24-65z" fill="#fff0bf" opacity="0.92"/>
+  <path d="M256 326v92" stroke="url(#gold)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M256 326c-4 34-16 58-32 76-20 24-30 52-30 84" fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <path d="M256 326c4 34 16 58 32 76 20 24 30 52 30 84" fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <text x="256" y="470" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="26" letter-spacing="9" fill="#d9ad5b" opacity="0.9">LES MISÉRABLES</text>
+</svg>

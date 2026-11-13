@@ -1,6 +1,6 @@
 # Data inventory
 
-Generated: 2026-11-10T18:33:49+00:00
+Generated: 2026-11-10T16:07:58+00:00
 
 Pilot: **Fidenza urbana** — detail bbox WGS84 `[10.038, 44.835, 10.108, 44.884]`
 Context bbox WGS84 `[10.0348, 44.8327, 10.1112, 44.8863]`; pilot buildings are LOD3, context is LOD1.
@@ -9,38 +9,38 @@ Context bbox WGS84 `[10.0348, 44.8327, 10.1112, 44.8863]`; pilot buildings are L
 
 | Source | Product | CRS | Path | License |
 | --- | --- | --- | --- | --- |
-| osm | pilot buildings, roads and street furniture | EPSG:4326 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/osm/buildings.geojson | ODbL 1.0 |
-| rer_ortho | orthophoto RGB | EPSG:7791 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/rer/ortho_rgb.tif | CC BY 4.0 |
-| rer_ortho | orthophoto NIR | EPSG:7791 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/rer/ortho_nir.tif | CC BY 4.0 |
-| rer_ortho | orthophoto RGB 0.5 m pilot | EPSG:7791 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/rer/ortho_rgb_05.tif | CC BY 4.0 |
-| rer_ortho | orthophoto NIR 0.5 m pilot | EPSG:7791 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/rer/ortho_nir_05.tif | CC BY 4.0 |
-| rer_ortho | orthophoto RGB 0.2 m centro | EPSG:7791 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/rer/ortho_rgb_02.tif | CC BY 4.0 |
-| rer_ortho | orthophoto NIR 0.2 m centro | EPSG:7791 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/rer/ortho_nir_02.tif | CC BY 4.0 |
-| rer_dtm | DTM 0.5 m | EPSG:7791 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/rer/dtm_rer2023_24.tif | CC BY 4.0 |
-| rer_dsm_agea2008 | DSM AGEA 2008 | EPSG:7791 | /Users/jessicabottarelli/Desktop/Gandalf/Github/random2/fidenza-recon/data/raw/rer/dsm_agea2008.tif | RER public service — license to verify before redistribution |
+| osm | pilot buildings, roads and street furniture | EPSG:4326 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/osm/buildings.geojson | ODbL 1.0 |
+| rer_ortho | orthophoto RGB | EPSG:7791 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/rer/ortho_rgb.tif | CC BY 4.0 |
+| rer_ortho | orthophoto NIR | EPSG:7791 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/rer/ortho_nir.tif | CC BY 4.0 |
+| rer_ortho | orthophoto RGB 0.5 m pilot | EPSG:7791 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/rer/ortho_rgb_05.tif | CC BY 4.0 |
+| rer_ortho | orthophoto NIR 0.5 m pilot | EPSG:7791 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/rer/ortho_nir_05.tif | CC BY 4.0 |
+| rer_ortho | orthophoto RGB 0.2 m centro | EPSG:7791 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/rer/ortho_rgb_02.tif | CC BY 4.0 |
+| rer_ortho | orthophoto NIR 0.2 m centro | EPSG:7791 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/rer/ortho_nir_02.tif | CC BY 4.0 |
+| rer_dtm | DTM 0.5 m | EPSG:7791 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/rer/dtm_rer2023_24.tif | CC BY 4.0 |
+| rer_dsm_agea2008 | DSM AGEA 2008 | EPSG:7791 | /Users/lgandolfi/Desktop/AI/Github/random2/fidenza-recon/data/raw/rer/dsm_agea2008.tif | RER public service — license to verify before redistribution |
 
 ## Sources
 
 | Key | Name | License | URL | Retrieved |
 | --- | --- | --- | --- | --- |
-| dbtr | Database Topografico Regionale — Unità volumetrica (UVL) | CC BY 4.0 | https://servizigis.regione.emilia-romagna.it/wms/dbtr | 2026-11-10T18:33:47+00:00 |
+| dbtr | Database Topografico Regionale — Unità volumetrica (UVL) | CC BY 4.0 | https://servizigis.regione.emilia-romagna.it/wms/dbtr | 2026-11-10T12:43:11+00:00 |
 | kartaview | KartaView (OpenStreetCam) | per-sequence; verify before use | https://kartaview.org/ | 2026-11-10T10:29:13+00:00 |
-| osm | OpenStreetMap via Overpass API | ODbL 1.0 | https://www.openstreetmap.org/ | 2026-11-10T18:29:57+00:00 |
+| osm | OpenStreetMap via Overpass API | ODbL 1.0 | https://www.openstreetmap.org/ | 2026-11-10T10:11:30+00:00 |
 | rer_dsm_agea2008 | Regione Emilia-Romagna public ArcGIS service — DSM AGEA 2008 | RER public service — license to verify before redistribution | https://servizigis.regione.emilia-romagna.it/arcgis/rest/services/public/DsmAgea2008/ImageServer | None |
 | rer_dtm | Regione Emilia-Romagna — DTM RER 2023-24 | CC BY 4.0 | https://geoportale.regione.emilia-romagna.it/approfondimenti/rer23_24 | None |
 | rer_ortho | Regione Emilia-Romagna — Ortofoto RER 2023-24 RGB/NIR | CC BY 4.0 | https://geoportale.regione.emilia-romagna.it/approfondimenti/rer23_24 | None |
-| wikimedia_commons | Wikimedia Commons | per-file (CC BY / CC BY-SA / public domain) | https://commons.wikimedia.org/ | 2026-11-10T18:33:44+00:00 |
+| wikimedia_commons | Wikimedia Commons | per-file (CC BY / CC BY-SA / public domain) | https://commons.wikimedia.org/ | 2026-11-10T10:36:08+00:00 |
 
 ## Counts
 
-- Buildings: 638 (259 pilot + 379 context)
-- Windows (procedural): 9816
-- Balconies (procedural): 1449
-- Landmarks: 5
-- Road segments: 248
-- Street props: 148
-- Detail chunks: 13
-- Districts: unknown: 638
+- Buildings: 4585 (4160 pilot + 425 context)
+- Windows (procedural): 130702
+- Balconies (procedural): 27644
+- Landmarks: 13
+- Road segments: 2587
+- Street props: 764
+- Detail chunks: 864
+- Districts: luce: 1118, centro: 895, corea: 722, azalee: 657, coduro: 622, sanlazzaro: 302, monica: 269
 
 ## Discovery notes
 

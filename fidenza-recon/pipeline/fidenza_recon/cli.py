@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from .config import ensure_dirs, load_config
+from .config import DOCS_DIR, PROCESSED_DIR, ensure_dirs, load_config
 from .db import connect, init_db
 
 
@@ -13,7 +13,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(prog="fidenza-recon")
     parser.add_argument(
         "command",
-        choices=["fetch", "analyze", "generate", "report", "audit", "export", "all"],
+        choices=["fetch", "analyze", "generate", "report", "audit", "coverage", "export", "all"],
     )
     parser.add_argument("--force", action="store_true", help="ignore cached outputs")
     parser.add_argument("--skip-imagery", action="store_true", help="skip KartaView/Commons probes")
@@ -112,6 +112,18 @@ def main() -> None:
         outputs = data_audit.generate(config)
         for name, path in outputs.items():
             print(f"wrote {name}: {path}")
+
+    if args.command == "coverage":
+        from .validate import coverage
+
+        result = coverage.analyze(config)
+        print(
+            f"coverage: {result['coverage_pct']}% of built-up surface, "
+            f"{result['candidate_count']} candidates"
+        )
+        print(f"wrote: {PROCESSED_DIR / 'coverage_audit.json'}")
+        print(f"wrote: {DOCS_DIR / 'COVERAGE_AUDIT.md'}")
+        print(f"wrote: {DOCS_DIR / 'screenshots' / '08-coverage-gaps.png'}")
 
 
 if __name__ == "__main__":
