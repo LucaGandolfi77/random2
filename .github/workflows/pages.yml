@@ -36,7 +36,6 @@ jobs:
             la-corona-e-la-testa/package-lock.json
             anna-karenina-film/package-lock.json
             briscola-pwa/package-lock.json
-            les-miserables-film/package-lock.json
             self-non-self/package-lock.json
 
       - name: Build BUCIO (Vite + PWA)
@@ -91,14 +90,6 @@ jobs:
           npm test
           npm run build
 
-      - name: Build LES MISÉRABLES — Le Fil d'Or
-        working-directory: les-miserables-film
-        run: |
-          npm ci
-          npm run typecheck
-          npm test
-          npm run build
-
       - name: Build NEVE E FERRO
         working-directory: anna-karenina-film
         env:
@@ -135,7 +126,6 @@ jobs:
           cp -R il-prezzo-della-liberta/dist/ _site/il-prezzo-della-liberta/
           cp -R la-corona-e-la-testa/dist/ _site/la-corona-e-la-testa/
           cp -R briscola-pwa/dist/ _site/briscola-pwa/
-          cp -R les-miserables-film/dist/ _site/les-miserables-film/
           cp -R anna-karenina-film/dist/ _site/anna-karenina-film/
           cp -R self-non-self/dist/ _site/self-non-self/
           touch _site/.nojekyll

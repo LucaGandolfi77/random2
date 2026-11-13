@@ -1728,8 +1728,6 @@ races — the newest deploy wins. The published URL is
 | Dottor Gelo (dev) | `cd dottor-gelo-pwa && npm install && npm run dev` | Vite dev server |
 | Dottor Gelo (test) | `cd dottor-gelo-pwa && npm test` | Node test runner |
 | Dottor Gelo (prod) | `cd dottor-gelo-pwa && npm run build` | serves `dottor-gelo-pwa/dist/` |
-| Le Fil d'Or (dev) | `cd les-miserables-film && npm install && npm run dev` | Vite dev server |
-| Le Fil d'Or (test/build) | `cd les-miserables-film && npm test && npm run build` | serves `les-miserables-film/dist/` |
 | SELF / NON-SELF (dev) | `cd self-non-self && npm install && npm run dev` | Vite dev server |
 | SELF / NON-SELF (test/build) | `cd self-non-self && npm test && npm run build` | serves `self-non-self/dist/` |
 | EADS | `cd EADS && pip install -r requirements*.txt && python app.py` | Flask UI |
