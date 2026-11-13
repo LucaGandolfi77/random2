@@ -134,6 +134,9 @@ export const scene04: SceneDef = {
       "Il matrimonio era stato una promessa in una chiesa d'oro. Il resto, una vita di gesti misurati.",
       'narration'
     ),
+    line('s04-k0', 14, 21, 'KARENIN', "Il dovere non è una catena, Anna. È una forma di cura."),
+    line('s04-a0', 23, 29, 'ANNA', "La cura non dovrebbe chiedere permesso."),
+    line('s04-s1', 31, 38, 'SERYOZHA', "Perché papà parla sempre di ciò che è giusto?"),
     line(
       's04-n2',
       42,
@@ -142,6 +145,9 @@ export const scene04: SceneDef = {
       'Aveva tutto ciò che una donna poteva desiderare. Era la frase che le ripetevano.',
       'narration'
     ),
+    line('s04-t1', 52, 60, 'ANNA', "In questa casa ogni cosa aveva un posto. Anche il mio silenzio.", 'thought'),
+    line('s04-k2', 64, 72, 'KARENIN', "Il silenzio non è una risposta."),
+    line('s04-a2', 74, 82, 'ANNA', "Per me lo è."),
     line('s04-k1', 84, 92, 'KARENIN', 'La nostra vita è ordinata, Anna. È una forma di rispetto.'),
     line('s04-a1', 93, 101, 'ANNA', 'Per chi?'),
     line('s04-n3', 104, 112, 'NARRAZIONE', 'Anna guardò fuori. La neve non rispondeva.', 'narration')

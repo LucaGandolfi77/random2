@@ -6,7 +6,7 @@
 - Durata: 25:00 (1500 secondi)
 - Scene: 12
 - Inquadrature: 79
-- Dialoghi, intertitoli e sottotitoli: 67
+- Dialoghi, pensieri e sottotitoli: 136
 
 > Un inverno. Un treno. Una scelta.  
 > L'amore non sempre salva: a volte rivela la gabbia.
@@ -50,11 +50,15 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 00:56–01:16 · *s01-anna-entrance* · ballroom · anna, society, society
 - 01:16–01:30 · *s01-anna-close* · ballroom · anna
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
 - **00:03–00:12 · NARRAZIONE**: A Pietroburgo l'inverno non finisce: si ritira dietro i vetri e aspetta.
+- **00:15–00:22 · CAPOSTAZIONE**: Il treno da Mosca è in ritardo.
+- **00:23–00:30 · SOCIETÀ**: Come tutte le cose importanti.
+- **00:31–00:39 · SOCIETÀ**: Dicono che porti una donna sola.
 - **00:41–00:50 · NARRAZIONE**: La società aveva una superficie perfetta. Come il ghiaccio, non perdonava chi la incrinava.
 - **00:58–01:07 · NARRAZIONE**: Anna entrò nella sala come si entra in una fotografia: tutti la videro. Nessuno la guardò.
+- **01:08–01:16 · PENSIERO DI ANNA**: Sorrido. È l'unica cosa che so fare con una stanza piena di occhi.
 - **01:19–01:28 · ANNA**: Non avevo chiesto di essere guardata.
 
 **Transizione in uscita:** fade
@@ -76,8 +80,12 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:24–01:42 · *s02-glove* · train · anna, vronsky
 - 01:42–02:00 · *s02-platform* · station · anna, vronsky
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
+- **00:08–00:16 · PENSIERO DI ANNA**: Il treno correva verso casa. Io non sapevo più dove fosse.
+- **00:22–00:29 · VRONSKIJ**: Permesso?
+- **00:30–00:38 · ANNA**: Il vagone è vuoto.
+- **00:39–00:44 · VRONSKIJ**: Non tutto.
 - **00:45–00:53 · ANNA**: Non guardarmi come se avessi già deciso per me.
 - **00:54–01:01 · VRONSKIJ**: E se fosse la prima cosa che vedo di te?
 - **01:06–01:14 · ANNA**: Non sai nulla di me.
@@ -107,13 +115,18 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:36–01:50 · *s03-mirror* · ballroom · anna
 - 01:50–02:00 · *s03-empty* · ballroom · society, society
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
+- **00:03–00:10 · KITTY**: Stasera sarà perfetto.
+- **00:12–00:19 · SOCIETÀ**: La perfezione si nota solo quando si rompe.
 - **00:22–00:29 · KITTY**: Ti ho aspettato.
 - **00:30–00:36 · VRONSKIJ**: Mi dispiace.
+- **00:40–00:48 · SOCIETÀ**: La contessa balla come se il marito non esistesse.
+- **00:50–00:58 · SOCIETÀ**: Il marito esiste. È il resto che non guarda.
 - **01:00–01:08 · ANNA**: Non avrei dovuto venire.
 - **01:09–01:17 · VRONSKIJ**: Sei qui.
 - **01:20–01:28 · NARRAZIONE**: La felicità di Kitty si spezzò senza rumore, come un cristallo sotto la neve.
+- **01:29–01:37 · PENSIERO DI KITTY**: Guardavo la porta. Ogni volta che si apriva, il mio futuro entrava o usciva.
 - **01:38–01:46 · NARRAZIONE**: Il valzer continuò. Il mondo, no.
 
 **Transizione in uscita:** fade
@@ -135,10 +148,16 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:22–01:42 · *s04-clock* · palace · anna, karenin
 - 01:42–02:00 · *s04-alone* · palace · anna
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
 - **00:03–00:11 · NARRAZIONE**: Il matrimonio era stato una promessa in una chiesa d'oro. Il resto, una vita di gesti misurati.
+- **00:14–00:21 · KARENIN**: Il dovere non è una catena, Anna. È una forma di cura.
+- **00:23–00:29 · ANNA**: La cura non dovrebbe chiedere permesso.
+- **00:31–00:38 · SERYOZHA**: Perché papà parla sempre di ciò che è giusto?
 - **00:42–00:50 · NARRAZIONE**: Aveva tutto ciò che una donna poteva desiderare. Era la frase che le ripetevano.
+- **00:52–01:00 · PENSIERO DI ANNA**: In questa casa ogni cosa aveva un posto. Anche il mio silenzio.
+- **01:04–01:12 · KARENIN**: Il silenzio non è una risposta.
+- **01:14–01:22 · ANNA**: Per me lo è.
 - **01:24–01:32 · KARENIN**: La nostra vita è ordinata, Anna. È una forma di rispetto.
 - **01:33–01:41 · ANNA**: Per chi?
 - **01:44–01:52 · NARRAZIONE**: Anna guardò fuori. La neve non rispondeva.
@@ -163,13 +182,19 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:54–02:14 · *s05-guilt* · apartment · anna, vronsky
 - 02:14–02:30 · *s05-departure* · apartment · anna, vronsky
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
+- **00:06–00:16 · PENSIERO DI ANNA**: La porta si chiuse. Il mondo rimase fuori, e per la prima volta non mi mancò.
+- **00:18–00:26 · VRONSKIJ**: Fuori c'è la neve. Qui dentro non esiste.
+- **00:28–00:36 · ANNA**: Esiste. La sento sciogliersi.
 - **00:46–00:54 · ANNA**: Con te non ho paura di essere felice.
 - **00:55–01:03 · VRONSKIJ**: Allora non chiudere gli occhi.
 - **01:04–01:12 · ANNA**: Li chiudo per non vedere quanto durerà.
+- **01:14–01:22 · VRONSKIJ**: Allora guarda me.
+- **01:24–01:30 · ANNA**: Ti sto guardando. È per questo che ho paura.
 - **01:32–01:40 · ANNA**: Se questa è colpa, voglio sapere di cosa sono colpevole.
 - **01:41–01:49 · VRONSKIJ**: Di essere viva.
+- **01:50–01:55 · PENSIERO DI VRONSKIJ**: Non avevo mai visto una donna avere tanta paura di essere felice.
 - **01:56–02:06 · NARRAZIONE**: Amare Vronskij era l'unica cosa che le sembrasse vera. Per questo era imperdonabile.
 - **02:16–02:22 · ANNA**: Domani?
 - **02:23–02:29 · VRONSKIJ**: Domani.
@@ -194,10 +219,15 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:24–01:44 · *s06-crowd* · racecourse · anna, society, society
 - 01:44–02:00 · *s06-rain* · train · anna
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
 - **00:02–00:10 · ANNA**: Non guardarmi.
 - **00:11–00:18 · KARENIN**: Non sono io che ti sto guardando.
+- **00:21–00:29 · SOCIETÀ**: Il cavaliere di Anna ha una caduta elegante.
+- **00:31–00:38 · SOCIETÀ**: Le cadute eleganti sono le più pericolose.
+- **00:40–00:48 · PENSIERO DI ANNA**: Quando cadde, il mondo trattenne il respiro. Io avevo già smesso.
+- **00:52–01:00 · ANNA**: Si è fatto male?
+- **01:02–01:09 · KARENIN**: Si è fatto notare.
 - **01:10–01:18 · KARENIN**: Hai reso pubblica la tua vergogna.
 - **01:19–01:27 · ANNA**: Ho reso pubblica la tua indifferenza.
 - **01:30–01:40 · NARRAZIONE**: Fu il momento in cui la società smise di guardarla come una donna e cominciò a guardarla come una colpa.
@@ -222,12 +252,17 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:22–01:42 · *s07-baby* · bedroom · anna, karenin
 - 01:42–02:00 · *s07-face* · bedroom · anna
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
+- **00:03–00:10 · KARENIN**: Il medico dice che è febbre. Io dico che è una verità.
+- **00:12–00:19 · ANNA**: Seryozha...
 - **00:24–00:32 · KARENIN**: Ti ho odiata. Eppure non posso desiderare la tua morte.
 - **00:33–00:41 · ANNA**: Se potessi tornare indietro...
+- **00:43–00:50 · ANNA**: Perché mi curi?
+- **00:52–01:00 · KARENIN**: Perché non so odiarti abbastanza.
 - **01:04–01:12 · KARENIN**: Non ti perdono perché sono buono. Ti perdono perché non so fare altrimenti.
 - **01:13–01:21 · ANNA**: Allora siamo entrambi prigionieri.
+- **01:24–01:32 · PENSIERO DI KARENIN**: Il perdono mi sembrò una stanza vuota. Ci entrai comunque.
 - **01:44–01:54 · NARRAZIONE**: Per un istante, il perdono sembrò una stanza in cui tutti potevano stare.
 
 **Transizione in uscita:** fade
@@ -250,13 +285,22 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:50–02:12 · *s08-room* · palace · anna
 - 02:12–02:30 · *s08-alone* · palace · anna
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
 - **00:04–00:12 · ANNA**: Ho scelto. Ma ogni mattina devo scegliere di nuovo.
 - **00:13–00:20 · VRONSKIJ**: Siamo liberi.
 - **00:21–00:31 · ANNA**: No. Libera è la parola che usano quelli che non hanno più niente da perdere.
+- **00:34–00:42 · VRONSKIJ**: Questa casa è nostra.
+- **00:44–00:52 · ANNA**: Nessuna casa è nostra se non possiamo invitare nessuno.
+- **00:54–01:02 · ANNA**: Ho scritto a Seryozha.
+- **01:04–01:12 · VRONSKIJ**: E ti ha risposto?
+- **01:14–01:22 · ANNA**: La lettera è tornata chiusa.
+- **01:24–01:29 · PENSIERO DI ANNA**: Avevo lasciato una casa per costruirne un'altra. Avevo dimenticato le porte.
 - **01:30–01:40 · NARRAZIONE**: La sua nuova vita era una casa senza porte.
+- **01:42–01:50 · ANNA**: Se ti chiedessi di rinunciare a tutto, lo faresti?
 - **01:52–02:00 · ANNA**: Non posso vederlo, vero?
+- **02:02–02:10 · ANNA**: Voglio vedere mio figlio.
+- **02:11–02:15 · VRONSKIJ**: Non oggi.
 - **02:16–02:26 · NARRAZIONE**: Aveva scelto l'amore. Scoprì che l'amore, da solo, non basta a costruire una casa.
 
 **Transizione in uscita:** fade
@@ -278,11 +322,17 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:22–01:42 · *s09-mirror* · apartment · anna
 - 01:42–02:00 · *s09-distance* · palace · anna, vronsky, society
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
+- **00:03–00:10 · SOCIETÀ**: Non è più una donna. È un argomento.
+- **00:12–00:19 · SOCIETÀ**: Un argomento che stanca.
 - **00:24–00:32 · NARRAZIONE**: La società non la condannò con un verdetto. Le tolse semplicemente le sedie intorno.
 - **00:46–00:54 · UNA DAMA**: Non possiamo riceverla.
+- **00:56–01:04 · ANNA**: Non chiedo di essere ricevuta. Chiedo di essere vista.
+- **01:06–01:14 · VRONSKIJ**: Dimenticali.
+- **01:16–01:23 · ANNA**: Loro non dimenticano me.
 - **01:24–01:32 · NARRAZIONE**: Anche l'amore, quando resta solo, comincia a somigliare a una stanza chiusa.
+- **01:33–01:39 · PENSIERO DI ANNA**: La stanza era piena di gente. Non c'era più spazio per me.
 - **01:40–01:48 · ANNA**: Perché mi guardano?
 - **01:49–01:57 · VRONSKIJ**: Perché sei più bella di loro.
 
@@ -305,10 +355,16 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:24–01:44 · *s10-window* · izba · kitty, levin
 - 01:44–02:00 · *s10-dawn* · country · kitty, levin
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
+- **00:04–00:12 · LEVIN**: La terra non ha fretta.
+- **00:23–00:30 · KITTY**: Noi ne abbiamo avuta troppa.
+- **00:40–00:45 · PENSIERO DI LEVIN**: In campagna il tempo non guariva le ferite. Insegnava a portarle.
 - **00:46–00:54 · KITTY**: Non volevo una vita straordinaria. Volevo una vita che restasse.
 - **00:55–01:03 · LEVIN**: La terra non mente. Ti dà ciò che le dai.
+- **01:04–01:12 · KITTY**: Anna mi ha scritto.
+- **01:13–01:20 · LEVIN**: Cosa dice?
+- **01:21–01:25 · KITTY**: Che è felice. Non le ho creduto.
 - **01:26–01:34 · LEVIN**: Il lavoro, la terra, tu. Non so se è poco o molto. So che è vero.
 - **01:35–01:43 · KITTY**: Allora basta.
 - **01:46–01:54 · NARRAZIONE**: Nello stesso tempo, in un altro punto della Russia, due persone imparavano una felicità più lenta.
@@ -336,12 +392,21 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 02:04–02:18 · *s11-light* · station · anna
 - 02:18–02:30 · *s11-aftermath* · station · nessun personaggio in campo
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
 - **00:02–00:10 · NARRAZIONE**: La stazione era l'unico luogo in cui Anna non doveva spiegare perché stava andando via.
+- **00:12–00:19 · CAPOSTAZIONE**: Il treno per Mosca è in arrivo.
+- **00:20–00:27 · ANNA**: C'è un treno che non parte mai?
+- **00:28–00:35 · SOCIETÀ**: È lei.
 - **00:42–00:50 · ANNA**: Forse il silenzio non è la fine. Forse è l'unico posto dove non devo spiegarmi.
+- **00:52–00:59 · VRONSKIJ**: Domani.
+- **01:00–01:07 · ANNA**: Domani è una parola che ho consumato.
+- **01:16–01:23 · SERYOZHA**: Mamma, tornerai?
+- **01:24–01:30 · ANNA**: Torno sempre.
+- **01:32–01:44 · PENSIERO DI ANNA**: Ho contato le stazioni come anni. Nessuna mi ha riportata indietro.
 - **01:46–01:56 · ANNA**: Forse ho solo bisogno che il rumore finisca.
 - **01:58–02:06 · NARRAZIONE**: Non cercava la morte. Cercava un luogo dove il rumore finisse.
+- **02:08–02:18 · PENSIERO DI ANNA**: Il rumore non mi ha mai lasciata sola.
 - **02:20–02:28 · NARRAZIONE**: La neve continuò a cadere.
 
 **Transizione in uscita:** black · musica in silenzio da 02:04
@@ -363,9 +428,13 @@ Il finale non mostra il corpo di Anna. Mostra l'assenza, la neve che copre le tr
 - 01:28–01:48 · *s12-horizon* · country · kitty, levin
 - 01:48–02:00 · *s12-tracks* · tracks · nessun personaggio in campo
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
 - **00:04–00:12 · NARRAZIONE**: La neve copre i binari. Non il rumore.
+- **00:14–00:22 · PENSIERO DI KITTY**: La neve copriva i binari. Sotto, la vita continuava a fare rumore.
+- **01:06–01:14 · KITTY**: Hai sentito?
+- **01:15–01:22 · LEVIN**: Sì.
+- **01:23–01:29 · KITTY**: Non è giusto.
 - **01:30–01:38 · KITTY**: Perché?
 - **01:39–01:47 · LEVIN**: Non lo so. Ma è qui che dobbiamo vivere.
 - **01:50–01:58 · NARRAZIONE**: Resta la neve. Resta il rumore. Resta la domanda.

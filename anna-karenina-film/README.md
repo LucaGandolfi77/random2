@@ -2,7 +2,7 @@
 
 **Un film d'animazione originale ispirato ad *Anna Karenina* di Lev Tolstoj.**
 
-25 minuti · 12 sequenze · 79 inquadrature · dialoghi e sottotitoli in italiano · colonna sonora originale · PWA offline.
+25 minuti · 12 sequenze · 79 inquadrature · dialoghi, pensieri e sottotitoli in italiano · colonna sonora originale · PWA offline.
 
 > Un inverno. Un treno. Una scelta.  
 > L'amore non sempre salva: a volte rivela la gabbia.
@@ -28,7 +28,7 @@ La versione cinematografica usa **narrazione scritta in intertitoli e dialoghi i
 ## Caratteristiche
 
 - **Timeline centrale unica** da 1500 secondi, con play/pausa/seek senza desincronizzazione.
-- **12 sequenze**, 79 inquadrature, 67 cue di dialogo/narrazione, nessuna scena placeholder.
+- **12 sequenze**, 79 inquadrature, 136 cue di dialogo, pensiero e narrazione, nessuna scena placeholder.
 - **Personaggi SVG** con rig 2D, espressioni, sguardo, battito di ciglia, respiro, mani, vestiti e viste di spalle.
 - **Ambienti vettoriali a strati** con parallasse, profondità di campo simulata, luci, crowd silhouettes e primo piano sfocato.
 - **Camera virtuale** con dolly, pan, zoom, rack focus simulato e tagli interni.
@@ -36,6 +36,7 @@ La versione cinematografica usa **narrazione scritta in intertitoli e dialoghi i
 - **Colonna sonora originale** da camera sintetizzata in tempo reale via Web Audio: pianoforte, archi, violoncello, violino, flauto, campane, percussioni.
 - **Sound design procedurale**: treno, fischi, vapore, passi, porte, orologi, campane, vento, pioggia, cavalli, fuoco, samovar, uccelli.
 - **Sottotitoli** cinematografici, attivabili/disattivabili, con testi in `src/subtitles/it.ts` separati dai cue di timing e speaker.
+- **Tre registri**: dialogo, pensiero interiore in corsivo con etichetta del personaggio, e narrazione. Ogni capitolo ha almeno un pensiero: Anna, Kitty, Vronsky, Karenin e Levin.
 - **Player completo** con capitoli, barra di avanzamento, tempo trascorso/rimanente, volume, mute, sottotitoli, fullscreen, ricomincia, resume.
 - **PWA installabile** con manifest, icone originali, splash, service worker e cache integrale.
 - **Offline reale** dopo il primo caricamento completo.

@@ -130,6 +130,10 @@ export const scene02: SceneDef = {
     )
   ],
   subtitles: [
+    line('s02-t1', 8, 16, 'ANNA', "Il treno correva verso casa. Io non sapevo più dove fosse.", 'thought'),
+    line('s02-v0', 22, 29, 'VRONSKIJ', "Permesso?"),
+    line('s02-a0', 30, 38, 'ANNA', "Il vagone è vuoto."),
+    line('s02-v4', 39, 44, 'VRONSKIJ', "Non tutto."),
     line('s02-a1', 45, 53, 'ANNA', 'Non guardarmi come se avessi già deciso per me.'),
     line('s02-v1', 54, 61, 'VRONSKIJ', 'E se fosse la prima cosa che vedo di te?'),
     line('s02-a2', 66, 74, 'ANNA', 'Non sai nulla di me.'),

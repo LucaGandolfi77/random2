@@ -20,7 +20,7 @@
 | 12 scene | ✅ | `src/data/film.ts`, test |
 | Durata 1500 s | ✅ | test timeline e validazione |
 | 79 inquadrature | ✅ | test e storyboard |
-| 67 cue dialogo/narrazione | ✅ | test e sceneggiatura |
+| 136 cue dialogo/pensiero/narrazione | ✅ | test e sceneggiatura |
 | Nessuna scena vuota | ✅ | shot sweep 79/79, 0 frame sotto soglia di luminosità |
 | Nessun errore console | ✅ | shot sweep + E2E |
 | Pausa congela il tempo | ✅ | E2E |

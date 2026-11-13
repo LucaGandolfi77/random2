@@ -150,6 +150,12 @@ export const scene08: SceneDef = {
       'ANNA',
       'No. Libera è la parola che usano quelli che non hanno più niente da perdere.'
     ),
+    line('s08-v0', 34, 42, 'VRONSKIJ', "Questa casa è nostra."),
+    line('s08-a4', 44, 52, 'ANNA', "Nessuna casa è nostra se non possiamo invitare nessuno."),
+    line('s08-a5', 54, 62, 'ANNA', "Ho scritto a Seryozha."),
+    line('s08-v4', 64, 72, 'VRONSKIJ', "E ti ha risposto?"),
+    line('s08-a6', 74, 82, 'ANNA', "La lettera è tornata chiusa."),
+    line('s08-t1', 84, 89, 'ANNA', "Avevo lasciato una casa per costruirne un'altra. Avevo dimenticato le porte.", 'thought'),
     line(
       's08-n1',
       90,
@@ -158,7 +164,10 @@ export const scene08: SceneDef = {
       'La sua nuova vita era una casa senza porte.',
       'narration'
     ),
+    line('s08-a7', 102, 110, 'ANNA', "Se ti chiedessi di rinunciare a tutto, lo faresti?"),
     line('s08-a3', 112, 120, 'ANNA', 'Non posso vederlo, vero?'),
+    line('s08-a8', 122, 130, 'ANNA', "Voglio vedere mio figlio."),
+    line('s08-v5', 131, 135, 'VRONSKIJ', "Non oggi."),
     line(
       's08-n2',
       136,

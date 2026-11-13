@@ -564,6 +564,26 @@
   line-height: 1.24;
 }
 
+.subtitle-layer.is-thought .subtitle-card {
+  padding: 0;
+  background: none;
+  max-width: 52ch;
+}
+
+.subtitle-layer.is-thought .subtitle-speaker {
+  color: rgba(214, 225, 232, 0.62);
+  font-size: 7.5px;
+  letter-spacing: 0.3em;
+}
+
+.subtitle-layer.is-thought .subtitle-text {
+  color: #dce5e9;
+  font-style: italic;
+  font-size: clamp(20px, 2.25vw, 32px);
+  line-height: 1.26;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
 .pause-screen {
   position: absolute;
   inset: 0;

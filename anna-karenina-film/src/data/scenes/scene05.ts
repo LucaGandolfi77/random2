@@ -143,11 +143,17 @@ export const scene05: SceneDef = {
     )
   ],
   subtitles: [
+    line('s05-t1', 6, 16, 'ANNA', "La porta si chiuse. Il mondo rimase fuori, e per la prima volta non mi mancò.", 'thought'),
+    line('s05-v0', 18, 26, 'VRONSKIJ', "Fuori c'è la neve. Qui dentro non esiste."),
+    line('s05-a0', 28, 36, 'ANNA', "Esiste. La sento sciogliersi."),
     line('s05-a1', 46, 54, 'ANNA', 'Con te non ho paura di essere felice.'),
     line('s05-v1', 55, 63, 'VRONSKIJ', 'Allora non chiudere gli occhi.'),
     line('s05-a2', 64, 72, 'ANNA', 'Li chiudo per non vedere quanto durerà.'),
+    line('s05-v4', 74, 82, 'VRONSKIJ', "Allora guarda me."),
+    line('s05-a5', 84, 90, 'ANNA', "Ti sto guardando. È per questo che ho paura."),
     line('s05-a3', 92, 100, 'ANNA', 'Se questa è colpa, voglio sapere di cosa sono colpevole.'),
     line('s05-v2', 101, 109, 'VRONSKIJ', 'Di essere viva.'),
+    line('s05-t2', 110, 115, 'VRONSKIJ', "Non avevo mai visto una donna avere tanta paura di essere felice.", 'thought'),
     line(
       's05-n1',
       116,

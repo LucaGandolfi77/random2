@@ -123,6 +123,9 @@ export const scene01: SceneDef = {
       "A Pietroburgo l'inverno non finisce: si ritira dietro i vetri e aspetta.",
       'narration'
     ),
+    line('s01-c1', 15, 22, 'CAPOSTAZIONE', "Il treno da Mosca è in ritardo."),
+    line('s01-s1', 23, 30, 'SOCIETÀ', "Come tutte le cose importanti."),
+    line('s01-s2', 31, 39, 'SOCIETÀ', "Dicono che porti una donna sola."),
     line(
       's01-n2',
       41,
@@ -139,6 +142,7 @@ export const scene01: SceneDef = {
       "Anna entrò nella sala come si entra in una fotografia: tutti la videro. Nessuno la guardò.",
       'narration'
     ),
+    line('s01-t1', 68, 76, 'ANNA', "Sorrido. È l'unica cosa che so fare con una stanza piena di occhi.", 'thought'),
     line('s01-a1', 79, 88, 'ANNA', 'Non avevo chiesto di essere guardata.')
   ]
 };

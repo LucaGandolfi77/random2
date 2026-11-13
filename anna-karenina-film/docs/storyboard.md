@@ -8,7 +8,7 @@
 - Durata: 25:00 (1500 secondi)
 - Scene: 12
 - Inquadrature: 79
-- Dialoghi, intertitoli e sottotitoli: 67
+- Dialoghi, pensieri e sottotitoli: 136
 
 > Un inverno. Un treno. Una scelta.  
 > L'amore non sempre salva: a volte rivela la gabbia.

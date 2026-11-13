@@ -125,8 +125,12 @@ export const scene07: SceneDef = {
     )
   ],
   subtitles: [
+    line('s07-k0', 3, 10, 'KARENIN', "Il medico dice che è febbre. Io dico che è una verità."),
+    line('s07-a0', 12, 19, 'ANNA', "Seryozha..."),
     line('s07-k1', 24, 32, 'KARENIN', 'Ti ho odiata. Eppure non posso desiderare la tua morte.'),
     line('s07-a1', 33, 41, 'ANNA', 'Se potessi tornare indietro...'),
+    line('s07-a3', 43, 50, 'ANNA', "Perché mi curi?"),
+    line('s07-k3', 52, 60, 'KARENIN', "Perché non so odiarti abbastanza."),
     line(
       's07-k2',
       64,
@@ -135,6 +139,7 @@ export const scene07: SceneDef = {
       'Non ti perdono perché sono buono. Ti perdono perché non so fare altrimenti.'
     ),
     line('s07-a2', 73, 81, 'ANNA', 'Allora siamo entrambi prigionieri.'),
+    line('s07-t1', 84, 92, 'KARENIN', "Il perdono mi sembrò una stanza vuota. Ci entrai comunque.", 'thought'),
     line(
       's07-n1',
       104,

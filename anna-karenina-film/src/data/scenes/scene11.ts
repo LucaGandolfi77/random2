@@ -187,6 +187,9 @@ export const scene11: SceneDef = {
       "La stazione era l'unico luogo in cui Anna non doveva spiegare perché stava andando via.",
       'narration'
     ),
+    line('s11-c1', 12, 19, 'CAPOSTAZIONE', "Il treno per Mosca è in arrivo."),
+    line('s11-a0', 20, 27, 'ANNA', "C'è un treno che non parte mai?"),
+    line('s11-s1', 28, 35, 'SOCIETÀ', "È lei."),
     line(
       's11-a1',
       42,
@@ -194,6 +197,11 @@ export const scene11: SceneDef = {
       'ANNA',
       'Forse il silenzio non è la fine. Forse è l\'unico posto dove non devo spiegarmi.'
     ),
+    line('s11-v4', 52, 59, 'VRONSKIJ', "Domani."),
+    line('s11-a3', 60, 67, 'ANNA', "Domani è una parola che ho consumato."),
+    line('s11-s2', 76, 83, 'SERYOZHA', "Mamma, tornerai?"),
+    line('s11-a4', 84, 90, 'ANNA', "Torno sempre."),
+    line('s11-t1', 92, 104, 'ANNA', "Ho contato le stazioni come anni. Nessuna mi ha riportata indietro.", 'thought'),
     line('s11-a2', 106, 116, 'ANNA', 'Forse ho solo bisogno che il rumore finisca.'),
     line(
       's11-n2',
@@ -203,6 +211,7 @@ export const scene11: SceneDef = {
       'Non cercava la morte. Cercava un luogo dove il rumore finisse.',
       'narration'
     ),
+    line('s11-t2', 128, 138, 'ANNA', "Il rumore non mi ha mai lasciata sola.", 'thought'),
     line('s11-n3', 140, 148, 'NARRAZIONE', 'La neve continuò a cadere.', 'narration')
   ]
 };

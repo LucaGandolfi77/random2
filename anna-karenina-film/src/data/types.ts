@@ -169,7 +169,7 @@ export interface SubtitleCue {
   end: number;
   speaker: string;
   text: string;
-  kind?: 'dialogue' | 'narration';
+  kind?: 'dialogue' | 'narration' | 'thought';
 }
 
 export interface MusicMood {

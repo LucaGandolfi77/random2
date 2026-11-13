@@ -149,6 +149,11 @@ export const scene06: SceneDef = {
   subtitles: [
     line('s06-a1', 2, 10, 'ANNA', 'Non guardarmi.'),
     line('s06-k1', 11, 18, 'KARENIN', 'Non sono io che ti sto guardando.'),
+    line('s06-s1', 21, 29, 'SOCIETÀ', "Il cavaliere di Anna ha una caduta elegante."),
+    line('s06-s2', 31, 38, 'SOCIETÀ', "Le cadute eleganti sono le più pericolose."),
+    line('s06-t1', 40, 48, 'ANNA', "Quando cadde, il mondo trattenne il respiro. Io avevo già smesso.", 'thought'),
+    line('s06-a4', 52, 60, 'ANNA', "Si è fatto male?"),
+    line('s06-k3', 62, 69, 'KARENIN', "Si è fatto notare."),
     line('s06-k2', 70, 78, 'KARENIN', 'Hai reso pubblica la tua vergogna.'),
     line('s06-a2', 79, 87, 'ANNA', 'Ho reso pubblica la tua indifferenza.'),
     line(

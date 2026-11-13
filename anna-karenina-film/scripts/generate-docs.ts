@@ -14,7 +14,7 @@ const header = `# NEVE E FERRO
 - Durata: 25:00 (1500 secondi)
 - Scene: 12
 - Inquadrature: ${FILM.scenes.reduce((sum, scene) => sum + scene.shots.length, 0)}
-- Dialoghi, intertitoli e sottotitoli: ${FILM.scenes.reduce((sum, scene) => sum + scene.subtitles.length, 0)}
+- Dialoghi, pensieri e sottotitoli: ${FILM.scenes.reduce((sum, scene) => sum + scene.subtitles.length, 0)}
 
 > Un inverno. Un treno. Una scelta.  
 > L'amore non sempre salva: a volte rivela la gabbia.
@@ -35,7 +35,7 @@ const screenplaySections = FILM.scenes
     const lines = scene.subtitles
       .map(
         (cue) =>
-          `- **${formatTime(cue.start)}–${formatTime(cue.end)} · ${cue.kind === 'narration' ? 'NARRAZIONE' : cue.speaker}**: ${cue.text}`
+          `- **${formatTime(cue.start)}–${formatTime(cue.end)} · ${cue.kind === 'narration' ? 'NARRAZIONE' : cue.kind === 'thought' ? `PENSIERO DI ${cue.speaker}` : cue.speaker}**: ${cue.text}`
       )
       .join('\n');
     const shots = scene.shots
@@ -56,7 +56,7 @@ const screenplaySections = FILM.scenes
 
 ${shots}
 
-**Dialoghi e narrazione**
+**Dialoghi, pensieri e narrazione**
 
 ${lines || '- Nessuna battuta: la sequenza è affidata a immagine, montaggio e suono.'}
 

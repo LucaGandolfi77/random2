@@ -162,8 +162,12 @@ export const scene03: SceneDef = {
     )
   ],
   subtitles: [
+    line('s03-k0', 3, 10, 'KITTY', "Stasera sarà perfetto."),
+    line('s03-s0', 12, 19, 'SOCIETÀ', "La perfezione si nota solo quando si rompe."),
     line('s03-k1', 22, 29, 'KITTY', 'Ti ho aspettato.'),
     line('s03-v1', 30, 36, 'VRONSKIJ', 'Mi dispiace.'),
+    line('s03-s1', 40, 48, 'SOCIETÀ', "La contessa balla come se il marito non esistesse."),
+    line('s03-s2', 50, 58, 'SOCIETÀ', "Il marito esiste. È il resto che non guarda."),
     line('s03-a1', 60, 68, 'ANNA', 'Non avrei dovuto venire.'),
     line('s03-v2', 69, 77, 'VRONSKIJ', 'Sei qui.'),
     line(
@@ -174,6 +178,7 @@ export const scene03: SceneDef = {
       'La felicità di Kitty si spezzò senza rumore, come un cristallo sotto la neve.',
       'narration'
     ),
+    line('s03-t1', 89, 97, 'KITTY', "Guardavo la porta. Ogni volta che si apriva, il mio futuro entrava o usciva.", 'thought'),
     line('s03-n2', 98, 106, 'NARRAZIONE', 'Il valzer continuò. Il mondo, no.', 'narration')
   ]
 };

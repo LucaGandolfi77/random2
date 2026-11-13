@@ -60,7 +60,7 @@ export function line(
   end: number,
   speaker: string,
   text: string,
-  kind: 'dialogue' | 'narration' = 'dialogue'
+  kind: 'dialogue' | 'narration' | 'thought' = 'dialogue'
 ): SubtitleCue {
   return { id, start, end, speaker, text, kind };
 }

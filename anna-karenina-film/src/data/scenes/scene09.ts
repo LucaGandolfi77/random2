@@ -139,6 +139,8 @@ export const scene09: SceneDef = {
     )
   ],
   subtitles: [
+    line('s09-s1', 3, 10, 'SOCIETÀ', "Non è più una donna. È un argomento."),
+    line('s09-s2', 12, 19, 'SOCIETÀ', "Un argomento che stanca."),
     line(
       's09-n1',
       24,
@@ -148,6 +150,9 @@ export const scene09: SceneDef = {
       'narration'
     ),
     line('s09-d1', 46, 54, 'UNA DAMA', 'Non possiamo riceverla.'),
+    line('s09-a3', 56, 64, 'ANNA', "Non chiedo di essere ricevuta. Chiedo di essere vista."),
+    line('s09-v3', 66, 74, 'VRONSKIJ', "Dimenticali."),
+    line('s09-a4', 76, 83.5, 'ANNA', "Loro non dimenticano me."),
     line(
       's09-n2',
       84,
@@ -156,6 +161,7 @@ export const scene09: SceneDef = {
       "Anche l'amore, quando resta solo, comincia a somigliare a una stanza chiusa.",
       'narration'
     ),
+    line('s09-t1', 93, 99, 'ANNA', "La stanza era piena di gente. Non c'era più spazio per me.", 'thought'),
     line('s09-a1', 100, 108, 'ANNA', 'Perché mi guardano?'),
     line('s09-v1', 109, 117, 'VRONSKIJ', 'Perché sei più bella di loro.')
   ]

@@ -101,6 +101,10 @@ export const scene12: SceneDef = {
   ],
   subtitles: [
     line('s12-n1', 4, 12, 'NARRAZIONE', 'La neve copre i binari. Non il rumore.', 'narration'),
+    line('s12-t1', 14, 22, 'KITTY', "La neve copriva i binari. Sotto, la vita continuava a fare rumore.", 'thought'),
+    line('s12-k0', 66, 74, 'KITTY', "Hai sentito?"),
+    line('s12-l0', 75, 82, 'LEVIN', "Sì."),
+    line('s12-k1b', 83, 89, 'KITTY', "Non è giusto."),
     line('s12-k1', 90, 98, 'KITTY', 'Perché?'),
     line('s12-l1', 99, 107, 'LEVIN', 'Non lo so. Ma è qui che dobbiamo vivere.'),
     line(

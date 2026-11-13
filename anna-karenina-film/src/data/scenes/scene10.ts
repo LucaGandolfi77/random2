@@ -133,8 +133,14 @@ export const scene10: SceneDef = {
     )
   ],
   subtitles: [
+    line('s10-l0', 4, 12, 'LEVIN', "La terra non ha fretta."),
+    line('s10-k0', 23, 30, 'KITTY', "Noi ne abbiamo avuta troppa."),
+    line('s10-t1', 40, 45.5, 'LEVIN', "In campagna il tempo non guariva le ferite. Insegnava a portarle.", 'thought'),
     line('s10-k1', 46, 54, 'KITTY', 'Non volevo una vita straordinaria. Volevo una vita che restasse.'),
     line('s10-l1', 55, 63, 'LEVIN', 'La terra non mente. Ti dà ciò che le dai.'),
+    line('s10-k3', 64, 72, 'KITTY', "Anna mi ha scritto."),
+    line('s10-l3', 73, 80, 'LEVIN', "Cosa dice?"),
+    line('s10-k4', 81, 85.5, 'KITTY', "Che è felice. Non le ho creduto."),
     line('s10-l2', 86, 94, 'LEVIN', 'Il lavoro, la terra, tu. Non so se è poco o molto. So che è vero.'),
     line('s10-k2', 95, 103, 'KITTY', 'Allora basta.'),
     line(

@@ -42,7 +42,7 @@ export class SubtitleView {
     if (!this.enabled) {
       this.lastCue = null;
       this.currentId = null;
-      this.element.classList.remove('is-visible', 'is-narration', 'is-dialogue');
+      this.element.classList.remove('is-visible', 'is-narration', 'is-dialogue', 'is-thought');
       return;
     }
     const info = sceneAtTime(time);
@@ -56,10 +56,13 @@ export class SubtitleView {
     if (cue.id !== this.currentId) {
       this.currentId = cue.id;
       this.lastCue = cue;
-      this.speaker.textContent = cue.kind === 'narration' ? '' : cue.speaker;
+      const isNarration = cue.kind === 'narration';
+      const isThought = cue.kind === 'thought';
+      this.speaker.textContent = isNarration ? '' : isThought ? `PENSIERO DI ${cue.speaker}` : cue.speaker;
       this.text.textContent = subtitleText(cue.id, cue.text);
-      this.element.classList.toggle('is-narration', cue.kind === 'narration');
-      this.element.classList.toggle('is-dialogue', cue.kind !== 'narration');
+      this.element.classList.toggle('is-narration', isNarration);
+      this.element.classList.toggle('is-thought', isThought);
+      this.element.classList.toggle('is-dialogue', !isNarration && !isThought);
       this.element.classList.add('is-visible');
     }
   }

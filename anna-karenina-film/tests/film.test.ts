@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { FILM, sceneAtTime, sceneStarts } from '../src/data/film';
 import { validateFilm } from '../src/data/validate';
+import { IT_SUBTITLES } from '../src/subtitles/it';
 import { FilmTimeline } from '../src/engine/FilmTimeline';
 import {
   clearProgress,
@@ -86,15 +87,39 @@ describe('film data', () => {
 
   it('keeps every subtitle inside its scene and readable', () => {
     for (const scene of FILM.scenes) {
-      let previous = -1;
+      let previousEnd = -1;
       for (const cue of scene.subtitles) {
-        expect(cue.start).toBeGreaterThanOrEqual(previous);
+        expect(cue.start).toBeGreaterThan(previousEnd);
         expect(cue.end).toBeGreaterThan(cue.start);
         expect(cue.end).toBeLessThanOrEqual(scene.duration);
         expect(cue.text.trim().length).toBeGreaterThan(0);
         const cps = cue.text.length / (cue.end - cue.start);
         expect(cps).toBeLessThanOrEqual(22);
-        previous = cue.start;
+        previousEnd = cue.end;
+      }
+    }
+  });
+
+  it('has unique subtitle ids across the whole film', () => {
+    const ids = new Set<string>();
+    for (const scene of FILM.scenes) {
+      for (const cue of scene.subtitles) {
+        expect(ids.has(cue.id)).toBe(false);
+        ids.add(cue.id);
+      }
+    }
+  });
+
+  it('has at least one interior thought in every scene', () => {
+    for (const scene of FILM.scenes) {
+      expect(scene.subtitles.some((cue) => cue.kind === 'thought')).toBe(true);
+    }
+  });
+
+  it('has an Italian subtitle table entry for every cue', () => {
+    for (const scene of FILM.scenes) {
+      for (const cue of scene.subtitles) {
+        expect(IT_SUBTITLES[cue.id]).toBe(cue.text);
       }
     }
   });
