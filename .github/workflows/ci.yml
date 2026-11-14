@@ -88,7 +88,29 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          # Only directories that ship a manifest are expected to be PWAs.
+          # Only files that look like a web app manifest are expected to sit
+          # next to an index.html. The spec requires name or short_name, while
+          # data folders also ship a manifest.json (ground tile grids, the
+          # processed city metadata) and correctly have no index.html.
+          python3 - > /tmp/pwa-manifests.txt <<'PY'
+          import json, os
+
+          skip_dirs = {'node_modules', '.venv', 'dist', 'public', 'EADS', '.git'}
+          for root, dirs, files in os.walk('.'):
+              dirs[:] = [d for d in dirs if d not in skip_dirs]
+              for name in files:
+                  if name != 'manifest.json' and not name.endswith('.webmanifest'):
+                      continue
+                  path = os.path.join(root, name)
+                  try:
+                      with open(path, encoding='utf-8') as fh:
+                          data = json.load(fh)
+                  except Exception:
+                      # Invalid JSON is reported by the previous step.
+                      continue
+                  if isinstance(data, dict) and ('name' in data or 'short_name' in data):
+                      print(path)
+          PY
           while IFS= read -r mf; do
             dir=$(dirname "$mf")
             f="$dir/index.html"
@@ -98,10 +120,7 @@ jobs:
             else
               echo "FAIL $f (no manifest link)"; fail=1
             fi
-          done < <(find . \( -name 'manifest.json' -o -name '*.webmanifest' \) \
-                     -not -path '*/node_modules/*' -not -path '*/.venv/*' \
-                     -not -path '*/dist/*' -not -path '*/public/*' \
-                     -not -path './EADS/*')
+          done < /tmp/pwa-manifests.txt
           exit $fail
 
       - name: arcade.js exists only in shared/
