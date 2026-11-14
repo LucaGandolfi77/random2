@@ -146,13 +146,17 @@ jobs:
           BUILD_ID="${GITHUB_SHA::12}"
           BUILD_DIR="fidenza-city-v3"
           python3 - "$BUILD_ID" <<'PY'
-          import json, os, sys, datetime
+          import json, os, sys, datetime, re
           build_id = sys.argv[1]
+          config_path = os.path.join('fidenza-city-v3', 'js', 'config.js')
+          with open(config_path, encoding='utf-8') as fh:
+              config = fh.read()
+          version = re.search(r"export const VERSION = '([^']+)'", config).group(1)
           target = os.path.join('_site', 'fidenza-city-v3', 'build-info.json')
           os.makedirs(os.path.dirname(target), exist_ok=True)
           with open(target, 'w', encoding='utf-8') as fh:
               json.dump({
-                  'version': '3.1.0',
+                  'version': version,
                   'commit': os.environ.get('GITHUB_SHA', ''),
                   'buildId': build_id,
                   'builtAt': datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -160,7 +164,11 @@ jobs:
           print('build-info.json', target)
           PY
           SW="_site/fidenza-city-v3/sw.js"
-          sed -i "s/fidenza-da-giocare-v3\.1\.0/fidenza-da-giocare-${BUILD_ID}/" "$SW"
+          sed -i "s/fidenza-da-giocare-v3\.[0-9][0-9]*\.[0-9][0-9]*/fidenza-da-giocare-${BUILD_ID}/" "$SW"
+          grep -q "fidenza-da-giocare-${BUILD_ID}" "$SW" || {
+            echo "::error::Cache ID del service worker non aggiornato"
+            exit 1
+          }
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

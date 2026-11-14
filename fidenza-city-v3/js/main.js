@@ -2316,6 +2316,38 @@ function registerServiceWorker() {
   }).catch(() => {});
 }
 
+function setupInstallPrompt() {
+  // iOS Safari non espone beforeinstallprompt: mostriamo le istruzioni
+  // per "Condividi → Aggiungi a Home" solo quando servono davvero.
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const standalone = window.matchMedia?.('(display-mode: standalone)').matches
+    || navigator.standalone === true;
+  if (!isIOS || standalone) return;
+
+  const dialog = document.getElementById('install-dialog');
+  const buttons = [
+    document.getElementById('install-ios'),
+    document.getElementById('pause-install')
+  ].filter(Boolean);
+  if (!dialog || !buttons.length) return;
+
+  for (const button of buttons) {
+    button.hidden = false;
+    button.addEventListener('click', () => {
+      if (typeof dialog.showModal === 'function') dialog.showModal();
+      else dialog.setAttribute('open', '');
+    });
+  }
+
+  window.addEventListener('appinstalled', () => {
+    for (const button of buttons) button.hidden = true;
+    if (dialog.open && typeof dialog.close === 'function') dialog.close();
+  });
+}
+
+setupInstallPrompt();
+
 init().catch(err => {
   console.error(err);
   const p = document.getElementById('loading-text');

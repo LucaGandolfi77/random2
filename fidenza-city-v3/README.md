@@ -290,6 +290,21 @@ self-hosted in `vendor/` e `assets/fonts/`.
 - **HUD adattivo**, risoluzione dinamica, ombre ridotte e dettagli contenuti su
   mobile.
 - **PWA installabile e offline** con cache versionata e avviso di aggiornamento.
+- **Installazione su iPhone**: icona 180×180 opaca, splash screen per i modelli
+  supportati e guida in-app per **Condividi → Aggiungi a Home**.
+
+### Installazione su iPhone
+
+1. Apri il gioco in **Safari** (non Chrome o un browser interno di
+   Instagram/WhatsApp).
+2. Tocca **Condividi** → **Aggiungi a Home** → **Aggiungi**.
+3. Avvia l’icona **Fidenza**: si apre a schermo intero, con splash screen e
+   modalità standalone.
+
+Safari non mostra un prompt automatico di installazione: il pulsante **Installa
+su iPhone** nella schermata iniziale apre la guida con gli stessi passaggi.
+Dopo il primo caricamento la PWA funziona offline. Se l’icona viene aggiornata,
+rimuovi e riaggiungi l’app dalla Home.
 
 ### Editor e dati
 

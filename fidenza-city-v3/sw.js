@@ -22,6 +22,27 @@ const ASSETS = [
   './assets/icons/icon-180.png',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
+  './assets/icons/icon-maskable-512.png',
+  './assets/icons/splash/splash-1320x2868.png',
+  './assets/icons/splash/splash-2868x1320.png',
+  './assets/icons/splash/splash-1206x2622.png',
+  './assets/icons/splash/splash-2622x1206.png',
+  './assets/icons/splash/splash-1290x2796.png',
+  './assets/icons/splash/splash-2796x1290.png',
+  './assets/icons/splash/splash-1179x2556.png',
+  './assets/icons/splash/splash-2556x1179.png',
+  './assets/icons/splash/splash-1284x2778.png',
+  './assets/icons/splash/splash-2778x1284.png',
+  './assets/icons/splash/splash-1170x2532.png',
+  './assets/icons/splash/splash-2532x1170.png',
+  './assets/icons/splash/splash-1125x2436.png',
+  './assets/icons/splash/splash-2436x1125.png',
+  './assets/icons/splash/splash-1242x2688.png',
+  './assets/icons/splash/splash-2688x1242.png',
+  './assets/icons/splash/splash-828x1792.png',
+  './assets/icons/splash/splash-1792x828.png',
+  './assets/icons/splash/splash-750x1334.png',
+  './assets/icons/splash/splash-1334x750.png',
   './assets/img/citta.jpg',
   './assets/img/corso.jpg',
   './assets/img/duomo.jpg',
@@ -87,10 +108,28 @@ self.addEventListener('message', event => {
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
+async function precacheShell(cache) {
+  // Per-asset e con concorrenza limitata: un 404 o un limite di storage iOS
+  // non deve annullare l'intero precache, e iPhone non riceve 100 richieste
+  // tutte insieme.
+  const queue = [...ASSETS];
+  const workers = Array.from({ length: 6 }, async () => {
+    while (queue.length) {
+      const url = queue.shift();
+      try {
+        await cache.add(new Request(url, { cache: 'reload' }));
+      } catch (err) {
+        console.warn('Precache saltato', url, err);
+      }
+    }
+  });
+  await Promise.all(workers);
+}
+
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE)
-      .then(cache => cache.addAll(ASSETS))
+      .then(cache => precacheShell(cache))
       .then(() => self.skipWaiting())
       .catch(err => console.warn('Precache parziale', err))
   );

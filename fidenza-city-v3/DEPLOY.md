@@ -53,12 +53,30 @@ La PR viene validata da CI. Il deploy su Pages avviene solo dopo il merge su
 `main`. In alternativa l’editor può sempre esportare i due JSON e il commit
 può essere fatto manualmente.
 
+## Installazione su iPhone
+
+Safari non espone un prompt automatico di installazione. La pagina mostra un
+pulsante **Installa su iPhone** solo su iOS e solo quando il gioco non è già in
+modalità standalone.
+
+1. Apri `https://lucagandolfi77.github.io/random2/fidenza-city-v3/` in **Safari**,
+   non in Chrome e non nel browser interno di Instagram/WhatsApp.
+2. Tocca **Condividi** → **Aggiungi a Home** → **Aggiungi**.
+3. Avvia l’icona **Fidenza** dalla Home: parte a schermo intero, senza barra di
+   Safari, con splash screen e service worker.
+
+Dopo il primo caricamento il gioco funziona offline. Se l’icona o le splash
+screen cambiano, rimuovi e riaggiungi l’app dalla Home per vederle.
+
 ## Cache e aggiornamenti
 
-- `sw.js` ha una cache versionata; in build l’ID viene sostituito con lo SHA.
-- `build-info.json` contiene versione, commit e data di build.
+- `sw.js` ha una cache versionata; in build l’ID `fidenza-da-giocare-v3.x.y`
+  viene sostituito con lo SHA del commit e il workflow verifica la sostituzione.
+- `build-info.json` legge la versione da `js/config.js` e contiene commit e data
+  di build.
 - Dopo un deploy, il gioco mostra il pulsante di aggiornamento PWA.
-- Il prefetch delle tessere usa una cache dedicata (`fidenza-ground-tiles-v1`); la cache shell è `v3.3.0`.
+- Il prefetch delle tessere usa una cache dedicata (`fidenza-ground-tiles-v1`);
+  la cache shell è `v3.3.0`.
 - L’editor non registra un service worker: un hard reload è sufficiente per
   aggiornare l’interfaccia.
 
