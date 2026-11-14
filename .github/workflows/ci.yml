@@ -22,7 +22,9 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Node 22 can import the .ts modules used by new-star-soccer's
+          # headless test; Node 20 cannot (ERR_UNKNOWN_FILE_EXTENSION).
+          node-version: 22
 
       - name: Briscola PWA (engine tests + build)
         working-directory: briscola-pwa

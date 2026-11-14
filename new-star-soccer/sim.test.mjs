@@ -1,5 +1,5 @@
 // Headless simulation test for the New Star Soccer career engine.
-// No browser needed — Node >= 23.6 strips the TS types natively.
+// No browser needed — Node >= 22.18 strips the TS types natively.
 //   node new-star-soccer/sim.test.mjs
 import { GameState } from './src/state/GameState.ts';
 import { CLUBS } from './src/types/index.ts';
