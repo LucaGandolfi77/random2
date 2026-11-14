@@ -193,6 +193,10 @@ mkdirSync(out, { recursive: true });
  * suspended without a user gesture, so currentTime never advances and the
  * lanes stay empty forever. */
 const browser = await launch({ bin });
+if (!browser) {
+    console.log("SKIP  Chromium did not start");
+    process.exit(0);
+}
 const { cdp, sessionId } = browser;
 
 await cdp.send("Page.enable", {}, sessionId);

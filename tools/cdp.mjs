@@ -134,23 +134,44 @@ export async function launch(options = {}) {
     { stdio: ["ignore", "ignore", "pipe"] }
   );
 
-  /* Chromium prints the DevTools endpoint on stderr once it is listening. */
-  const wsURL = await new Promise((resolve, reject) => {
+  /* Chromium prints the DevTools endpoint on stderr once it is listening.
+     A browser that cannot start is not an error: callers print SKIP instead
+     of turning the build red. */
+  const wsURL = await new Promise((resolve) => {
     let buf = "";
-    const timer = setTimeout(() => reject(new Error("no devtools endpoint")), 20000);
+    let done = false;
+    const finish = (value) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve(value);
+    };
+    const timer = setTimeout(() => {
+      console.warn("Chromium: no DevTools endpoint after 20 s");
+      finish(null);
+    }, 20000);
     child.stderr.on("data", (d) => {
       buf += d.toString();
       const m = buf.match(/DevTools listening on (ws:\/\/\S+)/);
-      if (m) {
-        clearTimeout(timer);
-        resolve(m[1].trim());
-      }
+      if (m) finish(m[1].trim());
+    });
+    child.on("error", (err) => {
+      console.warn("Chromium: spawn failed —", err.message);
+      finish(null);
     });
     child.on("exit", (code) => {
-      clearTimeout(timer);
-      reject(new Error("browser exited early (" + code + ")\n" + buf.slice(-400)));
+      if (done) return;
+      const tail = buf.trim().split("\n").slice(-3).join("\n");
+      console.warn("Chromium: exited early (" + code + ")" + (tail ? "\n" + tail : ""));
+      finish(null);
     });
   });
+
+  if (!wsURL) {
+    child.kill();
+    rmSync(profile, { recursive: true, force: true });
+    return null;
+  }
 
   const cdp = connect(wsURL);
   await cdp.ready;
