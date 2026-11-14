@@ -18,6 +18,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # The sitemap check derives each page's lastmod from git history,
+          # which a default one-commit checkout cannot provide.
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
