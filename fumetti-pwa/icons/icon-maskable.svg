@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Fumetti — Sentinelle">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#070b16"/>
+      <stop offset=".62" stop-color="#121a2e"/>
+      <stop offset="1" stop-color="#260b13"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff2a8"/>
+      <stop offset="1" stop-color="#f4a62a"/>
+    </linearGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="2.1" fill="#ffffff" opacity=".085"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#dots)"/>
+  <g transform="translate(51.2 51.2) scale(.8)">
+    <g stroke="#e63946" stroke-width="14" stroke-linecap="round" opacity=".5">
+      <path d="M256 30v74"/>
+      <path d="M256 408v74"/>
+      <path d="M64 256h74"/>
+      <path d="M374 256h74"/>
+      <path d="M120 120l52 52"/>
+      <path d="M340 340l52 52"/>
+      <path d="M392 120l-52 52"/>
+      <path d="M172 340l-52 52"/>
+    </g>
+    <circle cx="256" cy="256" r="168" fill="#f4d35e" opacity=".1"/>
+    <g transform="rotate(-7 256 262)">
+      <path d="M126 330h64l-56 78 116-78z" fill="#f3e7d0" stroke="#070a10" stroke-width="14" stroke-linejoin="round"/>
+      <rect x="92" y="128" width="336" height="244" rx="10" fill="#f3e7d0" stroke="#070a10" stroke-width="16"/>
+      <path d="M100 246h320M256 136v102" fill="none" stroke="#070a10" stroke-width="11"/>
+      <path d="M292 158l-96 128h60l-34 72 106-126h-62z" fill="url(#bolt)" stroke="#070a10" stroke-width="12" stroke-linejoin="round"/>
+      <g fill="#070a10">
+        <circle cx="130" cy="162" r="7"/>
+        <circle cx="382" cy="162" r="7"/>
+      </g>
+    </g>
+  </g>
+</svg>

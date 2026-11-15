@@ -1,0 +1,11 @@
+{
+  "name": "fumetti-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Fumetti — a small offline comic reader and Sentinelle #1, an original Italian superhero noir.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "icons": "node scripts/gen-icons.mjs"
+  }
+}

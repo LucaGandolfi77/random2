@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sentinelle — Fumetti · random2</title>
+<meta name="description" content="Fumetti: un lettore offline e due episodi di Sentinelle, fumetti originali noir-supereroistici ambientati a Milano.">
+<meta name="theme-color" content="#070a11">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fumetti">
+<meta property="og:title" content="Sentinelle — Fumetti">
+<meta property="og:description" content="Due fumetti originali disegnati dal codice: tre supereroi, una Milano sotto la pioggia e le ombre che si portano via i ricordi. Da leggere offline.">
+<meta property="og:type" content="article">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#shelf">Salta al contenuto</a>
+
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="../" aria-label="Torna a random2">
+      <span aria-hidden="true">←</span><span>random2</span>
+    </a>
+    <div class="brand" aria-label="Fumetti">
+      <span class="brand-mark" aria-hidden="true">F</span>
+      <span>FUMETTI</span>
+    </div>
+    <div class="top-actions">
+      <button id="install-btn" class="ghost small" type="button" hidden>Installa</button>
+      <button id="sound-btn" class="ghost icon" type="button" aria-pressed="true" aria-label="Suono attivo">🔊</button>
+    </div>
+  </header>
+
+  <main id="shelf" class="shelf">
+    <section class="hero">
+      <p class="eyebrow">Storie disegnate in codice</p>
+      <h1>FUMETTI</h1>
+      <p class="lede">Un lettore essenziale, due storie complete. Nessuna immagine da scaricare: ogni vignetta è disegnata dal browser.</p>
+    </section>
+
+    <section class="issue-grid" id="issue-grid" aria-label="Episodi di Sentinelle"></section>
+
+    <template id="issue-card-template">
+      <article class="issue-card">
+        <div class="cover">
+          <canvas class="issue-cover" role="img"></canvas>
+          <div class="cover-type" aria-hidden="true">
+            <span class="cover-series"></span>
+            <span class="cover-sub"></span>
+          </div>
+          <span class="cover-num" aria-hidden="true"></span>
+          <span class="cover-badge">FUMETTO ORIGINALE</span>
+          <span class="cover-new" hidden>NUOVO</span>
+        </div>
+        <div class="issue-body">
+          <p class="kicker"></p>
+          <h2 class="issue-title"></h2>
+          <p class="issue-desc"></p>
+          <ul class="meta"></ul>
+          <div class="issue-actions">
+            <button class="primary issue-read" type="button"></button>
+            <button class="secondary issue-restart" type="button" hidden>Ricomincia</button>
+          </div>
+          <p class="hint issue-hint" hidden></p>
+        </div>
+      </article>
+    </template>
+
+    <section class="about" aria-labelledby="about-title">
+      <h2 id="about-title">Come funziona</h2>
+      <div class="about-grid">
+        <article>
+          <span class="about-num" aria-hidden="true">01</span>
+          <h3>A tavole</h3>
+          <p>Swipe, frecce o i pulsanti in basso. Una tavola per schermo, il segnalibro si salva da solo.</p>
+        </article>
+        <article>
+          <span class="about-num" aria-hidden="true">02</span>
+          <h3>Disegnato in codice</h3>
+          <p>Milano, la pioggia, i personaggi e i balloon sono Canvas e CSS. Nessun file immagine, nessun font da scaricare.</p>
+        </article>
+        <article>
+          <span class="about-num" aria-hidden="true">03</span>
+          <h3>Sempre con te</h3>
+          <p>Installala dalla barra del browser. Una volta aperta, le tavole restano disponibili anche senza rete.</p>
+        </article>
+      </div>
+    </section>
+
+    <footer class="shelf-foot">
+      <p>Due fumetti originali di <a href="../">random2</a>. Storia, dialoghi e disegno sono generati dal codice.</p>
+      <p class="license">Testo e personaggi originali · nessun tracker · nessuna risorsa esterna</p>
+    </footer>
+  </main>
+
+  <section id="reader" class="reader" hidden aria-label="Lettore del fumetto">
+    <header class="reader-bar">
+      <button id="back-btn" class="ghost" type="button" aria-label="Torna allo scaffale">
+        <span aria-hidden="true">←</span><span>Scaffale</span>
+      </button>
+      <div class="reader-id">
+        <span class="reader-series" id="reader-series">SENTINELLE</span>
+        <span class="reader-ep" id="reader-ep">Ep. 1 — La città senza luci</span>
+      </div>
+      <div class="reader-tools">
+        <button id="text-btn" class="ghost small" type="button">Testo</button>
+        <button id="reader-sound-btn" class="ghost icon" type="button" aria-pressed="true" aria-label="Suono attivo">🔊</button>
+      </div>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="page-shell" id="page-shell" tabindex="-1" aria-label="Pagina del fumetto"></div>
+    </div>
+
+    <footer class="reader-foot">
+      <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+      <div class="foot-row">
+        <button id="prev-btn" class="foot-nav" type="button" aria-label="Tavola precedente">
+          <span class="chev" aria-hidden="true">‹</span><span>Precedente</span>
+        </button>
+        <span id="page-label">Tavola 1 di 8</span>
+        <span class="foot-hint">Swipe o frecce per girare pagina</span>
+        <button id="next-btn" class="foot-nav" type="button" aria-label="Tavola successiva">
+          <span>Successiva</span><span class="chev" aria-hidden="true">›</span>
+        </button>
+      </div>
+    </footer>
+    <p id="reader-status" class="visually-hidden" aria-live="polite"></p>
+  </section>
+</div>
+
+<dialog id="transcript-dialog" class="sheet">
+  <form method="dialog" class="sheet-head">
+    <h2>Il testo del fumetto</h2>
+    <button class="ghost small" type="submit">Chiudi</button>
+  </form>
+  <div class="sheet-body" id="transcript-body"></div>
+</dialog>
+
+<dialog id="end-dialog" class="end-card">
+  <div class="end-mark" aria-hidden="true">FINE</div>
+  <p class="kicker" id="end-kicker">Fine dell'episodio 1</p>
+  <h2 id="end-title">La città senza luci</h2>
+  <p id="end-text"></p>
+  <p class="teaser" id="end-teaser"></p>
+  <div class="end-actions">
+    <button id="again-btn" class="primary" type="button">Rileggi dall'inizio</button>
+    <button id="shelf-btn" class="secondary" type="button">Torna allo scaffale</button>
+  </div>
+</dialog>
+
+<noscript><p class="noscript">Fumetti ha bisogno di JavaScript per disegnare le tavole. Attivalo e ricarica la pagina.</p></noscript>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
