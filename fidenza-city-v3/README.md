@@ -1,4 +1,4 @@
-# Fidenza da Giocare v3.3.1 — Mondo Arnis, terreno reale e suolo in streaming
+# Fidenza da Giocare v3.3.2 — Mondo Arnis, terreno reale e suolo in streaming
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
@@ -73,7 +73,7 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **Materiali Minecraft** | Palette di blocchi, texture procedurali 16×16 e geometrie cubiche per edifici, tetti e arredi, tutte originali. |
 | **Ortofoto RER 2023-24** | Suolo realistico della città da GeoTIFF regionali a 0,5 m/px (centro a 0,2 m/px), ricampionati sulla griglia metrica locale. Licenza CC BY 4.0. |
 | **Materiali PBR del suolo** | Asfalto, cemento, porfido, erba, terra e ghiaia generati proceduralmente con normal map, variazioni di colore e UV lungo la strada. |
-| **Tessere ortofoto in streaming** | 441 tessere da 0,5 m/px (256 m) attorno alla camera, con bordo di 4 px, LOD 5×5/3×3 e fallback alla base. |
+| **Tessere ortofoto in streaming** | 441 tessere da 0,5 m/px (256 m) attorno alla camera, con bordo di 4 px, LOD 7×7 in alta desktop, 5×5 in alta mobile, 3×3 in media, fade radiale e fallback alla base. |
 | **Cache Storage + prefetch** | Prefetch completo della città (~31 MB) dopo il primo avvio, con ripresa, quota check, `storage.persist()` e rispetto di Data Saver. |
 | **Import ArnisWorld3** | Tool Node che legge i region file del save Minecraft e genera `data/arnis/arnis.json` e `data/arnis/surface.png`. |
 | **Palette 3D → materiali** | Il Duomo usa le texture dei blocchi Arnis (terracotta, end stone bricks, granito). |
@@ -559,9 +559,10 @@ all’URL per forzare il livello grafico.
 - **Tessere 0,5 m**: 441 tessere da 256 m con bordo di 4 px, generate dal
   raster RER 0.5 m; la griglia è rientrata di 64 m dal bordo del raster per
   evitare tessere parziali.
-- **Streaming attorno alla camera**: 5×5 tessere in alta qualità, 3×3 in media,
-  caricamento in priorità di distanza, sfratto e `dispose()` delle tessere
-  lontane; il centro storico resta coperto dalla patch a 0,295 m.
+- **Streaming attorno alla camera**: 7×7 tessere in alta qualità desktop,
+  5×5 in alta mobile, 3×3 in media; isteresi, look-ahead nella direzione di
+  vista, fade-in e fade radiale verso l’ortofoto base. Il centro storico resta
+  coperto dalla patch a 0,295 m.
 - **Prefetch completo**: dopo il primo avvio il gioco scarica tutte le tessere
   in background (~31 MB), con concorrenza, ripresa, controllo quota e
   `navigator.storage.persist()`.
@@ -570,7 +571,7 @@ all’URL per forzare il livello grafico.
 - **Niente più chiazze piatte**: le superfici OSM non d'acqua non vengono più
   coperte da materiali opachi; prati, campi, piazzali e parcheggi mostrano
   l'ortofoto reale e le tessere.
-- **PWA**: cache `v3.3.1`; Data Saver rispettato; toast di avvio/completamento
+- **PWA**: cache `v3.3.2`; Data Saver rispettato; toast di avvio/completamento
   del prefetch.
 - **Rigenerazione**: `../fidenza-recon/.venv/bin/python tools/build-ground.py --base ../fidenza-recon/data/raw/rer/ortho_rgb_05.tif --center ../fidenza-recon/data/raw/rer/ortho_rgb_02.tif` (aggiungi `--no-tiles` per saltare le tessere).
 

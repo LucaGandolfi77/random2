@@ -76,7 +76,7 @@ screen cambiano, rimuovi e riaggiungi l’app dalla Home per vederle.
   di build.
 - Dopo un deploy, il gioco mostra il pulsante di aggiornamento PWA.
 - Il prefetch delle tessere usa una cache dedicata (`fidenza-ground-tiles-v1`);
-  la cache shell è `v3.3.1`.
+  la cache shell è `v3.3.2`.
 - L’editor non registra un service worker: un hard reload è sufficiente per
   aggiornare l’interfaccia.
 

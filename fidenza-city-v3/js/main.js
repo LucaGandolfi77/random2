@@ -538,7 +538,7 @@ async function init() {
   await world.build((p, label) => {
     hud.setLoading(0.08 + p * 0.84, label);
   });
-  const initialSpawn = mapJson.spawn || WORLD.spawn;
+  const initialSpawn = deepSpawn || mapJson.spawn || WORLD.spawn;
   world.groundTiles?.preload(initialSpawn.x, initialSpawn.z);
   world.onFirework = () => audio.firework();
 

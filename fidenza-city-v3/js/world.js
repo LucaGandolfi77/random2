@@ -440,6 +440,7 @@ export class World {
     this.isMobile = isMobile;
     this.time = 0;
     this.hour = 15;
+    this._groundViewDir = new THREE.Vector3();
     this.weather = { rain: 0, clouds: 0.2 };
     this.userData = {};
 
@@ -6937,7 +6938,10 @@ export class World {
     this._updateRainRipples();
     this._updateSeasonParticles(dt, playerPos);
     this._updateClouds(dt);
-    if (camera) this.groundTiles?.update(camera.position);
+    if (camera) {
+      camera.getWorldDirection(this._groundViewDir);
+      this.groundTiles?.update(camera.position, this._groundViewDir);
+    }
   }
 
   _updateSky(playerPos) {

@@ -3,8 +3,10 @@
  *
  * The base orthophoto (4096 px, ~1.35 m/px) and the 0.295 m/px centre patch
  * stay in place. This streamer adds 0.5 m/px 256 m tiles around the camera so
- * the ground is sharp outside the historic centre too. Tiles live in their own
- * group above the base and below the centre/areas/roads.
+ * the ground is sharp outside the historic centre too. High quality extends
+ * the grid to 7×7 on desktop and fades the outer tiles into the base ortho to
+ * avoid a visible moving square. Tiles live in their own group above the base
+ * and below the centre/areas/roads.
  */
 
 import * as THREE from 'three';
@@ -26,7 +28,7 @@ export class GroundTileStreamer {
     this.renderer = renderer;
     this.meta = meta;
     this.quality = quality;
-    this.radius = quality === 'high' ? 2 : quality === 'medium' ? 1 : -1;
+    this.radius = quality === 'high' ? (isMobile ? 2 : 3) : quality === 'medium' ? 1 : -1;
     this.isMobile = isMobile;
     this.centerBounds = centerBounds;
     this.centerLoaded = centerLoaded;
@@ -43,8 +45,20 @@ export class GroundTileStreamer {
       renderer?.capabilities?.getMaxAnisotropy?.() || 1
     );
     this.webgl1 = renderer?.capabilities?.isWebGL2 === false;
-    this.maxActive = isMobile ? 3 : 4;
-    this.updateInterval = 250;
+    this.maxActive = isMobile ? 3 : quality === 'high' ? 6 : 4;
+    this.updateInterval = quality === 'high' && !isMobile ? 180 : 250;
+    this.maxRetained = quality === 'high' ? (isMobile ? 36 : 56) : quality === 'medium' ? (isMobile ? 18 : 24) : 0;
+    this.keepDistance = this.tileMeters * (this.radius + 1.05);
+    this.lookAhead = this.tileMeters * 0.25;
+    this.fadeEnabled = quality === 'high' && !isMobile;
+    this.fadeDuration = 220;
+    this.fadeStart = this.tileMeters * Math.max(0, this.radius - 0.7);
+    this.fadeEnd = this.tileMeters * Math.max(0, this.radius - 0.05);
+    this.fadeUniforms = {
+      uGroundCamera: { value: new THREE.Vector2() },
+      uGroundFadeStart: { value: this.fadeStart },
+      uGroundFadeEnd: { value: this.fadeEnd }
+    };
 
     this.group = new THREE.Group();
     this.group.name = 'ground-tiles';
@@ -67,6 +81,7 @@ export class GroundTileStreamer {
     this.queue = [];
     this.active = 0;
     this.initialized = false;
+    this.hasStarted = false;
     this.lastUpdate = -Infinity;
     this.disposed = false;
     this.prefetchProgress = null;
@@ -110,7 +125,7 @@ export class GroundTileStreamer {
     );
   }
 
-  _computeDesired(x, z) {
+  _computeDesired(x, z, viewDirection = null) {
     const desired = new Map();
     const { cols, rows } = this.grid;
     if (this.radius < 0 || !cols || !rows || !Number.isFinite(x) || !Number.isFinite(z)) {
@@ -123,11 +138,13 @@ export class GroundTileStreamer {
     ) {
       return desired;
     }
+    const aheadX = Number.isFinite(viewDirection?.x) ? viewDirection.x * this.lookAhead : 0;
+    const aheadZ = Number.isFinite(viewDirection?.z) ? viewDirection.z * this.lookAhead : 0;
     const baseCol = clamp(
-      Math.floor((x - this.bounds.minX) / this.tileMeters), 0, cols - 1
+      Math.floor((x + aheadX - this.bounds.minX) / this.tileMeters), 0, cols - 1
     );
     const baseRow = clamp(
-      Math.floor((z - this.bounds.minZ) / this.tileMeters), 0, rows - 1
+      Math.floor((z + aheadZ - this.bounds.minZ) / this.tileMeters), 0, rows - 1
     );
     for (let dr = -this.radius; dr <= this.radius; dr++) {
       for (let dc = -this.radius; dc <= this.radius; dc++) {
@@ -143,19 +160,79 @@ export class GroundTileStreamer {
     return desired;
   }
 
-  update(position, force = false) {
+  _tickFades(now) {
+    if (!this.fadeEnabled) return;
+    for (const tile of this.tiles.values()) {
+      if (!tile.fadeAt) continue;
+      const progress = Math.min(1, (now - tile.fadeAt) / this.fadeDuration);
+      tile.mesh.material.opacity = progress;
+      if (progress >= 1) tile.fadeAt = 0;
+    }
+  }
+
+  _patchGroundMaterial(shader) {
+    shader.uniforms.uGroundCamera = this.fadeUniforms.uGroundCamera;
+    shader.uniforms.uGroundFadeStart = this.fadeUniforms.uGroundFadeStart;
+    shader.uniforms.uGroundFadeEnd = this.fadeUniforms.uGroundFadeEnd;
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        '#include <common>',
+        '#include <common>\nvarying vec3 vGroundWorldPosition;'
+      )
+      .replace(
+        '#include <begin_vertex>',
+        '#include <begin_vertex>\nvGroundWorldPosition = (modelMatrix * vec4(transformed, 1.0)).xyz;'
+      );
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        '#include <common>\nuniform vec2 uGroundCamera;\nuniform float uGroundFadeStart;\nuniform float uGroundFadeEnd;\nvarying vec3 vGroundWorldPosition;'
+      )
+      .replace(
+        '#include <opaque_fragment>',
+        '#include <opaque_fragment>\nfloat groundDistance = distance(vGroundWorldPosition.xz, uGroundCamera);\ngl_FragColor.a *= 1.0 - smoothstep(uGroundFadeStart, uGroundFadeEnd, groundDistance);'
+      );
+  }
+
+  update(position, viewDirection = null, force = false) {
     if (this.disposed || this.radius < 0 || !position) return;
+    if (typeof viewDirection === 'boolean') {
+      force = viewDirection;
+      viewDirection = null;
+    }
     const now = performance.now();
-    if (!force && now - this.lastUpdate < this.updateInterval) return;
-    this.lastUpdate = now;
     const x = Number(position.x);
     const z = Number(position.z);
+    if (!force) this.hasStarted = true;
+    if (Number.isFinite(x) && Number.isFinite(z) && this.fadeEnabled) {
+      this.fadeUniforms.uGroundCamera.value.set(x, z);
+      this._tickFades(now);
+    }
+    if (!force && now - this.lastUpdate < this.updateInterval) return;
+    this.lastUpdate = now;
     if (!Number.isFinite(x) || !Number.isFinite(z)) return;
 
-    this.desired = this._computeDesired(x, z);
+    this.desired = this._computeDesired(x, z, viewDirection);
 
-    for (const key of [...this.tiles.keys()]) {
-      if (!this.desired.has(key)) this._evict(key);
+    for (const [key, tile] of [...this.tiles]) {
+      if (this.desired.has(key)) continue;
+      const center = tile.center;
+      const distance = Math.hypot(center.x - x, center.z - z);
+      if (distance > this.keepDistance) this._evict(key);
+    }
+    if (this.tiles.size > this.maxRetained) {
+      const extra = [];
+      for (const [key, tile] of this.tiles) {
+        if (this.desired.has(key)) continue;
+        extra.push({
+          key,
+          distance: Math.hypot(tile.center.x - x, tile.center.z - z)
+        });
+      }
+      extra.sort((a, b) => b.distance - a.distance);
+      while (this.tiles.size > this.maxRetained && extra.length) {
+        this._evict(extra.shift().key);
+      }
     }
 
     const queue = [];
@@ -173,7 +250,10 @@ export class GroundTileStreamer {
   }
 
   preload(x, z) {
-    this.update({ x, z }, true);
+    if (this.fadeEnabled && Number.isFinite(Number(x)) && Number.isFinite(Number(z))) {
+      this.fadeUniforms.uGroundCamera.value.set(Number(x), Number(z));
+    }
+    this.update({ x, z }, null, true);
   }
 
   _flush() {
@@ -212,17 +292,33 @@ export class GroundTileStreamer {
         const material = new THREE.MeshLambertMaterial({
           map: texture,
           color: this.tint,
+          transparent: this.fadeEnabled,
+          depthWrite: !this.fadeEnabled,
           polygonOffset: true,
           polygonOffsetFactor: -3,
           polygonOffsetUnits: -3
         });
+        if (this.fadeEnabled) {
+          material.opacity = this.hasStarted ? 0 : 1;
+          material.onBeforeCompile = shader => this._patchGroundMaterial(shader);
+          material.customProgramCacheKey = () => 'ground-tile-fade-v1';
+        }
         const mesh = new THREE.Mesh(this.geometry, material);
         const center = this._tileCenter(col, row);
         mesh.position.set(center.x, 0.016, center.z);
         mesh.receiveShadow = true;
+        mesh.renderOrder = this.fadeEnabled ? -1 : 0;
         mesh.name = `ground-tile-${key}`;
         this.group.add(mesh);
-        this.tiles.set(key, { mesh, texture, image });
+        this.tiles.set(key, {
+          mesh,
+          texture,
+          image,
+          col,
+          row,
+          center,
+          fadeAt: this.fadeEnabled && this.hasStarted ? performance.now() : 0
+        });
         this.loadedBytes += image.width * image.height * 4;
         this._flush();
       })
@@ -260,6 +356,11 @@ export class GroundTileStreamer {
       loading: this.loading.size,
       queued: this.queue.length,
       desired: this.desired.size,
+      radius: this.radius,
+      maxRetained: this.maxRetained,
+      fade: this.fadeEnabled,
+      fadeStart: this.fadeStart,
+      fadeEnd: this.fadeEnd,
       gpuBytes: this.tiles.size * this.imagePixels * this.imagePixels * 4
     };
   }
