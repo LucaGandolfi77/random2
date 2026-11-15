@@ -1,16 +1,85 @@
 {
-  "name": "King Shot PWA",
-  "short_name": "King Shot",
-  "description": "Defend the castle! Drag to aim the royal bow, arc arrows over the wall and hold the line against waves of monsters.",
   "id": "./",
+  "name": "KING SHOT — The Last Wall",
+  "short_name": "King Shot",
+  "description": "Draw. Loose. Hold the wall. A fast archery roguelite: choose an oath, draft royal decrees and survive an endless siege.",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0b1026",
-  "theme_color": "#0b1026",
-  "orientation": "portrait",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "orientation": "any",
+  "background_color": "#070b1d",
+  "theme_color": "#070b1d",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "prefer_related_applications": false,
   "icons": [
-    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
-    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Begin Siege",
+      "short_name": "Siege",
+      "description": "Choose an oath and hold the wall.",
+      "url": "./?play=1",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Daily Siege",
+      "short_name": "Daily",
+      "description": "Today's seeded horde, Knight's oath.",
+      "url": "./?daily=1",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "shots/play.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Hold the wall: hearts, wind, combo and the royal bow."
+    },
+    {
+      "src": "shots/desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "The KING SHOT menu on desktop."
+    }
   ]
 }

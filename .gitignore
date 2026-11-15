@@ -26,6 +26,10 @@ fidenza-recon/db/city.db
 !self-non-self/tests/
 !self-non-self/tests/**
 
+!king-shot-pwa/package.json
+!king-shot-pwa/tests/
+!king-shot-pwa/tests/**
+
 # Les Misérables needs its build manifest, lockfile and tests in CI.
 !les-miserables-film/package.json
 !les-miserables-film/package-lock.json

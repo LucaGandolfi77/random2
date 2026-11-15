@@ -224,6 +224,10 @@ jobs:
           # CORE 9: the heat chain, content tables, every low-poly mesh,
           # a balance bot that must reach prestige, and the PWA asset contract.
           node --test core9-pwa/tests/*.test.mjs
+          # KING SHOT: oath hearts/score, wave and boss composition beyond the
+          # old cap, wind/collision/combo rules, decree drafts, deterministic
+          # daily runs, save migration/streak logic and the PWA asset contract.
+          node --test king-shot-pwa/tests/*.test.mjs
           # DOTTOR GELO: the pure economy, the power grid, offline returns,
           # cyborg training/incubation, campaign progression, story flags,
           # prestige and save sanitising.

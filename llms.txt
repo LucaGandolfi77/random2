@@ -153,17 +153,19 @@ node pixel-cup-pwa/smoke.mjs      # in-browser (skips if no playwright)
 node cinder-belt-pwa/tests/sim.test.js     # CINDER BELT simulation/economy
 node cinder-belt-pwa/tests/content.test.js # CINDER BELT content + PWA wiring
 node cinder-belt-pwa/tests/boot.test.js    # CINDER BELT, the whole game on a fake DOM
+node --test king-shot-pwa/tests/*.test.mjs   # KING SHOT simulation, daily, saves + assets
 node last-call-pwa/tests/run.mjs           # LAST CALL simulation, content + PWA contract
 node last-call-pwa/tests/smoke.mjs         # LAST CALL in-browser match, tour, deck, offline
 ```
 
 ## Layout
 
-Each PWA is a plain static folder: `index.html`, `styles.css`, `game.js`,
+Most PWAs are a plain static folder: `index.html`, `styles.css`, `game.js`,
 `manifest.json`, `service-worker.js`, `icons/`. No build step, no bundler.
-The bigger games use a `src/` of classic scripts under one `window.<NS>`
+Some bigger games use a `src/` of classic scripts under one `window.<NS>`
 namespace instead of a single `game.js` - `ironfall-pwa/` is the reference for
-that shape. `bucio/` (Vite + three.js) and `new-star-soccer/` (Vite +
+that shape. `king-shot-pwa/` is a newer ES-module `src/` game with a
+dependency-free headless simulation and `node:test` suites. `bucio/` (Vite + three.js) and `new-star-soccer/` (Vite +
 TypeScript) are the exceptions.
 
 ## Live

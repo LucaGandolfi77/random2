@@ -1,0 +1,10 @@
+{
+  "name": "king-shot-pwa",
+  "version": "4.0.0",
+  "private": true,
+  "type": "module",
+  "description": "KING SHOT - a procedural archery roguelite for the browser",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}

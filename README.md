@@ -72,7 +72,7 @@
 
 | # | Project | Kind | Tech | Offline | Try it |
 |---|---------|------|------|:-------:|--------|
-| 1 | **King Shot** | Archery duels | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/king-shot-pwa/) |
+| 1 | **King Shot** | Archery roguelite: oaths, decrees, daily siege | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/king-shot-pwa/) |
 | 2 | **Plane Shooter** | Side-scrolling shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/plane-pwa/) |
 | 3 | **Slot Machine** | 3-reel casino | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/slot-pwa/) |
 | 4 | **Snake** | Retro arcade | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/snake-pwa/) |
@@ -166,20 +166,25 @@ photos) in `localStorage` / `IndexedDB` on the device.
 
 ### King Shot
 
-*Touch archery duels.* 👑
+*The horde is at the gate. You have one bow.* 👑
 
-Pull back with one finger to set angle and power, release to loose. The aim
-circle and crosshair mirror your finger in real time, so a single thumb is
-enough — designed phone-first, playable with mouse and keyboard too.
+A one-more-run archery roguelite. Drag to set angle and power, release to loose,
+and hold the wall against slimes, bats, imps, stone brutes and a warlord every
+five waves. Wind bends the arrow; a centred hit is a bullseye for double damage;
+fast kills build a combo before the crowd goes quiet.
 
-- Drag-to-aim, release-to-fire controls with a live trajectory feel
-- Ticking clock, combo scoring and escalating rounds
-- Procedural targets and synthesized WebAudio SFX (bow, impact, win)
-- Four color themes (neon, retro, forest, ocean) with persistent high score
-- Installable, offline-capable, ~15 KB of hand-written JS
+- Three oaths (Squire, Knight, Warlord) with different hearts, horde speed and
+  score multipliers
+- Thirteen royal decrees drafted three at a time, plus Royal Volley, pickups and
+  wall guards
+- Date-seeded Daily Siege with a local streak and best-of-day, no backend
+- Eight achievements, career stats, four themes, procedural WebAudio music/SFX
+- Canvas 2D with cached backdrop, DPR-aware rendering, reduced-motion support
+- Installable, offline-capable PWA with English copy, PNG/maskable icons and
+  generated social card
 
-**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
-`service-worker.js`, `icons/` (SVG).
+**Files:** `index.html`, `styles.css`, `src/` (ES modules), `manifest.json`,
+`service-worker.js`, `icons/` (SVG + PNG), `tests/`, `smoke.mjs`.
 
 ### Plane Shooter
 
@@ -1698,12 +1703,13 @@ random2/
 ├── .github/workflows/pages.yml   # build + deploy pipeline
 │
 ├── snake-pwa/              # ┐
-├── king-shot-pwa/          # │ plain static PWAs — same shape:
-├── plane-pwa/              # │   index.html · styles.css · game.js
-├── slot-pwa/               # │   manifest.json · service-worker.js · icons/
-├── virtual-farm-pwa/       # │   (+ <script src="../shared/arcade.js"> in the simple four)
+├── plane-pwa/              # │ plain static PWAs — same shape:
+├── slot-pwa/               # │   index.html · styles.css · game.js
+├── virtual-farm-pwa/       # │   manifest.json · service-worker.js · icons/
+│                          # │   (+ <script src="../shared/arcade.js"> in the simple four)
 │                          # ┘
 │
+├── king-shot-pwa/          # static PWA, src/ modules + node:test + CDP smoke
 ├── mustang-pwa/            # static PWA, code split into src/ modules + tests
 ├── lumen-pwa/              # static PWA, src/ modules + headless sim test
 ├── snap-pwa/               # static PWA + vendored MediaPipe engine
@@ -1926,7 +1932,8 @@ a PR — keep this list honest.
       post-processing, opt-in local broadcast (Notifications + BroadcastChannel
       across tabs)
 - [ ] Plane: end-of-wave boss encounters with attack patterns
-- [ ] King Shot: moving targets, wind drift and a duel-vs-AI mode
+- [x] King Shot: wind drift, bullseyes, decree drafts, warlords and a local daily siege
+- [ ] King Shot: a duel-vs-AI mode
 - [ ] Farm: save-file export/import (download/upload JSON) for device migration
 - [ ] Mustang: third front (Korea, 1951) reusing the existing stage engine
 - [ ] Lighthouse CI gate (perf ≥ 90, a11y ≥ 90) wired into the deploy workflow
