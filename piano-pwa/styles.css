@@ -311,6 +311,13 @@ body {
     z-index: 2;
 }
 
+.menu-sound {
+    position: absolute;
+    top: 14px;
+    right: 58px;
+    z-index: 2;
+}
+
 @keyframes panelIn {
     from { transform: translateY(24px) scale(0.96); opacity: 0; }
     to { transform: none; opacity: 1; }
@@ -512,6 +519,14 @@ body {
     font-weight: 700;
     color: var(--ink-dim);
     font-variant-numeric: tabular-nums;
+}
+
+.audio-hint {
+    margin: 8px 0 10px;
+    font-size: 0.66rem;
+    line-height: 1.4;
+    color: var(--ink-dim);
+    opacity: 0.8;
 }
 
 /* ---------- results ---------- */

@@ -46,6 +46,10 @@ The choice is saved locally, and the falling lanes, canvas grid, and computer-ke
 
 All built-in note data is tiny `[midi, beat]` arrays — no audio assets, everything is synthesized live with WebAudio (triangle + harmonic partials with a piano-style decay envelope).
 
+### No sound on iPhone?
+
+Web Audio on iPhone (Safari and Chrome, both using WebKit) is strict about the hardware silent switch: set it to ring, raise the media volume, then tap a key or the speaker button in the menu. The first tap unlocks a single shared `AudioContext`; if iOS interrupts it (call, Siri, lock screen), the next tap resumes it. The menu now has its own sound toggle so a globally muted `random2` setting can be fixed before choosing a song.
+
 ## MIDI Import
 
 - Uses the dependency-free `midi.js` parser (SMF format 0/1, running status, tempo maps, track names, sysex skipping).

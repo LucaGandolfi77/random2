@@ -34,7 +34,7 @@ if (!ctx.roundRect) {
 const ui = {
     score: $('score'), songName: $('songName'), progressFill: $('progressFill'),
     combo: $('combo'), acc: $('acc'),
-    btnPause: $('btnPause'), btnSound: $('btnSound'),
+    btnPause: $('btnPause'), btnSound: $('btnSound'), btnSoundMenu: $('btnSoundMenu'),
     keys: $('keys'),
     menu: $('menu'), songList: $('songList'), btnFreestyle: $('btnFreestyle'),
     paused: $('paused'), btnResume: $('btnResume'), btnQuit: $('btnQuit'),
@@ -125,18 +125,100 @@ function isBlack(midi) { return layout.white.indexOf(midi) < 0; }
 /* ---------------- audio (own small synth — piano-ish) ---------------- */
 
 let AC = null, master = null;
+let audioUnlocked = false;
+let audioBroken = false;
+
+/* A single AudioContext is shared by the piano and every UI blip. iOS WebKit
+   (which is what Chrome uses on iPhone) will not let an AudioContext make
+   sound until it has been resumed by a real touch/click/key gesture, and it
+   can move to "interrupted" when a call, Siri, or the lock screen takes the
+   audio session. Keep one context alive and resume it from gestures. */
+function createAudioContext() {
+    if (AC || audioBroken) return AC;
+    try {
+        const Ctor = window.AudioContext || window.webkitAudioContext;
+        if (!Ctor) { audioBroken = true; return null; }
+        try {
+            AC = new Ctor({ latencyHint: 'interactive' });
+        } catch (e) {
+            // Older WebKit builds ignore/throw on constructor options.
+            AC = new Ctor();
+        }
+        master = AC.createGain();
+        master.gain.value = 0.55;
+        master.connect(AC.destination);
+        AC.addEventListener('statechange', () => {
+            if (AC.state !== 'running') audioUnlocked = false;
+        });
+    } catch (e) {
+        AC = null;
+        master = null;
+        // Do not mark audio broken: some WebKit versions only allow the
+        // constructor during a user gesture. Retry on the next one.
+    }
+    return AC;
+}
+
+/* The silent one-sample buffer is the iOS WebKit unlock trick: it gives the
+   audio session something to start on the same gesture that created or
+   resumed the context. It is inaudible and runs only once per unlock. */
+function primeAudio(ac) {
+    if (!ac || audioUnlocked || ac.state !== 'running') return;
+    try {
+        const buffer = ac.createBuffer(1, 1, 22050);
+        const source = ac.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ac.destination);
+        source.start(0);
+        audioUnlocked = true;
+    } catch (e) {
+        /* The next gesture will try again. */
+    }
+}
+
+function unlockAudio() {
+    if (!R2.getSettings().sound) return AC;
+    const ac = createAudioContext();
+    if (!ac) return null;
+    if (ac.state === 'running') {
+        primeAudio(ac);
+        return ac;
+    }
+    if (ac.state !== 'closed') {
+        try {
+            const pending = ac.resume();
+            if (pending && typeof pending.then === 'function') {
+                pending.then(() => primeAudio(ac)).catch(() => { /* retry on next gesture */ });
+            } else {
+                primeAudio(ac);
+            }
+        } catch (e) {
+            /* retry on the next pointer/key event */
+        }
+    }
+    return ac;
+}
 
 function audio() {
-    if (!AC) {
+    const ac = createAudioContext();
+    if (!ac) return null;
+    if (ac.state !== 'running' && ac.state !== 'closed' && S.mode !== 'paused') {
         try {
-            AC = new (window.AudioContext || window.webkitAudioContext)();
-            master = AC.createGain();
-            master.gain.value = 0.5;
-            master.connect(AC.destination);
-        } catch (e) { AC = null; }
+            const pending = ac.resume();
+            if (pending && typeof pending.catch === 'function') pending.catch(() => {});
+        } catch (e) { /* gesture listeners will retry */ }
     }
-    if (AC && AC.state === 'suspended' && S.mode !== 'paused') AC.resume();
-    return AC;
+    return ac;
+}
+
+function installAudioUnlock() {
+    if (installAudioUnlock.installed) return;
+    installAudioUnlock.installed = true;
+    const unlock = () => { unlockAudio(); };
+    // Capture before the button/game handlers so the context is already awake.
+    ['pointerdown', 'touchend', 'click', 'keydown'].forEach((type) => {
+        document.addEventListener(type, unlock, { capture: true, passive: true });
+    });
 }
 
 function tone(midi, vel, when) {
@@ -167,8 +249,20 @@ function tone(midi, vel, when) {
 
 function blip(freq, dur, type, peak) {
     if (!R2.getSettings().sound) return;
-    R2.play(freq, dur, type || 'sine');
-    void peak;
+    const ac = audio();
+    if (!ac) return;
+    const t0 = ac.currentTime;
+    const length = dur || 0.06;
+    const g = ac.createGain();
+    g.connect(master);
+    g.gain.setValueAtTime(Math.max(0.01, peak || 0.06), t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + length);
+    const o = ac.createOscillator();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    o.connect(g);
+    o.start(t0);
+    o.stop(t0 + length + 0.02);
 }
 
 /* ---------------- songs (all inside C4–E5) ---------------- */
@@ -595,7 +689,7 @@ function updateFx(dt) {
 /* ---------------- gameplay ---------------- */
 
 function startSong(song) {
-    const ac = audio();
+    const ac = unlockAudio();
     if (!ac) return false;
 
     let fit;
@@ -638,7 +732,7 @@ function startSong(song) {
 }
 
 function startFreestyle() {
-    audio();
+    unlockAudio();
     S.freestyle = true;
     S.song = null;
     S.notes = [];
@@ -1099,7 +1193,7 @@ function applyKeyboardSize(whiteKeys, announce) {
 async function handleMidiFile(file) {
     if (!file) return;
     ui.midiFile.value = '';
-    audio();
+    unlockAudio();
 
     if (file.size > MAX_MIDI_BYTES) {
         setMidiStatus('That MIDI file is too large (max 5 MB).', 'error');
@@ -1144,7 +1238,9 @@ function gotoMenu() {
     S.mode = 'menu';
     S.song = null;
     S.notes = [];
-    if (AC && AC.state === 'suspended') AC.resume();
+    // Never create an AudioContext just by returning to the menu: iOS
+    // only allows that from a user gesture.
+    if (AC) unlockAudio();
     hideOverlays();
     ui.menu.classList.remove('hidden');
     ui.songName.textContent = 'Piano Fall';
@@ -1157,14 +1253,16 @@ function gotoMenu() {
 function pauseGame() {
     if (S.mode !== 'play') return;
     S.mode = 'paused';
-    if (AC) AC.suspend();          // freezes the song clock with it
+    if (AC) {                       // freezes the song clock with it
+        try { AC.suspend().catch(() => {}); } catch (e) { /* noop */ }
+    }
     ui.paused.classList.remove('hidden');
 }
 
 function resumeGame() {
     if (S.mode !== 'paused') return;
     S.mode = 'play';
-    if (AC) AC.resume();
+    unlockAudio();
     ui.paused.classList.add('hidden');
 }
 
@@ -1243,20 +1341,33 @@ function setupButtons() {
         else if (S.mode === 'paused') resumeGame();
     });
     ui.btnResume.addEventListener('click', resumeGame);
-    ui.btnQuit.addEventListener('click', () => { if (AC) AC.resume(); gotoMenu(); });
+    ui.btnQuit.addEventListener('click', () => { unlockAudio(); gotoMenu(); });
     ui.btnRetry.addEventListener('click', () => {
         if (S.song) startSong(S.song);
         else gotoMenu();
     });
     ui.btnMenu.addEventListener('click', gotoMenu);
     const syncSound = () => {
-        ui.btnSound.textContent = R2.getSettings().sound ? '🔊' : '🔇';
+        const on = R2.getSettings().sound;
+        const label = on ? 'Mute sound' : 'Enable sound';
+        for (const button of [ui.btnSound, ui.btnSoundMenu]) {
+            if (!button) continue;
+            button.textContent = on ? '🔊' : '🔇';
+            button.setAttribute('aria-label', label);
+            button.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
     };
-    ui.btnSound.addEventListener('click', () => {
-        R2.setSettings({ sound: !R2.getSettings().sound });
+    const toggleSound = () => {
+        const on = !R2.getSettings().sound;
+        R2.setSettings({ sound: on });
         syncSound();
-        blip(660, 0.06, 'triangle');
-    });
+        if (on) {
+            unlockAudio();
+            blip(660, 0.06, 'triangle');
+        }
+    };
+    ui.btnSound.addEventListener('click', toggleSound);
+    if (ui.btnSoundMenu) ui.btnSoundMenu.addEventListener('click', toggleSound);
     syncSound();
 }
 
@@ -1297,6 +1408,7 @@ function boot() {
     checkOrientation();
     setupInput();
     setupButtons();
+    installAudioUnlock();
     R2.markPlayed('piano-pwa/');
     R2.trackPlaytime('piano-pwa/');
     R2.installHint();

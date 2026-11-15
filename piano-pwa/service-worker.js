@@ -1,5 +1,5 @@
 /* ===== Piano Fall PWA Service Worker ===== */
-const CACHE_NAME = "piano-fall-pwa-v2";
+const CACHE_NAME = "piano-fall-pwa-v3";
 const ASSETS = [
     "./",
     "./index.html",
