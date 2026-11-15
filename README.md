@@ -17,6 +17,9 @@
 - [Installing as an app (PWA)](#installing-as-an-app-pwa)
 - [The games](#the-games)
   - [King Shot](#king-shot)
+  - [Whiteout: Last Ember](#whiteout-last-ember)
+  - [Milano Nera '77](#milano-nera-77)
+  - [Fumetti — Sentinelle](#fumetti--sentinelle)
   - [Plane Shooter](#plane-shooter)
   - [Slot Machine](#slot-machine)
   - [Snake](#snake)
@@ -124,6 +127,9 @@
 | 50 | **Briscola Online** | Briscola 1v1: stanze con codice, Supabase, CPU locale e PWA | React + Supabase + Vite | Locale ✅ · online config. | [▶ Play](https://lucagandolfi77.github.io/random2/briscola-pwa/) |
 | 51 | **SELF / NON-SELF** | 13-minute procedural film: the last immune cell of a dying body | TypeScript + Canvas 2D + Web Audio (Vite) | ✅ | [▶ Watch](https://lucagandolfi77.github.io/random2/self-non-self/) |
 | 52 | **Les Misérables — Le Fil d'Or** | 20-minute procedural film drawn in ink and candlelight | TypeScript + Canvas 2D + Web Audio (Vite) | ✅ | [▶ Watch](https://lucagandolfi77.github.io/random2/les-miserables-film/) |
+| 53 | **Milano Nera '77** | Six-chapter twin-stick noir: Metrò, Parco Lambro, bosses and a motorway chase | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/milano-nera-pwa/) |
+| 54 | **Fumetti — Sentinelle** | Comic reader + two superhero noir issues, 16 tavole, Italian, offline | Canvas 2D + vanilla JS | ✅ | [▶ Read](https://lucagandolfi77.github.io/random2/fumetti-pwa/) |
+| 55 | **Whiteout: Last Ember** | Survival city builder: furnace, weather, survivors, decrees, tech, heroes | React + Vite + Canvas 2D + Web Audio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/whiteout-survival-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -185,6 +191,99 @@ fast kills build a combo before the crowd goes quiet.
 
 **Files:** `index.html`, `styles.css`, `src/` (ES modules), `manifest.json`,
 `service-worker.js`, `icons/` (SVG + PNG), `tests/`, `smoke.mjs`.
+
+### Whiteout: Last Ember
+
+*One furnace. Endless winter. A settlement that has to earn another dawn.*
+
+A mobile-first survival city builder inspired by Whiteout Survival and built
+from scratch for the browser. Feed the central furnace, keep named survivors
+warm and fed, assign workers, enact chief decrees, research permanent upgrades
+and send a three-hero party into the whiteout for iron and supplies.
+
+- **The furnace is the clock.** It burns coal every second and stores heat.
+  Overdrive doubles coal use for a much hotter fire, and furnace levels 1–10
+  raise capacity while unlocking the coal mine, cookhouse, clinic and iron seam.
+- **Weather with teeth.** Calm, a 30-second warning and a 50–75 second blizzard
+  cycle forever; ambient temperature falls toward −70°C. Cold workers slow down,
+  and survivors can freeze if the fire dies.
+- **Named survivors, not a resource bar.** Health, hunger, warmth and happiness
+  drive individual output. A day is eight real minutes of work, meal call and
+  sleep; the roster grows when there is a spare bed and food to share.
+- **Three systems of choice.** One chief decree at a time (balanced, extended
+  shifts or hearty meals), eight permanent research nodes, and staffed facilities
+  that convert raw meat into cooked meals or heal the sick.
+- **A real auto-battler.** Recruit Tank, Marksman and Support heroes and clear
+  ten frost-beast stages. Taunts, shields, focused shots, heals, deterministic
+  combat and first-clear iron. Hero XP levels the party between runs.
+- **Offline-first PWA.** Autosave, an 8-hour capped return simulation at 65%
+  production, a readable offline report, portrait layout, generated icons,
+  service-worker precache, synthesised Web Audio and zero external assets.
+- **Tested like the rest of the arcade.** 47 Vitest checks for simulation,
+  offline safety, saves, expeditions and the PWA contract, plus a dependency-free
+  Chromium smoke test that verifies a real offline boot through the service
+  worker.
+
+**Files:** `src/game/` (pure TypeScript simulation), `src/store/`,
+`src/render/SettlementRenderer.ts`, `src/audio/AudioEngine.ts`,
+`src/components/`, `src/service-worker.ts`, `public/manifest.json`, `tests/`,
+`scripts/smoke.mjs`. The production build is Vite; the browser entry is static
+and deployable under any subpath.
+
+[▶ Play](https://lucagandolfi77.github.io/random2/whiteout-survival-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/whiteout-survival-pwa) ·
+[README](whiteout-survival-pwa/README.md)
+
+### Milano Nera '77
+
+*Milano, 1977. One ex-con, one gun, a city that lies.*
+
+A six-chapter twin-stick crime shooter inspired by 1970s Italian
+poliziotteschi. Three acts take Rocco Vanni from a brothel stealth job to Torre
+Velasca, through the Metrò and Parco Lambro, then a motorway chase and a final
+Darsena boss fight. The game is an original homage: no Milanoir characters,
+story or assets are reused.
+
+- Six chapters in three acts, two bosses, a playable chase and two new locations
+- Mouse/keyboard, gamepad and mobile twin-stick controls
+- Cover, roll, vault, stealth takedowns, real projectiles and neon-sign ricochets
+- Pistol, SMG, six-shot revolver, sawn-off Lupara and molotovs
+- Train hazard in the Metrò; dogs, shotgunmen and La Iena in Parco Lambro
+- Procedural 384x216 pixel art, film grain, rain, vignette and synthesized funk audio
+- Italian UI and dialogue, acts/chapter selection, volume settings, local saves
+- iPhone portrait/landscape layout, safe areas, splash screens and install guide
+- Installable offline PWA, pure DOM-free simulation, `node:test` and CDP smoke
+
+**Files:** `index.html`, `styles.css`, `src/` (ES modules), `manifest.json`,
+`service-worker.js`, `icons/`, `tests/`, `smoke.mjs`.
+
+### Fumetti — Sentinelle
+
+*Three superheroes. A Milan under the rain. A man who steals the light.* 🦸
+
+An offline comic reader and two issues of **Sentinelle**, an original Italian
+superhero noir. The shelf opens with two eight-page stories: four blackouts,
+three young heroes, and an ex-engineer who has decided the city should see the
+dark he saw at Niguarda hospital; then a man without a shadow starts stealing
+Milan's memories, one shadow at a time.
+
+- Two complete issues, each with its own cover, bookmark and resume state
+- Page-by-page reader: swipe, arrows, Page Up/Down, Space, Home/End
+- Reading progress saved on the device, resume or restart from either card
+- Full transcript dialog for screen readers and low-light reading
+- Every panel is procedural Canvas 2D: Milan skyline, Duomo, trams, rain,
+  halftone and ink; no binary art assets
+- Lettering is real DOM text, selectable and accessible
+- Italian story and UI, installable offline PWA with a versioned precache
+- `node:test` data, manifest, precache and progress contract
+
+**Files:** `index.html`, `styles.css`, `src/` (`main`, `reader`, `art`,
+`art-core`, `art-backgrounds`, `art-characters`, `art-fx`, `comics`, `progress`,
+`issues/`), `manifest.json`, `service-worker.js`, `icons/`, `tests/`.
+
+[▶ Read](https://lucagandolfi77.github.io/random2/fumetti-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/fumetti-pwa) ·
+[README](fumetti-pwa/README.md)
 
 ### Plane Shooter
 
@@ -1659,8 +1758,11 @@ project. It is itself an installable PWA.
   storage and shows it on the hub, with a "last played" timestamp and a
   one-click reset (currently Snake, King Shot, Plane Shooter, Slot Machine and
   LUMEN — the games that write `random2-last-played`)
-- **🌓 Dark/light theme toggle**, persisted and seeded from
-  `prefers-color-scheme` on first visit; `theme-color` meta follows along
+- **Style gallery**: nine complete page styles — Arcade Neon (default),
+  Arcade Dawn, Midnight Ink, Paper, Brutalist, Terminal, Sunset, Forest and
+  Blueprint — chosen from the hero, applied instantly, persisted in
+  `localStorage`, and migrated from the old `random2-theme` key. The
+  `theme-color` meta and `color-scheme` follow the selected style.
 - **↗ Share button**: Web Share API on mobile, clipboard fallback with a toast
   everywhere else
 - **🔊 / 📳 Global settings toggles** (sound & haptics) stored in the shared
@@ -1710,6 +1812,9 @@ random2/
 │                          # ┘
 │
 ├── king-shot-pwa/          # static PWA, src/ modules + node:test + CDP smoke
+├── milano-nera-pwa/        # static PWA, src/ sim/AI/renderer + node:test + CDP smoke
+├── fumetti-pwa/            # static PWA, comic reader + procedural Canvas issue
+├── whiteout-survival-pwa/  # React + Vite + Tailwind PWA, pure sim + Canvas 2D
 ├── mustang-pwa/            # static PWA, code split into src/ modules + tests
 ├── lumen-pwa/              # static PWA, src/ modules + headless sim test
 ├── snap-pwa/               # static PWA + vendored MediaPipe engine
@@ -1902,8 +2007,8 @@ a PR — keep this list honest.
       storage, with last-played timestamps and reset
 - [x] Cross-game tracker: Snake / King Shot / Plane / Slot write
       `random2-last-played` so the hub can show "last played"
-- [x] Hub: dark/light theme toggle (persisted, `prefers-color-scheme` seeded,
-      dynamic `theme-color`)
+- [x] Hub: style gallery with nine page styles (persisted, legacy dark/light
+      preference migrated, dynamic `theme-color`)
 - [x] Hub: share button (Web Share API + clipboard fallback + toast)
 - [x] Custom `404.html` with subpath-aware auto-redirect
 - [x] CI workflow (`.github/workflows/ci.yml`): ESM-aware `node --check` over
@@ -1921,7 +2026,7 @@ a PR — keep this list honest.
 ### 🗺️ Planned
 
 - [ ] Hub: re-add live tile previews (dropped during the LUMEN rework)
-- [ ] Hub: extend theme sync so games follow the hub's dark/light choice
+- [ ] Hub: extend style sync so games follow the hub's selected page style
 - [ ] Hub: live daily-challenge standings (compare `snake-daily` highs
       across… friends? a static JSON? needs a design)
 - [x] **MYCEL** — the fungal network .io: branching tendrils (one finger per
@@ -1934,6 +2039,7 @@ a PR — keep this list honest.
 - [ ] Plane: end-of-wave boss encounters with attack patterns
 - [x] King Shot: wind drift, bullseyes, decree drafts, warlords and a local daily siege
 - [ ] King Shot: a duel-vs-AI mode
+- [x] Milano Nera '77: six-chapter campaign, Metrò/Parco, bosses, chase, twin-stick and PWA
 - [ ] Farm: save-file export/import (download/upload JSON) for device migration
 - [ ] Mustang: third front (Korea, 1951) reusing the existing stage engine
 - [ ] Lighthouse CI gate (perf ≥ 90, a11y ≥ 90) wired into the deploy workflow

@@ -29,6 +29,14 @@ fidenza-recon/db/city.db
 !king-shot-pwa/package.json
 !king-shot-pwa/tests/
 !king-shot-pwa/tests/**
+!milano-nera-pwa/package.json
+!milano-nera-pwa/tests/
+!milano-nera-pwa/tests/**
+
+# Fumetti's reader test and package manifest are source, not local tooling.
+!fumetti-pwa/package.json
+!fumetti-pwa/tests/
+!fumetti-pwa/tests/**
 
 # Les Misérables needs its build manifest, lockfile and tests in CI.
 !les-miserables-film/package.json
@@ -39,3 +47,11 @@ fidenza-recon/db/city.db
 # Last Dawn is a local work-in-progress: icons/ and several tool scripts are
 # still missing, so it is not ready to be published as a PWA.
 last-dawn-rpg/
+
+# WHITEOUT: LAST EMBER needs its manifest, lockfile and tests in CI.
+!whiteout-survival-pwa/package.json
+!whiteout-survival-pwa/package-lock.json
+!whiteout-survival-pwa/tests/
+!whiteout-survival-pwa/tests/**
+whiteout-survival-pwa/dist/
+whiteout-survival-pwa/.vite/

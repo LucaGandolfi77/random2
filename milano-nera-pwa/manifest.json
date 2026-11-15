@@ -1,0 +1,120 @@
+{
+  "id": "./",
+  "name": "MILANO NERA '77 — Una notte di piombo",
+  "short_name": "Milano '77",
+  "description": "Milano, 1977. Un ex detenuto, una pistola e una città che mente. Sei capitoli noir tra stealth, cover, treni, cani, boss e inseguimenti.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "orientation": "any",
+  "background_color": "#08080b",
+  "theme_color": "#08080b",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nuova partita",
+      "short_name": "Gioca",
+      "description": "Entra nella notte dal primo capitolo.",
+      "url": "./?play=1",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Capitoli",
+      "short_name": "Capitoli",
+      "description": "Scegli un capitolo già sbloccato.",
+      "url": "./?chapters=1",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "shots/title.png",
+      "sizes": "844x390",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Il menu di MILANO NERA '77."
+    },
+    {
+      "src": "shots/play.png",
+      "sizes": "844x390",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Sparatoria nella Casa Chiusa."
+    },
+    {
+      "src": "shots/chase.png",
+      "sizes": "844x390",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "L'inseguimento in Tangenziale."
+    },
+    {
+      "src": "shots/desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "MILANO NERA '77 su desktop."
+    },
+    {
+      "src": "shots/metro.png",
+      "sizes": "844x390",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Il Metrò, tra treni merci e piattaforme vuote."
+    },
+    {
+      "src": "shots/parco.png",
+      "sizes": "844x390",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Parco Lambro sotto la pioggia, con La Iena."
+    },
+    {
+      "src": "shots/iphone-portrait.png",
+      "sizes": "393x852",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "MILANO NERA ’77 su iPhone in verticale."
+    }
+  ]
+}

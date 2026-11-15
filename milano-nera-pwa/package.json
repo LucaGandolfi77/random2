@@ -1,0 +1,10 @@
+{
+  "name": "milano-nera-77",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MILANO NERA '77 - a 1970s Italian crime twin-stick shooter for the browser",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}

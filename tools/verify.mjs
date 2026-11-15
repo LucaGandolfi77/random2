@@ -209,7 +209,7 @@ echo \"$((total-deps))/$total\"",
     where: "the third stat tile",
     whereIt: "la terza cifra",
     expect: "0",
-    how: "git ls-files | grep -iE '\\.(png|jpe?g|gif|webp|avif|bmp)$' | grep -vE '/icons/|apple-touch-icon|^icons/|og-cover\\.png$|/shots/|/screens/' | wc -l",
+    how: "git ls-files | grep -iE '\\.(png|jpe?g|gif|webp|avif|bmp)$' | grep -vE '/icons/|apple-touch-icon|^icons/|og-cover\\.png$|/shots/|/splash/|/screens/' | wc -l",
     compute: () => {
       /* No game may load a binary image as content. Icons are loaded, and are
          icons; social preview cards are metadata for crawlers, never loaded
@@ -217,7 +217,7 @@ echo \"$((total-deps))/$total\"",
          sheet, and the answer stops being zero. */
       const art = files().filter((f) => {
         if (!/\.(png|jpe?g|gif|webp|avif|bmp)$/i.test(f)) return false;
-        if (/\/icons\/|apple-touch-icon|^icons\/|og-cover\.png$|\/shots\/|\/screens\//.test(f)) return false;
+        if (/\/icons\/|apple-touch-icon|^icons\/|og-cover\.png$|\/shots\/|\/splash\/|\/screens\//.test(f)) return false;
         return true;
       });
       return art.length;

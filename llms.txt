@@ -105,6 +105,8 @@ seeds in Node.
 
 `last-call-pwa/` is a real-time lane card battler in a neon art-deco bar: 24 drinks across cocktails, wine, beer and spirits; two lane Taps and one Cellar per side; a Buzz resource that refills over time and doubles in the final Happy Hour; an eight-venue Bar Tour against bartender AIs whose card levels, think time and aggression rise venue by venue; a deck builder with three saved decks and five upgrade levels per card. The simulation is fixed-step at 60 Hz and DOM-free, the AI acts only through the same `Sim.playCard` as the player, and the arena, glasses and portraits are drawn procedurally in Canvas 2D with synthesised WebAudio. Single-player, offline PWA, no build step, no binary art beyond the generated icons. A 571-check headless suite covers the roster, economy, storage, deployment, spells, overtime and PWA contract; a 77-check Chrome smoke test plays a match, the tour, the deck builder and an offline reload.
 
+`milano-nera-pwa/` is a 1970s Italian crime twin-stick shooter built as an original homage to the poliziottesco genre. Six chapters in three acts move from a brothel stealth job to Torre Velasca, the Metrò, Parco Lambro, a motorway chase and the Darsena finale. The pure simulation runs at a fixed 60 Hz and covers vision cones/line-of-sight, patrols, alert propagation, cover, roll i-frames, stealth takedowns, real projectiles, ricochets, molotov fires, boss phases, a train hazard, dog/shotgun AI and chase traffic. Rendering is procedural 384x216 pixel art with cached room art, film grain, rain and vignette; audio is synthesised. Mouse/keyboard, gamepad and mobile twin-stick controls are supported. Italian UI with acts, comic-panel intros and volume settings; an adaptive iPhone portrait/landscape layout with safe-area handling and startup images; offline PWA, no binary sprites, `node:test` suites and CDP smoke tests for the campaign and iPhone layout.
+
 `pixel-cup-pwa/` is a low-poly arcade football game whose picture is neither
 WebGL nor images: the pitch, the players, the ball, the goal and the crowd are
 triangles drawn by hand into a 320x180 byte buffer that the browser scales up
@@ -132,7 +134,7 @@ reader with chapter menu, saved position and text-size controls.
 `shared/chart.js` — zero-dependency Canvas 2D charts: line, area, bar,
 histogram, scatter, boxplot, heatmap, sparkline. DPR-aware, honours
 `prefers-reduced-motion`, reads colours from CSS custom properties so it
-follows the hub's theme toggle.
+follows the hub's selected page style.
 
 ## Testing
 
@@ -154,6 +156,7 @@ node cinder-belt-pwa/tests/sim.test.js     # CINDER BELT simulation/economy
 node cinder-belt-pwa/tests/content.test.js # CINDER BELT content + PWA wiring
 node cinder-belt-pwa/tests/boot.test.js    # CINDER BELT, the whole game on a fake DOM
 node --test king-shot-pwa/tests/*.test.mjs   # KING SHOT simulation, daily, saves + assets
+node --test milano-nera-pwa/tests/*.test.mjs # MILANO NERA '77 sim, AI, levels, saves + assets
 node last-call-pwa/tests/run.mjs           # LAST CALL simulation, content + PWA contract
 node last-call-pwa/tests/smoke.mjs         # LAST CALL in-browser match, tour, deck, offline
 ```
@@ -164,9 +167,9 @@ Most PWAs are a plain static folder: `index.html`, `styles.css`, `game.js`,
 `manifest.json`, `service-worker.js`, `icons/`. No build step, no bundler.
 Some bigger games use a `src/` of classic scripts under one `window.<NS>`
 namespace instead of a single `game.js` - `ironfall-pwa/` is the reference for
-that shape. `king-shot-pwa/` is a newer ES-module `src/` game with a
-dependency-free headless simulation and `node:test` suites. `bucio/` (Vite + three.js) and `new-star-soccer/` (Vite +
-TypeScript) are the exceptions.
+that shape. `king-shot-pwa/` and `milano-nera-pwa/` are newer ES-module `src/`
+games with dependency-free headless simulations and `node:test` suites. `bucio/`
+(Vite + three.js) and `new-star-soccer/` (Vite + TypeScript) are the exceptions.
 
 ## Live
 

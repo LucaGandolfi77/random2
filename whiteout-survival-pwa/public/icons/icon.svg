@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Last Ember">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#102a36"/>
+      <stop offset="0.55" stop-color="#081721"/>
+      <stop offset="1" stop-color="#040b11"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.62" r="0.48">
+      <stop offset="0" stop-color="#ffb05d" stop-opacity="0.55"/>
+      <stop offset="0.45" stop-color="#ff7a28" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ff6b1c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="snow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaf9fc"/>
+      <stop offset="1" stop-color="#9dd3df"/>
+    </linearGradient>
+    <linearGradient id="fire" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff2cf"/>
+      <stop offset="0.45" stop-color="#ffc263"/>
+      <stop offset="1" stop-color="#f26a1d"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="330" r="225" fill="url(#glow)"/>
+  <g opacity="0.5" stroke="#bfe8ef" stroke-width="5" stroke-linecap="round">
+    <path d="M92 150v78M64 172l56 34M120 172l-56 34" opacity="0.6"/>
+    <path d="M418 120v56M398 136l40 24M438 136l-40 24" opacity="0.45"/>
+    <path d="M405 298v44M388 310l34 20M422 310l-34 20" opacity="0.35"/>
+  </g>
+  <g>
+    <path d="M368 166c11 17 27 28 27 47 0 17-14 31-31 31s-31-14-31-31c0-10 5-17 12-25 1 8 4 14 9 18 1-14 7-26 14-40Z" fill="url(#snow)" opacity="0.9"/>
+  </g>
+  <path d="M77 388c54-28 116-41 179-41 63 0 125 13 179 41v41c0 20-16 36-36 36H113c-20 0-36-16-36-36v-41Z" fill="#0b202a"/>
+  <path d="M62 398c59-31 127-46 194-46s135 15 194 46l-15 27c-53-26-114-41-179-41s-126 15-179 41l-15-27Z" fill="url(#snow)" opacity="0.9"/>
+  <path d="M208 366V231c0-22 18-40 40-40h16c22 0 40 18 40 40v135h-96Z" fill="#1b333b"/>
+  <path d="M221 357v-115c0-24 10-41 35-41s35 17 35 41v115h-70Z" fill="#0a171e"/>
+  <path d="M236 354v-47c0-22 8-39 20-54 12 15 20 32 20 54v47h-40Z" fill="url(#fire)"/>
+  <path d="M246 354v-39c0-11 4-21 10-30 6 9 10 19 10 30v39h-20Z" fill="#fff4d6" opacity="0.85"/>
+  <path d="M198 168h96" stroke="#54747b" stroke-width="12" stroke-linecap="round"/>
+  <path d="M211 168l-17 44M281 168l17 44" stroke="#54747b" stroke-width="10" stroke-linecap="round"/>
+  <path d="M257 103c11 18 24 28 24 46 0 14-11 25-24 25s-24-11-24-25c0-10 5-17 11-23 1 7 4 12 8 16 1-14 3-25 5-39Z" fill="url(#fire)" opacity="0.95"/>
+  <g fill="#ffca83" opacity="0.7">
+    <circle cx="156" cy="350" r="4"/>
+    <circle cx="352" cy="340" r="3"/>
+    <circle cx="177" cy="318" r="2.5"/>
+  </g>
+</svg>
