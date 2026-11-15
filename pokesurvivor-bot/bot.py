@@ -656,33 +656,33 @@ class PokéSurvivorBot:
         LOGGER.info("run %d: stats appended to %s", run_number, path)
 
     async def _finish_run(self, run_number: int) -> None:
-        """Return to the menu and press the game's Save button.
+        """Return to the menu after a run.
 
-        The game keeps the top bar hidden while a run is on screen, and the
-        Save button lives in that top bar, so the bot goes back to the menu
-        first and saves from there.  The run's results are already in the
-        save slot; pressing the button uploads them to the cloud.
+        The result screen is dismissed through its "Menú" action and the
+        finished run is stored locally at once. Current builds also upload it
+        to the cloud automatically and no longer render a Save button, so the
+        save step is a no-op there (an older build may still expose one).
         """
 
         try:
             await self._return_to_menu()
         except BotError as exc:
-            LOGGER.warning("run %d: could not reach the menu to save: %s", run_number, exc)
+            LOGGER.warning("run %d: could not reach the menu after the run: %s", run_number, exc)
             return
         await self._save_run(run_number)
 
     async def _save_run(self, run_number: int) -> None:
-        """Press the game's Save button once the run is over.
+        """Press the game's Save button when the build still has one.
 
-        The game keeps the finished run in its local save slot and only
-        uploads it to the cloud when the player presses "Guardar".  A guest
-        session or a browser-only save mode has no such button, so there is
-        nothing to press and nothing to report beyond a short log line.
+        Older builds kept the finished run in a local slot and only uploaded
+        it to the cloud when the player pressed "Guardar". Current builds save
+        automatically and have removed that button, so finding no button is
+        the expected outcome rather than an error.
         """
 
         if not await self._wait_for_optional(SAVE_BUTTON_SELECTOR, timeout_ms=3_000):
             LOGGER.info(
-                "run %d: no save button to press (guest session or local save mode)",
+                "run %d: no save button (automatic cloud save in this build)",
                 run_number,
             )
             return
@@ -726,6 +726,9 @@ class PokéSurvivorBot:
             return True
         if await self._visible("#scr-bond"):
             await self._choose_bond()
+            return True
+        if await self._visible("#scr-forget"):
+            await self._choose_forget()
             return True
         if await self._visible("#scr-pause"):
             await self.frame.locator("#btn-resume").click()
@@ -814,6 +817,46 @@ class PokéSurvivorBot:
             await asyncio.sleep(0.08)
         await self._wait_hidden("#scr-bond", timeout_ms=5_000)
 
+    async def _choose_forget(self) -> None:
+        """Keep every move when the game asks which move to forget.
+
+        The screen ("Quitamovimientos") lists the moves that could be removed
+        and appends a final "Quedarme con los que llevo" card. Clicking that
+        last card closes the screen without deleting anything. If a move was
+        already selected, step back to the list first so the keep card is
+        available again.
+        """
+
+        subtitle = ""
+        try:
+            subtitle = (await self.frame.locator("#forget-sub").text_content() or "").strip()
+        except Exception:
+            subtitle = ""
+        if "pones en lugar de" in _normalize(subtitle):
+            LOGGER.info("forget screen already has a move selected; going back")
+            await self.frame.locator("#forget-back").click()
+            await self._wait_for_cards("#forget-cards")
+
+        cards = self.frame.locator("#forget-cards .card")
+        count = await cards.count()
+        if count == 0:
+            raise BotError("forget screen has no cards")
+        await self._wait_for_cards("#forget-cards")
+        title = ""
+        try:
+            title = (await cards.last.inner_text()).splitlines()[0]
+        except Exception:
+            title = ""
+        LOGGER.info(
+            "forget screen: keeping every move (last card %d/%d%s)",
+            count,
+            count,
+            f": {title}" if title else "",
+        )
+        await cards.last.click()
+        await self._wait_hidden("#scr-forget", timeout_ms=5_000)
+        await self._select_attack_one()
+
     async def _wait_for_cards(self, container: str, timeout_ms: int = 3_000) -> None:
         """Wait until the game stops guarding freshly shown cards.
 
@@ -847,7 +890,17 @@ class PokéSurvivorBot:
 
     async def _return_to_menu(self) -> None:
         if await self._visible("#scr-over"):
-            await self.frame.locator("#btn-again").click()
+            # Current builds render the result actions dynamically: #over-back
+            # is the "Menú" button. #over-again starts a new run instead, so it
+            # must not be used here. Keep #btn-again for older builds.
+            target = None
+            if await self._wait_for_optional("#over-back", timeout_ms=2_000):
+                target = "#over-back"
+            elif await self._visible("#btn-again"):
+                target = "#btn-again"
+            if target is None:
+                raise BotError("result screen has no back-to-menu button")
+            await self.frame.locator(target).click()
         await self._wait_visible("#scr-menu")
         # Same overlays that can block the play click can also block the
         # top-bar save button right after a run.

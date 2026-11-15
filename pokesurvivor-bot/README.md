@@ -12,7 +12,9 @@ movement through the same keyboard input path used by a human player.
 During level-ups it always takes an upgrade of the attack in slot 1 when one
 is offered; otherwise it prioritizes other attack moves and the Power/damage
 upgrade before generic stats. After every level-up choice it presses `1` to
-reactivate attack slot 1. Movement avoids damaging liquid
+reactivate attack slot 1. If the game opens the forget-move screen
+(`Quitamovimientos`), the bot picks its last option, **Quedarme con los que
+llevo**, so no move is ever deleted. Movement avoids damaging liquid
 (lava, swamp, poison, spark, ice), raised wall formations, trees, rocks,
 chests, and other solid terrain props. Plain **water** is harmless in the
 game, so it is only mildly unattractive: the bot prefers land but still
@@ -25,11 +27,11 @@ then the speed/critical buffs) so a bad fight gets an escape tool. When a
 **rift** (grieta) opens, the bot walks straight into it to reach the
 legendary boss arena; the game enters the arena automatically on contact.
 
-After every run the bot goes back to the main menu and presses the game's
-**Guardar** (Save) button, which uploads the finished run to the cloud, and
-reports the message the game answers with. The game only shows that button
-for a signed-in account whose save mode is the cloud, so a guest session logs
-`no save button to press` instead of failing.
+After every run the bot goes back to the main menu (the result screen's
+**Menú** action, `#over-back`). The game now saves the finished run
+automatically and no longer shows a **Guardar** (Save) button; the bot still
+presses one if an older build exposes it, and otherwise just logs
+`no save button (automatic cloud save in this build)`.
 
 Each finished run is also appended as a row to a CSV report (default
 `runs.csv` in the current directory, override with `--csv`, disable with
@@ -210,7 +212,9 @@ la carta col punteggio più alto (parimerito: la prima in ordine). Dopo
 la scelta preme `1` per riattivare l'attacco dello slot 1. Per gli **item**
 sceglie sempre la seconda carta (il nuovo oggetto), così non resta una
 ricompensa obsoleta per sempre; per i **bond** clicca la prima carta,
-gestendo sia i bond semplici sia quelli a doppia schermata.
+gestendo sia i bond semplici sia quelli a doppia schermata. Se compare la
+schermata **Quitamovimientos** (`#scr-forget`), clicca sempre l'ultima carta,
+**Quedarme con los que llevo**: nessun movimento viene mai cancellato.
 
 ### Ciclo di vita di un run
 
@@ -223,9 +227,9 @@ gestendo sia i bond semplici sia quelli a doppia schermata.
    un overlay blocca il click, lo scarta e riprova.
 3. **Run**: loop a tick finché non appare `#scr-over` (esito `died`) oppure
    si raggiunge `--duration` (esito `timeout` → `Escape` → pausa → Quit).
-4. **Chiusura**: `#btn-again` per tornare al menu, scarta il prompt di
-   recupero, preme **Guardar** (`#btn-save`) se l'account è in modalità
-   salvataggio cloud e legge la risposta toast del gioco.
+4. **Chiusura**: `#over-back` ("Menú") per tornare al menu; il gioco salva
+   automaticamente e non mostra più il pulsante **Guardar**, quindi il bot lo
+   preme solo se una build più vecchia lo espone.
 5. **CSV**: aggiunge una riga di statistiche del run al file `--csv`
    (durata, esito, HP finali, picco nemici, testo del risultato).
 
