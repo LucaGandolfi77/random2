@@ -39,7 +39,7 @@ const DEFAULT = () => ({
   places: [],
   missions: {},
   best: { score: 0, stars: 0, places: 0 },
-  settings: { audio: true, season: 'auto' },
+  settings: { audio: true, season: 'auto', dayOfYear: null, hourOfDay: null },
   stats: DEFAULT_STATS(),
   achievements: {},
   daily: DEFAULT_DAILY(),

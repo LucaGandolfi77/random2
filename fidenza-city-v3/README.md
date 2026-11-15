@@ -1,4 +1,4 @@
-# Fidenza da Giocare v3.3.0 — Mondo Arnis, terreno reale e suolo in streaming
+# Fidenza da Giocare v3.3.1 — Mondo Arnis, terreno reale e suolo in streaming
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
@@ -326,7 +326,7 @@ rimuovi e riaggiungi l’app dalla Home.
 ### 1. Primo avvio
 
 1. Avvia il server statico e apri `http://localhost:8081`.
-2. Scegli la stagione (o lascia “automatica”).
+2. Scegli il giorno dell’anno e l’ora del giorno: stagioni ed eventi si aggiornano di conseguenza.
 3. Premi **Gioca** e, se vuoi, inserisci il tuo nome.
 4. Ti trovi in Piazza Duomo, davanti alla facciata del Duomo di San Donnino.
 
@@ -475,7 +475,7 @@ rimuovi e riaggiungi l’app dalla Home.
 | Mappa | N o click sulla minimappa | menu rapido touch |
 | Modalità foto | P o voce in pausa | menu rapido touch |
 | Audio | M | menu rapido touch |
-| Stagione | selettore in pausa o nell’intro | selettore |
+| Giorno e ora | selettore in pausa o nell’intro | selettore |
 | Pausa | Esc | Esc |
 
 Nota: i controlli laterali sono invertiti in tutte le modalità di movimento
@@ -570,7 +570,7 @@ all’URL per forzare il livello grafico.
 - **Niente più chiazze piatte**: le superfici OSM non d'acqua non vengono più
   coperte da materiali opachi; prati, campi, piazzali e parcheggi mostrano
   l'ortofoto reale e le tessere.
-- **PWA**: cache `v3.3.0`; Data Saver rispettato; toast di avvio/completamento
+- **PWA**: cache `v3.3.1`; Data Saver rispettato; toast di avvio/completamento
   del prefetch.
 - **Rigenerazione**: `../fidenza-recon/.venv/bin/python tools/build-ground.py --base ../fidenza-recon/data/raw/rer/ortho_rgb_05.tif --center ../fidenza-recon/data/raw/rer/ortho_rgb_02.tif` (aggiungi `--no-tiles` per saltare le tessere).
 
@@ -1153,9 +1153,11 @@ La mappa editabile è `maps/fidenza/map.json`; gli stili stagionali sono in
 3. lancia i tool con `--map maps/<id>/map.json`;
 4. il gioco carica `data/map.json`.
 
-La stagione predefinita è automatica in base al mese. Puoi forzarla con
-`?season=spring`, `?season=summer`, `?season=autumn` o `?season=winter`, oppure
-dal selettore in pausa/intro. La scelta viene salvata in locale.
+La stagione dipende dal giorno dell’anno scelto nell’intro o nel menu pausa;
+eventi e orari usano la stessa data simulata. La scelta viene salvata in locale.
+Puoi forzare il giorno con `?day=281` (8 ottobre, Festa di San Donnino) e l’ora
+con `?hour=12`; restano validi anche `?season=spring`, `?season=summer`,
+`?season=autumn` e `?season=winter`.
 
 ## Struttura
 

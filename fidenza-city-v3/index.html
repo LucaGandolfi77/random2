@@ -194,7 +194,7 @@
   <div id="intro">
     <main class="poster">
       <section class="talk">
-        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v3.3.0</span></p>
+        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v3.3.1</span></p>
         <h1 class="wordmark" aria-label="Fidenza da Giocare">
           <span>Fidenza</span>
           <span>da Giocare</span>
@@ -239,16 +239,16 @@
             <p id="event-desc">Fidenza scorre tranquilla.</p>
           </div>
           <div class="season-row">
-            <label for="season-select-intro">Stagione</label>
-            <select id="season-select-intro">
-              <option value="auto">Automatica</option>
-              <option value="spring">Primavera</option>
-              <option value="summer">Estate</option>
-              <option value="autumn">Autunno</option>
-              <option value="winter">Inverno</option>
-            </select>
-            <span id="season-current" class="season-current">Automatica</span>
+            <label for="day-of-year-intro">Giorno dell’anno</label>
+            <input id="day-of-year-intro" data-time-day type="number" min="1" max="365" step="1" inputmode="numeric">
+            <span data-time-date class="season-current">—</span>
           </div>
+          <div class="season-row">
+            <label for="hour-of-day-intro">Ora del giorno</label>
+            <input id="hour-of-day-intro" data-time-hour type="range" min="0" max="23.5" step="0.5">
+            <span data-time-hour-label class="season-current">—</span>
+          </div>
+          <p class="time-hint" data-time-hint></p>
         </section>
 
         <div class="meta">
@@ -368,15 +368,17 @@
         <button type="button" id="pause-export">Esporta salvataggio</button>
         <button type="button" id="pause-import">Importa salvataggio</button>
         <button type="button" id="pause-audio">Audio on/off</button>
-        <label class="season-row" for="season-select">Stagione
-          <select id="season-select">
-            <option value="auto">Automatica</option>
-            <option value="spring">Primavera</option>
-            <option value="summer">Estate</option>
-            <option value="autumn">Autunno</option>
-            <option value="winter">Inverno</option>
-          </select>
-        </label>
+        <div class="season-row">
+          <label for="day-of-year">Giorno dell’anno</label>
+          <input id="day-of-year" data-time-day type="number" min="1" max="365" step="1" inputmode="numeric">
+          <span data-time-date class="season-current">—</span>
+        </div>
+        <div class="season-row">
+          <label for="hour-of-day">Ora del giorno</label>
+          <input id="hour-of-day" data-time-hour type="range" min="0" max="23.5" step="0.5">
+          <span data-time-hour-label class="season-current">—</span>
+        </div>
+        <p class="time-hint" data-time-hint></p>
         <label class="season-row" for="graphics-quality">Grafica
           <select id="graphics-quality">
             <option value="auto">Auto</option>

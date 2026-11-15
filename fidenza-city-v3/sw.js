@@ -1,4 +1,4 @@
-const CACHE = 'fidenza-da-giocare-v3.3.0';
+const CACHE = 'fidenza-da-giocare-v3.3.1';
 const TILE_CACHE = 'fidenza-ground-tiles-v1';
 const ASSETS = [
   './',

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { WORLD, SCORE, PLAYER, VERSION, SAVE_KEY } from './config.js';
 import { clamp, formatDistance, normalizeAngle, angleDiff, formatNumber, formatTime, escapeHtml } from './utils.js';
-import { loadSave, getSave, setName, addScore, addStar, addPlace, resetSave, isAudioEnabled, getStats, getCareer, addStat, addUniqueStat, flush, markSeason, markDay, setStatFlag } from './save.js';
+import { loadSave, getSave, setName, addScore, addStar, addPlace, resetSave, isAudioEnabled, getStats, getCareer, addStat, addUniqueStat, flush, markSeason, markDay, setStatFlag, persist } from './save.js';
 import { evaluateAchievements, achievementState } from './achievements.js';
 import { getDailySnapshot, recordDaily } from './daily.js';
 import { CareerManager, CAREER_TYPES, UPGRADES, careerLevel } from './career.js';
@@ -79,8 +79,12 @@ postfx.setSize();
 let world = null;
 let mapData = null;
 let seasonStyles = {};
-let currentSeason = 'autumn';
-let seasonSetting = 'auto';
+const SEASON_PRESETS = { spring: [3, 20], summer: [6, 21], autumn: [9, 23], winter: [12, 21] };
+const initialClock = resolveInitialClock();
+let gameYear = initialClock.year;
+let gameDay = initialClock.day;
+let gameHour = initialClock.hour;
+let currentSeason = seasonFromDay(gameDay, gameYear);
 let player = null;
 let vehicles = null;
 let missions = null;
@@ -121,7 +125,6 @@ let lastDistrictId = '';
 let diaryTab = 'gazzetta';
 let lastPromptKey = '';
 let pausedByDialog = false;
-let gameTime = 0;
 let pendingStart = false;
 let clockFrozen = false;
 
@@ -129,11 +132,9 @@ const deepParams = new URLSearchParams(location.search);
 const deepX = Number(deepParams.get('x'));
 const deepZ = Number(deepParams.get('z'));
 const deepYaw = Number(deepParams.get('yaw'));
-const deepHour = Number(deepParams.get('hour'));
 const deepSpawn = Number.isFinite(deepX) && Number.isFinite(deepZ)
   ? { x: deepX, z: deepZ, yaw: Number.isFinite(deepYaw) ? deepYaw : WORLD.spawn.yaw }
   : null;
-const deepHourValue = Number.isFinite(deepHour) ? deepHour : null;
 
 const ui = {
   play: document.getElementById('play'),
@@ -249,11 +250,8 @@ function haptic(pattern = 18) {
 }
 
 function nowLabel() {
-  const d = new Date();
-  const fmt = new Intl.DateTimeFormat('it-IT', {
-    timeZone: 'Europe/Rome', weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-  });
-  return fmt.format(d);
+  const fmt = new Intl.DateTimeFormat('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+  return `${fmt.format(gameDate())} · ${formatClock(gameHour)}`;
 }
 
 function weatherInfo(code) {
@@ -283,6 +281,30 @@ function weatherInfo(code) {
   return map[code] || ['☀', 'cielo'];
 }
 
+function daysInYear(year = new Date().getFullYear()) {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 366 : 365;
+}
+
+function dayOfYearFromDate(date = new Date()) {
+  const start = Date.UTC(date.getFullYear(), 0, 1);
+  const current = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+  return Math.floor((current - start) / 86400000) + 1;
+}
+
+function dateFromDayOfYear(day, hour = 12, year = new Date().getFullYear()) {
+  const date = new Date(year, 0, 1, 0, 0, 0, 0);
+  date.setDate(clamp(Math.round(Number(day) || 1), 1, daysInYear(year)));
+  const h = clamp(Number.isFinite(Number(hour)) ? Number(hour) : 12, 0, 24);
+  date.setHours(Math.floor(h) % 24, Math.round((h % 1) * 60), 0, 0);
+  return date;
+}
+
+function dayOfYearForSeason(id, year = new Date().getFullYear()) {
+  const preset = SEASON_PRESETS[id];
+  if (!preset) return null;
+  return dayOfYearFromDate(new Date(year, preset[0] - 1, preset[1], 12));
+}
+
 function seasonFromMonth(month = new Date().getMonth()) {
   if (month >= 2 && month <= 4) return 'spring';
   if (month >= 5 && month <= 7) return 'summer';
@@ -290,47 +312,140 @@ function seasonFromMonth(month = new Date().getMonth()) {
   return 'winter';
 }
 
-function resolveSeasonSetting() {
-  const params = new URLSearchParams(location.search);
-  const url = params.get('season');
-  if (url && ['spring', 'summer', 'autumn', 'winter'].includes(url)) return url;
-  const saved = getSave().settings?.season;
-  if (saved && ['auto', 'spring', 'summer', 'autumn', 'winter'].includes(saved)) return saved;
-  return 'auto';
+function seasonFromDay(day = gameDay, year = gameYear) {
+  return seasonFromMonth(dateFromDayOfYear(day, 12, year).getMonth());
 }
 
-function resolveSeason(setting) {
-  return setting === 'auto' ? seasonFromMonth() : setting;
+function resolveInitialClock() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const params = new URLSearchParams(location.search);
+  const rawDay = params.get('day');
+  const rawHour = params.get('hour');
+  const urlSeason = params.get('season');
+  const saved = getSave().settings || {};
+  const savedDay = saved.dayOfYear != null ? Number(saved.dayOfYear) : NaN;
+  const savedHour = saved.hourOfDay != null ? Number(saved.hourOfDay) : NaN;
+  let day = null;
+  if (rawDay != null && Number.isFinite(Number(rawDay)) && Number(rawDay) >= 1) day = Number(rawDay);
+  else if (urlSeason && SEASON_PRESETS[urlSeason]) day = dayOfYearForSeason(urlSeason, year);
+  else if (Number.isFinite(savedDay) && savedDay >= 1) day = savedDay;
+  else if (saved.season && SEASON_PRESETS[saved.season]) day = dayOfYearForSeason(saved.season, year);
+  if (day == null) day = dayOfYearFromDate(now);
+  let hour;
+  if (rawHour != null && Number.isFinite(Number(rawHour))) hour = Number(rawHour);
+  else if (Number.isFinite(savedHour)) hour = savedHour;
+  else hour = now.getHours() + now.getMinutes() / 60;
+  return {
+    year,
+    day: clamp(Math.round(day), 1, daysInYear(year)),
+    hour: clamp(hour, 0, 23.5)
+  };
 }
 
 function seasonLabel(id) {
-  const labels = { auto: 'Automatica', spring: 'Primavera', summer: 'Estate', autumn: 'Autunno', winter: 'Inverno' };
-  return labels[id] || labels.auto;
+  const labels = { spring: 'Primavera', summer: 'Estate', autumn: 'Autunno', winter: 'Inverno' };
+  return labels[id] || 'Autunno';
 }
 
-function syncSeasonSelects() {
-  for (const id of ['season-select', 'season-select-intro']) {
-    const el = document.getElementById(id);
-    if (el) el.value = seasonSetting;
+function gameDate(day = gameDay, hour = gameHour) {
+  return dateFromDayOfYear(day, hour, gameYear);
+}
+
+function formatClock(hour = gameHour) {
+  const normalized = ((Number(hour) || 0) % 24 + 24) % 24;
+  const totalMinutes = Math.round(normalized * 60) % (24 * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function timeDateLabel(day = gameDay) {
+  const fmt = new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'short' });
+  return fmt.format(dateFromDayOfYear(day, 12, gameYear));
+}
+
+function syncTimeControls() {
+  const maxDay = daysInYear(gameYear);
+  const dayText = `${gameDay} · ${timeDateLabel()} · ${seasonLabel(currentSeason)}`;
+  const hourText = formatClock(gameHour);
+  for (const el of document.querySelectorAll('[data-time-day]')) {
+    el.max = String(maxDay);
+    el.value = String(gameDay);
   }
-  const label = document.getElementById('season-current');
-  if (label) label.textContent = `Ora: ${seasonLabel(currentSeason)}`;
+  for (const el of document.querySelectorAll('[data-time-hour]')) {
+    el.value = String(gameHour);
+  }
+  for (const el of document.querySelectorAll('[data-time-date]')) el.textContent = dayText;
+  for (const el of document.querySelectorAll('[data-time-hour-label]')) el.textContent = hourText;
+  const start = dayOfYearFromDate(new Date(gameYear, 9, 8, 12));
+  const end = dayOfYearFromDate(new Date(gameYear, 9, 10, 12));
+  for (const el of document.querySelectorAll('[data-time-hint]')) {
+    el.textContent = `Festa di San Donnino: 8–10 ottobre (giorni ${start}–${end}).`;
+  }
 }
 
-function applySeason(setting, { silent = false } = {}) {
-  seasonSetting = ['auto', 'spring', 'summer', 'autumn', 'winter'].includes(setting) ? setting : 'auto';
-  currentSeason = resolveSeason(seasonSetting);
-  const style = seasonStyles[currentSeason];
-  if (world) world.setSeason(style || null, currentSeason);
-  markSeason(currentSeason);
-  const save = getSave();
-  save.settings.season = seasonSetting;
-  try { localStorage.setItem('fidenza-da-giocare-v1', JSON.stringify(save)); } catch { /* ignore */ }
-  syncSeasonSelects();
-  if (!silent) hud.setToast(`Stagione: ${seasonLabel(currentSeason)}${seasonSetting === 'auto' ? ' (automatica)' : ''}`, 2200);
-  audio.click();
-  refreshDailyUI();
-  checkAchievements(!silent);
+function applyGameTime({ day = gameDay, hour = gameHour, silent = false, persist: shouldPersist = true } = {}) {
+  gameDay = clamp(Math.round(Number(day) || gameDay), 1, daysInYear(gameYear));
+  gameHour = clamp(Number.isFinite(Number(hour)) ? Number(hour) : gameHour, 0, 23.5);
+  const nextSeason = seasonFromDay(gameDay, gameYear);
+  const seasonChanged = nextSeason !== currentSeason;
+  currentSeason = nextSeason;
+  baseHour = gameHour;
+  if (world) {
+    if (seasonChanged) world.setSeason(seasonStyles[currentSeason] || null, currentSeason);
+    world.setHour(gameHour);
+  }
+  if (seasonChanged) markSeason(currentSeason);
+  if (shouldPersist) {
+    const save = getSave();
+    save.settings.dayOfYear = gameDay;
+    save.settings.hourOfDay = gameHour;
+    save.settings.season = currentSeason;
+    markDay(gameDate());
+    persist();
+  }
+  syncTimeControls();
+  refreshClockOnly();
+  refreshEventUI();
+  if (!silent) {
+    hud.setToast(`Giorno ${gameDay} · ${timeDateLabel()} · ${seasonLabel(currentSeason)} · ${formatClock(gameHour)}`, 2800);
+    audio.click();
+    refreshDailyUI();
+    checkAchievements(true);
+  }
+}
+
+function applySeason(setting, opts = {}) {
+  if (setting === 'auto') {
+    applyGameTime({ day: dayOfYearFromDate(new Date()), ...opts });
+    return;
+  }
+  const day = dayOfYearForSeason(setting, gameYear);
+  if (day != null) applyGameTime({ day, ...opts });
+}
+
+function bindTimeControls() {
+  for (const el of document.querySelectorAll('[data-time-day]')) {
+    el.addEventListener('change', () => {
+      const value = Number(el.value);
+      if (!el.value.trim() || !Number.isFinite(value)) {
+        syncTimeControls();
+        return;
+      }
+      applyGameTime({ day: value });
+    });
+  }
+  for (const el of document.querySelectorAll('[data-time-hour]')) {
+    el.addEventListener('input', () => {
+      const value = Number(el.value);
+      if (Number.isFinite(value)) applyGameTime({ hour: value, silent: true, persist: false });
+    });
+    el.addEventListener('change', () => {
+      const value = Number(el.value);
+      if (Number.isFinite(value)) applyGameTime({ hour: value });
+    });
+  }
 }
 
 async function loadWeather() {
@@ -357,12 +472,8 @@ async function loadWeather() {
 
 function updateClock() {
   if (photoMode?.active) return;
-  const d = new Date();
-  const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d);
-  const h = Number(parts.find(p => p.type === 'hour')?.value || 15);
-  const m = Number(parts.find(p => p.type === 'minute')?.value || 0);
-  baseHour = h + m / 60;
-  if (world) world.setHour(baseHour + gameTime / 3600 * 0.6);
+  baseHour = gameHour;
+  if (world) world.setHour(gameHour);
 }
 
 async function init() {
@@ -439,19 +550,14 @@ async function init() {
     })
   );
   seasonStyles = Object.fromEntries(stylePairs.filter(([, s]) => s));
-  seasonSetting = resolveSeasonSetting();
-  currentSeason = resolveSeason(seasonSetting);
+  currentSeason = seasonFromDay(gameDay, gameYear);
   world.setSeason(seasonStyles[currentSeason] || null, currentSeason);
   markSeason(currentSeason);
-  markDay();
+  markDay(gameDate());
 
   player = new Player({ scene, camera, world, input });
   const sp = deepSpawn || mapData?.spawn || WORLD.spawn;
   player.spawn(sp.x, sp.z, sp.yaw);
-  if (deepHourValue != null) {
-    world.setHour(deepHourValue);
-    clockFrozen = true;
-  }
   vehicles = new VehicleManager({ scene, world, audio, player, input });
   vehicles.spawnAll();
 
@@ -539,11 +645,7 @@ async function init() {
 
   world.setWeather(weather);
   updateClock();
-  world.setHour(baseHour);
-  if (deepHourValue != null) {
-    world.setHour(deepHourValue);
-    clockFrozen = true;
-  }
+  world.setHour(gameHour);
   refreshIntro();
   checkAchievements(false);
   checkEventBadges();
@@ -554,7 +656,7 @@ async function init() {
   hud.setLoading(1, 'Fidenza è pronta');
   hud.setPlayReady(true, 'Gioca');
   hud.hideLoading();
-  window.__fidenza = { world, player, vehicles, missions, career, map, photoMode, hud, renderer, scene, camera, input, postfx, arnis: world.arnis, groundTiles: world.groundTiles, startGame, getState: () => state, setHour: h => world.setHour(h), applySeason, enterPhoto, exitPhoto, freezeClock: (f = true) => { clockFrozen = !!f; } };
+  window.__fidenza = { world, player, vehicles, missions, career, map, photoMode, hud, renderer, scene, camera, input, postfx, arnis: world.arnis, groundTiles: world.groundTiles, startGame, getState: () => state, setHour: h => applyGameTime({ hour: h }), setGameTime: (day, hour) => applyGameTime({ day, hour }), applySeason, enterPhoto, exitPhoto, freezeClock: (f = true) => { clockFrozen = !!f; } };
   camera.position.set(-40, 20, 100);
   camera.lookAt(-120, 8, 20);
   requestAnimationFrame(loop);
@@ -563,7 +665,6 @@ async function init() {
     if (clockFrozen) return;
     updateClock();
     refreshClockOnly();
-    if (seasonSetting === 'auto' && resolveSeason('auto') !== currentSeason) applySeason('auto', { silent: true });
     refreshDailyUI();
     refreshEventUI();
   }, 30000);
@@ -581,7 +682,7 @@ function refreshIntro() {
   hud.setProgress(save.stars.length, world.starObjects.length, save.places.length, world.placeObjects.length);
   hud.setScore(save.score, false);
   hud.setAudioMuted(audio.muted);
-  syncSeasonSelects();
+  syncTimeControls();
   refreshDailyUI();
   refreshEventUI();
   updateCareerChip();
@@ -670,10 +771,7 @@ function refreshDailyUI() {
 }
 
 function eventClockDate() {
-  const date = new Date();
-  const hour = Number.isFinite(world?.hour) ? world.hour : date.getHours() + date.getMinutes() / 60;
-  date.setHours(Math.floor(hour) % 24, Math.floor((hour % 1) * 60), 0, 0);
-  return date;
+  return gameDate(gameDay, gameHour);
 }
 
 function refreshEventUI() {
@@ -1148,9 +1246,7 @@ function bindUI() {
   ui.photoPlayerToggle?.addEventListener('change', e => photoMode?.setPlayerVisible(e.target.checked));
   ui.photoVehiclesToggle?.addEventListener('change', e => photoMode?.setVehiclesVisible(e.target.checked));
   ui.photoGalleryGrid?.addEventListener('click', onPhotoGalleryClick);
-  for (const id of ['season-select', 'season-select-intro']) {
-    document.getElementById(id)?.addEventListener('change', e => applySeason(e.target.value));
-  }
+  bindTimeControls();
   ui.pauseReset?.addEventListener('click', () => {
     ui.pauseDialog.close();
     ui.confirmDialog.showModal();
@@ -2178,7 +2274,6 @@ function loop() {
   const dialogOpen = !!document.querySelector('dialog[open]');
   const photoActive = !!photoMode?.active;
   const paused = state === 'intro' || dialogOpen || map?.isOpen || photoActive;
-  if (!photoActive) gameTime += dt;
 
   if (state === 'intro') {
     const t = performance.now() * 0.00006;

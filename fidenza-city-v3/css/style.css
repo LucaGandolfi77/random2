@@ -416,9 +416,27 @@ canvas { display: block; }
   padding: 5px 8px;
   font-size: 12px;
 }
-.season-current { text-transform: none; letter-spacing: .02em; color: var(--green); font-weight: 600; }
+.season-row input[type="number"] {
+  width: 76px;
+  border: 1px solid rgba(27,36,30,.16);
+  border-radius: 8px;
+  background: rgba(255,250,239,.8);
+  color: var(--ink);
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 12px;
+  text-align: center;
+}
+.season-row input[type="range"] {
+  flex: 1;
+  min-width: 88px;
+  accent-color: var(--green);
+}
+.season-current { text-transform: none; letter-spacing: .02em; color: var(--green); font-weight: 600; white-space: nowrap; margin-left: auto; }
+.time-hint { margin: 8px 0 0; font-size: 10.5px; line-height: 1.35; color: var(--muted); letter-spacing: .02em; }
 .pause-actions .season-row { margin: 0; padding: 2px 0; flex-direction: row; text-transform: none; font-size: 13px; color: var(--green); }
 .pause-actions .season-row select { margin-left: auto; }
+.pause-actions .season-row input[type="number"] { width: 68px; }
 
 /* ------------------------------------------------------------------ */
 /* Mappa grande                                                        */
