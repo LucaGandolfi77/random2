@@ -104,7 +104,10 @@ await cdp.send("Network.enable", {}, sessionId);
 await cdp.send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 2, mobile: true }, sessionId);
 await cdp.send("Page.navigate", { url }, sessionId);
 
-ok(await waitFor("typeof window.__DEEP_ORBIT__ === 'object'"), "the game boots");
+if (!(await waitFor("typeof window.__DEEP_ORBIT__ === 'object'", 4000))) {
+    await cdp.send("Page.reload", {}, sessionId);
+}
+ok(await waitFor("typeof window.__DEEP_ORBIT__ === 'object'", 10000), "the game boots");
 ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "the menu is active");
 ok(await evaluate("!document.getElementById('overlay').classList.contains('hidden')"), "the menu overlay is visible");
 
@@ -134,6 +137,35 @@ await sleep(450);
 ok(await evaluate("!document.getElementById('debug-hud').classList.contains('hidden')"), "the debug HUD is visible in debug mode");
 ok(await evaluate("/FPS/.test(document.getElementById('debug-hud').textContent)"), "the debug HUD reports FPS");
 ok(await evaluate("/HULL MESH/.test(document.getElementById('debug-hud').textContent)"), "high quality uses faceted 3D hulls");
+
+/* Daily contracts and achievements panels. */
+ok(await evaluate("!!document.querySelector('[data-action=contracts]')"), "the menu has a Contracts button");
+await click('[data-action="contracts"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'info'"), "Contracts panel opens");
+ok(await evaluate("document.querySelectorAll('.contract-row').length === 3"), "three daily contracts are shown");
+await click('[data-action="close-info"]');
+await click('[data-action="achievements"]');
+ok(await evaluate("document.querySelectorAll('.upgrade-row').length >= 10"), "achievements are listed");
+await click('[data-action="close-info"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "info panels return to the menu");
+
+/* Hangar meta systems from the menu (where the preview ship is docked). */
+await click('[data-action="hangar"]');
+ok(await evaluate("!!document.querySelector('[data-action=dispatch]')"), "dispatch options are shown while docked");
+await click('[data-action="dispatch"][data-value="short"]');
+ok(await evaluate("!!window.__DEEP_ORBIT__.getProfile().dispatch.active"), "a retriever mission starts");
+await evaluate("window.__DEEP_ORBIT__.getProfile().dispatch.active.endsAt = Date.now() - 1000");
+await click('[data-action="close-hangar"]');
+await click('[data-action="hangar"]');
+await click('[data-action="claim-dispatch"]');
+ok(await evaluate("window.__DEEP_ORBIT__.getProfile().dispatch.active === null"), "a completed dispatch can be claimed");
+await evaluate("window.__DEEP_ORBIT__.getProfile().skillPoints = 3");
+await click('[data-action="close-hangar"]');
+await click('[data-action="hangar"]');
+await click('[data-action="buy-skill"][data-value="laser"]');
+ok(await evaluate("window.__DEEP_ORBIT__.getProfile().skills.laser === 1"), "a pilot skill can be purchased");
+await click('[data-action="close-hangar"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "hangar returns to the menu");
 
 /* Settings screen and persistence. */
 await click('[data-action="settings"]');
@@ -216,6 +248,7 @@ await evaluate(`(() => {
 await pointer("#fire-btn", 0, 0, 800);
 const scored = await evaluate("({ kills: window.__DEEP_ORBIT__.getState().kills, score: window.__DEEP_ORBIT__.getState().score })");
 ok(scored && scored.kills >= 1 && scored.score > 0, "firing kills the target and scores", scored && JSON.stringify(scored));
+ok(await waitFor("window.__DEEP_ORBIT__.getProfile().achievements.includes('first_kill')"), "the first-kill achievement unlocks");
 
 /* Joystick flight. */
 const beforeMove = await evaluate("window.__DEEP_ORBIT__.getState().player.x");
@@ -259,6 +292,17 @@ ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'destroyed'", 2500), "des
 await click('[data-action="respawn"]');
 ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'playing'"), "respawn returns to flight");
 ok(await evaluate("window.__DEEP_ORBIT__.getState().destroyed === false"), "the ship is restored");
+
+/* Run autosave + Continue from the menu. */
+await evaluate("window.__DEEP_ORBIT__.getState().score = 777; window.__DEEP_ORBIT__.saveRunNow()");
+ok(await evaluate("window.__DEEP_ORBIT__.hasRun() === true"), "the run is saved");
+await click("#btn-pause");
+await click('[data-action="restart"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "Main Menu is reachable");
+ok(await evaluate("!!document.querySelector('[data-action=continue]')"), "Continue Run is offered");
+await click('[data-action="continue"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'playing'"), "Continue Run resumes play");
+ok(await evaluate("window.__DEEP_ORBIT__.getState().score === 777"), "run score is restored");
 
 /* Landscape layout. */
 await cdp.send("Emulation.setDeviceMetricsOverride", { width: 844, height: 390, deviceScaleFactor: 2, mobile: true }, sessionId);

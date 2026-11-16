@@ -7,9 +7,13 @@
  */
 
 import {
-    SHIPS, UPGRADES, AMMO, ABILITIES, DRONE_MAX, droneCost, upgradeCost,
-    RESOURCES, RESOURCE_IDS, xpForLevel, clamp
+    SHIPS, UPGRADES, SKILLS, SKILL_BY_ID, ACHIEVEMENTS, AMMO, ABILITIES, DRONE_MAX,
+    DISPATCH_TIERS, droneCost, upgradeCost, RESOURCES, RESOURCE_IDS,
+    xpForLevel, clamp
 } from "./config.js";
+import { dispatchStatus } from "./dispatch.js";
+import { dailyContracts } from "./daily.js";
+import { achievementList, achievementCount } from "./achievements.js";
 
 function fmt(n) {
     return Math.floor(n || 0).toLocaleString("en-US");
@@ -87,6 +91,11 @@ export function createUI(handlers = {}) {
             jump: handlers.onJump,
             settings: handlers.onSettings,
             "close-settings": handlers.onCloseSettings,
+            continue: handlers.onContinue,
+            contracts: handlers.onContracts,
+            achievements: handlers.onAchievements,
+            "close-info": handlers.onCloseInfo,
+            "claim-dispatch": handlers.onClaimDispatch,
             "coach-next": handlers.onCoachNext,
             "coach-skip": handlers.onCoachSkip,
             "buy-drone": handlers.onBuyDrone
@@ -95,6 +104,8 @@ export function createUI(handlers = {}) {
         else if (action === "buy-upgrade" && handlers.onBuyUpgrade) handlers.onBuyUpgrade(value);
         else if (action === "buy-ship" && handlers.onBuyShip) handlers.onBuyShip(Number(value));
         else if (action === "select-ship" && handlers.onSelectShip) handlers.onSelectShip(Number(value));
+        else if (action === "buy-skill" && handlers.onBuySkill) handlers.onBuySkill(value);
+        else if (action === "dispatch" && handlers.onDispatch) handlers.onDispatch(value);
         else if (action === "setting" && handlers.onSetting) {
             const key = btn.getAttribute("data-key");
             let next = value;
@@ -113,7 +124,7 @@ export function createUI(handlers = {}) {
         el.overlay.classList.remove("hidden");
     }
 
-    function menuHTML(profile) {
+    function menuHTML(profile, hasRun) {
         return `
             <div class="panel" role="dialog" aria-modal="true">
                 <p class="kicker">OFFLINE SPACE COMBAT</p>
@@ -124,10 +135,14 @@ export function createUI(handlers = {}) {
                     <span>CR <b>${fmt(profile.credits)}</b></span>
                     <span>URIUM <b>${fmt(profile.urium)}</b></span>
                     <span>BEST <b>${fmt(profile.bestScore)}</b></span>
+                    <span>🏆 <b>${achievementCount(profile)}/${ACHIEVEMENTS.length}</b></span>
                 </div>
                 <div class="panel-actions">
-                    <button class="btn primary" data-action="play" type="button">▶ FLY</button>
+                    ${hasRun ? `<button class="btn primary" data-action="continue" type="button">▶ CONTINUE RUN</button>` : ""}
+                    <button class="btn ${hasRun ? "" : "primary"}" data-action="play" type="button">✦ NEW RUN</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="contracts" type="button">📋 CONTRACTS</button>
+                    <button class="btn" data-action="achievements" type="button">🏆 AWARDS</button>
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
                 </div>
@@ -176,6 +191,36 @@ export function createUI(handlers = {}) {
             </div>`;
     }
 
+    function skillRow(def, profile) {
+        const level = profile.skills[def.id] | 0;
+        const canBuy = (profile.skillPoints | 0) > 0 && level < def.max;
+        const pips = Array.from({ length: def.max }, (_, i) =>
+            `<i class="${i < level ? "on" : ""}"></i>`).join("");
+        return `
+            <div class="upgrade-row">
+                <div class="upgrade-info"><b>${def.name}</b><small>${def.desc}</small><div class="pips">${pips}</div></div>
+                <button class="btn tiny ${canBuy ? "primary" : ""}" data-action="buy-skill" data-value="${def.id}" type="button" ${canBuy ? "" : "disabled"}>
+                    ${level >= def.max ? "MAX" : "+"}
+                </button>
+            </div>`;
+    }
+
+    function dispatchHTML(profile, now) {
+        const status = dispatchStatus(profile, now);
+        if (status.active) {
+            if (status.done) {
+                return `<p class="section-note">Retriever returned — claim your reward.</p>
+                    <button class="btn small primary" data-action="claim-dispatch" type="button">CLAIM ${fmt(status.rewards.credits)} CR${status.rewards.urium ? " + " + status.rewards.urium + " URIUM" : ""}</button>`;
+            }
+            const hours = Math.max(1, Math.ceil(status.hours));
+            return `<p class="section-note">${status.tier} in progress — returns in ~${hours}h.</p>`;
+        }
+        return `<p class="section-note">Send a retriever offline. Rewards are waiting when you return.</p>
+            <div class="dispatch-tiers">
+                ${DISPATCH_TIERS.map((t) => `<button class="btn tiny" data-action="dispatch" data-value="${t.id}" type="button">${t.name.toUpperCase()} · ${t.hours}H</button>`).join("")}
+            </div>`;
+    }
+
     function buildHangar(state, profile) {
         const dcost = droneCost(profile.drones);
         const dmax = profile.drones >= DRONE_MAX;
@@ -197,6 +242,7 @@ export function createUI(handlers = {}) {
                     <span>CR <b>${fmt(profile.credits)}</b></span>
                     <span>URIUM <b>${fmt(profile.urium)}</b></span>
                     <span>LVL <b>${profile.level}</b></span>
+                    <span>SKILL PTS <b>${profile.skillPoints | 0}</b></span>
                 </div>
                 ${stationActions}
                 <div class="hangar-scroll">
@@ -215,6 +261,14 @@ export function createUI(handlers = {}) {
                             ${dmax ? "MAX DRONES" : "BUY DRONE · " + fmt(dcost) + " CR"}
                         </button>
                     </section>
+                    <section>
+                        <h3>PILOT SKILLS <small>${profile.skillPoints | 0} PTS</small></h3>
+                        ${SKILLS.map((def) => skillRow(def, profile)).join("")}
+                    </section>
+                    ${atStation ? `<section>
+                        <h3>DISPATCH</h3>
+                        ${dispatchHTML(profile, Date.now())}
+                    </section>` : ""}
                 </div>
                 <div class="panel-actions">
                     <button class="btn primary" data-action="${state ? "close-hangar" : "play"}" type="button">${state ? "◀ BACK TO FLIGHT" : "◀ BACK"}</button>
@@ -222,8 +276,8 @@ export function createUI(handlers = {}) {
             </div>`;
     }
 
-    function showMenu(profile) {
-        showOverlay(menuHTML(profile));
+    function showMenu(profile, hasRun) {
+        showOverlay(menuHTML(profile, !!hasRun));
     }
 
     function showHangar(state, profile) {
@@ -244,6 +298,8 @@ export function createUI(handlers = {}) {
                 <div class="panel-actions">
                     <button class="btn primary" data-action="resume" type="button">▶ RESUME</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="contracts" type="button">📋 CONTRACTS</button>
+                    <button class="btn" data-action="achievements" type="button">🏆 AWARDS</button>
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
                     <button class="btn" data-action="restart" type="button">↻ MAIN MENU</button>
@@ -335,6 +391,53 @@ export function createUI(handlers = {}) {
             el.debug.textContent = text;
             el.debug.classList.toggle("hidden", !text);
         }
+    }
+
+    function showContracts(profile) {
+        const daily = dailyContracts(profile, Date.now());
+        const streak = profile.daily.streak | 0;
+        return showOverlay(`
+            <div class="panel panel-wide" role="dialog" aria-modal="true">
+                <p class="kicker">DAILY CONTRACTS</p>
+                <h2>TODAY'S OBJECTIVES</h2>
+                <p class="section-note">Streak: <b>${streak}</b> day${streak === 1 ? "" : "s"} · rewards are paid automatically.</p>
+                <div class="contract-list">
+                    ${daily.map((c) => `
+                        <div class="contract-row ${c.done ? "done" : ""}">
+                            <div class="contract-info">
+                                <b>${c.text}</b>
+                                <div class="mini-track"><div class="hp" style="width:${Math.round(c.progress / c.target * 100)}%"></div></div>
+                                <small>${Math.min(c.progress, c.target)} / ${c.target}</small>
+                            </div>
+                            <span class="contract-reward">${c.done ? "✓ PAID" : "+" + fmt(c.reward) + " CR"}</span>
+                        </div>`).join("")}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+            </div>`);
+    }
+
+    function showAchievements(profile) {
+        const list = achievementList(profile);
+        return showOverlay(`
+            <div class="panel panel-wide" role="dialog" aria-modal="true">
+                <p class="kicker">PILOT RECORD</p>
+                <h2>ACHIEVEMENTS ${achievementCount(profile)}/${list.length}</h2>
+                <div class="hangar-scroll">
+                    ${list.map((a) => `
+                        <div class="upgrade-row ${a.unlocked ? "done" : ""}">
+                            <div class="upgrade-info">
+                                <b>${a.unlocked ? "🏆" : "○"} ${a.name}</b>
+                                <small>${a.desc}</small>
+                            </div>
+                            <span class="contract-reward">${a.unlocked ? "DONE" : "+" + fmt(a.reward) + " CR"}</span>
+                        </div>`).join("")}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+            </div>`);
     }
 
     function showDestroyed(state, profile) {
@@ -462,6 +565,8 @@ export function createUI(handlers = {}) {
         showHangar,
         refreshHangar,
         showSettings,
+        showContracts,
+        showAchievements,
         showCoach,
         hideCoach,
         setDebug,

@@ -7,7 +7,7 @@
 
 import {
     STORAGE_KEY, STORAGE_VERSION, SETTINGS_KEY, SETTINGS_VERSION,
-    SHIPS, UPGRADES, MAPS, clamp
+    SHIPS, UPGRADES, MAPS, SKILLS, SKILL_BY_ID, clamp
 } from "./config.js";
 
 export const DEFAULTS = {
@@ -23,6 +23,14 @@ export const DEFAULTS = {
     lastMap: 0,
     bestScore: 0,
     totalKills: 0,
+    totalSales: 0,
+    bestSale: 0,
+    bossKills: 0,
+    skillPoints: 0,
+    skills: { laser: 0, shield: 0, drone: 0, cargo: 0 },
+    dispatch: { active: null, totalSent: 0 },
+    daily: { date: "", contracts: [], progress: {}, completed: [], streak: 0, lastDay: "" },
+    achievements: [],
     tutorialDone: false,
     installDismissed: false
 };
@@ -69,6 +77,39 @@ export function loadProfile(storage) {
             for (const def of UPGRADES) {
                 profile.upgrades[def.id] = clamp(count(data.upgrades[def.id], 0), 0, def.max);
             }
+        }
+
+        profile.totalSales = count(data.totalSales, 0);
+        profile.bestSale = count(data.bestSale, 0);
+        profile.bossKills = count(data.bossKills, 0);
+        profile.skillPoints = count(data.skillPoints, 0);
+        if (data.skills && typeof data.skills === "object") {
+            for (const def of SKILLS) {
+                profile.skills[def.id] = clamp(count(data.skills[def.id], 0), 0, def.max);
+            }
+        }
+        if (data.dispatch && typeof data.dispatch === "object") {
+            profile.dispatch.totalSent = count(data.dispatch.totalSent, 0);
+            const a = data.dispatch.active;
+            if (a && typeof a === "object" && typeof a.endsAt === "number") {
+                profile.dispatch.active = {
+                    tier: String(a.tier || "short"),
+                    endsAt: a.endsAt,
+                    rewards: a.rewards && typeof a.rewards === "object" ? a.rewards : null
+                };
+            }
+        }
+        if (data.daily && typeof data.daily === "object") {
+            profile.daily.date = typeof data.daily.date === "string" ? data.daily.date : "";
+            profile.daily.contracts = Array.isArray(data.daily.contracts) ? data.daily.contracts : [];
+            profile.daily.progress = data.daily.progress && typeof data.daily.progress === "object"
+                ? data.daily.progress : {};
+            profile.daily.completed = Array.isArray(data.daily.completed) ? data.daily.completed : [];
+            profile.daily.streak = count(data.daily.streak, 0);
+            profile.daily.lastDay = typeof data.daily.lastDay === "string" ? data.daily.lastDay : "";
+        }
+        if (Array.isArray(data.achievements)) {
+            profile.achievements = data.achievements.filter((id) => typeof id === "string");
         }
     }
 
@@ -143,6 +184,14 @@ export function saveProfile(profile, storage) {
             lastMap: count(profile.lastMap, 0),
             bestScore: count(profile.bestScore, 0),
             totalKills: count(profile.totalKills, 0),
+            totalSales: count(profile.totalSales, 0),
+            bestSale: count(profile.bestSale, 0),
+            bossKills: count(profile.bossKills, 0),
+            skillPoints: count(profile.skillPoints, 0),
+            skills: profile.skills || {},
+            dispatch: profile.dispatch || { active: null, totalSent: 0 },
+            daily: profile.daily || { date: "", contracts: [], progress: {}, completed: [], streak: 0, lastDay: "" },
+            achievements: Array.isArray(profile.achievements) ? profile.achievements : [],
             tutorialDone: profile.tutorialDone === true,
             installDismissed: profile.installDismissed === true
         }));

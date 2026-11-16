@@ -30,6 +30,18 @@ a PWA on iOS and Android; works offline once installed.
 The layout adapts to **both portrait and landscape**, respects iOS safe areas,
 and uses haptics + WebAudio through the shared `R2` arcade library.
 
+## Meta progression
+
+- **Continue Run:** the simulation is saved every 5 s and on tab hide — closing
+  the app never loses a run.
+- **Offline Dispatch:** send a retriever on a 2/4/8 hour mission; collect the
+  reward when you return. Purely local, using the device clock.
+- **Daily contracts:** three deterministic goals per day via `R2.dailySeed`,
+  with automatic rewards and a 7-day streak bonus.
+- **Achievements:** 12 milestones with credit rewards, tracked in the menu.
+- **Pilot skills:** spend a point per level on Lasers, Shields, Drones or
+  Logistics; each branch changes your derived stats.
+
 A **Settings** screen (menu / pause) controls effects quality (Auto/High/Low),
 frame rate (60/30 power-save), joystick sensitivity, a colorblind-safe palette,
 HUD size, sound, music and haptics. The first launch includes a short 3-step

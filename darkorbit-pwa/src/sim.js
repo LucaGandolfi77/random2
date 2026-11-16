@@ -8,7 +8,7 @@
 
 import {
     AMMO, MAPS, ENEMY_BY_ID, SHIPS, RESOURCES, RESOURCE_IDS, BOX_TYPES,
-    UPGRADES, UPGRADE_BY_ID, ABILITIES, ABILITY_BY_ID, PICKUPS, PICKUP_IDS,
+    UPGRADES, UPGRADE_BY_ID, SKILLS, SKILL_BY_ID, ABILITIES, ABILITY_BY_ID, PICKUPS, PICKUP_IDS,
     PLAYER_RADIUS, PICKUP_RADIUS, DOCK_RADIUS, SAFE_STANDOFF, GATE_RADIUS,
     TARGET_RANGE, SPLASH_RADIUS, DOT_DURATION, MAGNET_RADIUS,
     OVERDRIVE_FIRE_MULT, DOCKED_SHIELD_REGEN_MULT,
@@ -28,19 +28,20 @@ export function deriveStats(profile) {
     const level = Math.max(1, profile.level | 0);
 
     const perks = ship.perks || {};
+    const sk = profile.skills || {};
     return {
         ship,
         hpMax: Math.round(ship.hp + (u.hull | 0) * 480 + (level - 1) * 42),
-        shieldMax: Math.round(ship.shield + (u.shield | 0) * 340 + (level - 1) * 32),
+        shieldMax: Math.round((ship.shield + (u.shield | 0) * 340 + (level - 1) * 32) * (1 + (sk.shield | 0) * 0.05)),
         speed: ship.speed + (u.generator | 0) * 13,
-        cargoMax: ship.cargo + (u.cargo | 0) * 260,
-        damageMult: 1 + (u.laser | 0) * 0.12 + (level - 1) * 0.025,
+        cargoMax: Math.round((ship.cargo + (u.cargo | 0) * 260) * (1 + (sk.cargo | 0) * 0.08)),
+        damageMult: (1 + (u.laser | 0) * 0.12 + (level - 1) * 0.025) * (1 + (sk.laser | 0) * 0.06),
         shieldRegen: (8 + (u.generator | 0) * 2.4) * (1 + (u.regen | 0) * 0.45),
         critChance: (u.critical | 0) * 0.04,
         pickupRadius: PICKUP_RADIUS + (u.magnet | 0) * 28,
         evasion: perks.evasion || 0,
         rocketMult: perks.rocketDamage || 1,
-        droneMult: perks.droneDamage || 1
+        droneMult: (perks.droneDamage || 1) * (1 + (sk.drone | 0) * 0.08)
     };
 }
 
@@ -388,9 +389,12 @@ function gainXp(state, profile, amount) {
     }
     if (levels > 0) {
         profile.urium += levels * 3;
+        profile.skillPoints += levels;
         refreshStats(state, profile, true);
         emit(state, "levelup", { level: profile.level });
-        emit(state, "message", { text: "LEVEL " + profile.level + " — ship repaired, +" + (levels * 3) + " urium" });
+        emit(state, "message", {
+            text: "LEVEL " + profile.level + " — ship repaired, +" + (levels * 3) + " urium, +" + levels + " skill point"
+        });
     }
 }
 
@@ -449,6 +453,7 @@ function killEnemy(state, enemy, profile) {
     profile.credits += credits;
     state.creditsEarned += credits;
     state.kills += 1;
+    if (def.boss) profile.bossKills = (profile.bossKills | 0) + 1;
     state.score += 100 * tier + (def.boss ? 2500 : 0);
     gainXp(state, profile, Math.round(def.xp * map.xpMul));
 
@@ -567,6 +572,8 @@ export function dock(state, profile) {
         return null;
     }
     profile.credits += total;
+    profile.totalSales = (profile.totalSales | 0) + total;
+    profile.bestSale = Math.max(profile.bestSale | 0, total);
     state.creditsEarned += total;
     state.cargoUsed = 0;
     state.lowCargoNotified = false;
@@ -1228,6 +1235,16 @@ export function buyShip(profile, index) {
     profile.urium -= ship.urium;
     profile.ownedShips.push(index);
     profile.ship = index;
+    return true;
+}
+
+export function buySkill(profile, id) {
+    const def = SKILL_BY_ID[id];
+    if (!def || profile.skillPoints <= 0) return false;
+    const level = profile.skills[id] | 0;
+    if (level >= def.max) return false;
+    profile.skillPoints -= 1;
+    profile.skills[id] = level + 1;
     return true;
 }
 

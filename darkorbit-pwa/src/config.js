@@ -23,6 +23,39 @@ export const MAX_PARTICLES = 220;
 export const MAX_ENEMY_BULLETS = 260;
 export const SETTINGS_KEY = "darkorbit-settings";
 export const SETTINGS_VERSION = 1;
+export const RUN_KEY = "darkorbit-run";
+export const RUN_VERSION = 1;
+
+/* Pilot skills — one point per level, spent in the hangar. */
+export const SKILLS = [
+    { id: "laser", name: "Laser Mastery", desc: "+6% laser damage / point", max: 5 },
+    { id: "shield", name: "Shield Tuning", desc: "+5% max shield / point", max: 5 },
+    { id: "drone", name: "Drone Control", desc: "+8% drone damage / point", max: 5 },
+    { id: "cargo", name: "Logistics", desc: "+8% cargo capacity / point", max: 5 }
+];
+export const SKILL_BY_ID = Object.fromEntries(SKILLS.map((s) => [s.id, s]));
+
+/* Offline retriever dispatch. Duration is in hours. */
+export const DISPATCH_TIERS = [
+    { id: "short", name: "Short Run", hours: 2, credits: [1400, 2600], urium: 0 },
+    { id: "long", name: "Deep Run", hours: 4, credits: [3600, 6200], urium: [1, 2] },
+    { id: "epic", name: "Epic Expedition", hours: 8, credits: [9000, 15000], urium: [3, 6] }
+];
+
+export const ACHIEVEMENTS = [
+    { id: "first_kill", name: "First Blood", desc: "Destroy your first alien", reward: 250 },
+    { id: "kills_50", name: "Exterminator", desc: "Destroy 50 aliens (lifetime)", reward: 1500 },
+    { id: "kills_250", name: "Swarm Breaker", desc: "Destroy 250 aliens (lifetime)", reward: 6000 },
+    { id: "boss", name: "Giant Slayer", desc: "Destroy a boss", reward: 3000 },
+    { id: "cargo_100", name: "Full Hold", desc: "Carry 100 units of ore at once", reward: 1200 },
+    { id: "sale_10000", name: "Merchant", desc: "Earn 10,000 credits in one sale", reward: 2000 },
+    { id: "level_5", name: "Veteran", desc: "Reach pilot level 5", reward: 1000 },
+    { id: "level_10", name: "Ace Pilot", desc: "Reach pilot level 10", reward: 4000 },
+    { id: "sector_delta", name: "Deep Space", desc: "Reach Delta Core", reward: 2500 },
+    { id: "sector_epsilon", name: "Beyond the Veil", desc: "Reach Epsilon Veil", reward: 6000 },
+    { id: "drones_4", name: "Hive Mind", desc: "Own four combat drones", reward: 3000 },
+    { id: "score_20000", name: "High Roller", desc: "Score 20,000 in a single run", reward: 2500 }
+];
 
 /* Quality tiers. `auto` picks between high and low from measured FPS. */
 export const QUALITY = {
