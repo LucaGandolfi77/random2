@@ -8,7 +8,8 @@
 
 import {
     AMMO, MAPS, ENEMY_BY_ID, SHIPS, RESOURCES, RESOURCE_IDS, BOX_TYPES,
-    UPGRADES, UPGRADE_BY_ID, SKILLS, SKILL_BY_ID, ABILITIES, ABILITY_BY_ID, PICKUPS, PICKUP_IDS,
+    UPGRADES, UPGRADE_BY_ID, SKILLS, SKILL_BY_ID, ABILITIES, ABILITY_BY_ID,
+    PICKUPS, PICKUP_IDS, GATE_CONFIG, ELITES, ELITE_BY_ID,
     PLAYER_RADIUS, PICKUP_RADIUS, DOCK_RADIUS, SAFE_STANDOFF, GATE_RADIUS,
     TARGET_RANGE, SPLASH_RADIUS, DOT_DURATION, MAGNET_RADIUS,
     OVERDRIVE_FIRE_MULT, DOCKED_SHIELD_REGEN_MULT,
@@ -137,6 +138,9 @@ export function createState(profile, options = {}) {
         mapIndex,
         map,
         world,
+        mode: "sector",
+        gate: null,
+        bossPhaseTimer: 0,
         nextId: 1,
         player: {
             x: start.x, y: start.y, vx: 0, vy: 0,
@@ -226,11 +230,11 @@ function spawnBoss(state, map, defId) {
     emit(state, "message", { text: "WARNING: " + boss.def.name + " detected" });
 }
 
-function makeEnemy(state, map, defId) {
+function makeEnemy(state, map, defId, forceElite) {
     const def = ENEMY_BY_ID[defId] || ENEMY_BY_ID.swarm;
     const hp = Math.round(def.hp * map.hpMul);
     const shield = Math.round(def.shield * map.hpMul);
-    return {
+    const e = {
         id: state.nextId++,
         defId: def.id,
         def,
@@ -251,8 +255,26 @@ function makeEnemy(state, map, defId) {
         dotTime: 0,
         dotDps: 0,
         charge: 0,
+        elite: null,
+        phase2: false,
         dead: false
     };
+
+    if (!def.boss) {
+        const chance = forceElite || (state.mode === "gate"
+            ? GATE_CONFIG.eliteChance
+            : 0.05 + Math.max(0, map.hpMul - 1) * 0.02);
+        if (Math.random() < chance) {
+            const affix = pick(ELITES);
+            e.elite = affix;
+            e.hpMax = Math.round(e.hpMax * affix.hp);
+            e.hp = e.hpMax;
+            e.shieldMax = Math.round(e.shieldMax * affix.shield);
+            e.shield = e.shieldMax;
+            e.radius = Math.round(e.radius * 1.08);
+        }
+    }
+    return e;
 }
 
 function anchorEnemy(e) {
@@ -415,6 +437,23 @@ function damageEnemy(state, enemy, dmg, profile, allowCrit) {
     enemy.hp -= rest;
     enemy.hitFlash = 0.14;
     if (crit) emit(state, "crit", { x: enemy.x, y: enemy.y, dmg: Math.round(dmg) });
+
+    if (enemy.def.boss && !enemy.phase2 && enemy.hp > 0 && enemy.hp <= enemy.hpMax * 0.5) {
+        enemy.phase2 = true;
+        state.bossPhaseTimer = 1.4;
+        enemy.fireCd = 0;
+        for (let i = 0; i < 3; i++) {
+            const add = makeEnemy(state, state.map, state.mode === "gate" ? "raider" : "swarm");
+            add.elite = null;
+            const a = (i / 3) * TAU;
+            add.x = enemy.x + Math.cos(a) * 110;
+            add.y = enemy.y + Math.sin(a) * 110;
+            anchorEnemy(add);
+            state.enemies.push(add);
+        }
+        emit(state, "bossphase", { x: enemy.x, y: enemy.y, name: enemy.def.name });
+    }
+
     if (enemy.hp <= 0) killEnemy(state, enemy, profile);
     return dmg;
 }
@@ -449,16 +488,33 @@ function killEnemy(state, enemy, profile) {
         spawnPickup(state, pick(PICKUP_IDS), enemy.x + rand(-18, 18), enemy.y + rand(-18, 18));
     }
 
-    const credits = randInt(def.credits[0], def.credits[1]);
+    const mult = enemy.elite ? enemy.elite.reward : 1;
+    const credits = Math.round(randInt(def.credits[0], def.credits[1]) * mult);
     profile.credits += credits;
     state.creditsEarned += credits;
     state.kills += 1;
     if (def.boss) profile.bossKills = (profile.bossKills | 0) + 1;
-    state.score += 100 * tier + (def.boss ? 2500 : 0);
-    gainXp(state, profile, Math.round(def.xp * map.xpMul));
+    state.score += Math.round((100 * tier) * mult) + (def.boss ? 2500 : 0);
+    gainXp(state, profile, Math.round(def.xp * map.xpMul * mult));
+    if (state.mode === "gate" && state.gate) state.gate.kills += 1;
+
+    if (enemy.elite && enemy.elite.id === "splitter") {
+        for (let i = 0; i < 2; i++) {
+            const spawn = makeEnemy(state, map, "swarm");
+            spawn.elite = null;
+            spawn.x = enemy.x + rand(-30, 30);
+            spawn.y = enemy.y + rand(-30, 30);
+            anchorEnemy(spawn);
+            state.enemies.push(spawn);
+        }
+        emit(state, "split", { x: enemy.x, y: enemy.y });
+    }
 
     burst(state, enemy.x, enemy.y, def.color, def.boss ? 34 : 14, def.boss ? 320 : 210, def.boss ? 7 : 4);
-    emit(state, "kill", { x: enemy.x, y: enemy.y, boss: !!def.boss, name: def.name });
+    emit(state, "kill", {
+        x: enemy.x, y: enemy.y, boss: !!def.boss, name: def.name,
+        elite: enemy.elite ? enemy.elite.name : null
+    });
     if (def.boss) {
         emit(state, "message", { text: def.name + " destroyed — bonus crate dropped" });
         spawnBox(state, "obsidian");
@@ -677,6 +733,133 @@ export function respawn(state, profile) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Galaxy Gate arena                                                   */
+/* ------------------------------------------------------------------ */
+
+export function launchGate(state, profile) {
+    if (state.mode === "gate" || state.destroyed || !state.docked) return false;
+    state.mode = "gate";
+    state.gate = {
+        wave: 1,
+        kills: 0,
+        target: GATE_CONFIG.waves[0],
+        timeLeft: GATE_CONFIG.duration,
+        bossSpawned: false,
+        done: false
+    };
+
+    for (const b of state.bullets) release(state, "bullets", b);
+    for (const b of state.enemyBullets) release(state, "enemyBullets", b);
+    state.bullets = [];
+    state.enemyBullets = [];
+    state.enemies = [];
+    state.loot = [];
+    state.boxes = [];
+    state.pickups = [];
+
+    const start = stationPos(state);
+    Object.assign(state.player, {
+        x: start.x, y: start.y, vx: 0, vy: 0,
+        hp: state.player.hpMax, shield: state.player.shieldMax,
+        targetId: null, firing: false, boost: 0, barrier: 0
+    });
+    state.docked = false;
+    state.wasDocked = false;
+    state.atGate = false;
+
+    spawnGateWave(state);
+    emit(state, "message", { text: "GATE OPEN — 3 waves, " + GATE_CONFIG.duration + " seconds" });
+    return true;
+}
+
+function spawnGateWave(state) {
+    const g = state.gate;
+    if (!g) return;
+    const count = GATE_CONFIG.waves[g.wave - 1] || GATE_CONFIG.waves[0];
+    const pool = state.map.pool.filter((id) => !ENEMY_BY_ID[id].boss);
+    const p = state.player;
+
+    for (let i = 0; i < count; i++) {
+        const boss = g.wave === GATE_CONFIG.bossWave && i === 0;
+        const id = boss
+            ? (state.map.boss || (state.mapIndex >= 3 ? "devourer" : "leviathan"))
+            : pick(pool.length ? pool : ["swarm"]);
+        const e = makeEnemy(state, state.map, id);
+        const a = (i / count) * TAU + rand(-0.2, 0.2);
+        const d = rand(420, 700);
+        e.x = clamp(p.x + Math.cos(a) * d, 60, state.world.x - 60);
+        e.y = clamp(p.y + Math.sin(a) * d, 60, state.world.y - 60);
+        anchorEnemy(e);
+        state.enemies.push(e);
+        if (boss) g.bossSpawned = true;
+    }
+    g.target = count;
+    g.kills = 0;
+    emit(state, "wave", { wave: g.wave, count });
+}
+
+export function updateGate(state, profile, dt) {
+    if (state.mode !== "gate" || !state.gate) return;
+    const g = state.gate;
+    g.timeLeft = Math.max(0, g.timeLeft - dt);
+    if (g.timeLeft <= 0) {
+        finishGate(state, profile, false);
+        return;
+    }
+    if (g.kills >= g.target) {
+        if (g.wave < GATE_CONFIG.waves.length) {
+            g.wave += 1;
+            spawnGateWave(state);
+        } else {
+            finishGate(state, profile, true);
+        }
+    }
+}
+
+function finishGate(state, profile, success) {
+    const g = state.gate;
+    let reward = { credits: 0, urium: 0 };
+    if (success) {
+        reward = {
+            credits: randInt(GATE_CONFIG.reward.credits[0], GATE_CONFIG.reward.credits[1]),
+            urium: randInt(GATE_CONFIG.reward.urium[0], GATE_CONFIG.reward.urium[1])
+        };
+        profile.credits += reward.credits;
+        profile.urium += reward.urium;
+        state.score += 4000;
+    }
+
+    state.mode = "sector";
+    state.gate = null;
+    state.enemies = [];
+    state.loot = [];
+    state.boxes = [];
+    state.pickups = [];
+    const start = stationPos(state);
+    Object.assign(state.player, {
+        x: start.x, y: start.y, vx: 0, vy: 0,
+        hp: state.player.hpMax, shield: state.player.shieldMax,
+        targetId: null, firing: false
+    });
+    state.docked = true;
+    state.wasDocked = true;
+    state.spawnTimer = 1.5;
+    state.boxTimer = 12;
+
+    if (success) {
+        const chest = spawnBox(state, "astral");
+        if (chest) {
+            chest.x = start.x + 90;
+            chest.y = start.y;
+        }
+        emit(state, "gatecomplete", reward);
+    } else {
+        emit(state, "gatefail", { wave: g ? g.wave : 1 });
+    }
+    spawnInitial(state, profile);
+}
+
+/* ------------------------------------------------------------------ */
 /* Projectiles                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -747,9 +930,9 @@ export function step(state, profile, input, dt) {
     // Zone presence is computed FIRST so enemy AI sees the current safe zone.
     const station = stationPos(state);
     const gate = gatePos(state);
-    state.docked = distance(p, station) < DOCK_RADIUS;
-    state.atGate = map.gateTo >= 0 && distance(p, gate) < GATE_RADIUS;
-    if (state.docked !== state.wasDocked) {
+    state.docked = state.mode !== "gate" && distance(p, station) < DOCK_RADIUS;
+    state.atGate = state.mode !== "gate" && map.gateTo >= 0 && distance(p, gate) < GATE_RADIUS;
+    if (state.docked !== state.wasDocked && state.mode !== "gate") {
         state.wasDocked = state.docked;
         emit(state, state.docked ? "safeenter" : "safeleave", {});
     }
@@ -766,6 +949,7 @@ export function step(state, profile, input, dt) {
     state.magnetTimer = Math.max(0, state.magnetTimer - dt);
     state.overdriveTimer = Math.max(0, state.overdriveTimer - dt);
     state.safeNotice = Math.max(0, state.safeNotice - dt);
+    state.bossPhaseTimer = Math.max(0, (state.bossPhaseTimer || 0) - dt);
 
     // Movement.
     let mx = input && input.move ? input.move.x : 0;
@@ -817,16 +1001,20 @@ export function step(state, profile, input, dt) {
     updatePickups(state, dt, profile);
     updateParticles(state, dt);
 
-    // Spawns.
-    state.spawnTimer -= dt;
-    if (state.spawnTimer <= 0) {
-        if (state.enemies.length < map.max) spawnEnemy(state, map, pick(map.pool));
-        state.spawnTimer = map.interval * rand(0.8, 1.3);
-    }
-    state.boxTimer -= dt;
-    if (state.boxTimer <= 0) {
-        spawnBox(state);
-        state.boxTimer = rand(12, 21);
+    if (state.mode === "gate") {
+        updateGate(state, profile, dt);
+    } else {
+        // Ambient sector spawns.
+        state.spawnTimer -= dt;
+        if (state.spawnTimer <= 0) {
+            if (state.enemies.length < map.max) spawnEnemy(state, map, pick(map.pool));
+            state.spawnTimer = map.interval * rand(0.8, 1.3);
+        }
+        state.boxTimer -= dt;
+        if (state.boxTimer <= 0) {
+            spawnBox(state);
+            state.boxTimer = rand(12, 21);
+        }
     }
 
     if (state.cargoUsed >= p.cargoMax && !state.lowCargoNotified) {
@@ -875,6 +1063,12 @@ function updateEnemies(state, dt, profile) {
             }
         }
 
+        // Regenerator elites slowly repair themselves.
+        if (e.elite && e.elite.regen) {
+            e.hp = Math.min(e.hpMax, e.hp + e.hpMax * e.elite.regen * dt);
+            e.shield = Math.min(e.shieldMax, e.shield + e.shieldMax * e.elite.regen * dt);
+        }
+
         const d = distance(e, p);
         const preferred = e.def.boss ? 320 : 215;
 
@@ -911,7 +1105,7 @@ function updateEnemies(state, dt, profile) {
             const wobble = Math.sin(e.wander) * 0.28;
             angle += wobble;
             e.angle = angle;
-            const es = e.def.speed * (e.cloaked ? 1.1 : 1);
+            const es = e.def.speed * (e.cloaked ? 1.1 : 1) * (e.elite ? e.elite.speed : 1) * (e.phase2 ? 1.2 : 1);
             e.x += Math.cos(angle) * es * dt;
             e.y += Math.sin(angle) * es * dt;
 
@@ -920,7 +1114,8 @@ function updateEnemies(state, dt, profile) {
 
             if (e.fireCd <= 0 && d < e.def.range) {
                 fireEnemyBullet(state, e);
-                e.fireCd = e.def.fireCd * (e.cloaked ? 1.7 : 1) * rand(0.85, 1.2);
+                e.fireCd = e.def.fireCd * (e.cloaked ? 1.7 : 1) *
+                    (e.elite ? e.elite.fire : 1) * (e.phase2 ? 0.62 : 1) * rand(0.85, 1.2);
             }
             if (d < p.radius + e.radius + 2 && e.contactCd <= 0) {
                 if (Math.random() >= p.evasion) {

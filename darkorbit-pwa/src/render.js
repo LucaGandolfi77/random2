@@ -662,6 +662,42 @@ export function createRenderer(canvas, minimap) {
                 ctx.globalAlpha = 1;
             }
 
+            // Elite affix tells.
+            if (e.elite) {
+                const ec = mappedColor(e.elite.color);
+                ctx.strokeStyle = ec;
+                ctx.globalAlpha = 0.55 + 0.25 * Math.sin(state.t * 4 + e.id);
+                ctx.lineWidth = 2 / zoom;
+                ctx.setLineDash(e.elite.id === "splitter" ? [4 / zoom, 4 / zoom] : []);
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.radius + 13, 0, TAU);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                if (e.elite.id === "armored") {
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.radius + 20, 0, TAU);
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = ec;
+                ctx.font = `${Math.round(9 / zoom)}px ui-monospace, monospace`;
+                ctx.textAlign = "center";
+                ctx.fillText(e.elite.name.toUpperCase(), e.x, e.y - e.radius - 30 / zoom);
+            }
+
+            // Boss enrage aura.
+            if (e.phase2) {
+                ctx.strokeStyle = "#ff4d6d";
+                ctx.globalAlpha = 0.5 + 0.4 * Math.sin(state.t * 9);
+                ctx.lineWidth = 4 / zoom;
+                glow("#ff4d6d", 22);
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.radius + 24, 0, TAU);
+                ctx.stroke();
+                noGlow();
+                ctx.globalAlpha = 1;
+            }
+
             // Weapon charge telegraph.
             if (e.charge > 0) {
                 ctx.strokeStyle = ecolor;
@@ -979,6 +1015,13 @@ export function createRenderer(canvas, minimap) {
         drawParticles(state);
         drawDamageTexts();
         ctx.restore();
+
+        // Brief red flash when a boss enters phase 2.
+        if (state.bossPhaseTimer > 0) {
+            const a = Math.min(0.35, state.bossPhaseTimer * 0.25);
+            ctx.fillStyle = "rgba(255,60,80," + a.toFixed(2) + ")";
+            ctx.fillRect(0, 0, view.w, view.h);
+        }
 
         // Low-hull vignette is drawn in screen space.
         const p = state.player;

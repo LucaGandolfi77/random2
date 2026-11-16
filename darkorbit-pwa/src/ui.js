@@ -58,6 +58,12 @@ export function createUI(handlers = {}) {
         effects: $("active-effects"),
         fireBtn: $("fire-btn"),
         dockBtn: $("btn-dock"),
+        gateBtn: $("btn-gate"),
+        gateHUD: $("gate-hud"),
+        gateWave: $("gate-wave"),
+        gateTime: $("gate-time"),
+        gateKills: $("gate-kills"),
+        gateFill: $("gate-fill"),
         jumpBtn: $("btn-jump"),
         hangarBtn: $("btn-hangar"),
         srStatus: $("sr-status"),
@@ -95,6 +101,7 @@ export function createUI(handlers = {}) {
             contracts: handlers.onContracts,
             achievements: handlers.onAchievements,
             "close-info": handlers.onCloseInfo,
+            "launch-gate": handlers.onLaunchGate,
             "claim-dispatch": handlers.onClaimDispatch,
             "coach-next": handlers.onCoachNext,
             "coach-skip": handlers.onCoachSkip,
@@ -520,8 +527,22 @@ export function createUI(handlers = {}) {
             el.targetPanel.classList.add("hidden");
         }
 
+        // Galaxy Gate HUD.
+        if (el.gateHUD) {
+            const inGate = state.mode === "gate" && state.gate;
+            el.gateHUD.classList.toggle("hidden", !inGate);
+            if (inGate) {
+                const g = state.gate;
+                const secs = Math.ceil(g.timeLeft);
+                setText(el.gateWave, "WAVE " + g.wave + " / 3");
+                setText(el.gateTime, Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0"));
+                setText(el.gateKills, Math.min(g.kills, g.target) + " / " + g.target + " KILLS");
+                setWidth(el.gateFill, g.kills / g.target);
+            }
+        }
+
         // Safe haven feedback.
-        if (el.safeBadge) el.safeBadge.classList.toggle("hidden", !state.docked);
+        if (el.safeBadge) el.safeBadge.classList.toggle("hidden", !state.docked || state.mode === "gate");
         if (el.fireBtn) el.fireBtn.classList.toggle("locked", !!state.docked);
 
         // Temporary effects.
@@ -547,8 +568,10 @@ export function createUI(handlers = {}) {
         } else {
             el.jumpBtn.classList.add("hidden");
         }
-        if (!state.docked && !state.atGate) setText(el.phase, "SECTOR ACTIVE");
-        if (el.hangarBtn) el.hangarBtn.classList.toggle("hidden", !state.docked);
+        if (state.mode === "gate") setText(el.phase, "GATE RUN ACTIVE");
+        else if (!state.docked && !state.atGate) setText(el.phase, "SECTOR ACTIVE");
+        if (el.hangarBtn) el.hangarBtn.classList.toggle("hidden", !state.docked || state.mode === "gate");
+        if (el.gateBtn) el.gateBtn.classList.toggle("hidden", !state.docked || state.mode === "gate");
     }
 
     function showInstall() {

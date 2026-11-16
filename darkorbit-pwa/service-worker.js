@@ -5,7 +5,7 @@
  */
 
 const CACHE_PREFIX = "darkorbit-pwa-";
-const CACHE_NAME = "darkorbit-pwa-v5";
+const CACHE_NAME = "darkorbit-pwa-v6";
 const ASSETS = [
     "./",
     "./index.html",

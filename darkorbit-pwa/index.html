@@ -38,6 +38,14 @@
 
             <div id="phase-label" class="phase-label">SECTOR ACTIVE</div>
 
+            <div id="gate-hud" class="gate-hud hidden" role="status">
+                <span class="gate-title">GALAXY GATE</span>
+                <span id="gate-wave" class="gate-wave">WAVE 1 / 3</span>
+                <span id="gate-time" class="gate-time">1:30</span>
+                <span id="gate-kills" class="gate-kills">0 / 4</span>
+                <div class="gate-track"><div id="gate-fill"></div></div>
+            </div>
+
             <div id="safe-badge" class="safe-badge hidden" role="status">🛡 SAFE ZONE · WEAPONS LOCKED</div>
 
             <div id="active-effects" class="active-effects" aria-label="Active effects"></div>
@@ -59,6 +67,7 @@
             </div>
 
             <div class="context-actions">
+                <button id="btn-gate" class="btn tiny hidden" type="button">⚡ LAUNCH GATE</button>
                 <button id="btn-dock" class="btn tiny hidden" type="button">E · DOCK / SELL</button>
                 <button id="btn-jump" class="btn tiny hidden" type="button">J · JUMP</button>
                 <button id="btn-hangar" class="btn tiny hidden" type="button">⚙ HANGAR</button>

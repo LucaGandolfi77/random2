@@ -30,6 +30,17 @@ a PWA on iOS and Android; works offline once installed.
 The layout adapts to **both portrait and landscape**, respects iOS safe areas,
 and uses haptics + WebAudio through the shared `R2` arcade library.
 
+## Gate mode & elites
+
+- **Galaxy Gate:** launch a 90-second arena from the station — three escalating
+  waves ending in a boss, with a live wave/timer HUD. Clear it for credits,
+  urium and a guaranteed Astral Cache; run out of time and you return empty-handed.
+- **Elite affixes:** Armored, Swift, Regenerator and Splitter enemies have
+  distinct visual tells, tougher stats and 1.5–1.8× loot. Splitters burst into
+  fragments when destroyed.
+- **Boss phase 2:** at half health bosses enrage — faster fire, summoned adds,
+  a red aura and screen flash, and a spike in the adaptive soundtrack.
+
 ## Meta progression
 
 - **Continue Run:** the simulation is saved every 5 s and on tab hide — closing

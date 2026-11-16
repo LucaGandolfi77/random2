@@ -13,7 +13,7 @@ import {
     createState, step, drainEvents, setMove, setFiring, selectTargetAt,
     cycleAmmo, useAbility, refreshStats, refreshDrones, dock,
     repairAtStation, jumpGate, respawn, buyUpgrade, buyShip, selectShip,
-    buySkill
+    buySkill, launchGate
 } from "./sim.js";
 import { hasRun, saveRun, loadRun, clearRun, restoreState } from "./run-save.js";
 import { startDispatch, claimDispatch } from "./dispatch.js";
@@ -113,9 +113,11 @@ function combatIntensity() {
         if (Math.hypot(e.x - p.x, e.y - p.y) < 640) near += 1;
     }
     const threat = Math.min(1, near / 7);
-    const boss = state.enemies.some((e) => e.def.boss) ? 0.25 : 0;
+    const boss = state.enemies.some((e) => e.def.boss && e.phase2) ? 0.4
+        : state.enemies.some((e) => e.def.boss) ? 0.25 : 0;
+    const gate = state.mode === "gate" ? 0.15 : 0;
     const hurt = 1 - p.hp / p.hpMax;
-    return Math.min(1, threat + boss + hurt * 0.35);
+    return Math.min(1, threat + boss + gate + hurt * 0.35);
 }
 
 if (R2 && typeof R2.markPlayed === "function") R2.markPlayed(SLUG);
@@ -362,6 +364,16 @@ function recordRun(outcome) {
 const ui = createUI({
     onPlay: startGame,
     onContinue: continueRun,
+    onLaunchGate: function () {
+        if (launchGate(state, profile)) {
+            renderer.resetCamera();
+            markDirty();
+            persist();
+            ui.hideOverlay();
+            phase = "playing";
+            lastTs = 0;
+        }
+    },
     onContracts: function () { openInfo("contracts"); },
     onAchievements: function () { openInfo("achievements"); },
     onCloseInfo: closeInfo,
@@ -587,6 +599,27 @@ function handleEvents(events) {
                 break;
             case "dock": if (soundOn) Sound.dock(); break;
             case "jump": if (soundOn) Sound.jump(); break;
+            case "wave":
+                ui.toast("WAVE " + e.wave + " — " + e.count + " hostiles");
+                renderer.addShake(3);
+                break;
+            case "bossphase":
+                if (soundOn) Sound.levelup();
+                renderer.addShockwave(e.x, e.y, "#ff4d6d", 300);
+                renderer.addShake(12);
+                ui.toast("BOSS ENRAGED — phase 2", "good");
+                buzz([40, 60, 40, 80]);
+                if (R2 && R2.stats && R2.stats.event) R2.stats.event(SLUG, "bossphase", 1);
+                break;
+            case "gatecomplete":
+                if (soundOn) Sound.box();
+                ui.toast("GATE CLEARED · +" + fmtNum(e.credits) + " CR, +" + e.urium + " URIUM", "good");
+                renderer.addShockwave(state.player.x, state.player.y, "#c08bff", 260);
+                if (R2 && R2.stats && R2.stats.event) R2.stats.event(SLUG, "gates", 1);
+                break;
+            case "gatefail":
+                ui.toast("Gate collapsed — returning to sector");
+                break;
             case "safeenter": ui.toast("Safe zone — shields recharging", "good"); break;
             case "destroyed":
                 if (soundOn) Sound.destroyed();
@@ -780,6 +813,17 @@ function el(id) { return document.getElementById(id); }
 
 if (el("btn-pause")) {
     el("btn-pause").addEventListener("click", togglePause);
+}
+if (el("btn-gate")) {
+    el("btn-gate").addEventListener("click", function () {
+        if (phase === "playing" && state && state.docked && state.mode !== "gate") {
+            if (launchGate(state, profile)) {
+                renderer.resetCamera();
+                markDirty();
+                persist();
+            }
+        }
+    });
 }
 
 function unlockAudioOnce() {

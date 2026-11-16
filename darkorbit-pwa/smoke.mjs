@@ -231,6 +231,24 @@ await evaluate(`(() => {
 await sleep(120);
 ok(await evaluate("window.__DEEP_ORBIT__.getState().docked === false"), "leaving the ring exits the safe zone");
 
+/* Galaxy Gate arena. */
+await evaluate("(() => { const s=window.__DEEP_ORBIT__.getState(); s.player.x=s.world.x/2; s.player.y=s.world.y/2; })()");
+await sleep(120);
+ok(await evaluate("!document.getElementById('btn-gate').classList.contains('hidden')"), "the gate button is shown while docked");
+await click("#btn-gate");
+ok(await waitFor("window.__DEEP_ORBIT__.getState().mode === 'gate'"), "Launch Gate starts an arena run");
+ok(await waitFor("!document.getElementById('gate-hud').classList.contains('hidden')"), "the gate HUD is visible");
+ok(await evaluate("/WAVE 1/.test(document.getElementById('gate-wave').textContent)"), "the gate HUD shows wave one");
+const gateCredits = await evaluate("window.__DEEP_ORBIT__.getProfile().credits");
+await evaluate("(() => { const g=window.__DEEP_ORBIT__.getState().gate; g.wave=3; g.kills=g.target; })()");
+ok(await waitFor("window.__DEEP_ORBIT__.getState().mode === 'sector'", 3000), "clearing wave three exits the gate");
+ok(await evaluate("window.__DEEP_ORBIT__.getProfile().credits > " + gateCredits), "gate rewards are paid");
+ok(await evaluate("document.getElementById('gate-hud').classList.contains('hidden')"), "the gate HUD hides after the run");
+
+/* Leave the station again for combat tests. */
+await evaluate("(() => { const s=window.__DEEP_ORBIT__.getState(); s.player.x=s.world.x/2+430; s.player.y=s.world.y/2+430; })()");
+await sleep(120);
+
 /* Place a weak target in front of the ship and hold FIRE. */
 await evaluate(`(() => {
     const s = window.__DEEP_ORBIT__.getState();

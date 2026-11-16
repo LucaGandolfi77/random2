@@ -91,6 +91,9 @@ export function restoreState(saved, profile) {
     if (state.overdriveTimer === undefined) state.overdriveTimer = 0;
     if (state.safeNotice === undefined) state.safeNotice = 0;
     if (state.wasDocked === undefined) state.wasDocked = !!state.docked;
+    if (!state.mode) state.mode = "sector";
+    if (state.mode === "gate" && !state.gate) state.mode = "sector";
+    if (state.bossPhaseTimer === undefined) state.bossPhaseTimer = 0;
     if (!state.pickups) state.pickups = [];
     if (!state.cargo) state.cargo = {};
 

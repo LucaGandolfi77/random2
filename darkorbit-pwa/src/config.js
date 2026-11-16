@@ -77,6 +77,24 @@ export const CB_COLORS = {
     "#ff4d8d": "#4db8ff", "#b07cff": "#7df9ff"
 };
 
+/* Galaxy Gate arena: three timed waves ending in a boss. */
+export const GATE_CONFIG = {
+    duration: 90,
+    waves: [4, 6, 8],
+    bossWave: 3,
+    eliteChance: 0.22,
+    reward: { credits: [5000, 9000], urium: [4, 9] }
+};
+
+/* Elite affixes give ordinary enemies a visual tell, tougher stats and loot. */
+export const ELITES = [
+    { id: "armored", name: "Armored", color: "#ffd166", hp: 1.35, shield: 2.2, speed: 0.85, fire: 1, reward: 1.8, regen: 0 },
+    { id: "swift", name: "Swift", color: "#7df9ff", hp: 0.85, shield: 0.9, speed: 1.6, fire: 0.75, reward: 1.6, regen: 0 },
+    { id: "regen", name: "Regenerator", color: "#8affc1", hp: 1.1, shield: 1.1, speed: 0.95, fire: 1, reward: 1.7, regen: 0.025 },
+    { id: "splitter", name: "Splitter", color: "#ff7ad9", hp: 1.15, shield: 1.2, speed: 1.05, fire: 1, reward: 1.5, regen: 0 }
+];
+export const ELITE_BY_ID = Object.fromEntries(ELITES.map((e) => [e.id, e]));
+
 /* Station safe haven. Enemies disengage inside DOCK_RADIUS and keep a wider
    standoff; incoming fire fizzles at the ring boundary. */
 export const SAFE_STANDOFF = DOCK_RADIUS + 100;
