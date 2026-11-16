@@ -582,6 +582,30 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .done .contract-reward, .upgrade-row.done .contract-reward { color: var(--green); }
 .dispatch-tiers { display: flex; gap: 6px; flex-wrap: wrap; }
 
+.refine-row {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 9px; margin-bottom: 5px;
+    background: rgba(9, 24, 38, 0.7);
+    border: 1px solid rgba(92, 225, 230, 0.14);
+    border-radius: 7px;
+}
+.refine-dot { width: 9px; height: 9px; border-radius: 50%; box-shadow: 0 0 8px currentColor; flex: 0 0 auto; }
+.refine-info { flex: 1; min-width: 0; }
+.refine-info b { display: block; font-size: 10px; }
+.refine-info small { display: block; font-size: 8px; color: var(--muted); }
+.refine-row .btn { min-height: 30px; }
+.mission-active {
+    padding: 12px; margin-bottom: 10px;
+    background: rgba(192, 139, 255, 0.08);
+    border: 1px solid rgba(192, 139, 255, 0.4);
+    border-radius: 8px;
+}
+.mission-active span { font-size: 9px; letter-spacing: 2px; color: var(--violet); }
+.mission-active h3 { margin: 4px 0 6px; font-size: 16px; color: #fff; }
+.mission-active p { margin: 0 0 9px; font-size: 10px; line-height: 1.5; color: #cfe4ef; }
+.mission-active small { display: block; margin-top: 5px; font-size: 9px; color: var(--amber); }
+.mission-list .upgrade-row.active { border-color: rgba(192, 139, 255, 0.55); }
+
 /* ---------------- onboarding ---------------- */
 
 .coach {

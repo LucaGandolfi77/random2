@@ -139,6 +139,11 @@ ok(await evaluate("/FPS/.test(document.getElementById('debug-hud').textContent)"
 ok(await evaluate("/HULL MESH/.test(document.getElementById('debug-hud').textContent)"), "high quality uses faceted 3D hulls");
 
 /* Daily contracts and achievements panels. */
+ok(await evaluate("!!document.querySelector('[data-action=mission-log]')"), "the menu has a Mission Log button");
+await click('[data-action="mission-log"]');
+ok(await evaluate("!!document.querySelector('.mission-active')"), "the mission log shows the active mission");
+await click('[data-action="close-info"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "the mission log returns to the menu");
 ok(await evaluate("!!document.querySelector('[data-action=contracts]')"), "the menu has a Contracts button");
 await click('[data-action="contracts"]');
 ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'info'"), "Contracts panel opens");
@@ -164,6 +169,14 @@ await click('[data-action="close-hangar"]');
 await click('[data-action="hangar"]');
 await click('[data-action="buy-skill"][data-value="laser"]');
 ok(await evaluate("window.__DEEP_ORBIT__.getProfile().skills.laser === 1"), "a pilot skill can be purchased");
+ok(await evaluate("!!document.querySelector('[data-action=refine]')"), "the refinery is shown while docked");
+await evaluate("(() => { const s=window.__DEEP_ORBIT__.getState(); s.cargo.aetherium=6; s.cargoUsed=6; })()");
+await click('[data-action="close-hangar"]');
+await click('[data-action="hangar"]');
+await click('[data-action="refine"][data-value="aetherium"]');
+ok(await evaluate("window.__DEEP_ORBIT__.getProfile().refined.aetherium === 1"), "raw ore refines into material");
+await click('[data-action="sell-refined"][data-value="aetherium"]');
+ok(await evaluate("window.__DEEP_ORBIT__.getProfile().refined.aetherium === 0"), "refined material can be sold");
 await click('[data-action="close-hangar"]');
 ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "hangar returns to the menu");
 
@@ -194,7 +207,7 @@ ok(await evaluate("document.getElementById('overlay').classList.contains('hidden
 ok(await evaluate("window.__DEEP_ORBIT__.getState().enemies.length > 0"), "enemies spawn in the sector");
 
 const cfg = await evaluate("window.__DEEP_ORBIT__.getConfig()");
-ok(cfg && cfg.maps === 5 && cfg.ammo === 5 && cfg.ships >= 6 && cfg.pickups >= 3,
+ok(cfg && cfg.maps === 6 && cfg.ammo === 5 && cfg.ships >= 8 && cfg.pickups >= 3,
     "v2 content is loaded", cfg && JSON.stringify(cfg));
 
 /* Station safe haven: hostiles disengage and bullets fizzle. */

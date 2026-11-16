@@ -30,6 +30,18 @@ a PWA on iOS and Android; works offline once installed.
 The layout adapts to **both portrait and landscape**, respects iOS safe areas,
 and uses haptics + WebAudio through the shared `R2` arcade library.
 
+## Economy & campaign
+
+- **Refining & assembly:** refine 3 raw ore into 1 refined unit worth 3× at the
+  station (no cargo space used), then assemble Nanite Repair, Barrier Cells,
+  Ore Magnets and Overdrive Cores from refined materials.
+- **Story missions:** 12 authored objectives across four chapters with
+  briefings, tracked progress and credit/urium rewards — from the first swarm
+  in Alpha Sector to the far side of Zeta Oblivion.
+- **Six sectors, eight ships:** Epsilon Veil and Zeta Oblivion join the map,
+  with the Ranger (critical-hit specialist) and Monolith (fortress gunship),
+  plus Void Lancers and the Swarm Queen boss.
+
 ## Gate mode & elites
 
 - **Galaxy Gate:** launch a 90-second arena from the station — three escalating

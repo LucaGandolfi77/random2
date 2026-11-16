@@ -38,7 +38,7 @@ export function deriveStats(profile) {
         cargoMax: Math.round((ship.cargo + (u.cargo | 0) * 260) * (1 + (sk.cargo | 0) * 0.08)),
         damageMult: (1 + (u.laser | 0) * 0.12 + (level - 1) * 0.025) * (1 + (sk.laser | 0) * 0.06),
         shieldRegen: (8 + (u.generator | 0) * 2.4) * (1 + (u.regen | 0) * 0.45),
-        critChance: (u.critical | 0) * 0.04,
+        critChance: (u.critical | 0) * 0.04 + (perks.crit || 0),
         pickupRadius: PICKUP_RADIUS + (u.magnet | 0) * 28,
         evasion: perks.evasion || 0,
         rocketMult: perks.rocketDamage || 1,

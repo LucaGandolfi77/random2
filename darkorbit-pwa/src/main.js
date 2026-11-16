@@ -19,6 +19,8 @@ import { hasRun, saveRun, loadRun, clearRun, restoreState } from "./run-save.js"
 import { startDispatch, claimDispatch } from "./dispatch.js";
 import { ensureDaily, contractProgress, streakBonus } from "./daily.js";
 import { checkAchievements } from "./achievements.js";
+import { refineOre, sellRefined, craftItem } from "./refinery.js";
+import { missionProgress } from "./missions.js";
 import { createRenderer } from "./render.js";
 import { createInput } from "./input.js";
 import { createUI } from "./ui.js";
@@ -281,6 +283,7 @@ function openInfo(kind) {
     infoFrom = phase;
     phase = "info";
     if (kind === "contracts") ui.showContracts(profile);
+    else if (kind === "missions") ui.showMissions(profile);
     else ui.showAchievements(profile);
 }
 
@@ -375,6 +378,33 @@ const ui = createUI({
         }
     },
     onContracts: function () { openInfo("contracts"); },
+    onMissionLog: function () { openInfo("missions"); },
+    onRefine: function (id) {
+        if (refineOre(state, profile, id)) {
+            handleEvents(drainEvents(state));
+            markDirty();
+            persist();
+            ui.refreshHangar(state, profile);
+        }
+    },
+    onSellRefined: function (id) {
+        const value = sellRefined(profile, id);
+        if (value) {
+            markDirty();
+            persist();
+            ui.refreshHangar(state, profile);
+            ui.toast("Refined ore sold: +" + fmtNum(value) + " CR", "good");
+            checkAwards();
+        }
+    },
+    onCraft: function (id) {
+        if (craftItem(state, profile, id)) {
+            handleEvents(drainEvents(state));
+            markDirty();
+            persist();
+            ui.refreshHangar(state, profile);
+        }
+    },
     onAchievements: function () { openInfo("achievements"); },
     onCloseInfo: closeInfo,
     onDispatch: function (tier) {
@@ -550,6 +580,12 @@ function doJump() {
 
 function handleEvents(events) {
     const completed = [];
+    const missionsDoneNow = [];
+
+    function mission(type, amount, absolute) {
+        const done = missionProgress(profile, type, amount, absolute);
+        if (done) missionsDoneNow.push(done);
+    }
     for (const e of events) {
         switch (e.type) {
             case "shoot": if (soundOn) Sound.shoot(); break;
@@ -633,11 +669,21 @@ function handleEvents(events) {
 
         if (e.type === "kill") {
             completed.push(...contractProgress(profile, "kills", 1));
-            if (e.boss) completed.push(...contractProgress(profile, "boss", 1));
+            mission("kills", 1);
+            if (e.boss) {
+                completed.push(...contractProgress(profile, "boss", 1));
+                mission("boss", 1);
+            }
         }
-        if (e.type === "dock" && e.units) completed.push(...contractProgress(profile, "sell", e.units));
+        if (e.type === "dock" && e.units) {
+            completed.push(...contractProgress(profile, "sell", e.units));
+            mission("sell", e.units);
+        }
         if (e.type === "box") completed.push(...contractProgress(profile, "box", 1));
         if (e.type === "crit") completed.push(...contractProgress(profile, "critical", 1));
+        if (e.type === "gatecomplete") mission("gate", 1);
+        if (e.type === "levelup") mission("level", profile.level, true);
+        if (e.type === "jump") mission("sector", state.mapIndex, true);
     }
 
     for (const item of completed) {
@@ -653,7 +699,13 @@ function handleEvents(events) {
         }
         markDirty();
     }
-    if (completed.length || events.length) checkAwards();
+    for (const item of missionsDoneNow) {
+        ui.toast("MISSION COMPLETE: " + item.mission.title + " · +" + fmtNum(item.reward.credits) + " CR", "good");
+        if (soundOn) Sound.levelup();
+        buzz([25, 40, 25, 60]);
+        markDirty();
+    }
+    if (completed.length || missionsDoneNow.length || events.length) checkAwards();
 }
 
 function handleCritStats() {

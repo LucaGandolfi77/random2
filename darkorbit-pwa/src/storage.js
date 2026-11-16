@@ -7,7 +7,7 @@
 
 import {
     STORAGE_KEY, STORAGE_VERSION, SETTINGS_KEY, SETTINGS_VERSION,
-    SHIPS, UPGRADES, MAPS, SKILLS, SKILL_BY_ID, clamp
+    SHIPS, UPGRADES, MAPS, SKILLS, SKILL_BY_ID, RESOURCE_IDS, MISSIONS, clamp
 } from "./config.js";
 
 export const DEFAULTS = {
@@ -28,6 +28,8 @@ export const DEFAULTS = {
     bossKills: 0,
     skillPoints: 0,
     skills: { laser: 0, shield: 0, drone: 0, cargo: 0 },
+    refined: { aetherium: 0, cryolite: 0, xenon: 0, phantomite: 0 },
+    missions: { active: 0, progress: 0, completed: [] },
     dispatch: { active: null, totalSent: 0 },
     daily: { date: "", contracts: [], progress: {}, completed: [], streak: 0, lastDay: "" },
     achievements: [],
@@ -77,6 +79,16 @@ export function loadProfile(storage) {
             for (const def of UPGRADES) {
                 profile.upgrades[def.id] = clamp(count(data.upgrades[def.id], 0), 0, def.max);
             }
+        }
+
+        if (data.refined && typeof data.refined === "object") {
+            for (const id of RESOURCE_IDS) profile.refined[id] = count(data.refined[id], 0);
+        }
+        if (data.missions && typeof data.missions === "object") {
+            profile.missions.active = clamp(count(data.missions.active, 0), 0, MISSIONS.length);
+            profile.missions.progress = count(data.missions.progress, 0);
+            profile.missions.completed = Array.isArray(data.missions.completed)
+                ? data.missions.completed.filter((id) => typeof id === "string") : [];
         }
 
         profile.totalSales = count(data.totalSales, 0);
@@ -189,6 +201,8 @@ export function saveProfile(profile, storage) {
             bossKills: count(profile.bossKills, 0),
             skillPoints: count(profile.skillPoints, 0),
             skills: profile.skills || {},
+            refined: profile.refined || {},
+            missions: profile.missions || { active: 0, progress: 0, completed: [] },
             dispatch: profile.dispatch || { active: null, totalSent: 0 },
             daily: profile.daily || { date: "", contracts: [], progress: {}, completed: [], streak: 0, lastDay: "" },
             achievements: Array.isArray(profile.achievements) ? profile.achievements : [],

@@ -182,6 +182,16 @@ export function createRenderer(canvas, minimap) {
             ctx.lineTo(-r * 0.6, 0);
             ctx.lineTo(-r * 1.1, -r * 0.9);
             ctx.lineTo(r * 0.1, -r * 0.42);
+        } else if (shape === "lancer" || shape === "monolith" || shape === "queen") {
+            ctx.moveTo(r * 1.4, 0);
+            ctx.lineTo(r * 0.5, r * 0.65);
+            ctx.lineTo(r * 0.9, r * 1.2);
+            ctx.lineTo(-r * 0.6, r * 1.05);
+            ctx.lineTo(-r * 1.05, r * 0.4);
+            ctx.lineTo(-r * 1.05, -r * 0.4);
+            ctx.lineTo(-r * 0.6, -r * 1.05);
+            ctx.lineTo(r * 0.9, -r * 1.2);
+            ctx.lineTo(r * 0.5, -r * 0.65);
         } else if (shape === "obelisk") {
             ctx.moveTo(r * 1.25, 0);
             ctx.lineTo(r * 0.35, r * 0.55);

@@ -8,12 +8,14 @@
 
 import {
     SHIPS, UPGRADES, SKILLS, SKILL_BY_ID, ACHIEVEMENTS, AMMO, ABILITIES, DRONE_MAX,
-    DISPATCH_TIERS, droneCost, upgradeCost, RESOURCES, RESOURCE_IDS,
-    xpForLevel, clamp
+    DISPATCH_TIERS, CRAFTS, MISSIONS, RESOURCES, RESOURCE_IDS, REFINE_RATIO, REFINED_PRICE_MULT,
+    droneCost, upgradeCost, xpForLevel, clamp
 } from "./config.js";
 import { dispatchStatus } from "./dispatch.js";
 import { dailyContracts } from "./daily.js";
 import { achievementList, achievementCount } from "./achievements.js";
+import { canCraft, refinedValue } from "./refinery.js";
+import { missionLog, missionsDone, currentMission } from "./missions.js";
 
 function fmt(n) {
     return Math.floor(n || 0).toLocaleString("en-US");
@@ -102,6 +104,7 @@ export function createUI(handlers = {}) {
             achievements: handlers.onAchievements,
             "close-info": handlers.onCloseInfo,
             "launch-gate": handlers.onLaunchGate,
+            "mission-log": handlers.onMissionLog,
             "claim-dispatch": handlers.onClaimDispatch,
             "coach-next": handlers.onCoachNext,
             "coach-skip": handlers.onCoachSkip,
@@ -113,6 +116,9 @@ export function createUI(handlers = {}) {
         else if (action === "select-ship" && handlers.onSelectShip) handlers.onSelectShip(Number(value));
         else if (action === "buy-skill" && handlers.onBuySkill) handlers.onBuySkill(value);
         else if (action === "dispatch" && handlers.onDispatch) handlers.onDispatch(value);
+        else if (action === "refine" && handlers.onRefine) handlers.onRefine(value);
+        else if (action === "sell-refined" && handlers.onSellRefined) handlers.onSellRefined(value);
+        else if (action === "craft" && handlers.onCraft) handlers.onCraft(value);
         else if (action === "setting" && handlers.onSetting) {
             const key = btn.getAttribute("data-key");
             let next = value;
@@ -148,6 +154,7 @@ export function createUI(handlers = {}) {
                     ${hasRun ? `<button class="btn primary" data-action="continue" type="button">▶ CONTINUE RUN</button>` : ""}
                     <button class="btn ${hasRun ? "" : "primary"}" data-action="play" type="button">✦ NEW RUN</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="mission-log" type="button">📖 MISSIONS</button>
                     <button class="btn" data-action="contracts" type="button">📋 CONTRACTS</button>
                     <button class="btn" data-action="achievements" type="button">🏆 AWARDS</button>
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
@@ -228,6 +235,34 @@ export function createUI(handlers = {}) {
             </div>`;
     }
 
+    function refineryHTML(state, profile) {
+        const raw = state && state.cargo ? state.cargo : {};
+        const refined = profile.refined || {};
+        const rows = RESOURCE_IDS.map((id) => `
+            <div class="refine-row">
+                <span class="refine-dot" style="background:${RESOURCES[id].color}"></span>
+                <div class="refine-info">
+                    <b>${RESOURCES[id].name}</b>
+                    <small>RAW ${fmt(raw[id] || 0)} · REFINED ${fmt(refined[id] || 0)}</small>
+                </div>
+                <button class="btn tiny" data-action="refine" data-value="${id}" type="button" ${((raw[id] || 0) >= REFINE_RATIO) ? "" : "disabled"}>
+                    REFINE ${REFINE_RATIO}→1
+                </button>
+                <button class="btn tiny" data-action="sell-refined" data-value="${id}" type="button" ${(refined[id] || 0) ? "" : "disabled"}>
+                    SELL ${fmt(refinedValue(id))} CR
+                </button>
+            </div>`).join("");
+
+        const crafts = CRAFTS.map((c) => `
+            <div class="upgrade-row">
+                <div class="upgrade-info"><b>${c.name}</b><small>${c.desc} · ${Object.keys(c.cost).map((k) => RESOURCES[k].name + " ×" + c.cost[k]).join(", ")}</small></div>
+                <button class="btn tiny ${canCraft(profile, c) ? "primary" : ""}" data-action="craft" data-value="${c.id}" type="button" ${canCraft(profile, c) ? "" : "disabled"}>ASSEMBLE</button>
+            </div>`).join("");
+
+        return `<p class="section-note">Refined ore is worth ${REFINED_PRICE_MULT}× more and takes no cargo space.</p>
+            ${rows}${crafts}`;
+    }
+
     function buildHangar(state, profile) {
         const dcost = droneCost(profile.drones);
         const dmax = profile.drones >= DRONE_MAX;
@@ -276,6 +311,10 @@ export function createUI(handlers = {}) {
                         <h3>DISPATCH</h3>
                         ${dispatchHTML(profile, Date.now())}
                     </section>` : ""}
+                    ${atStation ? `<section>
+                        <h3>REFINERY &amp; ASSEMBLY</h3>
+                        ${refineryHTML(state, profile)}
+                    </section>` : ""}
                 </div>
                 <div class="panel-actions">
                     <button class="btn primary" data-action="${state ? "close-hangar" : "play"}" type="button">${state ? "◀ BACK TO FLIGHT" : "◀ BACK"}</button>
@@ -305,6 +344,7 @@ export function createUI(handlers = {}) {
                 <div class="panel-actions">
                     <button class="btn primary" data-action="resume" type="button">▶ RESUME</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="mission-log" type="button">📖 MISSIONS</button>
                     <button class="btn" data-action="contracts" type="button">📋 CONTRACTS</button>
                     <button class="btn" data-action="achievements" type="button">🏆 AWARDS</button>
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
@@ -439,6 +479,39 @@ export function createUI(handlers = {}) {
                                 <small>${a.desc}</small>
                             </div>
                             <span class="contract-reward">${a.unlocked ? "DONE" : "+" + fmt(a.reward) + " CR"}</span>
+                        </div>`).join("")}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+            </div>`);
+    }
+
+    function showMissions(profile) {
+        const list = missionLog(profile);
+        const active = currentMission(profile);
+        const target = active ? active.objective.target : 1;
+        const progress = active ? Math.min(profile.missions.progress, target) : 0;
+        return showOverlay(`
+            <div class="panel panel-wide" role="dialog" aria-modal="true">
+                <p class="kicker">CAMPAIGN · ${missionsDone(profile)}/${MISSIONS.length} COMPLETE</p>
+                <h2>MISSION LOG</h2>
+                ${active ? `
+                    <div class="mission-active">
+                        <span>${active.chapter}</span>
+                        <h3>${active.title}</h3>
+                        <p>${active.brief}</p>
+                        <div class="mini-track"><div class="hp" style="width:${Math.round(progress / target * 100)}%"></div></div>
+                        <small>${progress} / ${target} · REWARD ${fmt(active.reward.credits)} CR, ${active.reward.urium} URIUM</small>
+                    </div>` : `<p class="section-note">All missions complete. The sector is yours, pilot.</p>`}
+                <div class="hangar-scroll mission-list">
+                    ${list.map((m) => `
+                        <div class="upgrade-row ${m.state}">
+                            <div class="upgrade-info">
+                                <b>${m.state === "completed" ? "✓" : m.state === "active" ? "▶" : "○"} ${m.title}</b>
+                                <small>${m.chapter} · ${m.objective.type.toUpperCase()} ${m.objective.target}</small>
+                            </div>
+                            <span class="contract-reward">${m.state === "completed" ? "DONE" : "+" + fmt(m.reward.credits) + " CR"}</span>
                         </div>`).join("")}
                 </div>
                 <div class="panel-actions">
@@ -590,6 +663,7 @@ export function createUI(handlers = {}) {
         showSettings,
         showContracts,
         showAchievements,
+        showMissions,
         showCoach,
         hideCoach,
         setDebug,

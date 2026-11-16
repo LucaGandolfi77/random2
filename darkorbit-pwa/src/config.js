@@ -26,6 +26,34 @@ export const SETTINGS_VERSION = 1;
 export const RUN_KEY = "darkorbit-run";
 export const RUN_VERSION = 1;
 
+/* Refining: three raw ore units become one refined unit worth 3× at sale. */
+export const REFINE_RATIO = 3;
+export const REFINED_PRICE_MULT = 3;
+
+/* Assembly recipes turn refined materials into immediate field effects. */
+export const CRAFTS = [
+    { id: "nanite", name: "Nanite Repair", desc: "Restore 50% hull", cost: { aetherium: 4 }, effect: "repair" },
+    { id: "barrier", name: "Barrier Cell", desc: "Restore 60% shield", cost: { cryolite: 3, xenon: 2 }, effect: "shield" },
+    { id: "magnet", name: "Ore Magnet", desc: "12 s auto-collect field", cost: { cryolite: 5 }, effect: "magnet" },
+    { id: "overdrive", name: "Overdrive Core", desc: "10 s rapid fire", cost: { xenon: 4, aetherium: 2 }, effect: "overdrive" }
+];
+
+/* Story missions. Objectives are checked against live play + the profile. */
+export const MISSIONS = [
+    { id: "m01", chapter: "I · FIRST CONTACT", title: "Shakedown", brief: "The station sensors picked up a swarm drifting through Alpha Sector. Clear them out and prove the hull holds.", objective: { type: "kills", target: 5 }, reward: { credits: 800, urium: 1 } },
+    { id: "m02", chapter: "I · FIRST CONTACT", title: "Cargo Run", brief: "Ore is worthless in the hold. Haul it back to the station and sell a full load.", objective: { type: "sell", target: 20 }, reward: { credits: 1200, urium: 1 } },
+    { id: "m03", chapter: "I · FIRST CONTACT", title: "Pest Control", brief: "The swarm is multiplying. Destroy twenty-five hostiles before they reach the shipping lanes.", objective: { type: "kills", target: 25 }, reward: { credits: 2000, urium: 2 } },
+    { id: "m04", chapter: "II · THE GATES", title: "First Jump", brief: "A gate has activated near the station. Enter it and survive three waves.", objective: { type: "gate", target: 1 }, reward: { credits: 3000, urium: 3 } },
+    { id: "m05", chapter: "II · THE GATES", title: "Big Game", brief: "Something large is guarding the deeper sectors. Bring down a boss ship.", objective: { type: "boss", target: 1 }, reward: { credits: 4000, urium: 4 } },
+    { id: "m06", chapter: "II · THE GATES", title: "Veteran", brief: "Your flight record is getting noticed. Reach pilot level five.", objective: { type: "level", target: 5 }, reward: { credits: 3500, urium: 4 } },
+    { id: "m07", chapter: "III · THE DEEP", title: "Extermination", brief: "Command wants the sector swept. Sixty more hostiles, no questions asked.", objective: { type: "kills", target: 60 }, reward: { credits: 6000, urium: 5 } },
+    { id: "m08", chapter: "III · THE DEEP", title: "Trade War", brief: "Refined ore is worth a fortune out here. Sell a hundred units and corner the market.", objective: { type: "sell", target: 100 }, reward: { credits: 7000, urium: 6 } },
+    { id: "m09", chapter: "III · THE DEEP", title: "Gate Runner", brief: "Three more gates, three more chances to prove you can handle the pressure.", objective: { type: "gate", target: 3 }, reward: { credits: 9000, urium: 7 } },
+    { id: "m10", chapter: "IV · OBLIVION", title: "Into Delta", brief: "The radiation is getting worse. Jump to Delta Core and map the hazards.", objective: { type: "sector", target: 3 }, reward: { credits: 10000, urium: 8 } },
+    { id: "m11", chapter: "IV · OBLIVION", title: "Hunt the Giants", brief: "Three boss signatures are moving through the outer sectors. Silence them.", objective: { type: "boss", target: 3 }, reward: { credits: 14000, urium: 10 } },
+    { id: "m12", chapter: "IV · OBLIVION", title: "Beyond the Veil", brief: "The last jump. Epsilon Veil, then Z Oblivion. No one has come back from the far side.", objective: { type: "sector", target: 5 }, reward: { credits: 20000, urium: 15 } }
+];
+
 /* Pilot skills — one point per level, spent in the hangar. */
 export const SKILLS = [
     { id: "laser", name: "Laser Mastery", desc: "+6% laser damage / point", max: 5 },
@@ -135,6 +163,11 @@ export const PALETTES = {
         bg: "#061a1e", bg2: "#01080b", nebula: "rgba(60,220,230,0.30)",
         grid: "rgba(150,255,250,0.09)", hazard: "#ff4d8d", accent: "#7df9ff",
         star: "#e6ffff", ground: "#08262c", planet: "#14545e"
+    },
+    zeta: {
+        bg: "#0d051c", bg2: "#02010a", nebula: "rgba(180,70,220,0.34)",
+        grid: "rgba(220,180,255,0.09)", hazard: "#5ce1e6", accent: "#ff7ad9",
+        star: "#f8e8ff", ground: "#1a0d2e", planet: "#3a1250"
     }
 };
 
@@ -202,6 +235,22 @@ export const SHIPS = [
         price: 420000, urium: 52, level: 11,
         perks: { rocketDamage: 1.35 },
         perkText: "+35% rocket (PLT) damage"
+    },
+    {
+        id: "ranger", name: "RANGER", role: "Precision marksman",
+        speed: 292, hp: 6400, shield: 5200, cargo: 1300, cargoBay: 1,
+        lasers: 11, color: "#ff9ff3", shape: "lancer",
+        price: 620000, urium: 80, level: 12,
+        perks: { crit: 0.08 },
+        perkText: "+8% critical hit chance"
+    },
+    {
+        id: "monolith", name: "MONOLITH", role: "Fortress-class juggernaut",
+        speed: 198, hp: 12500, shield: 9200, cargo: 2200, cargoBay: 2,
+        lasers: 16, color: "#b39aff", shape: "monolith",
+        price: 900000, urium: 120, level: 14,
+        perks: { rocketDamage: 1.2, droneDamage: 1.2 },
+        perkText: "+20% rockets · +20% drones"
     }
 ];
 
@@ -269,6 +318,18 @@ export const ENEMIES = [
         hp: 8800, shield: 4600, speed: 92, damage: 96, fireCd: 1.15,
         range: 640, radius: 54, xp: 880, credits: [2400, 4200],
         color: "#7df9ff", shape: "obelisk", spread: 7
+    },
+    {
+        id: "lancer", name: "Void Lancer", tier: 3,
+        hp: 1700, shield: 1050, speed: 184, damage: 72, fireCd: 1.45,
+        range: 640, radius: 24, xp: 280, credits: [750, 1400],
+        color: "#ff9ff3", shape: "lancer"
+    },
+    {
+        id: "queen", name: "Swarm Queen", tier: 4, boss: true,
+        hp: 11500, shield: 6400, speed: 98, damage: 112, fireCd: 1.0,
+        range: 690, radius: 56, xp: 1300, credits: [3200, 5800],
+        color: "#ff7ad9", shape: "queen", spread: 9
     }
 ];
 
@@ -306,8 +367,14 @@ export const MAPS = [
     {
         id: "epsilon", name: "EPSILON VEIL", level: 10, world: 3200,
         palette: "epsilon", pool: ["crawler", "phantom", "wisp", "raider", "obelisk"], max: 22,
-        interval: 0.74, hpMul: 4.2, dmgMul: 3.0, xpMul: 4.2, gateTo: -1,
+        interval: 0.74, hpMul: 4.2, dmgMul: 3.0, xpMul: 4.2, gateTo: 5,
         boss: "obelisk", loot: ["phantomite", "phantomite", "xenon"]
+    },
+    {
+        id: "zeta", name: "ZETA OBLIVION", level: 12, world: 3500,
+        palette: "zeta", pool: ["lancer", "crawler", "phantom", "wisp", "queen"], max: 24,
+        interval: 0.68, hpMul: 5.4, dmgMul: 3.8, xpMul: 5.4, gateTo: -1,
+        boss: "queen", loot: ["phantomite", "phantomite", "phantomite"]
     }
 ];
 
