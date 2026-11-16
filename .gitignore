@@ -33,6 +33,12 @@ fidenza-recon/db/city.db
 !milano-nera-pwa/tests/
 !milano-nera-pwa/tests/**
 
+# Plane Shooter's module manifest and node:test suites are source, not local
+# tooling; CI runs the same tests the browser imports.
+!plane-pwa/package.json
+!plane-pwa/tests/
+!plane-pwa/tests/**
+
 # Fumetti's reader test and package manifest are source, not local tooling.
 !fumetti-pwa/package.json
 !fumetti-pwa/tests/

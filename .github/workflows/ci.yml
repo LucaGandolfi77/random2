@@ -231,6 +231,10 @@ jobs:
           # CORE 9: the heat chain, content tables, every low-poly mesh,
           # a balance bot that must reach prestige, and the PWA asset contract.
           node --test core9-pwa/tests/*.test.mjs
+          # PLANE SHOOTER: relative drag, auto-fire, collisions, invulnerability,
+          # shields, power-ups, wave ramp, determinism, a survival bot and the
+          # PWA precache/manifest contract.
+          node --test plane-pwa/tests/*.test.mjs
           # KING SHOT: oath hearts/score, wave and boss composition beyond the
           # old cap, wind/collision/combo rules, decree drafts, deterministic
           # daily runs, save migration/streak logic and the PWA asset contract.
@@ -340,6 +344,14 @@ jobs:
           out=$(node pixel-cup-pwa/smoke.mjs http://localhost:8099/pixel-cup-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  pixel-cup-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # PLANE SHOOTER drags the plane, lets auto-fire score, pauses, ends
+          # the run, restarts, changes theme and boots again offline.
+          out=$(node plane-pwa/smoke.mjs http://localhost:8099/plane-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  plane-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3

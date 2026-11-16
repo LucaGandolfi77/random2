@@ -76,7 +76,7 @@
 | # | Project | Kind | Tech | Offline | Try it |
 |---|---------|------|------|:-------:|--------|
 | 1 | **King Shot** | Archery roguelite: oaths, decrees, daily siege | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/king-shot-pwa/) |
-| 2 | **Plane Shooter** | Side-scrolling shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/plane-pwa/) |
+| 2 | **Plane Shooter** | Vertical one-thumb shmup | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/plane-pwa/) |
 | 3 | **Slot Machine** | 3-reel casino | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/slot-pwa/) |
 | 4 | **Snake** | Retro arcade | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/snake-pwa/) |
 | 5 | **LUMEN** | Bioluminescent .io survival | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/lumen-pwa/) |
@@ -287,19 +287,24 @@ Milan's memories, one shadow at a time.
 
 ### Plane Shooter
 
-*Classic side-scrolling sky action.* ✈️
+*One thumb. Auto-fire. Don't get hit.* ✈️
 
-You fly a little plane at the bottom of the screen; enemies stream in from the
-edges. Drag to aim the gun direction, release to fire, dodge what comes back.
+A compact vertical shooter: drag anywhere on the playfield to fly, let the
+auto-fire handle the shooting, and dodge the swarm. The plane's sprite is
+20 px wide but its hitbox is a 4 px circle, so near misses are genuinely
+near misses.
 
-- 360° aiming (touch drag or mouse), infinite bullets with life-time falloff
-- Enemy spawner with bounce physics and a difficulty ramp per level
-- Occasional power-up drops, particle explosions on every kill
-- Three lives, level-up thresholds, high-score persistence
-- Full offline shell + install prompt, iPhone viewport locked (no zoom/jitter)
+- Relative drag (touch, mouse and pen) with a DPR-aware 400×600 playfield
+- Automatic fire, five enemy types, aimed bullets and three-way tank spreads
+- Rapid, Spread, Shield and Repair drops, collected by touching them
+- 20-second waves with a capped difficulty ramp, high score and best wave
+- Pause, auto-pause when the tab hides, keyboard controls and reduced motion
+- Full offline shell with PNG/maskable icons, iOS safe areas and install prompt
+- `node:test` simulation/input/PWA contract plus a real Chromium smoke test
 
-**Files:** `index.html`, `styles.css`, `game.js`, `manifest.json`,
-`service-worker.js`, `icons/` (SVG).
+**Files:** `index.html`, `styles.css`, `src/` (`config`, `sim`, `render`,
+`input`, `storage`, `ui`, `main`), `manifest.json`, `service-worker.js`,
+`icons/` (SVG + PNG), `tests/`, `smoke.mjs`.
 
 ### Slot Machine
 
@@ -1805,11 +1810,13 @@ random2/
 ├── .github/workflows/pages.yml   # build + deploy pipeline
 │
 ├── snake-pwa/              # ┐
-├── plane-pwa/              # │ plain static PWAs — same shape:
-├── slot-pwa/               # │   index.html · styles.css · game.js
-├── virtual-farm-pwa/       # │   manifest.json · service-worker.js · icons/
-│                          # │   (+ <script src="../shared/arcade.js"> in the simple four)
+├── slot-pwa/               # │ plain static PWAs — same shape:
+├── virtual-farm-pwa/       # │   index.html · styles.css · game.js
+│                          # │   manifest.json · service-worker.js · icons/
+│                          # │   (+ <script src="../shared/arcade.js"> in the simple three)
 │                          # ┘
+│
+├── plane-pwa/              # static PWA, src/ modules + node:test + CDP smoke
 │
 ├── king-shot-pwa/          # static PWA, src/ modules + node:test + CDP smoke
 ├── milano-nera-pwa/        # static PWA, src/ sim/AI/renderer + node:test + CDP smoke

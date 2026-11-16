@@ -1,0 +1,11 @@
+{
+  "name": "plane-pwa",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "One-thumb vertical shooter: drag to fly, auto-fire, dodge bullets and survive the swarm.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "smoke": "node smoke.mjs"
+  }
+}

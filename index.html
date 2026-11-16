@@ -1468,7 +1468,7 @@
       transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
     }
     .style-option:hover { border-color: var(--hover-border); background: var(--surface-hover); }
-    .style-option:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .style-option:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
     .style-option:has(input:checked) {
       border-color: var(--focus);
       background: var(--surface-hover);
@@ -1987,6 +1987,7 @@
       var saved = localStorage.getItem("random2-style");
       if (saved && STYLES[saved]) {
         id = saved;
+        localStorage.removeItem("random2-theme");
       } else {
         var old = localStorage.getItem("random2-theme");
         if (old === "light") id = "arcade-dawn";
@@ -2492,8 +2493,8 @@
             <div class="tile" style="background:linear-gradient(135deg,#38bdf8,#6366f1)">✈️</div>
             <h2>Plane Shooter</h2>
           </div>
-          <p class="tagline">Classic side-scrolling sky action. Weave through enemies and blast everything that moves.</p>
-          <div class="chips"><span class="chip">SHMUP</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
+          <p class="tagline">One thumb, auto-fire, endless swarm. Drag to fly and weave through the bullets.</p>
+          <div class="chips"><span class="chip">SHMUP</span><span class="chip">AUTO-FIRE</span><span class="chip">PWA</span><span class="chip">OFFLINE</span></div>
           <div class="actions">
             <a class="btn btn-play" href="plane-pwa/">▶&nbsp; Play</a>
             <a class="btn btn-src" href="https://github.com/LucaGandolfi77/random2/tree/main/plane-pwa" aria-label="Plane Shooter source code">
