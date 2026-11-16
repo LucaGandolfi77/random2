@@ -298,10 +298,14 @@ cargo has to be flown back to the station to be sold for credits and XP.
 
 - Virtual joystick + held FIRE, tap-to-target and abilities; keyboard fallback
 - Adaptive layout: portrait and landscape with iOS safe-area insets
-- Four sectors gated by level, escalating enemy pools and bosses
-- Hangar with four ships, five upgrade tracks, repair and four combat drones
+- Station safe haven: enemies disengage, bullets fizzle, shields recharge fast
+- Five sectors gated by level, escalating enemy pools, elites and three bosses
+- Five ammo types (splash rocket, infection DoT), field pickups, six ships,
+  eight upgrade tracks and four combat drones
+- Parallax stars, asteroids, planets, shockwaves, damage numbers, screen shake
+  and an animated radar — all procedural canvas art
 - Persistent profile, shared `R2` audio/haptics/stats, offline service worker
-- `node:test` simulation suite + 30-check Chromium smoke test
+- `node:test` simulation suite + 38-check Chromium smoke test
 
 [▶ Play](https://lucagandolfi77.github.io/random2/darkorbit-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/darkorbit-pwa) ·
