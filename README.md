@@ -20,6 +20,7 @@
   - [Whiteout: Last Ember](#whiteout-last-ember)
   - [Milano Nera '77](#milano-nera-77)
   - [Fumetti — Sentinelle](#fumetti--sentinelle)
+  - [Deep Orbit](#deep-orbit)
   - [Plane Shooter](#plane-shooter)
   - [Slot Machine](#slot-machine)
   - [Snake](#snake)
@@ -130,6 +131,7 @@
 | 53 | **Milano Nera '77** | Six-chapter twin-stick noir: Metrò, Parco Lambro, bosses and a motorway chase | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/milano-nera-pwa/) |
 | 54 | **Fumetti — Sentinelle** | Comic reader + two superhero noir issues, 16 tavole, Italian, offline | Canvas 2D + vanilla JS | ✅ | [▶ Read](https://lucagandolfi77.github.io/random2/fumetti-pwa/) |
 | 55 | **Whiteout: Last Ember** | Survival city builder: furnace, weather, survivors, decrees, tech, heroes | React + Vite + Canvas 2D + Web Audio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/whiteout-survival-pwa/) |
+| 56 | **Deep Orbit** | DarkOrbit-inspired mobile space combat: hunt, haul, upgrade, jump | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/darkorbit-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -284,6 +286,26 @@ Milan's memories, one shadow at a time.
 [▶ Read](https://lucagandolfi77.github.io/random2/fumetti-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/fumetti-pwa) ·
 [README](fumetti-pwa/README.md)
+
+### Deep Orbit
+
+*Fly the sector. Hunt aliens. Haul ore. Jump deeper.* 🚀
+
+A mobile-first, DarkOrbit-inspired space combat game built entirely with
+procedural canvas art (no binary assets). Shields absorb laser fire before
+hull, ammo types trade damage for cooldown, drones orbit and auto-fire, and
+cargo has to be flown back to the station to be sold for credits and XP.
+
+- Virtual joystick + held FIRE, tap-to-target and abilities; keyboard fallback
+- Adaptive layout: portrait and landscape with iOS safe-area insets
+- Four sectors gated by level, escalating enemy pools and bosses
+- Hangar with four ships, five upgrade tracks, repair and four combat drones
+- Persistent profile, shared `R2` audio/haptics/stats, offline service worker
+- `node:test` simulation suite + 30-check Chromium smoke test
+
+[▶ Play](https://lucagandolfi77.github.io/random2/darkorbit-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/darkorbit-pwa) ·
+[README](darkorbit-pwa/README.md)
 
 ### Plane Shooter
 
