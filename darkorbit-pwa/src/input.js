@@ -14,6 +14,7 @@ export function createInput(canvas, renderer, handlers = {}) {
     const abilityButtons = Array.from(document.querySelectorAll("[data-ability]"));
 
     const move = { x: 0, y: 0 };
+    let sensitivity = 1;
     let firing = false;
     let stickPointer = null;
     let canvasPointer = null;
@@ -38,8 +39,8 @@ export function createInput(canvas, renderer, handlers = {}) {
         const k = len > max ? max / len : 1;
         const nx = dx * k;
         const ny = dy * k;
-        move.x = dx / (max || 1);
-        move.y = dy / (max || 1);
+        move.x = (dx / (max || 1)) * sensitivity;
+        move.y = (dy / (max || 1)) * sensitivity;
         const ml = Math.hypot(move.x, move.y);
         if (ml > 1) { move.x /= ml; move.y /= ml; }
         if (knob) knob.style.transform = "translate(" + nx + "px," + ny + "px)";
@@ -237,6 +238,10 @@ export function createInput(canvas, renderer, handlers = {}) {
     return {
         keys,
         getMove,
+        setSensitivity: function (value) {
+            const n = Number(value);
+            sensitivity = Number.isFinite(n) ? Math.max(0.6, Math.min(1.4, n)) : 1;
+        },
         isFiring: function () { return firing; },
         clearKeys,
         destroy: function () {

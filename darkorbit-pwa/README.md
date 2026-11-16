@@ -30,6 +30,12 @@ a PWA on iOS and Android; works offline once installed.
 The layout adapts to **both portrait and landscape**, respects iOS safe areas,
 and uses haptics + WebAudio through the shared `R2` arcade library.
 
+A **Settings** screen (menu / pause) controls effects quality (Auto/High/Low),
+frame rate (60/30 power-save), joystick sensitivity, a colorblind-safe palette,
+HUD size, sound, music and haptics. The first launch includes a short 3-step
+onboarding, replayable from Settings. Add `?debug=1` to the URL for a live FPS /
+tier / particle counter.
+
 ## Game loop
 
 - **Station safe haven.** Inside the station ring enemies stop chasing, firing
@@ -54,6 +60,10 @@ and uses haptics + WebAudio through the shared `R2` arcade library.
 - **Visuals.** Parallax stars, drifting asteroids, distant planets, layered glow,
   hull plating, shield dome, shockwaves, floating damage numbers, screen shake
   and an animated radar sweep — all procedural, with reduced-motion support.
+- **Performance.** Adaptive quality (hysteresis-based FPS monitor dips DPR,
+  particles and glow on weak devices), pooled projectiles/particles, cached
+  gradients, optional 30 fps power-save, and a procedural adaptive soundtrack
+  that intensifies with nearby enemies.
 - **Permadeath-lite.** Destruction loses carried cargo but keeps your ship,
   upgrades and progress; respawn at the station.
 

@@ -171,6 +171,8 @@ export function createState(profile, options = {}) {
         enemyBullets: [],
         particles: [],
         drones: [],
+        fx: { particles: MAX_PARTICLES, glow: true, shake: true, layers: true, text: true },
+        pools: { bullets: [], enemyBullets: [], particles: [] },
         magnetTimer: 0,
         overdriveTimer: 0,
         safeNotice: 0,
@@ -284,20 +286,32 @@ export function drainEvents(state) {
 }
 
 function burst(state, x, y, color, count, speed, size) {
+    const cap = state.fx && state.fx.particles ? state.fx.particles : MAX_PARTICLES;
     for (let i = 0; i < count; i++) {
-        if (state.particles.length >= MAX_PARTICLES) state.particles.shift();
+        let pt;
+        if (state.particles.length >= cap) {
+            pt = state.particles.shift();
+        } else {
+            pt = state.pools.particles.pop() || {};
+        }
         const a = rand(0, TAU);
         const s = rand(speed * 0.3, speed);
-        state.particles.push({
-            x, y,
-            vx: Math.cos(a) * s,
-            vy: Math.sin(a) * s,
-            life: rand(0.25, 0.7),
-            maxLife: 0.7,
-            size: rand(size * 0.5, size),
-            color
-        });
+        pt.x = x;
+        pt.y = y;
+        pt.vx = Math.cos(a) * s;
+        pt.vy = Math.sin(a) * s;
+        pt.life = rand(0.25, 0.7);
+        pt.maxLife = 0.7;
+        pt.size = rand(size * 0.5, size);
+        pt.color = color;
+        state.particles.push(pt);
     }
+}
+
+function release(state, kind, obj) {
+    const pool = state.pools && state.pools[kind];
+    if (!pool) return;
+    if (pool.length < 240) pool.push(obj);
 }
 
 /* ------------------------------------------------------------------ */
@@ -609,6 +623,8 @@ export function jumpGate(state, profile) {
     state.loot = [];
     state.boxes = [];
     state.pickups = [];
+    for (const b of state.bullets) release(state, "bullets", b);
+    for (const b of state.enemyBullets) release(state, "enemyBullets", b);
     state.bullets = [];
     state.enemyBullets = [];
     state.drones.forEach((d) => { d.x = start.x; d.y = start.y; });
@@ -639,6 +655,8 @@ export function respawn(state, profile) {
         hurtFlash: 0, targetId: null, firing: false,
         boost: 0, barrier: 0, lastHit: state.t
     });
+    for (const b of state.bullets) release(state, "bullets", b);
+    for (const b of state.enemyBullets) release(state, "enemyBullets", b);
     state.bullets = [];
     state.enemyBullets = [];
     state.pickups = [];
@@ -660,22 +678,22 @@ function firePlayerBullet(state, target, ammo, fromDrone, rocketMult) {
     const angle = Math.atan2(target.y - p.y, target.x - p.x);
     const speed = ammo.speed;
     const mult = ammo.splash ? (rocketMult || 1) : 1;
-    state.bullets.push({
-        x: p.x + Math.cos(angle) * 22,
-        y: p.y + Math.sin(angle) * 22,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        speed,
-        dmg: ammo.dmg * p.damageMult * mult * (fromDrone ? 0.55 : 1),
-        color: ammo.color,
-        radius: fromDrone ? 2.5 : ammo.radius,
-        life: 1.35,
-        targetId: target.id,
-        drone: !!fromDrone,
-        splash: !!ammo.splash,
-        dot: !!ammo.dot,
-        ammoId: ammo.id
-    });
+    const b = state.pools.bullets.pop() || {};
+    b.x = p.x + Math.cos(angle) * 22;
+    b.y = p.y + Math.sin(angle) * 22;
+    b.vx = Math.cos(angle) * speed;
+    b.vy = Math.sin(angle) * speed;
+    b.speed = speed;
+    b.dmg = ammo.dmg * p.damageMult * mult * (fromDrone ? 0.55 : 1);
+    b.color = ammo.color;
+    b.radius = fromDrone ? 2.5 : ammo.radius;
+    b.life = 1.35;
+    b.targetId = target.id;
+    b.drone = !!fromDrone;
+    b.splash = !!ammo.splash;
+    b.dot = !!ammo.dot;
+    b.ammoId = ammo.id;
+    state.bullets.push(b);
 }
 
 function fireEnemyBullet(state, enemy) {
@@ -688,16 +706,16 @@ function fireEnemyBullet(state, enemy) {
     for (let i = 0; i < spread; i++) {
         if (state.enemyBullets.length >= MAX_ENEMY_BULLETS) break;
         const a = base + (i - (spread - 1) / 2) * 0.19;
-        state.enemyBullets.push({
-            x: enemy.x + Math.cos(a) * (enemy.radius + 6),
-            y: enemy.y + Math.sin(a) * (enemy.radius + 6),
-            vx: Math.cos(a) * speed,
-            vy: Math.sin(a) * speed,
-            dmg,
-            color: enemy.def.color,
-            radius: enemy.def.boss ? 7 : 5,
-            life: 3.4
-        });
+        const b = state.pools.enemyBullets.pop() || {};
+        b.x = enemy.x + Math.cos(a) * (enemy.radius + 6);
+        b.y = enemy.y + Math.sin(a) * (enemy.radius + 6);
+        b.vx = Math.cos(a) * speed;
+        b.vy = Math.sin(a) * speed;
+        b.dmg = dmg;
+        b.color = enemy.def.color;
+        b.radius = enemy.def.boss ? 7 : 5;
+        b.life = 3.4;
+        state.enemyBullets.push(b);
     }
     emit(state, "enemyshoot", { x: enemy.x, y: enemy.y });
 }
@@ -927,7 +945,7 @@ function updateBullets(state, dt, profile) {
     const kept = [];
     for (const b of state.bullets) {
         b.life -= dt;
-        if (b.life <= 0) continue;
+        if (b.life <= 0) { release(state, "bullets", b); continue; }
 
         // Light homing keeps fast mobile play satisfying; cloaked/evasive
         // targets are harder for the guidance to track.
@@ -956,6 +974,7 @@ function updateBullets(state, dt, profile) {
             if (distance(b, e) < e.radius + b.radius + 2) {
                 if (e.def.evade && Math.random() < e.def.evade) {
                     emit(state, "evade", { x: e.x, y: e.y });
+                    release(state, "bullets", b);
                     hit = true;
                     break;
                 }
@@ -977,6 +996,7 @@ function updateBullets(state, dt, profile) {
                     e.dotDps = b.dmg * 0.16;
                     emit(state, "infect", { x: e.x, y: e.y });
                 }
+                release(state, "bullets", b);
                 hit = true;
                 break;
             }
@@ -992,7 +1012,7 @@ function updateEnemyBullets(state, dt) {
     const kept = [];
     for (const b of state.enemyBullets) {
         b.life -= dt;
-        if (b.life <= 0) continue;
+        if (b.life <= 0) { release(state, "enemyBullets", b); continue; }
         b.x += b.vx * dt;
         b.y += b.vy * dt;
 
@@ -1000,6 +1020,7 @@ function updateEnemyBullets(state, dt) {
         if (distance(b, station) < DOCK_RADIUS) {
             burst(state, b.x, b.y, "#8affc1", 5, 90, 2.5);
             emit(state, "bulletblock", { x: b.x, y: b.y });
+            release(state, "enemyBullets", b);
             continue;
         }
 
@@ -1009,6 +1030,7 @@ function updateEnemyBullets(state, dt) {
             } else {
                 damagePlayer(state, b.dmg);
             }
+            release(state, "enemyBullets", b);
             continue;
         }
         kept.push(b);
@@ -1046,19 +1068,22 @@ function updateDrones(state, dt, lockedTarget) {
 function firePlayerBulletFrom(d, target, ammo, state) {
     const p = state.player;
     const angle = Math.atan2(target.y - d.y, target.x - d.x);
-    state.bullets.push({
-        x: d.x + Math.cos(angle) * 10,
-        y: d.y + Math.sin(angle) * 10,
-        vx: Math.cos(angle) * ammo.speed,
-        vy: Math.sin(angle) * ammo.speed,
-        speed: ammo.speed,
-        dmg: DRONE_DAMAGE * p.damageMult * p.droneMult,
-        color: "#b8f7ff",
-        radius: 2.5,
-        life: 1.1,
-        targetId: target.id,
-        drone: true
-    });
+    const b = state.pools.bullets.pop() || {};
+    b.x = d.x + Math.cos(angle) * 10;
+    b.y = d.y + Math.sin(angle) * 10;
+    b.vx = Math.cos(angle) * ammo.speed;
+    b.vy = Math.sin(angle) * ammo.speed;
+    b.speed = ammo.speed;
+    b.dmg = DRONE_DAMAGE * p.damageMult * p.droneMult;
+    b.color = "#b8f7ff";
+    b.radius = 2.5;
+    b.life = 1.1;
+    b.targetId = target.id;
+    b.drone = true;
+    b.splash = false;
+    b.dot = false;
+    b.ammoId = ammo.id;
+    state.bullets.push(b);
 }
 
 function updateLoot(state, dt, profile) {
@@ -1168,7 +1193,7 @@ function updateParticles(state, dt) {
     const kept = [];
     for (const pt of state.particles) {
         pt.life -= dt;
-        if (pt.life <= 0) continue;
+        if (pt.life <= 0) { release(state, "particles", pt); continue; }
         pt.x += pt.vx * dt;
         pt.y += pt.vy * dt;
         pt.vx *= 0.94;

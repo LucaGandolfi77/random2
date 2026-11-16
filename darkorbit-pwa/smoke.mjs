@@ -17,7 +17,8 @@
 
 import { launch, sleep } from "../tools/cdp.mjs";
 
-const url = process.argv[2] || "http://localhost:8099/darkorbit-pwa/";
+const base = process.argv[2] || "http://localhost:8099/darkorbit-pwa/";
+const url = base + (base.includes("?") ? "&" : "?") + "debug=1";
 
 const browser = await launch();
 if (!browser) {
@@ -128,8 +129,29 @@ ok(layout && layout.scrollWidth <= layout.innerWidth + 1, "portrait: no horizont
 ok(layout && layout.lit > 1000, "the canvas is painted", layout && layout.lit + " lit pixels");
 ok(layout && layout.backingWidth >= layout.cssWidth * 1.5, "the canvas backing store is DPR-aware", layout && layout.backingWidth + "x" + layout.backingHeight);
 
+/* Debug HUD (?debug=1). */
+await sleep(450);
+ok(await evaluate("!document.getElementById('debug-hud').classList.contains('hidden')"), "the debug HUD is visible in debug mode");
+ok(await evaluate("/FPS/.test(document.getElementById('debug-hud').textContent)"), "the debug HUD reports FPS");
+
+/* Settings screen and persistence. */
+await click('[data-action="settings"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'settings'"), "Settings opens from the menu");
+await click('[data-action="setting"][data-key="fps"][data-value="30"]');
+ok(await evaluate("window.__DEEP_ORBIT__.getSettings().fps === 30"), "30 fps mode is applied");
+await click('[data-action="setting"][data-key="palette"][data-value="colorblind"]');
+ok(await evaluate("document.body.classList.contains('cb')"), "colorblind palette is applied");
+ok(await waitFor("JSON.parse(localStorage.getItem('darkorbit-settings') || '{}').palette === 'colorblind'"), "settings are persisted");
+await click('[data-action="setting"][data-key="fps"][data-value="60"]');
+await click('[data-action="setting"][data-key="palette"][data-value="normal"]');
+await click('[data-action="close-settings"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "Settings returns to the menu");
+
 await click('[data-action="play"]');
-ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'playing'"), "Play starts a run");
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'coach'"), "first run shows onboarding");
+ok(await evaluate("!document.getElementById('coach').classList.contains('hidden')"), "the coach card is visible");
+for (let i = 0; i < 3; i++) await click('[data-action="coach-next"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'playing'"), "Play starts a run after onboarding");
 ok(await evaluate("document.getElementById('overlay').classList.contains('hidden')"), "the overlay hides while playing");
 ok(await evaluate("window.__DEEP_ORBIT__.getState().enemies.length > 0"), "enemies spawn in the sector");
 

@@ -6,7 +6,8 @@
  */
 
 import {
-    STORAGE_KEY, STORAGE_VERSION, SHIPS, UPGRADES, MAPS, clamp
+    STORAGE_KEY, STORAGE_VERSION, SETTINGS_KEY, SETTINGS_VERSION,
+    SHIPS, UPGRADES, MAPS, clamp
 } from "./config.js";
 
 export const DEFAULTS = {
@@ -22,6 +23,7 @@ export const DEFAULTS = {
     lastMap: 0,
     bestScore: 0,
     totalKills: 0,
+    tutorialDone: false,
     installDismissed: false
 };
 
@@ -41,6 +43,7 @@ export function loadProfile(storage) {
     const profile = JSON.parse(JSON.stringify(DEFAULTS));
 
     if (data && typeof data === "object") {
+        profile.tutorialDone = data.tutorialDone === true;
         profile.credits = count(data.credits, profile.credits);
         profile.urium = count(data.urium, profile.urium);
         profile.level = Math.max(1, count(data.level, 1));
@@ -72,6 +75,57 @@ export function loadProfile(storage) {
     return profile;
 }
 
+export const SETTINGS_DEFAULTS = {
+    version: SETTINGS_VERSION,
+    effects: "auto",       // auto | high | low
+    fps: 60,               // 60 | 30
+    sensitivity: 1,        // 0.6 .. 1.4
+    palette: "normal",     // normal | colorblind
+    hud: "normal",         // normal | large
+    showFps: false
+};
+
+export function loadSettings(storage) {
+    const store = storage || (typeof localStorage !== "undefined" ? localStorage : null);
+    let data = null;
+    try {
+        const raw = store ? store.getItem(SETTINGS_KEY) : null;
+        data = raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        data = null;
+    }
+    const out = Object.assign({}, SETTINGS_DEFAULTS);
+    if (data && typeof data === "object") {
+        if (["auto", "high", "low"].indexOf(data.effects) >= 0) out.effects = data.effects;
+        if (data.fps === 30 || data.fps === 60) out.fps = data.fps;
+        const sens = Number(data.sensitivity);
+        if (Number.isFinite(sens)) out.sensitivity = clamp(sens, 0.6, 1.4);
+        if (data.palette === "colorblind") out.palette = data.palette;
+        if (data.hud === "large") out.hud = data.hud;
+        out.showFps = data.showFps === true;
+    }
+    return out;
+}
+
+export function saveSettings(settings, storage) {
+    const store = storage || (typeof localStorage !== "undefined" ? localStorage : null);
+    if (!store || !settings) return false;
+    try {
+        store.setItem(SETTINGS_KEY, JSON.stringify({
+            version: SETTINGS_VERSION,
+            effects: settings.effects,
+            fps: settings.fps,
+            sensitivity: settings.sensitivity,
+            palette: settings.palette,
+            hud: settings.hud,
+            showFps: settings.showFps === true
+        }));
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 export function saveProfile(profile, storage) {
     const store = storage || (typeof localStorage !== "undefined" ? localStorage : null);
     if (!store || !profile) return false;
@@ -89,6 +143,7 @@ export function saveProfile(profile, storage) {
             lastMap: count(profile.lastMap, 0),
             bestScore: count(profile.bestScore, 0),
             totalKills: count(profile.totalKills, 0),
+            tutorialDone: profile.tutorialDone === true,
             installDismissed: profile.installDismissed === true
         }));
         return true;

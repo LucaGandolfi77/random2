@@ -7,7 +7,7 @@
  */
 
 import {
-    SLUG, STEP, SPLASH_RADIUS, droneCost, MAPS, AMMO, SHIPS, PICKUP_IDS
+    SLUG, STEP, SPLASH_RADIUS, droneCost, MAPS, AMMO, SHIPS, PICKUP_IDS, QUALITY
 } from "./config.js";
 import {
     createState, step, drainEvents, setMove, setFiring, selectTargetAt,
@@ -17,9 +17,13 @@ import {
 import { createRenderer } from "./render.js";
 import { createInput } from "./input.js";
 import { createUI } from "./ui.js";
-import { loadProfile, saveProfile } from "./storage.js";
+import { createQualityController } from "./quality.js";
+import { createAudio } from "./audio.js";
+import { loadProfile, saveProfile, loadSettings, saveSettings } from "./storage.js";
 
 const R2 = typeof window !== "undefined" ? (window.R2 || null) : null;
+const DEBUG = typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("debug");
 
 function noop() {}
 
@@ -58,15 +62,41 @@ const profile = loadProfile();
 let state = createState(profile);
 let phase = "menu";
 let hangarFrom = "menu";
+let settingsFrom = "menu";
 let lastTs = 0;
 let accumulator = 0;
 let dirty = false;
 let saveTimer = 0;
 let deferredPrompt = null;
+let fpsSmoothed = 60;
+let debugTimer = 0;
+let coachStep = 0;
+let currentTier = "high";
 
-let soundOn = R2 && typeof R2.getSettings === "function"
-    ? R2.getSettings().sound !== false
-    : true;
+const settings = loadSettings();
+const globalSettings = R2 && typeof R2.getSettings === "function" ? R2.getSettings() : {};
+let soundOn = globalSettings.sound !== false;
+let musicOn = globalSettings.music !== false;
+let hapticsOn = globalSettings.haptics !== false;
+
+const qualityCtl = createQualityController(settings);
+const audio = createAudio(
+    () => combatIntensity(),
+    () => musicOn
+);
+
+function combatIntensity() {
+    if (!state || state.destroyed) return 0;
+    const p = state.player;
+    let near = 0;
+    for (const e of state.enemies) {
+        if (Math.hypot(e.x - p.x, e.y - p.y) < 640) near += 1;
+    }
+    const threat = Math.min(1, near / 7);
+    const boss = state.enemies.some((e) => e.def.boss) ? 0.25 : 0;
+    const hurt = 1 - p.hp / p.hpMax;
+    return Math.min(1, threat + boss + hurt * 0.35);
+}
 
 if (R2 && typeof R2.markPlayed === "function") R2.markPlayed(SLUG);
 
@@ -82,6 +112,50 @@ function persist() {
     dirty = false;
 }
 
+function allSettings() {
+    return {
+        effects: settings.effects,
+        fps: settings.fps,
+        sensitivity: settings.sensitivity,
+        palette: settings.palette,
+        hud: settings.hud,
+        showFps: settings.showFps,
+        sound: soundOn,
+        music: musicOn,
+        haptics: hapticsOn
+    };
+}
+
+function applySettings() {
+    saveSettings(settings);
+    if (R2 && typeof R2.setSettings === "function") {
+        R2.setSettings({ sound: soundOn, music: musicOn, haptics: hapticsOn });
+    }
+    input.setSensitivity(settings.sensitivity);
+    renderer.setColorblind(settings.palette === "colorblind");
+    document.body.classList.toggle("cb", settings.palette === "colorblind");
+    document.body.classList.toggle("large-hud", settings.hud === "large");
+    audio.setEnabled(musicOn);
+
+    const forced = qualityCtl.setSettings(settings);
+    applyTier(forced);
+    if (!settings.showFps) ui.setDebug("");
+}
+
+function applyTier(tier) {
+    if (tier === currentTier) return;
+    currentTier = tier;
+    renderer.setQuality(tier);
+    if (state) {
+        const fx = (QUALITY[tier] || QUALITY.high).fx;
+        state.fx = Object.assign({}, fx);
+    }
+}
+
+function currentSettings() {
+    return allSettings();
+}
+
 /* ------------------------------------------------------------------ */
 /* Phase transitions                                                   */
 /* ------------------------------------------------------------------ */
@@ -95,6 +169,8 @@ function startGame() {
     ui.hideOverlay();
     input.clearKeys();
     persist();
+    audio.unlock();
+    if (!profile.tutorialDone) beginCoach();
 }
 
 function toMenu() {
@@ -130,6 +206,66 @@ function closeHangar() {
     lastTs = 0;
 }
 
+function openSettings() {
+    settingsFrom = phase;
+    phase = "settings";
+    ui.showSettings(currentSettings());
+}
+
+function closeSettings() {
+    if (phase !== "settings") return;
+    if (settingsFrom === "menu") {
+        phase = "menu";
+        ui.showMenu(profile);
+    } else if (settingsFrom === "paused") {
+        phase = "paused";
+        ui.showPause(profile);
+    } else {
+        phase = settingsFrom || "playing";
+        ui.hideOverlay();
+    }
+    lastTs = 0;
+}
+
+function replayTutorial() {
+    profile.tutorialDone = false;
+    markDirty();
+    persist();
+    closeSettings();
+    beginCoach();
+}
+
+const COACH_STEPS = [
+    { target: "#joystick", text: "Drag the joystick to fly. You can also drag on the left side of the screen." },
+    { target: "#fire-btn", text: "Hold FIRE to shoot. Tap an alien to lock onto it. Weapons unlock outside the station." },
+    { target: "#btn-dock", text: "Bring ore back to the station and press DOCK / SELL for credits and XP." }
+];
+
+function beginCoach() {
+    coachStep = 0;
+    phase = "coach";
+    ui.hideOverlay();
+    ui.showCoach(Object.assign({ index: 0 }, COACH_STEPS[0]), COACH_STEPS.length);
+}
+
+function nextCoach() {
+    coachStep += 1;
+    if (coachStep >= COACH_STEPS.length) {
+        endCoach();
+        return;
+    }
+    ui.showCoach(Object.assign({ index: coachStep }, COACH_STEPS[coachStep]), COACH_STEPS.length);
+}
+
+function endCoach() {
+    ui.hideCoach();
+    profile.tutorialDone = true;
+    markDirty();
+    phase = "playing";
+    lastTs = 0;
+    persist();
+}
+
 function togglePause() {
     if (phase === "playing") {
         phase = "paused";
@@ -162,6 +298,12 @@ const ui = createUI({
     onPlay: startGame,
     onHangar: openHangar,
     onCloseHangar: closeHangar,
+    onSettings: openSettings,
+    onCloseSettings: closeSettings,
+    onReplayTutorial: replayTutorial,
+    onCoachNext: nextCoach,
+    onCoachSkip: endCoach,
+    onSetting: changeSetting,
     onResume: function () { phase = "playing"; lastTs = 0; ui.hideOverlay(); },
     onRestart: toMenu,
     onRespawn: function () {
@@ -234,6 +376,20 @@ function toggleSound() {
     soundOn = !soundOn;
     if (R2 && typeof R2.setSettings === "function") R2.setSettings({ sound: soundOn });
     ui.toast(soundOn ? "Sound on" : "Sound off");
+}
+
+function changeSetting(key, value) {
+    if (key === "effects") settings.effects = value;
+    else if (key === "fps") settings.fps = Number(value) === 30 ? 30 : 60;
+    else if (key === "sensitivity") settings.sensitivity = Number(value) || 1;
+    else if (key === "palette") settings.palette = value === "colorblind" ? "colorblind" : "normal";
+    else if (key === "hud") settings.hud = value === "large" ? "large" : "normal";
+    else if (key === "showFps") settings.showFps = value === "on";
+    else if (key === "sound") soundOn = value === "on";
+    else if (key === "music") musicOn = value === "on";
+    else if (key === "haptics") hapticsOn = value === "on";
+    applySettings();
+    ui.showSettings(currentSettings());
 }
 
 /* ------------------------------------------------------------------ */
@@ -356,9 +512,27 @@ function handleCritStats() {
 /* Loop                                                                */
 /* ------------------------------------------------------------------ */
 
+let lastDrawTs = 0;
+
 function frame(ts) {
-    const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 1 / 60;
+    const rawDt = lastTs ? (ts - lastTs) / 1000 : 1 / 60;
     lastTs = ts;
+
+    // Power-save: keep the 60 Hz simulation but draw at 30 fps.
+    if (settings.fps === 30 && lastDrawTs && ts - lastDrawTs < 32) {
+        requestAnimationFrame(frame);
+        return;
+    }
+    lastDrawTs = ts;
+    const dt = Math.min(0.05, rawDt);
+
+    if (rawDt > 0.001) {
+        const instant = Math.min(120, 1 / rawDt);
+        fpsSmoothed += (instant - fpsSmoothed) * 0.08;
+        const tier = qualityCtl.sample(fpsSmoothed, dt);
+        if (tier !== currentTier) applyTier(tier);
+    }
+    audio.update(dt);
 
     if (phase === "playing") {
         accumulator += dt;
@@ -402,6 +576,20 @@ function frame(ts) {
         renderer.renderMinimap(state);
         ui.update(state, profile);
     }
+
+    debugTimer += dt;
+    if (debugTimer > 0.25) {
+        debugTimer = 0;
+        if (settings.showFps || DEBUG) {
+            ui.setDebug(
+                "FPS  " + fpsSmoothed.toFixed(0) +
+                "\nTIER " + currentTier + (qualityCtl.isForced() ? " (forced)" : "") +
+                "\nPTCL " + (state ? state.particles.length : 0) +
+                "\nBULL " + (state ? state.bullets.length + state.enemyBullets.length : 0) +
+                "\nAUD  " + (audio.isReady() ? "on" : "off")
+            );
+        }
+    }
     requestAnimationFrame(frame);
 }
 
@@ -422,9 +610,11 @@ document.addEventListener("visibilitychange", function () {
             phase = "paused";
             ui.showPause(profile);
         }
+        audio.suspend();
         persist();
     } else {
         lastTs = 0;
+        audio.resume();
     }
 });
 
@@ -462,6 +652,14 @@ if (el("btn-pause")) {
     el("btn-pause").addEventListener("click", togglePause);
 }
 
+function unlockAudioOnce() {
+    audio.unlock();
+    window.removeEventListener("pointerdown", unlockAudioOnce);
+    window.removeEventListener("keydown", unlockAudioOnce);
+}
+window.addEventListener("pointerdown", unlockAudioOnce);
+window.addEventListener("keydown", unlockAudioOnce);
+
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
         navigator.serviceWorker.register("service-worker.js").catch(function () {});
@@ -469,6 +667,7 @@ if ("serviceWorker" in navigator) {
 }
 
 renderer.resize();
+applySettings();
 ui.showMenu(profile);
 requestAnimationFrame(frame);
 
@@ -478,6 +677,8 @@ window.__DEEP_ORBIT__ = {
     getProfile: () => profile,
     getPhase: () => phase,
     getConfig: () => ({ maps: MAPS.length, ammo: AMMO.length, ships: SHIPS.length, pickups: PICKUP_IDS.length }),
+    getSettings: currentSettings,
+    getTier: () => currentTier,
     start: startGame,
     render: () => renderer.render(state, profile, 1 / 60)
 };

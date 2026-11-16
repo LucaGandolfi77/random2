@@ -86,6 +86,19 @@
             <span class="score-line"><b id="hud-score">0</b> PTS · <b id="hud-kills">0</b> KILLS</span>
         </footer>
 
+        <div id="coach" class="coach hidden" role="dialog" aria-modal="true">
+            <div class="coach-card">
+                <span id="coach-target" class="coach-step">1 / 3</span>
+                <p id="coach-text">Drag to fly</p>
+                <div class="panel-actions">
+                    <button class="btn tiny" data-action="coach-skip" type="button">SKIP</button>
+                    <button class="btn tiny primary" data-action="coach-next" type="button">GOT IT</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="debug-hud" class="debug-hud hidden" aria-hidden="true"></div>
+
         <div id="overlay" class="overlay hidden"></div>
 
         <div id="install-prompt" class="install-prompt hidden" role="status">

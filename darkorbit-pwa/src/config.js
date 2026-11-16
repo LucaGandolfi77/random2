@@ -21,6 +21,28 @@ export const GATE_RADIUS = 110;
 export const TARGET_RANGE = 560;
 export const MAX_PARTICLES = 220;
 export const MAX_ENEMY_BULLETS = 260;
+export const SETTINGS_KEY = "darkorbit-settings";
+export const SETTINGS_VERSION = 1;
+
+/* Quality tiers. `auto` picks between high and low from measured FPS. */
+export const QUALITY = {
+    high: {
+        fx: { particles: 220, glow: true, shake: true, layers: true, text: true },
+        dprCap: 2
+    },
+    low: {
+        fx: { particles: 70, glow: false, shake: false, layers: false, text: false },
+        dprCap: 1.25
+    }
+};
+
+/* Colorblind-friendly substitutions (applied when palette = "colorblind"). */
+export const CB_COLORS = {
+    "#ff6b6b": "#4db8ff", "#ff5d73": "#4db8ff", "#ff4d6d": "#4db8ff",
+    "#ff5e7a": "#ffb457", "#ff5ea8": "#ffb457", "#ff7ad9": "#ffb457",
+    "#ff9f43": "#ffd166", "#ff8a5c": "#ffd166", "#ff3b30": "#ffd166",
+    "#ff4d8d": "#4db8ff", "#b07cff": "#7df9ff"
+};
 
 /* Station safe haven. Enemies disengage inside DOCK_RADIUS and keep a wider
    standoff; incoming fire fizzles at the ring boundary. */
@@ -64,6 +86,14 @@ export const PALETTES = {
         star: "#e6ffff", ground: "#08262c", planet: "#14545e"
     }
 };
+
+/* Colorblind variants: danger cues move from red/pink to amber and blue. */
+export const PALETTES_CB = Object.fromEntries(
+    Object.entries(PALETTES).map(([id, p]) => [id, Object.assign({}, p, {
+        hazard: "#ffd166",
+        accent: id === "delta" || id === "gamma" ? "#7df9ff" : p.accent
+    })])
+);
 
 /* ------------------------------------------------------------------ */
 /* Ammunition — light / medium / heavy with escalating cooldowns       */

@@ -7,9 +7,9 @@
  */
 
 import {
-    PALETTES, AMMO, RESOURCES, SHIPS, PICKUPS, MAX_DPR, VIEW_BASE,
-    DOCK_RADIUS, SAFE_STANDOFF, GATE_RADIUS, MAX_DAMAGE_TEXT,
-    MAX_SHOCKWAVES, clamp, lerp
+    PALETTES, PALETTES_CB, CB_COLORS, QUALITY, AMMO, RESOURCES, SHIPS,
+    PICKUPS, VIEW_BASE, DOCK_RADIUS, SAFE_STANDOFF, GATE_RADIUS,
+    MAX_DAMAGE_TEXT, MAX_SHOCKWAVES, clamp, lerp
 } from "./config.js";
 import { stationPos, gatePos, getTarget } from "./sim.js";
 
@@ -31,11 +31,34 @@ export function createRenderer(canvas, minimap) {
     let camInit = false;
     let shake = 0;
     let sweep = 0;
+    let quality = QUALITY.high;
+    let colorblind = false;
+    const gradientCache = new Map();
     const reduced = typeof window !== "undefined" && window.matchMedia &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    function paletteFor(state) {
+        const base = colorblind ? PALETTES_CB : PALETTES;
+        return base[state.map.palette] || base.alpha;
+    }
+
+    function mappedColor(color) {
+        if (!colorblind) return color;
+        return CB_COLORS[color] || color;
+    }
+
+    function setQuality(tier) {
+        quality = QUALITY[tier] || QUALITY.high;
+        resize();
+    }
+
+    function setColorblind(on) {
+        colorblind = !!on;
+        gradientCache.clear();
+    }
+
     function resize() {
-        const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+        const dpr = Math.min(window.devicePixelRatio || 1, quality.dprCap);
         const rect = canvas.getBoundingClientRect();
         const w = Math.max(1, rect.width || canvas.clientWidth || 1);
         const h = Math.max(1, rect.height || canvas.clientHeight || 1);
@@ -91,6 +114,11 @@ export function createRenderer(canvas, minimap) {
     }
 
     function glow(color, blur) {
+        if (!quality.fx.glow) {
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = "transparent";
+            return;
+        }
         ctx.shadowColor = color;
         ctx.shadowBlur = blur;
     }
@@ -278,15 +306,22 @@ export function createRenderer(canvas, minimap) {
             const c = clouds[i];
             if (c.x < vis.left - c.r || c.x > vis.right + c.r ||
                 c.y < vis.top - c.r || c.y > vis.bottom + c.r) continue;
-            const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
-            g.addColorStop(0, palette.nebula);
-            g.addColorStop(1, "rgba(0,0,0,0)");
+            const key = state.map.palette + ":" + i + ":" + (colorblind ? "cb" : "n");
+            let g = gradientCache.get(key);
+            if (!g) {
+                g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
+                g.addColorStop(0, palette.nebula);
+                g.addColorStop(1, "rgba(0,0,0,0)");
+                gradientCache.set(key, g);
+            }
             ctx.fillStyle = g;
             ctx.fillRect(c.x - c.r, c.y - c.r, c.r * 2, c.r * 2);
         }
 
-        drawPlanet(state, palette, vis);
-        drawStarLayer(state, palette, 190, 0.35, 0.28, 0.9, t);
+        if (quality.fx.layers) {
+            drawPlanet(state, palette, vis);
+            drawStarLayer(state, palette, 190, 0.35, 0.28, 0.9, t);
+        }
 
         // Grid.
         const step = 120;
@@ -304,8 +339,10 @@ export function createRenderer(canvas, minimap) {
         ctx.stroke();
 
         // Near starfield (world-anchored) and drifting asteroid field.
-        drawStarLayer(state, palette, 92, 1, 0.68, 1.15, t);
-        drawAsteroids(state, palette, vis, t);
+        if (quality.fx.layers) {
+            drawStarLayer(state, palette, 92, 1, 0.68, 1.15, t);
+            drawAsteroids(state, palette, vis, t);
+        }
 
         // Radiation boundary.
         ctx.strokeStyle = palette.hazard;
@@ -534,8 +571,9 @@ export function createRenderer(canvas, minimap) {
             noGlow();
         }
         for (const b of state.enemyBullets) {
-            glow(b.color, 10);
-            ctx.fillStyle = b.color;
+            const bcolor = mappedColor(b.color);
+            glow(bcolor, 10);
+            ctx.fillStyle = bcolor;
             ctx.beginPath();
             ctx.arc(b.x, b.y, b.radius, 0, TAU);
             ctx.fill();
@@ -550,6 +588,7 @@ export function createRenderer(canvas, minimap) {
 
     function drawEnemies(state, palette, target) {
         for (const e of state.enemies) {
+            const ecolor = mappedColor(e.def.color);
             ctx.save();
             ctx.translate(e.x, e.y);
             ctx.rotate(e.angle);
@@ -557,7 +596,7 @@ export function createRenderer(canvas, minimap) {
             ctx.globalAlpha = alpha;
 
             if (e.def.boss) {
-                ctx.strokeStyle = e.def.color;
+                ctx.strokeStyle = ecolor;
                 ctx.globalAlpha = 0.35 * alpha;
                 ctx.lineWidth = 2 / zoom;
                 ctx.beginPath();
@@ -581,11 +620,11 @@ export function createRenderer(canvas, minimap) {
             const grad = ctx.createLinearGradient(-e.radius, 0, e.radius, 0);
             grad.addColorStop(0, "#05070c");
             grad.addColorStop(0.6, "#11202c");
-            grad.addColorStop(1, flash ? "#ffffff" : e.def.color);
+            grad.addColorStop(1, flash ? "#ffffff" : ecolor);
             ctx.fillStyle = grad;
-            ctx.strokeStyle = flash ? "#ffffff" : e.def.color;
+            ctx.strokeStyle = flash ? "#ffffff" : ecolor;
             ctx.lineWidth = 2 / zoom;
-            glow(e.def.color, e.def.boss ? 20 : 8);
+            glow(ecolor, e.def.boss ? 20 : 8);
             shipPath(e.def.shape, e.radius);
             ctx.fill();
             ctx.stroke();
@@ -596,7 +635,7 @@ export function createRenderer(canvas, minimap) {
             ctx.lineWidth = 1 / zoom;
             shipPath(e.def.shape, e.radius * 0.55);
             ctx.stroke();
-            ctx.fillStyle = e.def.color;
+            ctx.fillStyle = ecolor;
             ctx.globalAlpha = alpha * (0.6 + 0.4 * Math.sin(state.t * 4 + e.id));
             ctx.beginPath();
             ctx.arc(e.radius * 0.16, 0, Math.max(2, e.radius * 0.13), 0, TAU);
@@ -611,10 +650,10 @@ export function createRenderer(canvas, minimap) {
 
             // Weapon charge telegraph.
             if (e.charge > 0) {
-                ctx.strokeStyle = e.def.color;
+                ctx.strokeStyle = ecolor;
                 ctx.globalAlpha = 0.3 + e.charge * 0.7;
                 ctx.lineWidth = (1 + e.charge * 3) / zoom;
-                glow(e.def.color, 10 * e.charge);
+                glow(ecolor, 10 * e.charge);
                 ctx.beginPath();
                 ctx.arc(e.x, e.y, e.radius + 12 + (1 - e.charge) * 8, 0, TAU * e.charge);
                 ctx.stroke();
@@ -651,7 +690,7 @@ export function createRenderer(canvas, minimap) {
                 const y = e.y - e.radius - (e.def.boss ? 30 : 16);
                 ctx.fillStyle = "rgba(0,0,0,0.6)";
                 ctx.fillRect(x, y, w, 4 / zoom);
-                ctx.fillStyle = e.def.boss ? "#ffb457" : "#ff6b6b";
+                ctx.fillStyle = e.def.boss ? "#ffb457" : mappedColor("#ff6b6b");
                 ctx.fillRect(x, y, w * clamp(e.hp / e.hpMax, 0, 1), 4 / zoom);
             }
 
@@ -877,7 +916,7 @@ export function createRenderer(canvas, minimap) {
         const frameDt = dt === undefined ? 1 / 60 : dt;
         cameraFollow(state, frameDt);
         updateEffects(frameDt);
-        const palette = PALETTES[state.map.palette] || PALETTES.alpha;
+        const palette = paletteFor(state);
         const target = getTarget(state);
         const sx = shake ? (Math.random() * 2 - 1) * shake : 0;
         const sy = shake ? (Math.random() * 2 - 1) * shake : 0;
@@ -924,7 +963,7 @@ export function createRenderer(canvas, minimap) {
         if (!mctx) return;
         const w = view.mw || 140;
         const h = view.mh || 140;
-        const palette = PALETTES[state.map.palette] || PALETTES.alpha;
+        const palette = paletteFor(state);
         mctx.clearRect(0, 0, w, h);
         mctx.fillStyle = "rgba(2,6,12,0.86)";
         mctx.fillRect(0, 0, w, h);
@@ -1011,11 +1050,12 @@ export function createRenderer(canvas, minimap) {
     }
 
     function addShake(amount) {
-        if (reduced) return;
+        if (reduced || !quality.fx.shake) return;
         shake = Math.min(22, shake + amount);
     }
 
     function addDamageNumber(x, y, value, color, critical) {
+        if (!quality.fx.text || reduced) return;
         if (damageTexts.length >= MAX_DAMAGE_TEXT) damageTexts.shift();
         damageTexts.push({
             x: x + rand(-6, 6), y: y - 8,
@@ -1029,6 +1069,7 @@ export function createRenderer(canvas, minimap) {
     }
 
     function addShockwave(x, y, color, radius) {
+        if (!quality.fx.text || reduced) return;
         if (shockwaves.length >= MAX_SHOCKWAVES) shockwaves.shift();
         shockwaves.push({ x, y, color: color || "#ffffff", r: 8, max: radius || 90, life: 0.45, maxLife: 0.45 });
     }
@@ -1060,6 +1101,8 @@ export function createRenderer(canvas, minimap) {
         render,
         renderMinimap,
         screenToWorld,
+        setQuality,
+        setColorblind,
         addShake,
         addDamageNumber,
         addShockwave,

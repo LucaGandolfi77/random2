@@ -520,6 +520,76 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .install-prompt p { margin: 0 0 8px; font-size: 11px; }
 .install-actions { display: flex; gap: 8px; justify-content: center; }
 
+/* ---------------- settings ---------------- */
+
+.settings-list { max-height: min(58vh, 440px); overflow: auto; padding-right: 4px; }
+.setting-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 7px 9px; margin-bottom: 5px;
+    background: rgba(9, 24, 38, 0.7);
+    border: 1px solid rgba(92, 225, 230, 0.14);
+    border-radius: 7px;
+}
+.setting-row > span { font-size: 10px; color: #cfe4ef; }
+.segmented { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.segmented .btn { min-width: 46px; min-height: 34px; }
+.segmented .btn.on {
+    background: linear-gradient(180deg, #1a9aa6, #12636e);
+    border-color: var(--cyan);
+    color: #eaffff;
+}
+
+/* ---------------- onboarding ---------------- */
+
+.coach {
+    position: absolute; inset: 0; z-index: 18;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding: 0 14px 96px;
+    background: rgba(1, 5, 10, 0.45);
+    pointer-events: none;
+}
+.coach-card {
+    width: min(100%, 420px);
+    padding: 16px;
+    pointer-events: auto;
+    background: var(--panel-2);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(92, 225, 230, 0.25), var(--shadow);
+}
+.coach-card p { margin: 8px 0 12px; font-size: 12px; line-height: 1.5; }
+.coach-step { font-size: 9px; letter-spacing: 2px; color: var(--accent); }
+.coach-light {
+    position: relative;
+    z-index: 19;
+    box-shadow: 0 0 0 3px var(--accent), 0 0 28px rgba(92, 225, 230, 0.7);
+}
+body.coaching .controls, body.coaching .context-actions { z-index: 21; }
+
+/* ---------------- debug overlay ---------------- */
+
+.debug-hud {
+    position: absolute; left: 8px; top: 132px; z-index: 30;
+    padding: 6px 9px;
+    font-size: 9px; line-height: 1.5; white-space: pre;
+    color: #8affc1;
+    background: rgba(1, 6, 12, 0.85);
+    border: 1px solid rgba(138, 255, 193, 0.35);
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+/* accessibility variants */
+body.cb .track .hp { background: linear-gradient(90deg, #2a6fa8, #4db8ff); }
+body.cb .track .shield { background: linear-gradient(90deg, #8a6f24, #ffd166); }
+body.cb .mini-track .hp { background: #4db8ff; }
+body.cb .target-panel { border-color: rgba(77, 184, 255, 0.6); }
+body.cb .target-panel > span { color: #9fd4ff; }
+body.large-hud .hud-cell b { font-size: 16px; }
+body.large-hud .hud-cell span { font-size: 10px; }
+body.large-hud .bar-row, body.large-hud .bar-row small { font-size: 11px; }
+body.large-hud .phase-label, body.large-hud .footer, body.large-hud .ship-status small { font-size: 11px; }
+
 .noscript { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
 
 /* ---------------- landscape tuning ---------------- */
@@ -544,6 +614,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
     .target-panel { top: 28px; width: 130px; }
     .safe-badge { top: 28px; font-size: 8px; }
     .active-effects { top: 96px; font-size: 8px; }
+    .debug-hud { top: 118px; }
     .controls { padding: 0 10px 6px; }
     .panel { padding: 14px 16px; }
     .hangar-scroll { max-height: 56vh; }

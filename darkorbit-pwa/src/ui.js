@@ -59,7 +59,11 @@ export function createUI(handlers = {}) {
         srStatus: $("sr-status"),
         install: $("install-prompt"),
         installBtn: $("install-btn"),
-        installLater: $("install-later")
+        installLater: $("install-later"),
+        coach: $("coach"),
+        coachText: $("coach-text"),
+        coachTarget: $("coach-target"),
+        debug: $("debug-hud")
     };
 
     const abilityButtons = Array.from(document.querySelectorAll("[data-ability]"));
@@ -81,12 +85,22 @@ export function createUI(handlers = {}) {
             repair: handlers.onRepair,
             sell: handlers.onSell,
             jump: handlers.onJump,
+            settings: handlers.onSettings,
+            "close-settings": handlers.onCloseSettings,
+            "coach-next": handlers.onCoachNext,
+            "coach-skip": handlers.onCoachSkip,
             "buy-drone": handlers.onBuyDrone
         };
         if (map[action]) map[action]();
         else if (action === "buy-upgrade" && handlers.onBuyUpgrade) handlers.onBuyUpgrade(value);
         else if (action === "buy-ship" && handlers.onBuyShip) handlers.onBuyShip(Number(value));
         else if (action === "select-ship" && handlers.onSelectShip) handlers.onSelectShip(Number(value));
+        else if (action === "setting" && handlers.onSetting) {
+            const key = btn.getAttribute("data-key");
+            let next = value;
+            if (value === "toggle") next = undefined;
+            handlers.onSetting(key, next, btn);
+        } else if (action === "replay-tutorial" && handlers.onReplayTutorial) handlers.onReplayTutorial();
     });
 
     function hideOverlay() {
@@ -114,6 +128,7 @@ export function createUI(handlers = {}) {
                 <div class="panel-actions">
                     <button class="btn primary" data-action="play" type="button">▶ FLY</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
                 </div>
                 <p class="panel-hint">Joystick to fly · hold FIRE to shoot · tap an alien to lock · dock to sell</p>
@@ -229,11 +244,97 @@ export function createUI(handlers = {}) {
                 <div class="panel-actions">
                     <button class="btn primary" data-action="resume" type="button">▶ RESUME</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
                     <button class="btn" data-action="restart" type="button">↻ MAIN MENU</button>
                 </div>
                 <p class="panel-hint">P / Esc resume · M mute</p>
             </div>`);
+    }
+
+    function settingRow(label, key, options, current) {
+        const buttons = options.map((o) => {
+            const on = String(o.value) === String(current);
+            return `<button class="btn tiny ${on ? "on" : ""}" data-action="setting" data-key="${key}" data-value="${o.value}" type="button" aria-pressed="${on}">${o.label}</button>`;
+        }).join("");
+        return `<div class="setting-row"><span>${label}</span><div class="segmented">${buttons}</div></div>`;
+    }
+
+    function showSettings(settings) {
+        showOverlay(`
+            <div class="panel panel-wide" role="dialog" aria-modal="true">
+                <p class="kicker">CONFIGURATION</p>
+                <h2>SETTINGS</h2>
+                <div class="settings-list">
+                    ${settingRow("Effects", "effects", [
+                        { value: "auto", label: "AUTO" }, { value: "high", label: "HIGH" }, { value: "low", label: "LOW" }
+                    ], settings.effects)}
+                    ${settingRow("Frame rate", "fps", [
+                        { value: 60, label: "60 FPS" }, { value: 30, label: "30 FPS" }
+                    ], settings.fps)}
+                    ${settingRow("Joystick", "sensitivity", [
+                        { value: 0.7, label: "LOW" }, { value: 1, label: "NORMAL" }, { value: 1.3, label: "HIGH" }
+                    ], settings.sensitivity)}
+                    ${settingRow("Palette", "palette", [
+                        { value: "normal", label: "NORMAL" }, { value: "colorblind", label: "COLORBLIND" }
+                    ], settings.palette)}
+                    ${settingRow("HUD size", "hud", [
+                        { value: "normal", label: "NORMAL" }, { value: "large", label: "LARGE" }
+                    ], settings.hud)}
+                    ${settingRow("Sound", "sound", [
+                        { value: "on", label: "ON" }, { value: "off", label: "OFF" }
+                    ], settings.sound ? "on" : "off")}
+                    ${settingRow("Music", "music", [
+                        { value: "on", label: "ON" }, { value: "off", label: "OFF" }
+                    ], settings.music ? "on" : "off")}
+                    ${settingRow("Haptics", "haptics", [
+                        { value: "on", label: "ON" }, { value: "off", label: "OFF" }
+                    ], settings.haptics ? "on" : "off")}
+                    ${settingRow("FPS counter", "showFps", [
+                        { value: "on", label: "ON" }, { value: "off", label: "OFF" }
+                    ], settings.showFps ? "on" : "off")}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn" data-action="replay-tutorial" type="button">REPLAY TUTORIAL</button>
+                    <button class="btn primary" data-action="close-settings" type="button">◀ BACK</button>
+                </div>
+            </div>`);
+    }
+
+    function showCoach(step, total) {
+        if (!el.coach) return;
+        document.body.classList.add("coaching");
+        el.coach.classList.remove("hidden");
+        el.coach.setAttribute("data-step", String(step));
+        if (el.coachText) el.coachText.textContent = step.text;
+        if (el.coachTarget) el.coachTarget.textContent = (step.index + 1) + " / " + total;
+        document.querySelectorAll(".coach-light").forEach((n) => n.classList.remove("coach-light"));
+        const target = document.querySelector(step.target);
+        if (target) target.classList.add("coach-light");
+    }
+
+    if (el.coach) {
+        el.coach.addEventListener("click", (event) => {
+            const btn = event.target.closest("[data-action]");
+            if (!btn) return;
+            event.preventDefault();
+            const action = btn.getAttribute("data-action");
+            if (action === "coach-next" && handlers.onCoachNext) handlers.onCoachNext();
+            if (action === "coach-skip" && handlers.onCoachSkip) handlers.onCoachSkip();
+        });
+    }
+
+    function hideCoach() {
+        document.body.classList.remove("coaching");
+        if (el.coach) el.coach.classList.add("hidden");
+        document.querySelectorAll(".coach-light").forEach((n) => n.classList.remove("coach-light"));
+    }
+
+    function setDebug(text) {
+        if (el.debug) {
+            el.debug.textContent = text;
+            el.debug.classList.toggle("hidden", !text);
+        }
     }
 
     function showDestroyed(state, profile) {
@@ -360,6 +461,10 @@ export function createUI(handlers = {}) {
         showMenu,
         showHangar,
         refreshHangar,
+        showSettings,
+        showCoach,
+        hideCoach,
+        setDebug,
         showPause,
         showDestroyed,
         hideOverlay,
