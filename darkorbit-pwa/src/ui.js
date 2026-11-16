@@ -50,6 +50,9 @@ export function createUI(handlers = {}) {
         targetShield: $("target-shield-fill"),
         targetHp: $("target-hp-fill"),
         phase: $("phase-label"),
+        safeBadge: $("safe-badge"),
+        effects: $("active-effects"),
+        fireBtn: $("fire-btn"),
         dockBtn: $("btn-dock"),
         jumpBtn: $("btn-jump"),
         hangarBtn: $("btn-hangar"),
@@ -137,6 +140,7 @@ export function createUI(handlers = {}) {
                     <span>SPD ${ship.speed}</span><span>HULL ${fmt(ship.hp)}</span>
                     <span>SHD ${fmt(ship.shield)}</span><span>CARGO ${fmt(ship.cargo)}</span>
                 </div>
+                ${ship.perkText ? `<p class="ship-perk">${ship.perkText}</p>` : ""}
                 ${action}
             </div>`;
     }
@@ -312,9 +316,23 @@ export function createUI(handlers = {}) {
             el.targetPanel.classList.add("hidden");
         }
 
+        // Safe haven feedback.
+        if (el.safeBadge) el.safeBadge.classList.toggle("hidden", !state.docked);
+        if (el.fireBtn) el.fireBtn.classList.toggle("locked", !!state.docked);
+
+        // Temporary effects.
+        if (el.effects) {
+            const chips = [];
+            if (state.magnetTimer > 0) chips.push("◎ MAGNET " + Math.ceil(state.magnetTimer) + "s");
+            if (state.overdriveTimer > 0) chips.push("» OVERDRIVE " + Math.ceil(state.overdriveTimer) + "s");
+            const text = chips.join("  ·  ");
+            setText(el.effects, text);
+            el.effects.classList.toggle("hidden", !chips.length);
+        }
+
         // Context actions.
         if (state.docked) {
-            setText(el.phase, "DOCKED · E SELL");
+            setText(el.phase, "SAFE ZONE · E SELL");
             el.dockBtn.classList.remove("hidden");
         } else {
             el.dockBtn.classList.add("hidden");

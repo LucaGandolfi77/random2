@@ -8,8 +8,10 @@
 
 import {
     AMMO, MAPS, ENEMY_BY_ID, SHIPS, RESOURCES, RESOURCE_IDS, BOX_TYPES,
-    UPGRADES, UPGRADE_BY_ID, ABILITIES, ABILITY_BY_ID,
-    PLAYER_RADIUS, PICKUP_RADIUS, DOCK_RADIUS, GATE_RADIUS, TARGET_RANGE,
+    UPGRADES, UPGRADE_BY_ID, ABILITIES, ABILITY_BY_ID, PICKUPS, PICKUP_IDS,
+    PLAYER_RADIUS, PICKUP_RADIUS, DOCK_RADIUS, SAFE_STANDOFF, GATE_RADIUS,
+    TARGET_RANGE, SPLASH_RADIUS, DOT_DURATION, MAGNET_RADIUS,
+    OVERDRIVE_FIRE_MULT, DOCKED_SHIELD_REGEN_MULT,
     MAX_PARTICLES, MAX_ENEMY_BULLETS, DRONE_DAMAGE, DRONE_FIRE_CD,
     xpForLevel, clamp, rand, randInt, pick
 } from "./config.js";
@@ -25,6 +27,7 @@ export function deriveStats(profile) {
     const u = profile.upgrades || {};
     const level = Math.max(1, profile.level | 0);
 
+    const perks = ship.perks || {};
     return {
         ship,
         hpMax: Math.round(ship.hp + (u.hull | 0) * 480 + (level - 1) * 42),
@@ -32,7 +35,12 @@ export function deriveStats(profile) {
         speed: ship.speed + (u.generator | 0) * 13,
         cargoMax: ship.cargo + (u.cargo | 0) * 260,
         damageMult: 1 + (u.laser | 0) * 0.12 + (level - 1) * 0.025,
-        shieldRegen: 8 + (u.generator | 0) * 2.4
+        shieldRegen: (8 + (u.generator | 0) * 2.4) * (1 + (u.regen | 0) * 0.45),
+        critChance: (u.critical | 0) * 0.04,
+        pickupRadius: PICKUP_RADIUS + (u.magnet | 0) * 28,
+        evasion: perks.evasion || 0,
+        rocketMult: perks.rocketDamage || 1,
+        droneMult: perks.droneDamage || 1
     };
 }
 
@@ -45,6 +53,11 @@ export function refreshStats(state, profile, refill) {
     p.cargoMax = stats.cargoMax;
     p.damageMult = stats.damageMult;
     p.shieldRegen = stats.shieldRegen;
+    p.critChance = stats.critChance;
+    p.pickupRadius = stats.pickupRadius;
+    p.evasion = stats.evasion;
+    p.rocketMult = stats.rocketMult;
+    p.droneMult = stats.droneMult;
     p.ship = stats.ship;
     if (refill) {
         p.hp = stats.hpMax;
@@ -132,6 +145,9 @@ export function createState(profile, options = {}) {
             shield: stats.shieldMax, shieldMax: stats.shieldMax,
             speed: stats.speed, cargoMax: stats.cargoMax,
             damageMult: stats.damageMult, shieldRegen: stats.shieldRegen,
+            critChance: stats.critChance, pickupRadius: stats.pickupRadius,
+            evasion: stats.evasion, rocketMult: stats.rocketMult,
+            droneMult: stats.droneMult,
             ship: stats.ship,
             firing: false,
             targetId: null,
@@ -150,10 +166,15 @@ export function createState(profile, options = {}) {
         enemies: [],
         loot: [],
         boxes: [],
+        pickups: [],
         bullets: [],
         enemyBullets: [],
         particles: [],
         drones: [],
+        magnetTimer: 0,
+        overdriveTimer: 0,
+        safeNotice: 0,
+        wasDocked: true,
         cargo: emptyCargo(),
         cargoUsed: 0,
         kills: 0,
@@ -196,6 +217,7 @@ function spawnBoss(state, map, defId) {
     const boss = makeEnemy(state, map, defId);
     boss.x = state.world.x / 2 + 420;
     boss.y = state.world.y - 380;
+    anchorEnemy(boss);
     state.enemies.push(boss);
     state.bossSpawned = true;
     emit(state, "message", { text: "WARNING: " + boss.def.name + " detected" });
@@ -219,8 +241,20 @@ function makeEnemy(state, map, defId) {
         hitFlash: 0,
         orbitDir: Math.random() < 0.5 ? -1 : 1,
         wander: rand(0, TAU),
+        homeX: 0, homeY: 0,
+        cloakCd: rand(3, 7),
+        cloaked: false,
+        cloakAlpha: 1,
+        dotTime: 0,
+        dotDps: 0,
+        charge: 0,
         dead: false
     };
+}
+
+function anchorEnemy(e) {
+    e.homeX = e.x;
+    e.homeY = e.y;
 }
 
 export function spawnEnemy(state, map, defId) {
@@ -230,6 +264,7 @@ export function spawnEnemy(state, map, defId) {
     const dist = rand(720, 1180);
     e.x = clamp(p.x + Math.cos(angle) * dist, 70, state.world.x - 70);
     e.y = clamp(p.y + Math.sin(angle) * dist, 70, state.world.y - 70);
+    anchorEnemy(e);
     state.enemies.push(e);
     return e;
 }
@@ -345,8 +380,13 @@ function gainXp(state, profile, amount) {
     }
 }
 
-function damageEnemy(state, enemy, dmg, profile) {
-    if (enemy.dead) return;
+function damageEnemy(state, enemy, dmg, profile, allowCrit) {
+    if (enemy.dead) return 0;
+    let crit = false;
+    if (allowCrit && state.player.critChance > 0 && Math.random() < state.player.critChance) {
+        dmg *= 2;
+        crit = true;
+    }
     let rest = dmg;
     if (enemy.shield > 0) {
         const absorbed = Math.min(enemy.shield, rest);
@@ -356,7 +396,9 @@ function damageEnemy(state, enemy, dmg, profile) {
     }
     enemy.hp -= rest;
     enemy.hitFlash = 0.14;
+    if (crit) emit(state, "crit", { x: enemy.x, y: enemy.y, dmg: Math.round(dmg) });
     if (enemy.hp <= 0) killEnemy(state, enemy, profile);
+    return dmg;
 }
 
 function killEnemy(state, enemy, profile) {
@@ -381,9 +423,12 @@ function killEnemy(state, enemy, profile) {
         });
     }
 
-    // Chance to drop a box.
+    // Chance to drop a box or a temporary field pickup.
     if (Math.random() < 0.05 + tier * 0.025 || def.boss) {
         spawnBox(state, def.boss ? "gold" : null);
+    }
+    if (Math.random() < 0.06 + tier * 0.015 || def.boss) {
+        spawnPickup(state, pick(PICKUP_IDS), enemy.x + rand(-18, 18), enemy.y + rand(-18, 18));
     }
 
     const credits = randInt(def.credits[0], def.credits[1]);
@@ -415,7 +460,7 @@ function damagePlayer(state, dmg) {
     }
     p.hp -= rest;
     p.hurtFlash = 0.3;
-    emit(state, "hurt", { x: p.x, y: p.y });
+    emit(state, "hurt", { x: p.x, y: p.y, dmg: dmg });
 
     if (p.hp <= 0) {
         p.hp = 0;
@@ -479,6 +524,7 @@ function openBox(state, box, profile) {
 
     const p = state.player;
     if (def.shield) p.shield = Math.min(p.shieldMax, p.shield + p.shieldMax * def.shield);
+    if (def.pickup) spawnPickup(state, pick(PICKUP_IDS), box.x, box.y);
 
     burst(state, box.x, box.y, def.color, 16, 240, 5);
     emit(state, "box", { x: box.x, y: box.y, id: def.id, name: def.name, credits, urium });
@@ -562,13 +608,17 @@ export function jumpGate(state, profile) {
     state.enemies = [];
     state.loot = [];
     state.boxes = [];
+    state.pickups = [];
     state.bullets = [];
     state.enemyBullets = [];
     state.drones.forEach((d) => { d.x = start.x; d.y = start.y; });
     state.spawnTimer = 1;
     state.boxTimer = 9;
+    state.magnetTimer = 0;
+    state.overdriveTimer = 0;
     state.bossSpawned = false;
     state.docked = true;
+    state.wasDocked = true;
     state.atGate = false;
     state.cargo = emptyCargo();
     state.cargoUsed = 0;
@@ -591,7 +641,11 @@ export function respawn(state, profile) {
     });
     state.bullets = [];
     state.enemyBullets = [];
+    state.pickups = [];
+    state.magnetTimer = 0;
+    state.overdriveTimer = 0;
     state.docked = true;
+    state.wasDocked = true;
     state.enemies = state.enemies.filter((e) => distance(e, start) > 620);
     refreshDrones(state, profile);
     emit(state, "message", { text: "Respawned at station — cargo lost" });
@@ -601,22 +655,26 @@ export function respawn(state, profile) {
 /* Projectiles                                                         */
 /* ------------------------------------------------------------------ */
 
-function firePlayerBullet(state, target, ammo, fromDrone) {
+function firePlayerBullet(state, target, ammo, fromDrone, rocketMult) {
     const p = state.player;
     const angle = Math.atan2(target.y - p.y, target.x - p.x);
     const speed = ammo.speed;
+    const mult = ammo.splash ? (rocketMult || 1) : 1;
     state.bullets.push({
         x: p.x + Math.cos(angle) * 22,
         y: p.y + Math.sin(angle) * 22,
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         speed,
-        dmg: ammo.dmg * p.damageMult * (fromDrone ? 0.55 : 1),
+        dmg: ammo.dmg * p.damageMult * mult * (fromDrone ? 0.55 : 1),
         color: ammo.color,
         radius: fromDrone ? 2.5 : ammo.radius,
         life: 1.35,
         targetId: target.id,
-        drone: !!fromDrone
+        drone: !!fromDrone,
+        splash: !!ammo.splash,
+        dot: !!ammo.dot,
+        ammoId: ammo.id
     });
 }
 
@@ -661,6 +719,16 @@ export function step(state, profile, input, dt) {
     const p = state.player;
     const map = state.map;
 
+    // Zone presence is computed FIRST so enemy AI sees the current safe zone.
+    const station = stationPos(state);
+    const gate = gatePos(state);
+    state.docked = distance(p, station) < DOCK_RADIUS;
+    state.atGate = map.gateTo >= 0 && distance(p, gate) < GATE_RADIUS;
+    if (state.docked !== state.wasDocked) {
+        state.wasDocked = state.docked;
+        emit(state, state.docked ? "safeenter" : "safeleave", {});
+    }
+
     // Cooldowns & transient effects.
     for (let i = 0; i < p.ammoCd.length; i++) p.ammoCd[i] = Math.max(0, p.ammoCd[i] - dt);
     for (const id of Object.keys(p.abilityCd)) p.abilityCd[id] = Math.max(0, p.abilityCd[id] - dt);
@@ -670,6 +738,9 @@ export function step(state, profile, input, dt) {
     p.hurtFlash = Math.max(0, p.hurtFlash - dt);
     p.contactCd = Math.max(0, p.contactCd - dt);
     p.muzzle = Math.max(0, p.muzzle - dt);
+    state.magnetTimer = Math.max(0, state.magnetTimer - dt);
+    state.overdriveTimer = Math.max(0, state.overdriveTimer - dt);
+    state.safeNotice = Math.max(0, state.safeNotice - dt);
 
     // Movement.
     let mx = input && input.move ? input.move.x : 0;
@@ -683,12 +754,14 @@ export function step(state, profile, input, dt) {
     p.y = clamp(p.y + p.vy * dt, 30, state.world.y - 30);
     if (mag > 0.05) p.angle = Math.atan2(my, mx);
 
-    // Shield regeneration after a short lull in damage.
-    if (state.t - p.lastHit > 3.5 && p.shield < p.shieldMax) {
-        p.shield = Math.min(p.shieldMax, p.shield + p.shieldRegen * dt);
+    // Docked shields regenerate immediately and much faster (safe haven).
+    const regenMult = state.docked ? DOCKED_SHIELD_REGEN_MULT : 1;
+    if ((state.docked || state.t - p.lastHit > 3.5) && p.shield < p.shieldMax) {
+        p.shield = Math.min(p.shieldMax, p.shield + p.shieldRegen * regenMult * dt);
     }
 
     // Firing: keep a valid target and fire the selected ammo when ready.
+    // Weapons are locked inside the station so it cannot be used as a free kill zone.
     const ammo = AMMO[p.ammo];
     let target = getTarget(state);
     if (target && (distance(p, target) > TARGET_RANGE * 1.15)) {
@@ -699,19 +772,24 @@ export function step(state, profile, input, dt) {
         target = nearestEnemy(state, p.x, p.y, TARGET_RANGE);
         if (target) p.targetId = target.id;
     }
-    if (input && input.firing && p.ammoCd[p.ammo] <= 0 && target) {
-        firePlayerBullet(state, target, ammo, false);
-        p.ammoCd[p.ammo] = ammo.cd;
+    if (input && input.firing && state.docked && state.safeNotice <= 0) {
+        state.safeNotice = 3;
+        emit(state, "message", { text: "Safe zone — weapons locked" });
+    }
+    if (input && input.firing && !state.docked && p.ammoCd[p.ammo] <= 0 && target) {
+        firePlayerBullet(state, target, ammo, false, p.rocketMult);
+        p.ammoCd[p.ammo] = ammo.cd * (state.overdriveTimer > 0 ? OVERDRIVE_FIRE_MULT : 1);
         p.muzzle = 0.08;
         emit(state, "shoot", { ammo: ammo.id });
     }
 
-    updateEnemies(state, dt);
+    updateEnemies(state, dt, profile);
     updateBullets(state, dt, profile);
     updateEnemyBullets(state, dt);
-    updateDrones(state, dt, profile);
+    updateDrones(state, dt, state.docked ? null : getTarget(state));
     updateLoot(state, dt, profile);
     updateBoxes(state, dt, profile);
+    updatePickups(state, dt, profile);
     updateParticles(state, dt);
 
     // Spawns.
@@ -726,20 +804,17 @@ export function step(state, profile, input, dt) {
         state.boxTimer = rand(12, 21);
     }
 
-    // Zone presence.
-    const station = stationPos(state);
-    const gate = gatePos(state);
-    state.docked = distance(p, station) < DOCK_RADIUS;
-    state.atGate = map.gateTo >= 0 && distance(p, gate) < GATE_RADIUS;
-
     if (state.cargoUsed >= p.cargoMax && !state.lowCargoNotified) {
         state.lowCargoNotified = true;
         emit(state, "message", { text: "Cargo full — return to the station to sell" });
     }
 }
 
-function updateEnemies(state, dt) {
+function updateEnemies(state, dt, profile) {
     const p = state.player;
+    const station = stationPos(state);
+    const safe = state.docked;
+
     for (const e of state.enemies) {
         if (e.dead) continue;
         e.fireCd -= dt;
@@ -747,10 +822,59 @@ function updateEnemies(state, dt) {
         e.hitFlash = Math.max(0, e.hitFlash - dt);
         e.wander += dt * 0.7;
 
+        // Phase Phantom cloak cycle.
+        if (e.def.cloak) {
+            e.cloakCd -= dt;
+            if (e.cloakCd <= 0) {
+                e.cloaked = !e.cloaked;
+                e.cloakCd = e.cloaked ? rand(2.6, 4.2) : rand(3.5, 6);
+                emit(state, "cloak", { x: e.x, y: e.y, cloaked: e.cloaked });
+            }
+        }
+        const targetAlpha = e.cloaked ? 0.32 : 1;
+        e.cloakAlpha += (targetAlpha - e.cloakAlpha) * Math.min(1, dt * 6);
+
+        // Infection damage-over-time.
+        if (e.dotTime > 0) {
+            e.dotTime -= dt;
+            let rest = e.dotDps * dt;
+            if (e.shield > 0) {
+                const absorbed = Math.min(e.shield, rest);
+                e.shield -= absorbed;
+                rest -= absorbed;
+            }
+            e.hp -= rest;
+            if (e.hp <= 0) {
+                killEnemy(state, e, profile);
+                continue;
+            }
+        }
+
         const d = distance(e, p);
         const preferred = e.def.boss ? 320 : 215;
 
-        if (d < 1350) {
+        if (safe) {
+            // SAFE HAVEN: ignore the pilot completely. Drift around a home
+            // point and give the station ring a wide berth.
+            const ds = distance(e, station);
+            let angle;
+            if (ds < SAFE_STANDOFF) {
+                angle = ds > 12
+                    ? Math.atan2(e.y - station.y, e.x - station.x)
+                    : e.wander;
+            } else {
+                const hx = e.homeX - e.x;
+                const hy = e.homeY - e.y;
+                angle = Math.hypot(hx, hy) > 170
+                    ? Math.atan2(hy, hx)
+                    : e.wander + (Math.PI / 2) * e.orbitDir;
+            }
+            e.angle = angle;
+            const es = e.def.speed * 0.55;
+            e.x += Math.cos(angle) * es * dt;
+            e.y += Math.sin(angle) * es * dt;
+            e.charge = 0;
+        } else if (d < 1350) {
             let angle;
             if (d > preferred) {
                 angle = Math.atan2(p.y - e.y, p.x - e.x);
@@ -762,22 +886,30 @@ function updateEnemies(state, dt) {
             const wobble = Math.sin(e.wander) * 0.28;
             angle += wobble;
             e.angle = angle;
-            const es = e.def.speed;
+            const es = e.def.speed * (e.cloaked ? 1.1 : 1);
             e.x += Math.cos(angle) * es * dt;
             e.y += Math.sin(angle) * es * dt;
 
+            e.charge = (d < e.def.range && e.fireCd > 0 && e.fireCd < 0.45)
+                ? 1 - e.fireCd / 0.45 : 0;
+
             if (e.fireCd <= 0 && d < e.def.range) {
                 fireEnemyBullet(state, e);
-                e.fireCd = e.def.fireCd * rand(0.85, 1.2);
+                e.fireCd = e.def.fireCd * (e.cloaked ? 1.7 : 1) * rand(0.85, 1.2);
             }
             if (d < p.radius + e.radius + 2 && e.contactCd <= 0) {
-                damagePlayer(state, e.def.damage * state.map.dmgMul * 0.7);
+                if (Math.random() >= p.evasion) {
+                    damagePlayer(state, e.def.damage * state.map.dmgMul * 0.7);
+                } else {
+                    emit(state, "evade", { x: p.x, y: p.y });
+                }
                 e.contactCd = 1.1;
             }
         } else {
             e.angle = e.wander;
             e.x += Math.cos(e.wander) * e.def.speed * 0.3 * dt;
             e.y += Math.sin(e.wander) * e.def.speed * 0.3 * dt;
+            e.charge = 0;
         }
 
         e.x = clamp(e.x, 24, state.world.x - 24);
@@ -797,7 +929,8 @@ function updateBullets(state, dt, profile) {
         b.life -= dt;
         if (b.life <= 0) continue;
 
-        // Light homing keeps fast mobile play satisfying.
+        // Light homing keeps fast mobile play satisfying; cloaked/evasive
+        // targets are harder for the guidance to track.
         if (b.targetId) {
             const target = getEnemy(state, b.targetId);
             if (target) {
@@ -806,7 +939,8 @@ function updateBullets(state, dt, profile) {
                 let diff = desired - current;
                 while (diff > Math.PI) diff -= TAU;
                 while (diff < -Math.PI) diff += TAU;
-                const turn = clamp(diff, -5.5 * dt, 5.5 * dt);
+                const tracking = target.cloaked ? 1.6 : 5.5;
+                const turn = clamp(diff, -tracking * dt, tracking * dt);
                 const angle = current + turn;
                 b.vx = Math.cos(angle) * b.speed;
                 b.vy = Math.sin(angle) * b.speed;
@@ -820,9 +954,29 @@ function updateBullets(state, dt, profile) {
         for (const e of state.enemies) {
             if (e.dead) continue;
             if (distance(b, e) < e.radius + b.radius + 2) {
-                damageEnemy(state, e, b.dmg, profile);
+                if (e.def.evade && Math.random() < e.def.evade) {
+                    emit(state, "evade", { x: e.x, y: e.y });
+                    hit = true;
+                    break;
+                }
+                const dealt = damageEnemy(state, e, b.dmg, profile, !b.drone);
                 burst(state, b.x, b.y, b.color, b.drone ? 2 : 4, 120, 2.5);
-                emit(state, "hit", { x: b.x, y: b.y });
+                emit(state, "hit", { x: b.x, y: b.y, dmg: Math.round(dealt), color: b.color });
+
+                if (b.splash) {
+                    emit(state, "splash", { x: b.x, y: b.y, color: b.color });
+                    for (const other of state.enemies) {
+                        if (other === e || other.dead) continue;
+                        if (distance(b, other) < SPLASH_RADIUS + other.radius) {
+                            damageEnemy(state, other, b.dmg * 0.6, profile, false);
+                        }
+                    }
+                }
+                if (b.dot && !e.dead) {
+                    e.dotTime = DOT_DURATION;
+                    e.dotDps = b.dmg * 0.16;
+                    emit(state, "infect", { x: e.x, y: e.y });
+                }
                 hit = true;
                 break;
             }
@@ -834,14 +988,27 @@ function updateBullets(state, dt, profile) {
 
 function updateEnemyBullets(state, dt) {
     const p = state.player;
+    const station = stationPos(state);
     const kept = [];
     for (const b of state.enemyBullets) {
         b.life -= dt;
         if (b.life <= 0) continue;
         b.x += b.vx * dt;
         b.y += b.vy * dt;
+
+        // Hostile fire dissipates against the station's shield bubble.
+        if (distance(b, station) < DOCK_RADIUS) {
+            burst(state, b.x, b.y, "#8affc1", 5, 90, 2.5);
+            emit(state, "bulletblock", { x: b.x, y: b.y });
+            continue;
+        }
+
         if (distance(b, p) < p.radius + b.radius) {
-            damagePlayer(state, b.dmg);
+            if (state.docked || Math.random() < p.evasion) {
+                emit(state, "evade", { x: p.x, y: p.y });
+            } else {
+                damagePlayer(state, b.dmg);
+            }
             continue;
         }
         kept.push(b);
@@ -849,9 +1016,9 @@ function updateEnemyBullets(state, dt) {
     state.enemyBullets = kept;
 }
 
-function updateDrones(state, dt, profile) {
+function updateDrones(state, dt, lockedTarget) {
     const p = state.player;
-    const ammo = AMMO[Math.min(2, p.ammo + 1)];
+    const ammo = AMMO[Math.min(AMMO.length - 1, p.ammo + 1)];
     for (const d of state.drones) {
         d.orbit += dt * 1.5;
         const radius = 60 + (d.id % 3) * 9;
@@ -859,8 +1026,10 @@ function updateDrones(state, dt, profile) {
         d.y = p.y + Math.sin(d.orbit) * radius;
         d.angle = d.orbit + Math.PI / 2;
 
-        let target = getTarget(state);
-        if (!target || distance(target, d) > 480) {
+        // Drones stand down in the safe haven along with the pilot.
+        let target = lockedTarget === undefined ? getTarget(state) : lockedTarget;
+        if (target && distance(target, d) > 480) target = null;
+        if (!target && lockedTarget !== null) {
             target = nearestEnemy(state, d.x, d.y, 420);
         }
         if (target) {
@@ -883,7 +1052,7 @@ function firePlayerBulletFrom(d, target, ammo, state) {
         vx: Math.cos(angle) * ammo.speed,
         vy: Math.sin(angle) * ammo.speed,
         speed: ammo.speed,
-        dmg: DRONE_DAMAGE * p.damageMult,
+        dmg: DRONE_DAMAGE * p.damageMult * p.droneMult,
         color: "#b8f7ff",
         radius: 2.5,
         life: 1.1,
@@ -900,11 +1069,18 @@ function updateLoot(state, dt, profile) {
         if (item.life <= 0) continue;
         item.vx *= 0.96;
         item.vy *= 0.96;
+
+        const d = distance(item, p);
+        if (state.magnetTimer > 0 && d < MAGNET_RADIUS && d > 1) {
+            const pull = 420 * (1 - d / MAGNET_RADIUS) + 90;
+            item.vx += ((p.x - item.x) / d) * pull * dt;
+            item.vy += ((p.y - item.y) / d) * pull * dt;
+        }
         item.x += item.vx * dt;
         item.y += item.vy * dt;
         item.spin += dt * 2;
 
-        if (distance(item, p) < PICKUP_RADIUS) {
+        if (distance(item, p) < p.pickupRadius) {
             const space = p.cargoMax - state.cargoUsed;
             if (space > 0) {
                 const added = Math.min(space, item.amount);
@@ -930,13 +1106,62 @@ function updateBoxes(state, dt, profile) {
         box.x = clamp(box.x + box.vx * dt, 40, state.world.x - 40);
         box.y = clamp(box.y + box.vy * dt, 40, state.world.y - 40);
         box.spin += dt * 1.2;
-        if (distance(box, p) < PICKUP_RADIUS + 8) {
+        if (distance(box, p) < p.pickupRadius + 8) {
             openBox(state, box, profile);
             continue;
         }
         kept.push(box);
     }
     state.boxes = kept;
+}
+
+export function spawnPickup(state, kind, x, y) {
+    const def = PICKUPS[kind];
+    if (!def) return null;
+    if (state.pickups.length >= 10) state.pickups.shift();
+    const pickup = {
+        id: state.nextId++,
+        kind,
+        def,
+        x: x === undefined ? state.player.x + rand(-120, 120) : x,
+        y: y === undefined ? state.player.y + rand(-120, 120) : y,
+        vx: rand(-20, 20), vy: rand(-20, 20),
+        life: 26,
+        spin: rand(0, TAU)
+    };
+    state.pickups.push(pickup);
+    return pickup;
+}
+
+function updatePickups(state, dt, profile) {
+    const p = state.player;
+    const kept = [];
+    for (const item of state.pickups) {
+        item.life -= dt;
+        if (item.life <= 0) continue;
+        item.vx *= 0.95;
+        item.vy *= 0.95;
+        item.x += item.vx * dt;
+        item.y += item.vy * dt;
+        item.spin += dt * 2.4;
+
+        if (distance(item, p) < p.pickupRadius + 10) {
+            const def = item.def;
+            if (item.kind === "repair") {
+                p.hp = Math.min(p.hpMax, p.hp + p.hpMax * 0.25);
+            } else if (item.kind === "magnet") {
+                state.magnetTimer = Math.max(state.magnetTimer, def.duration);
+            } else if (item.kind === "overdrive") {
+                state.overdriveTimer = Math.max(state.overdriveTimer, def.duration);
+            }
+            burst(state, item.x, item.y, def.color, 12, 150, 4);
+            emit(state, "pickup-effect", { kind: item.kind, name: def.name });
+            emit(state, "message", { text: def.name + " collected" });
+            continue;
+        }
+        kept.push(item);
+    }
+    state.pickups = kept;
 }
 
 function updateParticles(state, dt) {

@@ -32,18 +32,28 @@ and uses haptics + WebAudio through the shared `R2` arcade library.
 
 ## Game loop
 
+- **Station safe haven.** Inside the station ring enemies stop chasing, firing
+  and ramming, steer back outside a wider standoff radius, and hostile bullets
+  fizzle at the boundary. Shields recharge 6× faster; weapons are locked so the
+  station can't be abused as a free kill zone.
 - **Shields first, hull second.** Lasers strip the shield before damaging hull;
-  shields regenerate after a lull in combat.
-- **Ammo with trade-offs.** X4 (fast, light), X6 (medium) and X7 (heavy, slow)
-  with escalating cooldowns and light homing.
-- **Enemies & bosses.** Swarm drones, scouts, sentinels, raiders and two bosses,
-  with chase/strafe AI and spread-fire attacks.
-- **Loot & economy.** Kills drop ore crates; boxes drop credits, urium and
-  shield repairs. Cargo is limited — fly into the station to sell it.
-- **Progression.** XP and levels, four ships, five upgrade tracks, up to four
-  combat drones, and three active abilities.
-- **Sectors.** Alpha → Beta → Gamma → Delta, gated by level, each with its own
-  palette, enemies, hazard level and loot table.
+  shields regenerate after a lull in combat (immediately while docked).
+- **Five ammo types with real trade-offs.** X4/X6/X7 escalation, plus a PLT
+  rocket with splash damage and a PIB infection round that deals damage over
+  time. Five-way ammo selector; light homing on every shot.
+- **Enemies & bosses.** Swarm drones, scouts, sentinels, raiders, evasive Nebula
+  Wisps, armoured Siege Crawlers, cloaking Phase Phantoms and three bosses
+  (Leviathan, Star Devourer, Void Obelisk), with chase/strafe AI, charge
+  telegraphs and spread fire.
+- **Loot & economy.** Kills drop ore crates, boxes and field pickups (Repair
+  Kit, Ore Magnet, Overdrive). Cargo is limited — fly into the station to sell.
+- **Progression.** XP and levels, six ships (two with unique perks), eight
+  upgrade tracks, up to four combat drones and three active abilities.
+- **Sectors.** Alpha → Beta → Gamma → Delta → Epsilon, gated by level, each with
+  its own palette, enemies, hazard level and loot table (including Phantomite).
+- **Visuals.** Parallax stars, drifting asteroids, distant planets, layered glow,
+  hull plating, shield dome, shockwaves, floating damage numbers, screen shake
+  and an animated radar sweep — all procedural, with reduced-motion support.
 - **Permadeath-lite.** Destruction loses carried cargo but keeps your ship,
   upgrades and progress; respawn at the station.
 

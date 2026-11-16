@@ -6,7 +6,9 @@
  * destroyed are explicit phases so overlays can never become unreachable.
  */
 
-import { SLUG, STEP, droneCost } from "./config.js";
+import {
+    SLUG, STEP, SPLASH_RADIUS, droneCost, MAPS, AMMO, SHIPS, PICKUP_IDS
+} from "./config.js";
 import {
     createState, step, drainEvents, setMove, setFiring, selectTargetAt,
     cycleAmmo, useAbility, refreshStats, refreshDrones, dock,
@@ -35,7 +37,12 @@ const Sound = R2 && typeof R2.makeSound === "function"
         destroyed: [90, 0.6, "sawtooth"],
         dock: [660, 0.2, "sine"],
         jump: [420, 0.3, "sine"],
-        enemyshoot: [180, 0.05, "square"]
+        enemyshoot: [180, 0.05, "square"],
+        splash: [140, 0.16, "sawtooth"],
+        crit: [1240, 0.1, "square"],
+        block: [720, 0.07, "sine"],
+        effect: [980, 0.22, "triangle"],
+        cloak: [300, 0.14, "sine"]
     })
     : new Proxy({}, { get: () => noop });
 
@@ -280,18 +287,43 @@ function handleEvents(events) {
     for (const e of events) {
         switch (e.type) {
             case "shoot": if (soundOn) Sound.shoot(); break;
-            case "hit": if (soundOn) Sound.hit(); break;
+            case "hit":
+                if (soundOn) Sound.hit();
+                if (e.dmg) renderer.addDamageNumber(e.x, e.y, e.dmg, e.color || "#ffffff", false);
+                renderer.addShake(0.7);
+                break;
+            case "crit":
+                if (soundOn) Sound.crit();
+                renderer.addDamageNumber(e.x, e.y, e.dmg, "#ffd166", true);
+                renderer.addShake(2.5);
+                handleCritStats();
+                break;
             case "enemyshoot": if (soundOn) Sound.enemyshoot(); break;
             case "kill":
                 if (soundOn) Sound.kill();
+                renderer.addShockwave(e.x, e.y, e.boss ? "#ffd166" : "#ff8a8a", e.boss ? 260 : 110);
+                renderer.addShake(e.boss ? 13 : 3);
                 if (e.boss) buzz([30, 50, 30, 50, 60]);
                 break;
             case "hurt":
                 if (soundOn) Sound.hurt();
+                renderer.addShake(5);
                 buzz(35);
                 break;
-            case "shieldbreak": if (soundOn) Sound.shieldbreak(); break;
+            case "shieldbreak":
+                if (soundOn) Sound.shieldbreak();
+                renderer.addShockwave(e.x, e.y, "#6fd8ff", 130);
+                renderer.addShake(4);
+                break;
+            case "splash":
+                if (soundOn) Sound.splash();
+                renderer.addShockwave(e.x, e.y, e.color || "#ff9f43", SPLASH_RADIUS);
+                renderer.addShake(3);
+                break;
+            case "bulletblock": if (soundOn) Sound.block(); break;
+            case "cloak": if (soundOn && e.cloaked) Sound.cloak(); break;
             case "pickup": if (soundOn) Sound.pickup(); break;
+            case "pickup-effect": if (soundOn) Sound.effect(); break;
             case "box": if (soundOn) Sound.box(); buzz([15, 20, 30]); break;
             case "ability": if (soundOn) Sound.ability(); buzz(18); break;
             case "levelup":
@@ -301,13 +333,22 @@ function handleEvents(events) {
                 break;
             case "dock": if (soundOn) Sound.dock(); break;
             case "jump": if (soundOn) Sound.jump(); break;
+            case "safeenter": ui.toast("Safe zone — shields recharging", "good"); break;
             case "destroyed":
                 if (soundOn) Sound.destroyed();
+                renderer.addShockwave(e.x, e.y, "#ff4d6d", 320);
+                renderer.addShake(20);
                 buzz([60, 80, 120]);
                 break;
             case "message": ui.toast(e.text); break;
             default: break;
         }
+    }
+}
+
+function handleCritStats() {
+    if (R2 && R2.stats && typeof R2.stats.event === "function") {
+        R2.stats.event(SLUG, "criticals", 1);
     }
 }
 
@@ -436,6 +477,7 @@ window.__DEEP_ORBIT__ = {
     getState: () => state,
     getProfile: () => profile,
     getPhase: () => phase,
+    getConfig: () => ({ maps: MAPS.length, ammo: AMMO.length, ships: SHIPS.length, pickups: PICKUP_IDS.length }),
     start: startGame,
     render: () => renderer.render(state, profile, 1 / 60)
 };

@@ -17,7 +17,7 @@ export const DEFAULTS = {
     level: 1,
     ship: 0,
     ownedShips: [0],
-    upgrades: { laser: 0, generator: 0, shield: 0, hull: 0, cargo: 0 },
+    upgrades: { laser: 0, generator: 0, shield: 0, hull: 0, cargo: 0, critical: 0, regen: 0, magnet: 0 },
     drones: 0,
     lastMap: 0,
     bestScore: 0,

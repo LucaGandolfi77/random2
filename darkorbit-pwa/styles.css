@@ -147,6 +147,36 @@ button { font: inherit; color: inherit; cursor: pointer; }
     z-index: 3;
 }
 
+.safe-badge {
+    position: absolute;
+    top: 34px; left: 50%; transform: translateX(-50%);
+    z-index: 4;
+    padding: 4px 11px;
+    font-size: 8px; letter-spacing: 0.4px;
+    white-space: nowrap;
+    color: #bfffe0;
+    background: rgba(10, 40, 30, 0.85);
+    border: 1px solid rgba(138, 255, 193, 0.6);
+    border-radius: 20px;
+    box-shadow: 0 0 18px rgba(138, 255, 193, 0.25);
+    pointer-events: none;
+    animation: safePulse 2.4s ease-in-out infinite;
+}
+@keyframes safePulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(138, 255, 193, 0.18); }
+    50% { box-shadow: 0 0 26px rgba(138, 255, 193, 0.5); }
+}
+
+.active-effects {
+    position: absolute;
+    left: 10px; top: 108px;
+    z-index: 4;
+    font-size: 9px; letter-spacing: 0.6px;
+    color: var(--amber);
+    text-shadow: 0 0 8px rgba(255, 209, 102, 0.5);
+    pointer-events: none;
+}
+
 #minimap {
     position: absolute;
     top: 8px; right: 8px;
@@ -331,6 +361,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
     transform: scale(0.94);
     box-shadow: 0 0 34px rgba(255, 93, 115, 0.8), var(--shadow);
 }
+.fire-btn.locked {
+    filter: grayscale(0.8);
+    opacity: 0.5;
+    box-shadow: none;
+}
+.fire-btn.locked .fire-core::after {
+    content: "×";
+    font-size: 18px;
+}
 
 /* ---------------- footer ---------------- */
 
@@ -447,6 +486,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ship-card small { display: block; margin: 2px 0 6px; font-size: 8px; color: var(--muted); }
 .ship-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 7px; }
 .ship-stats span { font-size: 8px; color: #bcd4e2; }
+.ship-perk {
+    margin: 0 0 7px; font-size: 8px; line-height: 1.3;
+    color: var(--amber);
+}
 .upgrade-row {
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     padding: 7px 9px; margin-bottom: 5px;
@@ -499,6 +542,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
     #minimap { width: 94px; height: 94px; top: 6px; right: 6px; }
     .context-actions { top: 108px; right: 6px; }
     .target-panel { top: 28px; width: 130px; }
+    .safe-badge { top: 28px; font-size: 8px; }
+    .active-effects { top: 96px; font-size: 8px; }
     .controls { padding: 0 10px 6px; }
     .panel { padding: 14px 16px; }
     .hangar-scroll { max-height: 56vh; }

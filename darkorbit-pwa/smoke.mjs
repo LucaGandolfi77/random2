@@ -133,6 +133,44 @@ ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'playing'"), "Play starts
 ok(await evaluate("document.getElementById('overlay').classList.contains('hidden')"), "the overlay hides while playing");
 ok(await evaluate("window.__DEEP_ORBIT__.getState().enemies.length > 0"), "enemies spawn in the sector");
 
+const cfg = await evaluate("window.__DEEP_ORBIT__.getConfig()");
+ok(cfg && cfg.maps === 5 && cfg.ammo === 5 && cfg.ships >= 6 && cfg.pickups >= 3,
+    "v2 content is loaded", cfg && JSON.stringify(cfg));
+
+/* Station safe haven: hostiles disengage and bullets fizzle. */
+ok(await evaluate("window.__DEEP_ORBIT__.getState().docked === true"), "the run starts docked");
+ok(await evaluate("!document.getElementById('safe-badge').classList.contains('hidden')"), "the safe-zone badge is shown");
+ok(await evaluate("document.getElementById('fire-btn').classList.contains('locked')"), "FIRE is locked in the safe zone");
+await evaluate(`(() => {
+    const s = window.__DEEP_ORBIT__.getState();
+    s.enemies = [{
+        id: 8001, defId: 'swarm',
+        def: { name: 'Lurker', tier: 1, color: '#f66', shape: 'triangle', speed: 160, range: 600, fireCd: 0.2, damage: 20, spread: 1, credits: [1, 2], xp: 1 },
+        x: s.player.x + 240, y: s.player.y, vx: 0, vy: 0, angle: 0, radius: 16,
+        hp: 10000, hpMax: 10000, shield: 1000, shieldMax: 1000,
+        fireCd: 0.1, contactCd: 0, hitFlash: 0, orbitDir: 1, wander: 0,
+        homeX: s.player.x + 240, homeY: s.player.y,
+        cloakCd: 99, cloaked: false, cloakAlpha: 1, dotTime: 0, dotDps: 0, charge: 0, dead: false
+    }];
+    s.enemyBullets.push({ x: s.player.x + 130, y: s.player.y, vx: -200, vy: 0, dmg: 500, color: '#f00', radius: 5, life: 2 });
+    s.spawnTimer = 99;
+})()`);
+const safeBefore = await evaluate("({ x: window.__DEEP_ORBIT__.getState().enemies[0].x, shield: window.__DEEP_ORBIT__.getState().player.shield })");
+await sleep(700);
+const safeAfter = await evaluate("({ x: window.__DEEP_ORBIT__.getState().enemies[0].x, bullets: window.__DEEP_ORBIT__.getState().enemyBullets.length, shield: window.__DEEP_ORBIT__.getState().player.shield })");
+ok(safeAfter && safeAfter.x >= safeBefore.x - 12, "enemies do not close in while docked", safeBefore && safeAfter && (safeAfter.x - safeBefore.x).toFixed(1));
+ok(safeAfter && safeAfter.bullets === 0, "hostile bullets fizzle at the station ring");
+ok(safeAfter && safeAfter.shield >= safeBefore.shield, "no damage taken in the safe zone");
+
+/* Leave the station so combat tests can fire. */
+await evaluate(`(() => {
+    const s = window.__DEEP_ORBIT__.getState();
+    s.player.x = s.world.x / 2 + 430;
+    s.player.y = s.world.y / 2 + 430;
+})()`);
+await sleep(120);
+ok(await evaluate("window.__DEEP_ORBIT__.getState().docked === false"), "leaving the ring exits the safe zone");
+
 /* Place a weak target in front of the ship and hold FIRE. */
 await evaluate(`(() => {
     const s = window.__DEEP_ORBIT__.getState();
@@ -141,7 +179,8 @@ await evaluate(`(() => {
         def: { name: 'Test Drone', tier: 1, color: '#fff', shape: 'triangle', speed: 0, range: 0, fireCd: 99, damage: 0, spread: 1, credits: [500, 500], xp: 10 },
         x: s.player.x + 90, y: s.player.y, vx: 0, vy: 0, angle: 0, radius: 16,
         hp: 1, hpMax: 1, shield: 0, shieldMax: 0,
-        fireCd: 99, contactCd: 99, hitFlash: 0, orbitDir: 1, wander: 0, dead: false
+        fireCd: 99, contactCd: 99, hitFlash: 0, orbitDir: 1, wander: 0,
+        cloakCd: 99, cloaked: false, cloakAlpha: 1, dotTime: 0, dotDps: 0, charge: 0, dead: false
     }];
     s.player.targetId = 9001;
     s.spawnTimer = 99;

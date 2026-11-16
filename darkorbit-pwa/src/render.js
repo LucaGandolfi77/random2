@@ -7,8 +7,9 @@
  */
 
 import {
-    PALETTES, AMMO, RESOURCES, SHIPS, MAX_DPR, VIEW_BASE,
-    DOCK_RADIUS, GATE_RADIUS, clamp, lerp
+    PALETTES, AMMO, RESOURCES, SHIPS, PICKUPS, MAX_DPR, VIEW_BASE,
+    DOCK_RADIUS, SAFE_STANDOFF, GATE_RADIUS, MAX_DAMAGE_TEXT,
+    MAX_SHOCKWAVES, clamp, lerp
 } from "./config.js";
 import { stationPos, gatePos, getTarget } from "./sim.js";
 
@@ -24,8 +25,14 @@ export function createRenderer(canvas, minimap) {
     const mctx = minimap ? minimap.getContext("2d") : null;
     const view = { w: 1, h: 1, dpr: 1 };
     const cam = { x: 0, y: 0 };
+    const damageTexts = [];
+    const shockwaves = [];
     let zoom = 1;
     let camInit = false;
+    let shake = 0;
+    let sweep = 0;
+    const reduced = typeof window !== "undefined" && window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function resize() {
         const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
@@ -116,7 +123,7 @@ export function createRenderer(canvas, minimap) {
             ctx.lineTo(0, r * 0.95);
             ctx.lineTo(-r * 1.1, 0);
             ctx.lineTo(0, -r * 0.95);
-        } else if (shape === "tank" || shape === "boss") {
+        } else if (shape === "tank" || shape === "boss" || shape === "siege") {
             ctx.moveTo(r * 1.05, 0);
             ctx.lineTo(r * 0.5, r * 0.72);
             ctx.lineTo(-r * 0.65, r * 0.82);
@@ -124,10 +131,129 @@ export function createRenderer(canvas, minimap) {
             ctx.lineTo(-r * 1.0, -r * 0.35);
             ctx.lineTo(-r * 0.65, -r * 0.82);
             ctx.lineTo(r * 0.5, -r * 0.72);
+        } else if (shape === "wisp") {
+            ctx.moveTo(r * 1.4, 0);
+            ctx.lineTo(-r * 0.3, r * 0.85);
+            ctx.lineTo(-r * 0.95, 0);
+            ctx.lineTo(-r * 0.3, -r * 0.85);
+        } else if (shape === "crawler") {
+            ctx.moveTo(r * 0.9, 0);
+            ctx.lineTo(r * 0.55, r * 0.6);
+            ctx.lineTo(r * 0.85, r * 1.05);
+            ctx.lineTo(-r * 0.55, r * 0.95);
+            ctx.lineTo(-r * 1.0, r * 0.4);
+            ctx.lineTo(-r * 1.0, -r * 0.4);
+            ctx.lineTo(-r * 0.55, -r * 0.95);
+            ctx.lineTo(r * 0.85, -r * 1.05);
+            ctx.lineTo(r * 0.55, -r * 0.6);
+        } else if (shape === "phantom" || shape === "stealth") {
+            ctx.moveTo(r * 1.5, 0);
+            ctx.lineTo(r * 0.1, r * 0.42);
+            ctx.lineTo(-r * 1.1, r * 0.9);
+            ctx.lineTo(-r * 0.6, 0);
+            ctx.lineTo(-r * 1.1, -r * 0.9);
+            ctx.lineTo(r * 0.1, -r * 0.42);
+        } else if (shape === "obelisk") {
+            ctx.moveTo(r * 1.25, 0);
+            ctx.lineTo(r * 0.35, r * 0.55);
+            ctx.lineTo(r * 0.55, r * 1.15);
+            ctx.lineTo(-r * 0.55, r * 1.15);
+            ctx.lineTo(-r * 0.35, r * 0.55);
+            ctx.lineTo(-r * 1.1, 0);
+            ctx.lineTo(-r * 0.35, -r * 0.55);
+            ctx.lineTo(-r * 0.55, -r * 1.15);
+            ctx.lineTo(r * 0.55, -r * 1.15);
+            ctx.lineTo(r * 0.35, -r * 0.55);
         } else {
             ctx.arc(0, 0, r, 0, TAU);
         }
         ctx.closePath();
+    }
+
+    /* ---------------- background layers ---------------- */
+
+    function drawStarLayer(state, palette, cell, parallax, alpha, sizeMul, t) {
+        const vis = worldVisible();
+        const ox = cam.x * (1 - parallax);
+        const oy = cam.y * (1 - parallax);
+        ctx.fillStyle = palette.star;
+        for (let gx = Math.floor((vis.left - ox) / cell); gx <= Math.floor((vis.right - ox) / cell); gx++) {
+            for (let gy = Math.floor((vis.top - oy) / cell); gy <= Math.floor((vis.bottom - oy) / cell); gy++) {
+                const h1 = hash(gx * 2 + gy * 71 + parallax * 17);
+                const h2 = hash(gx * 131 + gy * 7 + parallax * 31);
+                const sx = gx * cell + h1 * cell + ox;
+                const sy = gy * cell + h2 * cell + oy;
+                const tw = 0.2 + hash(gx * 19 + gy * 23) * 0.4;
+                ctx.globalAlpha = alpha * tw * (0.7 + 0.3 * Math.sin(t * 1.6 + h1 * 14));
+                const s = (0.9 + h2 * 1.7) * sizeMul / zoom;
+                ctx.fillRect(sx, sy, s, s);
+            }
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    function drawPlanet(state, palette, vis) {
+        if (!palette.planet) return;
+        const px = state.world.x * 0.78;
+        const py = state.world.y * 0.18;
+        const r = Math.min(state.world.x, state.world.y) * 0.29;
+        if (px < vis.left - r || px > vis.right + r || py < vis.top - r || py > vis.bottom + r) return;
+
+        const g = ctx.createRadialGradient(px - r * 0.3, py - r * 0.35, r * 0.15, px, py, r);
+        g.addColorStop(0, palette.planet);
+        g.addColorStop(0.7, "rgba(4,10,18,0.92)");
+        g.addColorStop(1, "rgba(2,6,12,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, TAU);
+        ctx.fill();
+
+        ctx.strokeStyle = palette.accent;
+        ctx.globalAlpha = 0.12;
+        ctx.lineWidth = 3 / zoom;
+        ctx.beginPath();
+        ctx.arc(px, py, r + 18, -0.5, 2.3);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+    }
+
+    function drawAsteroids(state, palette, vis, t) {
+        const cell = 430;
+        for (let gx = Math.floor(vis.left / cell); gx <= Math.floor(vis.right / cell); gx++) {
+            for (let gy = Math.floor(vis.top / cell); gy <= Math.floor(vis.bottom / cell); gy++) {
+                if (hash(gx * 91 + gy * 13) < 0.42) continue;
+                const h = hash(gx * 37 + gy * 211);
+                const h2 = hash(gx * 17 + gy * 59);
+                const ax = gx * cell + h * cell;
+                const ay = gy * cell + h2 * cell;
+                const r = 16 + h2 * 28;
+                if (Math.hypot(ax - state.player.x, ay - state.player.y) < 150) continue;
+                ctx.save();
+                ctx.translate(ax, ay);
+                ctx.rotate(t * 0.06 * (h > 0.5 ? 1 : -1) + h * TAU);
+                ctx.beginPath();
+                const points = 8;
+                for (let i = 0; i < points; i++) {
+                    const a = (i / points) * TAU;
+                    const rr = r * (0.72 + hash(gx * 300 + gy * 7 + i) * 0.5);
+                    const x = Math.cos(a) * rr;
+                    const y = Math.sin(a) * rr;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = palette.ground || "rgba(20,40,55,0.85)";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(210,240,255,0.18)";
+                ctx.lineWidth = 1.6 / zoom;
+                ctx.stroke();
+                ctx.strokeStyle = "rgba(140,220,255,0.09)";
+                ctx.beginPath();
+                ctx.moveTo(-r * 0.5, -r * 0.2);
+                ctx.lineTo(r * 0.25, -r * 0.45);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
     }
 
     /* ---------------- background ---------------- */
@@ -159,6 +285,9 @@ export function createRenderer(canvas, minimap) {
             ctx.fillRect(c.x - c.r, c.y - c.r, c.r * 2, c.r * 2);
         }
 
+        drawPlanet(state, palette, vis);
+        drawStarLayer(state, palette, 190, 0.35, 0.28, 0.9, t);
+
         // Grid.
         const step = 120;
         ctx.strokeStyle = palette.grid;
@@ -174,22 +303,9 @@ export function createRenderer(canvas, minimap) {
         }
         ctx.stroke();
 
-        // Deterministic starfield, one star per world cell.
-        const cell = 92;
-        ctx.fillStyle = palette.star;
-        for (let gx = Math.floor(vis.left / cell); gx <= Math.floor(vis.right / cell); gx++) {
-            for (let gy = Math.floor(vis.top / cell); gy <= Math.floor(vis.bottom / cell); gy++) {
-                const h1 = hash(gx * 2 + gy * 71);
-                const h2 = hash(gx * 131 + gy * 7);
-                const sx = gx * cell + h1 * cell;
-                const sy = gy * cell + h2 * cell;
-                const tw = 0.18 + hash(gx * 19 + gy * 23) * 0.35;
-                ctx.globalAlpha = tw * (0.72 + 0.28 * Math.sin(t * 1.4 + h1 * 12));
-                const s = 1 + h2 * 1.8;
-                ctx.fillRect(sx, sy, s / zoom, s / zoom);
-            }
-        }
-        ctx.globalAlpha = 1;
+        // Near starfield (world-anchored) and drifting asteroid field.
+        drawStarLayer(state, palette, 92, 1, 0.68, 1.15, t);
+        drawAsteroids(state, palette, vis, t);
 
         // Radiation boundary.
         ctx.strokeStyle = palette.hazard;
@@ -210,6 +326,56 @@ export function createRenderer(canvas, minimap) {
 
         ctx.save();
         ctx.translate(s.x, s.y);
+
+        // Safe-haven bubble: soft fill, hex lattice and a bright inner ring.
+        if (state.docked) {
+            const dome = ctx.createRadialGradient(0, 0, 20, 0, 0, DOCK_RADIUS);
+            dome.addColorStop(0, "rgba(138,255,193,0.10)");
+            dome.addColorStop(0.75, "rgba(138,255,193,0.05)");
+            dome.addColorStop(1, "rgba(138,255,193,0)");
+            ctx.fillStyle = dome;
+            ctx.beginPath();
+            ctx.arc(0, 0, DOCK_RADIUS, 0, TAU);
+            ctx.fill();
+
+            ctx.strokeStyle = "rgba(138,255,193,0.10)";
+            ctx.lineWidth = 1 / zoom;
+            for (let ring = 40; ring < DOCK_RADIUS; ring += 36) {
+                ctx.beginPath();
+                ctx.arc(0, 0, ring, 0, TAU);
+                ctx.stroke();
+            }
+            ctx.save();
+            ctx.rotate(state.t * 0.18);
+            ctx.strokeStyle = "rgba(138,255,193,0.14)";
+            for (let i = 0; i < 12; i++) {
+                const a = (i / 12) * TAU;
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(a) * 46, Math.sin(a) * 46);
+                ctx.lineTo(Math.cos(a) * DOCK_RADIUS, Math.sin(a) * DOCK_RADIUS);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            ctx.strokeStyle = "#8affc1";
+            ctx.globalAlpha = 0.4 + pulse * 0.3;
+            ctx.lineWidth = 3 / zoom;
+            glow("#8affc1", 16);
+            ctx.beginPath();
+            ctx.arc(0, 0, DOCK_RADIUS - 4, 0, TAU);
+            ctx.stroke();
+            noGlow();
+            ctx.globalAlpha = 1;
+        }
+
+        // Outer standoff ring: where hostiles are pushed back to.
+        ctx.strokeStyle = palette.hazard;
+        ctx.globalAlpha = 0.1;
+        ctx.lineWidth = 1.5 / zoom;
+        ctx.beginPath();
+        ctx.arc(0, 0, SAFE_STANDOFF, 0, TAU);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
 
         ctx.strokeStyle = state.docked ? "#8affc1" : palette.accent;
         ctx.globalAlpha = state.docked ? 0.65 : 0.32;
@@ -255,10 +421,16 @@ export function createRenderer(canvas, minimap) {
         ctx.globalAlpha = 1;
         ctx.restore();
 
-        ctx.font = `${Math.round(15 / zoom)}px ui-monospace, monospace`;
-        ctx.fillStyle = palette.accent;
         ctx.textAlign = "center";
-        ctx.fillText("STATION", s.x, s.y + DOCK_RADIUS + 20 / zoom);
+        ctx.font = `${Math.round(15 / zoom)}px ui-monospace, monospace`;
+        ctx.fillStyle = state.docked ? "#8affc1" : palette.accent;
+        ctx.fillText(state.docked ? "SAFE ZONE" : "STATION", s.x, s.y + DOCK_RADIUS + 20 / zoom);
+        if (state.docked) {
+            ctx.font = `${Math.round(10 / zoom)}px ui-monospace, monospace`;
+            ctx.globalAlpha = 0.65;
+            ctx.fillText("WEAPONS LOCKED · HOSTILES DISENGAGED", s.x, s.y + DOCK_RADIUS + 36 / zoom);
+            ctx.globalAlpha = 1;
+        }
     }
 
     function drawGate(state, palette) {
@@ -381,20 +553,34 @@ export function createRenderer(canvas, minimap) {
             ctx.save();
             ctx.translate(e.x, e.y);
             ctx.rotate(e.angle);
+            const alpha = e.cloakAlpha === undefined ? 1 : e.cloakAlpha;
+            ctx.globalAlpha = alpha;
 
             if (e.def.boss) {
                 ctx.strokeStyle = e.def.color;
-                ctx.globalAlpha = 0.35;
+                ctx.globalAlpha = 0.35 * alpha;
                 ctx.lineWidth = 2 / zoom;
                 ctx.beginPath();
                 ctx.arc(0, 0, e.radius + 16, state.t, state.t + 4.6);
                 ctx.stroke();
-                ctx.globalAlpha = 1;
+                ctx.globalAlpha = alpha;
+            }
+
+            // Damage smoke.
+            if (e.hp / e.hpMax < 0.45) {
+                ctx.fillStyle = "rgba(30,30,40,0.5)";
+                for (let i = 0; i < 3; i++) {
+                    const drift = (state.t * 0.7 + i * 0.33) % 1;
+                    ctx.beginPath();
+                    ctx.arc(-e.radius * 0.4 - drift * 22, (i - 1) * 7 + Math.sin(state.t * 3 + i) * 3, 3 + drift * 5, 0, TAU);
+                    ctx.fill();
+                }
             }
 
             const flash = e.hitFlash > 0;
             const grad = ctx.createLinearGradient(-e.radius, 0, e.radius, 0);
             grad.addColorStop(0, "#05070c");
+            grad.addColorStop(0.6, "#11202c");
             grad.addColorStop(1, flash ? "#ffffff" : e.def.color);
             ctx.fillStyle = grad;
             ctx.strokeStyle = flash ? "#ffffff" : e.def.color;
@@ -405,11 +591,49 @@ export function createRenderer(canvas, minimap) {
             ctx.stroke();
             noGlow();
 
+            // Hull panel lines + glowing core.
+            ctx.strokeStyle = "rgba(255,255,255,0.18)";
+            ctx.lineWidth = 1 / zoom;
+            shipPath(e.def.shape, e.radius * 0.55);
+            ctx.stroke();
+            ctx.fillStyle = e.def.color;
+            ctx.globalAlpha = alpha * (0.6 + 0.4 * Math.sin(state.t * 4 + e.id));
+            ctx.beginPath();
+            ctx.arc(e.radius * 0.16, 0, Math.max(2, e.radius * 0.13), 0, TAU);
+            ctx.fill();
+            ctx.globalAlpha = alpha;
+
             ctx.fillStyle = "rgba(255,255,255,0.8)";
             ctx.beginPath();
-            ctx.arc(e.radius * 0.3, 0, Math.max(2, e.radius * 0.12), 0, TAU);
+            ctx.arc(e.radius * 0.34, 0, Math.max(1.5, e.radius * 0.07), 0, TAU);
             ctx.fill();
             ctx.restore();
+
+            // Weapon charge telegraph.
+            if (e.charge > 0) {
+                ctx.strokeStyle = e.def.color;
+                ctx.globalAlpha = 0.3 + e.charge * 0.7;
+                ctx.lineWidth = (1 + e.charge * 3) / zoom;
+                glow(e.def.color, 10 * e.charge);
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.radius + 12 + (1 - e.charge) * 8, 0, TAU * e.charge);
+                ctx.stroke();
+                noGlow();
+                ctx.globalAlpha = 1;
+            }
+
+            // Infection marker.
+            if (e.dotTime > 0) {
+                ctx.strokeStyle = "#8affc1";
+                ctx.globalAlpha = 0.55;
+                ctx.lineWidth = 1.5 / zoom;
+                ctx.setLineDash([3 / zoom, 5 / zoom]);
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.radius + 12, state.t * 2, state.t * 2 + Math.PI);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 1;
+            }
 
             // Shield arc + health bar.
             if (e.shield > 0 && e.shieldMax > 0) {
@@ -432,12 +656,19 @@ export function createRenderer(canvas, minimap) {
             }
 
             if (target && target.id === e.id) {
+                const rr = e.radius + 16 + Math.sin(state.t * 5) * 2;
+                ctx.save();
+                ctx.translate(e.x, e.y);
+                ctx.rotate(state.t * 0.5);
                 ctx.strokeStyle = "#ffffff";
                 ctx.lineWidth = 2 / zoom;
-                ctx.globalAlpha = 0.85;
-                ctx.beginPath();
-                ctx.arc(e.x, e.y, e.radius + 15 + Math.sin(state.t * 6) * 2, 0, TAU);
-                ctx.stroke();
+                ctx.globalAlpha = 0.9;
+                for (let q = 0; q < 4; q++) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, rr, q * Math.PI / 2 + 0.16, q * Math.PI / 2 + 0.72);
+                    ctx.stroke();
+                }
+                ctx.restore();
                 ctx.globalAlpha = 1;
             }
         }
@@ -511,6 +742,37 @@ export function createRenderer(canvas, minimap) {
         ctx.stroke();
         noGlow();
 
+        // Hull plating + canopy.
+        ctx.strokeStyle = "rgba(255,255,255,0.22)";
+        ctx.lineWidth = 1 / zoom;
+        shipPath(p.ship.shape, p.radius * 0.62);
+        ctx.stroke();
+        ctx.fillStyle = "rgba(180,240,255,0.18)";
+        ctx.beginPath();
+        ctx.ellipse(p.radius * 0.18, 0, p.radius * 0.36, p.radius * 0.2, 0, 0, TAU);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(220,250,255,0.4)";
+        ctx.stroke();
+
+        // Engine nozzles.
+        ctx.fillStyle = p.boost > 0 ? "#fff2a8" : "#8ff6ff";
+        for (const side of [-1, 1]) {
+            ctx.fillRect(-p.radius * 0.72, side * p.radius * 0.38 - 2 / zoom, 5 / zoom, 4 / zoom);
+        }
+
+        // Speed streaks while boosting.
+        if (p.boost > 0) {
+            ctx.strokeStyle = "rgba(255,242,168,0.35)";
+            ctx.lineWidth = 1.5 / zoom;
+            for (let i = 0; i < 3; i++) {
+                const off = (i - 1) * 9;
+                ctx.beginPath();
+                ctx.moveTo(-p.radius, off);
+                ctx.lineTo(-p.radius - 30 - Math.sin(state.t * 25 + i) * 8, off);
+                ctx.stroke();
+            }
+        }
+
         ctx.fillStyle = "#eaffff";
         ctx.globalAlpha = 0.85;
         ctx.beginPath();
@@ -540,6 +802,62 @@ export function createRenderer(canvas, minimap) {
         ctx.globalAlpha = 1;
     }
 
+    function drawPickups(state) {
+        for (const item of state.pickups || []) {
+            ctx.save();
+            ctx.translate(item.x, item.y);
+            ctx.rotate(item.spin);
+            const fade = clamp(item.life / 3, 0, 1);
+            ctx.globalAlpha = fade;
+            glow(item.def.color, 16);
+            ctx.fillStyle = "rgba(4,12,18,0.92)";
+            ctx.strokeStyle = item.def.color;
+            ctx.lineWidth = 2 / zoom;
+            ctx.beginPath();
+            ctx.arc(0, 0, 13, 0, TAU);
+            ctx.fill();
+            ctx.stroke();
+            noGlow();
+            ctx.rotate(-item.spin);
+            ctx.fillStyle = item.def.color;
+            ctx.font = `bold ${Math.round(15 / zoom)}px ui-monospace, monospace`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(item.def.glyph, 0, 1);
+            ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    function drawShockwaves() {
+        for (const w of shockwaves) {
+            ctx.globalAlpha = clamp(w.life / w.maxLife, 0, 1) * 0.7;
+            ctx.strokeStyle = w.color;
+            ctx.lineWidth = (1 + 3 * (w.life / w.maxLife)) / zoom;
+            glow(w.color, 12);
+            ctx.beginPath();
+            ctx.arc(w.x, w.y, w.r, 0, TAU);
+            ctx.stroke();
+            noGlow();
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    function drawDamageTexts() {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        for (const d of damageTexts) {
+            const a = clamp(d.life / d.maxLife, 0, 1);
+            ctx.globalAlpha = a;
+            ctx.fillStyle = d.critical ? "#ffd166" : d.color;
+            ctx.font = `bold ${Math.round((d.critical ? 18 : 13) / zoom)}px ui-monospace, monospace`;
+            if (d.critical) glow("#ffd166", 12);
+            ctx.fillText((d.critical ? "✦ " : "") + d.value, d.x, d.y);
+            noGlow();
+        }
+        ctx.globalAlpha = 1;
+    }
+
     function drawTargetLine(state, target) {
         if (!target || state.destroyed) return;
         const p = state.player;
@@ -556,15 +874,19 @@ export function createRenderer(canvas, minimap) {
     /* ---------------- main render ---------------- */
 
     function render(state, profile, dt) {
-        cameraFollow(state, dt === undefined ? 1 / 60 : dt);
+        const frameDt = dt === undefined ? 1 / 60 : dt;
+        cameraFollow(state, frameDt);
+        updateEffects(frameDt);
         const palette = PALETTES[state.map.palette] || PALETTES.alpha;
         const target = getTarget(state);
+        const sx = shake ? (Math.random() * 2 - 1) * shake : 0;
+        const sy = shake ? (Math.random() * 2 - 1) * shake : 0;
 
         ctx.save();
         ctx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
         drawBackground(state, palette);
 
-        ctx.translate(view.w / 2, view.h / 2);
+        ctx.translate(view.w / 2 + sx, view.h / 2 + sy);
         ctx.scale(zoom, zoom);
         ctx.translate(-cam.x, -cam.y);
 
@@ -572,12 +894,15 @@ export function createRenderer(canvas, minimap) {
         drawGate(state, palette);
         drawLoot(state);
         drawBoxes(state);
+        drawPickups(state);
         drawBullets(state);
+        drawShockwaves();
         drawEnemies(state, palette, target);
         drawDrones(state);
         drawTargetLine(state, target);
         drawPlayer(state, palette);
         drawParticles(state);
+        drawDamageTexts();
         ctx.restore();
 
         // Low-hull vignette is drawn in screen space.
@@ -617,7 +942,39 @@ export function createRenderer(canvas, minimap) {
         mctx.lineWidth = 1;
         mctx.strokeRect(ox, oy, state.world.x * s, state.world.y * s);
 
+        const p = state.player;
+        const px = mx(p.x);
+        const py = my(p.y);
+
+        // Radar sweep + range rings, centred on the player.
+        mctx.save();
+        mctx.beginPath();
+        mctx.rect(ox, oy, state.world.x * s, state.world.y * s);
+        mctx.clip();
+        mctx.strokeStyle = "rgba(120,240,255,0.12)";
+        for (const rr of [40, 80, 130]) {
+            mctx.beginPath();
+            mctx.arc(px, py, rr, 0, TAU);
+            mctx.stroke();
+        }
+        const a = sweep;
+        const grad = mctx.createLinearGradient(px, py, px + Math.cos(a) * 120, py + Math.sin(a) * 120);
+        grad.addColorStop(0, "rgba(120,240,255,0.28)");
+        grad.addColorStop(1, "rgba(120,240,255,0)");
+        mctx.strokeStyle = grad;
+        mctx.lineWidth = 12;
+        mctx.beginPath();
+        mctx.moveTo(px, py);
+        mctx.lineTo(px + Math.cos(a) * 120, py + Math.sin(a) * 120);
+        mctx.stroke();
+        mctx.restore();
+
         const station = stationPos(state);
+        mctx.strokeStyle = state.docked ? "rgba(138,255,193,0.8)" : "rgba(138,255,193,0.35)";
+        mctx.lineWidth = 1;
+        mctx.beginPath();
+        mctx.arc(mx(station.x), my(station.y), Math.max(3, DOCK_RADIUS * s), 0, TAU);
+        mctx.stroke();
         mctx.fillStyle = "#8affc1";
         mctx.fillRect(mx(station.x) - 3, my(station.y) - 3, 6, 6);
         if (state.map.gateTo >= 0) {
@@ -629,14 +986,17 @@ export function createRenderer(canvas, minimap) {
         for (const item of state.loot) {
             mctx.fillRect(mx(item.x), my(item.y), 1.6, 1.6);
         }
+        for (const item of state.pickups || []) {
+            mctx.fillStyle = item.def.color;
+            mctx.fillRect(mx(item.x) - 1, my(item.y) - 1, 3, 3);
+        }
         for (const e of state.enemies) {
             mctx.fillStyle = e.def.boss ? "#ffb457" : "#ff6b6b";
-            const r = e.def.boss ? 3.5 : 2;
+            const r = e.def.boss ? 4 : (e.cloaked ? 1.3 : 2);
             mctx.beginPath();
             mctx.arc(mx(e.x), my(e.y), r, 0, TAU);
             mctx.fill();
         }
-        const p = state.player;
         mctx.save();
         mctx.translate(mx(p.x), my(p.y));
         mctx.rotate(p.angle);
@@ -650,12 +1010,60 @@ export function createRenderer(canvas, minimap) {
         mctx.restore();
     }
 
+    function addShake(amount) {
+        if (reduced) return;
+        shake = Math.min(22, shake + amount);
+    }
+
+    function addDamageNumber(x, y, value, color, critical) {
+        if (damageTexts.length >= MAX_DAMAGE_TEXT) damageTexts.shift();
+        damageTexts.push({
+            x: x + rand(-6, 6), y: y - 8,
+            value: Math.round(value),
+            color: color || "#ffffff",
+            critical: !!critical,
+            life: critical ? 0.95 : 0.7,
+            maxLife: critical ? 0.95 : 0.7,
+            vy: critical ? -70 : -52
+        });
+    }
+
+    function addShockwave(x, y, color, radius) {
+        if (shockwaves.length >= MAX_SHOCKWAVES) shockwaves.shift();
+        shockwaves.push({ x, y, color: color || "#ffffff", r: 8, max: radius || 90, life: 0.45, maxLife: 0.45 });
+    }
+
+    function rand(min, max) {
+        return min + Math.random() * (max - min);
+    }
+
+    function updateEffects(dt) {
+        shake = Math.max(0, shake - dt * 42);
+        sweep += dt * 1.7;
+        for (let i = damageTexts.length - 1; i >= 0; i--) {
+            const d = damageTexts[i];
+            d.life -= dt;
+            d.y += d.vy * dt;
+            d.vy *= 0.96;
+            if (d.life <= 0) damageTexts.splice(i, 1);
+        }
+        for (let i = shockwaves.length - 1; i >= 0; i--) {
+            const w = shockwaves[i];
+            w.life -= dt;
+            w.r = lerp(8, w.max, 1 - w.life / w.maxLife);
+            if (w.life <= 0) shockwaves.splice(i, 1);
+        }
+    }
+
     return {
         resize,
         render,
         renderMinimap,
         screenToWorld,
-        resetCamera: function () { camInit = false; },
+        addShake,
+        addDamageNumber,
+        addShockwave,
+        resetCamera: function () { camInit = false; damageTexts.length = 0; shockwaves.length = 0; shake = 0; },
         getZoom: function () { return zoom; },
         getView: function () { return view; }
     };
