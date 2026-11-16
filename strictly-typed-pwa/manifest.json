@@ -1,0 +1,89 @@
+{
+  "id": "./",
+  "name": "STRICTLY TYPED — Ada & the Last Compiler",
+  "short_name": "Strictly Typed",
+  "description": "Learn Ada by repairing a dying universe. A funny, philosophical tap-to-code adventure: a 20-step campaign, five boss audits, a secret ending, and no typing required.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#090611",
+  "theme_color": "#090611",
+  "categories": ["games", "education", "puzzle"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Continue inspection",
+      "short_name": "Continue",
+      "description": "Return to the House of Promises.",
+      "url": "./?go=continue",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Open the Codex",
+      "short_name": "Codex",
+      "description": "Read every Ada concept without the story pressure.",
+      "url": "./?go=codex",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Read the Book",
+      "short_name": "Book",
+      "description": "Open the collected field notes and endings.",
+      "url": "./?go=book",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "shots/map.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "The House of Promises: five chapters, twenty inspections, a Book to fill."
+    },
+    {
+      "src": "shots/rite.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Assemble real Ada by tapping code lines in the order the compiler accepts."
+    },
+    {
+      "src": "shots/desktop.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Strictly Typed on desktop: the cosmic terminal, the promise seal, and one very precise eye."
+    }
+  ]
+}

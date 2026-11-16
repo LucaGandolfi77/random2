@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>STRICTLY TYPED — social cover</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    color: #f4ecd9;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    background:
+      radial-gradient(ellipse 60% 75% at 78% 30%, rgba(255, 184, 77, 0.12), transparent 62%),
+      radial-gradient(ellipse 55% 80% at 12% 90%, rgba(126, 240, 200, 0.07), transparent 65%),
+      linear-gradient(145deg, #0d091a 0%, #090611 60%, #07040d 100%);
+    position: relative;
+  }
+  .stars {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1.4px 1.4px at 60px 80px, rgba(255,244,220,.65), transparent 60%),
+      radial-gradient(1px 1px at 260px 40px, rgba(255,244,220,.35), transparent 60%),
+      radial-gradient(1.6px 1.6px at 520px 150px, rgba(255,184,77,.35), transparent 60%),
+      radial-gradient(1px 1px at 900px 70px, rgba(255,244,220,.4), transparent 60%),
+      radial-gradient(1.2px 1.2px at 1130px 200px, rgba(126,240,200,.4), transparent 60%),
+      radial-gradient(1px 1px at 720px 430px, rgba(255,244,220,.3), transparent 60%),
+      radial-gradient(1.4px 1.4px at 330px 520px, rgba(183,155,255,.35), transparent 60%),
+      radial-gradient(1px 1px at 1040px 530px, rgba(255,244,220,.3), transparent 60%);
+    background-repeat: repeat;
+    background-size: 1200px 630px;
+    opacity: .8;
+  }
+  .frame { position: absolute; inset: 22px; border: 1px solid rgba(244,236,217,.09); border-radius: 26px; }
+  .brand { position: absolute; top: 46px; left: 64px; display: flex; align-items: center; gap: 14px; font-size: 13px; letter-spacing: .2em; font-weight: 700; }
+  .brand em { color: #ffb84d; font-style: normal; }
+  .copy { position: absolute; left: 64px; top: 130px; width: 650px; }
+  .eyebrow { margin: 0 0 20px; color: #ffb84d; font-size: 13px; font-weight: 700; letter-spacing: .22em; }
+  h1 { margin: 0; font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; font-weight: 600; font-size: 126px; line-height: .8; letter-spacing: -.045em; }
+  h1 em { color: #ffb84d; font-style: italic; letter-spacing: -.055em; }
+  .lede { width: 540px; margin: 30px 0 0; color: #b6a9c2; font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: 23px; line-height: 1.5; }
+  .chips { display: flex; gap: 9px; margin-top: 32px; }
+  .chip { padding: 8px 11px; border: 1px solid rgba(244,236,217,.16); border-radius: 5px; color: #81748f; font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+  .chip.mint { color: #7ef0c8; border-color: rgba(126,240,200,.28); }
+  .tag { position: absolute; left: 64px; bottom: 46px; color: #81748f; font-size: 12px; letter-spacing: .08em; }
+  .tag strong { color: #f4ecd9; }
+  .art { position: absolute; right: 48px; top: 84px; width: 465px; height: 470px; }
+  .orbit { position: absolute; left: 20px; top: 72px; width: 420px; height: 220px; border: 1px solid rgba(255,184,77,.22); border-radius: 50%; transform: rotate(-21deg); }
+  .orbit.b { left: -10px; top: 100px; width: 480px; height: 265px; border-color: rgba(126,240,200,.12); transform: rotate(28deg); }
+  .seal { position: absolute; left: 134px; top: 85px; width: 190px; height: 190px; }
+  .glow { position: absolute; width: 420px; height: 420px; left: 20px; top: 10px; background: radial-gradient(circle, rgba(255,184,77,.14), transparent 66%); filter: blur(16px); }
+  .terminal { position: absolute; left: 0; bottom: 4px; width: 465px; border: 1px solid rgba(244,236,217,.2); border-radius: 14px; background: #090611; box-shadow: 0 40px 90px -35px #000; overflow: hidden; transform: rotate(-1deg); }
+  .bar { display: flex; align-items: center; gap: 11px; height: 34px; padding: 0 13px; border-bottom: 1px solid rgba(244,236,217,.12); background: rgba(255,255,255,.025); color: #81748f; font-size: 9px; letter-spacing: .1em; }
+  .dots { display: flex; gap: 5px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(244,236,217,.16); }
+  .dots i:first-child { background: rgba(255,113,102,.6); }
+  .dots i:nth-child(2) { background: rgba(255,184,77,.6); }
+  .dots i:nth-child(3) { background: rgba(126,240,200,.5); }
+  pre { margin: 0; padding: 17px 18px; color: #e9dfca; font-size: 15px; line-height: 1.7; }
+  .kw { color: #ffb84d; }
+  .ty { color: #7ef0c8; }
+  .str { color: #f1b8c5; }
+  .terminal-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid rgba(244,236,217,.1); color: #81748f; font-size: 10px; letter-spacing: .06em; }
+  .stamp { color: #7ef0c8; font-size: 10px; letter-spacing: .16em; }
+  .stars3 { color: #ffb84d; letter-spacing: 4px; font-size: 18px; }
+  .quote { position: absolute; right: 28px; bottom: 22px; width: 430px; color: #b6a9c2; font-family: "Iowan Old Style", Palatino, Georgia, serif; font-size: 16px; font-style: italic; line-height: 1.45; text-align: right; }
+  .quote b { color: #ffb84d; font-family: ui-monospace, Menlo, monospace; font-style: normal; font-size: 11px; letter-spacing: .12em; }
+</style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="frame"></div>
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 64 64" aria-hidden="true">
+      <circle cx="32" cy="32" r="29" fill="none" stroke="#ffb84d" stroke-opacity=".25"/>
+      <path d="M32 8 L52 32 L32 56 L12 32 Z" fill="none" stroke="#ffb84d" stroke-width="1.7"/>
+      <path d="M32 18 L43 32 L32 46 L21 32 Z" fill="#ffb84d" fill-opacity=".14" stroke="#ffb84d" stroke-opacity=".7"/>
+      <circle cx="32" cy="32" r="4.2" fill="#7ef0c8"/>
+      <path d="M6 32 L11 32 M53 32 L58 32" stroke="#7ef0c8" stroke-opacity=".6"/>
+    </svg>
+    STRICTLY <em>TYPED</em>
+  </div>
+
+  <div class="copy">
+    <p class="eyebrow">ADA &amp; THE LAST COMPILER</p>
+    <h1>STRICTLY<br><em>TYPED.</em></h1>
+    <p class="lede">The universe is an Ada program with the checks turned off. You are the last inspector. Your guide is a moth with heartburn.</p>
+    <div class="chips">
+      <span class="chip">20 INSPECTIONS</span>
+      <span class="chip">5 BOSSES</span>
+      <span class="chip">1 SECRET</span>
+      <span class="chip mint">OFFLINE PWA</span>
+    </div>
+  </div>
+
+  <div class="art">
+    <div class="glow"></div>
+    <div class="orbit"></div>
+    <div class="orbit b"></div>
+    <svg class="seal" viewBox="0 0 200 200" aria-hidden="true">
+      <circle cx="100" cy="100" r="94" fill="none" stroke="#ffb84d" stroke-opacity=".16"/>
+      <circle cx="100" cy="100" r="72" fill="none" stroke="#7ef0c8" stroke-opacity=".13" stroke-dasharray="2 9"/>
+      <path d="M100 24 L166 100 L100 176 L34 100 Z" fill="none" stroke="#ffb84d" stroke-width="3"/>
+      <path d="M100 57 L137 100 L100 143 L63 100 Z" fill="#ffb84d" fill-opacity=".1" stroke="#ffb84d" stroke-opacity=".65"/>
+      <circle cx="100" cy="100" r="10" fill="#7ef0c8"/>
+      <circle cx="100" cy="100" r="19" fill="none" stroke="#7ef0c8" stroke-opacity=".2"/>
+      <path d="M8 100 L24 100 M176 100 L192 100" stroke="#7ef0c8" stroke-opacity=".5"/>
+    </svg>
+    <div class="terminal">
+      <div class="bar"><span class="dots"><i></i><i></i><i></i></span> gnat://hello<span style="margin-left:auto;color:#ffb84d">STRICT</span></div>
+      <pre><span class="kw">with</span> Ada.Text_IO;
+<span class="kw">use</span> Ada.Text_IO;
+
+<span class="kw">procedure</span> Hello <span class="kw">is</span>
+<span class="kw">begin</span>
+   Put_Line (<span class="str">"Hello, World!"</span>);
+<span class="kw">end</span> Hello;</pre>
+      <div class="terminal-foot"><span class="stamp">✓ COMPILED</span><span class="stars3">★★★</span><span>0 MISTAKES</span></div>
+    </div>
+  </div>
+  <p class="quote"><b>GNAT, COMPILER-MOTH</b><br>“I ate every warning in this codebase. I have heartburn.”</p>
+</body>
+</html>

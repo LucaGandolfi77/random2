@@ -254,6 +254,9 @@ jobs:
           # FUMETTI: the issue's data contract, manifest icons, service-worker
           # precache and the reading-progress save/load contract.
           node --test fumetti-pwa/tests/*.test.mjs
+          # STRICTLY TYPED: chapter/node integrity, unique rite orders, every
+          # boss answer, star rules, save sanitising and ending gating.
+          node --test strictly-typed-pwa/tests/*.test.mjs
 
       - name: Analysis tooling tests
         run: |

@@ -105,6 +105,8 @@ seeds in Node.
 
 `last-call-pwa/` is a real-time lane card battler in a neon art-deco bar: 24 drinks across cocktails, wine, beer and spirits; two lane Taps and one Cellar per side; a Buzz resource that refills over time and doubles in the final Happy Hour; an eight-venue Bar Tour against bartender AIs whose card levels, think time and aggression rise venue by venue; a deck builder with three saved decks and five upgrade levels per card. The simulation is fixed-step at 60 Hz and DOM-free, the AI acts only through the same `Sim.playCard` as the player, and the arena, glasses and portraits are drawn procedurally in Canvas 2D with synthesised WebAudio. Single-player, offline PWA, no build step, no binary art beyond the generated icons. A 571-check headless suite covers the roster, economy, storage, deployment, spells, overtime and PWA contract; a 77-check Chrome smoke test plays a match, the tour, the deck builder and an offline reload.
 
+`strictly-typed-pwa/` is a mobile-first Ada learning game disguised as a cosmic comedy: fifteen tap-to-order code rites across types, control flow, arrays, functions, packages, records, access types, exceptions, generics, tasks and contracts, plus five find-the-fault boss audits; a Codex of real Ada 2012 snippets; and 20 collectible philosophical field notes leading to four endings, one of them secret. The universe and its citizens are drawn in inline SVG, the running Ada output is simulated (no WASM compiler), and the whole campaign is precached for offline play. No build step, no dependencies, ES modules, versioned `localStorage`, and `node:test` suites for content, puzzle and state invariants.
+
 `milano-nera-pwa/` is a 1970s Italian crime twin-stick shooter built as an original homage to the poliziottesco genre. Six chapters in three acts move from a brothel stealth job to Torre Velasca, the Metrò, Parco Lambro, a motorway chase and the Darsena finale. The pure simulation runs at a fixed 60 Hz and covers vision cones/line-of-sight, patrols, alert propagation, cover, roll i-frames, stealth takedowns, real projectiles, ricochets, molotov fires, boss phases, a train hazard, dog/shotgun AI and chase traffic. Rendering is procedural 384x216 pixel art with cached room art, film grain, rain and vignette; audio is synthesised. Mouse/keyboard, gamepad and mobile twin-stick controls are supported. Italian UI with acts, comic-panel intros and volume settings; an adaptive iPhone portrait/landscape layout with safe-area handling and startup images; offline PWA, no binary sprites, `node:test` suites and CDP smoke tests for the campaign and iPhone layout.
 
 `pixel-cup-pwa/` is a low-poly arcade football game whose picture is neither
@@ -159,6 +161,7 @@ node --test king-shot-pwa/tests/*.test.mjs   # KING SHOT simulation, daily, save
 node --test milano-nera-pwa/tests/*.test.mjs # MILANO NERA '77 sim, AI, levels, saves + assets
 node last-call-pwa/tests/run.mjs           # LAST CALL simulation, content + PWA contract
 node last-call-pwa/tests/smoke.mjs         # LAST CALL in-browser match, tour, deck, offline
+node --test strictly-typed-pwa/tests/*.test.mjs  # STRICTLY TYPED content, rites + saves
 ```
 
 ## Layout
