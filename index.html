@@ -4687,7 +4687,9 @@
     });
 
     /* ---------- Surprise me ---------- */
-    document.getElementById("random-btn").addEventListener("click", function () {
+    var randomBtn = document.getElementById("random-btn");
+    var randomBtnLabel = randomBtn.innerHTML;
+    randomBtn.addEventListener("click", function () {
       var playables = Array.prototype.slice.call(document.querySelectorAll('[data-playable]'));
       if (!playables.length) return;
       var pick = playables[Math.floor(Math.random() * playables.length)];
@@ -4698,6 +4700,28 @@
       setTimeout(function () {
         warpTo(dest);
       }, 420);
+    });
+
+    /* ---------- Back/forward cache ----------
+     * Coming back with the Back button restores this document verbatim,
+     * including `warping`, which would otherwise stay true forever and make
+     * every later Play click return early at the guard in warpTo(). The same
+     * restore also kept the launch flash painted and left Surprise me
+     * disabled, so reset the whole launch state whenever the page is shown. */
+    function resetLaunchState() {
+      warping = false;
+      warp = 0;
+      document.body.classList.remove("is-warping");
+      randomBtn.disabled = false;
+      randomBtn.innerHTML = randomBtnLabel;
+    }
+    window.addEventListener("pageshow", resetLaunchState);
+    window.addEventListener("pagehide", function () {
+      /* Also clear before the page is frozen, so a restored paint never
+       * shows the fully white warp frame. */
+      warp = 0;
+      warping = false;
+      document.body.classList.remove("is-warping");
     });
 
     /* ---------- Launch warp ----------
