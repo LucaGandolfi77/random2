@@ -27,11 +27,11 @@ export const SETTINGS_VERSION = 1;
 /* Quality tiers. `auto` picks between high and low from measured FPS. */
 export const QUALITY = {
     high: {
-        fx: { particles: 220, glow: true, shake: true, layers: true, text: true },
+        fx: { particles: 220, glow: true, shake: true, layers: true, text: true, mesh: true },
         dprCap: 2
     },
     low: {
-        fx: { particles: 70, glow: false, shake: false, layers: false, text: false },
+        fx: { particles: 70, glow: false, shake: false, layers: false, text: false, mesh: false },
         dprCap: 1.25
     }
 };

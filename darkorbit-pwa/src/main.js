@@ -586,7 +586,8 @@ function frame(ts) {
                 "\nTIER " + currentTier + (qualityCtl.isForced() ? " (forced)" : "") +
                 "\nPTCL " + (state ? state.particles.length : 0) +
                 "\nBULL " + (state ? state.bullets.length + state.enemyBullets.length : 0) +
-                "\nAUD  " + (audio.isReady() ? "on" : "off")
+                "\nAUD  " + (audio.isReady() ? "on" : "off") +
+                "\nHULL " + renderer.getRenderMode().toUpperCase()
             );
         }
     }

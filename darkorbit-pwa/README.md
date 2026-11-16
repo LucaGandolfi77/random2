@@ -57,9 +57,11 @@ tier / particle counter.
   upgrade tracks, up to four combat drones and three active abilities.
 - **Sectors.** Alpha → Beta → Gamma → Delta → Epsilon, gated by level, each with
   its own palette, enemies, hazard level and loot table (including Phantomite).
-- **Visuals.** Parallax stars, drifting asteroids, distant planets, layered glow,
-  hull plating, shield dome, shockwaves, floating damage numbers, screen shake
-  and an animated radar sweep — all procedural, with reduced-motion support.
+- **Visuals.** Procedural low-poly 2.5D hulls: every ship, enemy and drone is a
+  faceted 3D mesh with backface culling, depth sorting and flat shading, drawn
+  on Canvas 2D with no WebGL or art assets. Parallax stars, drifting asteroids,
+  distant planets, glow, shield domes, shockwaves, floating damage numbers,
+  screen shake and an animated radar — all procedural, reduced-motion aware.
 - **Performance.** Adaptive quality (hysteresis-based FPS monitor dips DPR,
   particles and glow on weak devices), pooled projectiles/particles, cached
   gradients, optional 30 fps power-save, and a procedural adaptive soundtrack

@@ -133,17 +133,23 @@ ok(layout && layout.backingWidth >= layout.cssWidth * 1.5, "the canvas backing s
 await sleep(450);
 ok(await evaluate("!document.getElementById('debug-hud').classList.contains('hidden')"), "the debug HUD is visible in debug mode");
 ok(await evaluate("/FPS/.test(document.getElementById('debug-hud').textContent)"), "the debug HUD reports FPS");
+ok(await evaluate("/HULL MESH/.test(document.getElementById('debug-hud').textContent)"), "high quality uses faceted 3D hulls");
 
 /* Settings screen and persistence. */
 await click('[data-action="settings"]');
 ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'settings'"), "Settings opens from the menu");
 await click('[data-action="setting"][data-key="fps"][data-value="30"]');
 ok(await evaluate("window.__DEEP_ORBIT__.getSettings().fps === 30"), "30 fps mode is applied");
+await click('[data-action="setting"][data-key="effects"][data-value="low"]');
+ok(await waitFor("/HULL 2D/.test(document.getElementById('debug-hud').textContent)", 1500), "low quality falls back to 2D silhouettes");
+await click('[data-action="setting"][data-key="effects"][data-value="high"]');
+ok(await waitFor("/HULL MESH/.test(document.getElementById('debug-hud').textContent)", 1500), "high quality restores 3D hulls");
 await click('[data-action="setting"][data-key="palette"][data-value="colorblind"]');
 ok(await evaluate("document.body.classList.contains('cb')"), "colorblind palette is applied");
 ok(await waitFor("JSON.parse(localStorage.getItem('darkorbit-settings') || '{}').palette === 'colorblind'"), "settings are persisted");
 await click('[data-action="setting"][data-key="fps"][data-value="60"]');
 await click('[data-action="setting"][data-key="palette"][data-value="normal"]');
+await click('[data-action="setting"][data-key="effects"][data-value="auto"]');
 await click('[data-action="close-settings"]');
 ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "Settings returns to the menu");
 
