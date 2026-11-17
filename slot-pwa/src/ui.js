@@ -32,12 +32,15 @@ export class UI {
     };
     this.handlers = {};
     this.onClose = null;
+    this.fallbackAction = null;
 
     this.closeBtn.addEventListener('click', () => this.hide());
     this.overlay.addEventListener('click', (e) => {
       if (e.target === this.overlay) this.hide();
       const el = e.target.closest('[data-action]');
-      if (el && this.handlers[el.dataset.action]) this.handlers[el.dataset.action](el.dataset);
+      if (!el) return;
+      if (this.handlers[el.dataset.action]) this.handlers[el.dataset.action](el.dataset);
+      else if (this.fallbackAction) this.fallbackAction(el.dataset.action, el.dataset);
     });
     this.overlay.addEventListener('change', (e) => {
       if (e.target.dataset.setting && this.handlers.setting) {
@@ -47,12 +50,15 @@ export class UI {
     this.lobby.addEventListener('click', (e) => {
       if (e.target.id === 'lobby-close' || e.target === this.lobby) { this.hideLobby(); return; }
       const el = e.target.closest('[data-action]');
-      if (el && this.handlers[el.dataset.action]) this.handlers[el.dataset.action](el.dataset);
+      if (!el) return;
+      if (this.handlers[el.dataset.action]) this.handlers[el.dataset.action](el.dataset);
+      else if (this.fallbackAction) this.fallbackAction(el.dataset.action, el.dataset);
     });
     document.getElementById('lobby-close').addEventListener('click', () => this.hideLobby());
   }
 
   setHandlers(handlers) { this.handlers = { ...this.handlers, ...handlers }; }
+  setFallback(fn) { this.fallbackAction = fn; }
 
   show(title, html, { dismissible = true } = {}) {
     this.title.textContent = title;

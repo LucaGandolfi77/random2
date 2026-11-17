@@ -623,6 +623,7 @@ function init() {
   ];
   ui.setHandlers(Object.fromEntries(delegated.map((name) => [name, (data) => action(name, data)])));
   ui.setHandlers({ setting: (key, value) => action('setting', { setting: key, value }) });
+  ui.setFallback((name, data) => action(name, data));
   setupPWA(ui);
   markPlayed(R2);
   audio.startMusic();

@@ -50,7 +50,9 @@ try {
   ok(await evaluate('window.__slot.machines.length === 8'), 'eight machines registered');
   ok(await evaluate('window.__slot.state().credits === 1000'), 'starting credits');
 
-  await evaluate('window.__slot.action("close")');
+  // Click the welcome CTA like a real user (regression: unbound close action).
+  await evaluate('document.querySelector("#panel-body [data-action=\'close\']").click()');
+  ok(await evaluate('document.getElementById("panel-overlay").classList.contains("hidden")'), 'welcome CTA closes panel');
   await evaluate('window.__slot.action("lobby")');
   ok(await evaluate('!document.getElementById("lobby-overlay").classList.contains("hidden")'), 'lobby opens');
   ok(await evaluate('document.querySelectorAll(".machine-card").length === 8'), 'lobby lists eight machines');
@@ -86,7 +88,8 @@ try {
 
   await evaluate('window.__slot.action("daily")');
   ok(await evaluate('window.__slot.state().daily.last.length === 10'), 'daily bonus claimed');
-  await evaluate('window.__slot.action("close")');
+  await evaluate('document.querySelector("#panel-body [data-action=\'close\']").click()');
+  ok(await evaluate('document.getElementById("panel-overlay").classList.contains("hidden")'), 'daily CTA closes panel');
 
   await evaluate('window.__slot.action("challenge")');
   ok(await evaluate('window.__slot.mode() === "challenge"'), 'daily challenge starts');
