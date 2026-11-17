@@ -2,7 +2,7 @@
  * Network-first for navigations (offline falls back to the cached shell),
  * stale-while-revalidate for static assets. Install once, play forever.
  */
-const CACHE = 'slot-pwa-v6';
+const CACHE = 'slot-pwa-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -46,6 +46,12 @@ const ASSETS = [
   './src/machines/vault.js',
   './src/machines/atlantis.js',
   './src/machines/samurai.js',
+  './src/machines/bar-blu.js',
+  './src/machines/giro-bar.js',
+  './src/machines/armata.js',
+  './src/machines/sinibbio.js',
+  './src/machines/agente.js',
+  './src/machines/principina.js',
   './icons/icon.svg',
   './icons/icon-maskable.svg',
   './icons/machines/lucky-seven.png',
@@ -56,6 +62,12 @@ const ASSETS = [
   './icons/machines/vault.png',
   './icons/machines/atlantis.png',
   './icons/machines/samurai.png',
+  './icons/machines/bar-blu.svg', './icons/machines/bar-blu.png',
+  './icons/machines/giro-bar.svg', './icons/machines/giro-bar.png',
+  './icons/machines/armata.svg', './icons/machines/armata.png',
+  './icons/machines/sinibbio.svg', './icons/machines/sinibbio.png',
+  './icons/machines/agente.svg', './icons/machines/agente.png',
+  './icons/machines/principina.svg', './icons/machines/principina.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',

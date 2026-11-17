@@ -21,6 +21,12 @@ const THEMES = {
   safari:  { bg1: '#332206', bg2: '#0d0801', edge: '#fbbf24', accent: '#84cc16', metal: '#5c4210' },
   ocean:   { bg1: '#04243d', bg2: '#010a14', edge: '#38bdf8', accent: '#22d3ee', metal: '#0d3556' },
   samurai: { bg1: '#360507', bg2: '#0d0101', edge: '#ff5252', accent: '#ffd166', metal: '#6b1015' },
+  barblue:   { bg1: '#03122e', bg2: '#01050f', edge: '#3fa9ff', accent: '#7ce0ff', metal: '#0e2c66' },
+  girobar:   { bg1: '#2a0c03', bg2: '#0d0301', edge: '#ff7043', accent: '#ffd166', metal: '#5c1c0d' },
+  armata:    { bg1: '#0c1030', bg2: '#03040d', edge: '#ffd400', accent: '#0055ff', metal: '#25347a' },
+  sinibbio:  { bg1: '#1c1e29', bg2: '#08090d', edge: '#f5f5ff', accent: '#ff9fc4', metal: '#34384d' },
+  agente:    { bg1: '#04251a', bg2: '#010a06', edge: '#39ff9e', accent: '#b8ff4d', metal: '#0d4433' },
+  principina:{ bg1: '#052a3d', bg2: '#01090f', edge: '#7fe0ff', accent: '#ffe0a3', metal: '#0e4a6b' },
 };
 
 const MACHINES = [
@@ -32,6 +38,12 @@ const MACHINES = [
   { id: 'vault',          theme: 'safari', title: 'VAULT',       motif: 'vault' },
   { id: 'atlantis',       theme: 'ocean',  title: 'ATLANTIS',    motif: 'wave' },
   { id: 'samurai',        theme: 'samurai',title: 'SAMURAI',     motif: 'sword' },
+  { id: 'bar-blu',        theme: 'barblue',  title: 'BAR BLU',    motif: 'cocktail' },
+  { id: 'giro-bar',       theme: 'girobar',  title: 'GIRO BAR',   motif: 'bike' },
+  { id: 'armata',         theme: 'armata',   title: 'ARMATA',     motif: 'ball' },
+  { id: 'sinibbio',       theme: 'sinibbio', title: 'SINIBBIO',   motif: 'bunny' },
+  { id: 'agente',         theme: 'agente',   title: 'AGENTE ZERO',motif: 'lens' },
+  { id: 'principina',     theme: 'principina',title:'PRINCIPINA', motif: 'crown' },
 ];
 
 function motif(kind, t) {
@@ -63,6 +75,33 @@ function motif(kind, t) {
       return `<path d="M256 148 L282 196 L270 320 L242 320 L230 196 Z" fill="${t.edge}" filter="url(#glow)"/>
         <rect x="196" y="316" width="120" height="18" rx="8" fill="${t.accent}"/>
         <rect x="248" y="332" width="16" height="46" rx="6" fill="${t.edge}"/>`;
+    case 'cocktail':
+      return `<path d="M176 180 L336 180 L256 300 Z" fill="${t.edge}" opacity=".85" filter="url(#glow)"/>
+        <path d="M176 180 L336 180" stroke="#fff" stroke-width="8"/>
+        <path d="M256 300 L256 358 M210 358 L302 358" stroke="${t.accent}" stroke-width="10"/>
+        <circle cx="296" cy="206" r="15" fill="#ff5ec4"/>`;
+    case 'bike':
+      return `<circle cx="180" cy="290" r="58" fill="none" stroke="${t.edge}" stroke-width="12" filter="url(#glow)"/>
+        <circle cx="332" cy="290" r="58" fill="none" stroke="${t.edge}" stroke-width="12"/>
+        <path d="M180 290 L238 196 L300 290 L180 290 M238 196 L312 184" fill="none" stroke="${t.accent}" stroke-width="11"/>`;
+    case 'ball':
+      return `<circle cx="256" cy="250" r="88" fill="${t.edge}" filter="url(#glow)"/>
+        <path d="M168 250 H344 M256 162 V338" stroke="#2a1400" stroke-width="8"/>
+        <circle cx="256" cy="250" r="46" fill="none" stroke="#2a1400" stroke-width="8"/>`;
+    case 'bunny':
+      return `<ellipse cx="216" cy="168" rx="26" ry="60" fill="${t.edge}" filter="url(#glow)"/>
+        <ellipse cx="296" cy="168" rx="26" ry="60" fill="${t.edge}"/>
+        <circle cx="256" cy="272" r="82" fill="${t.edge}"/>
+        <circle cx="228" cy="258" r="9" fill="#111"/><circle cx="284" cy="258" r="9" fill="#111"/>
+        <circle cx="256" cy="292" r="10" fill="${t.accent}"/>`;
+    case 'lens':
+      return `<circle cx="232" cy="226" r="78" fill="none" stroke="${t.edge}" stroke-width="16" filter="url(#glow)"/>
+        <path d="M288 282 L356 350" stroke="${t.accent}" stroke-width="18" stroke-linecap="round"/>
+        <circle cx="216" cy="210" r="24" fill="#fff" opacity=".25"/>`;
+    case 'crown':
+      return `<path d="M156 320 L176 170 L256 250 L336 170 L356 320 Z" fill="${t.edge}" filter="url(#glow)"/>
+        <rect x="156" y="320" width="200" height="36" rx="8" fill="${t.accent}"/>
+        <circle cx="256" cy="160" r="14" fill="#fff6c0"/>`;
     default:
       return `<circle cx="256" cy="252" r="70" fill="${t.edge}"/>`;
   }

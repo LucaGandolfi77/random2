@@ -44,6 +44,30 @@ export const THEMES = {
     label: 'Safari Amber', bg: '#140d03', panel: '#2a1c07', metal: '#594011',
     edge: '#fbbf24', glow: '#f59e0b', accent: '#84cc16', text: '#fff7e0', motif: '#fbbf2420',
   },
+  barblue: {
+    label: 'Bar Blu', bg: '#030a1c', panel: '#071634', metal: '#0e2c66',
+    edge: '#3fa9ff', glow: '#0066ff', accent: '#7ce0ff', text: '#eaf6ff', motif: '#3fa9ff22',
+  },
+  girobar: {
+    label: 'Giro dei Bar', bg: '#160502', panel: '#2c0c05', metal: '#5c1c0d',
+    edge: '#ff7043', glow: '#ff3d00', accent: '#ffd166', text: '#fff0e6', motif: '#ff704320',
+  },
+  armata: {
+    label: 'Armata Gialloblù', bg: '#0a0c1a', panel: '#141a3d', metal: '#25347a',
+    edge: '#ffd400', glow: '#0055ff', accent: '#ffd400', text: '#ffffff', motif: '#ffd40022',
+  },
+  sinibbio: {
+    label: 'Sinibbio Reale', bg: '#0c0d12', panel: '#1a1c26', metal: '#34384d',
+    edge: '#f5f5ff', glow: '#c7d2fe', accent: '#ff9fc4', text: '#ffffff', motif: '#ffffff1e',
+  },
+  agente: {
+    label: 'Agente Zero', bg: '#03100c', panel: '#072119', metal: '#0d4433',
+    edge: '#39ff9e', glow: '#00e676', accent: '#b8ff4d', text: '#eafff5', motif: '#39ff9e20',
+  },
+  principina: {
+    label: 'Principina a Mare', bg: '#041018', panel: '#08263a', metal: '#0e4a6b',
+    edge: '#7fe0ff', glow: '#29b6f6', accent: '#ffe0a3', text: '#f2fbff', motif: '#7fe0ff20',
+  },
 };
 
 export const GLOBAL_JACKPOTS = {
@@ -63,8 +87,11 @@ export const STORAGE_KEY = 'slot-pwa-v3';
 export const JACKPOT_KEY = 'slot-jackpot-v2';
 
 /* XP needed to reach each VIP level (index = level - 1). */
-export const VIP_LEVELS = [0, 100, 300, 700, 1400, 2600, 5000];
-export const VIP_NAMES = ['Rookie', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Legend'];
+export const VIP_LEVELS = [0, 100, 300, 700, 1400, 2600, 5000, 8000, 12000, 17000, 23000];
+export const VIP_NAMES = [
+  'Rookie', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Legend',
+  'Champion', 'Master', 'Grandmaster', 'Icon',
+];
 export const XP_PER_WAGER = 0.1; // 10 credits wagered = 1 XP
 
 /* Seven-day reward ladder: credits + free spins. */

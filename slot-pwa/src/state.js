@@ -1,6 +1,6 @@
 /* Session state, shared wallet, VIP progression and persistence. Storage is injected. */
 import {
-  STORAGE_KEY, JACKPOT_KEY, GLOBAL_JACKPOTS, VIP_LEVELS,
+  STORAGE_KEY, JACKPOT_KEY, GLOBAL_JACKPOTS, VIP_LEVELS, VIP_NAMES,
   DEFAULT_LINES, XP_PER_WAGER, vipLevel, todayKey,
 } from './config.js';
 import { MACHINES, getMachine } from './machines/index.js';
@@ -88,7 +88,7 @@ export function saveJackpots(storage, jackpots) {
 
 export const machineOf = (state) => getMachine(state.machineId);
 export const vip = (state) => vipLevel(state.xp);
-export const vipName = (state) => ['Rookie', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Legend'][vip(state) - 1];
+export const vipName = (state) => VIP_NAMES[vip(state) - 1] || VIP_NAMES[0];
 export const betPerLine = (state, machine = machineOf(state)) => machine.betSteps[state.betIndex % machine.betSteps.length];
 export const activeLines = (state, machine = machineOf(state)) => {
   const opts = machine.lineOptions || [DEFAULT_LINES];

@@ -47,7 +47,7 @@ try {
 
   ok(await waitFor('!!window.__slot'), 'game boots');
   ok(await evaluate('document.getElementById("game-canvas").width === 540'), 'canvas logical size');
-  ok(await evaluate('window.__slot.machines.length === 8'), 'eight machines registered');
+  ok(await evaluate('window.__slot.machines.length === 14'), 'fourteen machines registered');
   ok(await evaluate('window.__slot.state().credits === 1000'), 'starting credits');
 
   // Click the welcome CTA like a real user (regression: unbound close action).
@@ -55,8 +55,8 @@ try {
   ok(await evaluate('document.getElementById("panel-overlay").classList.contains("hidden")'), 'welcome CTA closes panel');
   await evaluate('window.__slot.action("lobby")');
   ok(await evaluate('!document.getElementById("lobby-overlay").classList.contains("hidden")'), 'lobby opens');
-  ok(await evaluate('document.querySelectorAll(".machine-card").length === 8'), 'lobby lists eight machines');
-  ok(await evaluate('document.querySelectorAll(".machine-card.locked").length === 6'), 'six machines locked at VIP 1');
+  ok(await evaluate('document.querySelectorAll(".machine-card").length === 14'), 'lobby lists fourteen machines');
+  ok(await evaluate('document.querySelectorAll(".machine-card.locked").length === 10'), 'ten machines locked at VIP 1');
 
   await evaluate('window.__slot.action("selectMachine"); window.__slot.action("togglePractice")');
   ok(await evaluate('window.__slot.practice() === true'), 'practice mode toggles');

@@ -6,6 +6,8 @@ const FAMILY = {
   neon: 'spark', retro: 'grid', forest: 'leaves', ocean: 'bubbles',
   egypt: 'sand', cosmic: 'stars', candy: 'sprinkles', norse: 'snow',
   samurai: 'embers', safari: 'dust',
+  barblue: 'bubbles', girobar: 'spark', armata: 'confetti',
+  sinibbio: 'snow', agente: 'leaves', principina: 'bubbles',
 };
 
 function seeded(n) {

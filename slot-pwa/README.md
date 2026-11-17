@@ -1,10 +1,10 @@
 # Lucky Seven — Slot Arcade
 
-> Eight machines. Three pay systems. A dozen mechanics. Four progressive
-> jackpots. Six play modes, a nine-stage quest campaign, vector symbol art and
-> a full effects system — one installable, offline-first arcade with no build
-> step and no dependencies. Every cabinet, reel, symbol and effect is drawn on
-> canvas; nothing is fetched from the network at runtime.
+> Fourteen machines. Three pay systems. A dozen mechanics. Four progressive
+> jackpots. Twelve play modes, a nine-stage quest campaign, dedicated vector
+> symbol art and a full effects system — one installable, offline-first arcade
+> with no build step and no dependencies. Every cabinet, reel, symbol and
+> effect is drawn on canvas; nothing is fetched from the network at runtime.
 
 **Play it:** <https://lucagandolfi77.github.io/random2/slot-pwa/>
 
@@ -18,7 +18,7 @@ python3 -m http.server 8080
 ## The roster
 
 Pick a machine in the **lobby** (🏠 or `H`). Machines unlock with VIP level;
-all eight are available at VIP 7. One shared wallet and one set of global
+all fourteen are available at VIP 11. One shared wallet and one set of global
 jackpots span the whole arcade.
 
 | # | Machine | Grid / pays | Signature mechanics | VIP | Volatility | RTP* |
@@ -31,6 +31,16 @@ jackpots span the whole arcade.
 | 6 | 💎 **Vault Breaker** | 3×3 · 5 lines | Hold & Win respins with coin values and jackpots | 5 | Medium | ~98% |
 | 7 | 🐚 **Atlantis Deep** | 5×3 · 20 lines | Sticky wilds in free spins, scatter respins | 6 | Medium | ~92% |
 | 8 | ⚔️ **Samurai Spirit** | 5×3 · 15 lines | Shifting wild, gamble, bonus buy | 7 | High | ~91% |
+| 9 | 🍸 **Bar Blu di Luca Zheng** | 5×3 · 20 lines | Neon drinks, cascades, jackpot wheel | 1 | Medium | ~98% |
+| 10 | 🚲 **Giro dei Bar** | 5×3 · 25 lines | Pub-crawl bonus, gamble, bonus buy | 1 | High | ~97% |
+| 11 | 🏀 **Armata Gialloblù** | 5×4 · 243 ways | Fulgor Fidenza fans, sticky wilds, multiplier ladder | 8 | High | ~97% |
+| 12 | 🐰 **Sinibbio Reale** | 3×3 · 5 lines | Royal Hold & Win coins and jackpots | 9 | Medium | ~99% |
+| 13 | 🕵️ **Giardino Agente Zero** | 6×5 · clusters | Mystery symbols, upgrades, tumbling clusters | 10 | High | ~98% |
+| 14 | 👑 **Principina a Mare** | 5×3 · 20 lines | Seaside cascades, scatter respins, jackpot wheel | 11 | Medium | ~93% |
+
+The first six machines are free from VIP 1; Armata, Sinibbio, Agente Zero and
+Principina unlock at VIP 8–11. The VIP ladder now runs from **Rookie** to
+**Icon** across 11 levels.
 
 \* Measured by `node scripts/balance.mjs 20000`, a seeded Monte Carlo of the
 full game loop for each machine (line/cluster/ways wins, cascades, scatters,
@@ -207,7 +217,7 @@ exposes the global `R2`. Everything under `src/` is pure except `main.js`.
 ## Development
 
 ```bash
-npm test                          # 74 unit tests
+npm test                          # 76 unit tests
 npm run smoke                     # 45 headless mobile checks incl. offline reload
 node scripts/balance.mjs 20000    # per-machine RTP report
 npm run assets                    # regenerate SVG + PNG icons/screens (sharp in ../bucio)
