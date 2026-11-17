@@ -1,0 +1,23 @@
+{
+  "name": "Ripple Cove — Cozy Fishing",
+  "short_name": "Ripple Cove",
+  "description": "A cozy fishing PWA: fish the river, lake, sea and ocean, fill your fishopedia, and decorate your grandfather's cabin with furniture, fish and trophies.",
+  "background_color": "#0e3a4d",
+  "theme_color": "#0e3a4d",
+  "display": "standalone",
+  "orientation": "portrait",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "icons": [
+    { "src": "icons/icon-72.svg", "sizes": "72x72", "type": "image/svg+xml" },
+    { "src": "icons/icon-96.svg", "sizes": "96x96", "type": "image/svg+xml" },
+    { "src": "icons/icon-128.svg", "sizes": "128x128", "type": "image/svg+xml" },
+    { "src": "icons/icon-144.svg", "sizes": "144x144", "type": "image/svg+xml" },
+    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+    { "src": "icons/icon-256.svg", "sizes": "256x256", "type": "image/svg+xml" },
+    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

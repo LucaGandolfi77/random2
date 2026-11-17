@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0e3a4d">
+<title>Ripple Cove</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.svg">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<canvas id="scene" aria-label="Fishing scene"></canvas>
+
+<!-- ══════════ FISHING VIEW ══════════ -->
+<section id="view-fish" class="view">
+  <header id="hud">
+    <div class="chip"><span class="ic">🪙</span><b id="coins">0</b></div>
+    <div class="chip lvl"><span class="ic">⭐</span><b id="lvl">1</b><span id="xpbar"><i id="xpfill"></i></span></div>
+    <div class="chip env"><span id="clock">06:00</span><span id="wicon">☀️</span><span id="sicon">🌸</span></div>
+  </header>
+
+  <nav id="locbar">
+    <button class="loc" data-loc="river"><span>🏞️</span><small data-i18n="loc_river">Fiume</small></button>
+    <button class="loc" data-loc="lake"><span>🪷</span><small data-i18n="loc_lake">Lago</small></button>
+    <button class="loc" data-loc="sea"><span>🌊</span><small data-i18n="loc_sea">Mare</small></button>
+    <button class="loc" data-loc="ocean"><span>🐋</span><small data-i18n="loc_ocean">Oceano</small></button>
+  </nav>
+
+  <p id="status" data-i18n="tap_cast">Tocca LANCIA per pescare</p>
+
+  <footer id="dock">
+    <button id="btn-bait">🪱 <b id="bait-n">×3</b></button>
+    <button id="btn-cast">🎣 <span data-i18n="cast" id="cast-label">LANCIA</span></button>
+    <button id="btn-bucket">🪣 <b id="bucket-n">0</b></button>
+  </footer>
+</section>
+
+<!-- ══════════ CABIN VIEW ══════════ -->
+<section id="view-cabin" class="view" hidden>
+  <header id="cab-hud">
+    <div class="chip"><span class="ic">🛋️</span><b id="cozy">0</b></div>
+    <div class="chip" id="bonuses"><span class="ic">✨</span><b id="bonus-txt">—</b></div>
+  </header>
+  <div id="room">
+    <div id="wallband"></div>
+    <div id="cat" hidden>🐈</div>
+  </div>
+  <p class="hint" data-i18n="room_hint">Trascina gli oggetti · tocca un pesce montato per rimuoverlo</p>
+  <footer id="cab-foot">
+    <button id="btn-bucket2">🪣 <span data-i18n="bucket">Secchio</span></button>
+    <button id="btn-shop2">🛒 <span data-i18n="nav_shop">Negozi</span></button>
+  </footer>
+</section>
+
+<!-- ══════════ BOTTOM NAV ══════════ -->
+<nav id="nav">
+  <button data-view="fish" class="on"><span>🎣</span><small data-i18n="nav_fish">Pesca</small></button>
+  <button data-view="cabin"><span>🏠</span><small data-i18n="nav_cabin">Casa</small></button>
+  <button data-panel="shop"><span>🛒</span><small data-i18n="nav_shop">Negozi</small></button>
+  <button data-panel="fisho"><span>📖</span><small data-i18n="nav_fisho">Ittica</small></button>
+  <button data-panel="quests"><span>📋</span><small data-i18n="nav_quests">Missioni</small></button>
+  <button data-panel="settings"><span>⚙️</span><small data-i18n="nav_set">Opzioni</small></button>
+</nav>
+
+<!-- ══════════ BATTLE ══════════ -->
+<section id="battle" hidden>
+  <div id="b-head"><b id="b-name">???</b><span id="b-hint" data-i18n="b_hold">TIENI PREMUTO per sollevare</span></div>
+  <div id="b-track">
+    <div id="b-prog"></div>
+    <div id="b-zone"></div>
+    <span id="b-fish">🐟</span>
+  </div>
+  <div id="b-ten"><i id="b-tenfill"></i><span data-i18n="b_ten">Filo</span></div>
+</section>
+
+<!-- ══════════ CATCH CARD ══════════ -->
+<section id="card" class="modal" hidden>
+  <div class="sheet">
+    <div id="c-emoji">🐟</div>
+    <h2 id="c-name">—</h2>
+    <p id="c-meta">—</p>
+    <p id="c-rec" hidden>🏆 <span data-i18n="new_record">Nuovo record!</span></p>
+    <p id="c-flavor">—</p>
+    <div class="row">
+      <button id="c-mount">🖼️<small data-i18n="mount">Monta</small></button>
+      <button id="c-craft">🧪<small data-i18n="make_bait">Esca</small></button>
+      <button id="c-sell">🪙<small data-i18n="sell">Vendi</small></button>
+      <button id="c-keep">🪣<small data-i18n="keep">Tieni</small></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ITEM POPOVER (cabin) ══════════ -->
+<section id="pop" class="modal" hidden>
+  <div class="sheet small">
+    <h2 id="pop-name">—</h2>
+    <p id="pop-desc">—</p>
+    <div class="row">
+      <button id="pop-out">🪣<small data-i18n="back_bucket">In secchio</small></button>
+      <button id="pop-sell">🪙<small data-i18n="sell_item">Vendi ½</small></button>
+      <button id="pop-x">✕<small data-i18n="close">Chiudi</small></button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PANELS ══════════ -->
+<section id="p-shop" class="panel" hidden>
+  <header><h2 data-i18n="nav_shop">Negozi</h2><button class="close">✕</button></header>
+  <nav class="tabs" id="shop-tabs">
+    <button data-tab="rods">🎣</button>
+    <button data-tab="boats">⛵</button>
+    <button data-tab="bait">🪱</button>
+    <button data-tab="cabin">🛋️</button>
+    <button data-tab="extras">✨</button>
+    <button data-tab="merchant" id="tab-merc" hidden>🛍️</button>
+  </nav>
+  <div class="pbody" id="shop-body"></div>
+</section>
+
+<section id="p-bucket" class="panel" hidden>
+  <header><h2 data-i18n="bucket">Secchio</h2><button class="close">✕</button></header>
+  <div class="pbody">
+    <div class="row" id="bucket-actions">
+      <button id="bk-sellall">🪙 <span data-i18n="sell_all">Vendi tutto</span></button>
+      <button id="bk-sellall2" hidden>🛍️ <span data-i18n="sell_all2">Vendi tutto ×2</span></button>
+    </div>
+    <div id="bucket-list" class="list"></div>
+    <h3 data-i18n="recipes">Ricette esche</h3>
+    <div id="recipes" class="list"></div>
+  </div>
+</section>
+
+<section id="p-fisho" class="panel" hidden>
+  <header><h2 data-i18n="nav_fisho">Ittica</h2><button class="close">✕</button></header>
+  <div class="pbody">
+    <p id="fisho-progress" class="mini"></p>
+    <div id="fisho-list" class="cards"></div>
+  </div>
+</section>
+
+<section id="p-quests" class="panel" hidden>
+  <header><h2 data-i18n="nav_quests">Missioni</h2><button class="close">✕</button></header>
+  <div class="pbody"><div id="quest-list" class="list"></div></div>
+</section>
+
+<section id="p-bait" class="panel" hidden>
+  <header><h2 data-i18n="choose_bait">Scegli esca</h2><button class="close">✕</button></header>
+  <div class="pbody"><div id="bait-list" class="list"></div></div>
+</section>
+
+<section id="p-settings" class="panel" hidden>
+  <header><h2 data-i18n="nav_set">Opzioni</h2><button class="close">✕</button></header>
+  <div class="pbody">
+    <label class="setrow"><span data-i18n="set_lang">Lingua</span>
+      <select id="set-lang"><option value="it">Italiano</option><option value="en">English</option></select>
+    </label>
+    <label class="setrow"><span data-i18n="set_sound">Suoni</span><input type="checkbox" id="set-sound" checked></label>
+    <label class="setrow"><span data-i18n="set_haptic">Vibrazione</span><input type="checkbox" id="set-haptic" checked></label>
+    <div class="setrow"><span data-i18n="stats">Statistiche</span><b id="stats-txt">—</b></div>
+    <div class="row">
+      <button id="set-export">📤 <span data-i18n="export">Esporta</span></button>
+      <button id="set-import">📥 <span data-i18n="import">Importa</span></button>
+      <button id="set-reset" class="danger">🗑️ <span data-i18n="reset">Ricomincia</span></button>
+    </div>
+    <input type="file" id="import-file" accept="application/json" hidden>
+  </div>
+</section>
+
+<!-- ══════════ OFFLINE REPORT ══════════ -->
+<section id="p-offline" class="modal" hidden>
+  <div class="sheet small">
+    <h2>🕸️ <span data-i18n="offline_title">Mentre eri via…</span></h2>
+    <p id="offline-txt">—</p>
+    <div class="row"><button id="offline-ok">🪙<small data-i18n="collect">Raccogli</small></button></div>
+  </div>
+</section>
+
+<!-- ══════════ ONBOARDING ══════════ -->
+<section id="p-hello" class="modal" hidden>
+  <div class="sheet small">
+    <h2>🎣 Ripple Cove</h2>
+    <p data-i18n="hello_1">Hai ereditato la vecchia cabina del nonno, su una baia tranquilla.</p>
+    <p data-i18n="hello_2">Pesca al fiume, al lago, al mare e infine in oceano. Vendi o monta i pesci, compra esche, canne e arredi.</p>
+    <p data-i18n="hello_3">La mira: riempire l'ittica e rendere la cabina il posto più accogliente del mondo.</p>
+    <div class="row"><button id="hello-go">🌅<small data-i18n="start">Inizia</small></button></div>
+  </div>
+</section>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script type="module" src="game.js"></script>
+</body>
+</html>
