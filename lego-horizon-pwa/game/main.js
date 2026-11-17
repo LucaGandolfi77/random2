@@ -16,7 +16,7 @@ import {
 import { t } from "./i18n.js";
 import { createRecorder, record as recordFrame, encodeReplay } from "./replay.js";
 import { detectTier, qualityFor } from "./quality.js";
-import { renderHub, renderHunt, setPalette, villageHitTest, cellRect } from "./render.js";
+import { renderHub, renderHunt, setPalette, setQualityLevel, setReducedMotion, villageHitTest, cellScreenRect } from "./render.js";
 import { createInput } from "./input.js";
 import { createAudio } from "./audio.js";
 import { createEffects } from "./effects.js";
@@ -52,9 +52,11 @@ export function startGame(options = {}) {
   const effects = createEffects();
   let reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches || false;
   effects.setReduced(reduced);
+  setReducedMotion(reduced);
   const tier = detectTier();
   const quality = qualityFor(tier);
   effects.setQuality(quality.particles);
+  setQualityLevel(tier);
   if (!quality.effects) effects.setReduced(true);
 
   let save = loadSave();
@@ -588,6 +590,8 @@ export function startGame(options = {}) {
     updateHud();
   }, sig);
 
+  /* Canvas CSS pixels -> arena view coordinates. The renderer draws in these
+   * coordinates after applying the 2.5D camera, so hit tests use them too. */
   function clientToWorld(event) {
     const rect = canvas.getBoundingClientRect();
     const scale = Math.min(rect.width / ARENA.width, rect.height / ARENA.height);
@@ -601,7 +605,7 @@ export function startGame(options = {}) {
 
   function cellFromWorld(point) {
     for (let cell = 0; cell < GRID.cols * GRID.rows; cell++) {
-      const r = cellRect(cell);
+      const r = cellScreenRect(cell);
       if (point.x >= r.x && point.x <= r.x + r.w && point.y >= r.y && point.y <= r.y + r.h) {
         return cell;
       }
@@ -751,6 +755,7 @@ export function startGame(options = {}) {
       if (key === "reduced") {
         reduced = !reduced;
         effects.setReduced(reduced);
+        setReducedMotion(reduced);
       } else audio.toggle(key);
       paintSettings();
     }, sig)

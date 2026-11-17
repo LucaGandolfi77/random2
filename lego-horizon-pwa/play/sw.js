@@ -1,6 +1,6 @@
 /* Dedicated Machine Hunt app shell. Caches the play entry and all shared game
  * modules from the parent folder so the standalone app works offline. */
-const CACHE = "machine-hunt-app-v1";
+const CACHE = "machine-hunt-app-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -14,6 +14,8 @@ const ASSETS = [
   "../game/combat.js",
   "../game/bosses.js",
   "../game/render.js",
+  "../game/projection.js",
+  "../game/models.js",
   "../game/input.js",
   "../game/audio.js",
   "../game/effects.js",

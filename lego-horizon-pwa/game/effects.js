@@ -2,6 +2,8 @@
  * canvas drawing calls. The sim emits descriptors into hunt.fx; main.js feeds
  * them here.
  */
+import { project } from "./projection.js";
+
 const TAU = Math.PI * 2;
 const MAX_PARTICLES = 320;
 const MAX_TEXTS = 40;
@@ -80,6 +82,7 @@ export function createEffects() {
       case "kill":
         particle(fx.x, fx.y, COLORS.kill, 16, 210, 5);
         particle(fx.x, fx.y, COLORS.core, 8, 130, 4);
+        ring(fx.x, fx.y, 28, COLORS.kill, 0.38);
         if (fx.score) text(fx.x, fx.y - 20, `+${fx.score}`, COLORS.core, 20);
         addShake(4);
         if (!reduced) hitStop = Math.max(hitStop, 0.045);
@@ -158,32 +161,58 @@ export function createEffects() {
 
   function draw(ctx) {
     for (const p of particles) {
-      ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+      const k = Math.max(0, p.life / p.maxLife);
+      const v = project(p.x, p.y, 4);
+      const size = p.size * v.scale * (0.4 + k);
+      ctx.globalAlpha = k * 0.22;
       ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * (0.4 + p.life / p.maxLife), 0, TAU);
+      ctx.arc(v.x, v.y, size * 2.6, 0, TAU);
       ctx.fill();
+      ctx.globalAlpha = k;
+      ctx.beginPath();
+      ctx.arc(v.x, v.y, size, 0, TAU);
+      ctx.fill();
+      /* short motion streak for fast particles */
+      if (quality > 0.5 && Math.abs(p.vx) + Math.abs(p.vy) > 180) {
+        const tail = project(p.x - p.vx * 0.02, p.y - p.vy * 0.02, 4);
+        ctx.globalAlpha = k * 0.35;
+        ctx.fillRect(tail.x, tail.y, Math.abs(p.vx) * 0.02 * v.scale + 1, 2);
+      }
     }
     for (const r of rings) {
       const k = 1 - r.life / r.maxLife;
-      ctx.globalAlpha = Math.max(0, r.life / r.maxLife);
+      const v = project(r.x, r.y, 2);
+      const radius = r.radius * v.scale * (0.4 + k * 0.9);
+      ctx.globalAlpha = Math.max(0, r.life / r.maxLife) * 0.3;
       ctx.strokeStyle = r.color;
-      ctx.lineWidth = 4 * (1 - k) + 1;
+      ctx.lineWidth = (12 * (1 - k) + 3) * v.scale;
       ctx.beginPath();
-      ctx.arc(r.x, r.y, r.radius * (0.4 + k * 0.9), 0, TAU);
+      ctx.arc(v.x, v.y, radius, 0, TAU);
+      ctx.stroke();
+      ctx.globalAlpha = Math.max(0, r.life / r.maxLife);
+      ctx.lineWidth = (3 * (1 - k) + 1) * v.scale;
+      ctx.beginPath();
+      ctx.arc(v.x, v.y, radius, 0, TAU);
       ctx.stroke();
     }
     ctx.globalAlpha = 1;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     for (const t of texts) {
-      ctx.globalAlpha = Math.max(0, Math.min(1, t.life / (t.maxLife * 0.5)));
-      ctx.font = `800 ${t.size}px Arial, sans-serif`;
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "rgba(0,0,0,.6)";
-      ctx.strokeText(t.value, t.x, t.y);
+      const k = Math.max(0, Math.min(1, t.life / (t.maxLife * 0.5)));
+      const pop = 1 + 0.3 * Math.max(0, t.life / t.maxLife - 0.72);
+      const v = project(t.x, t.y, 26);
+      ctx.globalAlpha = k;
+      ctx.font = `900 ${t.size * pop * v.scale}px Arial, sans-serif`;
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = "rgba(0,0,0,.75)";
+      ctx.strokeText(t.value, v.x, v.y);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255,255,255,.35)";
+      ctx.strokeText(t.value, v.x, v.y);
       ctx.fillStyle = t.color;
-      ctx.fillText(t.value, t.x, t.y);
+      ctx.fillText(t.value, v.x, v.y);
     }
     ctx.globalAlpha = 1;
   }

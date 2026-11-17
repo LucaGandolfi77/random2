@@ -69,6 +69,22 @@ illustration work offline.
   script and CI-style visual-baseline checks.
 - **Quality hardening:** fixed-timestep simulation, pooled effects, tab-hide
   pause, save fuzzing, a `?debug=1` HUD and visual-baseline screenshots.
+- **Game visuals:** the playable demo uses a 2.5D perspective camera. The
+  simulation stays top-down, but everything is drawn on a trapezoid ground
+  plane with a horizon, distance fog and a converging grid; upright,
+  depth-scaled models are anchored to the ground and sorted far-to-near, with
+  flattened contact shadows. Heroes and every machine — including all four
+  bosses — are detailed volumetric LEGO builds with three shaded faces,
+  studs, articulated limbs, emissive sensors, weapons, hit flashes and four
+  animation frames, cached as offscreen sprites. A cached parallax backdrop
+  per biome adds gradient skies, sun and rays, drifting clouds, ambient motes,
+  ruin pillars, lantern-lit houses, desert mesas and glowing caverns. Arrow
+  trails, impact rings, light pools and a vignette complete the scene. The
+  world outside the trapezoid is alive too: stepped cliffs, suspended
+  platforms, moss and biome-coloured falls flank the play plane, while fog,
+  cloud drift and a moving light pool react to the player's position on it.
+  The HUD uses glass surfaces and brick accents; reduced-motion and low-tier
+  devices drop the ambient pass.
 - PWA manifest, versioned service-worker precache, install prompt on
   Android/desktop and an Add-to-Home-Screen guide on iOS.
 - Factual store metadata (price €39.99 / €49.99, Mixed 60% of 407 reviews,
@@ -84,7 +100,7 @@ src/main.js         UI wiring
 src/store.js        pure cart/wishlist logic
 src/gallery.js      lightbox behaviour
 src/pwa.js          service worker, offline state, install flow
-game/               Machine Hunt: data, pure sim, combat, renderer, input, audio, effects, UI
+game/               Machine Hunt: data, pure sim, combat, renderer, 3D-style models, input, audio, effects, UI
 scripts/gen-art.mjs generates the concept-art SVGs and icons
 scripts/gen-icons.mjs rasterises icons, social card, manifest screenshots
 scripts/shots.mjs    visual baselines at phone and tablet sizes
