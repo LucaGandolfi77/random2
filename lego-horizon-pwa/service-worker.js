@@ -2,7 +2,7 @@
  * The whole page ships as static files, so installing it once makes every
  * section and every piece of original concept art available offline.
  */
-const CACHE = "lego-horizon-store-v13";
+const CACHE = "lego-horizon-store-v14";
 
 const ASSETS = [
   "./",
@@ -20,6 +20,7 @@ const ASSETS = [
   "./game/render.js",
   "./game/projection.js",
   "./game/models.js",
+  "./game/terrain.js",
   "./game/input.js",
   "./game/audio.js",
   "./game/combat.js",

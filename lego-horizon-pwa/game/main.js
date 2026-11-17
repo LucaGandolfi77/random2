@@ -17,6 +17,8 @@ import { t } from "./i18n.js";
 import { createRecorder, record as recordFrame, encodeReplay } from "./replay.js";
 import { detectTier, qualityFor } from "./quality.js";
 import { renderHub, renderHunt, setPalette, setQualityLevel, setReducedMotion, villageHitTest, cellScreenRect } from "./render.js";
+import { setCamera, cameraState, resetCameraToView } from "./projection.js";
+import { WORLD } from "./data.js";
 import { createInput } from "./input.js";
 import { createAudio } from "./audio.js";
 import { createEffects } from "./effects.js";
@@ -780,6 +782,7 @@ export function startGame(options = {}) {
       if (!opts.biome) opts.biome = def.biome;
     }
     hunt = createHunt(save, (Date.now() & 0xffff) ^ (save.huntLevel * 7919), opts);
+    setCamera(hunt.player.x, hunt.player.y);
     recorder = createRecorder(hunt.seed, hunt.mode, hunt.biome);
     screen = "hunt";
     paused = false;
@@ -1056,8 +1059,22 @@ export function startGame(options = {}) {
     if (steps === 5) acc = 0;
 
     ctx.clearRect(0, 0, ARENA.width, ARENA.height);
-    if (screen === "hub") renderHub(ctx, save, elapsed);
-    else if (hunt) renderHunt(ctx, hunt, elapsed, effects);
+    if (screen === "hub") {
+      resetCameraToView();
+      renderHub(ctx, save, elapsed);
+    } else if (hunt) {
+      const p = hunt.player;
+      const move = input.state();
+      const lookX = move.dx * 105;
+      const lookY = move.dy * 105;
+      const cur = cameraState();
+      const k = 1 - Math.exp(-5.5 * Math.min(0.05, frameMs / 1000 || 0));
+      setCamera(
+        cur.x + (p.x + lookX - cur.x) * k,
+        cur.y + (p.y + lookY - cur.y) * k
+      );
+      renderHunt(ctx, hunt, elapsed, effects);
+    }
     paintDebug(frameMs, steps);
     raf = requestAnimationFrame(frame);
   }

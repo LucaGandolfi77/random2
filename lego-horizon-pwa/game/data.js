@@ -1,7 +1,10 @@
 /* Content tables for Machine Hunt. Pure data, no DOM. */
 
 export const SAVE_KEY = "lego-horizon-game-v1";
+/* The view (canvas logical size) and the actual game world are separate: the
+ * camera follows the player across the much larger WORLD. */
 export const ARENA = Object.freeze({ width: 600, height: 1080 });
+export const WORLD = Object.freeze({ width: 1800, height: 3240 });
 export const WAVES_PER_HUNT = 3;
 
 export const UPGRADES = Object.freeze({

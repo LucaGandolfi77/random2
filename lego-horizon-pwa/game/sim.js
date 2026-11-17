@@ -4,7 +4,7 @@
  * stepHunt() stay stable for audio and tests.
  */
 import {
-  SAVE_KEY, ARENA, WAVES_PER_HUNT, UPGRADES, PLOTS, COMPANIONS, ENEMIES,
+  SAVE_KEY, WORLD, WAVES_PER_HUNT, UPGRADES, PLOTS, COMPANIONS, ENEMIES,
   MODIFIERS, BASE, MISSIONS, DAILY, VILLAGE_ITEMS, VILLAGERS, BOUNTIES, GRID,
   BIOMES, HAZARDS, BOSS_TYPES, MODES, CAMPAIGN_HUNTS,
   SKILLS, MATERIALS, GEAR, QUESTS, XP, STORY, SEASONS, JOBS, ACHIEVEMENTS, SEASON,
@@ -183,7 +183,7 @@ export function sanitizeSave(raw) {
     score: count(g.score),
     samples: Array.isArray(g.samples)
       ? g.samples.slice(-400).filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.y))
-        .map((p) => ({ x: count(p.x, ARENA.width), y: count(p.y, ARENA.height) }))
+        .map((p) => ({ x: count(p.x, WORLD.width), y: count(p.y, WORLD.height) }))
       : [],
   };
 
@@ -626,8 +626,8 @@ function generateHazards(biome, rng) {
     const type = types[Math.floor(rng() * types.length)];
     out.push({
       type,
-      x: 70 + rng() * (ARENA.width - 140),
-      y: 120 + rng() * (ARENA.height - 240),
+      x: clamp(WORLD.width / 2 + (rng() - 0.5) * 900, 70, WORLD.width - 70),
+      y: clamp(WORLD.height / 2 + (rng() - 0.5) * 900, 120, WORLD.height - 120),
       radius: type === "lava" ? 52 : type === "spikes" ? 46 : 64,
       phase: rng() * 3,
       timer: 0,
@@ -644,13 +644,13 @@ export function spawnEnemy(hunt, type, rng) {
   const mod = hunt.modifier ? MODIFIERS[hunt.modifier] : null;
   const hp = Math.round((def.hp + Math.floor((level - 1) * (type === "boss" ? 12 : 2))) *
     (mod?.hp || 1));
-  const edge = Math.floor(rng() * 4);
-  const margin = 50;
-  let x, y;
-  if (edge === 0) { x = rng() * ARENA.width; y = margin; }
-  else if (edge === 1) { x = ARENA.width - margin; y = rng() * ARENA.height; }
-  else if (edge === 2) { x = rng() * ARENA.width; y = ARENA.height - margin; }
-  else { x = margin; y = rng() * ARENA.height; }
+  /* Spawn just outside the player's view instead of at the world edges, so
+   * waves stay close as the camera travels across the larger map. */
+  const center = hunt.player || { x: WORLD.width / 2, y: WORLD.height / 2 };
+  const angle = rng() * Math.PI * 2;
+  const distance = 380 + rng() * 160;
+  const x = clamp(center.x + Math.cos(angle) * distance, 50, WORLD.width - 50);
+  const y = clamp(center.y + Math.sin(angle) * distance, 50, WORLD.height - 50);
   const enemy = {
     id: nextId++, type, x, y, hp, maxHp: hp, boss: !!def.boss, bossType: type,
     timers: {}, chargeTime: 0, chargeVx: 0, chargeVy: 0,
@@ -798,18 +798,18 @@ export function createHunt(save, seed = 12345, opts = {}) {
     combat: createCombatState(),
     fx: [],
     player: {
-      x: ARENA.width / 2, y: ARENA.height / 2,
+      x: WORLD.width / 2, y: WORLD.height / 2,
       hp: stats.maxHp, maxHp: stats.maxHp,
       invuln: 0, fireCd: 0, charge: 0, radius: 16, angle: 0,
     },
     companion: {
       type: stats.companion,
-      x: ARENA.width / 2 - 40, y: ARENA.height / 2 + 34,
+      x: WORLD.width / 2 - 40, y: WORLD.height / 2 + 34,
       cooldown: 1.2, healCd: 6,
     },
     companions: (stats.party || []).filter(Boolean).map((type, i) => ({
       type,
-      x: ARENA.width / 2 - 40 - i * 44, y: ARENA.height / 2 + 34 + i * 26,
+      x: WORLD.width / 2 - 40 - i * 44, y: WORLD.height / 2 + 34 + i * 26,
       cooldown: 1.2, healCd: 6,
       level: save.companionLevels?.[type] || 0,
     })),
@@ -1040,8 +1040,8 @@ function updateEnemies(hunt, dt, events) {
         if (e.burrowTime <= 0) {
           e.burrowed = false;
           const a = hunt.rng() * Math.PI * 2;
-          e.x = clamp(p.x + Math.cos(a) * 130, e.radius, ARENA.width - e.radius);
-          e.y = clamp(p.y + Math.sin(a) * 130, e.radius, ARENA.height - e.radius);
+          e.x = clamp(p.x + Math.cos(a) * 130, e.radius, WORLD.width - e.radius);
+          e.y = clamp(p.y + Math.sin(a) * 130, e.radius, WORLD.height - e.radius);
           e.burrowCd = 5 + hunt.rng() * 2;
           fx(hunt, "emerge", { x: e.x, y: e.y });
           events.push("burrowerEmerge");
@@ -1067,8 +1067,8 @@ function updateEnemies(hunt, dt, events) {
         if (hurtPlayer(hunt, e.chargeDamage || e.damage)) events.push("playerHit");
         e.chargeTime = 0;
       }
-      e.x = clamp(e.x, e.radius, ARENA.width - e.radius);
-      e.y = clamp(e.y, e.radius, ARENA.height - e.radius);
+      e.x = clamp(e.x, e.radius, WORLD.width - e.radius);
+      e.y = clamp(e.y, e.radius, WORLD.height - e.radius);
       if (e.boss) {
         hunt.bossHp = e.hp;
         hunt.bossMaxHp = e.maxHp;
@@ -1137,8 +1137,8 @@ function updateEnemies(hunt, dt, events) {
     }
 
     if (e.type === "boss") updateBoss(hunt, e, dt, events);
-    e.x = clamp(e.x, e.radius, ARENA.width - e.radius);
-    e.y = clamp(e.y, e.radius, ARENA.height - e.radius);
+    e.x = clamp(e.x, e.radius, WORLD.width - e.radius);
+    e.y = clamp(e.y, e.radius, WORLD.height - e.radius);
     if (e.type === "boss") {
       hunt.bossHp = e.hp;
       hunt.bossMaxHp = e.maxHp;
@@ -1205,7 +1205,7 @@ function updateProjectiles(hunt, dt, events) {
     b.y += b.vy * dt;
     b.life -= dt;
     let gone = b.life <= 0 || b.x < -30 || b.y < -30 ||
-      b.x > ARENA.width + 30 || b.y > ARENA.height + 30;
+      b.x > WORLD.width + 30 || b.y > WORLD.height + 30;
     if (!gone && b.friendly) {
       if (b.trap) {
         if (b.triggerCd <= 0) {
@@ -1310,14 +1310,14 @@ function advanceWave(hunt, events) {
     if (hunt.bossRushIndex >= 3) {
       hunt.phase = "won";
       hunt.banner = 2;
-      fx(hunt, "wave", { x: ARENA.width / 2, y: ARENA.height / 2 });
+      fx(hunt, "wave", { x: hunt.player.x, y: hunt.player.y });
       events.push("won");
     } else {
       hunt.bossRushIndex += 1;
       hunt.phase = "boss";
       hunt.banner = 2;
       spawnBoss(hunt, hunt.rng);
-      fx(hunt, "boss", { x: ARENA.width / 2, y: ARENA.height / 2 });
+      fx(hunt, "boss", { x: hunt.player.x, y: hunt.player.y });
       events.push("boss");
     }
     return;
@@ -1329,12 +1329,12 @@ function advanceWave(hunt, events) {
     if (hunt.wave % 5 === 0) {
       hunt.phase = "boss";
       spawnBoss(hunt, hunt.rng);
-      fx(hunt, "boss", { x: ARENA.width / 2, y: ARENA.height / 2 });
+      fx(hunt, "boss", { x: hunt.player.x, y: hunt.player.y });
       events.push("boss");
     } else {
       hunt.phase = "wave";
       spawnWave(hunt, hunt.rng);
-      fx(hunt, "wave", { x: ARENA.width / 2, y: ARENA.height / 2 });
+      fx(hunt, "wave", { x: hunt.player.x, y: hunt.player.y });
       events.push("wave");
     }
     return;
@@ -1343,7 +1343,7 @@ function advanceWave(hunt, events) {
   if (hunt.phase === "boss") {
     hunt.phase = "won";
     hunt.banner = 2;
-    fx(hunt, "wave", { x: ARENA.width / 2, y: ARENA.height / 2 });
+    fx(hunt, "wave", { x: hunt.player.x, y: hunt.player.y });
     events.push("won");
     return;
   }
@@ -1351,13 +1351,13 @@ function advanceWave(hunt, events) {
     hunt.wave += 1;
     hunt.banner = 1.6;
     spawnWave(hunt, hunt.rng);
-    fx(hunt, "wave", { x: ARENA.width / 2, y: ARENA.height / 2 });
+    fx(hunt, "wave", { x: hunt.player.x, y: hunt.player.y });
     events.push("wave");
   } else {
     hunt.phase = "boss";
     hunt.banner = 2;
     spawnBoss(hunt, hunt.rng);
-    fx(hunt, "boss", { x: ARENA.width / 2, y: ARENA.height / 2 });
+    fx(hunt, "boss", { x: hunt.player.x, y: hunt.player.y });
     events.push("boss");
   }
 }
@@ -1394,8 +1394,8 @@ export function stepHunt(hunt, input = {}, dt = 1 / 60) {
   const len = Math.hypot(dx, dy) || 1;
   const terrain = hazardSlow(hunt, p.x, p.y) * (onIce ? 0.55 : 1);
   const moveSpeed = hunt.stats.speed * (combat.dodgeTime > 0 ? 2.3 : 1) * terrain;
-  p.x = clamp(p.x + (dx / len) * moveSpeed * dt, p.radius, ARENA.width - p.radius);
-  p.y = clamp(p.y + (dy / len) * moveSpeed * dt, p.radius, ARENA.height - p.radius);
+  p.x = clamp(p.x + (dx / len) * moveSpeed * dt, p.radius, WORLD.width - p.radius);
+  p.y = clamp(p.y + (dy / len) * moveSpeed * dt, p.radius, WORLD.height - p.radius);
 
   if (typeof input.charge === "number") p.charge = clamp(input.charge, 0, 1);
 

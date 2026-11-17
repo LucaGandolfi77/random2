@@ -4,9 +4,10 @@
  * through a perspective camera (see projection.js): a trapezoid ground plane,
  * a horizon, and upright sprites anchored to their ground point and sorted
  * from far to near. Original brick-world shapes only. */
-import { ARENA, GRID, VILLAGERS, VILLAGE_ITEMS, BIOMES, HAZARDS } from "./data.js";
-import { project, unproject, rowExtent, edgesAtScreenY, parallaxFor, CAMERA } from "./projection.js";
+import { ARENA, WORLD, GRID, VILLAGERS, VILLAGE_ITEMS, BIOMES, HAZARDS } from "./data.js";
+import { project, unproject, rowExtent, edgesAtScreenY, parallaxFor, visibleYRange, visibleXRange, cameraState, CAMERA } from "./projection.js";
 import { drawModel, FRAME_COUNT } from "./models.js";
+import { generateTerrain, featuresInView, drawFeature, setTerrainReducedMotion, ZONES } from "./terrain.js";
 
 const TAU = Math.PI * 2;
 const W = ARENA.width;
@@ -28,6 +29,7 @@ export function setQualityLevel(tier) {
 }
 export function setReducedMotion(value) {
   reducedMotion = !!value;
+  setTerrainReducedMotion(reducedMotion);
 }
 
 const fine = () => qualityLevel !== "low";
@@ -215,35 +217,28 @@ function paintGround(ctx, theme) {
   ctx.fillStyle = surround;
   ctx.fillRect(0, CAMERA.horizon, W, H - CAMERA.horizon);
 
-  const far = rowExtent(0);
+  const farLeft = W / 2 - (W / 2) * CAMERA.farScale;
+  const farRight = W / 2 + (W / 2) * CAMERA.farScale;
   const g = ctx.createLinearGradient(0, CAMERA.horizon, 0, H);
   g.addColorStop(0, shade(theme.ground, 26));
   g.addColorStop(0.35, theme.ground);
   g.addColorStop(1, shade(theme.ground, -26));
   polygon(ctx, [
-    [far.left, far.y], [far.right, far.y], [W, H], [0, H],
+    [farLeft, CAMERA.horizon], [farRight, CAMERA.horizon], [W, H], [0, H],
   ], g);
 
-  /* converging grid */
-  ctx.strokeStyle = "rgba(210,245,230,.06)";
-  ctx.lineWidth = 1;
-  for (let x = 0; x <= W; x += 60) {
-    const a = project(x, 0, 0);
-    const b = project(x, H, 0);
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-  }
-  for (let y = 0; y <= H; y += 60) {
-    const a = project(0, y, 0);
-    const b = project(W, y, 0);
-    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-  }
-  const c1 = project(5, 5, 0), c2 = project(W - 5, 5, 0);
-  const c3 = project(W - 5, H - 5, 0), c4 = project(5, H - 5, 0);
+  /* fixed trapezoid border (the grid itself scrolls with the camera) */
+  const inset = 5;
+  const topLeft = W / 2 - (W / 2 - inset) * CAMERA.farScale;
+  const topRight = W / 2 + (W / 2 - inset) * CAMERA.farScale;
   ctx.strokeStyle = "rgba(164,208,7,.42)";
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.moveTo(c1.x, c1.y); ctx.lineTo(c2.x, c2.y);
-  ctx.lineTo(c3.x, c3.y); ctx.lineTo(c4.x, c4.y); ctx.closePath();
+  ctx.moveTo(topLeft, CAMERA.horizon + inset);
+  ctx.lineTo(topRight, CAMERA.horizon + inset);
+  ctx.lineTo(W - inset, H - inset);
+  ctx.lineTo(inset, H - inset);
+  ctx.closePath();
   ctx.stroke();
 
   /* distance fog */
@@ -535,6 +530,80 @@ function drawSky(ctx, t, mode, biome, night, player) {
       glow(ctx, x, y, r * 6, theme.mote, 0.2 + 0.16 * (0.5 + 0.5 * Math.sin(t * 2 + ph)));
     }
   }
+}
+
+/* World grid and terrain are camera-relative: both scroll as the player moves. */
+let terrainMap = null;
+function terrainFor(seed) {
+  if (!terrainMap || terrainMap.seed !== seed) terrainMap = generateTerrain(seed);
+  return terrainMap;
+}
+function drawWorldGrid(ctx) {
+  const range = visibleYRange();
+  const left = Math.min(visibleXRange(range.top).left, visibleXRange(range.bottom).left);
+  const right = Math.max(visibleXRange(range.top).right, visibleXRange(range.bottom).right);
+  const step = 120;
+  ctx.strokeStyle = "rgba(210,245,230,.06)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = Math.floor(left / step) * step; x <= right; x += step) {
+    const a = project(x, range.top, 0);
+    const b = project(x, range.bottom, 0);
+    if (a.y < CAMERA.horizon || b.y > H) continue;
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+  }
+  for (let y = Math.floor(range.top / step) * step; y <= range.bottom; y += step) {
+    const xr = visibleXRange(y);
+    const a = project(xr.left, y, 0);
+    const b = project(xr.right, y, 0);
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+  }
+  ctx.stroke();
+}
+
+/* Small world map pinned to the lower-right of the view. */
+function drawMinimap(ctx, hunt) {
+  const w = 108;
+  const h = 194;
+  const x = W - w - 16;
+  const y = H - h - 20;
+  const sx = (wx) => x + (wx / WORLD.width) * w;
+  const sy = (wy) => y + (wy / WORLD.height) * h;
+  ctx.save();
+  ctx.fillStyle = "rgba(6,14,18,.78)";
+  ctx.beginPath();
+  ctx.roundRect(x - 7, y - 7, w + 14, h + 14, 10);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(164,208,7,.45)";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  const tints = ["rgba(130,160,180,.14)", "rgba(190,155,110,.14)",
+    "rgba(90,170,110,.16)", "rgba(90,160,200,.16)"];
+  ZONES.forEach((zone, i) => {
+    ctx.fillStyle = tints[i % tints.length];
+    ctx.fillRect(x, sy(zone.from), w, sy(zone.to) - sy(zone.from));
+  });
+  const range = visibleYRange();
+  const scale = visibleXRange(range.bottom).scale;
+  ctx.strokeStyle = "rgba(255,255,255,.5)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(
+    sx(cameraState().x - (W / 2) / scale), sy(range.top),
+    (W / scale) * (w / WORLD.width), (range.bottom - range.top) * (h / WORLD.height)
+  );
+  for (const hz of hunt.hazards || []) disc(ctx, sx(hz.x), sy(hz.y), 2, "rgba(232,115,60,.85)");
+  for (const e of hunt.enemies) {
+    if (e.hp > 0) disc(ctx, sx(e.x), sy(e.y), e.boss ? 3.4 : 2, e.boss ? "#e8733c" : "#ff6b81");
+  }
+  disc(ctx, sx(hunt.player.x), sy(hunt.player.y), 3.6, "#a4d007");
+  ctx.fillStyle = "rgba(255,255,255,.6)";
+  ctx.font = "800 9px Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.fillText("WORLD MAP", x + w / 2, y - 5);
+  ctx.restore();
 }
 
 function vignette(ctx, strength = 0.5) {
@@ -920,6 +989,7 @@ export function renderHunt(ctx, hunt, t, fx) {
   ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.clip();
   ctx.translate(shake.x, shake.y);
   drawSky(ctx, t, "hunt", hunt.biome, false, hunt.player);
+  drawWorldGrid(ctx);
 
   for (const h of hunt.hazards || []) drawHazard(ctx, h, t);
 
@@ -936,6 +1006,29 @@ export function renderHunt(ctx, hunt, t, fx) {
   }
 
   const drawables = [];
+  const terrainDrawables = [];
+
+  /* terrain is drawn first and depth-sorted; actors always stay on top so
+   * dense scenery never hides the player or machines. */
+  const viewRange = visibleYRange();
+  const wideX = visibleXRange(viewRange.bottom);
+  const narrowX = visibleXRange(viewRange.top);
+  const features = featuresInView(
+    terrainFor(hunt.seed),
+    Math.min(wideX.left, narrowX.left), viewRange.top,
+    Math.max(wideX.right, narrowX.right), viewRange.bottom
+  );
+  const terrainTheme = themeFor("hunt", hunt.biome);
+  for (const f of features) {
+    terrainDrawables.push({
+      y: f.y,
+      draw: () => {
+        if (f.type !== "pool") groundShadow(ctx, f.x, f.y, 14 * f.scale, 0.3);
+        actor(ctx, f.x, f.y, () => drawFeature(ctx, f, t, terrainTheme));
+      },
+    });
+  }
+
   for (const core of hunt.cores) {
     drawables.push({
       y: core.y,
@@ -1041,6 +1134,7 @@ export function renderHunt(ctx, hunt, t, fx) {
     },
   });
 
+  terrainDrawables.sort((a, b) => a.y - b.y).forEach((d) => d.draw());
   drawables.sort((a, b) => a.y - b.y).forEach((d) => d.draw());
 
   for (const b of hunt.projectiles) {
@@ -1109,6 +1203,7 @@ export function renderHunt(ctx, hunt, t, fx) {
       ctx.fillText(MOD_LABEL(hunt.modifier), W / 2, y + 72);
     }
   }
+  drawMinimap(ctx, hunt);
 }
 
 function MOD_LABEL(key) {

@@ -9,7 +9,7 @@
  * A missing Chromium prints SKIP and exits 0, like the other repo smokes.
  */
 import { launch, sleep } from "../tools/cdp.mjs";
-import { project } from "./game/projection.js";
+import { project, resetCameraToView } from "./game/projection.js";
 
 const url = process.argv[2] || "http://localhost:8099/lego-horizon-pwa/";
 const browser = await launch();
@@ -171,6 +171,7 @@ ok(
   "the achievement list is shown"
 );
 ok(await evaluate("!!document.querySelector('#game-hub .bounty-bar')"), "the community bounty is shown");
+resetCameraToView();
 const aloy = project(150, 158, 0);
 await evaluate(`(() => {
   const c = document.getElementById('game-canvas');

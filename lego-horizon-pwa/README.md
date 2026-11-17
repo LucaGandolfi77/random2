@@ -83,7 +83,14 @@ illustration work offline.
   world outside the trapezoid is alive too: stepped cliffs, suspended
   platforms, moss and biome-coloured falls flank the play plane, while fog,
   cloud drift and a moving light pool react to the player's position on it.
-  The HUD uses glass surfaces and brick accents; reduced-motion and low-tier
+  The hunt now takes place on a **3× world map** (1800×3240) split into four
+  zones — highlands, ruins, greenwood and river vale. A smooth camera with
+  look-ahead follows the hero across it, while a minimap shows the zones,
+  enemies and current viewport. Seeded terrain generation fills the world with
+  pines, trees, bushes, flowers, mushrooms, rocks, crystals, broken columns,
+  arches, banners, tents, pools, reeds and bridges; features are spatially
+  bucketed and culled to the visible area, and never occlude the actors. The
+  HUD uses glass surfaces and brick accents; reduced-motion and low-tier
   devices drop the ambient pass.
 - PWA manifest, versioned service-worker precache, install prompt on
   Android/desktop and an Add-to-Home-Screen guide on iOS.
@@ -100,7 +107,7 @@ src/main.js         UI wiring
 src/store.js        pure cart/wishlist logic
 src/gallery.js      lightbox behaviour
 src/pwa.js          service worker, offline state, install flow
-game/               Machine Hunt: data, pure sim, combat, renderer, 3D-style models, input, audio, effects, UI
+game/               Machine Hunt: data, pure sim, combat, renderer, 3D-style models, procedural terrain, camera, input, audio, effects, UI
 scripts/gen-art.mjs generates the concept-art SVGs and icons
 scripts/gen-icons.mjs rasterises icons, social card, manifest screenshots
 scripts/shots.mjs    visual baselines at phone and tablet sizes
