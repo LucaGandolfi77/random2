@@ -1,10 +1,11 @@
 // Ripple Cove — Cozy Fishing Service Worker
-const CACHE = 'ripple-cove-v3'
+const CACHE = 'ripple-cove-v4'
 
 const ASSETS = [
   './',
   './index.html',
   './game.js',
+  './fish-rules.js',
   './styles.css',
   './manifest.json',
   './icons/icon-72.svg',

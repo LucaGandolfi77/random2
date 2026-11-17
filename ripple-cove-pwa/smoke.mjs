@@ -126,10 +126,13 @@ try {
   ok(await ev("document.getElementById('p-shop').hidden"), "panel closes");
 
   await ev("document.querySelector('#nav button[data-panel=fisho]').click()");
-  ok(await ev("document.querySelectorAll('#fisho-list .fcard').length === 32"), "fishopedia has all 32 species");
+  ok(await ev("document.querySelectorAll('#fisho-list .fcard').length === 84"), "fishopedia has all 84 species");
+  await ev("document.querySelector('#dex-tabs button[data-dex=legends]').click()");
+  ok(await ev("document.querySelectorAll('#fisho-list .fcard.legend').length === 12"), "Legends tab shows 12 legendary fish");
+  await ev("document.querySelector('#dex-tabs button[data-dex=all]').click()");
   await ev("document.querySelector('#nav button[data-panel=fisho]').click()");
   await ev("document.querySelector('#nav button[data-panel=quests]').click()");
-  ok(await ev("document.querySelectorAll('#quest-list .qcard').length === 10"), "quests render");
+  ok(await ev("document.querySelectorAll('#quest-list .qcard').length === 12"), "quests render");
   await ev("document.querySelector('#nav button[data-panel=quests]').click()");
   await ev("document.getElementById('btn-bucket').click()");
   ok(await ev("!document.getElementById('p-bucket').hidden"), "bucket panel opens");
@@ -171,6 +174,21 @@ try {
   await sleep(420); // let the sheet entrance animation settle before capture
   await shot("13-legendary.png");
   await ev("document.getElementById('c-keep').click()");
+
+  // ── special legendary fish ──
+  ok(await ev("window.__ripple.legends().length === 12"), "twelve special legends registered");
+  const legendsBefore = await ev("window.__ripple.state().stats.legends || 0");
+  await ev("window.__ripple.forceLegend('silvermirror')");
+  ok(await ev("!document.getElementById('card').hidden && document.getElementById('card').dataset.legend === '1'"), "special legend gets golden catch card");
+  ok(await ev(`window.__ripple.state().stats.legends === ${legendsBefore + 1}`), "legend counter increments");
+  ok(await ev("!!window.__ripple.state().dex.silvermirror"), "legend recorded in dex");
+  await sleep(420);
+  await shot("14-special-legend.png");
+  await ev("document.getElementById('c-keep').click()");
+  await ev("document.querySelector('#nav button[data-panel=fisho]').click()");
+  await ev("document.querySelector('#dex-tabs button[data-dex=legends]').click()");
+  ok(await ev("[...document.querySelectorAll('#fisho-list .fcard.legend')].some(c => !c.classList.contains('no'))"), "caught legend revealed in Legends tab");
+  await ev("document.querySelector('.panel .close').click()");
 
   // ── persistence ──
   ok(await ev("!!localStorage.getItem('ripple-cove-save-v1')"), "progress saved to localStorage");

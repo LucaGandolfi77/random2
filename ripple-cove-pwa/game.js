@@ -6,6 +6,11 @@
  *
  * Layout, IDs and data-i18n keys mirror index.html.
  */
+import {
+  FISH, LEGENDS, BY_ID, chooseFish as chooseFishRules,
+  matchesCondition, conditionText,
+} from "./fish-rules.js";
+
 (function () {
   "use strict";
 
@@ -77,7 +82,11 @@
       table_cabin: "Cabina", table_extras: "Extra", table_merchant: "Mercante",
       cheapest: "Prezzo", owned: "Posseduto", lock_lvl: "Lv {n}",
       reset_confirm: "Cancellare tutti i progressi?", import_bad: "File non valido",
-      new_fish: "Nuova specie!", pressure: "Pressione", release_now: "Rilascia adesso"
+      new_fish: "Nuova specie!", pressure: "Pressione", release_now: "Rilascia adesso",
+      legendary: "LEGGENDARIO!", dex_all: "Tutte", dex_legends: "Leggende",
+      legends_progress: "Leggende", legend_hint: "Indizio", legend_lore: "Storia",
+      legend_condition: "Condizione", legend_caught: "Catturata", legend_unknown: "Non ancora scoperta",
+      legend_sighting: "Qualcosa di straordinario si muove sott'acqua…"
     },
     en: {
       loc_river: "River", loc_lake: "Lake", loc_sea: "Sea", loc_ocean: "Ocean",
@@ -121,7 +130,11 @@
       table_extras: "Extras", table_merchant: "Merchant", cheapest: "Price",
       owned: "Owned", lock_lvl: "Lv {n}",
       reset_confirm: "Erase all progress?", import_bad: "Invalid file",
-      new_fish: "New species!", pressure: "Pressure", release_now: "Release now"
+      new_fish: "New species!", pressure: "Pressure", release_now: "Release now",
+      legendary: "LEGENDARY!", dex_all: "All", dex_legends: "Legends",
+      legends_progress: "Legends", legend_hint: "Hint", legend_lore: "Lore",
+      legend_condition: "Condition", legend_caught: "Caught", legend_unknown: "Not discovered yet",
+      legend_sighting: "Something extraordinary moves beneath the surface…"
     }
   };
   function tr(k, vars) {
@@ -131,46 +144,9 @@
   }
 
   /* ═══════════════════════════ data ═══════════════════════════ */
-  // em, it, en, loc, r (rarity 0..4), min/max grams, base coins, xp, flavor
-  const FISH = [
-    // river
-    { id: "minnow",  em: "🐟", it: "Pesciolino",   en: "Minnow",        loc: "river", r: 0, w: [20, 80],    v: 4,   xp: 6,  it_f: "Un piccolo nuotatore timido.", en_f: "A shy little swimmer." },
-    { id: "crucian", em: "🐠", it: "Carassio",      en: "Crucian",       loc: "river", r: 0, w: [80, 220],   v: 7,   xp: 8,  it_f: "Dorato come il sole del mattino.", en_f: "Golden as the morning sun." },
-    { id: "trout",   em: "🐟", it: "Trota",         en: "Trout",         loc: "river", r: 1, w: [200, 900],  v: 18,  xp: 14, it_f: "Ama le acque fredde e correnti.", en_f: "Loves cold, running water." },
-    { id: "barbel",  em: "🐟", it: "Barbo",         en: "Barbel",        loc: "river", r: 1, w: [300, 1400], v: 22,  xp: 16, it_f: "Ha la barba, ma non racconta storie.", en_f: "Has a beard, but tells no tales." },
-    { id: "pike",    em: "🐟", it: "Luccio",        en: "Pike",          loc: "river", r: 2, w: [900, 3500], v: 55,  xp: 26, it_f: "Un predatore paziente tra i canneti.", en_f: "A patient hunter among the reeds." },
-    { id: "tench",   em: "🐠", it: "Tinca",         en: "Tench",         loc: "river", r: 2, w: [500, 2200], v: 48,  xp: 24, it_f: "Scivola via come un'ombra verde.", en_f: "Slips away like a green shadow." },
-    { id: "salmon",  em: "🐟", it: "Salmone",       en: "Salmon",        loc: "river", r: 3, w: [2200, 7000], v: 140, xp: 42, it_f: "Risale il fiume verso casa.", en_f: "Swims upstream toward home." },
-    { id: "sturgeon",em: "🦈", it: "Storione",      en: "Sturgeon",      loc: "river", r: 4, w: [6000, 20000],v: 420, xp: 80, it_f: "Un antico abitante del fiume.", en_f: "An ancient resident of the river." },
-    // lake
-    { id: "bleak",   em: "🐟", it: "Alborella",     en: "Bleak",         loc: "lake", r: 0, w: [15, 60],    v: 5,   xp: 6,  it_f: "Luccica tra i riflessi del lago.", en_f: "Glitters among the lake reflections." },
-    { id: "perch",   em: "🐠", it: "Persico",       en: "Perch",         loc: "lake", r: 0, w: [60, 300],   v: 8,   xp: 9,  it_f: "A righe, come una piccola tigre.", en_f: "Striped like a tiny tiger." },
-    { id: "carp",    em: "🐟", it: "Carpa",         en: "Carp",          loc: "lake", r: 1, w: [400, 2500], v: 24,  xp: 16, it_f: "Saggia e lenta, vive a lungo.", en_f: "Wise and slow, it lives a long life." },
-    { id: "whitefish",em:"🐟", it: "Coregone",      en: "Whitefish",     loc: "lake", r: 1, w: [300, 1500], v: 26,  xp: 17, it_f: "Sale dalle profondità azzurre.", en_f: "Rises from the blue depths." },
-    { id: "catfish", em: "🐟", it: "Siluro",        en: "Catfish",       loc: "lake", r: 2, w: [1500, 7000],v: 70,  xp: 30, it_f: "I baffi lunghi due come il lago.", en_f: "Whiskers as long as the lake is wide." },
-    { id: "lakepike",em: "🐟", it: "Luccio di lago",en: "Lake pike",     loc: "lake", r: 2, w: [1000, 4500],v: 65,  xp: 28, it_f: "L'ombra più veloce del lago.", en_f: "The fastest shadow in the lake." },
-    { id: "rainbow", em: "🌈", it: "Trota iridea",  en: "Rainbow trout", loc: "lake", r: 3, w: [800, 4000], v: 165, xp: 46, it_f: "Porta con sé tutti i colori.", en_f: "Carries every colour with it." },
-    { id: "lakeking",em: "🦈", it: "Re del lago",   en: "Lake king",     loc: "lake", r: 4, w: [8000, 26000],v: 480, xp: 90, it_f: "Vecchio quanto la cabina.", en_f: "As old as the cabin itself." },
-    // sea
-    { id: "sardine", em: "🐟", it: "Sardina",       en: "Sardine",       loc: "sea", r: 0, w: [20, 90],    v: 6,   xp: 7,  it_f: "Viaggia in compagnia, sempre.", en_f: "Never travels alone." },
-    { id: "anchovy", em: "🐟", it: "Alici",         en: "Anchovy",       loc: "sea", r: 0, w: [15, 70],    v: 6,   xp: 7,  it_f: "Piccola, ma dal sapore intenso.", en_f: "Small, but full of flavour." },
-    { id: "mullet",  em: "🐠", it: "Muggine",       en: "Mullet",        loc: "sea", r: 1, w: [200, 1200], v: 20,  xp: 15, it_f: "Salta fuori dall'acqua al tramonto.", en_f: "Leaps from the water at sunset." },
-    { id: "bream",   em: "🐟", it: "Orata",         en: "Bream",         loc: "sea", r: 1, w: [300, 1800], v: 30,  xp: 19, it_f: "Il suo dorato ricorda il sole.", en_f: "Its gold reminds you of the sun." },
-    { id: "bass",    em: "🐟", it: "Branzino",      en: "Sea bass",      loc: "sea", r: 2, w: [800, 4200], v: 75,  xp: 31, it_f: "Predatore elegante e silenzioso.", en_f: "An elegant, silent predator." },
-    { id: "mackerel",em: "🐟", it: "Sgombro",       en: "Mackerel",      loc: "sea", r: 2, w: [400, 2000], v: 60,  xp: 28, it_f: "Veloce come il vento salino.", en_f: "Fast as the salty wind." },
-    { id: "tuna",    em: "🐟", it: "Tonno",         en: "Tuna",          loc: "sea", r: 3, w: [4000, 25000],v: 220, xp: 55, it_f: "Un motore che non si ferma mai.", en_f: "An engine that never stops." },
-    { id: "sword",   em: "🦈", it: "Pescespada",    en: "Swordfish",     loc: "sea", r: 4, w: [12000, 45000],v: 560, xp: 95, it_f: "La lama taglia l' acqua in due.", en_f: "A blade cutting the sea in two." },
-    // ocean
-    { id: "shrimp",  em: "🦐", it: "Gambero",       en: "Shrimp",        loc: "ocean", r: 0, w: [10, 80],    v: 9,   xp: 8,  it_f: "Tiny, rosso come il corallo.", en_f: "Red as the coral." },
-    { id: "crab",    em: "🦀", it: "Granchio",      en: "Crab",          loc: "ocean", r: 0, w: [60, 500],   v: 12,  xp: 10, it_f: "Cammina di traverso, per dispetto.", en_f: "Walks sideways, just because." },
-    { id: "squid",   em: "🦑", it: "Calamaro",      en: "Squid",         loc: "ocean", r: 1, w: [200, 2000], v: 32,  xp: 20, it_f: "Disegna ombre sul fondo.", en_f: "Draws shadows on the seabed." },
-    { id: "octopus", em: "🐙", it: "Polpo",         en: "Octopus",       loc: "ocean", r: 1, w: [400, 3500], v: 45,  xp: 24, it_f: "Otto braccia, mille trucchi.", en_f: "Eight arms, a thousand tricks." },
-    { id: "dolphin", em: "🐬", it: "Delfino",       en: "Dolphin",       loc: "ocean", r: 2, w: [3000, 12000],v: 130, xp: 40, it_f: "Sorride anche quando non deve.", en_f: "Smiles even when it needn't." },
-    { id: "ray",     em: "🐟", it: "Razza",         en: "Ray",           loc: "ocean", r: 2, w: [1500, 9000], v: 110, xp: 38, it_f: "Volò via come un mantello scuro.", en_f: "Flies off like a dark cloak." },
-    { id: "shark",   em: "🦈", it: "Squalo",        en: "Shark",         loc: "ocean", r: 3, w: [9000, 40000],v: 340, xp: 70, it_f: "L'ombra più temuta del mare.", en_f: "The most feared shadow of the sea." },
-    { id: "whale",   em: "🐋", it: "Balena",        en: "Whale",         loc: "ocean", r: 4, w: [30000, 90000],v: 900, xp: 120,it_f: "Canta una canzone antica.", en_f: "Sings a very old song." }
-  ];
-  const F = Object.fromEntries(FISH.map((f) => [f.id, f]));
+  // Fish records, rarity rules and legend conditions live in fish-rules.js
+  // so they can be unit-tested in Node without a DOM.
+  const F = BY_ID;
 
   const LOCATIONS = {
     river: { em: "🏞️", lvl: 1, sky: ["#8fd0e8", "#dff1f0"], water: ["#4f9fb5", "#1c5266"], hill: "#3c7266", speed: 1, tide: 1 },
@@ -239,7 +215,9 @@
     { id: "q7", em: "🏞️", it: "Il fiume", en: "The river", d_it: "Cattura 8 pesci al fiume", d_en: "Catch 8 fish in the river", stat: "loc_river", n: 8, rw: 300 },
     { id: "q8", em: "🛍️", it: "Mercante", en: "The merchant", d_it: "Raggiungi il livello 8", d_en: "Reach level 8", stat: "level", n: 8, rw: 400 },
     { id: "q9", em: "🦈", it: "Leggenda", en: "Legend", d_it: "Cattura un pesce leggendario", d_en: "Catch a legendary fish", stat: "r4", n: 1, rw: 1000 },
-    { id: "q10", em: "🛋️", it: "Arredatore", en: "Decorator", d_it: "Compra 5 arredi", d_en: "Buy 5 furnishings", stat: "furn", n: 5, rw: 500 }
+    { id: "q10", em: "🛋️", it: "Arredatore", en: "Decorator", d_it: "Compra 5 arredi", d_en: "Buy 5 furnishings", stat: "furn", n: 5, rw: 500 },
+    { id: "q11", em: "🌟", it: "Cacciatore di leggende", en: "Legend hunter", d_it: "Cattura 3 pesci leggendari speciali", d_en: "Catch 3 special legendary fish", stat: "legends", n: 3, rw: 2500 },
+    { id: "q12", em: "👑", it: "Collezione completa", en: "Complete collection", d_it: "Cattura tutte le 12 leggende", d_en: "Catch all 12 legends", stat: "legendsDex", n: 12, rw: 10000 }
   ];
 
   const SLOTS = [
@@ -261,7 +239,7 @@
       locStat: { river: 0, lake: 0, sea: 0, ocean: 0 },
       time: 6 * 60, day: 1, season: 0, weather: "sunny", weatherT: 0,
       sound: true, haptic: true, lang: "it", seen: false, lastSeen: now(),
-      stats: { casts: 0, escapes: 0, sales: 0 }
+      stats: { casts: 0, escapes: 0, sales: 0, legends: 0 }
     };
   }
   let S = fresh();
@@ -270,7 +248,10 @@
       const raw = localStorage.getItem(SAVE);
       if (raw) {
         const o = JSON.parse(raw);
-        if (o && o.v === 1) S = Object.assign(fresh(), o);
+        if (o && o.v === 1) {
+          S = Object.assign(fresh(), o);
+          S.stats = Object.assign({ casts: 0, escapes: 0, sales: 0, legends: 0 }, o.stats || {});
+        }
       }
     } catch (e) { /* corrupt save — start fresh */ }
   }
@@ -341,6 +322,22 @@
       o.connect(g).connect(AC.destination);
       o.start(); o.stop(AC.currentTime + spec[2] + 0.02);
     } catch (e) { /* audio unsupported */ }
+  }
+  function legendSound() {
+    if (!S.sound) return;
+    [523, 659, 784, 1047, 1319].forEach((f, i) =>
+      setTimeout(() => {
+        try {
+          AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+          const o = AC.createOscillator(), g = AC.createGain();
+          o.type = "triangle"; o.frequency.value = f;
+          o.connect(g).connect(AC.destination);
+          g.gain.setValueAtTime(0.0001, AC.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.14, AC.currentTime + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + 0.3);
+          o.start(); o.stop(AC.currentTime + 0.32);
+        } catch (e) { /* audio unsupported */ }
+      }, i * 130));
   }
   function buzz(ms) {
     if (!S.haptic || !navigator.vibrate) return;
@@ -433,6 +430,10 @@
     }
     document.querySelectorAll("#nav button[data-panel]").forEach((b) => b.classList.toggle("on", !p.hidden && "p-" + b.dataset.panel === id));
   }
+
+  $("dex-tabs").querySelectorAll("button[data-dex]").forEach((b) => {
+    b.onclick = () => { dexTab = b.dataset.dex; renderDex(); sfx("tap"); };
+  });
   function closePanels() {
     document.querySelectorAll(".panel").forEach((p) => (p.hidden = true));
     document.querySelectorAll("#nav button[data-panel]").forEach((b) => b.classList.remove("on"));
@@ -533,7 +534,11 @@
   }
 
   /* ═══════════════════════════ bucket / recipes ═══════════════════════════ */
-  function bucketValue(f) { return Math.round(F[f.id].v * (0.6 + f.w / F[f.id].w[1] * 0.8)) * (perk("sell2") ? 2 : 1); }
+  function bucketValue(f) {
+    const def = F[f.id];
+    const legendBonus = def.legend ? 2 : 1;
+    return Math.round(def.v * (0.6 + f.w / def.w[1] * 0.8)) * (perk("sell2") ? 2 : 1) * legendBonus;
+  }
   function sellFish(f) {
     const v = bucketValue(f);
     addCoins(v); S.fishSold++; S.stats.sales++;
@@ -634,20 +639,35 @@
   }
 
   /* ═══════════════════════════ fishopedia ═══════════════════════════ */
+  let dexTab = "all";
   function renderDex() {
     const found = Object.keys(S.dex).length;
-    $("fisho-progress").textContent = tr("dex_title") + ": " + found + " / " + FISH.length + " · " + S.fishCaught + " " + tr("caught_n");
+    const legendsFound = LEGENDS.filter((f) => S.dex[f.id]).length;
+    $("fisho-progress").textContent = tr("dex_title") + ": " + found + " / " + FISH.length +
+      " · " + tr("legends_progress") + " " + legendsFound + "/" + LEGENDS.length +
+      " · " + S.fishCaught + " " + tr("caught_n");
+    $("dex-tabs").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.dex === dexTab));
     const box = $("fisho-list");
     box.innerHTML = "";
-    FISH.forEach((f) => {
+    const list = dexTab === "legends" ? LEGENDS : FISH;
+    list.forEach((f) => {
       const c = document.createElement("div");
       const got = S.dex[f.id];
-      c.className = "fcard" + (got ? "" : " no") + (f.r >= 3 ? " r" + f.r : "");
+      c.className = "fcard" + (got ? "" : " no") + (f.r >= 3 ? " r" + f.r : "") + (f.legend ? " legend" : "");
+      if (f.legend) c.style.setProperty("--legend-glow", f.glow || "#ffd36e");
       const rec = S.records[f.id] ? Math.round(S.records[f.id]) + " " + tr("weight") : tr("distance");
+      const name = got ? (f[S.lang] || f.it) : "???";
       c.innerHTML =
         '<div class="em">' + (got ? f.em : "❔") + "</div>" +
-        "<b>" + (got ? (f[S.lang] || f.it) : "???") + "</b>" +
+        "<b>" + name + "</b>" +
         '<small>' + (got ? tr("loc_" + f.loc) + " · " + rec : "—") + "</small>" +
+        (f.legend
+          ? '<div class="legend-note">' + tr("legend_condition") + ": " +
+              conditionText(f, S.lang) + "</div>" +
+            (got ? '<div class="legend-note lore">' + tr("legend_lore") + ": " +
+              (S.lang === "it" ? f.lore_it : f.lore_en) + "</div>"
+              : '<div class="legend-note">' + tr("legend_unknown") + "</div>")
+          : "") +
         '<div class="r r' + f.r + '">' + "★".repeat(f.r + 1) + "</div>";
       box.appendChild(c);
     });
@@ -659,6 +679,8 @@
     if (q.stat === "dex") return Object.keys(S.dex).length;
     if (q.stat === "mounted") return S.room.filter((r) => r.kind === "fish").length;
     if (q.stat === "furn") return S.furn || 0;
+    if (q.stat === "legends") return S.stats.legends || 0;
+    if (q.stat === "legendsDex") return LEGENDS.filter((f) => S.dex[f.id]).length;
     if (q.stat.startsWith("loc_")) return S.locStat[q.stat.slice(4)] || 0;
     return S[q.stat] || 0;
   }
@@ -802,7 +824,8 @@
     $("set-sound").checked = S.sound;
     $("set-haptic").checked = S.haptic;
     $("set-lang").value = S.lang;
-    $("stats-txt").textContent = tr("stats_line", { a: S.stats.casts, b: S.fishCaught, c: S.stats.sales, d: Object.keys(S.records).length });
+    $("stats-txt").textContent = tr("stats_line", { a: S.stats.casts, b: S.fishCaught, c: S.stats.sales, d: Object.keys(S.records).length }) +
+      " · " + tr("legends_progress") + " " + (S.stats.legends || 0);
   }
   $("set-lang").onchange = (e) => { S.lang = e.target.value; save(); applyI18n(); };
   $("set-sound").onchange = (e) => { S.sound = e.target.checked; save(); if (S.sound) sfx("tap"); };
@@ -882,17 +905,25 @@
     refreshHud();
   }
 
-  function chooseFish() {
-    const pool = FISH.filter((f) => f.loc === S.loc);
+  function luckValue() {
     let luck = baitDef().luck + (hasExtra("clover") ? 0.6 : 0) + (perk("luck") ? 0.8 : 0);
     if (S.weather === "rain" || S.weather === "storm") luck += 0.3;
     if (S.season === 1) luck += 0.15;
-    const weights = [0.4, 0.3, 0.18, 0.09, 0.03].map((w, r) => w * (1 + luck * r * 0.7));
-    const tot = weights.reduce((a, b) => a + b, 0);
-    let x = Math.random() * tot, r = 0;
-    for (; r < 4; r++) { if (x < weights[r]) break; x -= weights[r]; }
-    const candidates = pool.filter((f) => f.r === r);
-    return pick(candidates.length ? candidates : pool);
+    return luck;
+  }
+
+  function chooseFish() {
+    const h = S.time / 60;
+    const ctx = {
+      loc: S.loc,
+      weather: S.weather,
+      season: S.season,
+      night: h < 6 || h >= 20,
+      bait: S.equip.bait,
+      level: S.level,
+      luck: luckValue(),
+    };
+    return chooseFishRules(ctx, Math.random);
   }
 
   function bite() {
@@ -909,6 +940,11 @@
       fish: f, hint: ""
     };
     addSplash(bobber.tx, bobber.ty);
+    if (f.legend) {
+      toast(tr("legend_sighting"), "legend");
+      legendBurst(f.glow || "#ffd36e");
+      buzz([30, 30, 60]);
+    }
     setStatus("", false); // the battle overlay has its own prompt
     sfx("bite"); buzz([40, 40, 40]);
     $("b-name").textContent = hasExtra("binoculars") ? (f[S.lang] || f.it) + " " + "★".repeat(f.r + 1) : "★".repeat(f.r + 1) + " ???";
@@ -939,21 +975,29 @@
     S.locStat[S.loc] = (S.locStat[S.loc] || 0) + 1;
     if (f.r >= 2) S.rare++;
     if (f.r === 4) S.r4++;
+    if (f.legend) S.stats.legends++;
     const rec = !S.records[f.id] || w > S.records[f.id];
     if (rec) S.records[f.id] = w;
-    addXp(f.xp + f.r * 4);
+    addXp(f.xp + f.r * 4 + (f.legend ? 60 : 0));
     addToBucket(f.id, w);
-    sfx("catch"); buzz([30, 50, 30]);
+    sfx(f.legend ? "coin" : "catch");
+    buzz(f.legend ? [40, 60, 40, 60, 120] : [30, 50, 30]);
+    if (f.legend) { legendSound(); legendBurst(f.glow || "#ffd36e"); }
     // populate card
     $("card").dataset.rarity = f.r;
+    $("card").dataset.legend = f.legend ? "1" : "0";
+    $("card").style.setProperty("--legend-glow", f.glow || "#ffd36e");
     $("c-emoji").textContent = f.em;
     $("c-name").textContent = f[S.lang] || f.it;
     $("c-meta").textContent = Math.round(w) + " " + tr("weight") + " · " + tr("loc_" + f.loc) + " · " + "★".repeat(f.r + 1);
-    $("c-flavor").textContent = f[S.lang + "_f"] || f.it_f;
+    $("c-flavor").textContent = f.legend
+      ? (S.lang === "it" ? f.lore_it : f.lore_en)
+      : (f[S.lang + "_f"] || f.it_f);
     show("c-rec", rec);
     $("c-mount").disabled = S.room.length >= SLOTS.length;
     show("card", true);
-    if (isNew) toast(tr("new_fish") + " " + (f[S.lang] || f.it), "gold");
+    if (f.legend) toast(tr("legendary") + " " + (f[S.lang] || f.it) + "!", "legend");
+    else if (isNew) toast(tr("new_fish") + " " + (f[S.lang] || f.it), "gold");
     save();
   }
 
@@ -1538,14 +1582,26 @@
       splashes.push({ x, y, vx: rnd(-26, 26), vy: rnd(-52, -16), t: 0, life: rnd(0.5, 0.9), r: rnd(1.2, 2.8) });
     }
   }
+  function legendBurst(color) {
+    for (let i = 0; i < 46; i++) {
+      const a = (i / 46) * Math.PI * 2;
+      splashes.push({
+        x: 0.5, y: 0.62,
+        vx: Math.cos(a) * rnd(40, 130), vy: Math.sin(a) * rnd(40, 130) - 30,
+        t: 0, life: rnd(1.1, 2.1), r: rnd(2, 5), color,
+      });
+    }
+  }
   function drawSplashes(dt) {
     splashes = splashes.filter((s) => s.t < s.life);
     splashes.forEach((s) => {
       s.t += dt; s.vy += 130 * dt;
       const x = (s.x + s.vx * s.t) * V.w, y = (s.y + s.vy * s.t + 70 * s.t * s.t) * V.h;
       ctx.globalAlpha = Math.max(0, 1 - s.t / s.life);
-      ctx.fillStyle = "#eafcff";
+      ctx.fillStyle = s.color || "#eafcff";
+      if (s.color) { ctx.shadowColor = s.color; ctx.shadowBlur = 10; }
       ctx.beginPath(); ctx.arc(x, y, s.r, 0, SEGS); ctx.fill();
+      ctx.shadowBlur = 0;
     });
     ctx.globalAlpha = 1;
   }
@@ -1707,6 +1763,17 @@
       battle: () => battle,
       cast,
       forceBite: () => { if (phase === "wait") bite(); },
+      forceLegend: (id) => {
+        if (phase !== "idle") return false;
+        const f = BY_ID[id];
+        if (!f || !f.legend) return false;
+        catchFish = { f, w: Math.round(rnd(f.w[0], f.w[1])) };
+        registerCatch();
+        return true;
+      },
+      legends: () => LEGENDS,
+      fish: () => FISH,
+      matchesCondition,
       forceCatch: (r) => {
         if (phase !== "idle") return;
         const pool = FISH.filter((f) => f.r === r);
