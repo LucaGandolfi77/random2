@@ -33,7 +33,7 @@ const screens = join(here, 'screens');
 const MACHINE_IDS = [
   'lucky-seven', 'retro-777', 'bar-blu', 'giro-bar', 'pharaoh', 'nebula',
   'sugar-rush', 'vault', 'atlantis', 'samurai', 'armata', 'sinibbio',
-  'agente', 'principina',
+  'agente', 'principina', 'cristallo',
 ];
 for (const id of MACHINE_IDS) {
   await render(join(icons, 'machines', `${id}.svg`), join(icons, 'machines', `${id}.png`), 128, 128);

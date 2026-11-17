@@ -47,7 +47,7 @@ try {
 
   ok(await waitFor('!!window.__slot'), 'game boots');
   ok(await evaluate('document.getElementById("game-canvas").width === 540'), 'canvas logical size');
-  ok(await evaluate('window.__slot.machines.length === 14'), 'fourteen machines registered');
+  ok(await evaluate('window.__slot.machines.length === 15'), 'fifteen machines registered');
   ok(await evaluate('window.__slot.state().credits === 1000'), 'starting credits');
 
   // Click the welcome CTA like a real user (regression: unbound close action).
@@ -55,8 +55,8 @@ try {
   ok(await evaluate('document.getElementById("panel-overlay").classList.contains("hidden")'), 'welcome CTA closes panel');
   await evaluate('window.__slot.action("lobby")');
   ok(await evaluate('!document.getElementById("lobby-overlay").classList.contains("hidden")'), 'lobby opens');
-  ok(await evaluate('document.querySelectorAll(".machine-card").length === 14'), 'lobby lists fourteen machines');
-  ok(await evaluate('document.querySelectorAll(".machine-card.locked").length === 10'), 'ten machines locked at VIP 1');
+  ok(await evaluate('document.querySelectorAll(".machine-card").length === 15'), 'lobby lists fifteen machines');
+  ok(await evaluate('document.querySelectorAll(".machine-card.locked").length === 11'), 'eleven machines locked at VIP 1');
 
   await evaluate('window.__slot.action("selectMachine"); window.__slot.action("togglePractice")');
   ok(await evaluate('window.__slot.practice() === true'), 'practice mode toggles');
@@ -152,6 +152,17 @@ try {
   ok(await waitFor('window.__slot.state().modes.rush.runs > 0', 12000), 'rush finishes');
   ok(await evaluate('window.__slot.state().trophies.includes("rush")'), 'rush trophy awarded');
   await evaluate('window.__slot.action("close")');
+
+  // Cristallo 3D — either a real WebGL cabinet or the graceful 2D fallback.
+  await evaluate('window.__slot.state().xp = 5000; window.__slot.action("lobby"); window.__slot.action("selectMachine", {id:"cristallo"})');
+  await sleep(900);
+  ok(await evaluate('window.__slot.machine().id === "cristallo"'), 'Cristallo 3D selects');
+  ok(await evaluate('document.getElementById("game-canvas").width > 0'), '3D canvas has resolution');
+  await evaluate('window.__slot.action("close")');
+  const spins3d = await evaluate('window.__slot.state().stats.spins');
+  await evaluate('window.__slot.action("spin")');
+  ok(await waitFor(`window.__slot.state().stats.spins > ${spins3d}`, 15000), '3D machine spins');
+  await sleep(400);
 
   await send('Network.enable');
   await send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 });

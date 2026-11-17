@@ -18,6 +18,9 @@
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three.module.js" } }
+    </script>
 </head>
 <body>
     <div id="app">
@@ -32,7 +35,7 @@
             </div>
             <span id="hud-free" class="free-badge hidden">FREE ×0</span>
         </header>
-        <main><canvas id="game-canvas" aria-label="Slot machine cabinet"></canvas></main>
+        <main><div id="game-stage"><canvas id="game-canvas" aria-label="Slot machine cabinet"></canvas></div></main>
     </div>
 
     <div id="offline-badge" class="badge hidden">⚠ OFFLINE</div>

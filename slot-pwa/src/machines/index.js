@@ -13,10 +13,11 @@ import armata from './armata.js';
 import sinibbio from './sinibbio.js';
 import agente from './agente.js';
 import principina from './principina.js';
+import cristallo from './cristallo.js';
 
 export const MACHINES = [
   luckySeven, retro777, barBlu, giroBar, pharaoh, nebula, sugarRush,
-  vault, atlantis, samurai, armata, sinibbio, agente, principina,
+  vault, atlantis, samurai, armata, sinibbio, agente, principina, cristallo,
 ];
 
 export const MACHINE_BY_ID = Object.fromEntries(MACHINES.map((m) => [m.id, m]));

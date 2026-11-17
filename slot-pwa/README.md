@@ -1,6 +1,6 @@
 # Lucky Seven — Slot Arcade
 
-> Fourteen machines. Three pay systems. A dozen mechanics. Four progressive
+> Fifteen machines. Three pay systems. A dozen mechanics. Four progressive
 > jackpots. Twelve play modes, a nine-stage quest campaign, dedicated vector
 > symbol art and a full effects system — one installable, offline-first arcade
 > with no build step and no dependencies. Every cabinet, reel, symbol and
@@ -18,7 +18,7 @@ python3 -m http.server 8080
 ## The roster
 
 Pick a machine in the **lobby** (🏠 or `H`). Machines unlock with VIP level;
-all fourteen are available at VIP 11. One shared wallet and one set of global
+all fifteen are available at VIP 11. One shared wallet and one set of global
 jackpots span the whole arcade.
 
 | # | Machine | Grid / pays | Signature mechanics | VIP | Volatility | RTP* |
@@ -37,9 +37,10 @@ jackpots span the whole arcade.
 | 12 | 🐰 **Sinibbio Reale** | 3×3 · 5 lines | Royal Hold & Win coins and jackpots | 9 | Medium | ~99% |
 | 13 | 🕵️ **Giardino Agente Zero** | 6×5 · clusters | Mystery symbols, upgrades, tumbling clusters | 10 | High | ~98% |
 | 14 | 👑 **Principina a Mare** | 5×3 · 20 lines | Seaside cascades, scatter respins, jackpot wheel | 11 | Medium | ~93% |
+| 15 | 💎 **Cristallo 3D** | 5×3 · 20 lines | Real Three.js WebGL cabinet, gem cascades, jackpot wheel | 6 | High | ~95% |
 
-The first six machines are free from VIP 1; Armata, Sinibbio, Agente Zero and
-Principina unlock at VIP 8–11. The VIP ladder now runs from **Rookie** to
+The first four machines are free from VIP 1; Cristallo unlocks at VIP 6, then
+Armata, Sinibbio, Agente Zero and Principina at VIP 8–11. The VIP ladder now runs from **Rookie** to
 **Icon** across 11 levels.
 
 \* Measured by `node scripts/balance.mjs 20000`, a seeded Monte Carlo of the
@@ -158,9 +159,16 @@ Out of credits? A 500-credit top-up is one tap away. The game is never a dead en
   short of a line, the third reel slows one symbol before settling with a spark
   trail. The outcome is never changed — the reel animation only teases what
   actually happened.
-- **Reel geometry** — symbols are centred inside each cell, so all 3, 4 or 5
-  rows are fully visible and stay aligned with paylines, particles and near-miss
-  cues on every machine.
+- **Reel geometry** — symbols are centred inside each cell (the leading
+  off-window placeholder is skipped), so all 3, 4 or 5 rows are fully visible
+  and stay aligned with paylines, particles and near-miss cues.
+- **Cristallo 3D** — a real Three.js cabinet renders the reels in WebGL with
+  cylindrical drums, crystal materials, coloured lights, reflections and a
+  subtle parallax. It runs on its own canvas layered over the 2D chrome so all
+  buttons and HUD stay intact. Resolution adapts with
+  `setPixelRatio(Math.min(devicePixelRatio, 2))`; devices without WebGL fall
+  back to the regular 2D cabinet automatically. The Three.js modules are
+  vendored in `vendor/` (MIT licence) so the game stays offline and build-free.
 - **Draw-on win lines** and eased reel motion complete the presentation.
 
 ## Themes
@@ -211,14 +219,15 @@ exposes the global `R2`. Everything under `src/` is pure except `main.js`.
 | `src/meta.js` | dailies, calendar, missions, achievements, collections, challenge |
 | `src/spin.js` | outcome-first reel deceleration (near-misses, turbo) |
 | `src/render.js` | canvas cabinet, reel highlights, effects, hit regions |
+| `src/render3d.js` | Three.js WebGL reel overlay for Cristallo 3D (vendor/three.module.js) |
 | `src/ui.js` | lobby tabs, HUD and all DOM panels |
 | `src/main.js` | bootstrap, mode sessions and the single game loop |
 
 ## Development
 
 ```bash
-npm test                          # 76 unit tests
-npm run smoke                     # 45 headless mobile checks incl. offline reload
+npm test                          # 78 unit tests
+npm run smoke                     # 48 headless mobile checks incl. offline reload
 node scripts/balance.mjs 20000    # per-machine RTP report
 npm run assets                    # regenerate SVG + PNG icons/screens (sharp in ../bucio)
 ```

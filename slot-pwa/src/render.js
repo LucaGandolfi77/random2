@@ -6,7 +6,7 @@ import { Effects } from './effects.js';
 
 const { width: W, height: H } = CANVAS;
 export const REEL_TOP = 232, REEL_H = 312;
-const REEL_X = 52, REEL_W = 436;
+export const REEL_X = 52, REEL_W = 436;
 
 /* Centre Y of each visible row for a machine — used by rendering and tests. */
 export function rowCenters(machine) {
@@ -97,7 +97,7 @@ export class Cabinet {
     return HIT_REGIONS.find((r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) || null;
   }
 
-  draw(frame) {
+  draw(frame, opts = {}) {
     const ctx = this.ctx;
     const t = frame.theme || THEMES.neon;
     const machine = frame.machine;
@@ -117,14 +117,18 @@ export class Cabinet {
     this.drawMarquee(t, machine);
     this.drawJackpotBoard(t, frame.jackpots);
     this.drawBody(t);
-    this.drawReels(t, machine, frame.spinner, frame.wins, frame.time || 0);
-    this.drawWinOverlay(t, machine, frame.wins, frame.time || 0);
+    if (!opts.chromeOnly) {
+      this.drawReels(t, machine, frame.spinner, frame.wins, frame.time || 0);
+      this.drawWinOverlay(t, machine, frame.wins, frame.time || 0);
+    }
     this.drawLever(t);
     this.drawDeck(t, frame);
     this.drawDisplays(t, frame);
     this.drawFooter(t, frame);
-    this.drawParticles(dt);
-    this.effects.draw(ctx, W, H);
+    if (!opts.chromeOnly) {
+      this.drawParticles(dt);
+      this.effects.draw(ctx, W, H);
+    }
     ctx.restore();
   }
 
@@ -198,8 +202,9 @@ export class Cabinet {
       ctx.fillRect(x, REEL_TOP, cellW, REEL_H);
       const rs = renderState[r] || { symbols: ['·', ...Array(machine.rows).fill('🍒'), '·'], frac: 0 };
       rs.symbols.forEach((sym, i) => {
-        // rs.symbols = [above, row0, ...rowN, below]; centre each cell inside the window.
-        const cy = REEL_TOP + (i + 0.5) * cellH - rs.frac * cellH;
+        // rs.symbols = [above, row0, ...rowN, below]. Index 0 is the cell
+        // above the window, so real rows start at index 1 -> centre (i - 0.5).
+        const cy = REEL_TOP + (i - 0.5) * cellH - rs.frac * cellH;
         if (cy < REEL_TOP - cellH || cy > REEL_TOP + REEL_H + cellH) return;
         const def = machine.symbols[sym];
         const isWin = winning.has(`${r}:${i - 1}`) && !spinner.isSpinning;

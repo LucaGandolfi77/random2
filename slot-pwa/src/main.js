@@ -18,6 +18,7 @@ import {
 } from './features.js';
 import { ReelSpinner } from './spin.js';
 import { Cabinet, rowCenters } from './render.js';
+import { Slot3D } from './render3d.js';
 import { Audio } from './audio.js';
 import { UI } from './ui.js';
 import { setupInput } from './input.js';
@@ -31,12 +32,16 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const ui = new UI();
 const audio = new Audio(R2);
-const cabinet = new Cabinet(document.getElementById('game-canvas'));
+const gameStage = document.getElementById('game-stage');
+let gameCanvas = document.getElementById('game-canvas');
 const spinner = new ReelSpinner();
 
 let state = load(window.localStorage);
 let jackpots = loadJackpots(window.localStorage);
 let machine = selectMachine(state, state.machineId);
+let cabinet = machine.render3d && Slot3D.isSupported()
+  ? new Slot3D(gameCanvas, machine)
+  : new Cabinet(gameCanvas);
 
 let busy = false;
 let auto = false;
@@ -83,6 +88,20 @@ function refreshHUD() {
 function setStatus(text) { status = text; }
 
 /* ---------- Effects ---------- */
+
+function rebuildCabinet() {
+  if (cabinet instanceof Slot3D) cabinet.dispose();
+  // A canvas keeps its first context type, so swap in a fresh one when moving
+  // between the 2D cabinet and the WebGL renderer.
+  const fresh = document.createElement('canvas');
+  fresh.id = 'game-canvas';
+  fresh.setAttribute('aria-label', 'Slot machine cabinet');
+  gameCanvas.replaceWith(fresh);
+  gameCanvas = fresh;
+  cabinet = machine.render3d && Slot3D.isSupported()
+    ? new Slot3D(gameCanvas, machine)
+    : new Cabinet(gameCanvas);
+}
 
 function fx() { return cabinet.effects; }
 
@@ -442,6 +461,7 @@ function selectMachineById(id) {
   }
   machine = selectMachine(state, target.id);
   spinner.reset(machine.strips, machine.rows);
+  rebuildCabinet();
   applyTheme();
   sticky = []; shiftColumn = 0; wins = [];
   persist(); refreshHUD();
@@ -626,7 +646,12 @@ function loop(now) {
 function init() {
   applyTheme();
   spinner.reset(machine.strips, machine.rows);
-  setupInput(document.getElementById('game-canvas'), cabinet, { action });
+  setupInput(gameStage, cabinet, {
+    action,
+    getCabinet: () => cabinet,
+    getCanvas: () => gameCanvas,
+  });
+  window.addEventListener('resize', () => cabinet.resize?.());
   const delegated = [
     'buyBonus', 'selectMachine', 'togglePractice', 'collections', 'lobby',
     'challenge', 'gambleYes', 'gambleAgain', 'paytable', 'stats', 'settings',
@@ -661,8 +686,9 @@ function init() {
     action,
     spin: playSpin,
     spinner,
-    cabinet,
+    get cabinet() { return cabinet; },
     machines: MACHINES,
+    threeSupported: () => Slot3D.isSupported(),
   };
 }
 

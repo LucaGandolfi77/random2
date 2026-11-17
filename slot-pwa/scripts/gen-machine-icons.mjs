@@ -27,6 +27,7 @@ const THEMES = {
   sinibbio:  { bg1: '#1c1e29', bg2: '#08090d', edge: '#f5f5ff', accent: '#ff9fc4', metal: '#34384d' },
   agente:    { bg1: '#04251a', bg2: '#010a06', edge: '#39ff9e', accent: '#b8ff4d', metal: '#0d4433' },
   principina:{ bg1: '#052a3d', bg2: '#01090f', edge: '#7fe0ff', accent: '#ffe0a3', metal: '#0e4a6b' },
+  cristallo: { bg1: '#1d083f', bg2: '#05010f', edge: '#b78cff', accent: '#67e8f9', metal: '#3a1670' },
 };
 
 const MACHINES = [
@@ -44,6 +45,7 @@ const MACHINES = [
   { id: 'sinibbio',       theme: 'sinibbio', title: 'SINIBBIO',   motif: 'bunny' },
   { id: 'agente',         theme: 'agente',   title: 'AGENTE ZERO',motif: 'lens' },
   { id: 'principina',     theme: 'principina',title:'PRINCIPINA', motif: 'crown' },
+  { id: 'cristallo',      theme: 'cristallo', title: 'CRISTALLO 3D', motif: 'gem' },
 ];
 
 function motif(kind, t) {
@@ -102,6 +104,9 @@ function motif(kind, t) {
       return `<path d="M156 320 L176 170 L256 250 L336 170 L356 320 Z" fill="${t.edge}" filter="url(#glow)"/>
         <rect x="156" y="320" width="200" height="36" rx="8" fill="${t.accent}"/>
         <circle cx="256" cy="160" r="14" fill="#fff6c0"/>`;
+    case 'gem':
+      return `<path d="M256 140 L356 220 L256 360 L156 220 Z" fill="${t.edge}" filter="url(#glow)"/>
+        <path d="M156 220 H356 M256 140 L216 220 L256 360 L296 220 Z" fill="none" stroke="#fff" stroke-width="7" opacity=".8"/>`;
     default:
       return `<circle cx="256" cy="252" r="70" fill="${t.edge}"/>`;
   }

@@ -2,7 +2,7 @@
  * Network-first for navigations (offline falls back to the cached shell),
  * stale-while-revalidate for static assets. Install once, play forever.
  */
-const CACHE = 'slot-pwa-v7';
+const CACHE = 'slot-pwa-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,10 @@ const ASSETS = [
   './src/meta.js',
   './src/spin.js',
   './src/render.js',
+  './src/render3d.js',
+  './vendor/three.module.js',
+  './vendor/three.core.js',
+  './vendor/THREE-LICENSE.txt',
   './src/audio.js',
   './src/input.js',
   './src/ui.js',
@@ -52,6 +56,7 @@ const ASSETS = [
   './src/machines/sinibbio.js',
   './src/machines/agente.js',
   './src/machines/principina.js',
+  './src/machines/cristallo.js',
   './icons/icon.svg',
   './icons/icon-maskable.svg',
   './icons/machines/lucky-seven.png',
@@ -68,6 +73,7 @@ const ASSETS = [
   './icons/machines/sinibbio.svg', './icons/machines/sinibbio.png',
   './icons/machines/agente.svg', './icons/machines/agente.png',
   './icons/machines/principina.svg', './icons/machines/principina.png',
+  './icons/machines/cristallo.svg', './icons/machines/cristallo.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
