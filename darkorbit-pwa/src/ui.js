@@ -10,6 +10,7 @@ import {
     SHIPS, UPGRADES, SKILLS, SKILL_BY_ID, ACHIEVEMENTS, AMMO, ABILITIES, DRONE_MAX,
     DISPATCH_TIERS, CRAFTS, MISSIONS, MAPS, RESOURCES, RESOURCE_IDS,
     REFINE_RATIO, REFINED_PRICE_MULT, PRESTIGE_MIN_LEVEL,
+    SEASON_TIERS, SEASON_XP_PER_TIER, SEASON_REWARDS, VOUCHERS,
     droneCost, upgradeCost, xpForLevel, clamp
 } from "./config.js";
 import { dispatchStatus } from "./dispatch.js";
@@ -18,6 +19,9 @@ import { achievementList, achievementCount } from "./achievements.js";
 import { canCraft, refinedValue } from "./refinery.js";
 import { missionLog, missionsDone, currentMission } from "./missions.js";
 import { weeklyConfig, loadBoard } from "./challenge.js";
+import {
+    seasonProgress, seasonKey, claimSeasonTier, redeemVoucher
+} from "./season.js";
 
 function fmt(n) {
     return Math.floor(n || 0).toLocaleString("en-US");
@@ -58,6 +62,7 @@ export function createUI(handlers = {}) {
         targetShield: $("target-shield-fill"),
         targetHp: $("target-hp-fill"),
         phase: $("phase-label"),
+        eventBadge: $("event-badge"),
         safeBadge: $("safe-badge"),
         effects: $("active-effects"),
         fireBtn: $("fire-btn"),
@@ -111,6 +116,10 @@ export function createUI(handlers = {}) {
             "start-weekly": handlers.onStartWeekly,
             share: handlers.onShare,
             prestige: handlers.onPrestige,
+            season: handlers.onSeason,
+            voucher: handlers.onVoucher,
+            "claim-tier": handlers.onClaimTier,
+            "redeem-voucher": handlers.onRedeemVoucher,
             "claim-dispatch": handlers.onClaimDispatch,
             "coach-next": handlers.onCoachNext,
             "coach-skip": handlers.onCoachSkip,
@@ -125,6 +134,7 @@ export function createUI(handlers = {}) {
         else if (action === "refine" && handlers.onRefine) handlers.onRefine(value);
         else if (action === "sell-refined" && handlers.onSellRefined) handlers.onSellRefined(value);
         else if (action === "craft" && handlers.onCraft) handlers.onCraft(value);
+        else if (action === "claim-tier" && handlers.onClaimTier) handlers.onClaimTier(Number(value));
         else if (action === "setting" && handlers.onSetting) {
             const key = btn.getAttribute("data-key");
             let next = value;
@@ -161,6 +171,8 @@ export function createUI(handlers = {}) {
                     ${hasRun ? `<button class="btn primary" data-action="continue" type="button">▶ CONTINUE RUN</button>` : ""}
                     <button class="btn ${hasRun ? "" : "primary"}" data-action="play" type="button">✦ NEW RUN</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="season" type="button">🎟 SEASON</button>
+                    <button class="btn" data-action="voucher" type="button">🎁 VOUCHER</button>
                     <button class="btn" data-action="weekly" type="button">🏁 WEEKLY</button>
                     <button class="btn" data-action="mission-log" type="button">📖 MISSIONS</button>
                     <button class="btn" data-action="contracts" type="button">📋 CONTRACTS</button>
@@ -353,6 +365,8 @@ export function createUI(handlers = {}) {
                 <div class="panel-actions">
                     <button class="btn primary" data-action="resume" type="button">▶ RESUME</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="season" type="button">🎟 SEASON</button>
+                    <button class="btn" data-action="voucher" type="button">🎁 VOUCHER</button>
                     <button class="btn" data-action="weekly" type="button">🏁 WEEKLY</button>
                     <button class="btn" data-action="mission-log" type="button">📖 MISSIONS</button>
                     <button class="btn" data-action="contracts" type="button">📋 CONTRACTS</button>
@@ -561,6 +575,54 @@ export function createUI(handlers = {}) {
             </div>`);
     }
 
+    function showSeason(profile) {
+        const now = Date.now();
+        const prog = seasonProgress(profile, now);
+        return showOverlay(`
+            <div class="panel panel-wide" role="dialog" aria-modal="true">
+                <p class="kicker">SEASON ${seasonKey(now)}</p>
+                <h2>BATTLE PASS</h2>
+                <div class="mission-active">
+                    <span>TIER ${prog.tier} / ${SEASON_TIERS}</span>
+                    <h3>${fmt(prog.xp)} SEASON XP</h3>
+                    <div class="mini-track"><div class="hp" style="width:${Math.round(prog.into / prog.needed * 100)}%"></div></div>
+                    <small>${fmt(prog.into)} / ${fmt(prog.needed)} TO NEXT TIER · EARN XP FROM KILLS, SALES AND GATES</small>
+                </div>
+                <div class="hangar-scroll">
+                    ${SEASON_REWARDS.map((r, i) => {
+                        const tier = i + 1;
+                        const done = prog.claimed.includes(tier);
+                        const ready = prog.xp >= tier * SEASON_XP_PER_TIER;
+                        return `<div class="upgrade-row ${done ? "done" : ""}">
+                            <div class="upgrade-info">
+                                <b>${done ? "✓" : ready ? "▶" : "○"} TIER ${tier}</b>
+                                <small>${fmt(r.credits)} CR · ${r.urium} URIUM${r.tint ? " · HULL TINT" : ""}</small>
+                            </div>
+                            ${done ? `<span class="contract-reward">CLAIMED</span>` : `<button class="btn tiny ${ready ? "primary" : ""}" data-action="claim-tier" data-value="${tier}" type="button" ${ready ? "" : "disabled"}>CLAIM</button>`}
+                        </div>`;
+                    }).join("")}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+            </div>`);
+    }
+
+    function showVoucher(profile) {
+        return showOverlay(`
+            <div class="panel" role="dialog" aria-modal="true">
+                <p class="kicker">REDEEM CODE</p>
+                <h2>VOUCHERS</h2>
+                <p class="lead" style="font-size:10px">Enter a code to claim credits and urium. Each code works once.</p>
+                <input id="voucher-input" class="voucher-input" type="text" maxlength="24" autocomplete="off" spellcheck="false" placeholder="CODE" aria-label="Voucher code">
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="redeem-voucher" type="button">REDEEM</button>
+                    <button class="btn" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+                ${profile.vouchers.length ? `<p class="section-note">Redeemed: ${profile.vouchers.join(", ")}</p>` : ""}
+            </div>`);
+    }
+
     function showDestroyed(state, profile) {
         showOverlay(`
             <div class="panel" role="dialog" aria-modal="true">
@@ -641,6 +703,14 @@ export function createUI(handlers = {}) {
             el.targetPanel.classList.add("hidden");
         }
 
+        // Daily event badge.
+        if (el.eventBadge && state.event) {
+            setText(el.eventBadge, state.event.name + " · " + state.event.desc);
+            el.eventBadge.classList.remove("hidden");
+        } else if (el.eventBadge) {
+            el.eventBadge.classList.add("hidden");
+        }
+
         // Galaxy Gate HUD.
         if (el.gateHUD) {
             const inGate = state.mode === "gate" && state.gate;
@@ -706,6 +776,8 @@ export function createUI(handlers = {}) {
         showAchievements,
         showMissions,
         showWeekly,
+        showSeason,
+        showVoucher,
         showCoach,
         hideCoach,
         setDebug,

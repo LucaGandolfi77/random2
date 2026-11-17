@@ -167,6 +167,29 @@ button { font: inherit; color: inherit; cursor: pointer; }
     50% { box-shadow: 0 0 26px rgba(138, 255, 193, 0.5); }
 }
 
+.event-badge {
+    position: absolute; top: 34px; right: 10px; z-index: 5;
+    padding: 3px 9px;
+    font-size: 8px; letter-spacing: 0.8px;
+    color: var(--amber);
+    background: rgba(26, 20, 8, 0.8);
+    border: 1px solid rgba(255, 209, 102, 0.45);
+    border-radius: 20px;
+    pointer-events: none;
+}
+.voucher-input {
+    width: 100%;
+    margin: 10px 0;
+    padding: 12px;
+    font: inherit; font-size: 14px; letter-spacing: 3px; text-align: center;
+    color: #fff;
+    background: rgba(4, 12, 20, 0.9);
+    border: 1px solid var(--edge);
+    border-radius: 8px;
+    text-transform: uppercase;
+}
+.voucher-input:focus { outline: 2px solid var(--accent); }
+
 .gate-hud {
     position: absolute;
     top: 62px; left: 50%; transform: translateX(-50%);

@@ -25,6 +25,7 @@ import {
     weeklyConfig, addScore, bestScore, saveBestReplay, loadBestReplay, shareResult
 } from "./challenge.js";
 import { recordFrame, createGhost, GHOST_HZ } from "./ghost.js";
+import { dailyEvent, addSeasonXp, claimSeasonTier, redeemVoucher } from "./season.js";
 import { createRenderer } from "./render.js";
 import { createInput } from "./input.js";
 import { createUI } from "./ui.js";
@@ -82,8 +83,9 @@ const canvas = document.getElementById("game-canvas");
 const minimap = document.getElementById("minimap");
 const renderer = createRenderer(canvas, minimap);
 const profile = loadProfile();
+const dailyMod = dailyEvent();
 
-let state = createState(profile);
+let state = createState(profile, { event: dailyMod });
 let phase = "menu";
 let hangarFrom = "menu";
 let settingsFrom = "menu";
@@ -203,7 +205,7 @@ function startGame() {
     replayFrames = [];
     replayTick = 0;
     ghost = createGhost(loadBestReplay());
-    state = createState(profile);
+    state = createState(profile, { event: dailyMod });
     applyTier(currentTier);
     phase = "playing";
     accumulator = 0;
@@ -228,6 +230,7 @@ function continueRun() {
     replayTick = 0;
     ghost = createGhost(loadBestReplay());
     state = restoreState(saved, profile);
+    state.event = state.event || dailyMod;
     applyTier(currentTier);
     renderer.resetCamera();
     phase = state.destroyed ? "destroyed" : "playing";
@@ -253,7 +256,7 @@ function startWeekly() {
     replayFrames = [];
     replayTick = 0;
     ghost = createGhost(loadBestReplay());
-    state = createState(profile, { mapIndex: cfg.mapIndex });
+    state = createState(profile, { mapIndex: cfg.mapIndex, event: dailyMod });
     state.challenge = challenge;
     applyTier(currentTier);
     phase = "playing";
@@ -286,7 +289,7 @@ function toMenu() {
     recordRun("quit");
     persist();
     phase = "menu";
-    state = createState(profile);
+    state = createState(profile, { event: dailyMod });
     renderer.resetCamera();
     ui.showMenu(profile, hasRun());
 }
@@ -342,6 +345,8 @@ function openInfo(kind) {
     if (kind === "contracts") ui.showContracts(profile);
     else if (kind === "missions") ui.showMissions(profile);
     else if (kind === "weekly") ui.showWeekly(profile);
+    else if (kind === "season") ui.showSeason(profile);
+    else if (kind === "voucher") ui.showVoucher(profile);
     else ui.showAchievements(profile);
 }
 
@@ -437,6 +442,30 @@ const ui = createUI({
     },
     onContracts: function () { openInfo("contracts"); },
     onMissionLog: function () { openInfo("missions"); },
+    onSeason: function () { openInfo("season"); },
+    onVoucher: function () { openInfo("voucher"); },
+    onClaimTier: function (tier) {
+        const reward = claimSeasonTier(profile, tier);
+        if (reward) {
+            markDirty();
+            persist();
+            ui.refreshHangar(state, profile);
+            ui.showSeason(profile);
+            ui.toast("Season tier " + tier + " claimed: +" + fmtNum(reward.credits) + " CR", "good");
+        }
+    },
+    onRedeemVoucher: function () {
+        const input = document.getElementById("voucher-input");
+        const voucher = redeemVoucher(profile, input ? input.value : "");
+        if (voucher) {
+            markDirty();
+            persist();
+            ui.showVoucher(profile);
+            ui.toast("Code redeemed: +" + fmtNum(voucher.credits) + " CR, +" + voucher.urium + " URIUM", "good");
+        } else {
+            ui.toast("Invalid or already used code");
+        }
+    },
     onWeekly: function () { openInfo("weekly"); },
     onStartWeekly: startWeekly,
     onShare: async function () {
@@ -453,7 +482,7 @@ const ui = createUI({
         challenge = null;
         replayFrames = [];
         ghost = createGhost(loadBestReplay());
-        state = createState(profile);
+        state = createState(profile, { event: dailyMod });
         refreshStats(state, profile, true);
         applyTier(currentTier);
         renderer.resetCamera();
@@ -664,6 +693,7 @@ function doJump() {
 function handleEvents(events) {
     const completed = [];
     const missionsDoneNow = [];
+    let seasonGain = 0;
 
     function mission(type, amount, absolute) {
         const done = missionProgress(profile, type, amount, absolute);
@@ -712,6 +742,7 @@ function handleEvents(events) {
             case "box": if (soundOn) Sound.box(); buzz([15, 20, 30]); break;
             case "ability": if (soundOn) Sound.ability(); buzz(18); break;
             case "levelup":
+                seasonGain += 60;
                 if (soundOn) Sound.levelup();
                 ui.toast("LEVEL UP — " + profile.level, "good");
                 buzz([25, 40, 25]);
@@ -731,6 +762,7 @@ function handleEvents(events) {
                 if (R2 && R2.stats && R2.stats.event) R2.stats.event(SLUG, "bossphase", 1);
                 break;
             case "gatecomplete":
+                seasonGain += 300;
                 if (soundOn) Sound.box();
                 ui.toast("GATE CLEARED · +" + fmtNum(e.credits) + " CR, +" + e.urium + " URIUM", "good");
                 renderer.addShockwave(state.player.x, state.player.y, "#c08bff", 260);
@@ -751,6 +783,7 @@ function handleEvents(events) {
         }
 
         if (e.type === "kill") {
+            seasonGain += e.boss ? 100 : 25;
             completed.push(...contractProgress(profile, "kills", 1));
             mission("kills", 1);
             if (e.boss) {
@@ -759,6 +792,7 @@ function handleEvents(events) {
             }
         }
         if (e.type === "dock" && e.units) {
+            seasonGain += e.units * 2;
             completed.push(...contractProgress(profile, "sell", e.units));
             mission("sell", e.units);
         }
@@ -782,6 +816,15 @@ function handleEvents(events) {
         }
         markDirty();
     }
+    if (seasonGain) {
+        const tiers = addSeasonXp(profile, seasonGain);
+        for (const tier of tiers) {
+            ui.toast("SEASON TIER " + tier + " UNLOCKED — claim it in the Season panel", "good");
+        }
+        if (tiers.length && phase === "info") ui.showSeason(profile);
+        markDirty();
+    }
+
     for (const item of missionsDoneNow) {
         ui.toast("MISSION COMPLETE: " + item.mission.title + " · +" + fmtNum(item.reward.credits) + " CR", "good");
         if (soundOn) Sound.levelup();

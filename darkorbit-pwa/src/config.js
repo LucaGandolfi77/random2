@@ -27,6 +27,32 @@ export const RUN_KEY = "darkorbit-run";
 export const RUN_VERSION = 1;
 
 /* Refining: three raw ore units become one refined unit worth 3× at sale. */
+/* Offline season pass: eight-week cycles with twenty claimable tiers. */
+export const SEASON_LENGTH_DAYS = 56;
+export const SEASON_TIERS = 20;
+export const SEASON_XP_PER_TIER = 600;
+export const SEASON_REWARDS = Array.from({ length: SEASON_TIERS }, (_, i) => ({
+    credits: 1200 + i * 850,
+    urium: i % 4 === 3 ? 5 + Math.floor(i / 4) : i % 2 ? 1 : 2,
+    tint: i === 5 ? "#7df9ff" : i === 12 ? "#ff7ad9" : i === 19 ? "#ffd166" : null
+}));
+
+/* Redeemable codes, wiki style. Case-insensitive, one use each. */
+export const VOUCHERS = [
+    { code: "DEEPORBIT", credits: 2500, urium: 5 },
+    { code: "STARSCOUT", credits: 5000, urium: 8 },
+    { code: "GATEKEEPER", credits: 12000, urium: 20 }
+];
+
+/* Daily event modifier, chosen deterministically from the local date. */
+export const EVENT_TYPES = [
+    { id: "double_xp", name: "DOUBLE XP", desc: "+100% experience", xp: 2, credits: 1, elite: 0, shield: 1, dmg: 1 },
+    { id: "credit_rush", name: "CREDIT RUSH", desc: "+40% credits", xp: 1, credits: 1.4, elite: 0, shield: 1, dmg: 1 },
+    { id: "elite_swarm", name: "ELITE SWARM", desc: "+25% elite enemies", xp: 1, credits: 1, elite: 0.25, shield: 1, dmg: 1 },
+    { id: "flux_storm", name: "FLUX STORM", desc: "+100% shield regen", xp: 1, credits: 1, elite: 0, shield: 2, dmg: 1 },
+    { id: "quiet_space", name: "QUIET SPACE", desc: "-25% enemy damage", xp: 1.2, credits: 1, elite: 0, shield: 1, dmg: 0.75 }
+];
+
 /* Galaxy Reset: trade level and gear for a permanent bonus tier. */
 export const PRESTIGE_MIN_LEVEL = 10;
 export const PRESTIGE_BONUS = { damage: 0.1, shield: 0.1, cargo: 0.1 };

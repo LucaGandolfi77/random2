@@ -30,6 +30,17 @@ a PWA on iOS and Android; works offline once installed.
 The layout adapts to **both portrait and landscape**, respects iOS safe areas,
 and uses haptics + WebAudio through the shared `R2` arcade library.
 
+## Seasons & live content
+
+- **Battle pass:** an eight-week offline season with twenty claimable tiers;
+  earn season XP from kills, sales, gates and levels, and claim credits, urium
+  and cosmetic hull tints.
+- **Voucher codes:** wiki-style codes (e.g. `DEEPORBIT`) redeem once for a
+  credit and urium boost from the menu.
+- **Daily events:** a date-derived modifier each day — Double XP, Credit Rush,
+  Elite Swarm, Flux Storm or Quiet Space — shown as a badge in the HUD and
+  applied directly to rewards and combat.
+
 ## Longevity
 
 - **Weekly challenge:** one seed per week (derived from the date) fixes the map

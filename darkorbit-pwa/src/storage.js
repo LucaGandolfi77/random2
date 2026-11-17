@@ -26,6 +26,8 @@ export const DEFAULTS = {
     totalSales: 0,
     bestSale: 0,
     bossKills: 0,
+    season: { key: "", xp: 0, claimed: [] },
+    vouchers: [],
     prestige: 0,
     skillPoints: 0,
     skills: { laser: 0, shield: 0, drone: 0, cargo: 0 },
@@ -95,6 +97,15 @@ export function loadProfile(storage) {
         profile.totalSales = count(data.totalSales, 0);
         profile.bestSale = count(data.bestSale, 0);
         profile.bossKills = count(data.bossKills, 0);
+        if (data.season && typeof data.season === "object") {
+            profile.season.key = typeof data.season.key === "string" ? data.season.key : "";
+            profile.season.xp = count(data.season.xp, 0);
+            profile.season.claimed = Array.isArray(data.season.claimed)
+                ? data.season.claimed.filter((n) => Number.isInteger(n)) : [];
+        }
+        profile.vouchers = Array.isArray(data.vouchers)
+            ? data.vouchers.filter((v) => typeof v === "string") : [];
+
         profile.prestige = count(data.prestige, 0);
         profile.skillPoints = count(data.skillPoints, 0);
         if (data.skills && typeof data.skills === "object") {
@@ -201,6 +212,8 @@ export function saveProfile(profile, storage) {
             totalSales: count(profile.totalSales, 0),
             bestSale: count(profile.bestSale, 0),
             bossKills: count(profile.bossKills, 0),
+            season: profile.season || { key: "", xp: 0, claimed: [] },
+            vouchers: Array.isArray(profile.vouchers) ? profile.vouchers : [],
             prestige: count(profile.prestige, 0),
             skillPoints: count(profile.skillPoints, 0),
             skills: profile.skills || {},

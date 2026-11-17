@@ -163,6 +163,7 @@ export function createState(profile, options = {}) {
         map,
         world,
         mode: "sector",
+        event: options.event || null,
         gate: null,
         bossPhaseTimer: 0,
         nextId: 1,
@@ -285,9 +286,10 @@ function makeEnemy(state, map, defId, forceElite) {
     };
 
     if (!def.boss) {
+        const eventBonus = state.event ? state.event.elite || 0 : 0;
         const chance = forceElite || (state.mode === "gate"
-            ? GATE_CONFIG.eliteChance
-            : 0.05 + Math.max(0, map.hpMul - 1) * 0.02);
+            ? GATE_CONFIG.eliteChance + eventBonus
+            : 0.05 + Math.max(0, map.hpMul - 1) * 0.02 + eventBonus);
         if (random() < chance) {
             const affix = pick(ELITES);
             e.elite = affix;
@@ -426,6 +428,7 @@ export function refreshDrones(state, profile) {
 /* ------------------------------------------------------------------ */
 
 function gainXp(state, profile, amount) {
+    amount = Math.round(amount * (state.event ? state.event.xp : 1));
     profile.xp += amount;
     let levels = 0;
     while (profile.xp >= xpForLevel(profile.level)) {
@@ -513,7 +516,8 @@ function killEnemy(state, enemy, profile) {
     }
 
     const mult = enemy.elite ? enemy.elite.reward : 1;
-    const credits = Math.round(randInt(def.credits[0], def.credits[1]) * mult);
+    const credits = Math.round(randInt(def.credits[0], def.credits[1]) * mult *
+        (state.event ? state.event.credits : 1));
     profile.credits += credits;
     state.creditsEarned += credits;
     state.kills += 1;
@@ -915,7 +919,7 @@ function fireEnemyBullet(state, enemy) {
     const base = Math.atan2(p.y - enemy.y, p.x - enemy.x);
     const spread = enemy.def.spread || 1;
     const speed = 300 + (enemy.def.tier || 1) * 26;
-    const dmg = enemy.def.damage * state.map.dmgMul;
+    const dmg = enemy.def.damage * state.map.dmgMul * (state.event ? state.event.dmg : 1);
 
     for (let i = 0; i < spread; i++) {
         if (state.enemyBullets.length >= MAX_ENEMY_BULLETS) break;
@@ -988,7 +992,8 @@ export function step(state, profile, input, dt) {
     if (mag > 0.05) p.angle = Math.atan2(my, mx);
 
     // Docked shields regenerate immediately and much faster (safe haven).
-    const regenMult = state.docked ? DOCKED_SHIELD_REGEN_MULT : 1;
+    const regenMult = (state.docked ? DOCKED_SHIELD_REGEN_MULT : 1) *
+        (state.event ? state.event.shield : 1);
     if ((state.docked || state.t - p.lastHit > 3.5) && p.shield < p.shieldMax) {
         p.shield = Math.min(p.shieldMax, p.shield + p.shieldRegen * regenMult * dt);
     }
@@ -1143,7 +1148,8 @@ function updateEnemies(state, dt, profile) {
             }
             if (d < p.radius + e.radius + 2 && e.contactCd <= 0) {
                 if (random() >= p.evasion) {
-                    damagePlayer(state, e.def.damage * state.map.dmgMul * 0.7);
+                    damagePlayer(state, e.def.damage * state.map.dmgMul * 0.7 *
+                        (state.event ? state.event.dmg : 1));
                 } else {
                     emit(state, "evade", { x: p.x, y: p.y });
                 }
