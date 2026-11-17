@@ -147,6 +147,31 @@ try {
   ok(await ev("!document.getElementById('view-cabin').hidden && document.getElementById('view-fish').hidden"), "cabin view opens");
   await shot("06-cabin.png");
 
+  // ── deterministic visual sweep: all locations, times, weather ──
+  await ev("document.querySelector('#nav button[data-view=fish]').click()");
+  const scenes = [
+    ["07-river-dawn", { loc: "river", time: 360, weather: "sunny", season: 0 }],
+    ["08-lake-day", { loc: "lake", time: 720, weather: "sunny", season: 1 }],
+    ["09-sea-dusk", { loc: "sea", time: 1110, weather: "cloudy", season: 2 }],
+    ["10-ocean-night", { loc: "ocean", time: 1320, weather: "sunny", season: 3 }],
+    ["11-storm", { loc: "sea", time: 900, weather: "storm", season: 2 }],
+    ["12-snow", { loc: "lake", time: 600, weather: "snow", season: 3 }]
+  ];
+  for (const [name, sc] of scenes) {
+    await ev(`window.__ripple.setScene(${JSON.stringify(sc)})`);
+    await sleep(140);
+    await shot(name + ".png");
+  }
+  ok(await ev("window.__ripple.phase() === 'idle'"), "visual sweep leaves game playable");
+  await ev("window.__ripple.resumeTime()");
+
+  // ── rarity card visuals ──
+  await ev("window.__ripple.forceCatch(4)");
+  ok(await ev("!document.getElementById('card').hidden && document.getElementById('card').dataset.rarity === '4'"), "legendary catch card styled");
+  await sleep(420); // let the sheet entrance animation settle before capture
+  await shot("13-legendary.png");
+  await ev("document.getElementById('c-keep').click()");
+
   // ── persistence ──
   ok(await ev("!!localStorage.getItem('ripple-cove-save-v1')"), "progress saved to localStorage");
   ok(await ev("window.__ripple.state().seen === true"), "onboarding flag persisted");

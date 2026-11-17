@@ -1,5 +1,5 @@
 // Ripple Cove — Cozy Fishing Service Worker
-const CACHE = 'ripple-cove-v2'
+const CACHE = 'ripple-cove-v3'
 
 const ASSETS = [
   './',
