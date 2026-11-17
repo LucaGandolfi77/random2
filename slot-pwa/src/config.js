@@ -197,6 +197,12 @@ export const MODE_TABS = [
   { id: 'challenge', name: 'Daily', icon: '📅' },
   { id: 'tournament', name: 'Tournament', icon: '🏆' },
   { id: 'rush', name: 'Spin Rush', icon: '⚡' },
+  { id: 'bonus-hunt', name: 'Bonus Hunt', icon: '🎁' },
+  { id: 'boss', name: 'Boss Battle', icon: '👾' },
+  { id: 'chase', name: 'Jackpot Chase', icon: '🪙' },
+  { id: 'cascade', name: 'Cascade', icon: '🔗' },
+  { id: 'roulette', name: 'Roulette', icon: '🎲' },
+  { id: 'high-roller', name: 'High Roller', icon: '💎' },
   { id: 'quest', name: 'Quests', icon: '🗺️' },
   { id: 'profile', name: 'Profile', icon: '👤' },
 ];

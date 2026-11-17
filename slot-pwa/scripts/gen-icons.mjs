@@ -30,6 +30,10 @@ async function render(src, out, width, height) {
 
 const icons = join(here, 'icons');
 const screens = join(here, 'screens');
+const MACHINE_IDS = ['lucky-seven', 'retro-777', 'pharaoh', 'nebula', 'sugar-rush', 'vault', 'atlantis', 'samurai'];
+for (const id of MACHINE_IDS) {
+  await render(join(icons, 'machines', `${id}.svg`), join(icons, 'machines', `${id}.png`), 128, 128);
+}
 await render(join(icons, 'icon.svg'), join(icons, 'icon-192.png'), 192, 192);
 await render(join(icons, 'icon.svg'), join(icons, 'icon-512.png'), 512, 512);
 await render(join(icons, 'icon-maskable.svg'), join(icons, 'icon-maskable-512.png'), 512, 512);

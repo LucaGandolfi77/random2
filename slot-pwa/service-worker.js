@@ -2,7 +2,7 @@
  * Network-first for navigations (offline falls back to the cached shell),
  * stale-while-revalidate for static assets. Install once, play forever.
  */
-const CACHE = 'slot-pwa-v4';
+const CACHE = 'slot-pwa-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -29,6 +29,13 @@ const ASSETS = [
   './src/modes/tournament.js',
   './src/modes/rush.js',
   './src/modes/quest.js',
+  './src/modes/helpers.js',
+  './src/modes/bonus-hunt.js',
+  './src/modes/boss.js',
+  './src/modes/chase.js',
+  './src/modes/cascade.js',
+  './src/modes/roulette.js',
+  './src/modes/high-roller.js',
   './src/machines/index.js',
   './src/machines/build.js',
   './src/machines/lucky-seven.js',
@@ -41,6 +48,14 @@ const ASSETS = [
   './src/machines/samurai.js',
   './icons/icon.svg',
   './icons/icon-maskable.svg',
+  './icons/machines/lucky-seven.png',
+  './icons/machines/retro-777.png',
+  './icons/machines/pharaoh.png',
+  './icons/machines/nebula.png',
+  './icons/machines/sugar-rush.png',
+  './icons/machines/vault.png',
+  './icons/machines/atlantis.png',
+  './icons/machines/samurai.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',

@@ -5,7 +5,14 @@ import { drawBackground } from './art/backgrounds.js';
 import { Effects } from './effects.js';
 
 const { width: W, height: H } = CANVAS;
-const REEL_TOP = 232, REEL_H = 312, REEL_X = 52, REEL_W = 436;
+export const REEL_TOP = 232, REEL_H = 312;
+const REEL_X = 52, REEL_W = 436;
+
+/* Centre Y of each visible row for a machine — used by rendering and tests. */
+export function rowCenters(machine) {
+  const cellH = REEL_H / machine.rows;
+  return Array.from({ length: machine.rows }, (_, row) => REEL_TOP + (row + 0.5) * cellH);
+}
 
 export const HIT_REGIONS = [
   { id: 'spin', x: 60, y: 580, w: 170, h: 80 },
@@ -191,7 +198,8 @@ export class Cabinet {
       ctx.fillRect(x, REEL_TOP, cellW, REEL_H);
       const rs = renderState[r] || { symbols: ['·', ...Array(machine.rows).fill('🍒'), '·'], frac: 0 };
       rs.symbols.forEach((sym, i) => {
-        const cy = REEL_TOP + (i + 1) * cellH - rs.frac * cellH;
+        // rs.symbols = [above, row0, ...rowN, below]; centre each cell inside the window.
+        const cy = REEL_TOP + (i + 0.5) * cellH - rs.frac * cellH;
         if (cy < REEL_TOP - cellH || cy > REEL_TOP + REEL_H + cellH) return;
         const def = machine.symbols[sym];
         const isWin = winning.has(`${r}:${i - 1}`) && !spinner.isSpinning;

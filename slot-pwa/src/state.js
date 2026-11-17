@@ -23,6 +23,12 @@ export function defaults() {
     modes: {
       tournament: { results: {} },
       rush: { best: 0, runs: 0, last: 0 },
+      bonusHunt: { best: 0, runs: 0, last: 0 },
+      boss: { best: 0, runs: 0, last: 0 },
+      chase: { best: 0, runs: 0, last: 0 },
+      cascade: { best: 0, runs: 0, last: 0 },
+      roulette: { best: 0, runs: 0, last: 0 },
+      highRoller: { best: 0, runs: 0, last: 0 },
       quest: { active: null, completed: [], progress: {} },
     },
     trophies: [],

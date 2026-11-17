@@ -144,7 +144,7 @@ main { flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-co
 
 /* ===== Lobby ===== */
 .lobby-panel {
-  width:min(100%,720px); max-height:92dvh; overflow:auto; padding:18px;
+  width:min(100%,840px); max-height:92dvh; overflow:auto; padding:18px;
   background:linear-gradient(160deg,var(--panel),#05050a);
   border:2px solid var(--edge); border-radius:18px;
   box-shadow:0 0 44px color-mix(in srgb,var(--glow) 35%,transparent);
@@ -160,10 +160,11 @@ main { flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-co
 .machine-card.current { box-shadow:0 0 18px var(--glow); border-color:#fff; }
 .machine-card.locked { opacity:.45; cursor:not-allowed; filter:grayscale(.7); }
 .machine-art {
-  height:74px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-  font-size:2.6rem; background:radial-gradient(circle,var(--c),#000 75%);
-  border:1px solid var(--c);
+  height:88px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle,var(--c),#000 78%);
+  border:1px solid var(--c); overflow:hidden;
 }
+.machine-art img { height:100%; width:auto; image-rendering:auto; object-fit:contain; filter:drop-shadow(0 3px 8px #000); }
 .machine-info h3 { color:var(--edge); font-size:1rem; margin:0; }
 .machine-info p { font-size:.74rem; opacity:.8; margin:0; min-height:2.2em; }
 .machine-info small { font-size:.68rem; opacity:.7; }

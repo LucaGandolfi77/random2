@@ -26,7 +26,7 @@
   ],
   "shortcuts": [
     { "name": "Play now", "short_name": "Play", "url": "./", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
-    { "name": "Machine lobby", "short_name": "Lobby", "url": "./?panel=lobby", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Machine lobby", "short_name": "Lobby", "url": "./?panel=lobby", "icons": [{ "src": "icons/machines/lucky-seven.png", "sizes": "128x128" }] },
     { "name": "Quests", "short_name": "Quests", "url": "./?panel=quests", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Paytable", "short_name": "Pays", "url": "./?panel=paytable", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Daily bonus", "short_name": "Daily", "url": "./?panel=daily", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }

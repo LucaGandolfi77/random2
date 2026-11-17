@@ -5,6 +5,7 @@ import {
 } from './config.js';
 import { MACHINES, isUnlocked } from './machines/index.js';
 import { questSummary } from './modes/quest.js';
+import { getExtraMode } from './modes/index.js';
 
 const fmt = (n) => Math.floor(n || 0).toLocaleString('en-US');
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -93,7 +94,9 @@ export class UI {
       const chips = m.mechanics.map((x) => `<span class="chip">${esc(x.replace(/([A-Z])/g, ' $1'))}</span>`).join('');
       return `<button class="machine-card ${open ? '' : 'locked'} ${m.id === state.machineId ? 'current' : ''}"
           data-action="selectMachine" data-id="${m.id}" ${open ? '' : 'disabled'}>
-        <div class="machine-art" style="--c:${THEMES[m.theme].edge}"><span>${m.motif}</span></div>
+        <div class="machine-art" style="--c:${THEMES[m.theme].edge}">
+          <img src="./icons/machines/${m.id}.png" alt="" loading="lazy">
+        </div>
         <div class="machine-info">
           <h3>${esc(m.name)}</h3>
           <p>${esc(m.tagline)}</p>
@@ -135,6 +138,27 @@ export class UI {
           <div class="stat"><span>Trophy</span><b>${state.trophies.includes('rush') ? '⚡ Speed Demon' : 'Locked'}</b></div>
         </div>
         <button class="btn primary wide" data-action="startMode" data-mode="rush">⚡ Start Spin Rush</button>`;
+    }
+    if (['bonus-hunt', 'boss', 'chase', 'cascade', 'roulette', 'high-roller'].includes(tab)) {
+      const def = getExtraMode(tab);
+      const rec = state.modes[def.id.replace(/-([a-z])/g, (_, c) => c.toUpperCase())] || {};
+      const vip = vipLevel(state.xp);
+      const locked = def.minVip && vip < def.minVip;
+      const machines = MACHINES.filter((m) => isUnlocked(m, vip));
+      return `<div class="mode-panel">
+        <div class="mode-hero">${def.icon} <b>${esc(def.name)}</b></div>
+        ${def.rules}
+        <div class="stat-grid">
+          <div class="stat"><span>Best</span><b>${(rec.best || 0).toLocaleString()}</b></div>
+          <div class="stat"><span>Runs</span><b>${rec.runs || 0}</b></div>
+          <div class="stat"><span>Last</span><b>${(rec.last || 0).toLocaleString()}</b></div>
+          <div class="stat"><span>Status</span><b>${locked ? `VIP ${def.minVip}+` : 'Ready'}</b></div>
+        </div>
+        ${def.limit ? `<p class="sub">${def.limit} spins per run.</p>` : ''}
+        ${locked ? '' : `<div class="mode-actions">${def.id === 'roulette'
+          ? `<button class="btn primary wide" data-action="startMode" data-mode="${def.id}">🎲 Spin the wheel</button>`
+          : machines.map((m) => `<button class="btn" data-action="startMode" data-mode="${def.id}" data-machine="${m.id}">${m.motif} ${esc(m.name)}</button>`).join('')}</div>`}
+      </div>`;
     }
     if (tab === 'quest') {
       const quests = questSummary(state);

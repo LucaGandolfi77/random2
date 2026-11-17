@@ -38,7 +38,9 @@ free spins, bonuses and jackpots). Treat these as estimates, not guarantees.
 
 ## Play modes
 
-The lobby has six tabs: **Play, Daily, Tournament, Spin Rush, Quests, Profile**.
+The lobby has twelve tabs: **Play, Daily, Tournament, Spin Rush, Bonus Hunt,
+Boss Battle, Jackpot Chase, Cascade Challenge, Mystery Roulette, High Roller,
+Quests, Profile**.
 
 - **Play** — standard spins, with Auto (`A`) and Turbo (`T`) toggles.
 - **Daily** — the seeded five-spin challenge against simulated rivals.
@@ -49,6 +51,18 @@ The lobby has six tabs: **Play, Daily, Tournament, Spin Rush, Quests, Profile**.
 - **Spin Rush** — 60 seconds of automatic turbo spins with no wager. The score
   multiplier climbs every ten seconds (1× → 4×). Rewards scale with the final
   score, a personal best is saved, and 5,000 points unlocks **Speed Demon**.
+- **Bonus Hunt** — 12 spins where only bonus-triggering wins score; features pay a
+  final bounty scaled by hits.
+- **Boss Battle** — every machine has a boss with its own HP. Wins deal damage,
+  features deal double; defeat it for a bounty.
+- **Jackpot Chase** — 15 spins to fill a 6,000-unit personal meter; partial fills
+  still pay, a full meter pays a jackpot bonus.
+- **Cascade Challenge** — 10 spins where points are your wins multiplied by the
+  cascade length. Long tumble chains win.
+- **Mystery Roulette** — a random unlocked machine plus a random modifier (2×/3×
+  wins, extra wilds, free spins) for 10 spins.
+- **High Roller** (VIP 5+) — max bet only, prestige points on wins and double
+  prestige for features.
 - **Quests** — a nine-stage, three-chapter campaign. Activate a stage, then play
   normally: objectives are checked on every spin, in every mode. Completing a
   stage pays credits and unlocks a trophy. Stages unlock in order.
@@ -122,12 +136,21 @@ Out of credits? A 500-credit top-up is one tap away. The game is never a dead en
   drifting embers, candy sprinkles and a scrolling retro grid. All animations
   are time-based and simplified under `prefers-reduced-motion`.
 - **Effects system** — `src/effects.js` provides animated WIN / BIG WIN / MEGA
-  WIN banners, coin showers, confetti, fireworks, symbol-explosion shards,
+  WIN / EPIC / JACKPOT banners, coin showers, confetti, fireworks, rotating light
+  beams, lightning bolts, floating `+credit` popups, symbol-explosion shards,
   screen shake, screen flash and theme-specific signature particles (glitch,
-  bubbles, embers, sand, leaves, snow, sprinkles, stardust).
+  bubbles, embers, sand, leaves, snow, sprinkles, stardust). Particle count is
+  capped for smooth mobile play.
+- **Bonus presentation** — bonus rounds open with a "BONUS ROUND" cinematic
+  (spotlight rays + coin fountain), the jackpot wheel throws tick sparks, and
+  each pick'em chest reveal flips with its own burst and floating prize label.
 - **Near-miss tease** — when the decided result is genuinely two jackpot symbols
-  short of a line, the third reel slows one symbol before settling. The outcome
-  is never changed — the reel animation only teases what actually happened.
+  short of a line, the third reel slows one symbol before settling with a spark
+  trail. The outcome is never changed — the reel animation only teases what
+  actually happened.
+- **Reel geometry** — symbols are centred inside each cell, so all 3, 4 or 5
+  rows are fully visible and stay aligned with paylines, particles and near-miss
+  cues on every machine.
 - **Draw-on win lines** and eased reel motion complete the presentation.
 
 ## Themes
@@ -170,7 +193,7 @@ exposes the global `R2`. Everything under `src/` is pure except `main.js`.
 | `src/rng.js` | seedable RNG, weighted strips, daily seeds |
 | `src/engine.js` | lines / ways / cluster evaluation, cascades, Hold & Win, jackpot growth |
 | `src/features.js` | wild variants, mystery, Hold & Win sequence, gamble |
-| `src/modes/` | tournament, rush, quest modules + mode registry |
+| `src/modes/` | twelve-mode registry, score modes, tournament, rush, quest |
 | `src/art/symbols.js` | vector symbol art for every symbol |
 | `src/art/backgrounds.js` | animated theme backdrops |
 | `src/effects.js` | banners, shake, flash, particles, theme signatures |
@@ -184,10 +207,10 @@ exposes the global `R2`. Everything under `src/` is pure except `main.js`.
 ## Development
 
 ```bash
-npm test                          # 61 unit tests
-npm run smoke                     # 34 headless mobile checks incl. offline reload
+npm test                          # 74 unit tests
+npm run smoke                     # 45 headless mobile checks incl. offline reload
 node scripts/balance.mjs 20000    # per-machine RTP report
-npm run assets                    # regenerate PNG icons/screens (sharp in ../bucio)
+npm run assets                    # regenerate SVG + PNG icons/screens (sharp in ../bucio)
 ```
 
 ## Copyright & licence

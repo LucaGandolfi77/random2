@@ -105,7 +105,7 @@ try {
 
   // Mode tabs
   await evaluate('window.__slot.action("lobby")');
-  ok(await evaluate('document.querySelectorAll(".mode-tab").length === 6'), 'six lobby mode tabs');
+  ok(await evaluate('document.querySelectorAll(".mode-tab").length === 12'), 'twelve lobby mode tabs');
   await evaluate('window.__slot.action("modeTab", {tab:"quest"})');
   ok(await evaluate('document.querySelectorAll(".quest-card").length >= 9'), 'quest board renders stages');
   await evaluate('window.__slot.action("activateQuest", {id:"q1"})');
@@ -114,6 +114,26 @@ try {
   ok(await evaluate('document.querySelectorAll(".trophy").length >= 11'), 'trophy gallery renders');
   await evaluate('window.__slot.action("modeTab", {tab:"tournament"})');
   ok(await evaluate('document.querySelectorAll("[data-action=\'startMode\']").length >= 2'), 'tournament machine list');
+
+  // New score modes
+  for (const tab of ['bonus-hunt', 'boss', 'chase', 'cascade', 'roulette', 'high-roller']) {
+    await evaluate(`window.__slot.action("modeTab", {tab:"${tab}"})`);
+    ok(await evaluate('!!document.querySelector(".mode-hero")'), `${tab} panel renders`);
+  }
+  await evaluate('window.__slot.state().xp = 5000');
+  await evaluate('window.__slot.action("modeTab", {tab:"chase"})');
+  await evaluate('window.__slot.action("startMode", {mode:"chase", machine:"lucky-seven"})');
+  ok(await evaluate('window.__slot.mode() === "chase"'), 'Jackpot Chase starts');
+  await sleep(1400);
+  await evaluate('if (window.__slot.modeSession()) { window.__slot.modeSession().meter = 99999; window.__slot.modeSession().spinsLeft = 1; }');
+  await evaluate('document.getElementById("panel-overlay").classList.contains("hidden") || window.__slot.action("close")');
+  ok(await waitFor('window.__slot.state().modes.chase.runs > 0', 15000), 'Jackpot Chase finishes');
+  await evaluate('window.__slot.action("close")');
+
+  // Bonus / win effects
+  await evaluate('window.__slot.cabinet.effects.bonusIntro("BONUS ROUND", "#ffcc00"); window.__slot.cabinet.effects.lightning(); window.__slot.cabinet.effects.tier(12000)');
+  ok(await evaluate('window.__slot.cabinet.effects.rays.length > 0 && window.__slot.cabinet.effects.bolts.length > 0'), 'bonus effects fire');
+  await sleep(500);
 
   // Tournament (fast-forward the last spin)
   await evaluate('window.__slot.action("startMode", {mode:"tournament", machine:"lucky-seven"})');

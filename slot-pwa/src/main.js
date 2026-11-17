@@ -17,7 +17,7 @@ import {
   prepareGrid, collectSticky, runHoldSequence, gambleRound, bonusBuyCost,
 } from './features.js';
 import { ReelSpinner } from './spin.js';
-import { Cabinet } from './render.js';
+import { Cabinet, rowCenters } from './render.js';
 import { Audio } from './audio.js';
 import { UI } from './ui.js';
 import { setupInput } from './input.js';
@@ -87,31 +87,19 @@ function setStatus(text) { status = text; }
 function fx() { return cabinet.effects; }
 
 function celebrate(amount) {
-  const c = theme();
-  if (amount >= 10000) {
-    fx().banner('MEGA WIN!', c.edge, 3);
-    fx().fireworks(c.edge, 4);
-    fx().confetti(c.accent, 70);
-    fx().flash('#ffffff', 0.5);
-    fx().shakeScreen(15);
-  } else if (amount >= 3000) {
-    fx().banner('BIG WIN!', c.edge, 2);
-    fx().coinShower(270, 360, c.edge);
-    fx().flash(c.glow, 0.25);
-    fx().shakeScreen(9);
-    fx().signature(state.theme, c.accent);
-  } else if (amount >= 800) {
-    fx().banner('WIN!', c.accent, 1);
-    fx().signature(state.theme, c.glow);
-  }
+  fx().tier(amount);
+  if (amount > 0) fx().signature(state.theme, theme().glow);
 }
 
 function winBurst(wins) {
-  const { cellW, cellH } = cabinet.geometry(machine);
+  const { cellW } = cabinet.geometry(machine);
+  const centers = rowCenters(machine);
   const c = theme();
   wins.forEach((w) => w.positions.forEach(([r, row]) => {
-    fx().explode(52 + r * cellW + cellW / 2, 232 + row * cellH + cellH / 2,
-      machine.symbols[w.symbol]?.color || c.glow, 18);
+    const x = 52 + r * cellW + cellW / 2;
+    const y = centers[row];
+    fx().explode(x, y, machine.symbols[w.symbol]?.color || c.glow, 18);
+    fx().floatText(`+${Math.round(w.payout)}`, x, y - 24, machine.symbols[w.symbol]?.color || c.glow);
   }));
 }
 
@@ -162,6 +150,12 @@ async function playSpin() {
   await spinner.start(starts, { turbo, random, teaseReel: nearMiss ? machine.paylines[0][2][0] : -1 });
   if (nearMiss) {
     fx().banner('SO CLOSE!', theme().accent, 0);
+    const reel = machine.paylines[0][2][0];
+    const { cellW } = cabinet.geometry(machine);
+    for (let i = 0; i < 14; i++) {
+      fx().burst(52 + reel * cellW + cellW / 2 + (Math.random() - 0.5) * cellW,
+        300 + Math.random() * 160, theme().accent, 1, 'spark', 0.5);
+    }
     haptic([10, 10]);
   }
 
@@ -329,6 +323,8 @@ async function runWheel() {
   }
   const amount = awardJackpot(state, jackpots, tier, machine);
   audio.jackpot();
+  fx().wheelSparks(GLOBAL_JACKPOTS[tier].color, 34);
+  fx().beam(GLOBAL_JACKPOTS[tier].color, 1.3);
   fx().banner('JACKPOT!', GLOBAL_JACKPOTS[tier].color, 3);
   fx().coinShower(270, 360, GLOBAL_JACKPOTS[tier].color, 70);
   fx().fireworks(GLOBAL_JACKPOTS[tier].color, 4);
@@ -356,12 +352,14 @@ async function runBonus() {
     },
   }));
   let chosen = [];
-  fx().confetti(theme().accent, 40);
+  fx().bonusIntro('BONUS ROUND', theme().accent);
   audio.play('bonus');
+  await sleep(650);
   ui.showBonus(picks, (index) => {
     if (chosen.includes(index)) return;
     chosen.push(index);
     picks[index].apply();
+    fx().chestReveal(150 + index * 120, 430, picks[index].label, theme().edge);
     audio.play('win');
     persist();
     refreshHUD();
@@ -493,10 +491,22 @@ function startMode(modeId, machineId) {
     spinner.reset(machine.strips, machine.rows);
     applyTheme();
   }
-  const check = def.canEnter(state, machine, {});
+  const ctx = { machines: MACHINES, vip: vip(state), rand: Math.random };
+  const check = def.canEnter(state, machine, ctx);
   if (!check.ok) { ui.toast(check.reason || 'Cannot enter this mode'); return; }
-  modeSession = def.start(state, machine);
-  if (modeId === 'rush') modeSession.startedAt = performance.now();
+  modeSession = def.start(state, machine, ctx);
+  // Modes such as Mystery Roulette may choose a different machine.
+  if (modeSession && modeSession.machineId && modeSession.machineId !== machine.id) {
+    const chosen = getMachine(modeSession.machineId);
+    machine = selectMachine(state, chosen.id);
+    spinner.reset(machine.strips, machine.rows);
+    applyTheme();
+  }
+  if (modeSession && modeSession.bet) {
+    const idx = machine.betSteps.indexOf(modeSession.bet);
+    if (idx >= 0) state.betIndex = idx;
+  }
+  if (modeSession && def.duration) modeSession.startedAt = performance.now();
   mode = modeId;
   auto = false;
   practice = false;
@@ -595,8 +605,9 @@ ui.showPaytable = (m) => {
 function loop(now) {
   const dt = lastTime ? (now - lastTime) / 1000 : 0;
   lastTime = now;
-  if (mode === 'rush' && modeSession && modeSession.startedAt && !modeSession.done) {
-    const tick = getExtraMode('rush').onTick(state, modeSession, (now - modeSession.startedAt) / 1000);
+  const activeDef = modeDef();
+  if (activeDef && activeDef.duration && modeSession && modeSession.startedAt && !modeSession.done) {
+    const tick = activeDef.onTick(state, modeSession, (now - modeSession.startedAt) / 1000);
     if (tick && tick.status) setStatus(tick.status);
     if (tick && tick.done && !busy) finishActiveMode();
   }
