@@ -2,55 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Slot PWA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Lucky Seven — Slot Arcade · 8 Machines</title>
+    <meta name="description" content="A complete slot arcade: eight unique machines, ways and cluster pays, Hold & Win, wild variants, jackpots, daily challenges and VIP progression. Installable and playable offline.">
     <meta name="theme-color" content="#ffcc00">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Slot Arcade">
+    <meta name="format-detection" content="telephone=no">
+    <meta property="og:title" content="Lucky Seven — Slot Arcade">
+    <meta property="og:description" content="Eight machines. Endless mechanics. One giant jackpot. An installable offline slot arcade.">
+    <meta property="og:type" content="website">
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
 </head>
 <body>
     <div id="app">
-        <header>
-            <h1>SLOT PWA</h1>
-            <div class="score-board">
-                <span class="score">SCORE: <span id="score">0</span></span>
-                <span class="high-score">HIGH: <span id="high-score">0</span></span>
-                <span class="bet">BET: <span id="bet">1</span></span>
+        <header class="topbar">
+            <div class="brand"><span class="brand-icon">🎰</span><span id="hud-machine">LUCKY SEVEN</span></div>
+            <div class="hud">
+                <span class="pill"><small>CREDITS</small><b id="hud-credits">1,000</b></span>
+                <span class="pill win"><small>WIN</small><b id="hud-win">0</b></span>
+                <span class="pill"><small>BET</small><b id="hud-bet">2</b></span>
+                <span class="pill"><small>LINES</small><b id="hud-lines">20</b></span>
+                <span class="pill vip"><small id="hud-vip-label">VIP 1</small><b id="hud-vip">ROOKIE</b></span>
             </div>
+            <span id="hud-free" class="free-badge hidden">FREE ×0</span>
         </header>
+        <main><canvas id="game-canvas" aria-label="Slot machine cabinet"></canvas></main>
+    </div>
 
-        <main>
-            <canvas id="game-canvas"></canvas>
-            <div id="spin-button" class="spin-btn">SPIN</div>
-        </main>
+    <div id="offline-badge" class="badge hidden">⚠ OFFLINE</div>
+    <button id="update-btn" class="badge update hidden">↻ UPDATE</button>
 
-        <nav class="controls">
-            <button id="theme-btn" class="btn">🎨 Theme</button>
-            <button id="bet-btn" class="btn">BET</button>
-        </nav>
+    <div id="install-banner" class="install-banner hidden">
+        <span>📲 Install the Slot Arcade for the best experience</span>
+        <button id="install-btn" class="btn primary">Install</button>
+        <button id="install-later" class="btn">Later</button>
+    </div>
 
-        <div id="overlay" class="overlay hidden">
-            <div class="panel">
-                <h2 id="overlay-title">SLOT PWA</h2>
-                <p id="overlay-msg">Ready to spin the reels!</p>
-                <div id="overlay-stats" class="hidden">
-                    <p>Score: <span id="final-score">0</span></p>
-                    <p>High Score: <span id="final-high">0</span></p>
-                </div>
-                <button id="overlay-play" class="btn primary">▶ Play Again</button>
-                <button id="overlay-theme" class="btn">🎨 Change Theme</button>
+    <div id="lobby-overlay" class="overlay lobby hidden" role="dialog" aria-modal="true">
+        <div class="lobby-panel">
+            <div class="panel-head">
+                <div><h2>🎰 Slot Arcade</h2><p id="lobby-sub" class="sub"></p></div>
+                <button id="lobby-close" class="close" aria-label="Close">✕</button>
             </div>
-        </div>
-
-        <div id="install-prompt" class="install-prompt hidden">
-            <p>Install Slot PWA for the best iPhone experience!</p>
-            <button id="install-btn" class="btn primary">Install</button>
-            <button id="install-later" class="btn">Later</button>
+            <div id="lobby-tabs" class="lobby-tabs"></div>
+            <div id="lobby-grid" class="lobby-grid"></div>
         </div>
     </div>
 
+    <div id="panel-overlay" class="overlay hidden" role="dialog" aria-modal="true">
+        <div class="panel">
+            <div class="panel-head">
+                <h2 id="panel-title">Lucky Seven</h2>
+                <button id="panel-close" class="close" aria-label="Close">✕</button>
+            </div>
+            <div id="panel-body"></div>
+        </div>
+    </div>
+
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+
     <script src="../shared/arcade.js"></script>
-    <script src="game.js"></script>
+    <script type="module" src="./src/main.js"></script>
 </body>
 </html>

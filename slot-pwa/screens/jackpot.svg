@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a0f2e"/><stop offset="1" stop-color="#050308"/></linearGradient>
+    <radialGradient id="burst"><stop offset="0" stop-color="#fff3a0" stop-opacity=".85"/><stop offset="1" stop-color="#ffcc00" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="390" height="844" fill="url(#bg)"/>
+  <circle cx="195" cy="420" r="270" fill="url(#burst)"/>
+  <g opacity=".95">
+    <circle cx="70" cy="270" r="24" fill="#7cffb2"/><circle cx="84" cy="240" r="14" fill="#4ade80"/>
+    <circle cx="322" cy="290" r="26" fill="#7cffb2"/><circle cx="306" cy="256" r="13" fill="#4ade80"/>
+    <rect x="96" y="470" width="26" height="26" rx="5" fill="#ffe066" transform="rotate(20 109 483)"/>
+    <rect x="290" y="500" width="26" height="26" rx="5" fill="#ff5ec4" transform="rotate(-18 303 513)"/>
+    <circle cx="120" cy="560" r="10" fill="#5ec8ff"/><circle cx="280" cy="220" r="9" fill="#ff9f1c"/>
+  </g>
+  <text x="195" y="330" font-family="Arial" font-weight="900" font-size="40" fill="#ffcc00" text-anchor="middle">JACKPOT!</text>
+  <rect x="70" y="368" width="250" height="110" rx="18" fill="#0a0612" stroke="#ffcc00" stroke-width="3"/>
+  <text x="195" y="430" font-family="Arial" font-weight="900" font-size="38" fill="#7cffb2" text-anchor="middle">+12,480</text>
+  <text x="195" y="456" font-family="Arial" font-size="12" fill="#fff" text-anchor="middle">GRAND JACKPOT WON</text>
+  <rect x="110" y="540" width="170" height="44" rx="12" fill="#ffcc00"/>
+  <text x="195" y="569" font-family="Arial" font-weight="900" font-size="15" fill="#1a0f2e" text-anchor="middle">COLLECT</text>
+  <text x="195" y="640" font-family="Arial" font-size="12" fill="#ffcc00" text-anchor="middle">FREE SPINS × 10  ·  CASCADE × 3</text>
+</svg>
