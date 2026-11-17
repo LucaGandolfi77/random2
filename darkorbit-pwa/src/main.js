@@ -13,7 +13,7 @@ import {
     createState, step, drainEvents, setMove, setFiring, selectTargetAt,
     cycleAmmo, useAbility, refreshStats, refreshDrones, dock,
     repairAtStation, jumpGate, respawn, buyUpgrade, buyShip, selectShip,
-    buySkill, launchGate
+    buySkill, launchGate, galaxyReset, setRunRng
 } from "./sim.js";
 import { hasRun, saveRun, loadRun, clearRun, restoreState } from "./run-save.js";
 import { startDispatch, claimDispatch } from "./dispatch.js";
@@ -21,6 +21,10 @@ import { ensureDaily, contractProgress, streakBonus } from "./daily.js";
 import { checkAchievements } from "./achievements.js";
 import { refineOre, sellRefined, craftItem } from "./refinery.js";
 import { missionProgress } from "./missions.js";
+import {
+    weeklyConfig, addScore, bestScore, saveBestReplay, loadBestReplay, shareResult
+} from "./challenge.js";
+import { recordFrame, createGhost, GHOST_HZ } from "./ghost.js";
 import { createRenderer } from "./render.js";
 import { createInput } from "./input.js";
 import { createUI } from "./ui.js";
@@ -94,6 +98,10 @@ let runSaveTimer = 0;
 let infoFrom = "menu";
 let coachStep = 0;
 let currentTier = "high";
+let replayFrames = [];
+let replayTick = 0;
+let ghost = null;
+let challenge = null;
 
 const settings = loadSettings();
 const globalSettings = R2 && typeof R2.getSettings === "function" ? R2.getSettings() : {};
@@ -190,6 +198,11 @@ function currentSettings() {
 
 function startGame() {
     clearRun();
+    setRunRng(null);
+    challenge = null;
+    replayFrames = [];
+    replayTick = 0;
+    ghost = createGhost(loadBestReplay());
     state = createState(profile);
     applyTier(currentTier);
     phase = "playing";
@@ -209,6 +222,11 @@ function continueRun() {
         startGame();
         return;
     }
+    challenge = saved.challenge || null;
+    setRunRng(challenge ? challenge.seed : null);
+    replayFrames = [];
+    replayTick = 0;
+    ghost = createGhost(loadBestReplay());
     state = restoreState(saved, profile);
     applyTier(currentTier);
     renderer.resetCamera();
@@ -224,8 +242,47 @@ function continueRun() {
     if (phase === "destroyed") ui.showDestroyed(state, profile);
 }
 
+function startWeekly() {
+    clearRun();
+    const cfg = weeklyConfig(Date.now(), MAPS.length);
+    challenge = { week: cfg.key, seed: cfg.seed };
+    setRunRng(cfg.seed);
+    profile.ship = 0;
+    profile.tutorialDone = true;
+    profile.lastMap = cfg.mapIndex;
+    replayFrames = [];
+    replayTick = 0;
+    ghost = createGhost(loadBestReplay());
+    state = createState(profile, { mapIndex: cfg.mapIndex });
+    state.challenge = challenge;
+    applyTier(currentTier);
+    phase = "playing";
+    lastTs = 0;
+    accumulator = 0;
+    renderer.resetCamera();
+    ui.hideOverlay();
+    input.clearKeys();
+    audio.unlock();
+    persist();
+    ui.toast("WEEKLY " + cfg.label + " · " + state.map.name, "good");
+}
+
+function finalizeRun() {
+    if (!state || !replayFrames.length) return;
+    saveBestReplay({ score: state.score, mapIndex: state.mapIndex, frames: replayFrames });
+    if (challenge) {
+        addScore({
+            score: state.score,
+            kills: state.kills,
+            mapIndex: state.mapIndex
+        }, Date.now());
+    }
+    replayFrames = [];
+}
+
 function toMenu() {
     if (state && !state.destroyed && phase !== "menu") saveRun(state);
+    finalizeRun();
     recordRun("quit");
     persist();
     phase = "menu";
@@ -284,6 +341,7 @@ function openInfo(kind) {
     phase = "info";
     if (kind === "contracts") ui.showContracts(profile);
     else if (kind === "missions") ui.showMissions(profile);
+    else if (kind === "weekly") ui.showWeekly(profile);
     else ui.showAchievements(profile);
 }
 
@@ -379,6 +437,31 @@ const ui = createUI({
     },
     onContracts: function () { openInfo("contracts"); },
     onMissionLog: function () { openInfo("missions"); },
+    onWeekly: function () { openInfo("weekly"); },
+    onStartWeekly: startWeekly,
+    onShare: async function () {
+        const ok = await shareResult(bestScore(), weeklyConfig(Date.now(), MAPS.length).label);
+        ui.toast(ok ? "Result copied / shared" : "Sharing unavailable", ok ? "good" : "");
+    },
+    onPrestige: function () {
+        if (profile.level < 10) return;
+        if (typeof window !== "undefined" && window.confirm &&
+            !window.confirm("Galaxy Reset: lose level, credits and upgrades for a permanent +10% damage / shield / cargo bonus?")) return;
+        if (!galaxyReset(profile)) return;
+        clearRun();
+        setRunRng(null);
+        challenge = null;
+        replayFrames = [];
+        ghost = createGhost(loadBestReplay());
+        state = createState(profile);
+        refreshStats(state, profile, true);
+        applyTier(currentTier);
+        renderer.resetCamera();
+        phase = "menu";
+        persist();
+        ui.showMenu(profile, hasRun());
+        ui.toast("Galaxy Reset complete — prestige tier " + profile.prestige, "good");
+    },
     onRefine: function (id) {
         if (refineOre(state, profile, id)) {
             handleEvents(drainEvents(state));
@@ -740,6 +823,13 @@ function frame(ts) {
     }
     audio.update(dt);
 
+    if (ghost && phase === "playing") {
+        ghost.update(dt);
+        state.ghostPose = ghost.pose();
+    } else if (state) {
+        state.ghostPose = null;
+    }
+
     if (phase === "playing") {
         accumulator += dt;
         let guard = 0;
@@ -752,10 +842,13 @@ function frame(ts) {
             setFiring(state, inputState.firing);
             step(state, profile, inputState, STEP);
             handleEvents(drainEvents(state));
+            replayTick += 1;
+            if (replayTick % Math.round(60 / GHOST_HZ) === 0) recordFrame(replayFrames, state);
             markDirty();
             accumulator -= STEP;
             guard += 1;
             if (state.destroyed) {
+                finalizeRun();
                 clearRun();
                 phase = "destroyed";
                 profile.totalKills += state.kills;
@@ -912,6 +1005,9 @@ window.__DEEP_ORBIT__ = {
     getTier: () => currentTier,
     hasRun: () => hasRun(),
     saveRunNow: () => saveRun(state),
+    getChallenge: () => challenge,
+    startWeekly,
+    getReplayFrames: () => replayFrames.length,
     start: startGame,
     render: () => renderer.render(state, profile, 1 / 60)
 };

@@ -912,6 +912,23 @@ export function createRenderer(canvas, minimap) {
         }
     }
 
+    function drawGhost(state) {
+        const pose = state.ghostPose;
+        if (!pose) return;
+        ctx.save();
+        ctx.globalAlpha = 0.32;
+        drawMesh(ctx, getMesh("ship", state.player.ship.id), pose.x, pose.y, pose.angle,
+            "#c08bff", state.player.radius / 16, { alpha: 0.32 });
+        ctx.strokeStyle = "rgba(192,139,255,0.6)";
+        ctx.lineWidth = 1.5 / zoom;
+        ctx.setLineDash([4 / zoom, 5 / zoom]);
+        ctx.beginPath();
+        ctx.arc(pose.x, pose.y, state.player.radius + 14, 0, TAU);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+    }
+
     function drawParticles(state) {
         for (const pt of state.particles) {
             ctx.globalAlpha = clamp(pt.life / pt.maxLife, 0, 1);
@@ -1022,6 +1039,7 @@ export function createRenderer(canvas, minimap) {
         drawDrones(state);
         drawTargetLine(state, target);
         drawPlayer(state, palette);
+        drawGhost(state);
         drawParticles(state);
         drawDamageTexts();
         ctx.restore();

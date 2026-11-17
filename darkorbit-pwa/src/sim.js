@@ -10,14 +10,38 @@ import {
     AMMO, MAPS, ENEMY_BY_ID, SHIPS, RESOURCES, RESOURCE_IDS, BOX_TYPES,
     UPGRADES, UPGRADE_BY_ID, SKILLS, SKILL_BY_ID, ABILITIES, ABILITY_BY_ID,
     PICKUPS, PICKUP_IDS, GATE_CONFIG, ELITES, ELITE_BY_ID,
+    PRESTIGE_BONUS, PRESTIGE_MIN_LEVEL,
     PLAYER_RADIUS, PICKUP_RADIUS, DOCK_RADIUS, SAFE_STANDOFF, GATE_RADIUS,
     TARGET_RANGE, SPLASH_RADIUS, DOT_DURATION, MAGNET_RADIUS,
     OVERDRIVE_FIRE_MULT, DOCKED_SHIELD_REGEN_MULT,
     MAX_PARTICLES, MAX_ENEMY_BULLETS, DRONE_DAMAGE, DRONE_FIRE_CD,
-    xpForLevel, clamp, rand, randInt, pick
+    xpForLevel, clamp, rand, randInt, pick, setRandomSource
 } from "./config.js";
 
 const TAU = Math.PI * 2;
+
+/* Deterministic run RNG for weekly challenges. Normal play uses Math.random. */
+function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+        a = (a + 0x6D2B79F5) >>> 0;
+        let t = a;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+}
+
+let runRandom = null;
+
+export function setRunRng(seed) {
+    runRandom = seed === null || seed === undefined ? null : mulberry32(seed);
+    setRandomSource(runRandom || Math.random);
+}
+
+export function random() {
+    return runRandom ? runRandom() : Math.random();
+}
 
 /* ------------------------------------------------------------------ */
 /* Stats                                                               */
@@ -33,10 +57,10 @@ export function deriveStats(profile) {
     return {
         ship,
         hpMax: Math.round(ship.hp + (u.hull | 0) * 480 + (level - 1) * 42),
-        shieldMax: Math.round((ship.shield + (u.shield | 0) * 340 + (level - 1) * 32) * (1 + (sk.shield | 0) * 0.05)),
+        shieldMax: Math.round((ship.shield + (u.shield | 0) * 340 + (level - 1) * 32) * (1 + (sk.shield | 0) * 0.05) * (1 + (profile.prestige | 0) * PRESTIGE_BONUS.shield)),
         speed: ship.speed + (u.generator | 0) * 13,
-        cargoMax: Math.round((ship.cargo + (u.cargo | 0) * 260) * (1 + (sk.cargo | 0) * 0.08)),
-        damageMult: (1 + (u.laser | 0) * 0.12 + (level - 1) * 0.025) * (1 + (sk.laser | 0) * 0.06),
+        cargoMax: Math.round((ship.cargo + (u.cargo | 0) * 260) * (1 + (sk.cargo | 0) * 0.08) * (1 + (profile.prestige | 0) * PRESTIGE_BONUS.cargo)),
+        damageMult: (1 + (u.laser | 0) * 0.12 + (level - 1) * 0.025) * (1 + (sk.laser | 0) * 0.06) * (1 + (profile.prestige | 0) * PRESTIGE_BONUS.damage),
         shieldRegen: (8 + (u.generator | 0) * 2.4) * (1 + (u.regen | 0) * 0.45),
         critChance: (u.critical | 0) * 0.04 + (perks.crit || 0),
         pickupRadius: PICKUP_RADIUS + (u.magnet | 0) * 28,
@@ -246,7 +270,7 @@ function makeEnemy(state, map, defId, forceElite) {
         fireCd: rand(0.4, def.fireCd + 0.4),
         contactCd: 0,
         hitFlash: 0,
-        orbitDir: Math.random() < 0.5 ? -1 : 1,
+        orbitDir: random() < 0.5 ? -1 : 1,
         wander: rand(0, TAU),
         homeX: 0, homeY: 0,
         cloakCd: rand(3, 7),
@@ -264,7 +288,7 @@ function makeEnemy(state, map, defId, forceElite) {
         const chance = forceElite || (state.mode === "gate"
             ? GATE_CONFIG.eliteChance
             : 0.05 + Math.max(0, map.hpMul - 1) * 0.02);
-        if (Math.random() < chance) {
+        if (random() < chance) {
             const affix = pick(ELITES);
             e.elite = affix;
             e.hpMax = Math.round(e.hpMax * affix.hp);
@@ -423,7 +447,7 @@ function gainXp(state, profile, amount) {
 function damageEnemy(state, enemy, dmg, profile, allowCrit) {
     if (enemy.dead) return 0;
     let crit = false;
-    if (allowCrit && state.player.critChance > 0 && Math.random() < state.player.critChance) {
+    if (allowCrit && state.player.critChance > 0 && random() < state.player.critChance) {
         dmg *= 2;
         crit = true;
     }
@@ -481,10 +505,10 @@ function killEnemy(state, enemy, profile) {
     }
 
     // Chance to drop a box or a temporary field pickup.
-    if (Math.random() < 0.05 + tier * 0.025 || def.boss) {
+    if (random() < 0.05 + tier * 0.025 || def.boss) {
         spawnBox(state, def.boss ? "gold" : null);
     }
-    if (Math.random() < 0.06 + tier * 0.015 || def.boss) {
+    if (random() < 0.06 + tier * 0.015 || def.boss) {
         spawnPickup(state, pick(PICKUP_IDS), enemy.x + rand(-18, 18), enemy.y + rand(-18, 18));
     }
 
@@ -555,7 +579,7 @@ function damagePlayer(state, dmg) {
 
 function weightedBox() {
     const total = BOX_TYPES.reduce((sum, b) => sum + b.weight, 0);
-    let roll = Math.random() * total;
+    let roll = random() * total;
     for (const b of BOX_TYPES) {
         roll -= b.weight;
         if (roll <= 0) return b;
@@ -1118,7 +1142,7 @@ function updateEnemies(state, dt, profile) {
                     (e.elite ? e.elite.fire : 1) * (e.phase2 ? 0.62 : 1) * rand(0.85, 1.2);
             }
             if (d < p.radius + e.radius + 2 && e.contactCd <= 0) {
-                if (Math.random() >= p.evasion) {
+                if (random() >= p.evasion) {
                     damagePlayer(state, e.def.damage * state.map.dmgMul * 0.7);
                 } else {
                     emit(state, "evade", { x: p.x, y: p.y });
@@ -1174,7 +1198,7 @@ function updateBullets(state, dt, profile) {
         for (const e of state.enemies) {
             if (e.dead) continue;
             if (distance(b, e) < e.radius + b.radius + 2) {
-                if (e.def.evade && Math.random() < e.def.evade) {
+                if (e.def.evade && random() < e.def.evade) {
                     emit(state, "evade", { x: e.x, y: e.y });
                     release(state, "bullets", b);
                     hit = true;
@@ -1227,7 +1251,7 @@ function updateEnemyBullets(state, dt) {
         }
 
         if (distance(b, p) < p.radius + b.radius) {
-            if (state.docked || Math.random() < p.evasion) {
+            if (state.docked || random() < p.evasion) {
                 emit(state, "evade", { x: p.x, y: p.y });
             } else {
                 damagePlayer(state, b.dmg);
@@ -1430,6 +1454,24 @@ export function buyShip(profile, index) {
     profile.urium -= ship.urium;
     profile.ownedShips.push(index);
     profile.ship = index;
+    return true;
+}
+
+export function galaxyReset(profile) {
+    if ((profile.level | 0) < PRESTIGE_MIN_LEVEL) return false;
+    profile.prestige = (profile.prestige | 0) + 1;
+    profile.level = 1;
+    profile.xp = 0;
+    profile.credits = 2500;
+    profile.urium = 10;
+    profile.skillPoints = 1;
+    profile.skills = { laser: 0, shield: 0, drone: 0, cargo: 0 };
+    profile.upgrades = {
+        laser: 0, generator: 0, shield: 0, hull: 0, cargo: 0,
+        critical: 0, regen: 0, magnet: 0
+    };
+    profile.drones = 0;
+    profile.lastMap = 0;
     return true;
 }
 

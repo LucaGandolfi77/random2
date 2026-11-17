@@ -30,6 +30,16 @@ a PWA on iOS and Android; works offline once installed.
 The layout adapts to **both portrait and landscape**, respects iOS safe areas,
 and uses haptics + WebAudio through the shared `R2` arcade library.
 
+## Longevity
+
+- **Weekly challenge:** one seed per week (derived from the date) fixes the map
+  and ship for everyone. Scores go into a local top-10 leaderboard with a
+  Web Share / clipboard result button.
+- **Ghost replay:** your best run's trajectory is recorded at 30 Hz and flown
+  again as a translucent ship on later runs — a pace setter without a server.
+- **Galaxy Reset:** at level 10, reset level, credits and upgrades for a
+  permanent +10% damage / shield / cargo prestige tier (stacking).
+
 ## Economy & campaign
 
 - **Refining & assembly:** refine 3 raw ore into 1 refined unit worth 3× at the

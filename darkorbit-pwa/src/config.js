@@ -27,6 +27,10 @@ export const RUN_KEY = "darkorbit-run";
 export const RUN_VERSION = 1;
 
 /* Refining: three raw ore units become one refined unit worth 3× at sale. */
+/* Galaxy Reset: trade level and gear for a permanent bonus tier. */
+export const PRESTIGE_MIN_LEVEL = 10;
+export const PRESTIGE_BONUS = { damage: 0.1, shield: 0.1, cargo: 0.1 };
+
 export const REFINE_RATIO = 3;
 export const REFINED_PRICE_MULT = 3;
 
@@ -463,8 +467,14 @@ export function lerp(a, b, t) {
     return a + (b - a) * t;
 }
 
+let randomSource = Math.random;
+
+export function setRandomSource(fn) {
+    randomSource = typeof fn === "function" ? fn : Math.random;
+}
+
 export function rand(min, max) {
-    return min + Math.random() * (max - min);
+    return min + randomSource() * (max - min);
 }
 
 export function randInt(min, max) {
@@ -472,5 +482,5 @@ export function randInt(min, max) {
 }
 
 export function pick(list) {
-    return list[Math.floor(Math.random() * list.length)];
+    return list[Math.floor(randomSource() * list.length)];
 }

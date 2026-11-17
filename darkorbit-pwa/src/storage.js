@@ -26,6 +26,7 @@ export const DEFAULTS = {
     totalSales: 0,
     bestSale: 0,
     bossKills: 0,
+    prestige: 0,
     skillPoints: 0,
     skills: { laser: 0, shield: 0, drone: 0, cargo: 0 },
     refined: { aetherium: 0, cryolite: 0, xenon: 0, phantomite: 0 },
@@ -94,6 +95,7 @@ export function loadProfile(storage) {
         profile.totalSales = count(data.totalSales, 0);
         profile.bestSale = count(data.bestSale, 0);
         profile.bossKills = count(data.bossKills, 0);
+        profile.prestige = count(data.prestige, 0);
         profile.skillPoints = count(data.skillPoints, 0);
         if (data.skills && typeof data.skills === "object") {
             for (const def of SKILLS) {
@@ -199,6 +201,7 @@ export function saveProfile(profile, storage) {
             totalSales: count(profile.totalSales, 0),
             bestSale: count(profile.bestSale, 0),
             bossKills: count(profile.bossKills, 0),
+            prestige: count(profile.prestige, 0),
             skillPoints: count(profile.skillPoints, 0),
             skills: profile.skills || {},
             refined: profile.refined || {},

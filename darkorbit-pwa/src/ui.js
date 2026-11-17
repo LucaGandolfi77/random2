@@ -8,7 +8,8 @@
 
 import {
     SHIPS, UPGRADES, SKILLS, SKILL_BY_ID, ACHIEVEMENTS, AMMO, ABILITIES, DRONE_MAX,
-    DISPATCH_TIERS, CRAFTS, MISSIONS, RESOURCES, RESOURCE_IDS, REFINE_RATIO, REFINED_PRICE_MULT,
+    DISPATCH_TIERS, CRAFTS, MISSIONS, MAPS, RESOURCES, RESOURCE_IDS,
+    REFINE_RATIO, REFINED_PRICE_MULT, PRESTIGE_MIN_LEVEL,
     droneCost, upgradeCost, xpForLevel, clamp
 } from "./config.js";
 import { dispatchStatus } from "./dispatch.js";
@@ -16,6 +17,7 @@ import { dailyContracts } from "./daily.js";
 import { achievementList, achievementCount } from "./achievements.js";
 import { canCraft, refinedValue } from "./refinery.js";
 import { missionLog, missionsDone, currentMission } from "./missions.js";
+import { weeklyConfig, loadBoard } from "./challenge.js";
 
 function fmt(n) {
     return Math.floor(n || 0).toLocaleString("en-US");
@@ -105,6 +107,10 @@ export function createUI(handlers = {}) {
             "close-info": handlers.onCloseInfo,
             "launch-gate": handlers.onLaunchGate,
             "mission-log": handlers.onMissionLog,
+            weekly: handlers.onWeekly,
+            "start-weekly": handlers.onStartWeekly,
+            share: handlers.onShare,
+            prestige: handlers.onPrestige,
             "claim-dispatch": handlers.onClaimDispatch,
             "coach-next": handlers.onCoachNext,
             "coach-skip": handlers.onCoachSkip,
@@ -149,14 +155,17 @@ export function createUI(handlers = {}) {
                     <span>URIUM <b>${fmt(profile.urium)}</b></span>
                     <span>BEST <b>${fmt(profile.bestScore)}</b></span>
                     <span>🏆 <b>${achievementCount(profile)}/${ACHIEVEMENTS.length}</b></span>
+                    ${(profile.prestige | 0) ? `<span>🔄 <b>${profile.prestige}</b></span>` : ""}
                 </div>
                 <div class="panel-actions">
                     ${hasRun ? `<button class="btn primary" data-action="continue" type="button">▶ CONTINUE RUN</button>` : ""}
                     <button class="btn ${hasRun ? "" : "primary"}" data-action="play" type="button">✦ NEW RUN</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="weekly" type="button">🏁 WEEKLY</button>
                     <button class="btn" data-action="mission-log" type="button">📖 MISSIONS</button>
                     <button class="btn" data-action="contracts" type="button">📋 CONTRACTS</button>
                     <button class="btn" data-action="achievements" type="button">🏆 AWARDS</button>
+                    ${profile.level >= PRESTIGE_MIN_LEVEL ? `<button class="btn" data-action="prestige" type="button">🔄 GALAXY RESET</button>` : ""}
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
                 </div>
@@ -344,9 +353,11 @@ export function createUI(handlers = {}) {
                 <div class="panel-actions">
                     <button class="btn primary" data-action="resume" type="button">▶ RESUME</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="weekly" type="button">🏁 WEEKLY</button>
                     <button class="btn" data-action="mission-log" type="button">📖 MISSIONS</button>
                     <button class="btn" data-action="contracts" type="button">📋 CONTRACTS</button>
                     <button class="btn" data-action="achievements" type="button">🏆 AWARDS</button>
+                    ${profile.level >= PRESTIGE_MIN_LEVEL ? `<button class="btn" data-action="prestige" type="button">🔄 GALAXY RESET</button>` : ""}
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
                     <button class="btn" data-action="restart" type="button">↻ MAIN MENU</button>
@@ -520,6 +531,36 @@ export function createUI(handlers = {}) {
             </div>`);
     }
 
+    function showWeekly(profile) {
+        const now = Date.now();
+        const cfg = weeklyConfig(now, MAPS.length);
+        const board = loadBoard().filter((e) => e.week === cfg.key).slice(0, 10);
+        const map = MAPS[cfg.mapIndex] || MAPS[0];
+        return showOverlay(`
+            <div class="panel panel-wide" role="dialog" aria-modal="true">
+                <p class="kicker">WEEKLY SEED</p>
+                <h2>${cfg.label}</h2>
+                <div class="mission-active">
+                    <span>THIS WEEK'S RUN</span>
+                    <h3>${map.name}</h3>
+                    <p>One map, one ship, one seed. Everyone flies the same sector — only your piloting decides the score.</p>
+                    <small>SEED ${cfg.seed} · STARTER SHIP</small>
+                </div>
+                <h3 style="margin:12px 0 6px">LOCAL LEADERBOARD</h3>
+                <div class="hangar-scroll">
+                    ${board.length ? board.map((e, i) => `
+                        <div class="upgrade-row">
+                            <div class="upgrade-info"><b>#${i + 1} · ${fmt(e.score)} pts</b><small>${e.kills} kills · ${MAPS[e.mapIndex] ? MAPS[e.mapIndex].name : "sector"}</small></div>
+                        </div>`).join("") : `<p class="section-note">No runs yet this week. Set the first score.</p>`}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="start-weekly" type="button">▶ FLY THIS WEEK</button>
+                    <button class="btn" data-action="share" type="button">↗ SHARE</button>
+                    <button class="btn" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+            </div>`);
+    }
+
     function showDestroyed(state, profile) {
         showOverlay(`
             <div class="panel" role="dialog" aria-modal="true">
@@ -664,6 +705,7 @@ export function createUI(handlers = {}) {
         showContracts,
         showAchievements,
         showMissions,
+        showWeekly,
         showCoach,
         hideCoach,
         setDebug,

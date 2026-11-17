@@ -335,6 +335,28 @@ await click('[data-action="continue"]');
 ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'playing'"), "Continue Run resumes play");
 ok(await evaluate("window.__DEEP_ORBIT__.getState().score === 777"), "run score is restored");
 
+/* Weekly challenge, leaderboard and ghost. */
+await click("#btn-pause");
+await click('[data-action="restart"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "back at the menu for the weekly run");
+ok(await evaluate("!!document.querySelector('[data-action=weekly]')"), "the menu has a Weekly button");
+await click('[data-action="weekly"]');
+ok(await evaluate("!!document.querySelector('[data-action=start-weekly]')"), "the weekly panel shows the seeded run");
+await click('[data-action="start-weekly"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'playing' && !!window.__DEEP_ORBIT__.getChallenge()"), "the weekly challenge starts");
+await sleep(400);
+ok(await evaluate("window.__DEEP_ORBIT__.getReplayFrames() > 0"), "run frames are recorded for the ghost");
+await click("#btn-pause");
+await click('[data-action="restart"]');
+ok(await waitFor("JSON.parse(localStorage.getItem('darkorbit-weekly') || '[]').length > 0"), "the weekly score is recorded locally");
+await evaluate("window.__DEEP_ORBIT__.getProfile().level = 10");
+await click('[data-action="hangar"]');
+await click('[data-action="close-hangar"]');
+ok(await evaluate("!!document.querySelector('[data-action=prestige]')"), "Galaxy Reset is offered at level 10");
+await click('[data-action="play"]');
+await sleep(250);
+ok(await evaluate("!!window.__DEEP_ORBIT__.getState().ghostPose"), "a ghost appears from the saved run");
+
 /* Landscape layout. */
 await cdp.send("Emulation.setDeviceMetricsOverride", { width: 844, height: 390, deviceScaleFactor: 2, mobile: true }, sessionId);
 await sleep(300);

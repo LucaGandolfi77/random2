@@ -5,7 +5,7 @@
  */
 
 const CACHE_PREFIX = "darkorbit-pwa-";
-const CACHE_NAME = "darkorbit-pwa-v7";
+const CACHE_NAME = "darkorbit-pwa-v8";
 const ASSETS = [
     "./",
     "./index.html",
@@ -22,6 +22,8 @@ const ASSETS = [
     "./src/achievements.js",
     "./src/refinery.js",
     "./src/missions.js",
+    "./src/challenge.js",
+    "./src/ghost.js",
     "./src/sim.js",
     "./src/render.js",
     "./src/input.js",
