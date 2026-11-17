@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#111a24"/><stop offset="0.5" stop-color="#2a475e"/><stop offset="1" stop-color="#c28644"/></linearGradient>
+    <radialGradient id="vig" cx="50%" cy="44%" r="76%">
+      <stop offset="52%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity=".58"/>
+    </radialGradient>
+    <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".14"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  
+    <path d="M 1080 400 L 1700 400" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 1616.935750346352 710" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 1390 936.9357503463519" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 1080 1020" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 770.0000000000001 936.935750346352" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 543.064249653648 710" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 460 400.00000000000006" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 543.0642496536481 89.99999999999994" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 769.9999999999998 -136.93575034635182" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 1079.9999999999998 -220" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 1390 -136.93575034635194" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/><path d="M 1080 400 L 1616.9357503463518 89.99999999999972" fill="none" stroke="#ffd9a0" stroke-width="14" opacity=".08"/>
+    <circle cx="1080" cy="400" r="178" fill="#ffd9a0" opacity=".9"/>
+    <path d="M 0 900 L 0 640 L 0 640 L 400 540 L 900 600 L 1300 500 L 1600 560 L 1600 900 Z" fill="#2a4b4a" />
+    <path d="M 0 900 L 0 770 L 0 770 L 420 680 L 880 750 L 1300 660 L 1600 720 L 1600 900 Z" fill="#183b36" />
+    <rect x="1220.2" y="570" width="39.6" height="231.00000000000003" rx="8.8" fill="#81949c" /><rect x="1213.6" y="587.6" width="52.800000000000004" height="13.200000000000001" rx="4.4" fill="#9baeb6" /><rect x="1213.6" y="629.4" width="52.800000000000004" height="13.200000000000001" rx="4.4" fill="#9baeb6" /><rect x="1213.6" y="671.2" width="52.800000000000004" height="13.200000000000001" rx="4.4" fill="#9baeb6" /><rect x="1213.6" y="713" width="52.800000000000004" height="13.200000000000001" rx="4.4" fill="#9baeb6" /><rect x="1213.6" y="754.8000000000001" width="52.800000000000004" height="13.200000000000001" rx="4.4" fill="#9baeb6" /><rect x="1167.4" y="534.8" width="145.20000000000002" height="41.800000000000004" rx="8" fill="#8fa2aa" /><rect x="1167.4" y="534.8" width="145.20000000000002" height="8" rx="8" fill="#a9bcc4" /><circle cx="1181.92" cy="544.8" r="8.131200000000002" fill="#b7cad2" /><circle cx="1180.456384" cy="542.8" r="4.065600000000001" fill="#cde0e8" /><circle cx="1210.96" cy="544.8" r="8.131200000000002" fill="#b7cad2" /><circle cx="1209.496384" cy="542.8" r="4.065600000000001" fill="#cde0e8" /><circle cx="1240" cy="544.8" r="8.131200000000002" fill="#b7cad2" /><circle cx="1238.536384" cy="542.8" r="4.065600000000001" fill="#cde0e8" /><circle cx="1269.0400000000002" cy="544.8" r="8.131200000000002" fill="#b7cad2" /><circle cx="1267.5763840000002" cy="542.8" r="4.065600000000001" fill="#cde0e8" /><circle cx="1298.0800000000002" cy="544.8" r="8.131200000000002" fill="#b7cad2" /><circle cx="1296.6163840000002" cy="542.8" r="4.065600000000001" fill="#cde0e8" /><circle cx="1240" cy="519.4" r="11" fill="#6fd8ff" filter="url(#glow)"/>
+    <rect x="178" y="660" width="24" height="144" rx="6" fill="#5a3a2a" /><circle cx="133" cy="672" r="57" fill="#1c5931" /><circle cx="247" cy="672" r="57" fill="#246139" /><circle cx="190" cy="627" r="78" fill="#2e6b43" /><circle cx="181" cy="582" r="57" fill="#427f57" />
+    <path d="M 0 850 Q 500 800 1000 850 T 1600 830 L 1600 900 L 0 900 Z" fill="#10282a" />
+    <rect x="110" y="130" width="92" height="92" rx="12" fill="#c0392b" />
+    <rect x="138" y="146" width="18" height="18" rx="8" fill="#e86456" />
+    <rect x="170" y="146" width="18" height="18" rx="8" fill="#e86456" />
+    <rect x="138" y="178" width="18" height="18" rx="8" fill="#e86456" />
+    <rect x="170" y="178" width="18" height="18" rx="8" fill="#e86456" />
+    <text x="230" y="200" font-family="Arial, Helvetica, sans-serif" font-size="56" font-weight="800" letter-spacing="4" fill="#f4f6fa">LEGO®</text>
+    <text x="104" y="360" font-family="Arial Black, Impact, Arial, sans-serif" font-size="148" font-weight="900" letter-spacing="-3" fill="#f7f9fb" stroke="#0d1a1f" stroke-width="9" paint-order="stroke">HORIZON</text>
+    <text x="104" y="500" font-family="Arial Black, Impact, Arial, sans-serif" font-size="118" font-weight="900" letter-spacing="-2" fill="#f7f9fb" stroke="#0d1a1f" stroke-width="8" paint-order="stroke">ADVENTURES</text>
+    <text x="110" y="574" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" letter-spacing="9" fill="#66c0f4">A BRICK-BUILT FAN CONCEPT</text>
+    <text x="110" y="846" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="5" fill="#c7d5e0" opacity=".85">UNOFFICIAL · NOT FOR SALE</text>
+    <rect x="0" y="0" width="1600" height="900" rx="0" fill="url(#haze)" pointer-events="none"/>
+    
+  <rect width="1600" height="900" fill="url(#vig)" pointer-events="none"/>
+</svg>

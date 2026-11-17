@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Machine Hunt — Fan Game</title>
+<meta name="description" content="An original, offline-first brick-built machine-hunting action RPG. Fan-made demo.">
+<meta name="theme-color" content="#0d1714">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Machine Hunt">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<a class="skip" href="#game-canvas">Skip to game</a>
+<div class="app">
+  <section id="game-layer" class="game-layer" hidden aria-label="Machine Hunt game">
+    <header class="game-top">
+      <span class="game-brand">MACHINE HUNT</span>
+      <span class="game-level" id="game-level">HUNT 1</span>
+      <span class="game-hearts" id="game-hearts" aria-label="Health"></span>
+      <span class="game-chip" id="game-cores">◼ 0</span>
+      <span class="game-chip" id="game-biome">JUNGLE</span>
+      <span class="game-chip" id="game-companion">SOLO</span>
+      <button type="button" id="game-pause-btn" aria-label="Pause">⏸</button>
+      <button type="button" id="game-exit-btn" class="game-exit" aria-label="Return to store">✕</button>
+    </header>
+    <div class="game-stage">
+      <canvas id="game-canvas" aria-label="Machine Hunt playfield"></canvas>
+      <div id="game-stick" class="game-stick" hidden aria-label="Movement stick"><span aria-hidden="true">✥</span></div>
+      <button id="game-charge" class="game-charge" type="button" hidden aria-label="Charged shot">⚡</button>
+      <p id="game-a11y" class="visually-hidden" aria-live="polite"></p>
+      <div id="game-hub" class="game-hub"></div>
+      <div id="game-result" class="game-result" hidden>
+        <h2 id="result-title">Hunt cleared!</h2>
+        <p id="result-detail"></p>
+        <p class="reward" id="result-reward"></p>
+        <p id="result-daily" class="daily-badge" hidden></p>
+        <div class="game-row">
+          <button type="button" id="result-village" class="ghost">Village</button>
+          <button type="button" id="result-again">Hunt again</button>
+        </div>
+        <div class="game-row">
+          <button type="button" id="result-share" class="ghost">Share score</button>
+          <button type="button" id="result-replay" class="ghost">Replay code</button>
+        </div>
+      </div>
+      <div id="game-pause" class="game-pause" hidden>
+        <h2>Paused</h2>
+        <div class="game-row">
+          <button type="button" id="pause-resume">Resume</button>
+          <button type="button" id="pause-village" class="ghost">Village</button>
+        </div>
+        <div class="game-row">
+          <button type="button" id="pause-help" class="ghost">How to play</button>
+          <button type="button" id="pause-settings" class="ghost">Settings</button>
+        </div>
+        <div class="game-row">
+          <button type="button" id="pause-exit" class="ghost">Back to store</button>
+        </div>
+      </div>
+      <div id="game-tutorial" class="game-modal" hidden>
+        <p class="tut-step" id="tut-step">1 / 3</p>
+        <h2 id="tut-title">Drag to move</h2>
+        <p id="tut-body">Drag anywhere to move — the bow fires automatically at the nearest machine.</p>
+        <div class="game-row">
+          <button type="button" id="tut-skip" class="ghost">Skip</button>
+          <button type="button" id="tut-next">Next</button>
+        </div>
+      </div>
+      <div id="game-settings" class="game-modal" hidden>
+        <h2>Settings</h2>
+        <button class="setting-row" type="button" data-setting="sound">Sound <b id="set-sound">On</b></button>
+        <button class="setting-row" type="button" data-setting="music">Music <b id="set-music">On</b></button>
+        <button class="setting-row" type="button" data-setting="haptics">Haptics <b id="set-haptics">On</b></button>
+        <button class="setting-row" type="button" data-setting="reduced">Reduced motion <b id="set-reduced">Off</b></button>
+        <div class="game-row"><button type="button" id="settings-close">Done</button></div>
+      </div>
+      <div id="game-story" class="game-modal story-modal" hidden>
+        <p class="tut-step" id="story-chapter">CHAPTER I</p>
+        <h2 id="story-title">A choice for Mother's Heart</h2>
+        <p id="story-text"></p>
+        <div class="game-row" id="story-choices"></div>
+        <p id="story-result" class="story-result" hidden></p>
+        <div class="game-row"><button type="button" id="story-close" class="ghost" hidden>Continue</button></div>
+      </div>
+      <div id="game-toast" class="game-toast" hidden></div>
+    </div>
+    <footer class="game-bottom">
+      <div class="combat-hud">
+        <div class="weapon-row" aria-label="Weapons">
+          <button type="button" class="weapon-btn is-active" data-weapon="bow" aria-label="Bow">🏹</button>
+          <button type="button" class="weapon-btn" data-weapon="spear" aria-label="Spear">🗡️</button>
+          <button type="button" class="weapon-btn" data-weapon="bomb" aria-label="Bomb Sling">💣</button>
+          <button type="button" class="weapon-btn" data-weapon="trap" aria-label="Trap Kit">🕳️</button>
+        </div>
+        <div class="stamina" aria-label="Stamina"><span id="stamina-bar"></span></div>
+        <div class="status-icons" id="status-icons" aria-label="Active effects"></div>
+      </div>
+      <span class="game-hint" id="game-hint">DRAG TO MOVE · AUTO-FIRE · TAP/HOLD FOR CHARGED SHOT</span>
+      <span class="game-score" id="game-score">BEST 0</span>
+    </footer>
+  </section>
+
+<a class="play-store-link" href="../">← Fan store page</a>
+</div>
+<script src="../shared/arcade.js"></script>
+<script type="module">
+  import { startGame } from "../game/main.js";
+  const mode = new URLSearchParams(location.search).get("mode");
+  const game = startGame({ mode });
+  game?.setExitHandler(() => { window.location.href = "../"; });
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () =>
+      navigator.serviceWorker.register("./sw.js").catch(() => {})
+    );
+  }
+</script>
+</body>
+</html>

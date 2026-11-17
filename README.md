@@ -21,6 +21,7 @@
   - [Milano Nera '77](#milano-nera-77)
   - [Fumetti — Sentinelle](#fumetti--sentinelle)
   - [Deep Orbit](#deep-orbit)
+  - [LEGO Horizon — Fan Store](#lego-horizon--fan-store)
   - [Plane Shooter](#plane-shooter)
   - [Slot Machine](#slot-machine)
   - [Snake](#snake)
@@ -132,6 +133,7 @@
 | 54 | **Fumetti — Sentinelle** | Comic reader + two superhero noir issues, 16 tavole, Italian, offline | Canvas 2D + vanilla JS | ✅ | [▶ Read](https://lucagandolfi77.github.io/random2/fumetti-pwa/) |
 | 55 | **Whiteout: Last Ember** | Survival city builder: furnace, weather, survivors, decrees, tech, heroes | React + Vite + Canvas 2D + Web Audio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/whiteout-survival-pwa/) |
 | 56 | **Deep Orbit** | DarkOrbit-inspired mobile space combat: hunt, haul, upgrade, jump | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/darkorbit-pwa/) |
+| 57 | **LEGO Horizon — Fan Store** | Steam-style store clone with original concept art + playable Machine Hunt mini-game | HTML + CSS + vanilla JS + SVG/Canvas | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/lego-horizon-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -310,6 +312,48 @@ cargo has to be flown back to the station to be sold for credits and XP.
 [▶ Play](https://lucagandolfi77.github.io/random2/darkorbit-pwa/) ·
 [source](https://github.com/LucaGandolfi77/random2/tree/main/darkorbit-pwa) ·
 [README](darkorbit-pwa/README.md)
+
+### LEGO Horizon — Fan Store
+
+*A Steam store page, rebuilt in bricks and entirely offline.* 🧱
+
+A mobile-first, installable fan clone of the Steam store page for LEGO Horizon
+Adventures. It keeps the familiar store layout — hero, review pill, tags,
+editions, specs, language table — but every illustration is **original SVG
+concept art** generated from brick, minifigure and machine primitives. No
+official screenshots, logos or trailers are used, and no real purchases take
+place.
+
+- Steam-inspired dark UI tuned for phones: safe areas, 44 px targets, sticky buy bar
+- Seven original concept scenes, a cover illustration and a custom brick icon
+- Swipe gallery with fullscreen lightbox (swipe, arrows, Escape)
+- Wishlist and cart in `localStorage`; edition picker, cart sheet, demo checkout
+- Web Share API with clipboard fallback; install prompt + iOS home-screen guide
+- **Play Machine Hunt**: original top-down mini-game with a village hub, four
+  build plots, four upgrade tracks, one active companion bot and a three-phase
+  Tallneck boss; new Lancers, Bulwarks and Burrowers, seeded wave modifiers,
+  particles, screen shake, hit-stop, music/SFX, first-run tutorial and settings
+- Date-seeded daily hunts with streaks, five missions, stats panel, ghost trail and shareable score card
+- Drag/stick/one-hand controls, aim assist, colourblind palettes, gamepad and aria-live announcements
+- Draggable village grid with villagers and dialogue, seeded daily bounty, lanterns and day/night tint
+- Phase A1 combat: four weapons, charged/ultimate attacks, stamina dodge with i-frames, status effects and resistances
+- Phase A2 world: 12 machines, four scripted bosses, four biomes with seeded lava/quicksand/ice/spike hazards
+- Phase A3 modes: world-map hub with eight-chapter Campaign, Daily, Endless Gauntlet and Boss Rush
+- Phase B RPG: hunter XP/levels, five-tier skill tree, craftable gear, scrap/bricks/parts, companion training and two-slot party synergy
+- Phase C living world: 24-slot village grid, 20 buildings, villager jobs with offline production, four-chapter story choices and daily seasons
+- Phase D full app: standalone installable `play/` app, ten-week seasons with prestige, achievements, challenge codes, save export/import, EN/IT UI and adaptive music
+- Phase E hardening: deterministic balance bot, replay/bug-report codes, device-tier adaptive quality, PWA audit script and visual-baseline checks
+- Fixed timestep, pooled effects, tab-hide pause, `?debug=1` HUD and visual-baseline screenshots
+- Versioned service worker, offline preview, no runtime dependencies or network calls
+- `node:test` content/store/combat/bosses/world/modes/rpg/living/meta/hardening/game-sim/effects/progression/village tests + 55-check Chromium mobile/offline smoke
+
+**Files:** `index.html`, `styles.css`, `src/` (`main`, `store`, `gallery`, `pwa`),
+`scripts/` (`gen-art`, `gen-icons`), `screens/`, `icons/`, `manifest.json`,
+`service-worker.js`, `tests/`, `smoke.mjs`.
+
+[▶ Open](https://lucagandolfi77.github.io/random2/lego-horizon-pwa/) ·
+[source](https://github.com/LucaGandolfi77/random2/tree/main/lego-horizon-pwa) ·
+[README](lego-horizon-pwa/README.md)
 
 ### Plane Shooter
 

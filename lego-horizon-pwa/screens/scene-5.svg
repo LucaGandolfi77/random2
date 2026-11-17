@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" role="img">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#08151f"/><stop offset="0.55" stop-color="#12303f"/><stop offset="1" stop-color="#0a1924"/></linearGradient>
+    <radialGradient id="vig" cx="50%" cy="44%" r="76%">
+      <stop offset="52%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity=".58"/>
+    </radialGradient>
+    <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".14"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    </defs>
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  
+    <path d="M 0 0 L 260 0 L 180 900 L 0 900 Z" fill="#0b1c27" />
+    <path d="M 1600 0 L 1340 0 L 1420 900 L 1600 900 Z" fill="#0b1c27" />
+    <path d="M 0 0 Q 400 220 460 900 L 0 900 Z" fill="#102834" />
+    <path d="M 1600 0 Q 1200 220 1140 900 L 1600 900 Z" fill="#102834" />
+    <rect x="180" y="120" width="60" height="560" rx="8" fill="#1c3a49" />
+    <rect x="1360" y="180" width="54" height="520" rx="8" fill="#1c3a49" />
+    <rect x="300" y="360" width="170" height="70" rx="8" fill="#2b5263" /><rect x="300" y="360" width="170" height="11.200000000000001" rx="8" fill="#456c7d" /><circle cx="321.25" cy="370" r="11.9" fill="#537a8b" /><circle cx="319.108" cy="368" r="5.95" fill="#6990a1" /><circle cx="363.75" cy="370" r="11.9" fill="#537a8b" /><circle cx="361.608" cy="368" r="5.95" fill="#6990a1" /><circle cx="406.25" cy="370" r="11.9" fill="#537a8b" /><circle cx="404.108" cy="368" r="5.95" fill="#6990a1" /><circle cx="448.75" cy="370" r="11.9" fill="#537a8b" /><circle cx="446.608" cy="368" r="5.95" fill="#6990a1" />
+    <rect x="1130" y="420" width="170" height="70" rx="8" fill="#2b5263" /><rect x="1130" y="420" width="170" height="11.200000000000001" rx="8" fill="#456c7d" /><circle cx="1151.25" cy="430" r="11.9" fill="#537a8b" /><circle cx="1149.108" cy="428" r="5.95" fill="#6990a1" /><circle cx="1193.75" cy="430" r="11.9" fill="#537a8b" /><circle cx="1191.608" cy="428" r="5.95" fill="#6990a1" /><circle cx="1236.25" cy="430" r="11.9" fill="#537a8b" /><circle cx="1234.108" cy="428" r="5.95" fill="#6990a1" /><circle cx="1278.75" cy="430" r="11.9" fill="#537a8b" /><circle cx="1276.608" cy="428" r="5.95" fill="#6990a1" />
+    <ellipse cx="800" cy="720" rx="330" ry="90" fill="#0e2b3a" />
+    <ellipse cx="800" cy="706" rx="250" ry="62" fill="#1f6d86" filter="url(#glow)"/>
+    <ellipse cx="800" cy="700" rx="150" ry="34" fill="#7fe3ff" filter="url(#glow)"/>
+    <circle cx="520" cy="500" r="8" fill="#7fe3ff" filter="url(#glow)"/>
+    <circle cx="1080" cy="430" r="7" fill="#7fe3ff" filter="url(#glow)"/>
+    <circle cx="940" cy="560" r="5" fill="#7fe3ff" filter="url(#glow)"/>
+    <rect x="775.8" y="694" width="19.8" height="39.6" rx="4.4" fill="#2c3e50" /><rect x="804.4" y="694" width="19.8" height="39.6" rx="4.4" fill="#2c3e50" /><rect x="769.2" y="650" width="61.60000000000001" height="52.800000000000004" rx="11" fill="#2b4a5c" /><rect x="756" y="654.4" width="15.400000000000002" height="41.800000000000004" rx="6.6000000000000005" fill="#f1c27d" /><rect x="828.6" y="654.4" width="15.400000000000002" height="41.800000000000004" rx="6.6000000000000005" fill="#f1c27d" /><circle cx="800" cy="625.8" r="24.200000000000003" fill="#f1c27d" /><path d="M 773.6 621.4 Q 800 584 826.4 621.4 L 819.8 614.8 Q 800 601.6 780.2 614.8 Z" fill="#1b2a33" /><path d="M 839.6 601.6 L 848.4 724.8" fill="none" stroke="#8a6a45" stroke-width="8.8" /><circle cx="839.6" cy="592.8" r="15.400000000000002" fill="#6fd8ff" filter="url(#glow)"/>
+    <rect x="0" y="0" width="1600" height="900" rx="0" fill="url(#haze)" pointer-events="none"/>
+    
+  <rect width="1600" height="900" fill="url(#vig)" pointer-events="none"/>
+</svg>

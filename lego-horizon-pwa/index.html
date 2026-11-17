@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LEGO® Horizon Adventures™ — Fan Store · random2</title>
+<meta name="description" content="A mobile-first, installable fan-made store page for LEGO Horizon Adventures, with original SVG concept art. Not affiliated with Valve, Sony or the LEGO Group.">
+<meta name="theme-color" content="#171a21">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LEGO Horizon Store">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+<link rel="canonical" href="https://lucagandolfi77.github.io/random2/lego-horizon-pwa/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="random2">
+<meta property="og:title" content="LEGO Horizon Adventures — Fan Store">
+<meta property="og:description" content="An installable, mobile-first fan store page with original brick-built concept art. Offline-ready, no trackers.">
+<meta property="og:url" content="https://lucagandolfi77.github.io/random2/lego-horizon-pwa/">
+<meta property="og:image" content="https://lucagandolfi77.github.io/random2/lego-horizon-pwa/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "LEGO® Horizon Adventures™",
+  "url": "https://lucagandolfi77.github.io/random2/lego-horizon-pwa/",
+  "image": "https://lucagandolfi77.github.io/random2/lego-horizon-pwa/og-cover.png",
+  "description": "A colourful brick-built adventure: hunt machines alone or with friends, customize a village, and uncover a hunter's past.",
+  "genre": ["Action", "Adventure"],
+  "gamePlatform": "Windows",
+  "author": {"@type": "Organization", "name": "Guerrilla Games, Studio Gobo"},
+  "publisher": {"@type": "Organization", "name": "PlayStation Publishing LLC"},
+  "datePublished": "2024-11-14",
+  "inLanguage": "en",
+  "offers": {
+    "@type": "Offer",
+    "price": "39.99",
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/InStock"
+  }
+}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="app">
+  <div class="progress" id="progress" aria-hidden="true"><span></span></div>
+  <p class="offline-pill" id="offline-pill" hidden>Offline · cached copy</p>
+
+  <header class="topbar" id="topbar">
+    <a class="back" href="../" aria-label="Back to random2">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <div class="brand" aria-label="Steam Store fan demo">
+      <span class="brand-word">STEAM</span><span class="brand-sub">STORE</span>
+      <span class="demo-badge">DEMO</span>
+    </div>
+    <div class="top-actions">
+      <button id="share-btn" class="icon-btn" type="button" aria-label="Share this page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 14v5a1 1 0 001 1h12a1 1 0 001-1v-5"/></svg>
+      </button>
+      <button id="cart-btn" class="icon-btn cart-btn" type="button" aria-label="Cart, 0 items">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 002 1.6h7.7a2 2 0 002-1.6L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/></svg>
+        <span class="badge" id="cart-badge" hidden>0</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="hero" aria-labelledby="game-title">
+      <div class="hero-media">
+        <img id="hero-img" src="screens/scene-1.svg" alt="Original concept art: two brick-built adventurers explore an overgrown ruin beneath a tallneck machine" fetchpriority="high" width="1600" height="900">
+        <div class="hero-shade"></div>
+      </div>
+      <div class="hero-overlay">
+        <p class="eyebrow">Unofficial fan-made concept</p>
+        <button type="button" class="play-open" data-play>▶&nbsp; Play the demo</button>
+        <button type="button" class="gallery-open" id="hero-gallery-btn" data-gallery-index="0">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="8.5" cy="9.5" r="1.5"/></svg>
+          View 7 concept images
+        </button>
+      </div>
+    </section>
+
+    <section class="title-block" aria-labelledby="game-title">
+      <div class="cover-thumb"><img src="screens/cover.svg" alt="" width="1600" height="900"></div>
+      <div class="title-info">
+        <p class="kicker">Action · Adventure</p>
+        <h1 id="game-title">LEGO® Horizon Adventures™</h1>
+        <p class="byline">Guerrilla Games, Studio Gobo · PlayStation Publishing LLC</p>
+        <p class="release">Released 14 Nov, 2024 · Windows</p>
+        <div class="review-pill">
+          <span class="review-score">Mixed</span>
+          <span class="review-detail">60% of 407 user reviews positive</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="tags-section" aria-label="Popular tags">
+      <div class="section-head compact">
+        <h2>Popular user-defined tags</h2>
+        <button type="button" class="link-btn" id="tags-toggle" aria-expanded="false">Show all</button>
+      </div>
+      <div class="tag-list" id="tag-list">
+        <span class="tag">Action</span><span class="tag">Adventure</span>
+        <span class="tag">Female Protagonist</span><span class="tag">Co-op</span>
+        <span class="tag">Action-Adventure</span><span class="tag">3D Platformer</span>
+        <span class="tag">Precision Platformer</span><span class="tag">3D</span>
+        <span class="tag">Third Person</span><span class="tag">Comedy</span>
+        <span class="tag extra">Robots</span><span class="tag extra">Funny</span>
+        <span class="tag extra">Character Customization</span><span class="tag extra">Combat</span>
+        <span class="tag extra">Crafting</span><span class="tag extra">Co-op Campaign</span>
+        <span class="tag extra">Local Co-Op</span><span class="tag extra">Online Co-Op</span>
+        <span class="tag extra">Singleplayer</span><span class="tag extra">LGBTQ+</span>
+      </div>
+    </section>
+
+    <nav class="tabs" id="tabs" aria-label="Page sections">
+      <a href="#overview" class="tab is-active">Overview</a>
+      <a href="#editions" class="tab">Editions</a>
+      <a href="#reviews" class="tab">Reviews</a>
+      <a href="#details" class="tab">Details</a>
+    </nav>
+
+    <div class="content">
+      <section id="overview" class="section" aria-labelledby="overview-title">
+        <h2 id="overview-title" class="section-title">About this game</h2>
+        <p class="lede">Join a red-haired machine hunter and a cheerful crew of heroes on a brick-built quest across forests, mountains and machine-haunted ruins. Play solo or share the adventure, decorate a village and uncover the secrets of a mysterious past.</p>
+
+        <div class="feature-grid" aria-label="Features">
+          <div class="feature"><span aria-hidden="true">👤</span> Single-player</div>
+          <div class="feature"><span aria-hidden="true">🌐</span> Online Co-op</div>
+          <div class="feature"><span aria-hidden="true">🪟</span> Shared/Split Screen Co-op</div>
+          <div class="feature"><span aria-hidden="true">🏆</span> Steam Achievements</div>
+          <div class="feature"><span aria-hidden="true">☁️</span> Steam Cloud</div>
+          <div class="feature"><span aria-hidden="true">👨‍👩‍👧</span> Family Sharing</div>
+        </div>
+
+        <div class="prose">
+          <h3>A world built brick by brick</h3>
+          <p>Venture into a distant future where nature has reclaimed the Earth and everything is made of interlocking bricks. Meet the Nora tribe in the settlement at the heart of the forest, then step beyond the village walls to find dinosaur-like machines grazing among the ruins.</p>
+
+          <h3>The adventure of a lifetime</h3>
+          <p>Take the role of a determined hunter fighting to save the world from an ancient digital demon and a sun-worshipping cult that would rather burn everything than live in the shade. The tone is playful, colourful and full of brick-built surprises.</p>
+
+          <h3>Play alone or with friends</h3>
+          <p>Hunt machines as the lead hero, or unlock colourful companions with their own skills and personalities. Bring a friend online or share a single screen for couch co-op — the world is always better together.</p>
+
+          <h3>Make the village your own</h3>
+          <p>Give the home settlement a makeover, decorating it until new buildings and ornaments appear. Dress the whole crew in ridiculous outfits, from armour to unlikely crossover costumes, and see what the community board has to say.</p>
+
+          <h3>For newcomers and fans</h3>
+          <p>Explore forests, mountains, underground cauldrons and towering climbing machines, all reimagined in bricks. Replay levels with new twists, chase better scores and dig deeper into the heroine's past.</p>
+        </div>
+
+        <figure class="inline-art">
+          <img src="screens/scene-3.svg" alt="Original concept art: a plated machine in tall grass while an adventurer takes aim" loading="lazy" width="1600" height="900">
+          <figcaption>Original concept art drawn for this fan demo — not an in-game screenshot.</figcaption>
+        </figure>
+
+        <div class="play-card">
+          <div>
+            <strong>Play Machine Hunt</strong>
+            <p>An original top-down mini-game with a village hub, upgrades and companion bots. Drag to move, auto-fire, tap for a charged shot.</p>
+          </div>
+          <button class="buy-btn" type="button" data-play>▶ Play</button>
+        </div>
+
+        <div class="notice">
+          <strong>PlayStation Network account required</strong>
+          <p>Linking a PlayStation Network account and an internet connection are required for some features. This demo does not create accounts or process payments.</p>
+        </div>
+      </section>
+
+      <section id="media-section" class="section" aria-labelledby="media-title">
+        <div class="section-head">
+          <h2 id="media-title" class="section-title">Concept gallery</h2>
+          <span class="count">7 images</span>
+        </div>
+        <div class="media-rail" id="media-rail" role="region" aria-label="Concept art gallery" tabindex="0">
+          <button class="shot" type="button" data-gallery-index="0" aria-label="Open concept image 1: Overgrown ruins">
+            <img src="screens/scene-1.svg" alt="A tallneck machine above a jungle ruin" loading="lazy" width="1600" height="900"><span class="shot-label">1 / 7</span>
+          </button>
+          <button class="shot" type="button" data-gallery-index="1" aria-label="Open concept image 2: Mother's Heart">
+            <img src="screens/scene-2.svg" alt="A hillside of brick homes at sunset" loading="lazy" width="1600" height="900"><span class="shot-label">2 / 7</span>
+          </button>
+          <button class="shot" type="button" data-gallery-index="2" aria-label="Open concept image 3: Machine hunt">
+            <img src="screens/scene-3.svg" alt="A machine in tall grass and an adventurer aiming a bow" loading="lazy" width="1600" height="900"><span class="shot-label">3 / 7</span>
+          </button>
+          <button class="shot" type="button" data-gallery-index="3" aria-label="Open concept image 4: Heroes together">
+            <img src="screens/scene-4.svg" alt="Four heroes standing on a ridge at dawn" loading="lazy" width="1600" height="900"><span class="shot-label">4 / 7</span>
+          </button>
+          <button class="shot" type="button" data-gallery-index="4" aria-label="Open concept image 5: Cauldron depths">
+            <img src="screens/scene-5.svg" alt="A glowing blue pool inside an underground cavern" loading="lazy" width="1600" height="900"><span class="shot-label">5 / 7</span>
+          </button>
+          <button class="shot" type="button" data-gallery-index="5" aria-label="Open concept image 6: Desert canyon">
+            <img src="screens/scene-6.svg" alt="A long-necked machine crossing a red rock canyon" loading="lazy" width="1600" height="900"><span class="shot-label">6 / 7</span>
+          </button>
+          <button class="shot" type="button" data-gallery-index="6" aria-label="Open concept image 7: Make it yours">
+            <img src="screens/scene-7.svg" alt="A customized brick homestead and garden" loading="lazy" width="1600" height="900"><span class="shot-label">7 / 7</span>
+          </button>
+        </div>
+        <p class="caption">Fan-made illustrations inspired by the game's world. Not official screenshots.</p>
+      </section>
+
+      <section id="editions" class="section" aria-labelledby="editions-title">
+        <h2 id="editions-title" class="section-title">Buy LEGO® Horizon Adventures™</h2>
+
+        <article class="edition-card">
+          <img src="screens/cover.svg" alt="" loading="lazy" width="1600" height="900">
+          <div class="edition-body">
+            <h3>Standard Edition</h3>
+            <p class="edition-sub">The full base game</p>
+            <p class="price">39,99€</p>
+            <button class="buy-btn" type="button" data-edition="standard">Add to cart</button>
+          </div>
+        </article>
+
+        <article class="edition-card deluxe">
+          <span class="best-badge">BEST VALUE</span>
+          <div class="edition-art"><span aria-hidden="true">🧱</span></div>
+          <div class="edition-body">
+            <h3>Digital Deluxe Edition Bundle</h3>
+            <p class="edition-sub">2 items: base game + deluxe upgrade</p>
+            <p class="price">49,99€</p>
+            <ul class="included">
+              <li>Roller Coaster Customization</li>
+              <li>Banuk Armor · Shadow Stalwart · “Alloy” outfits</li>
+              <li>Ratchet · Rivet · Sackboy outfits</li>
+            </ul>
+            <button class="buy-btn" type="button" data-edition="deluxe">Add bundle</button>
+          </div>
+        </article>
+
+        <article class="edition-card dlc">
+          <div class="edition-art"><span aria-hidden="true">⬆️</span></div>
+          <div class="edition-body">
+            <h3>Upgrade to Digital Deluxe Edition</h3>
+            <p class="edition-sub">Included in the bundle above · not sold separately here</p>
+            <button class="secondary-btn" type="button" id="dlc-btn">View bundle</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="reviews" class="section" aria-labelledby="reviews-title">
+        <h2 id="reviews-title" class="section-title">Reviews</h2>
+        <div class="review-meter">
+          <div class="meter-head"><span class="meter-value">60%</span><span class="meter-label">Mixed · all time</span></div>
+          <div class="meter-bar" role="img" aria-label="60 percent positive, 40 percent negative"><span></span></div>
+          <p class="meter-note">60% of the 407 user reviews for this game are positive. Figures captured from the Steam listing on 16 Nov 2026.</p>
+        </div>
+        <div class="curator-note">59 curators have reviewed this product on Steam. <a href="https://store.steampowered.com/curators/curatorsreviewing/?appid=2428810" target="_blank" rel="noopener noreferrer">See curator reviews ↗</a></div>
+        <a class="wide-link" href="https://store.steampowered.com/app/2428810/LEGO_Horizon_Adventures/#app_reviews_hash" target="_blank" rel="noopener noreferrer">Read the real reviews on Steam ↗</a>
+      </section>
+
+      <section id="details" class="section" aria-labelledby="details-title">
+        <h2 id="details-title" class="section-title">Details &amp; system requirements</h2>
+
+        <details class="spec" open>
+          <summary>Minimum requirements <span aria-hidden="true">−</span></summary>
+          <ul>
+            <li>Requires a 64-bit processor and operating system</li>
+            <li><strong>OS:</strong> Windows 10</li>
+            <li><strong>Processor:</strong> Intel Core i5-8400 / AMD Ryzen 5 2600</li>
+            <li><strong>Memory:</strong> 16 GB RAM</li>
+            <li><strong>Graphics:</strong> NVIDIA GeForce GTX 1650 / AMD Radeon RX 580</li>
+            <li><strong>Storage:</strong> 30 GB available space</li>
+          </ul>
+        </details>
+        <details class="spec">
+          <summary>Recommended requirements <span aria-hidden="true">+</span></summary>
+          <ul>
+            <li>Requires a 64-bit processor and operating system</li>
+            <li><strong>OS:</strong> Windows 10</li>
+            <li><strong>Processor:</strong> Intel Core i5-10600K / AMD Ryzen 5 3600</li>
+            <li><strong>Memory:</strong> 16 GB RAM</li>
+            <li><strong>Graphics:</strong> NVIDIA GeForce RTX 3070 / AMD Radeon RX 6800</li>
+            <li><strong>Storage:</strong> 30 GB available space</li>
+          </ul>
+        </details>
+
+        <details class="langs">
+          <summary>Languages <span class="muted">· 25 supported</span></summary>
+          <div class="table-wrap">
+            <table class="lang-table">
+              <thead><tr><th scope="col">Language</th><th scope="col">Interface</th><th scope="col">Audio</th><th scope="col">Subtitles</th></tr></thead>
+              <tbody>
+                <tr data-lang="English"><td>English</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="French"><td>French</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Italian"><td>Italian</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="German"><td>German</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Spanish - Spain"><td>Spanish – Spain</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Arabic"><td>Arabic</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Czech"><td>Czech</td><td>✓</td><td>—</td><td>✓</td></tr>
+                <tr data-lang="Danish"><td>Danish</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Dutch"><td>Dutch</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Finnish"><td>Finnish</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Greek"><td>Greek</td><td>✓</td><td>—</td><td>✓</td></tr>
+                <tr data-lang="Hungarian"><td>Hungarian</td><td>✓</td><td>—</td><td>✓</td></tr>
+                <tr data-lang="Japanese"><td>Japanese</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Korean"><td>Korean</td><td>✓</td><td>—</td><td>✓</td></tr>
+                <tr data-lang="Norwegian"><td>Norwegian</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Polish"><td>Polish</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Portuguese - Brazil"><td>Portuguese – Brazil</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Portuguese - Portugal"><td>Portuguese – Portugal</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Russian"><td>Russian</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Simplified Chinese"><td>Simplified Chinese</td><td>✓</td><td>—</td><td>✓</td></tr>
+                <tr data-lang="Spanish - Latin America"><td>Spanish – Latin America</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Swedish"><td>Swedish</td><td>✓</td><td>✓</td><td>✓</td></tr>
+                <tr data-lang="Thai"><td>Thai</td><td>✓</td><td>—</td><td>✓</td></tr>
+                <tr data-lang="Traditional Chinese"><td>Traditional Chinese</td><td>✓</td><td>—</td><td>✓</td></tr>
+                <tr data-lang="Turkish"><td>Turkish</td><td>✓</td><td>✓</td><td>✓</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <div class="links-grid">
+          <a href="https://store.steampowered.com/app/2428810/LEGO_Horizon_Adventures/" target="_blank" rel="noopener noreferrer">Official Steam page ↗</a>
+          <a href="https://steamcommunity.com/app/2428810" target="_blank" rel="noopener noreferrer">Community Hub ↗</a>
+          <a href="https://steamcommunity.com/app/2428810/discussions/" target="_blank" rel="noopener noreferrer">Discussions ↗</a>
+          <a href="https://store.steampowered.com/newshub/?appids=2428810" target="_blank" rel="noopener noreferrer">Update history ↗</a>
+          <a href="https://www.legohorizonadventures.com" target="_blank" rel="noopener noreferrer">Official website ↗</a>
+          <a href="https://www.playstation.com/legal/health-warning/" target="_blank" rel="noopener noreferrer">Health warnings ↗</a>
+        </div>
+      </section>
+
+      <section class="install-card" id="install-card" aria-labelledby="install-title">
+        <div class="install-icon" aria-hidden="true">⬇</div>
+        <h2 id="install-title">Take this store page with you</h2>
+        <p>Install it to your home screen. It works fullscreen and keeps every page and illustration available offline.</p>
+        <button type="button" class="cta" id="install-btn">Install app</button>
+        <p class="install-state" id="install-state" hidden>Installed on this device.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p><a href="../">← Back to random2</a></p>
+    <p class="disclaimer"><strong>Fan-made demo.</strong> Not affiliated with Valve, Sony Interactive Entertainment, Guerrilla Games, Studio Gobo or the LEGO Group. LEGO® Horizon Adventures™ and all related marks belong to their respective owners. All artwork on this page is original fan-made concept art. Store facts captured 16 Nov 2026. No real purchases take place.</p>
+  </footer>
+
+  <div class="buybar" id="buybar">
+    <div class="price"><span class="from">From</span><strong>39,99€</strong></div>
+    <button class="play-bar-btn" type="button" data-play aria-label="Play the demo">▶<span>Demo</span></button>
+    <button class="wish-btn" id="wish-btn" type="button" aria-pressed="false" aria-label="Add to wishlist">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.4l-1.5-1.4C5.4 15 2 11.9 2 8.2 2 5.4 4.2 3.2 7 3.2c1.7 0 3.4.8 5 2.3 1.6-1.5 3.3-2.3 5-2.3 2.8 0 5 2.2 5 5 0 3.7-3.4 6.8-8.5 10.8L12 20.4z"/></svg>
+    </button>
+    <button class="cta" id="buy-cta" type="button">Add to cart</button>
+  </div>
+
+  <dialog id="buy-dialog" class="sheet" aria-labelledby="buy-title">
+    <div class="sheet-head"><h2 id="buy-title">Choose an edition</h2><button class="close-btn" type="button" data-close aria-label="Close">✕</button></div>
+    <p class="sheet-note">Demo only — no payment will be taken.</p>
+    <div class="choice" data-choice="standard">
+      <div><strong>Standard Edition</strong><span>The base game</span></div><b>39,99€</b>
+    </div>
+    <div class="choice" data-choice="deluxe">
+      <div><strong>Digital Deluxe Bundle</strong><span>Base game + upgrade + outfits</span></div><b>49,99€</b>
+    </div>
+  </dialog>
+
+  <dialog id="cart-dialog" class="sheet" aria-labelledby="cart-title">
+    <div class="sheet-head"><h2 id="cart-title">Your cart</h2><button class="close-btn" type="button" data-close aria-label="Close">✕</button></div>
+    <p class="sheet-note">Demo only — no payment will be taken.</p>
+    <div id="cart-items" class="cart-items"></div>
+    <div class="cart-foot"><span>Total</span><strong id="cart-total">0,00€</strong></div>
+    <button class="cta" type="button" id="checkout-btn" disabled>Complete demo order</button>
+  </dialog>
+
+  <dialog id="gallery-dialog" class="lightbox" aria-label="Concept art gallery">
+    <div class="lb-bar">
+      <span id="lb-counter">1 / 7</span>
+      <button class="close-btn" type="button" data-close aria-label="Close gallery">✕</button>
+    </div>
+    <div class="lb-track" id="lb-track">
+      <figure><img src="screens/scene-1.svg" alt="Overgrown ruins with a tallneck machine" width="1600" height="900"><figcaption>1 · Overgrown ruins — a brick-built tallneck above the jungle.</figcaption></figure>
+      <figure><img src="screens/scene-2.svg" alt="A hillside brick village at sunset" width="1600" height="900"><figcaption>2 · Mother's Heart — lanterns over a hillside of brick homes.</figcaption></figure>
+      <figure><img src="screens/scene-3.svg" alt="A plated machine in tall grass" width="1600" height="900"><figcaption>3 · Machine hunt — a plated machine stalks the tall grass.</figcaption></figure>
+      <figure><img src="screens/scene-4.svg" alt="Four heroes on a ridge at dawn" width="1600" height="900"><figcaption>4 · Heroes together — four adventurers at first light.</figcaption></figure>
+      <figure><img src="screens/scene-5.svg" alt="A glowing blue pool in a brick cavern" width="1600" height="900"><figcaption>5 · Cauldron depths — blue light pools underground.</figcaption></figure>
+      <figure><img src="screens/scene-6.svg" alt="A long-necked machine in a red canyon" width="1600" height="900"><figcaption>6 · Desert canyon — a long-necked machine crosses the red rock.</figcaption></figure>
+      <figure><img src="screens/scene-7.svg" alt="A customized brick homestead and garden" width="1600" height="900"><figcaption>7 · Make it yours — a customized homestead and garden.</figcaption></figure>
+    </div>
+    <div class="lb-nav">
+      <button type="button" id="lb-prev" class="lb-arrow" aria-label="Previous image">‹</button>
+      <button type="button" id="lb-next" class="lb-arrow" aria-label="Next image">›</button>
+    </div>
+  </dialog>
+
+  <dialog id="install-dialog" class="sheet" aria-labelledby="install-dialog-title">
+    <div class="sheet-head"><h2 id="install-dialog-title">Install this page</h2><button class="close-btn" type="button" data-close aria-label="Close">✕</button></div>
+    <p class="sheet-note" id="install-desc">Install the app to get a fullscreen, offline copy of this store page.</p>
+    <button class="cta" type="button" id="install-prompt-btn" hidden>Install now</button>
+    <ol class="install-steps">
+      <li>Open this page in Safari.</li>
+      <li>Tap the <strong>Share</strong> button.</li>
+      <li>Choose <strong>Add to Home Screen</strong>.</li>
+    </ol>
+  </dialog>
+
+  <section id="game-layer" class="game-layer" hidden aria-label="Machine Hunt game">
+    <header class="game-top">
+      <span class="game-brand">MACHINE HUNT</span>
+      <span class="game-level" id="game-level">HUNT 1</span>
+      <span class="game-hearts" id="game-hearts" aria-label="Health"></span>
+      <span class="game-chip" id="game-cores">◼ 0</span>
+      <span class="game-chip" id="game-biome">JUNGLE</span>
+      <span class="game-chip" id="game-companion">SOLO</span>
+      <button type="button" id="game-pause-btn" aria-label="Pause">⏸</button>
+      <button type="button" id="game-exit-btn" class="game-exit" aria-label="Return to store">✕</button>
+    </header>
+    <div class="game-stage">
+      <canvas id="game-canvas" aria-label="Machine Hunt playfield"></canvas>
+      <div id="game-stick" class="game-stick" hidden aria-label="Movement stick"><span aria-hidden="true">✥</span></div>
+      <button id="game-charge" class="game-charge" type="button" hidden aria-label="Charged shot">⚡</button>
+      <p id="game-a11y" class="visually-hidden" aria-live="polite"></p>
+      <div id="game-hub" class="game-hub"></div>
+      <div id="game-result" class="game-result" hidden>
+        <h2 id="result-title">Hunt cleared!</h2>
+        <p id="result-detail"></p>
+        <p class="reward" id="result-reward"></p>
+        <p id="result-daily" class="daily-badge" hidden></p>
+        <div class="game-row">
+          <button type="button" id="result-village" class="ghost">Village</button>
+          <button type="button" id="result-again">Hunt again</button>
+        </div>
+        <div class="game-row">
+          <button type="button" id="result-share" class="ghost">Share score</button>
+          <button type="button" id="result-replay" class="ghost">Replay code</button>
+        </div>
+      </div>
+      <div id="game-pause" class="game-pause" hidden>
+        <h2>Paused</h2>
+        <div class="game-row">
+          <button type="button" id="pause-resume">Resume</button>
+          <button type="button" id="pause-village" class="ghost">Village</button>
+        </div>
+        <div class="game-row">
+          <button type="button" id="pause-help" class="ghost">How to play</button>
+          <button type="button" id="pause-settings" class="ghost">Settings</button>
+        </div>
+        <div class="game-row">
+          <button type="button" id="pause-exit" class="ghost">Back to store</button>
+        </div>
+      </div>
+      <div id="game-tutorial" class="game-modal" hidden>
+        <p class="tut-step" id="tut-step">1 / 3</p>
+        <h2 id="tut-title">Drag to move</h2>
+        <p id="tut-body">Drag anywhere to move — the bow fires automatically at the nearest machine.</p>
+        <div class="game-row">
+          <button type="button" id="tut-skip" class="ghost">Skip</button>
+          <button type="button" id="tut-next">Next</button>
+        </div>
+      </div>
+      <div id="game-settings" class="game-modal" hidden>
+        <h2>Settings</h2>
+        <button class="setting-row" type="button" data-setting="sound">Sound <b id="set-sound">On</b></button>
+        <button class="setting-row" type="button" data-setting="music">Music <b id="set-music">On</b></button>
+        <button class="setting-row" type="button" data-setting="haptics">Haptics <b id="set-haptics">On</b></button>
+        <button class="setting-row" type="button" data-setting="reduced">Reduced motion <b id="set-reduced">Off</b></button>
+        <div class="game-row"><button type="button" id="settings-close">Done</button></div>
+      </div>
+      <div id="game-story" class="game-modal story-modal" hidden>
+        <p class="tut-step" id="story-chapter">CHAPTER I</p>
+        <h2 id="story-title">A choice for Mother's Heart</h2>
+        <p id="story-text"></p>
+        <div class="game-row" id="story-choices"></div>
+        <p id="story-result" class="story-result" hidden></p>
+        <div class="game-row"><button type="button" id="story-close" class="ghost" hidden>Continue</button></div>
+      </div>
+      <div id="game-toast" class="game-toast" hidden></div>
+    </div>
+    <footer class="game-bottom">
+      <div class="combat-hud">
+        <div class="weapon-row" aria-label="Weapons">
+          <button type="button" class="weapon-btn is-active" data-weapon="bow" aria-label="Bow">🏹</button>
+          <button type="button" class="weapon-btn" data-weapon="spear" aria-label="Spear">🗡️</button>
+          <button type="button" class="weapon-btn" data-weapon="bomb" aria-label="Bomb Sling">💣</button>
+          <button type="button" class="weapon-btn" data-weapon="trap" aria-label="Trap Kit">🕳️</button>
+        </div>
+        <div class="stamina" aria-label="Stamina"><span id="stamina-bar"></span></div>
+        <div class="status-icons" id="status-icons" aria-label="Active effects"></div>
+      </div>
+      <span class="game-hint" id="game-hint">DRAG TO MOVE · AUTO-FIRE · TAP/HOLD FOR CHARGED SHOT</span>
+      <span class="game-score" id="game-score">BEST 0</span>
+    </footer>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <noscript><p class="noscript">This fan demo needs JavaScript for the gallery, cart and install flow. The page content is still readable without it.</p></noscript>
+</div>
+
+<script src="../shared/arcade.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

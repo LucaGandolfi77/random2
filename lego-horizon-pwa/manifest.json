@@ -1,0 +1,31 @@
+{
+  "name": "LEGO Horizon Adventures — Fan Store",
+  "short_name": "LEGO Horizon Store",
+  "description": "A mobile-first, installable fan store page for LEGO Horizon Adventures, with original SVG concept art. Works offline.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#171a21",
+  "theme_color": "#171a21",
+  "lang": "en",
+  "categories": ["entertainment", "shopping"],
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "screens/store-1.png", "sizes": "960x540", "type": "image/png", "form_factor": "narrow", "label": "Concept gallery" },
+    { "src": "screens/store-2.png", "sizes": "960x540", "type": "image/png", "form_factor": "narrow", "label": "Machine hunt concept art" },
+    { "src": "screens/store-3.png", "sizes": "960x540", "type": "image/png", "form_factor": "narrow", "label": "Customization concept art" }
+  ],
+  "shortcuts": [
+    { "name": "Editions", "short_name": "Buy", "url": "./#editions", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Concept gallery", "short_name": "Gallery", "url": "./#media-section", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Reviews", "short_name": "Reviews", "url": "./#reviews", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ],
+  "prefer_related_applications": false
+}
