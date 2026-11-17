@@ -30,6 +30,19 @@ a PWA on iOS and Android; works offline once installed.
 The layout adapts to **both portrait and landscape**, respects iOS safe areas,
 and uses haptics + WebAudio through the shared `R2` arcade library.
 
+## Learning curve & tooling
+
+- **Training Academy:** eight guided lessons (flying, kills, selling, ammo,
+  abilities, drones, gates, refining) with live progress checks and rewards.
+- **Power rating & sector chart:** every ship/loadout gets a POWER score and
+  each sector a recommended rating, with clear under-powered warnings.
+- **Post-run debrief:** accuracy, damage dealt/taken, boxes, time, cause of death
+  and a suggested next goal after each run.
+- **One-time tips:** contextual hints appear the first time each mechanic matters.
+- **Dev sandbox:** add `?debug=1` to the URL to unlock a DEV panel with unlimited
+  credits, urium, levels, gear, ships and drones. Dev use flags the profile and
+  excludes weekly leaderboard scores. Hidden entirely in normal play.
+
 ## Ships, enemies and combat feel
 
 - **Bigger, richer hulls:** every low-poly mesh gained an extra curvature ring,

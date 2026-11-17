@@ -98,6 +98,10 @@ export function restoreState(saved, profile) {
     if (!state.event) state.event = null;
     if (state.mode === "gate" && !state.gate) state.mode = "sector";
     if (state.bossPhaseTimer === undefined) state.bossPhaseTimer = 0;
+    for (const key of ["damageDealt", "damageTaken", "shotsFired", "shotsHit", "boxesOpened"]) {
+        if (state[key] === undefined) state[key] = 0;
+    }
+    if (state.causeOfDeath === undefined) state.causeOfDeath = null;
     if (!state.pickups) state.pickups = [];
     if (!state.cargo) state.cargo = {};
 

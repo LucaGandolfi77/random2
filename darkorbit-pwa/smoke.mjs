@@ -363,6 +363,15 @@ ok(await evaluate("window.__DEEP_ORBIT__.getState().score === 777"), "run score 
 await click("#btn-pause");
 await click('[data-action="restart"]');
 ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "back at the menu for the weekly run");
+ok(await evaluate("!!document.querySelector('[data-action=academy]')"), "the menu has an Academy button");
+await click('[data-action="academy"]');
+ok(await evaluate("!!document.querySelector('.mission-active')"), "the academy shows the active lesson");
+await click('[data-action="close-info"]');
+await click('[data-action="sectors"]');
+ok(await evaluate("document.querySelectorAll('.upgrade-row').length >= 6"), "the sector chart lists all sectors");
+await click('[data-action="close-info"]');
+ok(await evaluate("/POWER/.test(document.querySelector('.profile-strip').textContent)"), "the menu shows a power rating");
+ok(await evaluate("!!document.querySelector('[data-action=dev]')"), "the dev sandbox is visible in debug mode");
 ok(await evaluate("!!document.querySelector('[data-action=weekly]')"), "the menu has a Weekly button");
 ok(await evaluate("!!document.querySelector('[data-action=season]')"), "the menu has a Season button");
 ok(await evaluate("!!document.querySelector('[data-action=voucher]')"), "the menu has a Voucher button");
@@ -392,6 +401,19 @@ ok(await evaluate("!!document.querySelector('[data-action=prestige]')"), "Galaxy
 await click('[data-action="play"]');
 await sleep(250);
 ok(await evaluate("!!window.__DEEP_ORBIT__.getState().ghostPose"), "a ghost appears from the saved run");
+
+/* Debug sandbox (smoke loads with ?debug=1). */
+await click("#btn-pause");
+await click('[data-action="restart"]');
+ok(await waitFor("window.__DEEP_ORBIT__.getPhase() === 'menu'"), "back at the menu");
+ok(await evaluate("!!document.querySelector('[data-action=dev]')"), "the dev sandbox is visible in debug mode");
+const devCredits = await evaluate("window.__DEEP_ORBIT__.getProfile().credits");
+await click('[data-action="dev"]');
+ok(await evaluate("!!document.querySelector('[data-action=dev-action][data-value=cash]')"), "the sandbox lists cheat actions");
+await click('[data-action="dev-action"][data-value="cash"]');
+ok(await evaluate("window.__DEEP_ORBIT__.getProfile().credits > " + devCredits), "the cash cheat works");
+ok(await evaluate("window.__DEEP_ORBIT__.getProfile().devUsed === true"), "dev use flags the profile");
+await click('[data-action="close-info"]');
 
 /* Landscape layout. */
 await cdp.send("Emulation.setDeviceMetricsOverride", { width: 844, height: 390, deviceScaleFactor: 2, mobile: true }, sessionId);

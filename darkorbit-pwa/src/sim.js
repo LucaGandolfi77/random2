@@ -237,6 +237,12 @@ export function createState(profile, options = {}) {
         cargo: emptyCargo(),
         cargoUsed: 0,
         kills: 0,
+        damageDealt: 0,
+        damageTaken: 0,
+        shotsFired: 0,
+        shotsHit: 0,
+        boxesOpened: 0,
+        causeOfDeath: null,
         score: 0,
         creditsEarned: 0,
         events: [],
@@ -483,6 +489,7 @@ function damageEnemy(state, enemy, dmg, profile, allowCrit) {
     }
     const armor = enemy.def.armor || 0;
     dmg = Math.max(1, dmg - armor);
+    state.damageDealt += dmg;
     let crit = false;
     if (allowCrit && state.player.critChance > 0 && random() < state.player.critChance) {
         dmg *= 2;
@@ -583,9 +590,10 @@ function killEnemy(state, enemy, profile) {
     }
 }
 
-function damagePlayer(state, dmg) {
+function damagePlayer(state, dmg, source) {
     const p = state.player;
     if (p.barrier > 0 || state.destroyed) return;
+    state.damageTaken += dmg;
 
     p.lastHit = state.t;
     let rest = dmg;
@@ -597,10 +605,11 @@ function damagePlayer(state, dmg) {
     }
     p.hp -= rest;
     p.hurtFlash = 0.3;
-    emit(state, "hurt", { x: p.x, y: p.y, dmg: dmg });
+    emit(state, "hurt", { x: p.x, y: p.y, dmg: dmg, source: source || "unknown" });
 
     if (p.hp <= 0) {
         p.hp = 0;
+        state.causeOfDeath = source || "combat";
         state.destroyed = true;
         state.destroyedTimer = 1.5;
         state.cargo = emptyCargo();
@@ -647,6 +656,7 @@ export function spawnBox(state, forcedId) {
 }
 
 function openBox(state, box, profile) {
+    state.boxesOpened += 1;
     const def = box.def;
     const credits = randInt(def.credits[0], def.credits[1]);
     profile.credits += credits;
@@ -946,6 +956,7 @@ function firePlayerBullet(state, target, ammo, fromDrone, rocketMult) {
     b.dot = !!ammo.dot;
     b.ammoId = ammo.id;
     state.bullets.push(b);
+    state.shotsFired += 1;
 }
 
 function fireEnemyBullet(state, enemy) {
@@ -1081,6 +1092,7 @@ export function step(state, profile, input, dt) {
 
     if (state.cargoUsed >= p.cargoMax && !state.lowCargoNotified) {
         state.lowCargoNotified = true;
+        emit(state, "cargo_full", {});
         emit(state, "message", { text: "Cargo full — return to the station to sell" });
     }
 }
@@ -1195,7 +1207,7 @@ function updateEnemies(state, dt, profile) {
             if (d < p.radius + e.radius + 2 && e.contactCd <= 0) {
                 if (random() >= p.evasion) {
                     damagePlayer(state, e.def.damage * state.map.dmgMul * 0.7 *
-                        (state.event ? state.event.dmg : 1));
+                        (state.event ? state.event.dmg : 1), e.def.name);
                 } else {
                     emit(state, "evade", { x: p.x, y: p.y });
                 }
@@ -1257,8 +1269,9 @@ function updateBullets(state, dt, profile) {
                     break;
                 }
                 const dealt = damageEnemy(state, e, b.dmg, profile, !b.drone);
+                if (!b.drone) state.shotsHit += 1;
                 burst(state, b.x, b.y, b.color, b.drone ? 2 : 4, 120, 2.5);
-                emit(state, "hit", { x: b.x, y: b.y, dmg: Math.round(dealt), color: b.color });
+                emit(state, "hit", { x: b.x, y: b.y, dmg: Math.round(dealt), color: b.color, ammo: b.ammoId });
 
                 if (b.splash) {
                     emit(state, "splash", { x: b.x, y: b.y, color: b.color });
@@ -1306,7 +1319,7 @@ function updateEnemyBullets(state, dt) {
             if (state.docked || random() < p.evasion) {
                 emit(state, "evade", { x: p.x, y: p.y });
             } else {
-                damagePlayer(state, b.dmg);
+                damagePlayer(state, b.dmg, "hostile fire");
             }
             release(state, "enemyBullets", b);
             continue;

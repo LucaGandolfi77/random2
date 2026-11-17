@@ -7,7 +7,8 @@
  */
 
 import {
-    SLUG, STEP, SPLASH_RADIUS, droneCost, MAPS, AMMO, SHIPS, PICKUP_IDS, QUALITY
+    SLUG, STEP, SPLASH_RADIUS, droneCost, MAPS, AMMO, SHIPS, PICKUP_IDS,
+    QUALITY, UPGRADES, SKILLS, MISSIONS
 } from "./config.js";
 import {
     createState, step, drainEvents, setMove, setFiring, selectTargetAt,
@@ -26,12 +27,22 @@ import {
 } from "./challenge.js";
 import { recordFrame, createGhost, GHOST_HZ } from "./ghost.js";
 import { dailyEvent, addSeasonXp, claimSeasonTier, redeemVoucher } from "./season.js";
+import { academyProgress } from "./academy.js";
+import { tipOnce } from "./tips.js";
+import { gearPower, sectorStatus } from "./gear.js";
 import { createRenderer } from "./render.js";
 import { createInput } from "./input.js";
 import { createUI } from "./ui.js";
 import { createQualityController } from "./quality.js";
 import { createAudio } from "./audio.js";
 import { loadProfile, saveProfile, loadSettings, saveSettings } from "./storage.js";
+
+window.addEventListener("error", function (event) {
+    if (!window.__DEEP_ORBIT__) {
+        const box = document.getElementById("boot-error");
+        if (box) box.classList.remove("hidden");
+    }
+});
 
 const R2 = typeof window !== "undefined" ? (window.R2 || null) : null;
 const DEBUG = typeof window !== "undefined" &&
@@ -104,6 +115,7 @@ let replayFrames = [];
 let replayTick = 0;
 let ghost = null;
 let challenge = null;
+let lastRun = null;
 
 const settings = loadSettings();
 const globalSettings = R2 && typeof R2.getSettings === "function" ? R2.getSettings() : {};
@@ -277,10 +289,44 @@ function finalizeRun() {
         addScore({
             score: state.score,
             kills: state.kills,
-            mapIndex: state.mapIndex
+            mapIndex: state.mapIndex,
+            dev: profile.devUsed
         }, Date.now());
     }
     replayFrames = [];
+}
+
+function devAction(id) {
+    if (!DEBUG) return;
+    profile.devUsed = true;
+    if (id === "cash") profile.credits += 10000;
+    else if (id === "urium") profile.urium += 100;
+    else if (id === "level") {
+        profile.level += 1;
+        profile.skillPoints = (profile.skillPoints | 0) + 1;
+    } else if (id === "max") {
+        for (const u of UPGRADES) profile.upgrades[u.id] = u.max;
+        for (const s of SKILLS) profile.skills[s.id] = s.max;
+    } else if (id === "ships") {
+        profile.ownedShips = SHIPS.map((_, i) => i);
+        profile.ship = SHIPS.length - 1;
+    } else if (id === "drones") profile.drones = 4;
+    else if (id === "refill") {
+        state.player.hp = state.player.hpMax;
+        state.player.shield = state.player.shieldMax;
+    } else if (id === "mission") {
+        const mission = MISSIONS[profile.missions.active];
+        if (mission) {
+            missionProgress(profile, mission.objective.type, mission.objective.target, true);
+        }
+    }
+    refreshStats(state, profile, false);
+    refreshDrones(state, profile);
+    markDirty();
+    persist();
+    ui.refreshHangar(state, profile);
+    ui.showDev(profile);
+    ui.toast("DEV: " + id + " applied", "good");
 }
 
 function toMenu() {
@@ -291,7 +337,7 @@ function toMenu() {
     phase = "menu";
     state = createState(profile, { event: dailyMod });
     renderer.resetCamera();
-    ui.showMenu(profile, hasRun());
+    ui.showMenu(profile, hasRun(), DEBUG);
 }
 
 function openHangar() {
@@ -309,7 +355,7 @@ function closeHangar() {
     if (phase !== "hangar") return;
     if (hangarFrom === "menu" || !state) {
         phase = "menu";
-        ui.showMenu(profile, hasRun());
+        ui.showMenu(profile, hasRun(), DEBUG);
         return;
     }
     phase = hangarFrom === "paused" ? "paused" : "playing";
@@ -328,7 +374,7 @@ function closeSettings() {
     if (phase !== "settings") return;
     if (settingsFrom === "menu") {
         phase = "menu";
-        ui.showMenu(profile, hasRun());
+        ui.showMenu(profile, hasRun(), DEBUG);
     } else if (settingsFrom === "paused") {
         phase = "paused";
         ui.showPause(profile);
@@ -347,13 +393,16 @@ function openInfo(kind) {
     else if (kind === "weekly") ui.showWeekly(profile);
     else if (kind === "season") ui.showSeason(profile);
     else if (kind === "voucher") ui.showVoucher(profile);
+    else if (kind === "academy") ui.showAcademy(profile);
+    else if (kind === "sectors") ui.showSectors(profile);
+    else if (kind === "dev" && DEBUG) ui.showDev(profile);
     else ui.showAchievements(profile);
 }
 
 function closeInfo() {
     if (phase !== "info") return;
     phase = infoFrom === "menu" || !infoFrom ? "menu" : infoFrom;
-    if (phase === "menu") ui.showMenu(profile, hasRun());
+    if (phase === "menu") ui.showMenu(profile, hasRun(), DEBUG);
     else if (phase === "paused") ui.showPause(profile);
     else if (phase === "hangar") ui.showHangar(state, profile);
     else ui.hideOverlay();
@@ -443,6 +492,15 @@ const ui = createUI({
     onContracts: function () { openInfo("contracts"); },
     onMissionLog: function () { openInfo("missions"); },
     onSeason: function () { openInfo("season"); },
+    onAcademy: function () { openInfo("academy"); },
+    onSectors: function () { openInfo("sectors"); },
+    onDev: function () { openInfo("dev"); },
+    onDevAction: devAction,
+    onDebrief: function () {
+        phase = "info";
+        ui.showDebrief(lastRun || state, profile);
+    },
+    onFlyAgain: function () { startGame(); },
     onVoucher: function () { openInfo("voucher"); },
     onClaimTier: function (tier) {
         const reward = claimSeasonTier(profile, tier);
@@ -462,6 +520,8 @@ const ui = createUI({
             persist();
             ui.showVoucher(profile);
             ui.toast("Code redeemed: +" + fmtNum(voucher.credits) + " CR, +" + voucher.urium + " URIUM", "good");
+            const tipResult = tipOnce(profile, "first_voucher");
+            if (tipResult) ui.toast("TIP: " + tipResult.text);
         } else {
             ui.toast("Invalid or already used code");
         }
@@ -488,11 +548,13 @@ const ui = createUI({
         renderer.resetCamera();
         phase = "menu";
         persist();
-        ui.showMenu(profile, hasRun());
+        ui.showMenu(profile, hasRun(), DEBUG);
         ui.toast("Galaxy Reset complete — prestige tier " + profile.prestige, "good");
     },
     onRefine: function (id) {
         if (refineOre(state, profile, id)) {
+            const done = academyProgress(profile, "refine", 1);
+            if (done) ui.toast("LESSON COMPLETE: " + done.lesson.title, "good");
             handleEvents(drainEvents(state));
             markDirty();
             persist();
@@ -619,6 +681,8 @@ const ui = createUI({
         persist();
         ui.refreshHangar(state, profile);
         ui.toast("Drone deployed");
+        const done = academyProgress(profile, "drone", 1);
+        if (done) ui.toast("LESSON COMPLETE: " + done.lesson.title, "good");
         buzz(20);
     }
 });
@@ -681,6 +745,11 @@ function doJump() {
     if (phase !== "playing") return;
     if (jumpGate(state, profile)) {
         renderer.resetCamera();
+        const status = sectorStatus(profile, state.map);
+        if (status.tone === "warn") {
+            const t = tipOnce(profile, "underpowered");
+            ui.toast(t ? "TIP: " + t.text : "UNDER-POWERED — sector recommends POWER " + fmtNum(status.need));
+        }
         markDirty();
         persist();
     }
@@ -693,7 +762,17 @@ function doJump() {
 function handleEvents(events) {
     const completed = [];
     const missionsDoneNow = [];
+    const academyDoneNow = [];
     let seasonGain = 0;
+
+    function ac(type, amount, meta) {
+        const done = academyProgress(profile, type, amount, meta);
+        if (done) academyDoneNow.push(done);
+    }
+    function tip(key) {
+        const result = tipOnce(profile, key);
+        if (result) ui.toast("TIP: " + result.text);
+    }
 
     function mission(type, amount, absolute) {
         const done = missionProgress(profile, type, amount, absolute);
@@ -705,6 +784,7 @@ function handleEvents(events) {
             case "hit":
                 if (soundOn) Sound.hit();
                 if (e.dmg) renderer.addDamageNumber(e.x, e.y, e.dmg, e.color || "#ffffff", false);
+                ac("ammo", 1, e.ammo);
                 renderer.addShake(0.7);
                 break;
             case "crit":
@@ -738,6 +818,7 @@ function handleEvents(events) {
             case "bulletblock": if (soundOn) Sound.block(); break;
             case "cloak": if (soundOn && e.cloaked) Sound.cloak(); break;
             case "aggro":
+                tip("neutral_alpha");
                 ui.toast(e.name + " is now hostile");
                 renderer.addShake(2);
                 if (soundOn) Sound.crit();
@@ -745,19 +826,29 @@ function handleEvents(events) {
             case "pickup": if (soundOn) Sound.pickup(); break;
             case "pickup-effect": if (soundOn) Sound.effect(); break;
             case "box": if (soundOn) Sound.box(); buzz([15, 20, 30]); break;
-            case "ability": if (soundOn) Sound.ability(); buzz(18); break;
+            case "ability":
+                ac("ability", 1, e.id);
+                if (soundOn) Sound.ability();
+                buzz(18);
+                break;
             case "levelup":
                 seasonGain += 60;
                 if (soundOn) Sound.levelup();
                 ui.toast("LEVEL UP — " + profile.level, "good");
                 buzz([25, 40, 25]);
                 break;
-            case "dock": if (soundOn) Sound.dock(); break;
+            case "dock":
+                ac("sell", e.units);
+                tip("first_sale");
+                if (soundOn) Sound.dock();
+                break;
             case "jump": if (soundOn) Sound.jump(); break;
             case "wave":
+                ac("wave", 1);
                 ui.toast("WAVE " + e.wave + " — " + e.count + " hostiles");
                 renderer.addShake(3);
                 break;
+            case "cargo_full": tip("cargo_full"); break;
             case "bossphase":
                 if (soundOn) Sound.levelup();
                 renderer.addShockwave(e.x, e.y, "#ff4d6d", 300);
@@ -778,6 +869,7 @@ function handleEvents(events) {
                 break;
             case "safeenter": ui.toast("Safe zone — shields recharging", "good"); break;
             case "destroyed":
+                tip("first_death");
                 if (soundOn) Sound.destroyed();
                 renderer.addShockwave(e.x, e.y, "#ff4d6d", 320);
                 renderer.addShake(20);
@@ -789,6 +881,9 @@ function handleEvents(events) {
 
         if (e.type === "kill") {
             seasonGain += e.boss ? 100 : 25;
+            ac("kills", 1);
+            if (e.elite) tip("first_elite");
+            if (e.boss) tip("first_boss");
             completed.push(...contractProgress(profile, "kills", 1));
             mission("kills", 1);
             if (e.boss) {
@@ -804,7 +899,10 @@ function handleEvents(events) {
         if (e.type === "box") completed.push(...contractProgress(profile, "box", 1));
         if (e.type === "crit") completed.push(...contractProgress(profile, "critical", 1));
         if (e.type === "gatecomplete") mission("gate", 1);
-        if (e.type === "levelup") mission("level", profile.level, true);
+        if (e.type === "levelup") {
+            mission("level", profile.level, true);
+            tip("first_level");
+        }
         if (e.type === "jump") mission("sector", state.mapIndex, true);
     }
 
@@ -821,6 +919,13 @@ function handleEvents(events) {
         }
         markDirty();
     }
+    for (const item of academyDoneNow) {
+        ui.toast("LESSON COMPLETE: " + item.lesson.title + " (+" + fmtNum(item.reward.credits) + " CR)", "good");
+        if (soundOn) Sound.levelup();
+        markDirty();
+    }
+    if (academyDoneNow.length && phase === "info") ui.showAcademy(profile);
+
     if (seasonGain) {
         const tiers = addSeasonXp(profile, seasonGain);
         for (const tier of tiers) {
@@ -836,7 +941,7 @@ function handleEvents(events) {
         buzz([25, 40, 25, 60]);
         markDirty();
     }
-    if (completed.length || missionsDoneNow.length || events.length) checkAwards();
+    if (completed.length || missionsDoneNow.length || academyDoneNow.length || events.length) checkAwards();
 }
 
 function handleCritStats() {
@@ -898,6 +1003,7 @@ function frame(ts) {
             if (state.destroyed) {
                 finalizeRun();
                 clearRun();
+                lastRun = state;
                 phase = "destroyed";
                 profile.totalKills += state.kills;
                 if (state.score > profile.bestScore) profile.bestScore = state.score;
@@ -1035,7 +1141,12 @@ if ("serviceWorker" in navigator) {
 
 renderer.resize();
 applySettings();
-ui.showMenu(profile, hasRun());
+ui.showMenu(profile, hasRun(), DEBUG);
+
+const bootPanel = new URLSearchParams(window.location.search).get("panel");
+if (bootPanel === "contracts") openInfo("contracts");
+else if (bootPanel === "weekly") openInfo("weekly");
+
 if (bootDispatch) {
     ui.toast("Dispatch returned: +" + fmtNum(bootDispatch.credits) + " credits" +
         (bootDispatch.urium ? ", +" + bootDispatch.urium + " urium" : ""), "good");

@@ -27,6 +27,32 @@ export const RUN_KEY = "darkorbit-run";
 export const RUN_VERSION = 1;
 
 /* Refining: three raw ore units become one refined unit worth 3× at sale. */
+/* Training Academy: short, checkable lessons that teach the core loop. */
+export const ACADEMY_LESSONS = [
+    { id: "move", title: "Take the Controls", desc: "Fly 200 units with the joystick", type: "distance", target: 200, reward: { credits: 300, urium: 1 } },
+    { id: "shoot", title: "First Contact", desc: "Destroy 3 aliens", type: "kills", target: 3, reward: { credits: 600, urium: 1 } },
+    { id: "sell", title: "Haul and Sell", desc: "Sell 20 units of ore at the station", type: "sell", target: 20, reward: { credits: 900, urium: 2 } },
+    { id: "ammo", title: "Heavy Weapons", desc: "Land a hit with the RSB-75 (X6)", type: "ammo", target: 1, ammoId: "rsb", reward: { credits: 900, urium: 2 } },
+    { id: "abilities", title: "Systems Online", desc: "Trigger BOOST, SHIELD and REPAIR once each", type: "abilities", target: 3, reward: { credits: 1200, urium: 3 } },
+    { id: "drone", title: "Wingman", desc: "Buy a combat drone in the hangar", type: "drone", target: 1, reward: { credits: 1500, urium: 3 } },
+    { id: "gate", title: "Through the Gate", desc: "Clear one Galaxy Gate wave", type: "wave", target: 1, reward: { credits: 2200, urium: 4 } },
+    { id: "refine", title: "Refinery 101", desc: "Refine 3 raw ore into 1 refined unit", type: "refine", target: 1, reward: { credits: 1800, urium: 4 } }
+];
+
+/* One-time contextual tips shown the first time a situation occurs. */
+export const TIPS = {
+    cargo_full: "Cargo hold full — fly into the green station ring and press DOCK / SELL.",
+    first_sale: "Nice haul. Refining ore before selling makes it worth 3× more and frees cargo space.",
+    first_elite: "Elite enemies have a coloured ring and better loot. Armour reduces your laser damage.",
+    first_boss: "Bosses enrage below 50% health, summoning adds and firing faster. Keep moving.",
+    first_death: "Destruction costs carried cargo, never your ship or upgrades. Respawn and try a different approach.",
+    first_level: "Each level grants a skill point. Spend it in the hangar on a build that suits you.",
+    underpowered: "This sector recommends a higher POWER rating. Upgrade your ship or try an easier sector first.",
+    first_gate: "Galaxy Gates are timed arenas: clear every wave before the clock runs out.",
+    first_voucher: "Voucher codes are single-use. Try the ones listed in the README.",
+    neutral_alpha: "Alpha aliens are neutral. Tap one to lock it and auto-fire will engage — only that enemy turns hostile."
+};
+
 /* Offline season pass: eight-week cycles with twenty claimable tiers. */
 export const SEASON_LENGTH_DAYS = 56;
 export const SEASON_TIERS = 20;
@@ -380,37 +406,37 @@ export const ENEMY_BY_ID = Object.fromEntries(ENEMIES.map((e) => [e.id, e]));
 export const MAPS = [
     {
         id: "alpha", name: "ALPHA SECTOR", level: 1, world: 2000,
-        palette: "alpha", pool: ["swarm", "swarm", "scout"], max: 14, passive: true,
+        palette: "alpha", pool: ["swarm", "swarm", "scout"], max: 14, passive: true, recommendedPower: 100,
         interval: 1.15, hpMul: 1, dmgMul: 1, xpMul: 1, gateTo: 1,
         loot: ["aetherium", "aetherium", "cryolite"]
     },
     {
         id: "beta", name: "BETA BELT", level: 3, world: 2300,
-        palette: "beta", pool: ["swarm", "scout", "scout", "wisp", "sentinel"], max: 17,
+        palette: "beta", pool: ["swarm", "scout", "scout", "wisp", "sentinel"], max: 17, recommendedPower: 500,
         interval: 1.0, hpMul: 1.5, dmgMul: 1.35, xpMul: 1.5, gateTo: 2,
         loot: ["aetherium", "cryolite", "cryolite", "xenon"]
     },
     {
         id: "gamma", name: "GAMMA RIFT", level: 5, world: 2600,
-        palette: "gamma", pool: ["scout", "sentinel", "wisp", "raider", "crawler"], max: 19,
+        palette: "gamma", pool: ["scout", "sentinel", "wisp", "raider", "crawler"], max: 19, recommendedPower: 1200,
         interval: 0.9, hpMul: 2.2, dmgMul: 1.8, xpMul: 2.2, gateTo: 3,
         boss: "leviathan", loot: ["cryolite", "xenon", "xenon"]
     },
     {
         id: "delta", name: "DELTA CORE", level: 7, world: 2900,
-        palette: "delta", pool: ["sentinel", "raider", "crawler", "phantom", "leviathan"], max: 20,
+        palette: "delta", pool: ["sentinel", "raider", "crawler", "phantom", "leviathan"], max: 20, recommendedPower: 2600,
         interval: 0.82, hpMul: 3.0, dmgMul: 2.3, xpMul: 3.0, gateTo: 4,
         boss: "devourer", loot: ["xenon", "xenon", "cryolite"]
     },
     {
         id: "epsilon", name: "EPSILON VEIL", level: 10, world: 3200,
-        palette: "epsilon", pool: ["crawler", "phantom", "wisp", "raider", "obelisk"], max: 22,
+        palette: "epsilon", pool: ["crawler", "phantom", "wisp", "raider", "obelisk"], max: 22, recommendedPower: 5200,
         interval: 0.74, hpMul: 4.2, dmgMul: 3.0, xpMul: 4.2, gateTo: 5,
         boss: "obelisk", loot: ["phantomite", "phantomite", "xenon"]
     },
     {
         id: "zeta", name: "ZETA OBLIVION", level: 12, world: 3500,
-        palette: "zeta", pool: ["lancer", "crawler", "phantom", "wisp", "queen"], max: 24,
+        palette: "zeta", pool: ["lancer", "crawler", "phantom", "wisp", "queen"], max: 24, recommendedPower: 9500,
         interval: 0.68, hpMul: 5.4, dmgMul: 3.8, xpMul: 5.4, gateTo: -1,
         boss: "queen", loot: ["phantomite", "phantomite", "phantomite"]
     }

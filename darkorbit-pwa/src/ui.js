@@ -22,6 +22,8 @@ import { weeklyConfig, loadBoard } from "./challenge.js";
 import {
     seasonProgress, seasonKey, claimSeasonTier, redeemVoucher
 } from "./season.js";
+import { academyList, academyDone, academyTotal } from "./academy.js";
+import { sectorList, gearPower } from "./gear.js";
 
 function fmt(n) {
     return Math.floor(n || 0).toLocaleString("en-US");
@@ -87,6 +89,7 @@ export function createUI(handlers = {}) {
     };
 
     const abilityButtons = Array.from(document.querySelectorAll("[data-ability]"));
+    let debugEnabled = false;
 
     el.overlay.addEventListener("click", (event) => {
         const btn = event.target.closest("[data-action]");
@@ -119,8 +122,12 @@ export function createUI(handlers = {}) {
             prestige: handlers.onPrestige,
             season: handlers.onSeason,
             voucher: handlers.onVoucher,
-            "claim-tier": handlers.onClaimTier,
             "redeem-voucher": handlers.onRedeemVoucher,
+            academy: handlers.onAcademy,
+            sectors: handlers.onSectors,
+            dev: handlers.onDev,
+            debrief: handlers.onDebrief,
+            "fly-again": handlers.onFlyAgain,
             "claim-dispatch": handlers.onClaimDispatch,
             "coach-next": handlers.onCoachNext,
             "coach-skip": handlers.onCoachSkip,
@@ -135,6 +142,8 @@ export function createUI(handlers = {}) {
         else if (action === "refine" && handlers.onRefine) handlers.onRefine(value);
         else if (action === "sell-refined" && handlers.onSellRefined) handlers.onSellRefined(value);
         else if (action === "craft" && handlers.onCraft) handlers.onCraft(value);
+        else if (action === "claim-tier" && handlers.onClaimTier) handlers.onClaimTier(Number(value));
+        else if (action === "dev-action" && handlers.onDevAction) handlers.onDevAction(value);
         else if (action === "claim-tier" && handlers.onClaimTier) handlers.onClaimTier(Number(value));
         else if (action === "setting" && handlers.onSetting) {
             const key = btn.getAttribute("data-key");
@@ -154,7 +163,8 @@ export function createUI(handlers = {}) {
         el.overlay.classList.remove("hidden");
     }
 
-    function menuHTML(profile, hasRun) {
+    function menuHTML(profile, hasRun, debug) {
+        debugEnabled = !!debug;
         return `
             <div class="panel" role="dialog" aria-modal="true">
                 <p class="kicker">OFFLINE SPACE COMBAT</p>
@@ -166,12 +176,17 @@ export function createUI(handlers = {}) {
                     <span>URIUM <b>${fmt(profile.urium)}</b></span>
                     <span>BEST <b>${fmt(profile.bestScore)}</b></span>
                     <span>🏆 <b>${achievementCount(profile)}/${ACHIEVEMENTS.length}</b></span>
+                    <span>🎓 <b>${academyDone(profile)}/${academyTotal()}</b></span>
+                    <span>POWER <b>${gearPower(profile)}</b></span>
                     ${(profile.prestige | 0) ? `<span>🔄 <b>${profile.prestige}</b></span>` : ""}
+                    ${profile.devUsed ? `<span class="dev-flag">DEV</span>` : ""}
                 </div>
                 <div class="panel-actions">
                     ${hasRun ? `<button class="btn primary" data-action="continue" type="button">▶ CONTINUE RUN</button>` : ""}
                     <button class="btn ${hasRun ? "" : "primary"}" data-action="play" type="button">✦ NEW RUN</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="academy" type="button">🎓 ACADEMY</button>
+                    <button class="btn" data-action="sectors" type="button">🗺 SECTORS</button>
                     <button class="btn" data-action="season" type="button">🎟 SEASON</button>
                     <button class="btn" data-action="voucher" type="button">🎁 VOUCHER</button>
                     <button class="btn" data-action="weekly" type="button">🏁 WEEKLY</button>
@@ -181,6 +196,7 @@ export function createUI(handlers = {}) {
                     ${profile.level >= PRESTIGE_MIN_LEVEL ? `<button class="btn" data-action="prestige" type="button">🔄 GALAXY RESET</button>` : ""}
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
+                    ${debug ? `<button class="btn dev-btn" data-action="dev" type="button">🛠 DEV SANDBOX</button>` : ""}
                 </div>
                 <p class="panel-hint">Joystick to fly · auto-fire is always on · tap an alien to lock · dock to sell</p>
             </div>`;
@@ -345,8 +361,8 @@ export function createUI(handlers = {}) {
             </div>`;
     }
 
-    function showMenu(profile, hasRun) {
-        showOverlay(menuHTML(profile, !!hasRun));
+    function showMenu(profile, hasRun, debug) {
+        showOverlay(menuHTML(profile, !!hasRun, !!debug));
     }
 
     function showHangar(state, profile) {
@@ -367,6 +383,8 @@ export function createUI(handlers = {}) {
                 <div class="panel-actions">
                     <button class="btn primary" data-action="resume" type="button">▶ RESUME</button>
                     <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="academy" type="button">🎓 ACADEMY</button>
+                    <button class="btn" data-action="sectors" type="button">🗺 SECTORS</button>
                     <button class="btn" data-action="season" type="button">🎟 SEASON</button>
                     <button class="btn" data-action="voucher" type="button">🎁 VOUCHER</button>
                     <button class="btn" data-action="weekly" type="button">🏁 WEEKLY</button>
@@ -376,6 +394,7 @@ export function createUI(handlers = {}) {
                     ${profile.level >= PRESTIGE_MIN_LEVEL ? `<button class="btn" data-action="prestige" type="button">🔄 GALAXY RESET</button>` : ""}
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
+                    ${debugEnabled ? `<button class="btn dev-btn" data-action="dev" type="button">🛠 DEV SANDBOX</button>` : ""}
                     <button class="btn" data-action="restart" type="button">↻ MAIN MENU</button>
                 </div>
                 <p class="panel-hint">P / Esc resume · M mute</p>
@@ -625,6 +644,117 @@ export function createUI(handlers = {}) {
             </div>`);
     }
 
+    function showAcademy(profile) {
+        const lessons = academyList(profile);
+        const active = lessons.find((l) => l.state === "active");
+        return showOverlay(`
+            <div class="panel panel-wide" role="dialog" aria-modal="true">
+                <p class="kicker">TRAINING ACADEMY · ${academyDone(profile)}/${academyTotal()}</p>
+                <h2>LEARN THE ROPES</h2>
+                ${active ? `
+                    <div class="mission-active">
+                        <span>LESSON ${lessons.indexOf(active) + 1}</span>
+                        <h3>${active.title}</h3>
+                        <p>${active.desc}</p>
+                        <div class="mini-track"><div class="hp" style="width:${Math.round(Math.min(profile.academy.progress, active.target) / active.target * 100)}%"></div></div>
+                        <small>${Math.min(profile.academy.progress, active.target)} / ${active.target} · REWARD ${fmt(active.reward.credits)} CR, ${active.reward.urium} URIUM</small>
+                    </div>` : `<p class="section-note">Academy complete. You're ready for anything the sector throws at you.</p>`}
+                <div class="hangar-scroll">
+                    ${lessons.map((l, i) => `
+                        <div class="upgrade-row ${l.state}">
+                            <div class="upgrade-info">
+                                <b>${l.state === "completed" ? "✓" : l.state === "active" ? "▶" : "○"} ${l.title}</b>
+                                <small>${l.desc}</small>
+                            </div>
+                            <span class="contract-reward">${l.state === "completed" ? "DONE" : "+" + fmt(l.reward.credits) + " CR"}</span>
+                        </div>`).join("")}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+            </div>`);
+    }
+
+    function showSectors(profile) {
+        const power = gearPower(profile);
+        return showOverlay(`
+            <div class="panel panel-wide" role="dialog" aria-modal="true">
+                <p class="kicker">STAR CHART</p>
+                <h2>SECTORS · POWER ${fmt(power)}</h2>
+                <div class="hangar-scroll">
+                    ${sectorList(profile).map((entry, i) => `
+                        <div class="upgrade-row ${entry.status.tone}">
+                            <div class="upgrade-info">
+                                <b>${i < profile.lastMap ? "✓" : i === profile.lastMap ? "▶" : "○"} ${entry.map.name}</b>
+                                <small>LEVEL ${entry.map.level} · RECOMMENDED POWER ${fmt(entry.status.need)}</small>
+                            </div>
+                            <span class="contract-reward">${entry.status.label}</span>
+                        </div>`).join("")}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+            </div>`);
+    }
+
+    function showDev(profile) {
+        const actions = [
+            ["cash", "+10,000 CR"], ["urium", "+100 URIUM"], ["level", "+1 LEVEL"],
+            ["max", "MAX GEAR"], ["ships", "UNLOCK ALL SHIPS"], ["drones", "+4 DRONES"],
+            ["refill", "REFILL HULL / SHIELD"], ["mission", "COMPLETE MISSION"]
+        ];
+        return showOverlay(`
+            <div class="panel" role="dialog" aria-modal="true">
+                <p class="kicker dev-flag">DEV ONLY · ?debug=1</p>
+                <h2>SANDBOX</h2>
+                <p class="section-note">Cheats for testing only. Using them flags your profile and excludes weekly scores.</p>
+                <div class="dev-grid">
+                    ${actions.map(([id, label]) => `<button class="btn tiny" data-action="dev-action" data-value="${id}" type="button">${label}</button>`).join("")}
+                </div>
+                <div class="panel-actions">
+                    <button class="btn primary" data-action="close-info" type="button">◀ BACK</button>
+                </div>
+            </div>`);
+    }
+
+    function showDebrief(state, profile) {
+        const accuracy = state.shotsFired
+            ? Math.round(state.shotsHit / state.shotsFired * 100) : 0;
+        return showOverlay(`
+            <div class="panel" role="dialog" aria-modal="true">
+                <p class="kicker">RUN COMPLETE</p>
+                <h2>DEBRIEF</h2>
+                <div class="result-grid">
+                    <div><span>SCORE</span><b>${fmt(state.score)}</b></div>
+                    <div><span>KILLS</span><b>${state.kills}</b></div>
+                    <div><span>ACCURACY</span><b>${accuracy}%</b></div>
+                </div>
+                <div class="debrief-stats">
+                    <span>DAMAGE DEALT <b>${fmt(state.damageDealt)}</b></span>
+                    <span>DAMAGE TAKEN <b>${fmt(state.damageTaken)}</b></span>
+                    <span>BOXES <b>${state.boxesOpened}</b></span>
+                    <span>TIME <b>${Math.floor(state.timePlayed / 60)}m ${Math.floor(state.timePlayed % 60)}s</b></span>
+                </div>
+                ${state.causeOfDeath ? `<p class="section-note">Downed by: <b>${state.causeOfDeath}</b>. Try keeping your distance and using cover fire from drones.</p>` : ""}
+                <p class="section-note">Next goal: ${goalSuggestion(profile)}</p>
+                <div class="panel-actions">
+                    ${state.destroyed ? `<button class="btn primary" data-action="respawn" type="button">↻ RESPAWN</button>` : `<button class="btn primary" data-action="fly-again" type="button">▶ FLY AGAIN</button>`}
+                    <button class="btn" data-action="debrief" type="button">📊 DEBRIEF</button>
+                    <button class="btn" data-action="hangar" type="button">⚙ HANGAR</button>
+                    <button class="btn" data-action="restart" type="button">MENU</button>
+                </div>
+            </div>`);
+    }
+
+    function goalSuggestion(profile) {
+        if (profile.level < 3) return "reach pilot level 3 and buy a better ship";
+        if (!(profile.drones > 0)) return "buy your first combat drone in the hangar";
+        if (Object.values(profile.upgrades).some((v) => v === 0)) return "spend credits on ship upgrades";
+        if (academyDone(profile) < academyTotal()) return "finish the next Training Academy lesson";
+        if (profile.lastMap < 1) return "jump to Beta Belt and try a Galaxy Gate";
+        return "chase a higher score in this week's challenge";
+    }
+
     function showDestroyed(state, profile) {
         showOverlay(`
             <div class="panel" role="dialog" aria-modal="true">
@@ -782,6 +912,10 @@ export function createUI(handlers = {}) {
         showWeekly,
         showSeason,
         showVoucher,
+        showAcademy,
+        showSectors,
+        showDev,
+        showDebrief,
         showCoach,
         hideCoach,
         setDebug,

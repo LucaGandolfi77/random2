@@ -56,6 +56,7 @@ export function loadBoard() {
 }
 
 export function addScore(entry, now) {
+    if (entry && entry.dev) return loadBoard();
     const key = weekKey(now);
     const all = loadBoard();
     const current = all.filter((e) => e.week === key);

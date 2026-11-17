@@ -26,6 +26,9 @@ export const DEFAULTS = {
     totalSales: 0,
     bestSale: 0,
     bossKills: 0,
+    academy: { index: 0, progress: 0, done: [], flags: [] },
+    tipsSeen: [],
+    devUsed: false,
     season: { key: "", xp: 0, claimed: [] },
     vouchers: [],
     prestige: 0,
@@ -97,6 +100,18 @@ export function loadProfile(storage) {
         profile.totalSales = count(data.totalSales, 0);
         profile.bestSale = count(data.bestSale, 0);
         profile.bossKills = count(data.bossKills, 0);
+        if (data.academy && typeof data.academy === "object") {
+            profile.academy.index = clamp(count(data.academy.index, 0), 0, 99);
+            profile.academy.progress = count(data.academy.progress, 0);
+            profile.academy.done = Array.isArray(data.academy.done)
+                ? data.academy.done.filter((v) => typeof v === "string") : [];
+            profile.academy.flags = Array.isArray(data.academy.flags)
+                ? data.academy.flags.filter((v) => typeof v === "string") : [];
+        }
+        profile.tipsSeen = Array.isArray(data.tipsSeen)
+            ? data.tipsSeen.filter((v) => typeof v === "string") : [];
+        profile.devUsed = data.devUsed === true;
+
         if (data.season && typeof data.season === "object") {
             profile.season.key = typeof data.season.key === "string" ? data.season.key : "";
             profile.season.xp = count(data.season.xp, 0);
@@ -212,6 +227,9 @@ export function saveProfile(profile, storage) {
             totalSales: count(profile.totalSales, 0),
             bestSale: count(profile.bestSale, 0),
             bossKills: count(profile.bossKills, 0),
+            academy: profile.academy || { index: 0, progress: 0, done: [], flags: [] },
+            tipsSeen: Array.isArray(profile.tipsSeen) ? profile.tipsSeen : [],
+            devUsed: profile.devUsed === true,
             season: profile.season || { key: "", xp: 0, claimed: [] },
             vouchers: Array.isArray(profile.vouchers) ? profile.vouchers : [],
             prestige: count(profile.prestige, 0),
