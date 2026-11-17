@@ -262,7 +262,30 @@ ok(await evaluate("document.getElementById('gate-hud').classList.contains('hidde
 await evaluate("(() => { const s=window.__DEEP_ORBIT__.getState(); s.player.x=s.world.x/2+430; s.player.y=s.world.y/2+430; })()");
 await sleep(120);
 
-/* Place a weak target in front of the ship and hold FIRE. */
+/* Alpha enemies are neutral until hit. */
+await evaluate(`(() => {
+    const s=window.__DEEP_ORBIT__.getState();
+    s.enemies=[{
+        id: 9100, defId: 'scout',
+        def: { name:'Neutral Scout', tier:1, color:'#ff9f43', shape:'diamond', speed:120, range:390, fireCd:0.2, damage:20, spread:1, credits:[1,2], xp:1 },
+        x: s.player.x+240, y: s.player.y, vx:0, vy:0, angle:0, radius:21,
+        hp:5000, hpMax:5000, shield:0, shieldMax:0, fireCd:0.1, contactCd:0,
+        hitFlash:0, orbitDir:1, wander:0, homeX:s.player.x+240, homeY:s.player.y,
+        cloakCd:99, cloaked:false, cloakAlpha:1, dotTime:0, dotDps:0, charge:0,
+        elite:null, phase2:false, aggro:false, dead:false
+    }];
+    s.player.targetId=null; s.spawnTimer=999; s.boxTimer=999;
+})()`);
+const neutralShield = await evaluate("window.__DEEP_ORBIT__.getState().player.shield");
+await sleep(900);
+ok(await evaluate("window.__DEEP_ORBIT__.getState().enemies[0].aggro === false"), "Alpha enemies start neutral");
+ok(await evaluate("window.__DEEP_ORBIT__.getState().enemyBullets.length === 0"), "neutral enemies do not fire");
+ok(await evaluate("window.__DEEP_ORBIT__.getState().player.shield >= " + neutralShield), "neutral enemies do not damage the pilot");
+await evaluate("window.__DEEP_ORBIT__.getState().player.targetId = 9100");
+await sleep(400);
+ok(await evaluate("window.__DEEP_ORBIT__.getState().enemies[0].aggro === true"), "shooting a neutral makes it hostile");
+
+/* Place a weak target in front of the ship for the auto-fire check. */
 await evaluate(`(() => {
     const s = window.__DEEP_ORBIT__.getState();
     s.enemies = [{
@@ -276,9 +299,10 @@ await evaluate(`(() => {
     s.player.targetId = 9001;
     s.spawnTimer = 99;
 })()`);
-await pointer("#fire-btn", 0, 0, 800);
+await sleep(800);
 const scored = await evaluate("({ kills: window.__DEEP_ORBIT__.getState().kills, score: window.__DEEP_ORBIT__.getState().score })");
-ok(scored && scored.kills >= 1 && scored.score > 0, "firing kills the target and scores", scored && JSON.stringify(scored));
+ok(scored && scored.kills >= 1 && scored.score > 0, "auto-fire kills the target without input", scored && JSON.stringify(scored));
+ok(await evaluate("/AUTO/.test(document.getElementById('fire-btn').textContent)"), "the fire button shows AUTO status");
 ok(await waitFor("window.__DEEP_ORBIT__.getProfile().achievements.includes('first_kill')"), "the first-kill achievement unlocks");
 
 /* Joystick flight. */

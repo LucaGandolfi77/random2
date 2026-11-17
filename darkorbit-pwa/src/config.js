@@ -229,31 +229,36 @@ export const SHIPS = [
     {
         id: "kestrel", name: "KESTREL", role: "Starter scout",
         speed: 252, hp: 2600, shield: 1900, cargo: 420, cargoBay: 0,
-        lasers: 4, color: "#7ad7ff", shape: "arrow",
+        lasers: 4, radius: 19, fireRate: 0.88, range: 1.0, shieldRegen: 1.0,
+        color: "#7ad7ff", shape: "arrow",
         price: 0, urium: 0, level: 1, perks: {}, perkText: null
     },
     {
         id: "viper", name: "VIPER", role: "Fast interceptor",
         speed: 310, hp: 3200, shield: 2400, cargo: 560, cargoBay: 0,
-        lasers: 6, color: "#8affc1", shape: "dart",
+        lasers: 6, radius: 17, fireRate: 0.82, range: 0.92, shieldRegen: 0.9,
+        color: "#8affc1", shape: "dart",
         price: 14000, urium: 0, level: 2, perks: {}, perkText: null
     },
     {
         id: "warden", name: "WARDEN", role: "Balanced gunship",
         speed: 274, hp: 4600, shield: 3800, cargo: 980, cargoBay: 1,
-        lasers: 9, color: "#c08bff", shape: "wing",
+        lasers: 9, radius: 21, fireRate: 1.0, range: 1.05, shieldRegen: 1.1,
+        color: "#c08bff", shape: "wing",
         price: 52000, urium: 6, level: 4, perks: {}, perkText: null
     },
     {
         id: "bulwark", name: "BULWARK", role: "Heavy tank",
         speed: 228, hp: 7600, shield: 5600, cargo: 1500, cargoBay: 2,
-        lasers: 12, color: "#ffb457", shape: "tank",
+        lasers: 12, radius: 24, fireRate: 1.18, range: 1.1, shieldRegen: 1.25,
+        color: "#ffb457", shape: "tank",
         price: 140000, urium: 18, level: 7, perks: {}, perkText: null
     },
     {
         id: "spectre", name: "SPECTRE", role: "Evasive phantom hunter",
         speed: 336, hp: 4100, shield: 3400, cargo: 1100, cargoBay: 1,
-        lasers: 10, color: "#7df9ff", shape: "stealth",
+        lasers: 10, radius: 18, fireRate: 0.86, range: 1.15, shieldRegen: 1.0,
+        color: "#7df9ff", shape: "stealth",
         price: 260000, urium: 34, level: 9,
         perks: { evasion: 0.12, droneDamage: 1.3 },
         perkText: "+12% evasion · +30% drone damage"
@@ -261,7 +266,8 @@ export const SHIPS = [
     {
         id: "colossus", name: "COLOSSUS", role: "Siege artillery platform",
         speed: 206, hp: 9200, shield: 6800, cargo: 1800, cargoBay: 2,
-        lasers: 14, color: "#ff8a5c", shape: "siege",
+        lasers: 14, radius: 26, fireRate: 1.25, range: 1.25, shieldRegen: 1.2,
+        color: "#ff8a5c", shape: "siege",
         price: 420000, urium: 52, level: 11,
         perks: { rocketDamage: 1.35 },
         perkText: "+35% rocket (PLT) damage"
@@ -269,7 +275,8 @@ export const SHIPS = [
     {
         id: "ranger", name: "RANGER", role: "Precision marksman",
         speed: 292, hp: 6400, shield: 5200, cargo: 1300, cargoBay: 1,
-        lasers: 11, color: "#ff9ff3", shape: "lancer",
+        lasers: 11, radius: 19, fireRate: 1.1, range: 1.4, shieldRegen: 1.0,
+        color: "#ff9ff3", shape: "lancer",
         price: 620000, urium: 80, level: 12,
         perks: { crit: 0.08 },
         perkText: "+8% critical hit chance"
@@ -277,7 +284,8 @@ export const SHIPS = [
     {
         id: "monolith", name: "MONOLITH", role: "Fortress-class juggernaut",
         speed: 198, hp: 12500, shield: 9200, cargo: 2200, cargoBay: 2,
-        lasers: 16, color: "#b39aff", shape: "monolith",
+        lasers: 16, radius: 28, fireRate: 1.3, range: 1.15, shieldRegen: 1.4,
+        color: "#b39aff", shape: "monolith",
         price: 900000, urium: 120, level: 14,
         perks: { rocketDamage: 1.2, droneDamage: 1.2 },
         perkText: "+20% rockets · +20% drones"
@@ -292,73 +300,73 @@ export const ENEMIES = [
     {
         id: "swarm", name: "Swarm Drone", tier: 1,
         hp: 280, shield: 130, speed: 148, damage: 13, fireCd: 1.9,
-        range: 340, radius: 16, xp: 16, credits: [40, 95],
+        range: 340, radius: 18, armor: 0, xp: 16, credits: [40, 95],
         color: "#ff6b6b", shape: "triangle"
     },
     {
         id: "scout", name: "Hive Scout", tier: 1,
         hp: 460, shield: 220, speed: 196, damage: 19, fireCd: 1.5,
-        range: 390, radius: 19, xp: 26, credits: [70, 150],
+        range: 390, radius: 21, armor: 1, xp: 26, credits: [70, 150],
         color: "#ff9f43", shape: "diamond"
     },
     {
         id: "sentinel", name: "Crystal Sentinel", tier: 2,
         hp: 980, shield: 560, speed: 118, damage: 29, fireCd: 1.7,
-        range: 470, radius: 25, xp: 62, credits: [190, 340],
+        range: 470, radius: 28, armor: 8, xp: 62, credits: [190, 340],
         color: "#b07cff", shape: "hex"
     },
     {
         id: "raider", name: "Void Raider", tier: 2,
         hp: 780, shield: 420, speed: 236, damage: 35, fireCd: 1.15,
-        range: 410, radius: 22, xp: 70, credits: [230, 400],
+        range: 410, radius: 25, armor: 3, xp: 70, credits: [230, 400],
         color: "#ff5ea8", shape: "arrow"
     },
     {
         id: "leviathan", name: "Leviathan", tier: 3, boss: true,
         hp: 3200, shield: 1800, speed: 104, damage: 56, fireCd: 1.25,
-        range: 540, radius: 40, xp: 280, credits: [900, 1500],
+        range: 540, radius: 44, armor: 18, xp: 280, credits: [900, 1500],
         color: "#5ce1e6", shape: "boss", spread: 3
     },
     {
         id: "devourer", name: "Star Devourer", tier: 4, boss: true,
         hp: 6400, shield: 3400, speed: 112, damage: 84, fireCd: 1.05,
-        range: 600, radius: 50, xp: 620, credits: [1800, 3000],
+        range: 600, radius: 56, armor: 28, xp: 620, credits: [1800, 3000],
         color: "#ffd166", shape: "boss", spread: 5
     },
     {
         id: "wisp", name: "Nebula Wisp", tier: 2,
         hp: 420, shield: 300, speed: 288, damage: 22, fireCd: 1.3,
-        range: 330, radius: 15, xp: 74, credits: [190, 360],
+        range: 330, radius: 17, armor: 0, xp: 74, credits: [190, 360],
         color: "#7df9ff", shape: "wisp", evade: 0.35
     },
     {
         id: "crawler", name: "Siege Crawler", tier: 3,
         hp: 2100, shield: 1500, speed: 78, damage: 52, fireCd: 2.1,
-        range: 440, radius: 31, xp: 190, credits: [520, 980],
+        range: 440, radius: 35, armor: 14, xp: 190, credits: [520, 980],
         color: "#b66bff", shape: "crawler"
     },
     {
         id: "phantom", name: "Phase Phantom", tier: 3,
         hp: 1180, shield: 800, speed: 232, damage: 44, fireCd: 1.25,
-        range: 430, radius: 23, xp: 180, credits: [420, 780],
+        range: 430, radius: 26, armor: 6, xp: 180, credits: [420, 780],
         color: "#c9d6ff", shape: "phantom", cloak: true
     },
     {
         id: "obelisk", name: "Void Obelisk", tier: 4, boss: true,
         hp: 8800, shield: 4600, speed: 92, damage: 96, fireCd: 1.15,
-        range: 640, radius: 54, xp: 880, credits: [2400, 4200],
+        range: 640, radius: 60, armor: 32, xp: 880, credits: [2400, 4200],
         color: "#7df9ff", shape: "obelisk", spread: 7
     },
     {
         id: "lancer", name: "Void Lancer", tier: 3,
         hp: 1700, shield: 1050, speed: 184, damage: 72, fireCd: 1.45,
-        range: 640, radius: 24, xp: 280, credits: [750, 1400],
+        range: 640, radius: 27, armor: 10, xp: 280, credits: [750, 1400],
         color: "#ff9ff3", shape: "lancer"
     },
     {
         id: "queen", name: "Swarm Queen", tier: 4, boss: true,
         hp: 11500, shield: 6400, speed: 98, damage: 112, fireCd: 1.0,
-        range: 690, radius: 56, xp: 1300, credits: [3200, 5800],
+        range: 690, radius: 62, armor: 36, xp: 1300, credits: [3200, 5800],
         color: "#ff7ad9", shape: "queen", spread: 9
     }
 ];
@@ -372,7 +380,7 @@ export const ENEMY_BY_ID = Object.fromEntries(ENEMIES.map((e) => [e.id, e]));
 export const MAPS = [
     {
         id: "alpha", name: "ALPHA SECTOR", level: 1, world: 2000,
-        palette: "alpha", pool: ["swarm", "swarm", "scout"], max: 14,
+        palette: "alpha", pool: ["swarm", "swarm", "scout"], max: 14, passive: true,
         interval: 1.15, hpMul: 1, dmgMul: 1, xpMul: 1, gateTo: 1,
         loot: ["aetherium", "aetherium", "cryolite"]
     },

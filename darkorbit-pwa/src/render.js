@@ -11,7 +11,7 @@ import {
     PICKUPS, VIEW_BASE, DOCK_RADIUS, SAFE_STANDOFF, GATE_RADIUS,
     MAX_DAMAGE_TEXT, MAX_SHOCKWAVES, clamp, lerp
 } from "./config.js";
-import { stationPos, gatePos, getTarget } from "./sim.js";
+import { stationPos, gatePos, getTarget, isNeutral } from "./sim.js";
 import { drawMesh, getMesh, meshStats } from "./mesh.js";
 
 const TAU = Math.PI * 2;
@@ -627,7 +627,7 @@ export function createRenderer(canvas, minimap) {
             }
 
             if (quality.fx.mesh) {
-                const meshScale = (e.radius / 14) * 1.1;
+                const meshScale = (e.radius / 14) * 1.38;
                 drawMesh(ctx, getMesh("enemy", e.defId), e.x, e.y, e.angle, ecolor, meshScale, {
                     alpha,
                     flash
@@ -670,6 +670,24 @@ export function createRenderer(canvas, minimap) {
                 ctx.fill();
                 ctx.restore();
                 ctx.globalAlpha = 1;
+            }
+
+            // Neutral / provoked tells on the first map.
+            if (state.map.passive && state.mode !== "gate") {
+                const neutral = isNeutral(state, e);
+                ctx.strokeStyle = neutral ? "#5ce1e6" : "#ff5d73";
+                ctx.globalAlpha = neutral ? 0.45 : 0.75;
+                ctx.lineWidth = 1.5 / zoom;
+                ctx.setLineDash(neutral ? [3 / zoom, 5 / zoom] : []);
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, e.radius + (neutral ? 10 : 18), 0, TAU);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = neutral ? "#5ce1e6" : "#ff5d73";
+                ctx.font = `bold ${Math.round(9 / zoom)}px ui-monospace, monospace`;
+                ctx.textAlign = "center";
+                ctx.fillText(neutral ? "NEUTRAL" : "!", e.x, e.y - e.radius - (neutral ? 30 : 26) / zoom);
             }
 
             // Elite affix tells.
@@ -776,7 +794,7 @@ export function createRenderer(canvas, minimap) {
     function drawDrones(state) {
         for (const d of state.drones) {
             if (quality.fx.mesh) {
-                drawMesh(ctx, getMesh("drone"), d.x, d.y, d.angle, "#9fe8ff", 0.95, {});
+                drawMesh(ctx, getMesh("drone"), d.x, d.y, d.angle, "#9fe8ff", 1.2, {});
             } else {
                 ctx.save();
                 ctx.translate(d.x, d.y);
@@ -839,7 +857,7 @@ export function createRenderer(canvas, minimap) {
         const shipColor = mappedColor(p.ship.color || SHIPS[0].color);
 
         if (quality.fx.mesh) {
-            drawMesh(ctx, getMesh("ship", p.ship.id), p.x, p.y, p.angle, shipColor, p.radius / 16, {
+            drawMesh(ctx, getMesh("ship", p.ship.id), p.x, p.y, p.angle, shipColor, (p.radius / 16) * 1.3, {
                 flash: p.hurtFlash > 0
             });
             // Engine nozzles.
@@ -918,7 +936,7 @@ export function createRenderer(canvas, minimap) {
         ctx.save();
         ctx.globalAlpha = 0.32;
         drawMesh(ctx, getMesh("ship", state.player.ship.id), pose.x, pose.y, pose.angle,
-            "#c08bff", state.player.radius / 16, { alpha: 0.32 });
+            "#c08bff", (state.player.radius / 16) * 1.3, { alpha: 0.32 });
         ctx.strokeStyle = "rgba(192,139,255,0.6)";
         ctx.lineWidth = 1.5 / zoom;
         ctx.setLineDash([4 / zoom, 5 / zoom]);

@@ -85,6 +85,9 @@ export function restoreState(saved, profile) {
         p.ammoCd = AMMO.map(() => 0);
     }
     if (!p.abilityCd) p.abilityCd = { boost: 0, barrier: 0, repair: 0 };
+    if (p.radius === undefined) p.radius = 18;
+    if (p.fireRate === undefined) p.fireRate = 1;
+    if (p.rangeMul === undefined) p.rangeMul = 1;
     if (p.critChance === undefined) p.critChance = 0;
     if (p.pickupRadius === undefined) p.pickupRadius = 62;
     if (state.magnetTimer === undefined) state.magnetTimer = 0;
@@ -103,6 +106,7 @@ export function restoreState(saved, profile) {
         if (e.cloakCd === undefined) e.cloakCd = 99;
         if (e.dotTime === undefined) { e.dotTime = 0; e.dotDps = 0; }
         if (e.charge === undefined) e.charge = 0;
+        if (e.aggro === undefined) e.aggro = true;
         if (e.homeX === undefined) { e.homeX = e.x; e.homeY = e.y; }
     }
     return state;

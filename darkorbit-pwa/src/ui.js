@@ -59,6 +59,7 @@ export function createUI(handlers = {}) {
         ammoTag: $("ammo-tag"),
         targetPanel: $("target-panel"),
         targetName: $("target-name"),
+        targetMeta: $("target-meta"),
         targetShield: $("target-shield-fill"),
         targetHp: $("target-hp-fill"),
         phase: $("phase-label"),
@@ -181,7 +182,7 @@ export function createUI(handlers = {}) {
                     <button class="btn" data-action="settings" type="button">🎛 SETTINGS</button>
                     <button class="btn" data-action="mute" type="button">🔊 SOUND</button>
                 </div>
-                <p class="panel-hint">Joystick to fly · hold FIRE to shoot · tap an alien to lock · dock to sell</p>
+                <p class="panel-hint">Joystick to fly · auto-fire is always on · tap an alien to lock · dock to sell</p>
             </div>`;
     }
 
@@ -204,6 +205,7 @@ export function createUI(handlers = {}) {
                 <div class="ship-stats">
                     <span>SPD ${ship.speed}</span><span>HULL ${fmt(ship.hp)}</span>
                     <span>SHD ${fmt(ship.shield)}</span><span>CARGO ${fmt(ship.cargo)}</span>
+                    <span>FIRE ${Math.round(100 / ship.fireRate)}%</span><span>RANGE ${Math.round(ship.range * 100)}%</span>
                 </div>
                 ${ship.perkText ? `<p class="ship-perk">${ship.perkText}</p>` : ""}
                 ${action}
@@ -697,6 +699,8 @@ export function createUI(handlers = {}) {
         if (target) {
             el.targetPanel.classList.remove("hidden");
             setText(el.targetName, target.def.name);
+            setText(el.targetMeta, "ARMOR " + (target.def.armor || 0) +
+                (target.aggro === false ? " · NEUTRAL" : ""));
             setWidth(el.targetShield, target.shield / target.shieldMax);
             setWidth(el.targetHp, target.hp / target.hpMax);
         } else {

@@ -146,10 +146,33 @@ function merge(parts) {
     return { v, f };
 }
 
+function enrich(sections) {
+    const out = [sections[0]];
+    for (let i = 0; i < sections.length - 1; i++) {
+        const a = sections[i];
+        const b = sections[i + 1];
+        out.push({
+            x: (a.x + b.x) / 2,
+            w: (a.w + b.w) / 2 * 0.96,
+            h: (a.h + b.h) / 2 * 0.94
+        });
+        out.push(b);
+    }
+    return out;
+}
+
 function hull(profile, options) {
     const o = options || {};
-    const body = loft(profile, o.sides || 8, o.tone || 1);
+    const sections = enrich(profile);
+    const body = loft(sections, o.sides || 8, o.tone || 1);
     const parts = [body];
+
+    // Canopy, sensor ridge and two wing-mounted cannon housings.
+    const mid = profile[Math.floor(profile.length / 2)];
+    parts.push(translated(box(6.5, mid.w * 0.42, mid.h * 0.32, 1.22), mid.x * 0.2, 0, mid.h * 0.82));
+    parts.push(translated(box(3, 1.8, 1.5, 0.82), profile[0].x * 0.45, mid.w * 0.72, mid.h * 0.5));
+    parts.push(translated(box(3, 1.8, 1.5, 0.82), profile[0].x * 0.45, -mid.w * 0.72, mid.h * 0.5));
+
     for (const pod of o.pods || []) {
         parts.push(translated(box(pod.w, pod.h, pod.d, pod.tone || 0.86), pod.x, pod.y, pod.z || 0));
     }
@@ -203,8 +226,8 @@ const SHIP_MESHES = {
 };
 
 const ENEMY_MESHES = {
-    swarm: hull([P(13, 0.5, 0.4), P(4, 3.2, 1.8), P(-8, 5, 2), P(-13, 3, 1.2)], { sides: 6, tone: 0.9 }),
-    scout: hull([P(16, 0.6, 0.4), P(3, 5, 2.4), P(-8, 6.5, 2.8), P(-14, 3.5, 1.6)], { sides: 4, tone: 0.95 }),
+    swarm: hull([P(13, 0.5, 0.4), P(4, 3.2, 1.8), P(-8, 5, 2), P(-13, 3, 1.2)], { sides: 8, tone: 0.9 }),
+    scout: hull([P(16, 0.6, 0.4), P(3, 5, 2.4), P(-8, 6.5, 2.8), P(-14, 3.5, 1.6)], { sides: 6, tone: 0.95 }),
     sentinel: hull([P(14, 1, 0.8), P(4, 6, 4), P(-8, 8, 4.8), P(-15, 5, 2.8)], { sides: 6, tone: 1.05 }),
     raider: hull([P(19, 0.7, 0.5), P(6, 4.5, 2.4), P(-7, 7, 3), P(-15, 4, 1.8)], { sides: 6 }),
     leviathan: hull([P(30, 2, 1.4), P(12, 11, 6), P(-8, 20, 9), P(-26, 12, 5.5)], {
@@ -221,7 +244,7 @@ const ENEMY_MESHES = {
             { x: -8, y: -18, z: 1.5, w: 24, h: 6, d: 5, tone: 0.8 }
         ]
     }),
-    wisp: hull([P(22, 0.35, 0.3), P(8, 2, 1.2), P(-6, 4.5, 1.6), P(-16, 2, 0.9)], { sides: 4, tone: 1.1 }),
+    wisp: hull([P(22, 0.35, 0.3), P(8, 2, 1.2), P(-6, 4.5, 1.6), P(-16, 2, 0.9)], { sides: 6, tone: 1.1 }),
     crawler: hull([P(16, 2, 1), P(4, 11, 3.6), P(-10, 18, 4.5), P(-20, 12, 2.8)], {
         sides: 8, tone: 0.82,
         pods: [
@@ -247,7 +270,7 @@ const ENEMY_MESHES = {
     })
 };
 
-const DRONE_MESH = hull([P(11, 0.4, 0.3), P(3, 2.6, 1.3), P(-7, 4.2, 1.5), P(-11, 2, 0.8)], { sides: 4, tone: 1.05 });
+const DRONE_MESH = hull([P(11, 0.4, 0.3), P(3, 2.6, 1.3), P(-7, 4.2, 1.5), P(-11, 2, 0.8)], { sides: 6, tone: 1.05 });
 
 export function getMesh(kind, id) {
     if (kind === "ship") return SHIP_MESHES[id] || SHIP_MESHES.kestrel;

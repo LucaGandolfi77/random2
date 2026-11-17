@@ -106,13 +106,9 @@ export function createInput(canvas, renderer, handlers = {}) {
         if (event) event.preventDefault();
     }
 
-    if (fireBtn) {
-        fireBtn.addEventListener("pointerdown", fireOn, { passive: false });
-        fireBtn.addEventListener("pointerup", fireOff, { passive: false });
-        fireBtn.addEventListener("pointercancel", fireOff, { passive: false });
-        fireBtn.addEventListener("pointerleave", fireOff);
-        fireBtn.addEventListener("contextmenu", (e) => e.preventDefault());
-    }
+    // FIRE is an AUTO status indicator: weapons fire automatically, so the
+    // button is intentionally inert (keyboard Space remains a no-op fallback).
+    if (fireBtn) fireBtn.addEventListener("contextmenu", (e) => e.preventDefault());
     if (ammoBtn) {
         ammoBtn.addEventListener("click", (event) => {
             event.preventDefault();
@@ -252,12 +248,7 @@ export function createInput(canvas, renderer, handlers = {}) {
                 joystick.removeEventListener("pointercancel", stickUp);
                 joystick.removeEventListener("lostpointercapture", stickUp);
             }
-            if (fireBtn) {
-                fireBtn.removeEventListener("pointerdown", fireOn);
-                fireBtn.removeEventListener("pointerup", fireOff);
-                fireBtn.removeEventListener("pointercancel", fireOff);
-                fireBtn.removeEventListener("pointerleave", fireOff);
-            }
+            // Fire button is display-only.
             canvas.removeEventListener("pointerdown", canvasDown);
             canvas.removeEventListener("pointermove", canvasMove);
             canvas.removeEventListener("pointerup", canvasUp);

@@ -30,6 +30,22 @@ a PWA on iOS and Android; works offline once installed.
 The layout adapts to **both portrait and landscape**, respects iOS safe areas,
 and uses haptics + WebAudio through the shared `R2` arcade library.
 
+## Ships, enemies and combat feel
+
+- **Bigger, richer hulls:** every low-poly mesh gained an extra curvature ring,
+  a canopy, a sensor ridge and wing cannons; player hulls render ~30% larger,
+  enemy hulls ~40% larger, with hitboxes grown ~12% to match.
+- **Distinct ship statistics:** each of the 8 ships has its own size, fire rate,
+  targeting range, shield regeneration and perks — shown on its hangar card.
+- **Armoured enemies:** all 14 enemy types have individual armour values that
+  reduce incoming damage; the target readout shows armour and neutral status.
+- **Neutral Alpha aliens:** Swarm Drones and Hive Scouts in Alpha Sector patrol
+  peacefully and never attack — the one you actually shoot turns hostile, with
+  a clear `NEUTRAL` → `!` visual switch. Gate arenas stay fully hostile.
+- **Always-on auto-fire:** weapons fire automatically outside the station; the
+  FIRE button is now an `AUTO` status indicator. Auto-fire ignores neutrals
+  unless you tap to lock one first.
+
 ## Seasons & live content
 
 - **Battle pass:** an eight-week offline season with twenty claimable tiers;

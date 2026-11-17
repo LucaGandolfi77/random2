@@ -370,7 +370,7 @@ function replayTutorial() {
 
 const COACH_STEPS = [
     { target: "#joystick", text: "Drag the joystick to fly. You can also drag on the left side of the screen." },
-    { target: "#fire-btn", text: "Hold FIRE to shoot. Tap an alien to lock onto it. Weapons unlock outside the station." },
+    { target: "#fire-btn", text: "Auto-fire is always on outside the station. Tap an alien to lock onto it — on Alpha, neutrals only fight back once you shoot them." },
     { target: "#btn-dock", text: "Bring ore back to the station and press DOCK / SELL for credits and XP." }
 ];
 
@@ -737,6 +737,11 @@ function handleEvents(events) {
                 break;
             case "bulletblock": if (soundOn) Sound.block(); break;
             case "cloak": if (soundOn && e.cloaked) Sound.cloak(); break;
+            case "aggro":
+                ui.toast(e.name + " is now hostile");
+                renderer.addShake(2);
+                if (soundOn) Sound.crit();
+                break;
             case "pickup": if (soundOn) Sound.pickup(); break;
             case "pickup-effect": if (soundOn) Sound.effect(); break;
             case "box": if (soundOn) Sound.box(); buzz([15, 20, 30]); break;
@@ -879,7 +884,7 @@ function frame(ts) {
         while (accumulator >= STEP && guard < 5) {
             const inputState = {
                 move: input.getMove(),
-                firing: input.isFiring()
+                firing: true // auto-fire is always on; safe-zone lock lives in sim
             };
             setMove(state, inputState.move.x, inputState.move.y);
             setFiring(state, inputState.firing);

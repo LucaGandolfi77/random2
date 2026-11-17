@@ -56,6 +56,7 @@
 
             <div id="target-panel" class="target-panel hidden">
                 <span id="target-name">TARGET</span>
+                <small id="target-meta" class="target-meta"></small>
                 <div class="mini-track"><div id="target-shield-fill" class="shield"></div></div>
                 <div class="mini-track"><div id="target-hp-fill" class="hp"></div></div>
             </div>
@@ -87,13 +88,13 @@
                         <button class="ability" data-ability="repair" type="button" aria-label="Nano Repair"><span class="glyph">+</span><small>REPAIR</small><div class="cd-mask"></div></button>
                     </div>
                     <button id="ammo-btn" class="ammo-btn" type="button" aria-label="Change ammo"><span id="ammo-tag" class="ammo-tag">X4</span><small id="ammo-name">UCB-100</small></button>
-                    <button id="fire-btn" class="fire-btn" type="button" aria-label="Fire lasers"><span class="fire-core">◉</span><small>FIRE</small></button>
+                    <button id="fire-btn" class="fire-btn" type="button" aria-label="Auto-fire status"><span class="fire-core">◉</span><small>AUTO</small></button>
                 </div>
             </div>
         </main>
 
         <footer class="footer">
-            <span id="hint">JOYSTICK TO FLY · HOLD FIRE · TAP TO LOCK</span>
+            <span id="hint">JOYSTICK TO FLY · AUTO-FIRE ON · TAP TO LOCK</span>
             <span class="score-line"><b id="hud-score">0</b> PTS · <b id="hud-kills">0</b> KILLS</span>
         </footer>
 

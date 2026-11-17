@@ -61,7 +61,10 @@ export function deriveStats(profile) {
         speed: ship.speed + (u.generator | 0) * 13,
         cargoMax: Math.round((ship.cargo + (u.cargo | 0) * 260) * (1 + (sk.cargo | 0) * 0.08) * (1 + (profile.prestige | 0) * PRESTIGE_BONUS.cargo)),
         damageMult: (1 + (u.laser | 0) * 0.12 + (level - 1) * 0.025) * (1 + (sk.laser | 0) * 0.06) * (1 + (profile.prestige | 0) * PRESTIGE_BONUS.damage),
-        shieldRegen: (8 + (u.generator | 0) * 2.4) * (1 + (u.regen | 0) * 0.45),
+        shieldRegen: (8 + (u.generator | 0) * 2.4) * (1 + (u.regen | 0) * 0.45) * (ship.shieldRegen || 1),
+        radius: ship.radius || PLAYER_RADIUS,
+        fireRate: ship.fireRate || 1,
+        rangeMul: ship.range || 1,
         critChance: (u.critical | 0) * 0.04 + (perks.crit || 0),
         pickupRadius: PICKUP_RADIUS + (u.magnet | 0) * 28,
         evasion: perks.evasion || 0,
@@ -79,6 +82,9 @@ export function refreshStats(state, profile, refill) {
     p.cargoMax = stats.cargoMax;
     p.damageMult = stats.damageMult;
     p.shieldRegen = stats.shieldRegen;
+    p.radius = stats.radius;
+    p.fireRate = stats.fireRate;
+    p.rangeMul = stats.rangeMul;
     p.critChance = stats.critChance;
     p.pickupRadius = stats.pickupRadius;
     p.evasion = stats.evasion;
@@ -120,6 +126,26 @@ export function getEnemy(state, id) {
 
 export function getTarget(state) {
     return state.player.targetId ? getEnemy(state, state.player.targetId) : null;
+}
+
+/* Alpha aliens are neutral until the pilot damages one of them. */
+export function isNeutral(state, enemy) {
+    return !!(enemy && state.map.passive && state.mode !== "gate" && enemy.aggro === false);
+}
+
+function nearestHostile(state, x, y, maxDist) {
+    let best = null;
+    let bestD = maxDist;
+    const point = { x, y };
+    for (const e of state.enemies) {
+        if (e.dead || isNeutral(state, e)) continue;
+        const d = distance(point, e);
+        if (d < bestD) {
+            bestD = d;
+            best = e;
+        }
+    }
+    return best;
 }
 
 export function nearestEnemy(state, x, y, maxDist) {
@@ -170,11 +196,12 @@ export function createState(profile, options = {}) {
         player: {
             x: start.x, y: start.y, vx: 0, vy: 0,
             angle: -Math.PI / 2,
-            radius: PLAYER_RADIUS,
+            radius: stats.radius,
             hp: stats.hpMax, hpMax: stats.hpMax,
             shield: stats.shieldMax, shieldMax: stats.shieldMax,
             speed: stats.speed, cargoMax: stats.cargoMax,
             damageMult: stats.damageMult, shieldRegen: stats.shieldRegen,
+            fireRate: stats.fireRate, rangeMul: stats.rangeMul,
             critChance: stats.critChance, pickupRadius: stats.pickupRadius,
             evasion: stats.evasion, rocketMult: stats.rocketMult,
             droneMult: stats.droneMult,
@@ -282,6 +309,7 @@ function makeEnemy(state, map, defId, forceElite) {
         charge: 0,
         elite: null,
         phase2: false,
+        aggro: !(state.map.passive && state.mode !== "gate"),
         dead: false
     };
 
@@ -449,6 +477,12 @@ function gainXp(state, profile, amount) {
 
 function damageEnemy(state, enemy, dmg, profile, allowCrit) {
     if (enemy.dead) return 0;
+    if (enemy.aggro === false) {
+        enemy.aggro = true;
+        emit(state, "aggro", { x: enemy.x, y: enemy.y, name: enemy.def.name });
+    }
+    const armor = enemy.def.armor || 0;
+    dmg = Math.max(1, dmg - armor);
     let crit = false;
     if (allowCrit && state.player.critChance > 0 && random() < state.player.critChance) {
         dmg *= 2;
@@ -1001,22 +1035,21 @@ export function step(state, profile, input, dt) {
     // Firing: keep a valid target and fire the selected ammo when ready.
     // Weapons are locked inside the station so it cannot be used as a free kill zone.
     const ammo = AMMO[p.ammo];
+    const effectiveRange = TARGET_RANGE * (p.rangeMul || 1);
     let target = getTarget(state);
-    if (target && (distance(p, target) > TARGET_RANGE * 1.15)) {
+    if (target && distance(p, target) > effectiveRange * 1.15) {
         p.targetId = null;
         target = null;
     }
     if (!target) {
-        target = nearestEnemy(state, p.x, p.y, TARGET_RANGE);
+        // Auto-fire never picks a neutral alien; the pilot must lock it first.
+        target = nearestHostile(state, p.x, p.y, effectiveRange);
         if (target) p.targetId = target.id;
-    }
-    if (input && input.firing && state.docked && state.safeNotice <= 0) {
-        state.safeNotice = 3;
-        emit(state, "message", { text: "Safe zone — weapons locked" });
     }
     if (input && input.firing && !state.docked && p.ammoCd[p.ammo] <= 0 && target) {
         firePlayerBullet(state, target, ammo, false, p.rocketMult);
-        p.ammoCd[p.ammo] = ammo.cd * (state.overdriveTimer > 0 ? OVERDRIVE_FIRE_MULT : 1);
+        p.ammoCd[p.ammo] = ammo.cd * (p.fireRate || 1) *
+            (state.overdriveTimer > 0 ? OVERDRIVE_FIRE_MULT : 1);
         p.muzzle = 0.08;
         emit(state, "shoot", { ammo: ammo.id });
     }
@@ -1100,8 +1133,21 @@ function updateEnemies(state, dt, profile) {
 
         const d = distance(e, p);
         const preferred = e.def.boss ? 320 : 215;
+        const neutral = isNeutral(state, e);
 
-        if (safe) {
+        if (neutral && !safe) {
+            // NEUTRAL: patrol around home, never fire, never ram.
+            const hx = e.homeX - e.x;
+            const hy = e.homeY - e.y;
+            const angle = Math.hypot(hx, hy) > 140
+                ? Math.atan2(hy, hx)
+                : e.wander + (Math.PI / 2) * e.orbitDir;
+            e.angle = angle;
+            const es = e.def.speed * 0.42;
+            e.x += Math.cos(angle) * es * dt;
+            e.y += Math.sin(angle) * es * dt;
+            e.charge = 0;
+        } else if (safe) {
             // SAFE HAVEN: ignore the pilot completely. Drift around a home
             // point and give the station ring a wide berth.
             const ds = distance(e, station);
