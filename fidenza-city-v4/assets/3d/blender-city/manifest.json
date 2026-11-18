@@ -1,0 +1,206 @@
+{
+  "version": 2,
+  "file": "fidenza-realistic.glb",
+  "windowObject": "finestre",
+  "generator": "fidenza-v4 Blender realistic PBR",
+  "attribution": "OpenStreetMap (ODbL), AWS Terrarium / EU-DEM, ArnisWorld3",
+  "landmarkModels": [
+    "duomo",
+    "porta",
+    "ponte",
+    "teatro",
+    "comunale",
+    "granmadre",
+    "sanpietro",
+    "musini",
+    "stazione",
+    "obelisco"
+  ],
+  "legacyChunks": [
+    "terreno.glb",
+    "centro.glb",
+    "monica.glb",
+    "sanlazzaro.glb",
+    "azalee.glb",
+    "corea.glb",
+    "luce.glb",
+    "coduro.glb"
+  ],
+  "coordinateNote": "Blender (x, -z, y) -> glTF Y-up -> Three (x, y, z)",
+  "chunks": [
+    {
+      "id": "terreno",
+      "object": "terreno",
+      "faces": 25600,
+      "vertices": 25921
+    },
+    {
+      "id": "centro",
+      "object": "quartiere-centro-hi",
+      "faces": 146262,
+      "vertices": 440586
+    },
+    {
+      "id": "centro-lo",
+      "object": "quartiere-centro-lo",
+      "faces": 11249,
+      "vertices": 22524
+    },
+    {
+      "id": "monica",
+      "object": "quartiere-monica-hi",
+      "faces": 42685,
+      "vertices": 128551
+    },
+    {
+      "id": "monica-lo",
+      "object": "quartiere-monica-lo",
+      "faces": 4410,
+      "vertices": 11267
+    },
+    {
+      "id": "sanlazzaro",
+      "object": "quartiere-sanlazzaro-hi",
+      "faces": 53362,
+      "vertices": 159971
+    },
+    {
+      "id": "sanlazzaro-lo",
+      "object": "quartiere-sanlazzaro-lo",
+      "faces": 3971,
+      "vertices": 8017
+    },
+    {
+      "id": "azalee",
+      "object": "quartiere-azalee-hi",
+      "faces": 97624,
+      "vertices": 304797
+    },
+    {
+      "id": "azalee-lo",
+      "object": "quartiere-azalee-lo",
+      "faces": 9357,
+      "vertices": 22565
+    },
+    {
+      "id": "corea",
+      "object": "quartiere-corea-hi",
+      "faces": 127880,
+      "vertices": 395991
+    },
+    {
+      "id": "corea-lo",
+      "object": "quartiere-corea-lo",
+      "faces": 11456,
+      "vertices": 26755
+    },
+    {
+      "id": "luce",
+      "object": "quartiere-luce-hi",
+      "faces": 181495,
+      "vertices": 561139
+    },
+    {
+      "id": "luce-lo",
+      "object": "quartiere-luce-lo",
+      "faces": 15707,
+      "vertices": 36555
+    },
+    {
+      "id": "coduro",
+      "object": "quartiere-coduro-hi",
+      "faces": 62498,
+      "vertices": 196175
+    },
+    {
+      "id": "coduro-lo",
+      "object": "quartiere-coduro-lo",
+      "faces": 6439,
+      "vertices": 15977
+    },
+    {
+      "id": "finestre-warm",
+      "object": "finestre-warm",
+      "faces": 35500,
+      "vertices": 142000
+    },
+    {
+      "id": "finestre-cool",
+      "object": "finestre-cool",
+      "faces": 35452,
+      "vertices": 141808
+    },
+    {
+      "id": "finestre-dark",
+      "object": "finestre-dark",
+      "faces": 35497,
+      "vertices": 141988
+    },
+    {
+      "id": "neve-tetti",
+      "object": "neve-tetti",
+      "faces": 46,
+      "vertices": 138
+    },
+    {
+      "id": "landmark-duomo",
+      "object": "landmark-duomo",
+      "faces": 133,
+      "vertices": 205
+    },
+    {
+      "id": "landmark-porta",
+      "object": "landmark-porta",
+      "faces": 28,
+      "vertices": 34
+    },
+    {
+      "id": "landmark-ponte",
+      "object": "landmark-ponte",
+      "faces": 36,
+      "vertices": 56
+    },
+    {
+      "id": "landmark-teatro",
+      "object": "landmark-teatro",
+      "faces": 67,
+      "vertices": 91
+    },
+    {
+      "id": "landmark-comunale",
+      "object": "landmark-comunale",
+      "faces": 35,
+      "vertices": 45
+    },
+    {
+      "id": "landmark-granmadre",
+      "object": "landmark-granmadre",
+      "faces": 61,
+      "vertices": 85
+    },
+    {
+      "id": "landmark-sanpietro",
+      "object": "landmark-sanpietro",
+      "faces": 61,
+      "vertices": 85
+    },
+    {
+      "id": "landmark-musini",
+      "object": "landmark-musini",
+      "faces": 28,
+      "vertices": 38
+    },
+    {
+      "id": "landmark-stazione",
+      "object": "landmark-stazione",
+      "faces": 36,
+      "vertices": 48
+    },
+    {
+      "id": "landmark-obelisco",
+      "object": "landmark-obelisco",
+      "faces": 11,
+      "vertices": 13
+    }
+  ]
+}

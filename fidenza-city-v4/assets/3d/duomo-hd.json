@@ -1,0 +1,39 @@
+{
+  "format": "fidenza-splat-v1",
+  "source": "assets/3d/idol-seed42-262144-3b8df9a4.ply",
+  "generated": "2026-11-05T23:43:16.618Z",
+  "count": 260305,
+  "sourceCount": 262144,
+  "filtered": 1839,
+  "recordSize": 20,
+  "bounds": {
+    "min": [
+      -0.34615,
+      -0.45625,
+      -0.46178
+    ],
+    "max": [
+      0.34458,
+      0.52471,
+      0.4847
+    ],
+    "size": [
+      0.69074,
+      0.98095,
+      0.94649
+    ]
+  },
+  "normalized": {
+    "centerX": -0.00078,
+    "baseY": 0,
+    "centerZ": 0.01146,
+    "flippedY": true
+  },
+  "sortedBy": "x:asc",
+  "splatSize": {
+    "min": 0.0009,
+    "max": 0.092269,
+    "clampedMax": 0.022
+  },
+  "outputBytes": 5206100
+}

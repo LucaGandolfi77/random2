@@ -1,0 +1,14 @@
+{
+  "name": "GIGANT BATTLE PWA - Arena Fighter",
+  "short_name": "GIGANT BATTLE",
+  "description": "A mobile-first 2D arena fighter with teams, assists and arcade mode.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#0b0f1c",
+  "theme_color": "#0b0f1c",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

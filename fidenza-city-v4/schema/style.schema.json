@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fidenza-da-giocare.local/schema/style.schema.json",
+  "title": "Fidenza da Giocare — season style",
+  "type": "object",
+  "required": ["id", "label", "palette", "lighting"],
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "palette": {
+      "type": "object",
+      "properties": {
+        "terrainTint": { "type": "string" },
+        "areaTint": { "type": "string" },
+        "tree": { "type": "array", "items": { "type": "string" } },
+        "snow": { "type": "number", "minimum": 0, "maximum": 1 },
+        "groundDetail": { "type": "string" }
+      }
+    },
+    "lighting": {
+      "type": "object",
+      "properties": {
+        "sunColor": { "type": "string" },
+        "sunIntensity": { "type": "number" },
+        "ambient": { "type": "number" },
+        "hemi": { "type": "number" },
+        "fogColor": { "type": "string" },
+        "fogNear": { "type": "number" },
+        "fogFar": { "type": "number" },
+        "exposure": { "type": "number" }
+      }
+    },
+    "particles": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["none", "petals", "leaves", "snow"] },
+        "count": { "type": "number", "minimum": 0, "maximum": 600 },
+        "color": { "type": "string" },
+        "size": { "type": "number" },
+        "speed": { "type": "number" }
+      }
+    },
+    "weather": {
+      "type": "object",
+      "properties": {
+        "rain": { "type": "number", "minimum": 0, "maximum": 1 },
+        "clouds": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "props": {
+      "type": "object",
+      "properties": {
+        "christmas": { "type": "boolean" },
+        "umbrellas": { "type": "boolean" }
+      }
+    }
+  }
+}

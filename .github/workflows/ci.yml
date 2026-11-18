@@ -60,6 +60,13 @@ jobs:
           npm run build
           npm test
 
+      - name: "GIGANT BATTLE PWA (typecheck, tests, build)"
+        working-directory: gigant-battle-pwa
+        run: |
+          npm ci
+          npm test
+          npm run build
+
       - name: JavaScript syntax check (ESM-aware)
         run: |
           set -euo pipefail

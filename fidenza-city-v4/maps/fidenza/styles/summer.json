@@ -1,0 +1,24 @@
+{
+  "id": "summer",
+  "label": "Estate",
+  "palette": {
+    "terrainTint": "#fff8e8",
+    "areaTint": "#fff6df",
+    "tree": ["#4f7748", "#5d8850", "#6f9a5a", "#7fa164", "#8fae6a"],
+    "snow": 0,
+    "groundDetail": "#fffdf4"
+  },
+  "lighting": {
+    "sunColor": "#fff3d1",
+    "sunIntensity": 1.12,
+    "ambient": 1.0,
+    "hemi": 1.05,
+    "fogColor": "#d9e6df",
+    "fogNear": 190,
+    "fogFar": 950,
+    "exposure": 1.08
+  },
+  "particles": { "type": "none", "count": 0, "color": "#ffffff", "size": 0.1, "speed": 1 },
+  "weather": { "rain": 0.05, "clouds": 0.15 },
+  "props": { "christmas": false, "umbrellas": true }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "spring",
+  "label": "Primavera",
+  "palette": {
+    "terrainTint": "#f4fff0",
+    "areaTint": "#f2ffe8",
+    "tree": ["#6f9a5a", "#82b36a", "#a7c97e", "#e8a7b8", "#f0c1cf"],
+    "snow": 0,
+    "groundDetail": "#ffffff"
+  },
+  "lighting": {
+    "sunColor": "#fff1cf",
+    "sunIntensity": 1.0,
+    "ambient": 1.0,
+    "hemi": 1.0,
+    "fogColor": "#cfe0d6",
+    "fogNear": 170,
+    "fogFar": 850,
+    "exposure": 1.05
+  },
+  "particles": { "type": "petals", "count": 180, "color": "#f3c6d4", "size": 0.18, "speed": 0.7 },
+  "weather": { "rain": 0.15, "clouds": 0.3 },
+  "props": { "christmas": false, "umbrellas": false }
+}

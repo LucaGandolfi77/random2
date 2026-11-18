@@ -1,0 +1,238 @@
+const CACHE = 'fidenza-da-giocare-v4.3.0';
+const TILE_CACHE = 'fidenza-ground-tiles-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './css/style.css',
+  './assets/fonts/fonts.css',
+  './assets/fonts/anton-400-latin.woff2',
+  './assets/fonts/anton-400-latin-ext.woff2',
+  './assets/fonts/oswald-400-latin.woff2',
+  './assets/fonts/oswald-400-latin-ext.woff2',
+  './assets/fonts/oswald-500-latin.woff2',
+  './assets/fonts/oswald-500-latin-ext.woff2',
+  './assets/fonts/oswald-600-latin.woff2',
+  './assets/fonts/oswald-600-latin-ext.woff2',
+  './assets/fonts/oswald-700-latin.woff2',
+  './assets/fonts/oswald-700-latin-ext.woff2',
+  './assets/fonts/OFL-Anton.txt',
+  './assets/fonts/OFL-Oswald.txt',
+  './assets/icons/icon.svg',
+  './assets/icons/icon-180.png',
+  './assets/icons/icon-192.png',
+  './assets/icons/icon-512.png',
+  './assets/icons/icon-maskable-512.png',
+  './assets/icons/splash/splash-1320x2868.png',
+  './assets/icons/splash/splash-2868x1320.png',
+  './assets/icons/splash/splash-1206x2622.png',
+  './assets/icons/splash/splash-2622x1206.png',
+  './assets/icons/splash/splash-1290x2796.png',
+  './assets/icons/splash/splash-2796x1290.png',
+  './assets/icons/splash/splash-1179x2556.png',
+  './assets/icons/splash/splash-2556x1179.png',
+  './assets/icons/splash/splash-1284x2778.png',
+  './assets/icons/splash/splash-2778x1284.png',
+  './assets/icons/splash/splash-1170x2532.png',
+  './assets/icons/splash/splash-2532x1170.png',
+  './assets/icons/splash/splash-1125x2436.png',
+  './assets/icons/splash/splash-2436x1125.png',
+  './assets/icons/splash/splash-1242x2688.png',
+  './assets/icons/splash/splash-2688x1242.png',
+  './assets/icons/splash/splash-828x1792.png',
+  './assets/icons/splash/splash-1792x828.png',
+  './assets/icons/splash/splash-750x1334.png',
+  './assets/icons/splash/splash-1334x750.png',
+  './assets/img/citta.jpg',
+  './assets/img/corso.jpg',
+  './assets/img/duomo.jpg',
+  './assets/img/og.jpg',
+  './vendor/three.module.js',
+  './vendor/BufferGeometryUtils.js',
+  './vendor/loaders/GLTFLoader.js',
+  './vendor/loaders/DRACOLoader.js',
+  './vendor/environments/RoomEnvironment.js',
+  './vendor/utils/BufferGeometryUtils.js',
+  './vendor/draco/draco_decoder.wasm',
+  './vendor/draco/draco_wasm_wrapper.js',
+  './vendor/draco/draco_decoder.js',
+  './assets/3d/blender-city/manifest.json',
+  './assets/3d/blender-city/fidenza-realistic.glb',
+  './assets/3d/blender-city/interiors.glb',
+  './assets/3d/blender-city/interiors-manifest.json',
+  './assets/3d/blender-city/terreno.glb',
+  './assets/3d/blender-city/centro.glb',
+  './assets/3d/blender-city/monica.glb',
+  './assets/3d/blender-city/sanlazzaro.glb',
+  './assets/3d/blender-city/azalee.glb',
+  './assets/3d/blender-city/corea.glb',
+  './assets/3d/blender-city/luce.glb',
+  './assets/3d/blender-city/coduro.glb',
+  './js/main.js',
+  './js/config.js',
+  './js/utils.js',
+  './js/save.js',
+  './js/input.js',
+  './js/audio.js',
+  './js/hud.js',
+  './js/models.js',
+  './js/world.js',
+  './js/blender-world.js',
+  './js/postfx.js',
+  './js/block-palette.js',
+  './js/block-textures.js',
+  './js/ground-textures.js',
+  './js/ground-cache.js',
+  './js/ground-tiles.js',
+  './js/mc-blocks.js',
+  './js/voxel-details.js',
+  './js/transit.js',
+  './js/building-geometry.js',
+  './js/poi-signs.js',
+  './js/traffic.js',
+  './js/npcs.js',
+  './js/districts.js',
+  './js/diary.js',
+  './js/schedules.js',
+  './js/landmarks.js',
+  './js/player.js',
+  './js/vehicles.js',
+  './js/missions.js',
+  './js/map.js',
+  './js/photo-mode.js',
+  './js/photo-store.js',
+  './js/achievements.js',
+  './js/daily.js',
+  './js/career.js',
+  './js/events.js',
+  './js/map-overrides.js',
+  './data/city.json',
+  './data/terrain.json',
+  './data/map.json',
+  './data/arnis/arnis.json',
+  './data/ground/ground.json',
+  './data/ground/ortho-z0.jpg',
+  './data/ground/ortho-z1.jpg',
+  './data/ground/ortho-z2.jpg',
+  './data/ground/ortho-center-z0.jpg',
+  './data/ground/ortho-center-z1.jpg',
+  './data/ground/tiles/manifest.json',
+  './data/styles/spring.json',
+  './data/styles/summer.json',
+  './data/styles/autumn.json',
+  './data/styles/winter.json',
+  './data/ATTRIBUTION.md'
+];
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
+async function precacheShell(cache) {
+  // Per-asset e con concorrenza limitata: un 404 o un limite di storage iOS
+  // non deve annullare l'intero precache, e iPhone non riceve 100 richieste
+  // tutte insieme.
+  const queue = [...ASSETS];
+  const workers = Array.from({ length: 6 }, async () => {
+    while (queue.length) {
+      const url = queue.shift();
+      try {
+        await cache.add(new Request(url, { cache: 'reload' }));
+      } catch (err) {
+        console.warn('Precache saltato', url, err);
+      }
+    }
+  });
+  await Promise.all(workers);
+}
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => precacheShell(cache))
+      .then(() => self.skipWaiting())
+      .catch(err => console.warn('Precache parziale', err))
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys()
+      .then(keys => {
+        const keep = new Set([CACHE, TILE_CACHE]);
+        return Promise.all(keys.filter(k => !keep.has(k)).map(k => caches.delete(k)));
+      })
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+
+  // Le tessere del suolo vivono in una cache dedicata, senza limite: il
+  // prefetch completo del gioco le scarica tutte per l'uso offline.
+  if (url.pathname.includes('/data/ground/tiles/')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(TILE_CACHE);
+      let hit = await cache.match(req);
+      if (!hit && url.pathname.endsWith('/data/ground/tiles/manifest.json')) {
+        // Il manifest è già nel precache shell: rendilo disponibile anche
+        // prima che il prefetch completo delle tessere sia partito.
+        hit = await caches.match(req);
+        if (hit) cache.put(req, hit.clone()).catch(() => {});
+      }
+      if (hit) return hit;
+      try {
+        const res = await fetch(req);
+        if (res.ok) cache.put(req, res.clone()).catch(() => {});
+        return res;
+      } catch {
+        return new Response('', { status: 504 });
+      }
+    })());
+    return;
+  }
+
+  const dynamicData = url.pathname.endsWith('/data/map.json') || url.pathname.includes('/data/styles/');
+  if (dynamicData) {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(req).then(cached => {
+      if (cached) return cached;
+      return fetch(req).then(res => {
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      });
+    })
+  );
+});

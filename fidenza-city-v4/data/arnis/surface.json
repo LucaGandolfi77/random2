@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "bounds": {
+    "minX": -1870,
+    "maxX": 3730,
+    "minZ": -2040,
+    "maxZ": 3540
+  },
+  "blockSizeMeters": 2,
+  "levels": [
+    {
+      "id": "z0",
+      "src": "surface.png",
+      "width": 2798,
+      "height": 2793,
+      "blocksPerPixel": 1
+    },
+    {
+      "id": "z1",
+      "src": "surface-z1.png",
+      "width": 1399,
+      "height": 1397,
+      "blocksPerPixel": 2
+    },
+    {
+      "id": "z2",
+      "src": "surface-z2.png",
+      "width": 700,
+      "height": 699,
+      "blocksPerPixel": 4
+    },
+    {
+      "id": "z3",
+      "src": "surface-z3.png",
+      "width": 350,
+      "height": 350,
+      "blocksPerPixel": 8
+    },
+    {
+      "id": "z4",
+      "src": "surface-z4.png",
+      "width": 175,
+      "height": 175,
+      "blocksPerPixel": 16
+    }
+  ]
+}

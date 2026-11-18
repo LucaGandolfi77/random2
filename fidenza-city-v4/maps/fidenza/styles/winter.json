@@ -1,0 +1,24 @@
+{
+  "id": "winter",
+  "label": "Inverno",
+  "palette": {
+    "terrainTint": "#eaf2f5",
+    "areaTint": "#e8f0f2",
+    "tree": ["#8a8a78", "#6f7568", "#9a9a86", "#5f655c", "#7a7f70"],
+    "snow": 0.85,
+    "groundDetail": "#ffffff"
+  },
+  "lighting": {
+    "sunColor": "#dce8f2",
+    "sunIntensity": 0.72,
+    "ambient": 1.1,
+    "hemi": 1.0,
+    "fogColor": "#b9c9d2",
+    "fogNear": 130,
+    "fogFar": 680,
+    "exposure": 1.0
+  },
+  "particles": { "type": "snow", "count": 420, "color": "#ffffff", "size": 0.15, "speed": 1.4 },
+  "weather": { "rain": 0.0, "clouds": 0.6 },
+  "props": { "christmas": true, "umbrellas": false }
+}
