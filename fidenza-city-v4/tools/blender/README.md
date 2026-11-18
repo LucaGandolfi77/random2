@@ -38,6 +38,18 @@ di controllo.
   organica. Ogni faccia ha UV own-world e un materiale dedicato con texture.
 - `build_landmarks.py`: costruisce 10 landmark PBR come nodi separati
   (`landmark-<id>`), posizionati da `map.json`.
+- `fetch-interior-textures.mjs`: scarica da Wikimedia Commons le foto CC degli
+  interni (Duomo, teatri, bar, stazione, comune), le attribuisce in
+  `assets/textures/interiors/SOURCES.md` e crea `tools/blender/interior-textures.json`.
+- `fetch-exterior-textures.mjs`: scarica 22 foto CC degli esterni (Duomo,
+  Porta San Donnino, Teatro, Comune, Stazione, San Pietro, Gran Madre) con
+  attribuzione in `assets/textures/exteriors/SOURCES.md`.
+- `build_exteriors.py`: ricostruisce 7 facciate HD con foto proiettate sulla
+  fronte e dettagli in rilievo; esporta `landmarks-hd.glb` + manifest, che
+  sostituiscono i landmark semplificati del GLB principale.
+- `build_interiors.py`: costruisce 10 interni visitabili con quelle foto come
+  pannelli/affreschi e li esporta in `interiors.glb` + `interiors-manifest.json`
+  (porte, spawn e collider per la runtime).
 - Finestre in tre gruppi (`finestre-warm/cool/dark`), tende, neve sui tetti
   (`neve-tetti`) e mesh LOD (`quartiere-*-hi` / `-lo`).
 

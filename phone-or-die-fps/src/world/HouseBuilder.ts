@@ -5,7 +5,9 @@ import type { Interactable, RoomInfo, World } from './Interactable';
 interface Opening { at: number; width: number; height?: number; bottom?: number; type?: 'door' | 'window' }
 
 export class HouseBuilder {
-  readonly materials: Materials = createMaterials();
+  readonly materials: Materials;
+
+  constructor(materials: Materials = createMaterials()) { this.materials = materials; }
   readonly group = new THREE.Group();
   private colliders: THREE.Box3[] = [];
   private interactables: Interactable[] = [];
@@ -21,6 +23,7 @@ export class HouseBuilder {
     this.furniture();
     this.outdoors();
     this.nav();
+    this.addExit();
     return {
       group: this.group,
       colliders: this.colliders,
@@ -289,6 +292,16 @@ export class HouseBuilder {
       this.group.add(win);
     }
     this.shadowSpawns.push(new THREE.Vector3(-6, 0.2, 11), new THREE.Vector3(6, 0.2, 11), new THREE.Vector3(-7, 0.2, -9), new THREE.Vector3(7, 0.2, -9));
+  }
+
+  private addExit() {
+    const marker = new THREE.Mesh(
+      new THREE.BoxGeometry(0.9, 1.7, 0.08),
+      new THREE.MeshStandardMaterial({ color: 0x14202c, emissive: 0x2a6f7a, emissiveIntensity: 0.9, transparent: true, opacity: 0.85 })
+    );
+    marker.position.set(0, 1.0, -5.55);
+    this.group.add(marker);
+    this.interact('home_exit', 'zone', 'Leave the house', marker, { target: 'street', spawn: 'home' });
   }
 
   private addNode(x: number, z: number, name: string, radius = 2.6) {

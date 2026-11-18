@@ -1,6 +1,6 @@
 import type { GameState } from '../game/GameState';
 
-export type PhoneTab = 'contacts' | 'messages' | 'history' | 'notifications' | 'settings';
+export type PhoneTab = 'contacts' | 'messages' | 'history' | 'notifications' | 'settings' | 'map';
 
 export interface Message { from: string; text: string; at: number }
 

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { SceneManager } from './SceneManager';
 import type { GameState } from '../game/GameState';
 import { Materials } from './ProceduralAssets';
+import type { ZoneLight } from '../data/zones';
 
 interface RoomLight {
   light: THREE.PointLight;
@@ -37,12 +38,27 @@ export class LightingManager {
     this.sm.camera.add(this.flashlight.target);
     this.sm.scene.add(this.sm.camera);
 
-    this.addLight(-4.5, 2.5, -3, 0xffcf94, 2.4);
-    this.addLight(4.5, 2.5, -3, 0xffd7a4, 2.1);
-    this.addLight(-4.5, 2.5, 3, 0xffc98a, 2.0);
-    this.addLight(6.2, 2.5, 3, 0xffd2a0, 1.7);
-    this.addLight(3.2, 2.5, 3, 0xffe0b8, 1.5);
-    this.addLight(0, 2.6, 0, 0xffd9a8, 1.6);
+    this.rebuild();
+  }
+
+  /** Swap the point lights when the active zone changes. */
+  rebuild(zoneLights?: ZoneLight[]) {
+    for (const l of this.lights) {
+      this.sm.scene.remove(l.light);
+      this.sm.scene.remove(l.bulb);
+      l.bulb.geometry.dispose();
+      (l.bulb.material as THREE.Material).dispose();
+    }
+    this.lights = [];
+    const list: ZoneLight[] = zoneLights?.length ? zoneLights : [
+      { at: [-4.5, 2.5, -3], color: 0xffcf94, power: 2.4 },
+      { at: [4.5, 2.5, -3], color: 0xffd7a4, power: 2.1 },
+      { at: [-4.5, 2.5, 3], color: 0xffc98a, power: 2.0 },
+      { at: [6.2, 2.5, 3], color: 0xffd2a0, power: 1.7 },
+      { at: [3.2, 2.5, 3], color: 0xffe0b8, power: 1.5 },
+      { at: [0, 2.6, 0], color: 0xffd9a8, power: 1.6 }
+    ];
+    for (const l of list) this.addLight(l.at[0], l.at[1], l.at[2], l.color, l.power);
   }
 
   private addLight(x: number, y: number, z: number, color: number, power: number) {

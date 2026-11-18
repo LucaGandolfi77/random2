@@ -31,6 +31,14 @@ export class SceneManager {
     window.addEventListener('orientationchange', () => setTimeout(() => this.resize(), 250));
   }
 
+  setAtmosphere(sky: number, fog: number) {
+    (this.scene.background as THREE.Color).setHex(sky);
+    if (this.scene.fog instanceof THREE.FogExp2) {
+      this.scene.fog.color.setHex(fog);
+      this.scene.fog.density = 0.018;
+    }
+  }
+
   setQuality(q: Quality) {
     this.quality = q;
     const c = CONFIG.quality[q];

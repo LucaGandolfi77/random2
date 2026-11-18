@@ -71,3 +71,12 @@ in `assets/textures/interiors/SOURCES.md` e `tools/blender/interior-textures.jso
 - Stazione di Fidenza: **Arbalete**, CC BY-SA 3.0.
 - Palazzo Comunale di Fidenza: CC BY-SA 4.0.
 - Organo del Duomo: CC0.
+
+## Fotografie degli esterni (CC BY-SA / CC BY)
+
+Le texture fotografiche degli esterni in `assets/3d/blender-city/landmarks-hd.glb`
+provengono da Wikimedia Commons (categorie Duomo, Teatro Magnani, Palazzo
+Comunale, Stazione, San Pietro e Gran Madre di Fidenza). Ogni file e' stato
+ridimensionato e ricompresso; i file derivati restano soggetti alla licenza
+della foto originale, mentre il resto del progetto mantiene la propria licenza.
+Autore, URL e licenza di ogni immagine sono in `assets/textures/exteriors/SOURCES.md`.

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "file": "landmarks-hd.glb",
+  "replace": [
+    "landmark-duomo",
+    "landmark-porta",
+    "landmark-teatro",
+    "landmark-comunale",
+    "landmark-stazione",
+    "landmark-sanpietro",
+    "landmark-granmadre"
+  ],
+  "landmarks": [
+    {
+      "id": "duomo",
+      "object": "landmark-hd-duomo",
+      "faces": 188
+    },
+    {
+      "id": "porta",
+      "object": "landmark-hd-porta",
+      "faces": 36
+    },
+    {
+      "id": "teatro",
+      "object": "landmark-hd-teatro",
+      "faces": 123
+    },
+    {
+      "id": "comunale",
+      "object": "landmark-hd-comunale",
+      "faces": 99
+    },
+    {
+      "id": "stazione",
+      "object": "landmark-hd-stazione",
+      "faces": 14
+    },
+    {
+      "id": "sanpietro",
+      "object": "landmark-hd-sanpietro",
+      "faces": 20
+    },
+    {
+      "id": "granmadre",
+      "object": "landmark-hd-granmadre",
+      "faces": 76
+    }
+  ]
+}

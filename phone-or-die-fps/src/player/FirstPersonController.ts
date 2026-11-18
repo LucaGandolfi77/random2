@@ -19,7 +19,7 @@ export class FirstPersonController {
 
   constructor(
     private camera: THREE.PerspectiveCamera,
-    private world: World,
+    public world: World,
     private canvas: HTMLCanvasElement,
     public mobile: MobileInput | null
   ) {
@@ -111,9 +111,9 @@ export class FirstPersonController {
     this.resolveAxis('x', r);
     this.position.z += dz;
     this.resolveAxis('z', r);
-    // keep the player inside the outer world
-    this.position.x = THREE.MathUtils.clamp(this.position.x, -9.4, 9.4);
-    this.position.z = THREE.MathUtils.clamp(this.position.z, -9.4, 9.4);
+    // keep the player inside the active zone
+    this.position.x = THREE.MathUtils.clamp(this.position.x, this.world.bounds.min.x + 0.6, this.world.bounds.max.x - 0.6);
+    this.position.z = THREE.MathUtils.clamp(this.position.z, this.world.bounds.min.z + 0.6, this.world.bounds.max.z - 0.6);
   }
 
   private resolveAxis(axis: 'x' | 'z', r: number) {

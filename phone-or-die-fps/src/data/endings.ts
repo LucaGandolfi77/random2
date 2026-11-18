@@ -30,5 +30,15 @@ export const ENDINGS: Record<string, Ending> = {
     id: 'secret',
     title: 'THE VOICE IN THE GARDEN',
     text: 'You followed the Unknown Number\'s instructions and looked into the garden at exactly the right moment. The last call was not to a person. It was to the thing wearing your mother\'s face. At six, it answers. And this time, you are the one who says the name.'
+  },
+  'city-remembers': {
+    id: 'city-remembers',
+    title: 'THE CITY REMEMBERS',
+    text: 'Dawn reaches every window you visited. Sophie puts the kettle on, your mother opens the old journal, Daniel answers on the first ring. The whole neighbourhood keeps the line open tonight, because you went looking for them.'
+  },
+  'alone-in-the-crowd': {
+    id: 'alone-in-the-crowd',
+    title: 'ALONE IN THE CROWD',
+    text: 'You walked through the bar, the market and the park, surrounded by people who never once looked up. At six the streets are bright and ordinary. You survived the night and nobody knows what you saw.'
   }
 };

@@ -1,4 +1,4 @@
-const CACHE = 'fidenza-da-giocare-v4.3.0';
+const CACHE = 'fidenza-da-giocare-v4.4.0';
 const TILE_CACHE = 'fidenza-ground-tiles-v1';
 const ASSETS = [
   './',
@@ -59,6 +59,8 @@ const ASSETS = [
   './assets/3d/blender-city/manifest.json',
   './assets/3d/blender-city/fidenza-realistic.glb',
   './assets/3d/blender-city/interiors.glb',
+  './assets/3d/blender-city/landmarks-hd.glb',
+  './assets/3d/blender-city/landmarks-hd-manifest.json',
   './assets/3d/blender-city/interiors-manifest.json',
   './assets/3d/blender-city/terreno.glb',
   './assets/3d/blender-city/centro.glb',

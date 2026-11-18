@@ -1,0 +1,200 @@
+[
+  {
+    "local": "duomo-facciata.jpg",
+    "building": "duomo",
+    "side": "front",
+    "title": "Duomo (Fidenza) - facciata 1 2022-07-18.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Duomo_(Fidenza)_-_facciata_1_2022-07-18.jpg"
+  },
+  {
+    "local": "duomo-lato-nord.jpg",
+    "building": "duomo",
+    "side": "side",
+    "title": "Duomo (Fidenza) - facciata e lato nord 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Duomo_(Fidenza)_-_facciata_e_lato_nord_2019-10-02.jpg"
+  },
+  {
+    "local": "duomo-lato-sud.jpg",
+    "building": "duomo",
+    "side": "side",
+    "title": "Duomo (Fidenza) - abside e lato sud 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Duomo_(Fidenza)_-_abside_e_lato_sud_2019-10-02.jpg"
+  },
+  {
+    "local": "duomo-protiro.jpg",
+    "building": "duomo",
+    "side": "detail",
+    "title": "Duomo (Fidenza) - protiro 1 2022-07-18.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Duomo_(Fidenza)_-_protiro_1_2022-07-18.jpg"
+  },
+  {
+    "local": "duomo-portale.jpg",
+    "building": "duomo",
+    "side": "detail",
+    "title": "Duomo (Fidenza) - portale d'ingresso sinistro 2022-07-18.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Duomo_(Fidenza)_-_portale_d%27ingresso_sinistro_2022-07-18.jpg"
+  },
+  {
+    "local": "duomo-campanile.jpg",
+    "building": "duomo",
+    "side": "detail",
+    "title": "Ingresso e campanile del Duomo di Fidenza.jpg",
+    "author": "Nadietta90",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Ingresso_e_campanile_del_Duomo_di_Fidenza.jpg"
+  },
+  {
+    "local": "porta-esterno.jpg",
+    "building": "porta",
+    "side": "front",
+    "title": "Porta di San Donnino (Fidenza) - lato esterno 1 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Porta_di_San_Donnino_(Fidenza)_-_lato_esterno_1_2019-10-02.jpg"
+  },
+  {
+    "local": "porta-interno.jpg",
+    "building": "porta",
+    "side": "back",
+    "title": "Porta di San Donnino (Fidenza) - lato interno 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Porta_di_San_Donnino_(Fidenza)_-_lato_interno_2019-10-02.jpg"
+  },
+  {
+    "local": "teatro-facciata.jpg",
+    "building": "teatro",
+    "side": "front",
+    "title": "Teatro Girolamo Magnani (Fidenza) - facciata 1 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Teatro_Girolamo_Magnani_(Fidenza)_-_facciata_1_2019-10-02.jpg"
+  },
+  {
+    "local": "teatro-dettaglio.jpg",
+    "building": "teatro",
+    "side": "detail",
+    "title": "Teatro Girolamo Magnani, dettaglio facciata.jpg",
+    "author": "Basilicofresco",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Teatro_Girolamo_Magnani,_dettaglio_facciata.jpg"
+  },
+  {
+    "local": "teatro-stemma.jpg",
+    "building": "teatro",
+    "side": "detail",
+    "title": "Teatro Girolamo Magnani, stemma facciata.jpg",
+    "author": "Basilicofresco",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Teatro_Girolamo_Magnani,_stemma_facciata.jpg"
+  },
+  {
+    "local": "comune-facciata.jpg",
+    "building": "comunale",
+    "side": "front",
+    "title": "Municipio di Fidenza.jpg",
+    "author": "Nadietta90",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Municipio_di_Fidenza.jpg"
+  },
+  {
+    "local": "comune-porticato.jpg",
+    "building": "comunale",
+    "side": "detail",
+    "title": "Palazzo Comunale (Fidenza) - porticato 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Palazzo_Comunale_(Fidenza)_-_porticato_2019-10-02.jpg"
+  },
+  {
+    "local": "comune-torre.jpg",
+    "building": "comunale",
+    "side": "back",
+    "title": "Palazzo Comunale (Fidenza) - retro e torre campanaria 1 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Palazzo_Comunale_(Fidenza)_-_retro_e_torre_campanaria_1_2019-10-02.jpg"
+  },
+  {
+    "local": "stazione-facciata.jpg",
+    "building": "stazione",
+    "side": "front",
+    "title": "Stazione ferroviaria di Fidenza.jpg",
+    "author": "Basilicofresco",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Stazione_ferroviaria_di_Fidenza.jpg"
+  },
+  {
+    "local": "stazione-orologio.jpg",
+    "building": "stazione",
+    "side": "detail",
+    "title": "Fidenza staz ferr orologio.jpg",
+    "author": "ho visto nina volare",
+    "license": "CC BY-SA 2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Fidenza_staz_ferr_orologio.jpg"
+  },
+  {
+    "local": "stazione-lato.jpg",
+    "building": "stazione",
+    "side": "side",
+    "title": "Stazione ferroviaria Fidenza, PR, Italia 04.jpg",
+    "author": "Alejandro Caserio",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Stazione_ferroviaria_Fidenza,_PR,_Italia_04.jpg"
+  },
+  {
+    "local": "sanpietro-facciata.jpg",
+    "building": "sanpietro",
+    "side": "front",
+    "title": "Chiesa di San Pietro (Fidenza) - facciata 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chiesa_di_San_Pietro_(Fidenza)_-_facciata_2019-10-02.jpg"
+  },
+  {
+    "local": "sanpietro-convento.jpg",
+    "building": "sanpietro",
+    "side": "side",
+    "title": "Chiesa di San Pietro (Fidenza) - convento e facciata 1 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Chiesa_di_San_Pietro_(Fidenza)_-_convento_e_facciata_1_2019-10-02.jpg"
+  },
+  {
+    "local": "granmadre-facciata.jpg",
+    "building": "granmadre",
+    "side": "front",
+    "title": "Santuario della Gran Madre di Dio (Fidenza) - facciata 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Santuario_della_Gran_Madre_di_Dio_(Fidenza)_-_facciata_2019-10-02.jpg"
+  },
+  {
+    "local": "granmadre-lato.jpg",
+    "building": "granmadre",
+    "side": "side",
+    "title": "Santuario della Gran Madre di Dio (Fidenza) - facciata e lato ovest 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Santuario_della_Gran_Madre_di_Dio_(Fidenza)_-_facciata_e_lato_ovest_2019-10-02.jpg"
+  },
+  {
+    "local": "granmadre-collegio.jpg",
+    "building": "granmadre",
+    "side": "detail",
+    "title": "Via Agostino Berenini (Fidenza) - santuario della Gran Madre di Dio e collegio dei Gesuiti 2019-10-02.jpg",
+    "author": "Parma1983",
+    "license": "CC BY-SA 4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Via_Agostino_Berenini_(Fidenza)_-_santuario_della_Gran_Madre_di_Dio_e_collegio_dei_Gesuiti_2019-10-02.jpg"
+  }
+]

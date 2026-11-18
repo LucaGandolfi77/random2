@@ -1,10 +1,15 @@
-# Fidenza da Giocare v4.3.0 — Fidenza realistica ricostruita in Blender
+# Fidenza da Giocare v4.4.0 — Fidenza realistica ricostruita in Blender
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
-## Novità v4.3 — luce, suolo, stagioni e coerenza
+## Novità v4.4 — luce, suolo, stagioni e coerenza
 
-Rispetto alla v4.2, il mondo Blender guadagna:
+Rispetto alla v4.3, il mondo Blender guadagna:
+
+- **esterni HD**: facciate dei 7 edifici principali ricostruite con foto CC di
+  Wikimedia Commons proiettate sulla fronte e dettagli in rilievo (portali,
+  rosoni, colonne, torri), in `landmarks-hd.glb` caricato al posto dei vecchi
+  landmark; attribuzioni in `assets/textures/exteriors/SOURCES.md`.
 
 - **interni visitabili**: Duomo con cripta, Teatro Magnani, i quattro bar
   (Blu Piramide, Nuovo, Diana, La Strega), Comune, stazione, Gran Madre e

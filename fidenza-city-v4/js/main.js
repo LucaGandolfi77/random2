@@ -568,6 +568,7 @@ async function init() {
         quality,
         onProgress: () => hud.setLoading(0.94, 'Carico gli interni…')
       });
+      if (new URLSearchParams(location.search).has('debug')) window.__interiorsManager = interiors;
     } catch (err) {
       console.warn('Interni non disponibili', err);
       interiors = null;
@@ -595,7 +596,7 @@ async function init() {
     window.__fidenza = {
       get world() { return world; },
       get player() { return player; },
-      get interiors() { return interiors; },
+      get interiors() { return window.__interiorsManager || interiors; },
     };
   }
   const sp = deepSpawn || mapData?.spawn || WORLD.spawn;

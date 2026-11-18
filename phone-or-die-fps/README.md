@@ -26,11 +26,11 @@ phone-or-die-fps/
 │   ├── game/          Game orchestrator, state, configuration
 │   ├── renderer/      Scene, lighting, procedural meshes and textures
 │   ├── player/        First-person controller, raycast interactions, touch input
-│   ├── world/         House, furniture, doors, windows, navigation nodes
+│   ├── world/         House, modular zone builder, furniture, doors, navigation
 │   ├── enemies/       Shadow meshes, AI states, waypoint navigator, manager
 │   ├── systems/       Threat, phone, calls, battery, events, story, audio, saves
 │   ├── ui/            HUD, phone interface, menus and endings
-│   ├── data/          Contacts, dialogue, chapters, events, endings
+│   ├── data/          Contacts, dialogue, chapters, events, endings, city zones
 │   └── styles.css
 ├── tests/             Logic tests, browser smoke test and captured screenshots
 └── dist/              Production build (generated)
@@ -95,9 +95,10 @@ and all requested assets, so the game starts offline.
 
 ## Content
 
-- 9 explorable areas: hallway, living room, kitchen, bedroom, bathroom, garage/storage, front and back entrances, garden and front yard.
-- 8 fully written contacts with branching calls, cooldowns, diminishing returns and individual benefits.
-- 6 chapters from 22:00 to 06:00, 8 weighted random events, 6 reachable endings.
+- Emma's house plus **10 connected zones**: Oaklane Street, Maple Park, Sophie's apartment, the family house, Daniel's old apartment, The Lantern Bar, Night Market, Wellness Block (gym/salon/boutique) and the Old Cemetery. The street also exposes the hospital and the station as facades.
+- Zone transitions through doors, plus a **phone taxi** that costs 8% battery and about 15 in-game minutes. Only the active zone is loaded, so mobile memory stays low.
+- 8 fully written contacts with branching calls, cooldowns, diminishing returns and individual benefits. Contacts and visited locations reveal new clues.
+- 6 chapters from 22:00 to 06:00, 12 weighted random events, 8 reachable endings — including two exploration endings tied to the places you visit.
 - Threat bands from SAFE to CAPTURE, four Shadow archetypes (Watcher, Crawler, Tall One, Mimic)
   with stalking, approaching, investigating, hunting, ambushing and attacking behaviours.
 - Battery, flashlight, wall charger, power bank, lockable doors, light switches, photographs and
@@ -107,27 +108,28 @@ and all requested assets, so the game starts offline.
 ## Testing
 
 ```bash
-npm test              # 10/10 logic tests passing
+npm test              # 14/14 logic tests passing
 npm run test:browser  # headless Chrome end-to-end smoke test (needs Chrome on macOS)
 ```
 
 The browser smoke test drives the real game through: main menu, introduction, first-person scene,
 phone, contacts, ringing, a connected call, a branching response, movement, pickups, flashlight,
-door interaction, high-threat Shadow spawning, save/load, the 06:00 ending, the capture sequence,
-game over, and a mobile touch-emulated viewport. It fails on any uncaught runtime exception.
-Screenshots from the latest run are in `tests/screenshots/`.
+door interaction, the home-to-street transition, the safe bar, the ten-zone phone map, a taxi trip
+home, high-threat Shadow spawning, save/load, the 06:00 ending, the capture sequence, game over,
+and a mobile touch-emulated viewport. It fails on any uncaught runtime exception. Screenshots from
+the latest run are in `tests/screenshots/`.
 
-Verified in this environment: TypeScript type-check, production build, 10/10 unit tests, and all
-browser smoke checks passing (including mobile layout and zero runtime exceptions).
+Verified in this environment: TypeScript type-check, production build, 14/14 unit tests, and all
+browser smoke checks passing (including the city transitions, mobile layout and zero runtime exceptions).
 
 ## Known limitations
 
 - Art direction is stylized low-poly with procedural geometry and canvas textures; there are no
   photorealistic assets and no Blender-authored GLB files.
 - Reflections in mirrors and windows are approximated with materials rather than real-time planar reflection.
-- The house is a single level with flat floors; stairs are not implemented.
-- Content volume is intentionally compact (one night, one house, eight contacts) in exchange for all
-  systems being implemented and playable end to end.
+- Every zone is a flat, single-level area; stairs and multi-storey buildings are not implemented.
+- The city is zone-based rather than seamlessly open: transitions are short and only one zone is rendered at a time.
+- Hospital and station are street facades rather than fully explorable interiors.
 - Headless browsers throttle animation frames heavily, so the smoke test advances the real call
   system clock directly instead of waiting for wall-clock time.
 - Positional audio uses Web Audio panners; some mobile browsers require a first user gesture before sound starts.

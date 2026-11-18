@@ -8,7 +8,7 @@ const ROSTER: ShadowType[] = ['watcher', 'crawler', 'tall', 'mimic'];
 
 export class ShadowManager {
   readonly shadows: Shadow[] = [];
-  readonly nav: NavigationSystem;
+  nav: NavigationSystem;
   private captureTriggered = false;
 
   constructor(
@@ -27,7 +27,14 @@ export class ShadowManager {
     this.captureTriggered = false;
   }
 
+  setWorld(world: World) {
+    this.reset();
+    this.world = world;
+    this.nav = new NavigationSystem(world.navNodes, world.navEdges);
+  }
+
   private spawn(type: ShadowType, player: THREE.Vector3) {
+    if (!this.world.shadowsSpawn.length) return;
     const spots = this.world.shadowsSpawn.filter((p) => p.distanceTo(player) > 6);
     const pos = (spots.length ? spots[Math.floor(Math.random() * spots.length)] : this.world.shadowsSpawn[0]).clone();
     const s = new Shadow(type, pos, this.materials);
@@ -36,8 +43,8 @@ export class ShadowManager {
     this.onSound('stinger');
   }
 
-  update(dt: number, time: number, threat: number, playerPos: THREE.Vector3, playerYaw: number, flashlight: boolean, lightNear: boolean, speedFactor: number): number {
-    const wanted = threat >= 80 ? 4 : threat >= 60 ? 3 : threat >= 40 ? 2 : threat >= 20 ? 1 : 0;
+  update(dt: number, time: number, threat: number, playerPos: THREE.Vector3, playerYaw: number, flashlight: boolean, lightNear: boolean, speedFactor: number, safe = false): number {
+    const wanted = safe ? 0 : threat >= 80 ? 4 : threat >= 60 ? 3 : threat >= 40 ? 2 : threat >= 20 ? 1 : 0;
     while (this.shadows.length < wanted) {
       const type = ROSTER[this.shadows.length % ROSTER.length];
       this.spawn(type, playerPos);

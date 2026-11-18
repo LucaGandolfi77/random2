@@ -1,0 +1,23 @@
+{
+  "name": "phone-or-die-fps",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "PHONE OR DIE - a first-person 3D horror survival game for desktop and mobile browsers",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "test:browser": "node tests/browser-smoke.mjs"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.180.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vitest": "^3.2.4"
+  }
+}

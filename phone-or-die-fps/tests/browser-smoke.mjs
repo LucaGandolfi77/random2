@@ -150,6 +150,29 @@ await evaluate(`(()=>{const g=window.__POD_GAME__;const d=g.world.interactables.
 check('door opens with collider disabled', await evaluate(`(()=>{const d=window.__POD_GAME__.world.interactables.find(i=>i.kind==='door');return d.data.open && d.data.collider.isEmpty();})()`));
 await shot('08-interactions');
 
+console.log('5b. City zones and the phone map');
+await evaluate(`(()=>{const g=window.__POD_GAME__;const exit=g.world.interactables.find(i=>i.kind==='zone'&&i.data.target==='street');g.interaction.hovered=exit;g.interact();})()`);
+await sleep(600);
+check('home exit leads to the street', await evaluate(`window.__POD_GAME__.state.zone === 'street'`));
+check('street was marked as visited', await evaluate(`window.__POD_GAME__.state.visited.has('street')`));
+check('HUD shows the new zone', await evaluate(`document.querySelector('#hud-chapter').textContent.includes('OAKLANE')`));
+await shot('08b-street');
+await evaluate(`window.__POD_GAME__.transitionTo('bar')`);
+await sleep(400);
+check('bar is a safe zone', await evaluate(`window.__POD_GAME__.state.zone === 'bar'`));
+await evaluate(`window.__POD_GAME__.calls.hangUp()`);
+await evaluate(`window.dispatchEvent(new KeyboardEvent('keydown',{code:'Tab',bubbles:true}))`);
+await sleep(300);
+await evaluate(`document.querySelector('[data-tab="map"]').click()`);
+await waitFor(`document.querySelectorAll('.zone-row').length === 10`);
+check('ten zones on the phone map', await evaluate(`document.querySelectorAll('.zone-row').length === 10`));
+await shot('08c-map');
+const batteryBefore = await evaluate(`window.__POD_GAME__.state.battery`);
+await evaluate(`document.querySelector('[data-zone="home"]').click()`);
+await sleep(500);
+check('taxi returns home and costs battery', await evaluate(`(()=>{const g=window.__POD_GAME__;return g.state.zone==='home' && g.state.battery < ${batteryBefore};})()`));
+await shot('08d-back-home');
+
 console.log('6. Shadows and threat');
 await evaluate(`(()=>{const g=window.__POD_GAME__;g.state.threat=85;g.shadows.update(1,g.time,85,g.sm.camera.position,g.controller.yaw,false,false,1);g.sm.render();})()`);
 await sleep(500);
@@ -165,7 +188,7 @@ check('save loaded', await evaluate(`window.__POD_GAME__.state.phase === 'playin
 console.log('8. Ending at 6 AM');
 await evaluate(`(()=>{const g=window.__POD_GAME__;g.state.elapsed=25*60;g.story.update(0.1);})()`);
 await sleep(700);
-check('ending screen shown', await evaluate(`document.body.innerText.includes('DAWN') && /TRUE SURVIVAL|ESCAPE ALONE|EVERYONE IS SAFE|THE TRUTH|THE VOICE IN THE GARDEN/.test(document.body.innerText)`));
+check('ending screen shown', await evaluate(`document.body.innerText.includes('DAWN') && /TRUE SURVIVAL|ESCAPE ALONE|EVERYONE IS SAFE|THE TRUTH|THE VOICE IN THE GARDEN|THE CITY REMEMBERS|ALONE IN THE CROWD/.test(document.body.innerText)`));
 await shot('10-ending');
 
 console.log('9. Capture sequence');

@@ -2,7 +2,7 @@
   "$schema": "../../schema/map.schema.json",
   "id": "fidenza",
   "name": "Fidenza",
-  "version": "4.2.0",
+  "version": "4.4.0",
   "center": {
     "lat": 44.8665,
     "lon": 10.0612

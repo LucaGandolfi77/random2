@@ -11,6 +11,12 @@ export class InteractionSystem {
     this.objects = world.interactables.map((i) => i.object);
   }
 
+  setWorld(world: World) {
+    this.world = world;
+    this.objects = world.interactables.map((i) => i.object);
+    this.hovered = null;
+  }
+
   update() {
     this.ray.setFromCamera(new THREE.Vector2(0, 0), this.camera);
     this.ray.far = CONFIG.interactionRange;

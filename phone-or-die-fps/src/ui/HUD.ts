@@ -1,6 +1,7 @@
 import type { GameState } from '../game/GameState';
 import { THREAT_TEXT, threatLevel } from '../systems/ThreatSystem';
 import type { Interactable } from '../world/Interactable';
+import { ZONE_BY_ID } from '../data/zones';
 
 export class HUD {
   readonly root: HTMLElement;
@@ -55,9 +56,13 @@ export class HUD {
   setVisible(on: boolean) { this.root.classList.toggle('hidden', !on); }
 
   update(dt: number, state: GameState, hovered: Interactable | null, mobile: boolean, room: string) {
-    this.clock.textContent = `CHAPTER ${state.chapter} · ${room.toUpperCase()}`;
+    const zone = ZONE_BY_ID[state.zone]?.name ?? state.zone.toUpperCase();
+    const roomLabel = room.toUpperCase() === zone.toUpperCase() ? '' : ` · ${room.toUpperCase()}`;
+    this.clock.textContent = `CH ${state.chapter} · ${zone}${roomLabel}`;
     (this.root.querySelector('#hud-time') as HTMLElement).textContent = state.timeString;
-    this.objective.textContent = state.chapterData.objective;
+    this.objective.textContent = state.zone === 'home'
+      ? state.chapterData.objective
+      : `${ZONE_BY_ID[state.zone]?.name ?? state.zone}: find the exit and keep the line open.`;
     const bat = Math.ceil(state.battery);
     this.battery.innerHTML = `PHONE <b>${bat}%</b>`;
     this.battery.classList.toggle('low', bat <= 15);

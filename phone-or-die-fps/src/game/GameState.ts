@@ -26,6 +26,9 @@ export interface StateSnapshot {
   yaw: number;
   pitch: number;
   slots: Record<string, boolean>;
+  zone?: string;
+  visited?: string[];
+  zonePositions?: Record<string, [number, number, number]>;
   savedAt: number;
   label: string;
 }
@@ -53,6 +56,9 @@ export class GameState {
   pitch = 0;
   /** true when the player has picked up the emergency power bank */
   slots: Record<string, boolean> = { powerBank: false, flashlight: false, chargerUsed: false };
+  zone = 'home';
+  visited = new Set<string>(['home']);
+  zonePositions: Record<string, [number, number, number]> = {};
   activeEnding: string | null = null;
   lastChapterSeen = 0;
   shieldSec = 0;
@@ -134,6 +140,9 @@ export class GameState {
       yaw: this.yaw,
       pitch: this.pitch,
       slots: { ...this.slots },
+      zone: this.zone,
+      visited: [...this.visited],
+      zonePositions: { ...this.zonePositions },
       savedAt: Date.now(),
       label
     };
@@ -158,6 +167,9 @@ export class GameState {
     this.yaw = Number(data.yaw) || 0;
     this.pitch = Number(data.pitch) || 0;
     this.slots = { powerBank: false, flashlight: false, chargerUsed: false, ...(data.slots || {}) };
+    this.zone = typeof data.zone === 'string' && data.zone ? data.zone : 'home';
+    this.visited = new Set(Array.isArray(data.visited) && data.visited.length ? data.visited : ['home']);
+    this.zonePositions = data.zonePositions && typeof data.zonePositions === 'object' ? { ...data.zonePositions } : {};
     this.lastChapterSeen = this.chapter;
     this.phase = 'playing';
     this.activeEnding = null;
@@ -180,6 +192,9 @@ export class GameState {
     this.yaw = 0;
     this.pitch = 0;
     this.slots = { powerBank: false, flashlight: false, chargerUsed: false };
+    this.zone = 'home';
+    this.visited = new Set(['home']);
+    this.zonePositions = {};
     this.activeEnding = null;
     this.lastChapterSeen = 0;
     this.shieldSec = 0;

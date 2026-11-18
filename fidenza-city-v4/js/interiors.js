@@ -47,10 +47,13 @@ export class InteriorManager {
 
   _hideExterior(id, world) {
     const hidden = [];
+    // I nodi landmark del GLB non si toccano: vengono gestiti dallo swap HD
+    // in blender-world.js (e rimetterli visibili li sovrapporrebbero).
     const candidates = [
       world.landmarkGroups?.get(id),
       world.venues?.find(venue => venue.id === id)?.group,
-      world.blenderWorld?.root?.getObjectByName('landmark-' + id),
+      // Il guscio HD va nascosto dentro e ripristinato all'uscita.
+      world.blenderWorld?.root?.getObjectByName('landmark-hd-' + id),
     ];
     for (const object of candidates) {
       if (object && object.visible) {
@@ -120,6 +123,16 @@ export class InteriorManager {
     }
 
     this.active = entry;
+    try {
+      const key = 'fidenza-interiors-visited';
+      const visited = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!visited.includes(id)) {
+        visited.push(id);
+        localStorage.setItem(key, JSON.stringify(visited));
+      }
+    } catch {
+      // localStorage non disponibile: la visita non viene registrata.
+    }
     return true;
   }
 

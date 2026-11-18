@@ -3,12 +3,14 @@ import { contactAvailability, type GameState } from '../game/GameState';
 import type { ActiveCall, CallSystem } from '../systems/CallSystem';
 import type { PhoneSystem, PhoneTab } from '../systems/PhoneSystem';
 import type { ContactId } from '../data/types';
+import { ZONES, TAXI_COST } from '../data/zones';
 
 export interface PhoneUICallbacks {
   onCall: (id: ContactId) => void;
   onHangup: () => void;
   onChoice: (index: number) => void;
   onClose: () => void;
+  onTravel: (zoneId: string) => void;
   onSound: (name: string) => void;
 }
 
@@ -33,6 +35,7 @@ export class PhoneUI {
           <div class="tab" data-tab="contacts">Contacts</div>
           <div class="tab" data-tab="messages">Messages</div>
           <div class="tab" data-tab="history">Calls</div>
+          <div class="tab" data-tab="map">Map</div>
           <div class="tab" data-tab="notifications">Alerts</div>
         </div>
         <div class="phone-body" id="p-body"></div>
@@ -76,7 +79,7 @@ export class PhoneUI {
     const sig = [
       phone.tab, c?.id, c?.phase, c && Math.floor(c.elapsed),
       c && Math.floor(c.nodeElapsed), c?.nodeId, state.chapter,
-      state.battery | 0, phone.messages.length, state.history.length,
+      state.battery | 0, phone.messages.length, state.history.length, state.zone, state.visited.size,
       Object.keys(state.relationships).map((k) => state.relationships[k]).join(',')
     ].join('|');
     if (sig === this.signature) return;
@@ -91,6 +94,7 @@ export class PhoneUI {
     else if (phone.tab === 'contacts') this.renderContacts(state);
     else if (phone.tab === 'messages') this.renderMessages(phone);
     else if (phone.tab === 'history') this.renderHistory(state);
+    else if (phone.tab === 'map') this.renderMap(state);
     else this.renderNotifications(state);
   }
 
@@ -135,6 +139,27 @@ export class PhoneUI {
       return `<div class="history-row"><span>${h.name}</span><span class="${h.missed ? 'missed' : ''}">${h.missed ? 'MISSED' : time}</span></div>`;
     }).join('') || '<div class="msg">No calls yet. Tonight is not over.</div>';
     this.actions.innerHTML = '<button class="btn" data-act="close">Close phone</button>';
+  }
+
+  private renderMap(state: GameState) {
+    this.setHead('Night map', `${state.visited.size}/${ZONES.length} places discovered · taxi costs ${TAXI_COST}% battery and about 15 minutes.`);
+    this.body.innerHTML = ZONES.map((z) => {
+      const visited = state.visited.has(z.id);
+      const here = state.zone === z.id;
+      return `<button class="zone-row ${here ? 'here' : ''}" data-zone="${z.id}" ${visited && !here ? '' : 'disabled'}>
+        <span class="avatar" style="color:${z.palette.accent}">${here ? '●' : visited ? '◆' : '·'}</span>
+        <span class="who"><b>${visited ? z.name : 'UNDISCOVERED'}</b><small>${visited ? z.subtitle : 'Walk there to discover it'}</small></span>
+        <span class="state ${here ? '' : visited ? 'busy' : 'off'}">${here ? 'HERE' : visited ? `TAXI ${TAXI_COST}%` : 'LOCKED'}</span>
+      </button>`;
+    }).join('');
+    this.body.querySelectorAll<HTMLElement>('[data-zone]').forEach((el) => {
+      el.addEventListener('click', () => {
+        this.cb.onSound('click');
+        this.cb.onTravel(el.dataset.zone!);
+      });
+    });
+    this.actions.innerHTML = '<button class="btn" data-act="close">Close phone</button>';
+    this.footer.textContent = 'FOLLOW THE DOORS ON FOOT · USE THE TAXI ONLY WHEN DESPERATE';
   }
 
   private renderNotifications(state: GameState) {

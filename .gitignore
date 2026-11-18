@@ -61,3 +61,15 @@ last-dawn-rpg/
 !whiteout-survival-pwa/tests/**
 whiteout-survival-pwa/dist/
 whiteout-survival-pwa/.vite/
+
+# GIGANT BATTLE PWA needs its manifest, lockfile and tests in CI.
+!gigant-battle-pwa/package.json
+!gigant-battle-pwa/package-lock.json
+!gigant-battle-pwa/tests/
+!gigant-battle-pwa/tests/**
+
+# PHONE OR DIE FPS keeps its manifest, lockfile and tests in the repository.
+!phone-or-die-fps/package.json
+!phone-or-die-fps/package-lock.json
+!phone-or-die-fps/tests/
+!phone-or-die-fps/tests/**

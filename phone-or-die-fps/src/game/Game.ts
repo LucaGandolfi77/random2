@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import { GameState } from './GameState';
+import { CONFIG } from './GameConfig';
 import { SceneManager } from '../renderer/SceneManager';
 import { LightingManager } from '../renderer/LightingManager';
 import { createFlashlightModel, createMaterials, createPhoneModel } from '../renderer/ProceduralAssets';
-import { HouseBuilder } from '../world/HouseBuilder';
+import { ZoneBuilder } from '../world/ZoneBuilder';
 import type { DoorData, World } from '../world/Interactable';
+import { ZONE_BY_ID, TAXI_COST, TAXI_SECONDS } from '../data/zones';
 import { FirstPersonController } from '../player/FirstPersonController';
 import { InteractionSystem } from '../player/InteractionSystem';
 import { MobileInput } from '../player/MobileInput';
@@ -43,7 +45,28 @@ const REVEAL_TEXT: Record<string, string> = {
   unknown_knows: 'The caller knows things it should not know.',
   unknown_rule: 'Keep a voice in your ear. Never let the line go quiet.',
   missed_breathing: 'The missed call was three seconds of breathing.',
-  knows_dawn: 'Dawn is a door. You must choose who walks through it with you.'
+  knows_dawn: 'Dawn is a door. You must choose who walks through it with you.',
+  street_tracks: 'Someone was watching the house from a parked car.',
+  park_bench: 'Someone left a warm cup with your name on it.',
+  sophie_note: 'Sophie warned you not to answer the landline.',
+  sophie_away: 'Sophie\'s apartment is empty, but her kettle is still warm.',
+  family_photo: 'A scratched-out figure appears in every family photograph.',
+  journal_city: 'The journal repeats the rule: keep a voice in the room.',
+  family_house: 'The family house kept its secret for twenty years.',
+  daniel_note: 'Daniel knew about the Shadows all along.',
+  daniel_apartment: 'Daniel\'s apartment is full of warnings you ignored.',
+  bar_safe: 'A crowd of voices is the one thing the Shadows dislike.',
+  bar_rumour: 'A silent regular has been watching the door all night.',
+  market_receipt: 'The last receipt is dated 05:59 AM.',
+  market_visited: 'The night market was open when nobody else was.',
+  salon_mirror: 'The salon mirror showed someone standing behind you.',
+  wellness_visited: 'Every mirror in the wellness block was covered.',
+  cemetery_name: 'Your name is already carved into the oldest headstone.',
+  cemetery_truth: 'The rule began in this cemetery, and it ends with you.',
+  street_watcher: 'Every parked car seems to be watching the same house.',
+  park_voice: 'The park used your mother\'s voice to call your name.',
+  bar_voice: 'Someone in the crowd was breathing in your ear without moving.',
+  mirror_face: 'Your reflection is one second behind you.'
 };
 
 export class Game {
@@ -79,9 +102,10 @@ export class Game {
     this.appEl = app;
     this.sm = new SceneManager(sceneHost);
 
-    const built = new HouseBuilder().build();
+    const built = new ZoneBuilder(this.materials).build(ZONE_BY_ID.home);
     this.world = built;
     this.sm.scene.add(built.group);
+    this.sm.setAtmosphere(ZONE_BY_ID.home.palette.sky, ZONE_BY_ID.home.palette.fog);
     this.lighting = new LightingManager(this.sm, this.materials);
 
     this.phoneModel = createPhoneModel(this.materials);
@@ -121,6 +145,7 @@ export class Game {
       onHangup: () => this.calls.hangUp(),
       onChoice: (i) => this.calls.choose(i),
       onClose: () => this.togglePhone(false),
+      onTravel: (zoneId) => this.travelByTaxi(zoneId),
       onSound: (n) => this.audio.play(n)
     });
     this.phoneUI.onTab = (tab: PhoneTab) => { this.phone.tab = tab; };
@@ -188,6 +213,71 @@ export class Game {
     if (this.controller) this.controller.mobile = this.mobile;
   }
 
+  private spawnFor(zoneId: string, fromId: string): [number, number] {
+    const zone = ZONE_BY_ID[zoneId];
+    if (!zone) return [0, 0];
+    const back = zone.exits.find((e) => e.target === fromId);
+    if (back) {
+      const indoor = zone.kind === 'interior' || zone.kind === 'bar' || zone.kind === 'shop';
+      return [back.at[0], back.at[1] + (indoor ? 1.6 : 2.4)];
+    }
+    return [...zone.spawn];
+  }
+
+  private disposeWorld(world: World) {
+    world.group.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (mesh.geometry) mesh.geometry.dispose();
+    });
+  }
+
+  /** Replace the active 3D area. Only one zone is ever in the scene. */
+  private loadZoneWorld(zoneId: string, spawn?: [number, number]) {
+    const zone = ZONE_BY_ID[zoneId] ?? ZONE_BY_ID.home;
+    const next = new ZoneBuilder(this.materials).build(zone);
+    this.sm.scene.remove(this.world.group);
+    this.disposeWorld(this.world);
+    this.world = next;
+    this.sm.scene.add(next.group);
+    this.controller.world = next;
+    this.interaction.setWorld(next);
+    this.shadows.setWorld(next);
+    this.lighting.rebuild(zone.lights);
+    this.sm.setAtmosphere(zone.palette.sky, zone.palette.fog);
+    this.state.zone = zone.id;
+    this.state.visited.add(zone.id);
+    const at = spawn ?? (zone.id === 'home' ? [0, 1] as [number, number] : [...zone.spawn] as [number, number]);
+    this.controller.position.set(at[0], CONFIG.eyeHeight, at[1]);
+    this.controller.yaw = 0;
+    this.controller.pitch = 0;
+    this.controller.syncTo(this.state);
+    if (zone.reveal && this.state.reveal(zone.reveal)) this.onReveal(zone.reveal);
+    this.hud.toast(`${zone.name} · ${zone.description}`, 6);
+  }
+
+  private transitionTo(zoneId: string, spawn?: [number, number]) {
+    if (!ZONE_BY_ID[zoneId] || zoneId === this.state.zone) return;
+    this.controller.syncTo(this.state);
+    this.state.zonePositions[this.state.zone] = [...this.state.position] as [number, number, number];
+    const remembered = this.state.zonePositions[zoneId];
+    this.loadZoneWorld(zoneId, spawn ?? (remembered ? [remembered[0], remembered[2]] : undefined));
+    this.audio.play('door');
+    this.saveGame(false);
+  }
+
+  private travelByTaxi(zoneId: string) {
+    if (zoneId === this.state.zone || !this.state.visited.has(zoneId)) return;
+    if (this.state.battery < TAXI_COST) {
+      this.hud.toast('Not enough battery for the taxi.', 3);
+      return;
+    }
+    this.state.battery = Math.max(0, this.state.battery - TAXI_COST);
+    this.state.elapsed += TAXI_SECONDS;
+    this.togglePhone(false);
+    this.transitionTo(zoneId);
+    this.hud.toast(`Taxi ride · -${TAXI_COST}% battery · about 15 minutes lost.`, 5);
+  }
+
   private listener() {
     const p = this.sm.camera.position;
     return { position: { x: p.x, y: p.y, z: p.z }, yaw: this.controller.yaw };
@@ -224,6 +314,7 @@ export class Game {
     this.shadows.reset();
     this.lighting.setBlackout(false);
     this.phone.messages = [{ from: 'Unknown', text: 'They only come when you are alone.', at: 0 }];
+    this.loadZoneWorld('home');
     this.controller.syncFrom(this.state);
     this.calls.call = null;
     this.phone.close();
@@ -244,6 +335,7 @@ export class Game {
     this.battery.wasLow = false;
     this.shadows.reset();
     this.lighting.setBlackout(data.flags.includes('blackout'));
+    this.loadZoneWorld(this.state.zone, [this.state.position[0], this.state.position[2]]);
     this.controller.syncFrom(this.state);
     this.calls.call = null;
     this.phone.close();
@@ -430,8 +522,22 @@ export class Game {
         break;
       }
       case 'note': {
-        s.reveal('mirror_face');
-        this.hud.toast('Your reflection is one second behind you.', 5);
+        const reveal = (it.data?.reveal as string) || 'mirror_face';
+        const text = (it.data?.text as string) || 'Your reflection is one second behind you.';
+        if (s.reveal(reveal)) this.hud.toast(text, 6);
+        break;
+      }
+      case 'clue': {
+        const reveal = it.data?.reveal as string | undefined;
+        const text = (it.data?.text as string) || 'Something here is not right.';
+        if (!reveal || s.reveal(reveal)) this.hud.toast(text, 6);
+        this.audio.play('pickup');
+        break;
+      }
+      case 'zone': {
+        const target = it.data?.target as string | undefined;
+        const from = it.data?.spawn as string | undefined;
+        if (target) this.transitionTo(target, this.spawnFor(target, from ?? s.zone));
         break;
       }
       default: {
@@ -454,7 +560,7 @@ export class Game {
     this.hud.toast(title, 4);
     this.controller.releaseLock();
     this.mobile?.hide();
-    if (title === 'POWER OUTAGE') this.lighting.setBlackout(true);
+    if (title === 'POWER OUTAGE' || title === 'MARKET BLACKOUT') this.lighting.setBlackout(true);
   }
 
   private onReveal(id: string) {
@@ -492,6 +598,7 @@ export class Game {
   private saveGame(manual: boolean) {
     if (this.state.phase === 'menu') return;
     this.controller.syncTo(this.state);
+    this.state.zonePositions[this.state.zone] = [...this.state.position] as [number, number, number];
     this.saves.save(this.state, 'slot1', manual ? 'Manual save' : `Chapter ${this.state.chapter} checkpoint`);
     if (manual) this.hud.toast('Game saved.', 2.5);
   }
@@ -521,7 +628,8 @@ export class Game {
 
       const camPos = this.sm.camera.position;
       const lightNear = this.lighting.hasLightNear(camPos);
-      const proximity = this.shadows.update(dt, this.time, s.threat, camPos, this.controller.yaw, s.flashlightOn, lightNear, s.difficultyFactor.enemySpeed);
+      const zone = ZONE_BY_ID[s.zone];
+      const proximity = this.shadows.update(dt, this.time, s.threat, camPos, this.controller.yaw, s.flashlightOn, lightNear, s.difficultyFactor.enemySpeed, !!zone?.safe);
       const level = this.threat.update(dt, s, this.calls.connected, proximity);
       if (level) this.hud.toast(`THREAT · ${THREAT_WARNINGS[level]}`, 5);
 

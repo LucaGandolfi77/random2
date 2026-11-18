@@ -3,7 +3,7 @@ import * as THREE from 'three';
 export type InteractKind =
   | 'door' | 'window' | 'curtain' | 'switch' | 'charger' | 'powerbank'
   | 'flashlight' | 'photo' | 'tv' | 'laptop' | 'drawer' | 'medicine'
-  | 'security' | 'key' | 'note' | 'outlet';
+  | 'security' | 'key' | 'note' | 'outlet' | 'clue' | 'zone';
 
 export interface DoorData {
   pivot: THREE.Group;

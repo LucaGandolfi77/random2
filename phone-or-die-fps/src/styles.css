@@ -198,6 +198,20 @@ html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; backg
 .msg b { display: block; font-size: 10px; color: var(--cyan); margin-bottom: 2px; }
 .msg.them { background: rgba(105,183,198,.1); }
 .msg.them b { color: #d4a6b2; }
+.zone-row {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 8px; margin-bottom: 5px;
+  background: rgba(255,255,255,.035); border: 1px solid var(--line); border-radius: 9px;
+  color: var(--ink); cursor: pointer; font: inherit; text-align: left; min-height: 56px;
+}
+.zone-row:hover:not([disabled]) { background: rgba(105,183,198,.12); }
+.zone-row[disabled] { opacity: .42; cursor: default; }
+.zone-row.here { border-color: var(--cyan); background: rgba(105,183,198,.12); }
+.zone-row .who { flex: 1; min-width: 0; }
+.zone-row .who b { display: block; font-size: 12px; }
+.zone-row .who small { color: var(--muted); font-size: 10px; }
+.zone-row .state { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--cyan); }
+.zone-row .state.off { color: #c96070; }
+.zone-row .state.busy { color: #e0b45d; }
 .history-row { display: flex; justify-content: space-between; padding: 9px 6px; border-bottom: 1px solid var(--line); font-size: 12px; }
 .history-row .missed { color: var(--accent); }
 .phone-footer { flex: none; text-align: center; font-size: 10px; color: #5f7183; padding: 6px 0 10px; letter-spacing: .1em; }

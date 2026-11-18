@@ -40,6 +40,26 @@ export const EVENTS: RandomEvent[] = [
     id: 'last_message', title: 'THE LAST MESSAGE', minChapter: 4, weight: 7,
     text: 'A new message: "I can see you holding the phone." It is from your own number.',
     threat: 10, reveal: 'shadow_names', flag: 'event_last_message'
+  },
+  {
+    id: 'empty_street', title: 'THE EMPTY STREET', minChapter: 2, weight: 8,
+    text: 'Every car on the street is facing the same direction. You could swear one of them was empty a moment ago.',
+    threat: 6, reveal: 'street_watcher', flag: 'event_empty_street'
+  },
+  {
+    id: 'park_whisper', title: 'THE PARK WHISPER', minChapter: 2, weight: 8,
+    text: 'Something in the trees says your name with your mother\'s voice. The bench is empty.',
+    threat: 9, reveal: 'park_voice', flag: 'event_park_whisper'
+  },
+  {
+    id: 'crowded_bar', title: 'A VOICE IN THE CROWD', minChapter: 3, weight: 7,
+    text: 'Twenty people are talking at once. One of them is not moving its lips, but you can still hear it breathing in your ear.',
+    threat: 5, reveal: 'bar_voice', flag: 'event_crowded_bar'
+  },
+  {
+    id: 'market_blackout', title: 'MARKET BLACKOUT', minChapter: 3, weight: 8,
+    text: 'The freezers stop. In the sudden quiet, every checkout light blinks on at once — and they all face you.',
+    threat: 10, flag: 'event_market_blackout'
   }
 ];
 

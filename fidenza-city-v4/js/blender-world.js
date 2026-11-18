@@ -188,6 +188,31 @@ export async function loadBlenderWorld({ scene, quality = 'high', onProgress = (
     onProgress((i + 1) / files.length, manifest.chunks?.[i]?.name || `chunk ${i + 1}`);
   }
 
+  // Esterni HD: sostituiscono i landmark semplificati del GLB principale.
+  if (!useLegacy) {
+    try {
+      const hdResponse = await fetch(CHUNK_BASE + 'landmarks-hd-manifest.json');
+      if (hdResponse.ok) {
+        const hdManifest = await hdResponse.json();
+        const hdGltf = await loader.loadAsync(CHUNK_BASE + (hdManifest.file || 'landmarks-hd.glb'));
+        for (const name of hdManifest.replace || []) {
+          const old = root.getObjectByName(name);
+          if (old) old.visible = false;
+        }
+        hdGltf.scene.name = 'landmark-hd';
+        hdGltf.scene.traverse((object) => {
+          if (!object.isMesh) return;
+          object.castShadow = quality !== 'low';
+          object.receiveShadow = true;
+        });
+        root.add(hdGltf.scene);
+        onProgress(1, 'Facciate HD');
+      }
+    } catch (err) {
+      console.warn('Esterni HD non disponibili', err);
+    }
+  }
+
   if (!useLegacy && terrainMeshes.length && ground) {
     try {
       applyOrthophoto(terrainMeshes, ground, root, quality);

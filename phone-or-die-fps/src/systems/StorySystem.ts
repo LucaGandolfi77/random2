@@ -64,6 +64,8 @@ export class StorySystem {
     if (r('journal') || (r('mother_knew') && f('truth_seeker') && state.reveals.size >= 5)) return 'the-truth';
     if (called >= 8) return 'everyone-is-safe';
     const bonds = Object.values(state.relationships).reduce((a, b) => a + b, 0);
+    if (state.visited.size >= 10 && state.reveals.size >= 8 && bonds >= 5) return 'city-remembers';
+    if (state.visited.size >= 5 && called <= 2) return 'alone-in-the-crowd';
     if (bonds >= 7 && state.reveals.size >= 4 && state.threat < 60) return 'true-survival';
     return 'escape-alone';
   }
