@@ -3,7 +3,7 @@ import { contactAvailability, type GameState } from '../game/GameState';
 import type { ActiveCall, CallSystem } from '../systems/CallSystem';
 import type { PhoneSystem, PhoneTab } from '../systems/PhoneSystem';
 import type { ContactId } from '../data/types';
-import { ZONES, TAXI_COST } from '../data/zones';
+import { ZONES, taxiCost } from '../data/zones';
 
 export interface PhoneUICallbacks {
   onCall: (id: ContactId) => void;
@@ -142,14 +142,15 @@ export class PhoneUI {
   }
 
   private renderMap(state: GameState) {
-    this.setHead('Night map', `${state.visited.size}/${ZONES.length} places discovered · taxi costs ${TAXI_COST}% battery and about 15 minutes.`);
+    this.setHead('Night map', `${state.visited.size}/${ZONES.length} places discovered · taxi battery depends on distance.`);
     this.body.innerHTML = ZONES.map((z) => {
       const visited = state.visited.has(z.id);
       const here = state.zone === z.id;
+      const cost = taxiCost(state.zone, z.id);
       return `<button class="zone-row ${here ? 'here' : ''}" data-zone="${z.id}" ${visited && !here ? '' : 'disabled'}>
         <span class="avatar" style="color:${z.palette.accent}">${here ? '●' : visited ? '◆' : '·'}</span>
         <span class="who"><b>${visited ? z.name : 'UNDISCOVERED'}</b><small>${visited ? z.subtitle : 'Walk there to discover it'}</small></span>
-        <span class="state ${here ? '' : visited ? 'busy' : 'off'}">${here ? 'HERE' : visited ? `TAXI ${TAXI_COST}%` : 'LOCKED'}</span>
+        <span class="state ${here ? '' : visited ? 'busy' : 'off'}">${here ? 'HERE' : visited ? `TAXI ${cost}%` : 'LOCKED'}</span>
       </button>`;
     }).join('');
     this.body.querySelectorAll<HTMLElement>('[data-zone]').forEach((el) => {

@@ -6,7 +6,7 @@ import { LightingManager } from '../renderer/LightingManager';
 import { createFlashlightModel, createMaterials, createPhoneModel } from '../renderer/ProceduralAssets';
 import { ZoneBuilder } from '../world/ZoneBuilder';
 import type { DoorData, World } from '../world/Interactable';
-import { ZONE_BY_ID, TAXI_COST, TAXI_SECONDS } from '../data/zones';
+import { ZONE_BY_ID, TAXI_SECONDS, taxiCost } from '../data/zones';
 import { FirstPersonController } from '../player/FirstPersonController';
 import { InteractionSystem } from '../player/InteractionSystem';
 import { MobileInput } from '../player/MobileInput';
@@ -95,6 +95,7 @@ export class Game {
   private appEl: HTMLElement;
   private lastTime = performance.now();
   private saveTimer = 0;
+  private cullTimer = 0;
   private time = 0;
   private isTouch = false;
 
@@ -219,7 +220,7 @@ export class Game {
     const back = zone.exits.find((e) => e.target === fromId);
     if (back) {
       const indoor = zone.kind === 'interior' || zone.kind === 'bar' || zone.kind === 'shop';
-      return [back.at[0], back.at[1] + (indoor ? 1.6 : 2.4)];
+      return [back.at[0], back.at[1] + (indoor ? 1.6 : 6)];
     }
     return [...zone.spawn];
   }
@@ -267,15 +268,27 @@ export class Game {
 
   private travelByTaxi(zoneId: string) {
     if (zoneId === this.state.zone || !this.state.visited.has(zoneId)) return;
-    if (this.state.battery < TAXI_COST) {
+    const cost = taxiCost(this.state.zone, zoneId);
+    if (this.state.battery < cost) {
       this.hud.toast('Not enough battery for the taxi.', 3);
       return;
     }
-    this.state.battery = Math.max(0, this.state.battery - TAXI_COST);
+    this.state.battery = Math.max(0, this.state.battery - cost);
     this.state.elapsed += TAXI_SECONDS;
     this.togglePhone(false);
     this.transitionTo(zoneId);
-    this.hud.toast(`Taxi ride · -${TAXI_COST}% battery · about 15 minutes lost.`, 5);
+    this.hud.toast(`Taxi ride · -${cost}% battery · about 15 minutes lost.`, 5);
+  }
+
+  /** Hide distant decoration in the larger maps without unloading the zone. */
+  private cullWorld() {
+    const p = this.controller.position;
+    for (const o of this.world.group.children) {
+      if (!o.userData.cullable) continue;
+      const dx = o.position.x - p.x;
+      const dz = o.position.z - p.z;
+      o.visible = dx * dx + dz * dz < 34 * 34;
+    }
   }
 
   private listener() {
@@ -635,6 +648,9 @@ export class Game {
 
       if (s.threat >= 100) this.capture();
       this.story.update(dt);
+
+      this.cullTimer += dt;
+      if (this.cullTimer > 0.3) { this.cullTimer = 0; this.cullWorld(); }
 
       this.saveTimer += dt;
       if (this.saveTimer > 60) { this.saveTimer = 0; this.saveGame(false); }

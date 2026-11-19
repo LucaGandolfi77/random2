@@ -1,4 +1,4 @@
-const CACHE = 'fidenza-da-giocare-v3.3.2';
+const CACHE = 'fidenza-da-giocare-v3.3.3';
 const TILE_CACHE = 'fidenza-ground-tiles-v1';
 const ASSETS = [
   './',
@@ -101,6 +101,21 @@ const ASSETS = [
   './data/styles/summer.json',
   './data/styles/autumn.json',
   './data/styles/winter.json',
+  './data/interiors.json',
+  './assets/textures/interiors/bar-gritti.jpg',
+  './assets/textures/interiors/bar-tropea.jpg',
+  './assets/textures/interiors/comune-cortile.jpg',
+  './assets/textures/interiors/duomo-arca.jpg',
+  './assets/textures/interiors/duomo-cripta.jpg',
+  './assets/textures/interiors/duomo-cristo-antelami.jpg',
+  './assets/textures/interiors/duomo-navata.jpg',
+  './assets/textures/interiors/duomo-organo.jpg',
+  './assets/textures/interiors/duomo-presbiterio.jpg',
+  './assets/textures/interiors/stazione-interno.jpg',
+  './assets/textures/interiors/teatro-busseto.jpg',
+  './assets/textures/interiors/teatro-sala.jpg',
+  './assets/textures/interiors/teatro-sipario.jpg',
+  './assets/textures/interiors/teatro-soffitto.jpg',
   './data/ATTRIBUTION.md'
 ];
 

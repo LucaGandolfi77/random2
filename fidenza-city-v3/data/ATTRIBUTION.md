@@ -55,3 +55,13 @@ Le descrizioni dei luoghi sono testi divulgativi originali, scritti per il gioco
 - I POI sono verificati contro OpenStreetMap con `tools/audit-pois.mjs`; il report è `data/poi-audit.json`.
 - La validazione di raggiungibilità di beacon, stelle e missioni è in `tools/validate-map.mjs`; il report è `data/map-validation.json`.
 - Gli stili stagionali sono in `maps/fidenza/styles/` e vengono compilati in `data/styles/`.
+
+## Fotografie degli interni (CC BY-SA / CC BY / CC0)
+
+Le texture fotografiche degli interni costruiti in JavaScript
+(`assets/textures/interiors/`) provengono da Wikimedia Commons: Duomo di
+Fidenza, Teatro Regio di Parma e Teatro Verdi di Busseto, bar italiani,
+stazione e palazzo comunale di Fidenza. Ogni file è stato ridimensionato e
+ricompresso; i derivati restano soggetti alla licenza della foto originale,
+mentre il resto del progetto mantiene la propria licenza. Autore, URL e
+licenza di ogni immagine sono in `assets/textures/interiors/SOURCES.md`.

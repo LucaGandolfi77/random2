@@ -95,10 +95,11 @@ and all requested assets, so the game starts offline.
 
 ## Content
 
-- Emma's house plus **10 connected zones**: Oaklane Street, Maple Park, Sophie's apartment, the family house, Daniel's old apartment, The Lantern Bar, Night Market, Wellness Block (gym/salon/boutique) and the Old Cemetery. The street also exposes the hospital and the station as facades.
-- Zone transitions through doors, plus a **phone taxi** that costs 8% battery and about 15 in-game minutes. Only the active zone is loaded, so mobile memory stays low.
+- Emma's house plus **15 connected zones**, each about twice the old area: Oaklane Street, Maple Park, Sophie's apartment, the family house, Daniel's old apartment, The Lantern Bar, Night Market, Wellness Block, Old Cemetery, Greystone Harbour, Oaklane Metro, St. Anne Hospital, Grand Mall and Westfield Campus.
+- Zone transitions through doors, plus a **phone taxi** whose battery cost scales with distance (6-18%) and takes about 15 in-game minutes. Only the active zone is loaded; distant decoration is culled every 0.3 s.
 - 8 fully written contacts with branching calls, cooldowns, diminishing returns and individual benefits. Contacts and visited locations reveal new clues.
 - 6 chapters from 22:00 to 06:00, 12 weighted random events, 8 reachable endings — including two exploration endings tied to the places you visit.
+- Larger districts add lakes, mausoleums, docks, platforms, hospital wards, mall units and a sports field, with more chargers, power banks, clues and hiding places.
 - Threat bands from SAFE to CAPTURE, four Shadow archetypes (Watcher, Crawler, Tall One, Mimic)
   with stalking, approaching, investigating, hunting, ambushing and attacking behaviours.
 - Battery, flashlight, wall charger, power bank, lockable doors, light switches, photographs and

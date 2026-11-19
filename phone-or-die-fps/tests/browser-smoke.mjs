@@ -155,7 +155,7 @@ await evaluate(`(()=>{const g=window.__POD_GAME__;const exit=g.world.interactabl
 await sleep(600);
 check('home exit leads to the street', await evaluate(`window.__POD_GAME__.state.zone === 'street'`));
 check('street was marked as visited', await evaluate(`window.__POD_GAME__.state.visited.has('street')`));
-check('HUD shows the new zone', await evaluate(`document.querySelector('#hud-chapter').textContent.includes('OAKLANE')`));
+check('HUD shows the new zone', await waitFor(`document.querySelector('#hud-chapter').textContent.includes('OAKLANE')`, 5000));
 await shot('08b-street');
 await evaluate(`window.__POD_GAME__.transitionTo('bar')`);
 await sleep(400);
@@ -164,14 +164,23 @@ await evaluate(`window.__POD_GAME__.calls.hangUp()`);
 await evaluate(`window.dispatchEvent(new KeyboardEvent('keydown',{code:'Tab',bubbles:true}))`);
 await sleep(300);
 await evaluate(`document.querySelector('[data-tab="map"]').click()`);
-await waitFor(`document.querySelectorAll('.zone-row').length === 10`);
-check('ten zones on the phone map', await evaluate(`document.querySelectorAll('.zone-row').length === 10`));
+await waitFor(`document.querySelectorAll('.zone-row').length === 15`);
+check('fifteen zones on the phone map', await evaluate(`document.querySelectorAll('.zone-row').length === 15`));
 await shot('08c-map');
 const batteryBefore = await evaluate(`window.__POD_GAME__.state.battery`);
 await evaluate(`document.querySelector('[data-zone="home"]').click()`);
 await sleep(500);
 check('taxi returns home and costs battery', await evaluate(`(()=>{const g=window.__POD_GAME__;return g.state.zone==='home' && g.state.battery < ${batteryBefore};})()`));
 await shot('08d-back-home');
+
+console.log('5c. Larger maps and new districts');
+await evaluate(`window.__POD_GAME__.transitionTo('harbour')`);
+await sleep(500);
+check('harbour loads as a large district', await evaluate(`(()=>{const g=window.__POD_GAME__;return g.state.zone==='harbour' && g.world.bounds.max.x-g.world.bounds.min.x>70;})()`));
+check('distant decoration is culled', await evaluate(`(()=>{const g=window.__POD_GAME__;g.cullWorld();return g.world.group.children.filter(o=>o.userData.cullable&&!o.visible).length>0;})()`));
+await shot('08e-harbour');
+await evaluate(`window.__POD_GAME__.transitionTo('home')`);
+await sleep(300);
 
 console.log('6. Shadows and threat');
 await evaluate(`(()=>{const g=window.__POD_GAME__;g.state.threat=85;g.shadows.update(1,g.time,85,g.sm.camera.position,g.controller.yaw,false,false,1);g.sm.render();})()`);

@@ -15,6 +15,7 @@ import { VehicleManager } from './vehicles.js';
 import { MissionManager } from './missions.js';
 import { GameMap } from './map.js';
 import { PhotoMode, PHOTO_FILTERS } from './photo-mode.js';
+import { loadInteriors } from './interiors.js';
 import { PostFX } from './postfx.js';
 import { buildDiary } from './diary.js';
 import { listPhotos, deletePhoto, downloadPhoto, clearPhotos } from './photo-store.js';
@@ -77,6 +78,7 @@ postfx = new PostFX({ renderer, quality, isMobile });
 postfx.setSize();
 
 let world = null;
+let interiors = null;
 let mapData = null;
 let seasonStyles = {};
 const SEASON_PRESETS = { spring: [3, 20], summer: [6, 21], autumn: [9, 23], winter: [12, 21] };
@@ -538,6 +540,16 @@ async function init() {
   await world.build((p, label) => {
     hud.setLoading(0.08 + p * 0.84, label);
   });
+  try {
+    interiors = await loadInteriors({
+      scene,
+      onProgress: () => hud.setLoading(0.94, 'Preparo gli interni…')
+    });
+    window.__intMgr = interiors;
+  } catch (err) {
+    console.warn('Interni non disponibili', err);
+    interiors = null;
+  }
   const initialSpawn = deepSpawn || mapJson.spawn || WORLD.spawn;
   world.groundTiles?.preload(initialSpawn.x, initialSpawn.z);
   world.onFirework = () => audio.firework();
@@ -556,6 +568,14 @@ async function init() {
   markDay(gameDate());
 
   player = new Player({ scene, camera, world, input });
+  if (new URLSearchParams(location.search).has('debug')) {
+    window.__setInteriors = value => { window.__intMgr = value; };
+    window.__fidenza = {
+      get world() { return world; },
+      get player() { return player; },
+      get interiors() { return interiors; },
+    };
+  }
   const sp = deepSpawn || mapData?.spawn || WORLD.spawn;
   player.spawn(sp.x, sp.z, sp.yaw);
   vehicles = new VehicleManager({ scene, world, audio, player, input });
@@ -2032,6 +2052,21 @@ function updateInteraction() {
     setPromptSafe({ text: '<kbd>E</kbd> scendi dal veicolo', action: 'exit' });
     return;
   }
+  if (interiors?.active) {
+    currentInteraction = { type: 'interior-exit' };
+    setPromptSafe({ text: '<kbd>E</kbd> esci', action: 'interior-exit', icon: '🚪' });
+    return;
+  }
+  const nearDoor = interiors?.nearestDoor(player.position.x, player.position.z, 4.5);
+  if (nearDoor) {
+    currentInteraction = { type: 'interior-enter', id: nearDoor.id };
+    setPromptSafe({
+      text: `<kbd>E</kbd> entra in ${escapeHtml(nearDoor.name)}`,
+      action: 'interior-enter',
+      icon: '🚪'
+    });
+    return;
+  }
   const missionPrompt = missions.getPrompt(player);
   if (missionPrompt) {
     currentInteraction = { type: missionPrompt.action, step: missionPrompt.step };
@@ -2077,6 +2112,22 @@ function setPromptSafe(prompt) {
 
 function handleInteract() {
   if (!currentInteraction) return;
+  if (currentInteraction.type === 'interior-enter') {
+    if (interiors?.enter(currentInteraction.id, world, player)) {
+      haptic(18);
+      hud.setToast(`Sei dentro: ${interiors.active.name}`);
+      updateTouchUI();
+    }
+    return;
+  }
+  if (currentInteraction.type === 'interior-exit') {
+    if (interiors?.exit(world, player)) {
+      haptic(18);
+      hud.setToast('Sei tornato in strada');
+      updateTouchUI();
+    }
+    return;
+  }
   if (currentInteraction.type === 'land') {
     toggleFly();
     return;

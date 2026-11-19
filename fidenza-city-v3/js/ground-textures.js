@@ -14,9 +14,9 @@ import * as THREE from 'three';
 import { seededRandom } from './utils.js';
 
 export const GROUND_STYLES = {
-  asphalt:  { repeat: 8,  color: '#5f6366', roughness: 0.78, normal: 0.55 },
-  concrete: { repeat: 6,  color: '#b8b3a6', roughness: 0.9,  normal: 0.35 },
-  porphyry: { repeat: 5,  color: '#8a8175', roughness: 0.82, normal: 0.9 },
+  asphalt:  { repeat: 8,  color: '#5f6366', roughness: 0.82, normal: 0.72 },
+  concrete: { repeat: 6,  color: '#b8b3a6', roughness: 0.88, normal: 0.5 },
+  porphyry: { repeat: 5,  color: '#8a8175', roughness: 0.86, normal: 1.15 },
   grass:    { repeat: 7,  color: '#5d7d3f', roughness: 0.97, normal: 0.3 },
   soil:     { repeat: 9,  color: '#6b543c', roughness: 0.97, normal: 0.7 },
   gravel:   { repeat: 5,  color: '#9a958c', roughness: 0.92, normal: 0.85 },
@@ -261,7 +261,7 @@ function stonePolygon(ctx, cx, cy, radius, angle, rnd) {
 function paintPorphyry(ctx, size, rnd) {
   ctx.fillStyle = '#5f5a52';
   ctx.fillRect(0, 0, size, size);
-  const cells = 7;
+  const cells = 10;
   const cell = size / cells;
   const tones = ['#8a8175', '#958b7d', '#7d7468', '#a0978a', '#756d62', '#8f8578', '#9c9182'];
   for (let row = -1; row <= cells; row++) {
@@ -282,7 +282,7 @@ function paintPorphyry(ctx, size, rnd) {
       });
     }
   }
-  speckles(ctx, size, rnd, ['#6d655b', '#b3a89a', '#8d8376'], 3800, 0.3, 1);
+  speckles(ctx, size, rnd, ['#6d655b', '#b3a89a', '#8d8376'], 7000, 0.3, 1);
   softStain(ctx, size, rnd, 'rgba(54,50,44,.14)', 10, 46);
   softStain(ctx, size, rnd, 'rgba(197,185,166,.08)', 6, 60);
   // subtle wet/dark grout pooling
@@ -297,7 +297,7 @@ function paintPorphyry(ctx, size, rnd) {
 }
 
 function paintGrass(ctx, size, rnd) {
-  const phases = makePhases(71, 6);
+  const phases = makePhases(71, 4);
   const image = ctx.createImageData(size, size);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
@@ -469,10 +469,19 @@ function normalMap(source, size, strength) {
     const index = ((((y + size) % size) * size) + ((x + size) % size)) * 4;
     return (pixels[index] * 0.299 + pixels[index + 1] * 0.587 + pixels[index + 2] * 0.114) / 255;
   };
+  const micro = makePhases(991, 3);
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const dx = (luminance(x + 1, y) - luminance(x - 1, y)) * strength * 4.2;
-      const dy = (luminance(x, y + 1) - luminance(x, y - 1)) * strength * 4.2;
+      // Sobel 3x3: piu' stabile del semplice gradiente a 2 campioni.
+      const tl = luminance(x - 1, y - 1), t = luminance(x, y - 1), tr = luminance(x + 1, y - 1);
+      const l = luminance(x - 1, y), r = luminance(x + 1, y);
+      const bl = luminance(x - 1, y + 1), b = luminance(x, y + 1), br = luminance(x + 1, y + 1);
+      let dx = (tr + 2 * r + br - tl - 2 * l - bl) * strength * 1.9;
+      let dy = (bl + 2 * b + br - tl - 2 * t - tr) * strength * 1.9;
+      // Micro-rumore tiled: dà granello anche dove il colore e' piatto.
+      const grain = fbm(x, y, size, micro) * 0.14 * strength;
+      dx += grain;
+      dy += grain * 0.7;
       const length = Math.hypot(dx, dy, 1);
       const index = (y * size + x) * 4;
       out.data[index] = Math.round(((-dx / length) * 0.5 + 0.5) * 255);
@@ -484,6 +493,30 @@ function normalMap(source, size, strength) {
   const normalCanvas = canvas(size);
   normalCanvas.getContext('2d').putImageData(out, 0, 0);
   return normalCanvas;
+}
+
+/** Roughness tiled: variazioni locali senza rendere le superfici specchianti. */
+function roughnessMap(source, size) {
+  const canvasEl = canvas(size);
+  const ctx = canvasEl.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(source, 0, 0, size, size);
+  const pixels = ctx.getImageData(0, 0, size, size).data;
+  const out = ctx.createImageData(size, size);
+  const phases = makePhases(4242, 3);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = (y * size + x) * 4;
+      const lum = (pixels[i] * 0.299 + pixels[i + 1] * 0.587 + pixels[i + 2] * 0.114) / 255;
+      const wear = fbm(x, y, size, phases) * 0.12;
+      const value = Math.max(0.62, Math.min(1, 0.88 - lum * 0.16 + wear));
+      const v = Math.round(value * 255);
+      out.data[i] = out.data[i + 1] = out.data[i + 2] = v;
+      out.data[i + 3] = 255;
+    }
+  }
+  const roughCanvas = canvas(size);
+  roughCanvas.getContext('2d').putImageData(out, 0, 0);
+  return roughCanvas;
 }
 
 export function groundRepeat(style) {
@@ -508,8 +541,9 @@ export function getGroundTextureSet(style, quality = 'high') {
   color.anisotropy = quality === 'low' ? 1 : quality === 'medium' ? 4 : 8;
 
   let normal = null;
+  let roughness = null;
   if (quality !== 'low') {
-    const normalCanvas = normalMap(colorCanvas, Math.max(64, Math.floor(size / 2)), definition.normal);
+    const normalCanvas = normalMap(colorCanvas, Math.max(128, Math.floor(size / 4)), definition.normal);
     normal = new THREE.CanvasTexture(normalCanvas);
     normal.wrapS = normal.wrapT = THREE.RepeatWrapping;
     normal.colorSpace = THREE.NoColorSpace;
@@ -517,8 +551,16 @@ export function getGroundTextureSet(style, quality = 'high') {
     normal.minFilter = THREE.LinearMipmapLinearFilter;
     normal.generateMipmaps = true;
     normal.anisotropy = color.anisotropy;
+    const roughCanvas = roughnessMap(colorCanvas, Math.max(128, Math.floor(size / 4)));
+    roughness = new THREE.CanvasTexture(roughCanvas);
+    roughness.wrapS = roughness.wrapT = THREE.RepeatWrapping;
+    roughness.colorSpace = THREE.NoColorSpace;
+    roughness.magFilter = THREE.LinearFilter;
+    roughness.minFilter = THREE.LinearMipmapLinearFilter;
+    roughness.generateMipmaps = true;
+    roughness.anisotropy = color.anisotropy;
   }
-  const set = { color, normal, repeat: definition.repeat, roughness: definition.roughness };
+  const set = { color, normal, roughness, repeat: definition.repeat, roughnessBase: definition.roughness };
   textureCache.set(key, set);
   return set;
 }
@@ -549,7 +591,7 @@ export function getGroundMaterial(style, {
     map: textures.color,
     normalMap: textures.normal,
     normalScale: new THREE.Vector2(scale, scale),
-    roughness: definition.roughness,
+    roughness: textures.roughnessBase ?? definition.roughness,
     metalness: 0.0,
     vertexColors,
     side

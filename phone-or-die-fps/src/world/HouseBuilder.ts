@@ -291,7 +291,23 @@ export class HouseBuilder {
       if (z === -2) win.position.z = 1.01;
       this.group.add(win);
     }
-    this.shadowSpawns.push(new THREE.Vector3(-6, 0.2, 11), new THREE.Vector3(6, 0.2, 11), new THREE.Vector3(-7, 0.2, -9), new THREE.Vector3(7, 0.2, -9));
+    // Larger garden: shed, greenhouse and hiding places
+    const shed = this.box(m.darkWood, 10, 1.0, 8, 2.4, 2, 2.2, false);
+    this.interact('garden_shed', 'clue', 'Look inside the garden shed', shed, {
+      reveal: 'garden_shed', text: 'Old tools, a burned phone, and a calendar circled at 06:00.'
+    });
+    const greenhouse = this.box(m.glass, -10, 1.1, 8, 3, 2.2, 2.6, false);
+    this.interact('garden_greenhouse', 'note', 'Inspect the greenhouse', greenhouse, {
+      reveal: 'garden_greenhouse', text: 'Every plant is dead except one, growing in the shape of a handprint.'
+    });
+    const outlet = this.box(m.metal, 8, 0.5, 3.5, 0.3, 0.4, 0.2, false);
+    this.interact('garden_outlet', 'charger', 'Use the garden outlet', outlet);
+    this.box(m.concrete, -8, 0.3, 4, 1.4, 0.6, 1, false);
+    this.shadowSpawns.push(
+      new THREE.Vector3(-6, 0.2, 11), new THREE.Vector3(6, 0.2, 11),
+      new THREE.Vector3(-11, 0.2, -9), new THREE.Vector3(11, 0.2, -9),
+      new THREE.Vector3(12, 0.2, 8), new THREE.Vector3(-12, 0.2, 8)
+    );
   }
 
   private addExit() {

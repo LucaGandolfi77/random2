@@ -1,0 +1,19 @@
+{
+  "name": "bros-saga-pwa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A mobile-first 2D RPG with two brothers, timed action commands and Bros. Attacks",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "test:browser": "node tests/browser-smoke.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vitest": "^3.2.4"
+  }
+}

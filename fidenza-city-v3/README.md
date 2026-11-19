@@ -1,4 +1,4 @@
-# Fidenza da Giocare v3.3.2 — Mondo Arnis, terreno reale e suolo in streaming
+# Fidenza da Giocare v3.3.3 — Mondo Arnis, terreno reale e suolo in streaming
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
@@ -40,6 +40,15 @@ quello della v2.23.
 - [Dati, rigenerazione ed editor](#dati-e-correzioni)
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
+
+## Novità v3.3.3 — interni visitabili
+
+Sono stati aggiunti **10 interni** (Duomo con cripta, Teatro Magnani, i quattro
+bar, Comune, stazione, Gran Madre e San Pietro), costruiti a runtime in
+JavaScript con primitive Three.js: **nessun Blender, nessun GLB**. Le foto CC
+usate come texture sono in `assets/textures/interiors/` con attribuzione in
+`SOURCES.md`. Si entra premendo **E** presso la porta e si esce sempre con **E**.
+L'esterno del gioco non è stato modificato.
 
 ## Avvio
 

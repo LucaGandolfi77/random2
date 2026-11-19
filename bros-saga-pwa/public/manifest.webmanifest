@@ -1,0 +1,14 @@
+{
+  "name": "BROS. SAGA - Timed Action RPG",
+  "short_name": "BROS. SAGA",
+  "description": "Two brothers, one adventure. Timed attacks and combo moves.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#10182b",
+  "theme_color": "#10182b",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

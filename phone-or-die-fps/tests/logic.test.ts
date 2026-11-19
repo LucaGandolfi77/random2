@@ -9,7 +9,7 @@ import { DIALOGUE } from '../src/data/dialogue';
 import { CONTACTS } from '../src/data/contacts';
 import { pickEvent, EVENTS } from '../src/data/events';
 import { NIGHT_REAL_SECONDS } from '../src/data/chapters';
-import { ZONES, ZONE_BY_ID, TAXI_COST, TAXI_SECONDS } from '../src/data/zones';
+import { ZONES, ZONE_BY_ID, TAXI_COST, TAXI_SECONDS, taxiCost } from '../src/data/zones';
 
 describe('time and state', () => {
   it('maps the night from 22:00 to 06:00', () => {
@@ -142,8 +142,8 @@ describe('navigation', () => {
 
 describe('city zones', () => {
   it('has ten unique, connected areas', () => {
-    expect(ZONES.length).toBe(10);
-    expect(new Set(ZONES.map((z) => z.id)).size).toBe(10);
+    expect(ZONES.length).toBe(15);
+    expect(new Set(ZONES.map((z) => z.id)).size).toBe(15);
     const seen = new Set(['home']);
     const queue = ['home'];
     while (queue.length) {
@@ -168,6 +168,8 @@ describe('city zones', () => {
     expect(ZONE_BY_ID.home.exits[0].target).toBe('street');
     expect(TAXI_COST).toBeGreaterThan(0);
     expect(TAXI_SECONDS).toBeGreaterThan(0);
+    expect(taxiCost('home', 'street')).toBeLessThanOrEqual(18);
+    expect(taxiCost('home', 'campus')).toBeGreaterThanOrEqual(taxiCost('home', 'street'));
   });
 
   it('persists zone, visited places and per-zone positions', () => {

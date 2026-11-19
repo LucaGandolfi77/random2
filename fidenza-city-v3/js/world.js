@@ -1303,6 +1303,8 @@ export class World {
     const markGeoms = [];
     const edgePositions = [];
     const manholeGeoms = [];
+    const manholeRingGeoms = [];
+    const jointGeoms = [];
     const wearGeoms = [];
     const puddleGeoms = [];
     const labels = [];
@@ -1356,6 +1358,18 @@ export class World {
               'concrete',
               voxelBox(0.16, curbHeight, len + 0.04, (ax + bx) / 2 + nx * outerOffset, y + curbHeight / 2, (az + bz) / 2 + nz * outerOffset, angle)
             );
+            // Giunti trasversali del marciapiede: pochi, solo su high.
+            if (this.quality === 'high' && len > 8 && jointGeoms.length < 2600) {
+              for (let d = 6.5; d < len - 1 && jointGeoms.length < 2600; d += 6.5) {
+                const jx = ax + ux * d + nx * side * (r.w / 2 + 0.8);
+                const jz = az + uz * d + nz * side * (r.w / 2 + 0.8);
+                const joint = new THREE.PlaneGeometry(1.25, 0.035);
+                joint.rotateX(-Math.PI / 2);
+                joint.rotateY(angle);
+                joint.translate(jx, sidewalkY + 0.008, jz);
+                jointGeoms.push(paintGeometry(joint, '#6f6a60'));
+              }
+            }
           }
           // Angoli smussati.
           if (this.quality !== 'low') {
@@ -1479,10 +1493,22 @@ export class World {
           if (this.quality !== 'low' && r.length > 80) {
             for (let d = 28 + rnd() * 40; d < len; d += 82) {
               const cx = ax + ux * d, cz = az + uz * d;
-              const circle = new THREE.CircleGeometry(0.34, 10);
+              const circle = new THREE.CircleGeometry(0.34, 12);
               circle.rotateX(-Math.PI / 2);
               circle.translate(cx, y + 0.012, cz);
               manholeGeoms.push(circle);
+              const rim = new THREE.RingGeometry(0.34, 0.43, 12);
+              rim.rotateX(-Math.PI / 2);
+              rim.translate(cx, y + 0.014, cz);
+              manholeRingGeoms.push(rim);
+              // Due barre interne: il coperchio non sembra un disco piatto.
+              for (const bar of [-1, 1]) {
+                this.addMaterialGeometry(
+                  roadDetailBuckets,
+                  'iron_block',
+                  voxelBox(0.5, 0.012, 0.035, cx + bar * 0.12, y + 0.016, cz)
+                );
+              }
             }
           }
           if (this.quality === 'high' && r.length > 18 && r.w >= 4.5 && !pedestrian) {
@@ -1568,6 +1594,26 @@ export class World {
       if (manholes) {
         const mesh = new THREE.Mesh(manholes, this.blockMaterial('iron_block'));
         mesh.name = 'tombini';
+        this.scene.add(mesh);
+      }
+      const rims = mergeClean(manholeRingGeoms);
+      if (rims) {
+        const mesh = new THREE.Mesh(rims, new THREE.MeshBasicMaterial({
+          color: '#8d8a80', transparent: true, opacity: 0.85,
+          depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3
+        }));
+        mesh.name = 'bordi-tombini';
+        this.scene.add(mesh);
+      }
+    }
+    if (jointGeoms.length) {
+      const joints = mergeClean(jointGeoms);
+      if (joints) {
+        const mesh = new THREE.Mesh(joints, new THREE.MeshBasicMaterial({
+          vertexColors: true, transparent: true, opacity: 0.3, depthWrite: false,
+          polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3
+        }));
+        mesh.name = 'giunti-marciapiedi';
         this.scene.add(mesh);
       }
     }

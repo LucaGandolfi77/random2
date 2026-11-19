@@ -52,13 +52,17 @@ export class GroundTileStreamer {
     this.lookAhead = this.tileMeters * 0.25;
     this.fadeEnabled = quality === 'high' && !isMobile;
     this.fadeDuration = 220;
-    this.fadeStart = this.tileMeters * Math.max(0, this.radius - 0.7);
-    this.fadeEnd = this.tileMeters * Math.max(0, this.radius - 0.05);
+    this.fadeStart = this.tileMeters * Math.max(0, this.radius - 1.15);
+    this.fadeEnd = this.tileMeters * Math.max(0, this.radius + 0.15);
     this.fadeUniforms = {
       uGroundCamera: { value: new THREE.Vector2() },
       uGroundFadeStart: { value: this.fadeStart },
       uGroundFadeEnd: { value: this.fadeEnd }
     };
+
+    // Micro-rilievo condiviso: la foto resta leggibile ma non sembra carta piatta.
+    this.tileNormal = null; // le tessere foto restano leggere (Lambert)
+    this.tileNormalScale = new THREE.Vector2(0.16, 0.16);
 
     this.group = new THREE.Group();
     this.group.name = 'ground-tiles';

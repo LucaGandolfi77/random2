@@ -67,6 +67,13 @@ jobs:
           npm test
           npm run build
 
+      - name: "BROS. SAGA PWA (typecheck, tests, build)"
+        working-directory: bros-saga-pwa
+        run: |
+          npm ci
+          npm test
+          npm run build
+
       - name: JavaScript syntax check (ESM-aware)
         run: |
           set -euo pipefail
