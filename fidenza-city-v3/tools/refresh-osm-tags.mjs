@@ -27,10 +27,18 @@ const map = JSON.parse(fs.readFileSync(MAP, 'utf8'));
 const city = JSON.parse(fs.readFileSync(CITY, 'utf8'));
 const bbox = map.bbox || { south: 44.85, west: 10.04, north: 44.882, east: 10.085 };
 const b = `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
-const query = `[out:json][timeout:180];
+const query = `[out:json][timeout:60];
 (
-  way["building"](${b});
-  relation["building"](${b});
+  way["building"]["height"](${b});
+  way["building"]["building:levels"](${b});
+  way["building"]["addr:housenumber"](${b});
+  way["building"]["addr:street"](${b});
+  way["building"]["building:colour"](${b});
+  way["building"]["building:color"](${b});
+  way["building"]["roof:colour"](${b});
+  way["building"]["roof:color"](${b});
+  way["building"]["roof:shape"](${b});
+  relation["building"]["addr:housenumber"](${b});
 );
 out tags;`;
 
@@ -58,7 +66,7 @@ async function fetchOsm() {
           'User-Agent': 'FidenzaDaGiocare/3.3 (OSM tag refresh)'
         },
         body: new URLSearchParams({ data: query }),
-        signal: AbortSignal.timeout(180000)
+        signal: AbortSignal.timeout(90000)
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const json = await response.json();
@@ -134,7 +142,7 @@ for (const building of city.buildings || []) {
 }
 
 console.log(`Aggiornati: altezze=${updatedHeight}, livelli=${updatedLevels}, indirizzi=${updatedAddress}, colori=${updatedColors}`);
-console.log(`Edifici OSM non trovati in city.json: ${missing}`);
+console.log(`Edifici di city.json senza tag OSM aggiuntivi: ${missing}`);
 
 if (!DRY) {
   fs.mkdirSync(path.dirname(BACKUP), { recursive: true });
