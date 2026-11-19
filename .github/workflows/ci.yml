@@ -74,6 +74,13 @@ jobs:
           npm test
           npm run build
 
+      - name: "PHONE OR DIE FPS (typecheck, tests, build)"
+        working-directory: phone-or-die-fps
+        run: |
+          npm ci
+          npm test
+          npm run build
+
       - name: JavaScript syntax check (ESM-aware)
         run: |
           set -euo pipefail
