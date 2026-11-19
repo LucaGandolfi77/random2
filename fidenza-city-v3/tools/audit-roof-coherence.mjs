@@ -170,3 +170,41 @@ console.log('\nZona Ponte Romano:');
 for (const item of nearPonte) {
   console.log(`  ${item.id} (${item.x}, ${item.z}) ${item.type || 'ok'} overhang=${item.overhangMax ?? '-'} rect=${item.rectangularity ?? '-'} convex=${item.convex ?? '-'}`);
 }
+
+// --- Coerenza dati OSM / POI / cartellonistica -----------------------------
+const buildings = city.buildings || [];
+const pois = city.pois || [];
+const roads = city.roads || [];
+const countBy = (items, key) => items.reduce((acc, item) => {
+  const value = item[key] || 'none';
+  acc[value] = (acc[value] || 0) + 1;
+  return acc;
+}, {});
+const provenance = {
+  heightSource: countBy(buildings, 'heightSource'),
+  withColor: buildings.filter(b => b.color).length,
+  withWallColor: buildings.filter(b => b.wallColor).length,
+  withRoofColor: buildings.filter(b => b.roofColor).length,
+  withAddress: buildings.filter(b => b.addr).length,
+};
+const poiIssues = pois.filter(p => !Number.isFinite(p.x) || !Number.isFinite(p.z));
+const namedRoads = roads.filter(r => r.name);
+const facadeFile = resolve(root, 'data/facades.json');
+const facades = JSON.parse(readFileSync(facadeFile, 'utf8'));
+const missingFacadePhotos = facades.filter(f => {
+  try { readFileSync(resolve(root, 'assets/textures/exteriors', f.image)); return false; }
+  catch { return true; }
+});
+
+console.log('\n=== Coerenza citta reale ===');
+console.log(`Altezze: ${JSON.stringify(provenance.heightSource)}`);
+console.log(`Colori: ${provenance.withColor}/${buildings.length} muri, ${provenance.withRoofColor} tetti, ${provenance.withWallColor} pareti`);
+console.log(`IndirizziOSM: ${provenance.withAddress} edifici, strade nominate: ${namedRoads.length}/${roads.length}`);
+console.log(`POI: ${pois.length}, coordinate invalide: ${poiIssues.length}`);
+console.log(`Facciate fotografiche: ${facades.length}, foto mancanti: ${missingFacadePhotos.length}`);
+if (missingFacadePhotos.length) {
+  for (const f of missingFacadePhotos) console.log(`  MANCANTE ${f.id}: ${f.image}`);
+}
+const globalIssues = issues.filter(i => i.type !== 'skipped-landmark').length +
+  poiIssues.length + missingFacadePhotos.length;
+console.log(`\nTOTALE anomalie correggibili: ${globalIssues}`);

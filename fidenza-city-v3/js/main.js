@@ -15,7 +15,10 @@ import { VehicleManager } from './vehicles.js';
 import { MissionManager } from './missions.js';
 import { GameMap } from './map.js';
 import { PhotoMode, PHOTO_FILTERS } from './photo-mode.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { loadInteriors } from './interiors.js';
+import { loadFacades } from './facades.js';
+import { buildStreetSigns } from './street-signs.js';
 import { PostFX } from './postfx.js';
 import { buildDiary } from './diary.js';
 import { listPhotos, deletePhoto, downloadPhoto, clearPhotos } from './photo-store.js';
@@ -71,6 +74,18 @@ function applyRendererScale(ratio) {
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const scene = new THREE.Scene();
+
+// Illuminazione basata su immagine: riflessi credibili senza file HDR esterni.
+try {
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const room = new RoomEnvironment();
+  const envTarget = pmrem.fromScene(room, 0.04);
+  scene.environment = envTarget.texture;
+  room.dispose();
+  pmrem.dispose();
+} catch (err) {
+  console.warn('Environment map non disponibile', err);
+}
 const camera = new THREE.PerspectiveCamera(isMobile ? 70 : 74, window.innerWidth / window.innerHeight, 0.1, 5000);
 
 let postfx = null;
@@ -548,6 +563,19 @@ async function init() {
   } catch (err) {
     console.warn('Interni non disponibili', err);
     interiors = null;
+  }
+  try {
+    await loadFacades({
+      scene,
+      onProgress: (p, label) => hud.setLoading(0.94 + p * 0.02, `Facciate: ${label}`)
+    });
+  } catch (err) {
+    console.warn('Facciate non disponibili', err);
+  }
+  try {
+    buildStreetSigns({ scene, city: world.city, quality });
+  } catch (err) {
+    console.warn('Targhe stradali non disponibili', err);
   }
   const initialSpawn = deepSpawn || mapJson.spawn || WORLD.spawn;
   world.groundTiles?.preload(initialSpawn.x, initialSpawn.z);

@@ -12,6 +12,7 @@ import { QUESTS } from '../data/quests';
 import { ACHIEVEMENTS } from '../data/achievements';
 import type { MetaSystem } from '../systems/MetaSystem';
 import { COLLECTIONS } from '../data/collections';
+import { broSprite } from '../render/Sprites';
 
 const COLLECTION_LABELS = COLLECTIONS.map((c) => ({ id: c.id, name: c.name, total: c.entries.length }));
 
@@ -66,6 +67,7 @@ export class UI {
   private miniScore!: HTMLElement;
   private miniTime!: HTMLElement;
   private miniMsg!: HTMLElement;
+  private portrait!: HTMLCanvasElement;
 
   constructor(container: HTMLElement, private cb: UICallbacks) {
     this.root = document.createElement('div');
@@ -95,6 +97,7 @@ export class UI {
     this.battle = document.createElement('div');
     this.battle.className = 'battle-hud hidden';
     this.battle.innerHTML = `
+      <canvas class="battle-portrait" id="ui-portrait" width="20" height="28"></canvas>
       <div class="enemy-panel"><b id="ui-enemy-name">ENEMY</b>
         <div class="enemy-track"><i id="ui-enemy-fill"></i></div></div>
       <div class="bro-panels" id="ui-bro-panels"></div>
@@ -113,6 +116,7 @@ export class UI {
     this.cmdGrid = this.battle.querySelector('#ui-cmds')!;
     this.pressHint = this.battle.querySelector('#ui-press')!;
     this.bpLine = this.battle.querySelector('#ui-bp')!;
+    this.portrait = this.battle.querySelector('#ui-portrait')!;
 
     this.miniHud = document.createElement('div');
     this.miniHud.className = 'battle-hud hidden';
@@ -252,6 +256,10 @@ export class UI {
   hideBattle() { this.battle.classList.add('hidden'); }
 
   updateBattle(view: BattleView) {
+    const ctx = this.portrait.getContext('2d')!;
+    ctx.clearRect(0, 0, 20, 28);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(broSprite(BRO_BY_ID[view.activeBro], 0, true), 0, 0);
     this.enemyName.textContent = `${view.enemyName} ${view.enemyHp}/${view.enemyMaxHp}`;
     this.enemyFill.style.width = `${(view.enemyHp / view.enemyMaxHp) * 100}%`;
     this.broPanels.innerHTML = view.bros.map((b) => `

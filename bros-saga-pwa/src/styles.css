@@ -41,6 +41,12 @@ html,body,#app{width:100%;height:100%;margin:0;overflow:hidden;background:var(--
 .dialogue-box b{color:var(--gold);display:block;font-size:10px;letter-spacing:.14em;margin-bottom:3px}
 
 .battle-hud{position:absolute;inset:0;z-index:12;pointer-events:none}
+.battle-portrait{position:absolute;left:3%;top:calc(8px + var(--safe-t));width:40px;height:56px;image-rendering:pixelated;background:linear-gradient(160deg,#243560,#111a30);border:2px solid var(--gold);border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.battle-panel{background:linear-gradient(180deg,rgba(18,28,52,.97),rgba(9,14,27,.97));box-shadow:0 -6px 28px rgba(0,0,0,.5)}
+.cmd{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border-color:rgba(244,197,66,.25)}
+.cmd:hover{background:linear-gradient(180deg,rgba(244,197,66,.22),rgba(244,197,66,.08));border-color:var(--gold)}
+.dialogue-box{background:linear-gradient(180deg,rgba(20,30,55,.96),rgba(8,13,26,.96));box-shadow:0 6px 22px rgba(0,0,0,.55)}
+.hud-top>div{background:rgba(8,13,26,.55);border:1px solid var(--line);border-radius:8px;padding:5px 9px;backdrop-filter:blur(3px)}
 .enemy-panel{position:absolute;top:calc(8px + var(--safe-t));left:50%;transform:translateX(-50%);width:min(420px,80%);text-align:center;text-shadow:0 2px 4px #000}
 .enemy-panel b{font-size:13px;letter-spacing:.08em}
 .enemy-track{height:9px;background:#1a2438;border:2px solid #dfe7f5;border-radius:4px;overflow:hidden;margin-top:4px}

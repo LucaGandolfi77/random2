@@ -65,3 +65,10 @@ stazione e palazzo comunale di Fidenza. Ogni file è stato ridimensionato e
 ricompresso; i derivati restano soggetti alla licenza della foto originale,
 mentre il resto del progetto mantiene la propria licenza. Autore, URL e
 licenza di ogni immagine sono in `assets/textures/interiors/SOURCES.md`.
+
+## Fotografie delle facciate (CC BY-SA)
+
+Le texture in `assets/textures/exteriors/` provengono da Wikimedia Commons
+(Duomo, Teatro, Comune, Stazione, San Pietro, Gran Madre, Porta di San Donnino).
+Ogni derivato resta soggetto alla licenza della foto originale; autore, URL e
+licenza sono elencati in `assets/textures/exteriors/SOURCES.md`.

@@ -1,0 +1,79 @@
+[
+  {
+    "id": "duomo",
+    "name": "Duomo di San Donnino",
+    "x": -267.47,
+    "z": 2.67,
+    "rotation": 180,
+    "image": "duomo-facciata.jpg",
+    "width": 22,
+    "height": 13,
+    "depth": 34
+  },
+  {
+    "id": "porta",
+    "name": "Porta di San Donnino",
+    "x": -305.18,
+    "z": -47.79,
+    "rotation": 0,
+    "image": "porta-esterno.jpg",
+    "width": 14,
+    "height": 11,
+    "depth": 8
+  },
+  {
+    "id": "teatro",
+    "name": "Teatro Girolamo Magnani",
+    "x": -94.05,
+    "z": 72.01,
+    "rotation": 0,
+    "image": "teatro-facciata.jpg",
+    "width": 22,
+    "height": 11,
+    "depth": 26
+  },
+  {
+    "id": "comunale",
+    "name": "Palazzo Comunale",
+    "x": -32.19,
+    "z": 70.01,
+    "rotation": 0,
+    "image": "comune-facciata.jpg",
+    "width": 20,
+    "height": 12,
+    "depth": 16
+  },
+  {
+    "id": "stazione",
+    "name": "Stazione di Fidenza",
+    "x": 175.39,
+    "z": -124.58,
+    "rotation": 0,
+    "image": "stazione-facciata.jpg",
+    "width": 36,
+    "height": 9,
+    "depth": 14
+  },
+  {
+    "id": "sanpietro",
+    "name": "Chiesa di San Pietro",
+    "x": -266.99,
+    "z": 198.48,
+    "rotation": 0,
+    "image": "sanpietro-facciata.jpg",
+    "width": 16,
+    "height": 10,
+    "depth": 14
+  },
+  {
+    "id": "granmadre",
+    "name": "Santuario della Gran Madre di Dio",
+    "x": 415.56,
+    "z": 147.81,
+    "rotation": 0,
+    "image": "granmadre-facciata.jpg",
+    "width": 22,
+    "height": 12,
+    "depth": 22
+  }
+]

@@ -1,4 +1,4 @@
-# Fidenza da Giocare v3.3.5 — Mondo Arnis, terreno reale e suolo in streaming
+# Fidenza da Giocare v3.3.6 — Mondo Arnis, terreno reale e suolo in streaming
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
@@ -41,7 +41,7 @@ quello della v2.23.
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
 
-## Novità v3.3.5 — interni, pavimentazioni e tetti coerenti
+## Novità v3.3.6 — facciate reali, cartelli e luce
 
 Sono stati aggiunti **10 interni** (Duomo con cripta, Teatro Magnani, i quattro
 bar, Comune, stazione, Gran Madre e San Pietro), costruiti a runtime in
@@ -50,6 +50,12 @@ usate come texture sono in `assets/textures/interiors/` con attribuzione in
 `SOURCES.md`. Si entra premendo **E** presso la porta e si esce sempre con **E**.
 L'esterno del gioco non è stato modificato.
 
+- **facciate fotografiche**: 7 edifici principali (Duomo, Porta, Teatro,
+  Comune, stazione, San Pietro, Gran Madre) usano foto CC proiettate sulle
+  facciate, senza Blender né GLB; attribuzioni in `assets/textures/exteriors/SOURCES.md`.
+- **cartelli reali**: nomi stradali e numeri civici dai tag OSM, con texture su canvas.
+- **illuminazione IBL**: environment map procedurale e riflessi coerenti.
+- **audit completo**: `node tools/audit-roof-coherence.mjs` verifica tetti, OSM, POI e facciate.
 - **coerenza tetti/case**: audit automatico (`node tools/audit-roof-coherence.mjs`)
   e generazione corretta: i tetti a falde vengono usati solo su footprint
   regolari e con ingombro contenuto, altrimenti si usa un tetto piano che
@@ -1078,7 +1084,21 @@ all’URL per forzare il livello grafico.
 - **Terreno RER**: ortofoto 2023-24 a 0,5 m/px (centro a 0,2 m/px) per il
   suolo realistico, con licenza CC BY 4.0 e attribuzione regionale.
 
-## Dati e correzioni
+## ## Refresh tag OSM degli edifici
+
+Per aggiornare solo i tag reali degli edifici (altezze, `building:levels`,
+indirizzi, colori, `roof:shape`) senza rigenerare l'intera citta':
+
+```bash
+node tools/refresh-osm-tags.mjs --dry-run   # anteprima
+node tools/refresh-osm-tags.mjs             # aggiorna data/city.json
+```
+
+Lo script scarica i dati da OpenStreetMap via Overpass, mantiene un backup in
+`.cache/city-before-osm-refresh.json` e preserva tutti gli altri livelli di dati
+(Arnis, dettagli del centro, POI, stelle). I dati restano soggetti a ODbL.
+
+Dati e correzioni
 
 La mappa è costruita da **OpenStreetMap**, **AWS Terrain Tiles** (Terrarium,
 EU-DEM Copernicus) e **ortofoto RER 2023-24** (CC BY 4.0). I POI sono

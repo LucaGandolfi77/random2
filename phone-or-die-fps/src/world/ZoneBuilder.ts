@@ -233,6 +233,29 @@ export class ZoneBuilder {
       this.box(m.metal, cx, 0.15, cz + 3, w - 4, 0.3, 0.5, false, true);
     }
 
+    // decorative details: rug, framed pictures, plants and a ceiling lamp
+    const rug = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 2.2), new THREE.MeshStandardMaterial({ color: zone.palette.accent, roughness: 1, transparent: true, opacity: 0.22 }));
+    rug.rotation.x = -Math.PI / 2;
+    rug.position.set(cx, 0.04, cz + 1.8);
+    this.group.add(rug);
+    for (const px of [minX + 2.5, maxX - 2.5]) {
+      const frame = this.box(m.darkWood, px, 1.85, maxZ - 0.22, 0.7, 0.55, 0.05, false, true);
+      frame.material = new THREE.MeshStandardMaterial({ color: 0x2a2f3d, roughness: 0.7 });
+      const art = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.4), new THREE.MeshStandardMaterial({ color: zone.palette.accent, roughness: 0.9 }));
+      art.position.set(px, 1.85, maxZ - 0.19);
+      this.group.add(art);
+    }
+    for (const px of [minX + 1.6, maxX - 1.6]) {
+      this.cyl(m.darkWood, px, 0.22, minZ + 1.6, 0.12, 0.44);
+      const leaves = this.cullable(new THREE.Mesh(new THREE.ConeGeometry(0.34, 0.8, 7), m.grass));
+      leaves.position.set(px, 0.75, minZ + 1.6);
+      this.group.add(leaves);
+    }
+    const shade = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.3, 12, 1, true), new THREE.MeshStandardMaterial({ color: zone.palette.accent, side: THREE.DoubleSide, roughness: 0.5, transparent: true, opacity: 0.8 }));
+    shade.rotation.x = Math.PI;
+    shade.position.set(cx, 2.62, cz);
+    this.group.add(shade);
+
     for (const e of zone.exits) this.marker(e.at[0], e.at[1], 0x2f8fa8, e.label, { target: e.target, spawn: e.spawn, requires: e.requires });
     for (const p of zone.props) this.prop(p.kind, p.at[0], p.at[1], p.label, p.reveal, p.text);
     this.navInterior(zone);

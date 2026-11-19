@@ -367,7 +367,14 @@ export class Game {
     this.touch.hide();
     this.audio.play('warn');
     this.battle = new BattleSystem(enemy, this.bros, challengeMode.noItems ? {} : this.items, {
-      onSound: (n) => this.audio.play(n),
+      onSound: (n) => {
+        this.audio.play(n);
+        if (n === 'hit' || n === 'heavy' || n === 'counter') {
+          this.renderer.kick(n === 'heavy' ? 6 : 3);
+          this.renderer.burst(240, 100, n === 'counter' ? '#7fd8f0' : '#f4c542', n === 'heavy' ? 16 : 9);
+        }
+        if (n === 'timing') this.renderer.popup('PERFECT!', 240, 70, '#f4c542');
+      },
       onEnd: (res) => {
         this.battleWon = res.won;
         this.bros = this.battle!.bros.map((b) => ({ ...b }));
@@ -507,6 +514,7 @@ export class Game {
 
     this.ui.update(dt);
     this.audio.update(dt);
+    this.renderer.update(dt);
     if (this.mode === 'world') this.renderer.renderWorld(this.world, this.time);
     else if (this.mode === 'battle' && this.battle) this.renderer.renderBattle(this.battle.view, this.time);
     else if (this.mode === 'minigame') this.renderer.renderMinigame(this.minigame.view, this.time);

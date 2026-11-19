@@ -36,6 +36,9 @@ export class Shadow {
   private legL: THREE.Mesh;
   private legR: THREE.Mesh;
   private eyes: THREE.Group;
+  private cloak: THREE.Mesh;
+  private spikes: THREE.Group;
+  private claws: THREE.Group;
   private target = new THREE.Vector3();
   private path: number[] = [];
   private repath = 0;
@@ -86,6 +89,33 @@ export class Shadow {
     }
     this.eyes.visible = false;
     this.group.add(this.eyes);
+
+    // tattered cloak + spinal spikes give each archetype a readable silhouette
+    this.cloak = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.16, 0.42, spec.height * 0.72, 9, 1, true),
+      new THREE.MeshStandardMaterial({ color: spec.color, roughness: 1, side: THREE.DoubleSide, transparent: true, opacity: 0.92 })
+    );
+    this.cloak.position.y = spec.height * 0.42;
+    this.group.add(this.cloak);
+    this.spikes = new THREE.Group();
+    for (let i = 0; i < 5; i++) {
+      const h = 0.1 + i * 0.03;
+      const spike = new THREE.Mesh(new THREE.ConeGeometry(0.045, h, 4), mat);
+      spike.position.set(0, spec.height * (0.36 + i * 0.1), -0.12);
+      spike.rotation.x = -0.35;
+      this.spikes.add(spike);
+    }
+    this.group.add(this.spikes);
+    this.claws = new THREE.Group();
+    for (const x of [-0.24, 0.24]) {
+      for (let i = 0; i < 3; i++) {
+        const claw = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.14, 4), mat);
+        claw.position.set(x + (i - 1) * 0.035, spec.height * 0.24, 0.05);
+        claw.rotation.x = Math.PI;
+        this.claws.add(claw);
+      }
+    }
+    this.group.add(this.claws);
 
     this.group.position.copy(position);
     this.group.rotation.y = Math.random() * Math.PI * 2;
@@ -161,6 +191,11 @@ export class Shadow {
     this.legL.rotation.x = Math.sin(t * 1.2) * 0.22;
     this.legR.rotation.x = -Math.sin(t * 1.2) * 0.22;
     this.head.rotation.y = Math.sin(t * 0.4) * 0.3;
+    this.cloak.rotation.z = Math.sin(t * 0.7) * 0.08;
+    this.cloak.scale.x = 1 + Math.sin(t * 1.4) * 0.07;
+    this.spikes.rotation.y = Math.sin(t * 0.5) * 0.14;
+    this.claws.rotation.x = Math.sin(t * 1.1) * 0.18 + (this.state === 'hunt' ? -0.4 : 0);
+    this.group.position.y = Math.sin(t * 0.9) * 0.035;
 
     return { distance: dist, captured: dist < 1.25 && threat >= 60 && this.group.visible };
   }
