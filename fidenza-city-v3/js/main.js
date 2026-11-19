@@ -545,7 +545,6 @@ async function init() {
       scene,
       onProgress: () => hud.setLoading(0.94, 'Preparo gli interni…')
     });
-    window.__intMgr = interiors;
   } catch (err) {
     console.warn('Interni non disponibili', err);
     interiors = null;
@@ -569,7 +568,6 @@ async function init() {
 
   player = new Player({ scene, camera, world, input });
   if (new URLSearchParams(location.search).has('debug')) {
-    window.__setInteriors = value => { window.__intMgr = value; };
     window.__fidenza = {
       get world() { return world; },
       get player() { return player; },

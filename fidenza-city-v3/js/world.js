@@ -2170,7 +2170,7 @@ export class World {
       const span = Math.max(2, bounds.width);
       const length = Math.max(2, bounds.length);
       const angle = Math.atan2(edge.ux, edge.uz);
-      const overhang = this.quality === 'low' ? 0.45 : 1.0;
+      const overhang = this.quality === 'low' ? 0.2 : 0.35;
       const { boxes } = roofStepBoxes({
         span,
         length,
@@ -2417,6 +2417,7 @@ export class World {
       }
 
       const roofBlock = blocks.roof || info?.roof || roofFallbackBlock(b);
+      if (b.poly.length < 3 || b.h <= 1) continue;
       const roofInfo = classifyBuildingRoof(b);
       let roofStyle = roofInfo.style;
       const roofType = blocks.roofType || info?.roofType;

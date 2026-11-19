@@ -62,11 +62,12 @@ In battle, number keys 1-9 pick commands; J/Space performs the timed press.
 - **Items**: Mushroom heals, Pepper boosts attack for the battle, 1-UP revives a fainted brother.
 - **Minigames**: Coin Rush, Hammer Toss, Jump Rope, Recipe Dash and Card Match award coins, BP, items and badges.
 - **Badges**: six equippable accessories (max two) modify stats, timing window, HP, loot and perfect-hit power. Buy them with coins.
-- **Progression**: XP levels up each brother independently up to level 10; choose POWER, DEFENCE or SPEED. Defeat six bosses and restore the star.
+- **Progression**: XP levels up each brother independently up to level 20; choose POWER, DEFENCE or SPEED. Defeat ten bosses and restore the star.
+- **Long-term play**: New Game+ with stronger enemies and a secret final boss, four challenge modes (including Iron Man and Timer Attack), endless dungeon, boss rush, daily seeded challenges with local leaderboards, six side quests, achievements and collectibles.
 
 ## Content
 
-Nine areas (Sunfield Plains, Mosswood Forest, Cobble Town, Ember Cavern, Cloud Harbour, Starlight Keep, Dune Basin, Frost Peak, Sky Citadel), fourteen enemies, six multi-phase bosses, chests, items, minigames, badges, powers, status attacks and an ending.
+Thirteen areas, twenty-two enemies, ten bosses, thirteen badges, six side quests, five minigames, six powers, achievements, collections and an ending — plus New Game+ and endless replay modes.
 
 ## PWA installation
 
@@ -76,16 +77,17 @@ After the first load the service worker caches the game for offline play.
 ## Testing
 
 ```bash
-npm test              # 14/14 logic tests passing
+npm test              # 16/16 logic tests passing
 npm run test:browser  # headless Chrome CDP smoke test (needs Chrome on macOS)
 ```
 
-The smoke test uses touch emulation and covers: menu, new game, overworld HUD, touch controls,
-a minigame and its reward, a battle with a power move and burn status, a timed attack, victory,
-return to the overworld, badge purchase/equip, save data, an offline reload and a check for
-uncaught runtime exceptions. Screenshots are in `tests/screenshots/`.
+The smoke test uses touch emulation and covers: menu, challenge selection, overworld HUD, touch
+controls, a minigame and its reward, a battle with a power move and burn status, a timed attack,
+victory, badge purchase/equip, achievements, collections, quest log, endless dungeon start,
+save data, an offline reload and a check for uncaught runtime exceptions. Screenshots are in
+`tests/screenshots/`.
 
-Verified here: production build, 14/14 unit tests and every browser smoke check passing.
+Verified here: production build, 16/16 unit tests and every browser smoke check passing.
 
 ## Known limitations
 

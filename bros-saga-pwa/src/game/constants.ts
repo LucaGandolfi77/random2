@@ -6,6 +6,6 @@ export const TIMING_WINDOW = 0.19;
 export const PERFECT_WINDOW = 0.07;
 export const DEFEND_WINDOW = 0.24;
 export const BP_MAX = 10;
-export const MAX_LEVEL = 10;
+export const MAX_LEVEL = 20;
 export const XP_PER_LEVEL = 42;
 export const WALK_SPEED = 92;

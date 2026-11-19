@@ -61,6 +61,13 @@ export class Renderer {
       const s = enemySprite(ed, Math.floor(time * 3));
       g.drawImage(s, Math.round(e.x - cam.x - 12), Math.round(e.y - cam.y - 14), 24, 22);
     }
+    if (world.npc) {
+      g.fillStyle = '#f4c542';
+      g.fillRect(Math.round(world.npc.x - cam.x - 6), Math.round(world.npc.y - cam.y - 14), 12, 16);
+      g.fillStyle = '#10182b';
+      g.fillRect(Math.round(world.npc.x - cam.x - 1), Math.round(world.npc.y - cam.y - 11), 2, 6);
+      g.fillRect(Math.round(world.npc.x - cam.x - 1), Math.round(world.npc.y - cam.y - 3), 2, 2);
+    }
 
     const f = world.follower;
     const fDef = BRO_BY_ID[world.leader === 'pip' ? 'pop' : 'pip'];

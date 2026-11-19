@@ -1,4 +1,4 @@
-# Fidenza da Giocare v3.3.3 — Mondo Arnis, terreno reale e suolo in streaming
+# Fidenza da Giocare v3.3.5 — Mondo Arnis, terreno reale e suolo in streaming
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
@@ -41,7 +41,7 @@ quello della v2.23.
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
 
-## Novità v3.3.3 — interni visitabili
+## Novità v3.3.5 — interni, pavimentazioni e tetti coerenti
 
 Sono stati aggiunti **10 interni** (Duomo con cripta, Teatro Magnani, i quattro
 bar, Comune, stazione, Gran Madre e San Pietro), costruiti a runtime in
@@ -49,6 +49,15 @@ JavaScript con primitive Three.js: **nessun Blender, nessun GLB**. Le foto CC
 usate come texture sono in `assets/textures/interiors/` con attribuzione in
 `SOURCES.md`. Si entra premendo **E** presso la porta e si esce sempre con **E**.
 L'esterno del gioco non è stato modificato.
+
+- **coerenza tetti/case**: audit automatico (`node tools/audit-roof-coherence.mjs`)
+  e generazione corretta: i tetti a falde vengono usati solo su footprint
+  regolari e con ingombro contenuto, altrimenti si usa un tetto piano che
+  segue esattamente il poligono dei muri. Nessun tetto "orfano" nelle piazze.
+- **pavimentazioni**: texture PBR potenziate (albedo 1024 su high, normal map
+  Sobel con micro-rumore, roughness map), normal map leggera sulle tessere
+  ortofoto, tombini con bordo e barre, giunti dei marciapiedi e pavimenti in
+  porfido/cemento anche dentro gli edifici.
 
 ## Avvio
 

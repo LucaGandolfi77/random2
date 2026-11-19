@@ -10,6 +10,9 @@ import { POWERS, powersForLevel } from '../src/data/powers';
 import { MINIGAMES, MINIGAME_BY_ID } from '../src/data/minigames';
 import { BadgeSystem } from '../src/systems/BadgeSystem';
 import { MinigameSystem } from '../src/systems/MinigameSystem';
+import { MetaSystem } from '../src/systems/MetaSystem';
+import { QUESTS } from '../src/data/quests';
+import { ACHIEVEMENTS } from '../src/data/achievements';
 
 const enemy = ENEMY_BY_ID.grubbo;
 const noop = { onSound: () => {}, onEnd: () => {} };
@@ -101,11 +104,11 @@ describe('action commands', () => {
 });
 
 describe('areas', () => {
-  it('has nine areas and six bosses', () => {
-    expect(AREAS.length).toBe(9);
-    expect(AREAS.filter((a) => a.boss).length).toBe(6);
+  it('has thirteen areas and ten bosses', () => {
+    expect(AREAS.length).toBe(13);
+    expect(AREAS.filter((a) => a.boss).length).toBe(10);
     expect(AREAS.every((a) => a.enemies.length >= 3)).toBe(true);
-    expect(MAX_LEVEL).toBe(10);
+    expect(MAX_LEVEL).toBe(20);
   });
 
   it('generates deterministic connected maps with doors and chests', () => {
@@ -160,6 +163,29 @@ describe('badges, powers and minigames', () => {
     expect(b.enemyHp).toBeLessThan(200);
   });
 
+  it('tracks quests, achievements, collections and daily seeds', () => {
+    const meta = new MetaSystem();
+    expect(QUESTS.length).toBeGreaterThanOrEqual(6);
+    expect(ACHIEVEMENTS.length).toBeGreaterThanOrEqual(10);
+    const q = QUESTS[0];
+    expect(meta.questProgress(q.id, q.needed - 1)).toBe(false);
+    expect(meta.questProgress(q.id, 1)).toBe(true);
+    expect(meta.data.questsDone).toContain(q.id);
+    meta.registerWin('grubbo');
+    expect(meta.data.stats.wins).toBe(1);
+    expect(meta.data.collected.enemies).toContain('grubbo');
+    expect(meta.evaluateAchievements()).toContain('a_first');
+    const a = meta.daily();
+    const b = meta.daily();
+    expect(a.seed).toBe(b.seed);
+    meta.submitScore('daily', 120, a.date);
+    expect(meta.data.leaderboard.daily[a.date]).toBe(120);
+    expect(meta.completion()).toBeGreaterThanOrEqual(0);
+    const restored = new MetaSystem();
+    restored.restore(meta.data);
+    expect(restored.data.stats.wins).toBe(1);
+  });
+
   it('runs five minigames and awards coins on completion', () => {
     expect(MINIGAMES.length).toBe(5);
     expect(Object.keys(MINIGAME_BY_ID).length).toBe(5);
@@ -175,5 +201,16 @@ describe('badges, powers and minigames', () => {
     expect(m.view.phase).toBe('result');
     expect(reward).not.toBeNull();
     expect(reward!.coins).toBeGreaterThan(0);
+  });
+
+  it('produces deterministic minigame targets from a daily seed', () => {
+    const a = new MinigameSystem(() => {});
+    const b = new MinigameSystem(() => {});
+    a.start('coinrush', 12345);
+    b.start('coinrush', 12345);
+    a.cursor = 0.5; a.press(true);
+    b.cursor = 0.5; b.press(true);
+    expect(a.view.score).toBe(b.view.score);
+    expect(a.view.cursor).toBeCloseTo(b.view.cursor);
   });
 });

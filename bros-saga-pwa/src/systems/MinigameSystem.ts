@@ -22,7 +22,19 @@ export class MinigameSystem {
 
   constructor(private onEnd: (reward: MinigameReward) => void) {}
 
-  start(id: MinigameId) {
+  private rand: () => number = Math.random;
+
+  start(id: MinigameId, seed?: number) {
+    this.rand = seed === undefined ? Math.random : (() => {
+      let s = seed >>> 0;
+      return () => {
+        s = (s + 0x6d2b79f5) >>> 0;
+        let t = s;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    })();
     this.def = MINIGAME_BY_ID[id];
     this.phase = 'play';
     this.time = this.def.seconds;
@@ -50,7 +62,7 @@ export class MinigameSystem {
       this.score++;
       this.hits++;
       this.message = 'NICE!';
-      this.zone = 0.22 + Math.random() * 0.56;
+      this.zone = 0.22 + this.rand() * 0.56;
     } else {
       this.missed++;
       this.message = alternated ? 'Miss!' : 'Alternate A and B!';

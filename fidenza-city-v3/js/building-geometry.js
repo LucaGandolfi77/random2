@@ -91,6 +91,42 @@ export function orientedBounds(poly, ux, uz) {
   };
 }
 
+
+function pointSegmentDistance(p, a, b) {
+  const dx = b[0] - a[0], dz = b[1] - a[1];
+  const len2 = dx * dx + dz * dz;
+  const t = len2 < 1e-9 ? 0 : Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / len2));
+  return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dz));
+}
+
+function distanceToPolygon(p, poly) {
+  let min = Infinity;
+  for (let i = 0; i < poly.length; i++) {
+    min = Math.min(min, pointSegmentDistance(p, poly[i], poly[(i + 1) % poly.length]));
+  }
+  return min;
+}
+
+/**
+ * Quanto il rettangolo del tetto (asse + overhang) esce dal poligono dei muri.
+ * Usato per evitare tetti che sembrano non avere una casa sotto.
+ */
+export function roofFootprintOverhang(poly, edge, bounds, overhang = 0.35) {
+  if (!poly || poly.length < 3) return Infinity;
+  const corners = [
+    [bounds.minU - overhang, bounds.minN - overhang],
+    [bounds.maxU + overhang, bounds.minN - overhang],
+    [bounds.maxU + overhang, bounds.maxN + overhang],
+    [bounds.minU - overhang, bounds.maxN + overhang]
+  ];
+  let max = 0;
+  for (const [u, n] of corners) {
+    const p = [u * edge.ux - n * edge.uz, u * edge.uz + n * edge.ux];
+    max = Math.max(max, distanceToPolygon(p, poly));
+  }
+  return max;
+}
+
 export function classifyBuildingRoof(building) {
   const poly = building.poly || [];
   const area = Number(building.area) || polygonArea(poly);
@@ -102,16 +138,20 @@ export function classifyBuildingRoof(building) {
   const explicit = building.roofShape || '';
   let style = 'flat';
 
-  if (explicit === 'flat' || FLAT_KINDS.has(building.kind) || building.h < 4.2 || area < 36) {
+  // Un tetto a falde viene costruito come rettangolo orientato: se il
+  // footprint e' irregolare, il rettangolo sporge dai muri e sembra un tetto
+  // senza casa. In quei casi si usa il tetto piano, che segue il poligono.
+  const tooIrregular = !convex || rectangularity < 0.82 ||
+    roofFootprintOverhang(poly, edge, bounds, 0.35) > 0.9;
+  if (explicit === 'flat' || FLAT_KINDS.has(building.kind) || building.h < 4.2 ||
+      area < 36 || tooIrregular) {
     style = 'flat';
   } else if (explicit === 'gabled' || explicit === 'gambrel') {
-    style = rectangularity >= 0.68 ? 'gabled' : (convex ? 'hipped' : 'flat');
-  } else if (explicit === 'half-hipped' || explicit === 'hipped' || explicit === 'many') {
-    style = convex ? 'hipped' : 'flat';
-  } else if (rectangularity >= 0.78 && edge.len >= 3.2) {
     style = 'gabled';
-  } else if (convex) {
+  } else if (explicit === 'half-hipped' || explicit === 'hipped' || explicit === 'many') {
     style = 'hipped';
+  } else if (edge.len >= 3.2) {
+    style = 'gabled';
   }
 
   const span = Math.min(bounds.width, bounds.length);
@@ -130,6 +170,8 @@ export function classifyBuildingRoof(building) {
     span: +span.toFixed(2),
     length: +bounds.length.toFixed(2),
     ridgeHeight: +ridgeHeight.toFixed(2),
-    flatKind: FLAT_KINDS.has(building.kind)
+    flatKind: FLAT_KINDS.has(building.kind),
+    tooIrregular,
+    footprintOverhang: +roofFootprintOverhang(poly, edge, bounds, 0.35).toFixed(2)
   };
 }

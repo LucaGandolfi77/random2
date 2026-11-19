@@ -102,6 +102,54 @@ export const ENEMIES: EnemyDef[] = [
     weak: 'thunder', resist: 'fire', boss: true,
     colors: { body: '#8f7ad8', accent: '#f0e8ff', eye: '#301050' }, telegraph: 'blast',
     dialogue: 'The storm above the keep. It has never lost.'
+  },
+  {
+    id: 'crystalbug', name: 'CRYSTAL BUG', hp: 70, attack: 20, defense: 11, speed: 10, xp: 48,
+    weak: 'hammer', resist: 'thunder', boss: false,
+    colors: { body: '#8fd8e8', accent: '#e0ffff', eye: '#203050' }, telegraph: 'blast',
+    dialogue: 'Its shell rings when you hit it. Pleasantly, then less so.'
+  },
+  {
+    id: 'ashgolem', name: 'ASH GOLEM', hp: 84, attack: 23, defense: 15, speed: 5, xp: 55,
+    weak: 'thunder', resist: 'fire', boss: false,
+    colors: { body: '#5a5a5e', accent: '#ff8a4a', eye: '#401010' }, telegraph: 'hammer',
+    dialogue: 'Still warm from a fire that went out centuries ago.'
+  },
+  {
+    id: 'tidewraith', name: 'TIDE WRAITH', hp: 76, attack: 22, defense: 9, speed: 13, xp: 58,
+    weak: 'fire', resist: 'jump', boss: false,
+    colors: { body: '#5f8fb8', accent: '#c8e8ff', eye: '#102040' }, telegraph: 'blast',
+    dialogue: 'A sailor who forgot to come home.'
+  },
+  {
+    id: 'voidmoth', name: 'VOID MOTH', hp: 82, attack: 24, defense: 10, speed: 14, xp: 62,
+    weak: 'fire', resist: 'hammer', boss: false,
+    colors: { body: '#6a5a8a', accent: '#d8c8ff', eye: '#301040' }, telegraph: 'blast',
+    dialogue: 'It eats light. Bring a flame.'
+  },
+  {
+    id: 'sunkenwarden', name: 'SUNKEN WARDEN', hp: 340, attack: 30, defense: 19, speed: 11, xp: 380,
+    weak: 'fire', resist: 'thunder', boss: true,
+    colors: { body: '#4a7a8a', accent: '#c8e8f0', eye: '#102030' }, telegraph: 'hammer',
+    dialogue: 'It was a lighthouse once. Now it guards the drowned road.'
+  },
+  {
+    id: 'clockworkduo', name: 'CLOCKWORK DUO', hp: 380, attack: 32, defense: 18, speed: 14, xp: 420,
+    weak: 'thunder', resist: 'fire', boss: true,
+    colors: { body: '#b8a06a', accent: '#f6e0a8', eye: '#302010' }, telegraph: 'blast',
+    dialogue: 'Two machines that finish each other\'s sentences.'
+  },
+  {
+    id: 'stormherald', name: 'STORM HERALD', hp: 420, attack: 35, defense: 20, speed: 15, xp: 470,
+    weak: 'hammer', resist: 'thunder', boss: true,
+    colors: { body: '#7a8ac8', accent: '#e8f0ff', eye: '#202050' }, telegraph: 'blast',
+    dialogue: 'The sky sends its announcement. It is not good news.'
+  },
+  {
+    id: 'nightemperor', name: 'NIGHT EMPEROR', hp: 520, attack: 38, defense: 22, speed: 16, xp: 600,
+    weak: 'bros', resist: 'fire', boss: true,
+    colors: { body: '#3a2a58', accent: '#f4c542', eye: '#ff4060' }, telegraph: 'blast',
+    dialogue: 'The one who wrote the letter. It has been waiting for you.'
   }
 ];
 

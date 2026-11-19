@@ -80,11 +80,15 @@ if (!await waitFor(`!!document.querySelector('[data-a="new"]')`)) {
   console.error('Menu did not render:', await evaluate(`document.body.innerText.slice(0,300)`));
   ws.close(); chrome.kill(); process.exit(1);
 }
-check('title rendered', await evaluate(`document.body.innerText.includes('BROS')`));
+check('title rendered', await waitFor(`document.body.innerText.includes('BROS')`, 5000));
 await shot('01-menu');
 
-console.log('2. New game and overworld');
+console.log('2. New game, challenge mode and overworld');
+check('long-term menu entries', await evaluate(`!!document.querySelector('[data-a="endless"]') && !!document.querySelector('[data-a="daily"]') && !!document.querySelector('[data-a="collections"]')`));
 await evaluate(`document.querySelector('[data-a="new"]').click()`);
+await waitFor(`document.querySelectorAll('[data-ch]').length === 4`);
+check('four challenge modes', await evaluate(`document.querySelectorAll('[data-ch]').length === 4`));
+await evaluate(`document.querySelector('[data-ch="normal"]').click()`);
 await waitFor(`!!document.querySelector('[data-a="go"]')`);
 await evaluate(`document.querySelector('[data-a="go"]').click()`);
 await waitFor(`!document.querySelector('.hud').classList.contains('hidden')`);
@@ -139,12 +143,28 @@ check('save written', await evaluate(`!!localStorage.getItem('bros-saga:save')`)
 
 console.log('4b. Badges');
 await evaluate(`(()=>{const g=window.__BROS_GAME__;g.coins=50;g.mode='menu';g.ui.badges(g.badges,g.coins);})()`);
-await waitFor(`document.querySelectorAll('[data-badge]').length === 6`);
-check('six badges listed', await evaluate(`document.querySelectorAll('[data-badge]').length === 6`));
+await waitFor(`document.querySelectorAll('[data-badge]').length >= 13`);
+check('thirteen badges listed', await evaluate(`document.querySelectorAll('[data-badge]').length >= 13`));
 await evaluate(`document.querySelector('[data-badge="power_badge"]').click()`);
 await sleep(200);
 check('badge purchased and equipped', await evaluate(`window.__BROS_GAME__.badges.owned.includes('power_badge') && window.__BROS_GAME__.badges.equipped.includes('power_badge')`));
 await shot('05b-badges');
+
+console.log('4c. Long-term systems');
+await evaluate(`(()=>{const g=window.__BROS_GAME__;g.meta.registerWin('grubbo');g.meta.bump('bosses',1);g.checkAchievements();g.ui.achievements(g.meta);})()`);
+await sleep(250);
+check('achievements screen populated', await evaluate(`document.querySelectorAll('.settings-row').length >= 10`));
+await shot('05c-achievements');
+await evaluate(`window.__BROS_GAME__.ui.collections(window.__BROS_GAME__.meta)`);
+await sleep(200);
+check('collection completion shown', await evaluate(`document.body.innerText.includes('COMPLETION')`));
+await evaluate(`window.__BROS_GAME__.ui.questLog(window.__BROS_GAME__.meta)`);
+await sleep(200);
+check('quest log populated', await evaluate(`document.body.innerText.includes('Quest Log')`));
+await evaluate(`window.__BROS_GAME__.startRun('endless')`);
+await sleep(300);
+check('endless dungeon starts a battle', await evaluate(`window.__BROS_GAME__.runKind === 'endless' && window.__BROS_GAME__.mode === 'battle'`));
+await shot('05d-endless');
 
 console.log('5. Offline PWA');
 await sleep(400);

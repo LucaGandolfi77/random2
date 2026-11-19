@@ -36,6 +36,22 @@ export const AREAS: AreaDef[] = [
   {
     id: 'citadel', name: 'SKY CITADEL', subtitle: 'Above the storm', seed: 419, size: [60, 28],
     enemies: ['skyfin', 'iceling', 'mimicap'], boss: 'skytyrant', ground: '#8f80b8', wall: '#544480', accent: '#f0e8ff', sky: '#6a5aa8'
+  },
+  {
+    id: 'sunken', name: 'SUNKEN ROAD', subtitle: 'Where the lighthouse fell', seed: 521, size: [58, 26],
+    enemies: ['tidewraith', 'crystalbug', 'sandworm'], boss: 'sunkenwarden', ground: '#4a7080', wall: '#2a4a58', accent: '#c8e8f0', sky: '#3a6a80'
+  },
+  {
+    id: 'clockworks', name: 'CLOCKWORK WARDS', subtitle: 'Everything here ticks', seed: 613, size: [60, 28],
+    enemies: ['ashgolem', 'crystalbug', 'pebble'], boss: 'clockworkduo', ground: '#8a7a5a', wall: '#5a4c34', accent: '#f6e0a8', sky: '#a89468'
+  },
+  {
+    id: 'stormpeak', name: 'STORM PEAK', subtitle: 'Above the clouds, inside the thunder', seed: 719, size: [62, 28],
+    enemies: ['voidmoth', 'gusto', 'skyfin'], boss: 'stormherald', ground: '#5a6a9a', wall: '#3a4570', accent: '#e8f0ff', sky: '#5a6ab0'
+  },
+  {
+    id: 'nightgate', name: 'NIGHT GATE', subtitle: 'The author of the letter', seed: 827, size: [64, 30],
+    enemies: ['voidmoth', 'tidewraith', 'ashgolem'], boss: 'nightemperor', ground: '#3a3050', wall: '#221a38', accent: '#f4c542', sky: '#1a1430'
   }
 ];
 

@@ -1,6 +1,7 @@
 import { AREA_BY_ID, generateArea, type AreaData } from '../data/areas';
 import { ENEMY_BY_ID } from '../data/enemies';
 import { TILE, VIEW_H, VIEW_W, WALK_SPEED } from '../game/constants';
+import { QUESTS } from '../data/quests';
 
 export interface WorldInput {
   left: boolean; right: boolean; up: boolean; down: boolean;
@@ -15,6 +16,7 @@ export interface WorldCallbacks {
   onChest: (item: string) => void;
   onSound: (name: string) => void;
   onDialogue: (text: string) => void;
+  onNpc: (questId: string) => void;
 }
 
 const CHEST_ITEMS = ['mushroom', 'pepper', 'oneup'];
@@ -27,6 +29,7 @@ export class Overworld {
   y = 0;
   trail: { x: number; y: number }[] = [];
   enemies: RoamingEnemy[] = [];
+  npc: { x: number; y: number; questId: string } | null = null;
   time = 0;
   actionFlash = 0;
   powers: string[] = [];
@@ -61,6 +64,8 @@ export class Overworld {
       const by = this.data.spawn.y * TILE + 8;
       this.enemies.push({ kind: def.boss, x: bx, y: by, homeX: bx, homeY: by, phase: 0.5 });
     }
+    const quest = QUESTS.find((q) => q.areaId === def.id);
+    this.npc = quest ? { x: (this.data.spawn.x + 3) * TILE + 8, y: this.data.spawn.y * TILE + 8, questId: quest.id } : null;
     this.actionFlash = 0;
     this.airTimer = 0;
     this.dashTimer = 0;
@@ -132,6 +137,10 @@ export class Overworld {
         this.cb.onChest(item);
         this.cb.onDialogue(`Found a ${item.replace('oneup', '1-UP Cap').toUpperCase()}!`);
         this.cb.onSound('coin');
+      }
+      if (this.npc && aPress && Math.hypot(this.npc.x - this.x, this.npc.y - this.y) < 22) {
+        this.cb.onNpc(this.npc.questId);
+        return;
       }
     }
 

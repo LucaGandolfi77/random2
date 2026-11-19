@@ -24,7 +24,7 @@ export const GROUND_STYLES = {
   cycleway: { repeat: 8,  color: '#8f4a3a', roughness: 0.82, normal: 0.55 }
 };
 
-const TEXTURE_SCALE = { high: 512, medium: 256, low: 128 };
+const TEXTURE_SCALE = { high: 1024, medium: 256, low: 128 };
 const textureCache = new Map();
 const materialCache = new Map();
 
@@ -591,6 +591,7 @@ export function getGroundMaterial(style, {
     map: textures.color,
     normalMap: textures.normal,
     normalScale: new THREE.Vector2(scale, scale),
+    roughnessMap: textures.roughness,
     roughness: textures.roughnessBase ?? definition.roughness,
     metalness: 0.0,
     vertexColors,

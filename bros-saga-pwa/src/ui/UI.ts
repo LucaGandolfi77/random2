@@ -7,10 +7,25 @@ import { MINIGAMES } from '../data/minigames';
 import { BADGES, BADGE_BY_ID } from '../data/badges';
 import type { BadgeSystem } from '../systems/BadgeSystem';
 import type { MinigameView } from '../game/types';
+import { CHALLENGE_MODES } from '../data/challenges';
+import { QUESTS } from '../data/quests';
+import { ACHIEVEMENTS } from '../data/achievements';
+import type { MetaSystem } from '../systems/MetaSystem';
+import { COLLECTIONS } from '../data/collections';
+
+const COLLECTION_LABELS = COLLECTIONS.map((c) => ({ id: c.id, name: c.name, total: c.entries.length }));
 
 export interface UICallbacks {
   onNew: () => void;
   onContinue: () => void;
+  onChallenge: (id: string) => void;
+  onNgPlus: () => void;
+  onEndless: () => void;
+  onBossRush: () => void;
+  onDaily: () => void;
+  onCollections: () => void;
+  onAchievements: () => void;
+  onQuestLog: () => void;
   onIntroDone: () => void;
   onCommand: (id: string) => void;
   onPress: () => void;
@@ -134,10 +149,17 @@ export class UI {
       <h1 class="title">BROS.<br>SAGA</h1>
       <p class="lead">Pip and Pop travel together, jump in and out of trouble, and win fights with perfectly timed attacks. One brother leads, the other follows — but both get a turn in battle.</p>
       <div class="menu-actions">
-        <button class="btn primary" data-a="new">New Adventure <span>START</span></button>
+        <button class="btn primary" data-a="new">New Adventure <span>CHOOSE MODE</span></button>
         ${hasSave ? '<button class="btn" data-a="continue">Continue <span>LAST SAVE</span></button>' : ''}
+        ${hasSave ? '<button class="btn" data-a="ngplus">New Game+ <span>REPLAY, STRONGER</span></button>' : ''}
+        <button class="btn" data-a="endless">Endless Dungeon <span>SURVIVE</span></button>
+        <button class="btn" data-a="bossrush">Boss Rush <span>10 FIGHTS</span></button>
+        <button class="btn" data-a="daily">Daily Challenge <span>SEEDED RUN</span></button>
         <button class="btn" data-a="minigames">Minigames <span>5 CHALLENGES</span></button>
         <button class="btn" data-a="badges">Badges <span>EQUIP 2</span></button>
+        <button class="btn" data-a="collections">Collections <span>COMPLETION</span></button>
+        <button class="btn" data-a="achievements">Achievements <span>TROPHIES</span></button>
+        <button class="btn" data-a="quests">Quest Log <span>SIDE STORIES</span></button>
         <button class="btn" data-a="howto">How to Play <span>CONTROLS</span></button>
         <button class="btn" data-a="settings">Settings <span>VOLUME</span></button>
       </div>
@@ -146,6 +168,13 @@ export class UI {
     this.wire({
       new: () => this.cb.onNew(),
       continue: () => this.cb.onContinue(),
+      ngplus: () => this.cb.onNgPlus(),
+      endless: () => this.cb.onEndless(),
+      bossrush: () => this.cb.onBossRush(),
+      daily: () => this.cb.onDaily(),
+      collections: () => this.cb.onCollections(),
+      achievements: () => this.cb.onAchievements(),
+      quests: () => this.cb.onQuestLog(),
       minigames: () => this.minigames(),
       badges: () => this.cb.onBadges(),
       howto: () => this.howto(),
@@ -188,10 +217,13 @@ export class UI {
   showWorld() { this.hud.classList.remove('hidden'); this.dialogueBox.classList.add('hidden'); this.hideBattle(); }
   hideWorld() { this.hud.classList.add('hidden'); this.dialogueBox.classList.add('hidden'); }
 
-  updateWorld(world: Overworld, bros: BroState[], items: Record<string, number>) {
+  updateWorld(world: Overworld, bros: BroState[], items: Record<string, number>, timer = 0) {
     this.areaName.textContent = AREA_BY_ID[world.areaId]?.name ?? world.areaId;
     this.leaderName.textContent = `Leader: ${BRO_BY_ID[world.leader].name}`;
-    this.itemsLine.textContent = `Items: ${Object.values(items).reduce((a, b) => a + b, 0)}`;
+    const count = Object.values(items).reduce((a, b) => a + b, 0);
+    this.itemsLine.textContent = timer > 0
+      ? `Items: ${count} · Time ${Math.floor(timer / 60)}:${String(Math.floor(timer % 60)).padStart(2, '0')}`
+      : `Items: ${count} · Coins: ${this.coinCount ?? 0}`;
     const pip = bros.find((b) => b.id === 'pip')!;
     const pop = bros.find((b) => b.id === 'pop')!;
     this.hpPip.textContent = `PIP ${pip.hp}/${pip.maxHp}`;
@@ -199,6 +231,9 @@ export class UI {
     (this.hud.querySelector('#ui-fill-pip') as HTMLElement).style.width = `${(pip.hp / pip.maxHp) * 100}%`;
     (this.hud.querySelector('#ui-fill-pop') as HTMLElement).style.width = `${(pop.hp / pop.maxHp) * 100}%`;
   }
+
+  private coinCount: number | null = null;
+  setCoins(n: number) { this.coinCount = n; }
 
   dialogue(text: string, seconds = 4) {
     this.dialogueBox.querySelector('#ui-dialogue-text')!.textContent = text;
@@ -252,6 +287,52 @@ export class UI {
       this.cmdGrid.querySelector('[data-continue]')!.addEventListener('click', () => this.cb.onBattleContinue());
       this.cmdSignature = view.phase;
     }
+  }
+
+  challenges() {
+    this.show('challenges', `
+      <div class="subtitle">CHOOSE YOUR RUN</div><h2>Game mode</h2>
+      <p class="lead">Modifiers change enemy strength and the score multiplier. Iron Man removes items entirely.</p>
+      <div class="menu-actions">${CHALLENGE_MODES.map((m) => `<button class="btn" data-ch="${m.id}">${m.name}<span>${m.description} · ×${m.scoreMultiplier}</span></button>`).join('')}</div>
+      <div class="btn-row"><button class="btn" data-a="back">Back</button></div>`);
+    this.root.querySelectorAll<HTMLElement>('[data-ch]').forEach((el) => el.addEventListener('click', () => this.cb.onChallenge(el.dataset.ch!)));
+    this.wire({ back: () => this.main(true) });
+  }
+
+  collections(meta: MetaSystem) {
+    const groups = COLLECTION_LABELS.map((label) => {
+      const found = meta.data.collected[label.id]?.length ?? 0;
+      return `<div class="settings-row"><span>${label.name}</span><b class="gold">${found}/${label.total}</b></div>`;
+    }).join('');
+    this.show('collections', `
+      <div class="subtitle">COMPLETION ${meta.completion()}%</div><h2>Collections</h2>
+      ${groups}
+      <div class="lead" style="margin-top:14px">Bosses defeated: ${meta.data.stats.bosses ?? 0} · Wins: ${meta.data.stats.wins ?? 0}</div>
+      <div class="btn-row"><button class="btn" data-a="back">Back</button></div>`);
+    this.wire({ back: () => this.main(true) });
+  }
+
+  achievements(meta: MetaSystem) {
+    const rows = ACHIEVEMENTS.map((a) => {
+      const done = meta.data.achievements.includes(a.id);
+      return `<div class="settings-row"><span>${done ? '✓' : '○'} ${a.name}<small style="display:block;color:var(--muted)">${a.description}</small></span><b>${meta.data.stats[a.key] ?? 0}/${a.goal}</b></div>`;
+    }).join('');
+    this.show('achievements', `
+      <div class="subtitle">TROPHY ROOM</div><h2>Achievements</h2>${rows}
+      <div class="btn-row"><button class="btn" data-a="back">Back</button></div>`);
+    this.wire({ back: () => this.main(true) });
+  }
+
+  questLog(meta: MetaSystem) {
+    const rows = QUESTS.map((q) => {
+      const done = meta.data.questsDone.includes(q.id);
+      const progress = meta.data.quests[q.id] ?? 0;
+      return `<div class="settings-row"><span>${done ? '✓' : '○'} ${q.title}<small style="display:block;color:var(--muted)">${q.objective}</small></span><b>${done ? 'DONE' : `${progress}/${q.needed}`}</b></div>`;
+    }).join('');
+    this.show('questlog', `
+      <div class="subtitle">SIDE STORIES</div><h2>Quest Log</h2>${rows}
+      <div class="btn-row"><button class="btn" data-a="back">Back</button></div>`);
+    this.wire({ back: () => this.main(true) });
   }
 
   minigames() {
