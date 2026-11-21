@@ -360,6 +360,120 @@ export function makePerson({ shirt = '#c2684b', pants = '#2f4a3c', skin = '#d8aa
   return group;
 }
 
+/** Refined low-poly hero. Keeps userData.limbs/height compatible with player.js. */
+export function makeHero(outfit = 'explorer') {
+  const looks = {
+    explorer: { jacket: '#e7b95a', jacketDark: '#c99538', pants: '#2e4439', skin: '#d8aa85', hair: '#4a3222', scarf: '#b5483c', hat: '#3f5c46', boots: '#4a3524', pack: '#8a4a34' },
+    city: { jacket: '#3d6ea8', jacketDark: '#2a4f7a', pants: '#2a2f3a', skin: '#d8aa85', hair: '#25242a', scarf: '#9aa8b8', hat: '#2b3442', boots: '#24272e', pack: '#3a4250' },
+    night: { jacket: '#4a4468', jacketDark: '#332e4c', pants: '#3a3550', skin: '#d8aa85', hair: '#c9c2b8', scarf: '#6fd0d8', hat: '#2a2740', boots: '#22202e', pack: '#4a4266' }
+  };
+  const c = looks[outfit] || looks.explorer;
+  const g = new THREE.Group();
+  const skin = mat(c.skin, { flatShading: true });
+  const jacket = mat(c.jacket, { flatShading: true });
+  const jacketDark = mat(c.jacketDark, { flatShading: true });
+  const pants = mat(c.pants, { flatShading: true });
+  const boots = mat(c.boots, { flatShading: true });
+  const hair = mat(c.hair, { flatShading: true });
+
+  // legs and boots (pivots at hip so rotation.x animates a proper stride)
+  const legPivot = (x) => {
+    const p = new THREE.Group();
+    p.position.set(x, 0.78, 0);
+    const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.065, 0.44, 8), pants);
+    thigh.position.y = -0.22; thigh.castShadow = true; p.add(thigh);
+    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.18, 0.26), boots);
+    boot.position.set(0, -0.66, 0.04); boot.castShadow = true; p.add(boot);
+    const toe = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.07, 0.1), mat(c.jacketDark, { flatShading: true }));
+    toe.position.set(0, -0.73, 0.13); p.add(toe);
+    g.add(p);
+    return p;
+  };
+  const legL = legPivot(0.11), legR = legPivot(-0.11);
+
+  // tapered torso, belt, collar
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.26, 0.72, 10), jacket);
+  torso.position.y = 1.14; torso.castShadow = true; torso.receiveShadow = true;
+  g.add(torso);
+  const chest = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.34, 0.06), jacketDark);
+  chest.position.set(0, 1.2, 0.2); chest.castShadow = true; g.add(chest);
+  const belt = new THREE.Mesh(new THREE.CylinderGeometry(0.265, 0.265, 0.09, 10), mat('#2b2118', { flatShading: true }));
+  belt.position.y = 0.82; g.add(belt);
+  const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.04), mat('#d8b25a', { flatShading: true }));
+  buckle.position.set(0, 0.82, 0.265); g.add(buckle);
+  const collar = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.14, 10), jacketDark);
+  collar.position.y = 1.52; g.add(collar);
+
+  // head, face and hair
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.12, 8), skin);
+  neck.position.y = 1.57; g.add(neck);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.19, 12, 10), skin);
+  head.position.y = 1.75; head.scale.set(1, 1.08, 0.95); head.castShadow = true; g.add(head);
+  const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), hair);
+  hairCap.position.y = 1.78; hairCap.castShadow = true; g.add(hairCap);
+  const fringe = box(0.3, 0.07, 0.08, c.hair, 0, 1.82, 0.16); g.add(fringe);
+  const eyeMat = new THREE.MeshBasicMaterial({ color: '#201c1a' });
+  for (const side of [-1, 1]) {
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.022, 8, 6), eyeMat);
+    eye.position.set(side * 0.075, 1.77, 0.178); g.add(eye);
+    const brow = box(0.075, 0.014, 0.02, c.hair, side * 0.075, 1.81, 0.18); g.add(brow);
+  }
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.026, 0.06, 6), skin);
+  nose.position.set(0, 1.73, 0.2); nose.rotation.x = Math.PI / 2; g.add(nose);
+  const mouth = box(0.07, 0.012, 0.02, '#8a5a48', 0, 1.68, 0.182); g.add(mouth);
+
+  // hat / beanie depending on outfit
+  if (outfit === 'city') {
+    const beret = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.19, 0.08, 12), mat(c.hat, { flatShading: true }));
+    beret.position.y = 1.9; beret.rotation.z = 0.12; beret.castShadow = true; g.add(beret);
+  } else {
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.2, 0.13, 12), mat(c.hat, { flatShading: true }));
+    crown.position.y = 1.91; crown.castShadow = true; g.add(crown);
+    const brim = box(0.34, 0.035, 0.22, c.hat, 0, 1.86, 0.12); g.add(brim);
+  }
+
+  // scarf with a tail that can sway
+  const scarf = new THREE.Group();
+  const wrap = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.18, 0.1, 10), mat(c.scarf, { flatShading: true }));
+  wrap.position.y = 1.52; scarf.add(wrap);
+  const tail = box(0.1, 0.34, 0.05, c.scarf, 0.07, 1.34, 0.18); scarf.add(tail);
+  g.add(scarf);
+
+  // arms with pivots and hands
+  const armPivot = (x) => {
+    const p = new THREE.Group();
+    p.position.set(x, 1.38, 0);
+    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.052, 0.56, 8), jacket);
+    sleeve.position.y = -0.28; sleeve.castShadow = true; p.add(sleeve);
+    const cuff = new THREE.Mesh(new THREE.CylinderGeometry(0.056, 0.056, 0.08, 8), jacketDark);
+    cuff.position.y = -0.54; p.add(cuff);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.058, 8, 6), skin);
+    hand.position.y = -0.62; hand.castShadow = true; p.add(hand);
+    g.add(p);
+    return p;
+  };
+  const armL = armPivot(0.29), armR = armPivot(-0.29);
+
+  // backpack with straps and buckles
+  const pack = new THREE.Group();
+  const bag = box(0.36, 0.44, 0.22, c.pack, 0, 1.14, -0.29); bag.castShadow = true; pack.add(bag);
+  const flap = box(0.36, 0.12, 0.24, c.jacketDark, 0, 1.32, -0.3); pack.add(flap);
+  for (const side of [-1, 1]) {
+    pack.add(box(0.05, 0.5, 0.04, c.pack, side * 0.13, 1.16, -0.16));
+    pack.add(box(0.05, 0.05, 0.02, '#d8b25a', side * 0.13, 1.1, -0.13));
+  }
+  g.add(pack);
+
+  g.userData.limbs = { armL, armR, legL, legR };
+  g.userData.scarf = scarf;
+  g.userData.torso = torso;
+  g.userData.outfit = outfit;
+  g.userData.height = 1.75;
+  g.userData.person = true;
+  g.userData.hero = true;
+  return g;
+}
+
 export function makeBench() {
   const g = new THREE.Group();
   const wood = '#8b6848';

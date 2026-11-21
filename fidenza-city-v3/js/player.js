@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { PLAYER, WORLD } from './config.js';
 import { clamp, damp, dampAngle, groundHeightAt, resolveCirclePolygon } from './utils.js';
-import { makePerson } from './models.js';
+import { makeHero } from './models.js';
 
 export class Player {
   constructor({ scene, camera, world, input }) {
@@ -23,31 +23,57 @@ export class Player {
     this.cameraShake = 0;
     this.flyMode = false;
 
-    this.mesh = makePerson({ shirt: '#e7b95a', pants: '#2e4439', skin: '#d8aa85', hair: '#2d2119' });
+    this.outfits = ['explorer', 'city', 'night'];
+    try { this.outfit = localStorage.getItem('fidenza-outfit') || 'explorer'; } catch { this.outfit = 'explorer'; }
+    if (!this.outfits.includes(this.outfit)) this.outfit = 'explorer';
+    this.mesh = makeHero(this.outfit);
     this.mesh.traverse(o => { if (o.isMesh) o.castShadow = true; });
-    // zaino
-    const pack = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.42, 0.2), new THREE.MeshLambertMaterial({ color: '#9a4a34' }));
-    pack.position.set(0, 1.14, -0.24);
-    pack.castShadow = true;
-    this.mesh.add(pack);
     // ombra
     const shadowTex = (() => {
       const c = document.createElement('canvas');
-      c.width = c.height = 64;
+      c.width = c.height = 128;
       const ctx = c.getContext('2d');
-      const g = ctx.createRadialGradient(32, 32, 2, 32, 32, 30);
-      g.addColorStop(0, 'rgba(0,0,0,.4)');
+      const g = ctx.createRadialGradient(64, 64, 4, 64, 64, 62);
+      g.addColorStop(0, 'rgba(0,0,0,.45)');
+      g.addColorStop(0.55, 'rgba(0,0,0,.2)');
       g.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, 128, 128);
       const t = new THREE.CanvasTexture(c);
       return t;
     })();
-    this.shadow = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false }));
+    this.shadow = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, opacity: 0.85 }));
     this.shadow.rotation.x = -Math.PI / 2;
     this.shadow.position.y = 0.03;
     this.mesh.add(this.shadow);
     scene.add(this.mesh);
     this._syncMesh();
+  }
+
+  setOutfit(id) {
+    if (!this.outfits.includes(id) || id === this.outfit) return;
+    const old = this.mesh;
+    const next = makeHero(id);
+    next.traverse(o => { if (o.isMesh) o.castShadow = true; });
+    if (this.shadow) { old.remove(this.shadow); next.add(this.shadow); }
+    next.visible = this.onFoot;
+    this.scene.remove(old);
+    this.scene.add(next);
+    old.traverse(o => {
+      if (!o.isMesh) return;
+      o.geometry.dispose();
+      if (Array.isArray(o.material)) o.material.forEach(m => m.dispose());
+      else o.material.dispose();
+    });
+    this.mesh = next;
+    this.outfit = id;
+    try { localStorage.setItem('fidenza-outfit', id); } catch { /* storage unavailable */ }
+    this._syncMesh();
+  }
+
+  cycleOutfit() {
+    const next = this.outfits[(this.outfits.indexOf(this.outfit) + 1) % this.outfits.length];
+    this.setOutfit(next);
+    return this.outfit;
   }
 
   spawn(x, z, yaw = this.yaw) {
@@ -165,6 +191,17 @@ export class Player {
       limbs.armL.rotation.x = b * 0.8;
       limbs.armR.rotation.x = a * 0.8;
       this.mesh.position.y = this.position.y + 0.04 + Math.abs(Math.sin(this.walkPhase * 6)) * amp * 0.035;
+    }
+    const scarf = this.mesh.userData.scarf;
+    if (scarf) {
+      scarf.rotation.x = -0.12 - amp * 0.35 + Math.sin(this.walkPhase * 6 + 0.7) * amp * 0.22;
+      scarf.rotation.z = Math.sin(this.walkPhase * 3) * amp * 0.12;
+    }
+    const torso = this.mesh.userData.torso;
+    if (torso) {
+      const breath = 1 + Math.sin(this.walkPhase * 1.6) * 0.012 * (1 - amp);
+      torso.scale.y = breath;
+      torso.rotation.x = amp * 0.06;
     }
     this.updateCamera(dt);
   }

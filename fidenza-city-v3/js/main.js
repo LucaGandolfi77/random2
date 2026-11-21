@@ -180,6 +180,7 @@ const ui = {
   pauseDiary: document.getElementById('pause-diary'),
   pauseAudio: document.getElementById('pause-audio'),
   pausePhoto: document.getElementById('pause-photo'),
+  pauseOutfit: document.getElementById('pause-outfit'),
   pauseAchievements: document.getElementById('pause-achievements'),
   pauseExport: document.getElementById('pause-export'),
   pauseImport: document.getElementById('pause-import'),
@@ -595,6 +596,7 @@ async function init() {
   markDay(gameDate());
 
   player = new Player({ scene, camera, world, input });
+  if (ui.pauseOutfit) ui.pauseOutfit.textContent = `Abbigliamento: ${player.outfit}`;
   if (new URLSearchParams(location.search).has('debug')) {
     window.__fidenza = {
       get world() { return world; },
@@ -1263,6 +1265,13 @@ function bindUI() {
   ui.pausePhoto?.addEventListener('click', () => {
     ui.pauseDialog.close();
     enterPhoto();
+  });
+  ui.pauseOutfit?.addEventListener('click', () => {
+    const name = player?.cycleOutfit();
+    if (ui.pauseOutfit) ui.pauseOutfit.textContent = `Abbigliamento: ${name || 'explorer'}`;
+    hud.setToast(`Abbigliamento: ${name || 'explorer'}`);
+    ui.pauseDialog.close();
+    requestPointerLock();
   });
   ui.touchQuick?.addEventListener('click', event => {
     const btn = event.target.closest('[data-touch-action]');
