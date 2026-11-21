@@ -167,6 +167,7 @@ const ui = {
   diaryContent: document.getElementById('diary-content'),
   npcNext: document.getElementById('npc-next'),
   npcClose: document.getElementById('npc-close'),
+  npcQuiz: document.getElementById('npc-quiz'),
   pauseDialog: document.getElementById('pause-dialog'),
   boardDialog: document.getElementById('board-dialog'),
   confirmDialog: document.getElementById('confirm-dialog'),
@@ -1324,6 +1325,37 @@ function bindUI() {
     requestPointerLock();
   });
   ui.npcClose?.addEventListener('click', () => ui.npcDialog?.close());
+  ui.npcQuiz?.addEventListener('click', () => {
+    if (!activeNpc?.quiz) return;
+    const panel = document.getElementById('npc-quiz-panel');
+    const question = document.getElementById('npc-question');
+    const options = document.getElementById('npc-options');
+    const result = document.getElementById('npc-result');
+    if (!panel || !question || !options || !result) return;
+    panel.hidden = false;
+    result.hidden = true;
+    question.textContent = activeNpc.quiz.question;
+    options.replaceChildren();
+    activeNpc.quiz.options.forEach((option, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = option;
+      button.addEventListener('click', () => {
+        const correct = index === activeNpc.quiz.answer;
+        result.textContent = correct ? activeNpc.quiz.correct : activeNpc.quiz.wrong;
+        result.hidden = false;
+        result.style.color = correct ? '#2f6b4f' : '#8f3e34';
+        options.querySelectorAll('button').forEach(item => { item.disabled = true; });
+        const key = 'quiz-' + activeNpc.id;
+        if (correct && addUniqueStat('npcQuiz', key)) {
+          addScore(activeNpc.quiz.reward || 20);
+          hud.setToast(`Risposta giusta · +${activeNpc.quiz.reward || 20} punti`, 3200);
+          refreshSaveUI();
+        }
+      });
+      options.appendChild(button);
+    });
+  });
   ui.npcNext?.addEventListener('click', () => {
     if (!activeNpc?.lines?.length) return;
     activeNpcLine = (activeNpcLine + 1) % activeNpc.lines.length;

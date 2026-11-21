@@ -391,13 +391,33 @@ function buildDuomo(g, world) {
 }
 
 function buildPorta(g) {
+  // torri gemelle con merlature ghibelline
   for (const z of [-3.6, 3.6]) {
     box(g, 3.4, 12, 3.4, STONE, 0, 6, z);
-    for (let i = -1; i <= 1; i++) box(g, 0.8, 1.2, 3.6, STONE_DARK, 0, 11.6 + 1.0, z + i * 1.1);
+    // beccatelli di sostegno
+    for (const dz of [-1.2, 0, 1.2]) {
+      box(g, 0.6, 0.4, 0.6, STONE_DARK, 0, 11.2, z + dz);
+    }
+    // merlature a coda di rondine
+    for (let m = -1; m <= 1; m++) {
+      const merlo = new THREE.Mesh(new THREE.CylinderGeometry(0.0, 0.45, 0.9, 3), lam(STONE_DARK));
+      merlo.position.set(0, 12.4, z + m * 0.8);
+      merlo.rotation.y = m * 0.3;
+      merlo.castShadow = true;
+      g.add(merlo);
+    }
+    // feritoia
+    box(g, 0.2, 0.8, 0.12, '#2d241f', 1.7, 8.5, z);
   }
+  // fornice centrale
   box(g, 2.4, 2.2, 10.6, STONE_DARK, 0, 10.6, 0);
   box(g, 1.2, 7.4, 6.8, '#3a2e2a', 0, 3.7, 0);
   box(g, 1.4, 0.7, 7.4, STONE_LIGHT, 0, 7.7, 0);
+  // scudo sopra l'arco
+  box(g, 1.8, 1.4, 0.2, '#8f7a5e', 0, 8.4, -1.7);
+  box(g, 1.2, 1.0, 0.15, '#c4b290', 0, 8.4, -1.75);
+  // cordolo di base in pietra
+  box(g, 3.8, 0.5, 12.2, STONE_DARK, 0, 0.25, 0);
   addSign(g, 'PORTA SAN DONNINO', 0, 14.2, 0, 0.62);
 }
 
@@ -424,23 +444,49 @@ function buildPonte(g) {
 }
 
 function buildTeatro(g) {
+  // corpo principale con bugnato rustico sui lati
   box(g, 34, 13, 22, '#ddc9a9', 0, 6.5, 0);
   box(g, 36, 1.2, 24, STONE_DARK, 0, 13.3, 0);
-  // portico
-  for (let i = -2; i <= 2; i++) {
-    cyl(g, 0.38, 0.46, 8.6, STONE_LIGHT, i * 3.1, 4.3, 11.6, 10);
+  for (let i = -3; i <= 3; i++) {
+    if (i === 0) continue;
+    box(g, 1.0, 10.2, 0.3, '#c4b290', i * 4.4, 5.1, 11.2);
   }
-  box(g, 17.5, 1.0, 3.8, STONE_LIGHT, 0, 9.1, 11.6);
-  box(g, 19.5, 0.9, 4.4, STONE_DARK, 0, 9.8, 11.6);
-  // frontone
+  // colonnato neoclassico a 6 colonne doriche
+  for (let i = -2; i <= 2; i++) {
+    const x = i * 3.1;
+    // base e capitello
+    cyl(g, 0.50, 0.50, 0.4, STONE_DARK, x, 0.2, 11.6, 8);
+    cyl(g, 0.38, 0.46, 8.6, STONE_LIGHT, x, 4.7, 11.6, 10);
+    cyl(g, 0.52, 0.52, 0.4, STONE_DARK, x, 9.2, 11.6, 8);
+    // scanalature: tre sottili box per colonna
+    for (const dz of [-0.2, 0, 0.2]) {
+      box(g, 0.04, 7.8, 0.04, STONE_DARK, x, 4.7, 11.6 + dz);
+    }
+  }
+  // entablatura: architrave, fregio e cornice
+  box(g, 17.5, 1.0, 3.8, STONE_LIGHT, 0, 9.7, 11.6);
+  box(g, 18.5, 0.6, 4.2, '#c4b290', 0, 10.4, 11.6);
+  box(g, 19.5, 0.9, 4.4, STONE_DARK, 0, 11.1, 11.6);
+  // frontone triangolare con timpano pieno
   const shape = new THREE.Shape();
   shape.moveTo(-10.5, 0); shape.lineTo(10.5, 0); shape.lineTo(0, 4.6); shape.closePath();
   const ped = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 1.8, bevelEnabled: false }), lam(STONE_LIGHT));
-  ped.position.set(0, 10.2, 11.0);
+  ped.position.set(0, 11.5, 11.0);
   ped.castShadow = true;
   g.add(ped);
-  box(g, 3.0, 5.0, 0.8, '#3c2e29', 0, 5.2, 12.8);
-  addSign(g, 'TEATRO G. MAGNANI', 0, 12.4, 13.2, 0.68);
+  // stemma al centro del frontone
+  box(g, 2.4, 2.4, 0.3, '#8f7a5e', 0, 13.4, 11.9);
+  box(g, 1.6, 1.6, 0.2, '#c4b290', 0, 13.4, 12.0);
+  // ingresso con arco a tutto sesto
+  box(g, 4.2, 5.8, 0.8, '#3c2e29', 0, 3.2, 12.8);
+  const arch = new THREE.Mesh(new THREE.TorusGeometry(1.9, 0.22, 8, 16, Math.PI), lam(STONE_DARK));
+  arch.position.set(0, 6.0, 12.8);
+  arch.castShadow = true;
+  g.add(arch);
+  // gradinata
+  box(g, 22, 0.22, 5.5, STONE_DARK, 0, 0.11, 13.6);
+  box(g, 20, 0.18, 4.0, STONE_LIGHT, 0, 0.3, 13.2);
+  addSign(g, 'TEATRO G. MAGNANI', 0, 14.8, 13.2, 0.68);
 }
 
 function buildComunale(g) {

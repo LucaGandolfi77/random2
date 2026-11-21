@@ -8,6 +8,72 @@
 
 export const NPC_FIXED = [
   {
+    id: 'giuseppe-ponte',
+    name: 'Giuseppe',
+    role: 'Guardiano del Ponte Romano',
+    area: 'Ponte Romano',
+    x: -310, z: -60,
+    shirt: '#5c6b5f', pants: '#3a3f46', skin: '#c99a78', hair: '#4a3326',
+    lines: [
+      'Questo ponte è il ricordo più antico di Fidenza: passa sopra lo Stirone da secoli.',
+      'La sera l’acqua riflette le luci del centro: fermati un attimo ad ascoltarla.',
+      'Se cammini lungo il fiume, trovi angoli che la mappa non sa raccontare.'
+    ],
+    hint: 'Consiglio: apri la mappa con N e segui il corso dello Stirone.',
+    quiz: {
+      question: 'Come si chiama il fiume che passa sotto il Ponte Romano?',
+      options: ['Torrente Stirone', 'Fiume Po', 'Canale Naviglio'],
+      answer: 0,
+      reward: 30,
+      correct: 'Esatto! Lo Stirone attraversa Fidenza e il ponte lo scavalca.',
+      wrong: 'Non proprio: è lo Stirone, il torrente che attraversa la città.'
+    }
+  },
+  {
+    id: 'serena-blu',
+    name: 'Serena',
+    role: 'Barista del Bar Blu Piramide',
+    area: 'Le Azalee',
+    x: 2082, z: 783,
+    shirt: '#2f6fa8', pants: '#1d2b3a', skin: '#d8aa85', hair: '#2d2119',
+    lines: [
+      'Il caffè qui si serve con una storia, non solo con lo zucchero.',
+      'La nostra insegna blu è diventata un punto di riferimento per tutto il quartiere.',
+      'Se passi di qui la sera, l’insegna si accende e la terrazza si riempie.'
+    ],
+    hint: 'Consiglio: il Bar Blu Piramide si trova in Via Ferraris 14.',
+    quiz: {
+      question: 'In che via si trova il Bar Blu Piramide?',
+      options: ['Via Ferraris', 'Via Emilia', 'Piazza Garibaldi'],
+      answer: 0,
+      reward: 30,
+      correct: 'Giusto! Via Ferraris 14, nel quartiere Le Azalee.',
+      wrong: 'Sbagliato: è in Via Ferraris 14, Le Azalee.'
+    }
+  },
+  {
+    id: 'rodolfo-capostazione',
+    name: 'Rodolfo',
+    role: 'Capostazione',
+    area: 'Stazione',
+    x: 181, z: -119,
+    shirt: '#3f5f7a', pants: '#2f4a3c', skin: '#c99a78', hair: '#3a2a20',
+    lines: [
+      'La stazione di Fidenza è un crocevia: treni, navette e storie che partono.',
+      'Il tabellone non mente: se una coincidenza salta, c’è sempre un’altra corsa.',
+      'Da qui passa anche la Via Francigena: molti pellegrini si fermano a riposare.'
+    ],
+    hint: 'Consiglio: la missione Il pellegrino parte proprio dalla stazione.',
+    quiz: {
+      question: 'Quale missione parte dalla stazione di Fidenza?',
+      options: ['Il pellegrino', 'Consegna urgente', 'Ultimo treno'],
+      answer: 0,
+      reward: 30,
+      correct: 'Corretto: Il pellegrino inizia qui in stazione.',
+      wrong: 'No: è Il pellegrino a partire dalla stazione.'
+    }
+  },
+  {
     id: 'blue-bartender',
     name: 'Blue',
     role: 'Barista del Bar Blu Piramide',
@@ -192,6 +258,48 @@ export const NPC_FIXED = [
 ];
 
 export const NPC_WALKERS = [
+  {
+    id: 'alba-restauratrice',
+    name: 'Alba',
+    role: 'Restauratrice',
+    area: 'Piazza Duomo',
+    x: -299, z: 6,
+    shirt: '#c99a3f', pants: '#5b4a3a', skin: '#d8aa85', hair: '#4a3326',
+    lines: [
+      'Restauro la pietra del Duomo un millimetro alla volta: ogni segno è una storia.',
+      'La facciata non è mai finita davvero: cantiere e fede convivono da secoli.',
+      'Se guardi bene i capitelli, trovi volti che sembrano ancora vivi.'
+    ],
+    hint: 'Consiglio: usa la modalità foto per osservare i dettagli della facciata.'
+  },
+  {
+    id: 'nicola-pizzaiolo',
+    name: 'Nicola',
+    role: 'Pizzaiolo',
+    area: 'Via Emilia',
+    x: 30, z: 4,
+    shirt: '#c2684b', pants: '#2f4a3c', skin: '#c99a78', hair: '#2d2119',
+    lines: [
+      'A Fidenza la pizza si è fatta strada tra le osterie: qui si mangia bene a ogni ora.',
+      'Il forno a legna va tenuto d’occhio: la pazienza è l’ingrediente segreto.',
+      'Dopo una giornata in bici, niente batte un margherita con basilico fresco.'
+    ],
+    hint: 'Consiglio: le insegne delle attività si leggono passeggiando per il centro.'
+  },
+  {
+    id: 'federica-bibliotecaria',
+    name: 'Federica',
+    role: 'Bibliotecaria',
+    area: 'Piazza Repubblica',
+    x: 190, z: -100,
+    shirt: '#7a5a8a', pants: '#3a3f46', skin: '#d8aa85', hair: '#3a2a20',
+    lines: [
+      'I libri di Fidenza parlano di Langobardi, pellegrini e strade che non esistono più.',
+      'Se ti piace perdere tempo bene, la biblioteca è il posto giusto.',
+      'Ogni quartiere ha una storia: basta chiedere a chi ci vive.'
+    ],
+    hint: 'Consiglio: il Diario di Fidenza raccoglie storie e luoghi scoperti.'
+  },
   {
     id: 'sofia-studentessa',
     name: 'Sofia',

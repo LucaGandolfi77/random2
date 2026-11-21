@@ -1,4 +1,4 @@
-# Fidenza da Giocare v3.3.6 — Mondo Arnis, terreno reale e suolo in streaming
+# Fidenza da Giocare v3.4.0 — Mondo Arnis, terreno reale e suolo in streaming
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
@@ -41,6 +41,21 @@ quello della v2.23.
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
 
+## Novità v3.4.0 — facciate, landmark, SSAO e luce
+
+Rispetto alla v3.3.7:
+
+- **facciate per quartiere**: balconi in ferro sul Centro, persiane con palette
+distinta per Monica/Corea/Luce/Coduro, comignoli in cotto o metallo,
+ringhiere sui tetti piani alti;
+- **landmark ricostruiti**: Teatro con colonnato dorico a 6 colonne, frontone
+con stemma e gradinata; Porta con merlature ghibelline, beccatelli e scudo;
+- **SSAO**: occlusione ambientale a schermo nel compositor, 12 campioni,
+solo su high desktop (`?ssao=0` per disattivare);
+- **nebbia mattutina e ombre lunghe** al tramonto;
+- **alberi per quartiere**: platano, tiglio, pino e quercia con chiome
+geometriche diverse, assegnati in base al quartiere.
+
 ## Novità v3.3.6 — facciate reali, cartelli e luce
 
 Sono stati aggiunti **10 interni** (Duomo con cripta, Teatro Magnani, i quattro
@@ -64,6 +79,127 @@ L'esterno del gioco non è stato modificato.
   Sobel con micro-rumore, roughness map), normal map leggera sulle tessere
   ortofoto, tombini con bordo e barre, giunti dei marciapiedi e pavimenti in
   porfido/cemento anche dentro gli edifici.
+
+## Modificare gli NPC a mano
+
+Tutti gli abitanti si definiscono in **`js/npcs.js`** (due array: `NPC_FIXED`
+per chi sta fermo in un punto, `NPC_WALKERS` per chi cammina su una strada
+pedonale). I loro orari e le destinazioni stanno in **`js/schedules.js`**, nel
+dialogo `NPC_SCHEDULES`. Non servono Blender né file esterni: basta modificare
+questi due file e ricaricare la pagina.
+
+### Campi di un NPC (`js/npcs.js`)
+
+| Campo | Dove | Significato | Esempio |
+| --- | --- | --- | --- |
+| `id` | `npcs.js` | identificatore unico (usato anche per quiz e salvataggio) | `'giuseppe-ponte'` |
+| `name` | `npcs.js` | nome mostrato nel dialogo | `'Giuseppe'` |
+| `role` | `npcs.js` | professione, mostrata sotto il nome | `'Guardiano del Ponte Romano'` |
+| `area` | `npcs.js` | zona, mostrata accanto al ruolo | `'Ponte Romano'` |
+| `x`, `z` | `npcs.js` | posizione di partenza in metri (coordinate locali del gioco) | `x: -310, z: -60` |
+| `shirt` | `npcs.js` | **colore della maglia** (hex) | `'#5c6b5f'` |
+| `pants` | `npcs.js` | colore dei pantaloni | `'#3a3f46'` |
+| `skin` | `npcs.js` | **colore della pelle** | `'#c99a78'` |
+| `hair` | `npcs.js` | colore dei capelli | `'#4a3326'` |
+| `lines` | `npcs.js` | array di battute: il pulsante "Parla ancora" le scorre in ciclo | `['Ciao…', 'Un’altra frase…']` |
+| `hint` | `npcs.js` | consiglio finale mostrato in fondo al dialogo | `'Consiglio: apri la mappa con N.'` |
+| `quiz` | `npcs.js` | **domanda opzionale** (vedi sotto) | vedi esempio |
+
+### Orari, dove va e cosa fa (`js/schedules.js`)
+
+`NPC_SCHEDULES` e' un og indicizzato per `id`. Ogni voce e' un array di slot:
+
+```js
+'giuseppe-ponte': [
+  { from: 8, to: 13, x: -310, z: -60, activity: 'ponte' },
+  { from: 16, to: 21, x: -310, z: -60, activity: 'ponte' }
+],
+```
+
+- `from`/`to`: ore di inizio e fine (nel fuso orario del gioco).
+- `x`/`z`: **dove va** l'NPC in quella fascia; il gioco cerca un punto libero vicino.
+- `activity`: **cosa fa**, usata anche nelle card e nel Diario (es. `'bar'`, `'mercato'`, `'stazione'`, `'lavoro'`, `'tempo libero'`).
+- Se non c'e' uno slot attivo, l'NPC diventa invisibile ("a casa").
+
+Per i camminanti si puo' usare l'helper `active(from, to)`, che li tiene in giro
+per una fascia oraria senza fissare una destinazione, lasciandoli seguire la
+strada pedonale piu' vicina:
+
+```js
+'alba-restauratrice': active(8, 18),
+```
+
+### Aggiungere o togliere una domanda (quiz)
+
+Il quiz e' **facoltativo**: se un NPC non ha il campo `quiz`, il pulsante
+"Fai una domanda" non compare. Per aggiungerlo:
+
+```js
+quiz: {
+  question: 'Come si chiama il fiume sotto il Ponte Romano?',
+  options: ['Torrente Stirone', 'Fiume Po', 'Canale Naviglio'],
+  answer: 0,                 // indice (da 0) della risposta corretta
+  reward: 30,                // punti una sola volta
+  correct: 'Esatto! Lo Stirone attraversa Fidenza.',
+  wrong: 'Non proprio: e' lo Stirone.'
+}
+```
+
+- `answer` e' un **indice numerico**, non il testo.
+- I punti vengono assegnati una sola volta per NPC e salvati in
+  `npcQuiz` (chiave `quiz-<id>`); la risposta sbagliata non dà punti e permette
+  di riprovare in un'altra conversazione.
+- Per togliere il quiz, elimina semplicemente il blocco `quiz: { … }`.
+
+### Esempio completo: NPC fisso con quiz
+
+```js
+{
+  id: 'mario-gelataio',
+  name: 'Mario',
+  role: 'Gelataio',
+  area: 'Piazza Duomo',
+  x: -280, z: -10,
+  shirt: '#4f8fa8', pants: '#2f4a3c', skin: '#d8aa85', hair: '#2d2119',
+  lines: [
+    'Il gelato qui si fa con la frutta del mercato.',
+    'D'estate la piazza si riempie di gente sotto l’ombrellone.'
+  ],
+  hint: 'Consiglio: cambia stagione dal menu pausa.',
+  quiz: {
+    question: 'Quale frutta si usa per il gelato?',
+    options: ['Frutta del mercato', 'Solo cioccolato', 'Nessuna'],
+    answer: 0,
+    reward: 25,
+    correct: 'Bravo! Qui si usa la frutta del mercato.',
+    wrong: 'Riprova: la frutta arriva dal mercato.'
+  }
+}
+```
+
+E il suo orario in `js/schedules.js`:
+
+```js
+'mario-gelataio': [
+  { from: 11, to: 20, x: -280, z: -10, activity: 'gelateria' }
+],
+```
+
+### Perche' un NPC nuovo potrebbe non comparire
+
+In **`js/world.js`**, `_buildNpcs()` limita il numero di personaggi in base alla
+qualita': `fixedCount` e' 9/11/**13** (low/medium/high) e `walkerCount` e'
+3/5/**6**. Se aggiungi NPC oltre quelli, spostali **in cima agli array** in
+`npcs.js` oppure aumenta quei valori. I camminanti vengono creati solo se
+vicino alla loro `x,z` esiste una strada pedonale.
+
+### Errori comuni
+
+- Dimenticare la virgola tra due voci dell'array: il gioco non carica `npcs.js`.
+- Usare colori senza `#` oppure con nome (`red`): servono hex tipo `'#c2684b'`.
+- Mettere `answer` come testo invece che numero: il confronto non funziona.
+- Coordinate lontane dalla citta': l'NPC puo' finire dentro un edificio;
+  il gioco cerca un punto libero con `findFreeSpot`, ma entro certi limiti.
 
 ## Avvio
 

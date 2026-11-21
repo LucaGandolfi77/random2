@@ -538,7 +538,30 @@ export function makeBlockTreeGeometry(species = 'oak') {
       }
     }
   };
-  if (species === 'spruce') {
+  if (species === 'platano') {
+    // platano: alto, chioma dappled, tronco liscio
+    layer(4, 4, block * 0.5, true, 0.2);
+    layer(3, 3, block * 1.5, true, 0.15);
+    layer(1, 1, block * 2.5, false, 0);
+  } else if (species === 'tiliglio') {
+    // tiglio: chioma rotonda e densa
+    layer(4, 4, block * 0.4, true, 0.08);
+    layer(5, 5, block * 1.2, true, 0.1);
+    layer(3, 3, block * 2.0, true, 0.08);
+    layer(1, 1, block * 2.8, false, 0);
+  } else if (species === 'pino') {
+    // pino: conico, strati stretti
+    layer(5, 5, block * 0.2, true, 0.15);
+    layer(3, 3, block * 1.0, true, 0.1);
+    layer(3, 3, block * 1.8, false, 0.1);
+    layer(1, 1, block * 2.6, false, 0);
+  } else if (species === 'quercia') {
+    // quercia: larga e massiccia
+    layer(5, 5, block * 0.3, true, 0.08);
+    layer(7, 7, block * 1.2, true, 0.12);
+    layer(5, 5, block * 2.1, true, 0.1);
+    layer(3, 3, block * 2.9, false, 0.08);
+  } else if (species === 'spruce') {
     layer(5, 5, block * 0.3, true, 0.15);
     layer(3, 3, block * 1.1, true, 0.1);
     layer(3, 3, block * 1.9, false, 0.1);

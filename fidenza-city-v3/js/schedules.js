@@ -21,6 +21,21 @@ const standard = (x, z, opts = {}) => {
 const active = (from, to, activity = 'in giro') => [{ from, to, keepRoute: true, activity }];
 
 export const NPC_SCHEDULES = {
+  'giuseppe-ponte': [
+    { from: 8, to: 13, x: -310, z: -60, activity: 'ponte' },
+    { from: 16, to: 21, x: -310, z: -60, activity: 'ponte' }
+  ],
+  'serena-blu': [
+    { from: 9, to: 15, x: 2082, z: 783, activity: 'bar' },
+    { from: 18, to: 23, x: 2082, z: 783, activity: 'bar' }
+  ],
+  'rodolfo-capostazione': [
+    { from: 6, to: 14, x: 181, z: -119, activity: 'stazione' },
+    { from: 16, to: 22, x: 181, z: -119, activity: 'stazione' }
+  ],
+  'alba-restauratrice': active(8, 18),
+  'nicola-pizzaiolo': active(10, 23),
+  'federica-bibliotecaria': active(9, 19),
   'blue-bartender': [
     { from: 8, to: 20, x: 2078, z: 788, activity: 'bar' }
   ],

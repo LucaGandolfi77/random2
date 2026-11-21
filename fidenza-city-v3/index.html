@@ -194,7 +194,7 @@
   <div id="intro">
     <main class="poster">
       <section class="talk">
-        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v3.3.6</span></p>
+        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v3.4.0</span></p>
         <h1 class="wordmark" aria-label="Fidenza da Giocare">
           <span>Fidenza</span>
           <span>da Giocare</span>
@@ -342,7 +342,13 @@
       <p id="npc-hint" class="fact"></p>
       <div class="info-actions">
         <button type="button" id="npc-next" class="primary">Parla ancora</button>
+        <button type="button" id="npc-quiz" hidden>Fai una domanda</button>
         <button type="button" id="npc-close">Saluta</button>
+      </div>
+      <div id="npc-quiz-panel" hidden>
+        <p id="npc-question" class="fact"></p>
+        <div id="npc-options" class="info-actions"></div>
+        <p id="npc-result" class="dialog-note" hidden></p>
       </div>
     </div>
   </dialog>

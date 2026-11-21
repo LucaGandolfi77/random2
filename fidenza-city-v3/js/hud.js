@@ -270,6 +270,12 @@ export class HUD {
     if (this.el.npcText) this.el.npcText.textContent = npc.lines?.[lineIndex] || '';
     if (this.el.npcHint) this.el.npcHint.textContent = npc.hint || '';
     if (this.el.npcNext) this.el.npcNext.hidden = (npc.lines?.length || 0) <= 1;
+    const quizButton = document.getElementById('npc-quiz');
+    const quizPanel = document.getElementById('npc-quiz-panel');
+    if (quizButton) quizButton.hidden = !npc.quiz;
+    if (quizPanel) quizPanel.hidden = true;
+    const result = document.getElementById('npc-result');
+    if (result) result.hidden = true;
     const d = document.getElementById('npc-dialog');
     if (d && !d.open) d.showModal();
   }
