@@ -20,6 +20,8 @@ export const GROUND_STYLES = {
   grass:    { repeat: 7,  color: '#5d7d3f', roughness: 0.97, normal: 0.3 },
   soil:     { repeat: 9,  color: '#6b543c', roughness: 0.97, normal: 0.7 },
   gravel:   { repeat: 5,  color: '#9a958c', roughness: 0.92, normal: 0.85 },
+  // Tappeto misto per landuse=urban: cortili, giardini, passaggi e lastre.
+  urban:    { repeat: 6,  color: '#8f8a7d', roughness: 0.93, normal: 0.55 },
   turf:     { repeat: 8,  color: '#4f7a3a', roughness: 0.96, normal: 0.22 },
   cycleway: { repeat: 8,  color: '#8f4a3a', roughness: 0.82, normal: 0.55 }
 };
@@ -400,6 +402,49 @@ function paintGravel(ctx, size, rnd) {
   softStain(ctx, size, rnd, 'rgba(52,48,42,.16)', 8, 44);
 }
 
+function paintUrban(ctx, size, rnd) {
+  // Il landuse urbano non è una superficie pavimentata: sotto ci sono
+  // cortili, giardini, passaggi e lastre di cemento. Una base ghiaiosa con
+  // chiazze d'erba evita l'effetto "città nel deserto".
+  paintGravel(ctx, size, rnd);
+  const greens = ['rgba(86,110,62,.42)', 'rgba(104,126,74,.34)', 'rgba(70,94,52,.38)', 'rgba(120,138,86,.28)'];
+  for (let i = 0; i < 34; i++) {
+    const x = rnd() * size, y = rnd() * size;
+    const rx = size * (0.035 + rnd() * 0.09);
+    const ry = rx * (0.5 + rnd() * 0.7);
+    const angle = rnd() * Math.PI;
+    ctx.fillStyle = greens[Math.floor(rnd() * greens.length)];
+    wrapDraw(ctx, size, x, y, (ox, oy) => {
+      ctx.beginPath();
+      ctx.ellipse(ox, oy, rx, ry, angle, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+  const slabs = ['rgba(196,190,178,.30)', 'rgba(150,146,136,.32)', 'rgba(176,170,158,.26)'];
+  for (let i = 0; i < 12; i++) {
+    const x = rnd() * size, y = rnd() * size;
+    const w = size * (0.04 + rnd() * 0.12);
+    const h = size * (0.03 + rnd() * 0.08);
+    const angle = rnd() * Math.PI;
+    ctx.fillStyle = slabs[Math.floor(rnd() * slabs.length)];
+    wrapDraw(ctx, size, x, y, (ox, oy) => {
+      ctx.save();
+      ctx.translate(ox, oy);
+      ctx.rotate(angle);
+      ctx.fillRect(-w / 2, -h / 2, w, h);
+      ctx.restore();
+    });
+  }
+  // micro-verde tra le fughe
+  for (let i = 0; i < 1200; i++) {
+    const x = rnd() * size, y = rnd() * size;
+    ctx.globalAlpha = 0.2 + rnd() * 0.4;
+    ctx.fillStyle = rnd() > 0.5 ? '#5c7a42' : '#758c52';
+    wrapDraw(ctx, size, x, y, (ox, oy) => ctx.fillRect(ox, oy, 1, 1));
+  }
+  ctx.globalAlpha = 1;
+}
+
 function paintTurf(ctx, size, rnd) {
   const phases = makePhases(113, 5);
   const image = ctx.createImageData(size, size);
@@ -455,6 +500,7 @@ const PAINTERS = {
   grass: paintGrass,
   soil: paintSoil,
   gravel: paintGravel,
+  urban: paintUrban,
   turf: paintTurf,
   cycleway: paintCycleway
 };

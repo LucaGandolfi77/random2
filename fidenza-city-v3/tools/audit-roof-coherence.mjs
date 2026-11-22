@@ -12,11 +12,17 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  resolveBuildingRoof, hippedRoofRing, polygonCentroid
+} from '../js/building-geometry.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..');
 const city = JSON.parse(readFileSync(resolve(root, 'data/city.json'), 'utf8'));
 const map = JSON.parse(readFileSync(resolve(root, 'data/map.json'), 'utf8'));
+const arnis = JSON.parse(readFileSync(resolve(root, 'data/arnis/arnis.json'), 'utf8'));
+const arnisBuildings = arnis.buildings || {};
+const roofStyleCounts = { flat: 0, gabled: 0, hipped: 0 };
 
 const LANDMARK_NAMES = new Set([
   'Cattedrale di San Donnino', 'Porta di San Donnino',
@@ -111,22 +117,29 @@ for (const b of city.buildings || []) {
   const edge = longestEdge(poly);
   const bounds = orientedBounds(poly, edge.ux, edge.uz);
   const rectangularity = area / Math.max(0.01, bounds.width * bounds.length);
-  const convex = isConvex(poly);
-  const edgeTmp = longestEdge(poly);
-  const boundsTmp = orientedBounds(poly, edgeTmp.ux, edgeTmp.uz);
-  const rectangularityCheck = area / Math.max(0.01, boundsTmp.width * boundsTmp.length);
-  const cornersTmp = [
-    [boundsTmp.minU - 0.35, boundsTmp.minN - 0.35],
-    [boundsTmp.maxU + 0.35, boundsTmp.minN - 0.35],
-    [boundsTmp.maxU + 0.35, boundsTmp.maxN + 0.35],
-    [boundsTmp.minU - 0.35, boundsTmp.maxN + 0.35]
-  ].map(([u, n]) => [u * edgeTmp.ux - n * edgeTmp.uz, u * edgeTmp.uz + n * edgeTmp.ux]);
-  let overhangTmp = 0;
-  for (const corner of cornersTmp) overhangTmp = Math.max(overhangTmp, distanceToPolygon(corner, poly));
-  const flat = b.roofShape === 'flat' || b.h < 4.2 || area < 36 ||
-    !convex || rectangularityCheck < 0.82 || overhangTmp > 0.9 ||
+  // Stessa funzione usata da world.js: così l'audit non può divergere dalla
+  // scelta reale del tetto (incluso il roofType di Arnis).
+  const resolved = resolveBuildingRoof(b, arnisBuildings[String(b.id)]?.roofType);
+  roofStyleCounts[resolved.style] = (roofStyleCounts[resolved.style] || 0) + 1;
+  const flat = resolved.style === 'flat' ||
     ['shed', 'flat', 'none'].includes((b.kind || '').toLowerCase());
   if (flat) continue;
+
+  if (resolved.style === 'hipped') {
+    const ring = hippedRoofRing(poly, 0.5);
+    const centroid = polygonCentroid(poly);
+    let cx = 0, cz = 0;
+    for (const [x, shapeY] of ring) { cx += x; cz += -shapeY; }
+    cx /= ring.length;
+    cz /= ring.length;
+    const mirrorDrift = Math.hypot(cx - centroid.x, cz - centroid.z);
+    if (mirrorDrift > 0.01) {
+      issues.push({
+        id: b.id, name: b.name, x: b.x, z: b.z,
+        type: 'hipped-roof-mirrored', drift: +mirrorDrift.toFixed(2), area, h: b.h
+      });
+    }
+  }
 
   // Rettangolo del tetto con overhang alto (1 m), come in world.js quality!=low.
   const overhang = 0.35;
@@ -153,7 +166,14 @@ for (const b of city.buildings || []) {
 
 const nearPonteIssues = nearPonte.filter(item => item.type);
 console.log(`Edifici: ${(city.buildings || []).length}, tetti analizzati: ${(city.buildings || []).length - issues.length + nearPonte.length}`);
+console.log(`Stili tetto risolti: piani ${roofStyleCounts.flat}, a falde ${roofStyleCounts.gabled}, a padiglione ${roofStyleCounts.hipped}`);
 console.log(`Problemi totali: ${issues.length}, zona Ponte Romano: ${nearPonteIssues.length}/${nearPonte.length}`);
+console.log('\nTetti a padiglione specchiati:');
+const mirrored = issues.filter(i => i.type === 'hipped-roof-mirrored');
+if (!mirrored.length) console.log('  nessuno');
+for (const item of mirrored.slice(0, 12)) {
+  console.log(`  ${item.id} (${item.x}, ${item.z}) drift=${item.drift} m`);
+}
 console.log('\nPeggiori (sporgenza):');
 for (const item of [...issues].filter(i => i.type === 'roof-outside-walls').sort((a, b) => b.overhangMax - a.overhangMax).slice(0, 12)) {
   console.log(`  ${item.id} (${item.x}, ${item.z}) ${item.type} overhang=${item.overhangMax} rect=${item.rectangularity} h=${item.h}`);

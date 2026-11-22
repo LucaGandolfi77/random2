@@ -5,6 +5,7 @@
  */
 
 import * as THREE from 'three';
+import { groundHeightAt } from './utils.js';
 
 const DATA_URL = './data/facades.json';
 const TEX_BASE = './assets/textures/exteriors/';
@@ -23,7 +24,7 @@ function coverUvs(image, width, height) {
   return [[0, dv], [1, dv], [1, 1 - dv], [0, 1 - dv]];
 }
 
-export async function loadFacades({ scene, onProgress = () => {} } = {}) {
+export async function loadFacades({ scene, terrain = null, onProgress = () => {} } = {}) {
   const response = await fetch(DATA_URL);
   if (!response.ok) throw new Error(`Facciate non trovate (${response.status})`);
   const entries = await response.json();
@@ -59,7 +60,7 @@ export async function loadFacades({ scene, onProgress = () => {} } = {}) {
       mesh.userData.facade = entry.id;
 
       const building = new THREE.Group();
-      building.position.set(entry.x, 0, entry.z);
+      building.position.set(entry.x, groundHeightAt(terrain, entry.x, entry.z, 0), entry.z);
       building.rotation.y = (entry.rotation || 0) * Math.PI / 180;
       // Fronte sul lato -z locale, verso la piazza.
       mesh.position.set(0, entry.height / 2 + 0.05, -entry.depth / 2 - 0.12);

@@ -1,4 +1,4 @@
-const CACHE = 'fidenza-da-giocare-v3.4.0';
+const CACHE = 'fidenza-da-giocare-v3.5.0';
 const TILE_CACHE = 'fidenza-ground-tiles-v1';
 const ASSETS = [
   './',
@@ -75,6 +75,9 @@ const ASSETS = [
   './js/diary.js',
   './js/schedules.js',
   './js/landmarks.js',
+  './js/facades.js',
+  './js/interiors.js',
+  './js/street-signs.js',
   './js/player.js',
   './js/vehicles.js',
   './js/missions.js',
@@ -90,13 +93,8 @@ const ASSETS = [
   './data/terrain.json',
   './data/map.json',
   './data/arnis/arnis.json',
-  './data/ground/ground.json',
-  './data/ground/ortho-z0.jpg',
-  './data/ground/ortho-z1.jpg',
-  './data/ground/ortho-z2.jpg',
-  './data/ground/ortho-center-z0.jpg',
-  './data/ground/ortho-center-z1.jpg',
-  './data/ground/tiles/manifest.json',
+  // L'ortofoto non fa parte della shell: viene scaricata solo con ?ortho=1.
+  // Tenerla qui costringerebbe ogni utente a scaricare decine di MB inutili.
   './data/styles/spring.json',
   './data/styles/summer.json',
   './data/styles/autumn.json',

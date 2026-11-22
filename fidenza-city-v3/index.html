@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <title>Fidenza da Giocare v3.3 · open world gratis nel browser</title>
-  <meta name="description" content="Scorrazza per Fidenza, esplora sette quartieri, guida auto e bici, parla con gli abitanti, apri il Diario di Fidenza e fermati al Bar Blu Piramide. Scopri il Duomo, il Teatro Magnani e 27 stelle nascoste, in un mondo con edifici a blocchi ispirato ad ArnisWorld3 e terreno realistico dall’ortofoto RER. Un open world gratuito nel browser, ispirato alla città di Fidenza.">
+  <title>Fidenza da Giocare v3.5 · open world gratis nel browser</title>
+  <meta name="description" content="Scorrazza per Fidenza, esplora sette quartieri, guida auto e bici, parla con gli abitanti, apri il Diario di Fidenza e fermati al Bar Blu Piramide. Scopri il Duomo, il Teatro Magnani e 27 stelle nascoste, in un mondo con edifici a blocchi ispirato ad ArnisWorld3, terreno reale e suolo PBR procedurale. Un open world gratuito nel browser, ispirato alla città di Fidenza.">
   <meta name="theme-color" content="#1b241e">
   <meta name="color-scheme" content="light dark">
   <meta name="mobile-web-app-capable" content="yes">
@@ -15,13 +15,13 @@
   <meta property="og:url" content="https://lucagandolfi77.github.io/random2/fidenza-city-v3/">
   <link rel="canonical" href="https://lucagandolfi77.github.io/random2/fidenza-city-v3/">
   <meta property="og:site_name" content="Fidenza da Giocare">
-  <meta property="og:title" content="Fidenza da Giocare v3.3 · open world gratis nel browser">
-  <meta property="og:description" content="Fidenza vera, quartiere per quartiere, come open world: guida, parla con gli abitanti, esplora, completa missioni, apri il Diario di Fidenza e trova le 27 stelle. Con edifici a blocchi ispirati ad ArnisWorld3 e terreno realistico dall’ortofoto RER.">
+  <meta property="og:title" content="Fidenza da Giocare v3.5 · open world gratis nel browser">
+  <meta property="og:description" content="Fidenza vera, quartiere per quartiere, come open world: guida, parla con gli abitanti, esplora, completa missioni, apri il Diario di Fidenza e trova le 27 stelle. Con edifici a blocchi ispirati ad ArnisWorld3, terreno reale e suolo PBR procedurale.">
   <meta property="og:locale" content="it_IT">
   <meta property="og:image" content="https://lucagandolfi77.github.io/random2/fidenza-city-v3/assets/img/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Fidenza da Giocare — Mondo Arnis: suolo in streaming e piazza del Duomo realistica">
+  <meta property="og:image:alt" content="Fidenza da Giocare — Mondo Arnis: suolo PBR procedurale e piazza del Duomo">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="geo.region" content="IT-PR">
   <meta name="geo.placename" content="Fidenza">
@@ -88,7 +88,7 @@
     <div class="load-mark">F</div>
     <p id="loading-text">Sto costruendo Fidenza…</p>
     <div class="load-bar"><i id="load-progress"></i></div>
-    <small>Mappa © OpenStreetMap · Ortofoto RER 2023-24 (CC BY 4.0) · Suolo in streaming · Mondo a blocchi: ArnisWorld3</small>
+    <small>Mappa © OpenStreetMap · Terreno AWS/EU-DEM · Suolo PBR procedurale · Mondo a blocchi: ArnisWorld3</small>
   </div>
 
   <div id="hud" data-ui hidden>
@@ -132,6 +132,19 @@
     <div id="zone">
       <div id="mode">A piedi</div>
       <div id="zone-name">Fidenza</div>
+    </div>
+
+    <div id="inspector" hidden>
+      <div class="inspect-title">Coordinate e quote <span>I</span></div>
+      <div class="inspect-row"><span>Posizione</span><b id="inspect-pos">—</b></div>
+      <div class="inspect-row"><span>GPS</span><b id="inspect-gps">—</b></div>
+      <div class="inspect-row"><span>Quota reale</span><b id="inspect-alt">—</b></div>
+      <div class="inspect-row"><span>Suolo gioco</span><b id="inspect-ground">—</b></div>
+      <div class="inspect-row"><span>Camera Y</span><b id="inspect-eye">—</b></div>
+      <div class="inspect-sep"></div>
+      <div class="inspect-row"><span>Monumento vicino</span><b id="inspect-target">—</b></div>
+      <div class="inspect-row"><span>Distanza</span><b id="inspect-dist">—</b></div>
+      <div class="inspect-row"><span>Quota monumento</span><b id="inspect-target-alt">—</b></div>
     </div>
 
     <div id="speed" hidden><b>0</b><span>km/h</span></div>
@@ -194,12 +207,12 @@
   <div id="intro">
     <main class="poster">
       <section class="talk">
-        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v3.4.0</span></p>
+        <p class="eyebrow">Fidenza, Emilia-Romagna · <span id="game-version" class="game-version">v3.5.0</span></p>
         <h1 class="wordmark" aria-label="Fidenza da Giocare">
           <span>Fidenza</span>
           <span>da Giocare</span>
         </h1>
-        <p class="lede">Scorrazza per Fidenza in un open world: la città vera, strada per strada, con il terreno realistico dall’ortofoto RER 2023-24 e i materiali del mondo ArnisWorld3. Tutto gratis, dal browser.</p>
+        <p class="lede">Scorrazza per Fidenza in un open world: la città vera, strada per strada, con il terreno reale, il suolo PBR procedurale e i materiali del mondo ArnisWorld3. Tutto gratis, dal browser.</p>
         <div class="cta-row">
           <button id="play" disabled>Caricamento…</button>
           <button type="button" id="install-ios" class="install-cta" hidden>
@@ -277,7 +290,7 @@
       </section>
 
       <footer class="road">
-        <small>Progetto non ufficiale, non affiliato al Comune di Fidenza · Mappa © OpenStreetMap contributors (ODbL) · Dati territoriali © Regione Emilia-Romagna · Ortofoto RER 2023-24 (CC BY 4.0) · Mondo a blocchi derivato da ArnisWorld3 · Texture dei blocchi originali del progetto</small>
+        <small>Progetto non ufficiale, non affiliato al Comune di Fidenza · Mappa © OpenStreetMap contributors (ODbL) · Dati territoriali © Regione Emilia-Romagna · Ortofoto RER 2023-24 (CC BY 4.0, solo modalità diagnostica ?ortho=1) · Mondo a blocchi derivato da ArnisWorld3 · Texture dei blocchi originali del progetto</small>
       </footer>
     </main>
   </div>

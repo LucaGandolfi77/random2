@@ -1,11 +1,13 @@
-# Fidenza da Giocare v3.4.0 — Mondo Arnis, terreno reale e suolo in streaming
+# Fidenza da Giocare v3.5.0 — Mondo Arnis, terreno reale e suolo procedurale
 
 ![Fidenza da Giocare v3 — Mondo Arnis](assets/img/mondo-arnis.jpg)
 
 Open world gratuito nel browser ambientato a **Fidenza**, Emilia-Romagna. La
-**v3.3** porta il **suolo in streaming**: l'ortofoto RER 2023-24 al posto
-della griglia di blocchi, con tessere da 0,5 m attorno al giocatore e prefetch
-completo della città per l'uso offline. La **v3.2** aveva introdotto il terreno
+**v3.5** riporta il suolo a una ricostruzione **vettoriale e procedurale**:
+il terreno 3D usa un materiale erba PBR a risoluzione costante e ogni area OSM
+— prati, campi, piazze, parcheggi, cortili — riceve il proprio materiale.
+L'ortofoto RER 2023-24 non viene più stampata sul terreno: resta solo come
+confronto diagnostico con `?ortho=1`. La **v3.2** aveva introdotto il terreno
 reale e i materiali PBR per asfalto, cemento, porfido, erba e terra. Gli edifici restano la variante **Mondo Arnis** della v3.0, ricostruiti
 con i **materiali reali estratti da ArnisWorld3**: muri in mattoni, pietra,
 terracotta e cemento; tetti in granito e laterizio; campi con grano, patate,
@@ -26,6 +28,7 @@ quello della v2.23.
 - [Come giocare](#come-giocare)
 - [Comandi](#comandi)
 - [Curiosità](#curiosità)
+- [Novità v3.5](#novità-v350--suolo-procedurale-e-quote-verificate)
 - [Novità v3.3](#novità-v33--suolo-in-streaming-e-offline)
 - [Novità v3.2](#novità-v32--terreno-reale)
 - [Novità v3.1](#novità-v31--strade-osm-normalizzate)
@@ -40,6 +43,41 @@ quello della v2.23.
 - [Dati, rigenerazione ed editor](#dati-e-correzioni)
 - [Struttura del progetto](#struttura)
 - [Licenze](#licenze)
+
+## Novità v3.5.0 — suolo procedurale e quote verificate
+
+Rispetto alla v3.4.0:
+
+- **suolo vettoriale di default**: niente più ortofoto stampata sul terreno e
+  niente tessere ad alta risoluzione attorno al giocatore. Il terreno usa un
+  materiale erba PBR con UV planari ogni 12 m, quindi la risoluzione è la
+  stessa vicino e lontano.
+- **aree OSM sempre visibili**: prati, campi, piazze, parcheggi e cortili
+  ricevono i materiali procedurali di `ground-textures.js` (erba, terra,
+  ghiaia, asfalto, porfido, cemento e un misto urbano con erba e lastre)
+  anche quando l'ortofoto è attiva.
+- **ortofoto solo diagnostica**: `?ortho=1` riattiva il vecchio sfondo RER e
+  le tessere per confrontare i due modi; senza il parametro non viene
+  scaricato nulla da `data/ground/`.
+- **tetti coerenti**: corretto lo specchiamento dei tetti a padiglione
+  (`ExtrudeGeometry` mappa `y` in `-z`) e bloccato l'upgrade a falde dei
+  footprint irregolari deciso dal `roofType` Arnis (`stairs`/`slab`). I tetti
+  non compaiono più staccati o sopra le piazze.
+- **landmark e facciate alla quota del suolo**: i gruppi si appoggiano a
+  `groundHeightAt()`, non più a `y = 0` fisso.
+- **spawn corretto**: senza `?x=` e `?z=` il gioco parte dallo spawn della
+  mappa (`-312, 12`, Piazza Duomo) e non più da `(0, 0)`, perché `Number(null)`
+  rendeva sempre valido il deep spawn.
+- **ispezione quote in gioco**: `?inspect=1` apre il pannello coordinate e
+  quote; il tasto **I** lo mostra/nasconde. Mostra posizione, GPS, quota reale
+  del DEM, suolo di gioco, camera Y e il monumento più vicino con distanza e
+  quota.
+- **audit monumenti e suolo**: `node tools/audit-monuments-ground.mjs` scrive
+  `data/monument-ground-audit.json` con coordinate, quote reali, quota di
+  gioco, riferimento OSM e avvisi.
+- **audit tetti esteso**: `node tools/audit-roof-coherence.mjs` usa la stessa
+  `resolveBuildingRoof()` del runtime e segnala tetti a padiglione specchiati
+  o disallineati.
 
 ## Novità v3.4.0 — facciate, landmark, SSAO e luce
 
@@ -231,10 +269,10 @@ self-hosted in `vendor/` e `assets/fonts/`.
 | **Three.js r169** | Scena 3D, camera, materiali, luci, ombre, geometrie, `InstancedMesh`, `BufferGeometryUtils`. |
 | **WebGL** | Rendering accelerato di città, veicoli, alberi, particelle e cielo. |
 | **Materiali Minecraft** | Palette di blocchi, texture procedurali 16×16 e geometrie cubiche per edifici, tetti e arredi, tutte originali. |
-| **Ortofoto RER 2023-24** | Suolo realistico della città da GeoTIFF regionali a 0,5 m/px (centro a 0,2 m/px), ricampionati sulla griglia metrica locale. Licenza CC BY 4.0. |
-| **Materiali PBR del suolo** | Asfalto, cemento, porfido, erba, terra e ghiaia generati proceduralmente con normal map, variazioni di colore e UV lungo la strada. |
-| **Tessere ortofoto in streaming** | 441 tessere da 0,5 m/px (256 m) attorno alla camera, con bordo di 4 px, LOD 7×7 in alta desktop, 5×5 in alta mobile, 3×3 in media, fade radiale e fallback alla base. |
-| **Cache Storage + prefetch** | Prefetch completo della città (~31 MB) dopo il primo avvio, con ripresa, quota check, `storage.persist()` e rispetto di Data Saver. |
+| **Materiali PBR del suolo** | Erba, terra, ghiaia, asfalto, porfido, cemento e misto urbano generati proceduralmente con normal map, variazioni di colore e UV planari; usati dal terreno e da tutte le aree OSM. |
+| **Ortofoto RER 2023-24 (diagnostica)** | Suolo fotografico da GeoTIFF regionali a 0,5 m/px, disponibile solo con `?ortho=1` per confrontare la ricostruzione vettoriale. Licenza CC BY 4.0. |
+| **Tessere ortofoto (diagnostica)** | Con `?ortho=1`, 441 tessere da 0,5 m/px attorno alla camera. Nel gioco normale non vengono né caricate né precaricate. |
+| **Cache Storage + prefetch** | Prefetch della città dopo il primo avvio, con ripresa, quota check, `storage.persist()` e rispetto di Data Saver; disattivato quando non ci sono tessere ortofoto. |
 | **Import ArnisWorld3** | Tool Node che legge i region file del save Minecraft e genera `data/arnis/arnis.json` e `data/arnis/surface.png`. |
 | **Palette 3D → materiali** | Il Duomo usa le texture dei blocchi Arnis (terracotta, end stone bricks, granito). |
 | **Layer OSM del centro** | Negozi, arredo urbano, alberi, barriere e segnaletica letti da `city.json`, con instancing e merge. |
@@ -301,17 +339,21 @@ self-hosted in `vendor/` e `assets/fonts/`.
   industriale, urbano, storico o civico, colori e tetti OSM quando presenti.
 - **51 insegne di attività** su ristoranti, bar, caffè, farmacie, banche, hotel
   e musei, montate sulla facciata più vicina.
-- **Terreno realistico in streaming**: ortofoto RER 2023-24 sul suolo, con
-  tessere da 0,5 m attorno alla camera e centro storico a 0,295 m; niente più
-  griglia di blocchi o lastre quadrate.
-- **Offline completo**: prefetch automatico delle 441 tessere, cache dedicata,
-  ripresa dopo un'interruzione e fallback alla base se una tessera manca.
+- **Terreno realistico procedurale**: mesh 3D con heightmap AWS/EU-DEM e
+  materiale erba PBR a risoluzione costante, UV planari ogni 12 m; niente
+  ortofoto stampata né tessere che cambiano dettaglio vicino al giocatore.
+- **Aree OSM materializzate**: prati, campi, piazze, parcheggi e cortili usano
+  erba, terra, ghiaia, asfalto, porfido e cemento procedurali, sopra il
+  terreno e sotto le strade.
+- **Ortofoto solo su richiesta**: `?ortho=1` riattiva lo sfondo RER e le
+  tessere per un confronto diagnostico; la modalità normale non scarica
+  `data/ground/`.
 - **Materiali Arnis per edifici e arredi**: muri, tetti, alberi e dettagli
   usano i blocchi estratti da ArnisWorld3, con texture pixel 16×16 originali.
 - **Strade e piazze PBR**: asfalto, cemento e porfido con normal map, UV lungo
   la strada, cordoli continui, segnaletica pulita e usura.
-- **Prati e campi reali**: l'ortofoto resta visibile sotto alberi, cespugli e
-  colture 3D, senza chiazze di erba finta.
+- **Prati e campi coerenti**: erba, terra e colture 3D condividono la stessa
+  palette procedurale, senza chiazze fotografiche né cuciture di risoluzione.
 - **Tetti a gradoni** in stile Minecraft, alture reali dagli edifici Arnis e
   finestre raggruppate per vetro colorato.
 - **Selettore qualità** Auto/Bassa/Media/Alta; tone mapping, ombre e
@@ -480,6 +522,13 @@ rimuovi e riaggiungi l’app dalla Home.
 - **Salvataggio** con File System Access API, download/import JSON e bozza in
   `localStorage`.
 - **Audit e validatori**: POI, edifici, insegne, traffico e raggiungibilità.
+- **Audit quote e monumenti**: `node tools/audit-monuments-ground.mjs`
+  confronta coordinate GPS, posizione locale, quota DEM, suolo di gioco e
+  riferimento OSM di ogni landmark e facciata, e scrive
+  `data/monument-ground-audit.json`.
+- **Audit tetti**: `node tools/audit-roof-coherence.mjs` usa la stessa
+  `resolveBuildingRoof()` del runtime e segnala sporgenze, specchiamenti e
+  tetti applicati a footprint irregolari.
 
 ## Come giocare
 
@@ -636,6 +685,7 @@ rimuovi e riaggiungi l’app dalla Home.
 | Modalità foto | P o voce in pausa | menu rapido touch |
 | Audio | M | menu rapido touch |
 | Giorno e ora | selettore in pausa o nell’intro | selettore |
+| Pannello quote | I (o `?inspect=1`) | — |
 | Pausa | Esc | Esc |
 
 Nota: i controlli laterali sono invertiti in tutte le modalità di movimento
@@ -652,6 +702,12 @@ Start per la pausa.
 
 **Performance**: aggiungi `?quality=low`, `?quality=medium` o `?quality=high`
 all’URL per forzare il livello grafico.
+
+**Diagnostica**: `?inspect=1` apre il pannello con posizione locale, GPS,
+quota reale del DEM, suolo di gioco, camera Y e monumento più vicino (distanza
+e quota). `?ortho=1` riattiva l’ortofoto RER e le tessere solo per un confronto
+con il suolo procedurale. Da console, `__fidenza.altitudeAt(x, z)` restituisce
+`{ real, ground, gps }` per qualsiasi punto della mappa.
 
 ## Curiosità
 

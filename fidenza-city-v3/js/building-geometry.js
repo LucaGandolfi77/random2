@@ -175,3 +175,40 @@ export function classifyBuildingRoof(building) {
     footprintOverhang: +roofFootprintOverhang(poly, edge, bounds, 0.35).toFixed(2)
   };
 }
+
+/**
+ * Decide lo stile del tetto tenendo conto anche del roofType di Arnis.
+ *
+ * Arnis usa "stairs" e "slab" per quasi tutti i tetti a falde, ma non sono
+ * abbastanza specifici: un tetto a falde viene costruito come rettangolo
+ * orientato e, su un footprint irregolare, sporge dai muri sembrando una
+ * casa senza tetto (o un tetto senza casa). classifyBuildingRoof() ha già
+ * deciso in base a forma e area del poligono, quindi l'unica informazione
+ * che aggiungiamo è il caso esplicito "flat". Gli altri roofType non
+ * forzano più falde sui footprint irregolari.
+ */
+export function resolveBuildingRoof(building, roofType = '') {
+  const info = classifyBuildingRoof(building);
+  const style = roofType === 'flat' ? 'flat' : info.style;
+  return {
+    ...info,
+    style,
+    requestedStyle: info.style,
+    roofType: roofType || null
+  };
+}
+
+/**
+ * Anello di un tetto a padiglione in coordinate Shape.
+ *
+ * THREE.Shape usa (x, y) e rotateX(-PI/2) mappa (x, y, 0) in (x, 0, -y):
+ * per questo la z del mondo va negata. Senza la negazione il tetto finisce
+ * specchiato rispetto all'edificio e galleggia dall'altra parte della citta'.
+ */
+export function hippedRoofRing(poly, factor = 1) {
+  const centroid = polygonCentroid(poly);
+  return poly.map(([x, z]) => [
+    centroid.x + (x - centroid.x) * factor,
+    -(centroid.z + (z - centroid.z) * factor)
+  ]);
+}

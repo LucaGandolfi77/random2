@@ -15,7 +15,7 @@ import {
 import { hasStar, hasPlace, getStats } from './save.js';
 import { applyOverrides } from './map-overrides.js';
 import { buildBusRoute, makeLoopRoute } from './transit.js';
-import { classifyBuildingRoof, polygonCentroid } from './building-geometry.js';
+import { polygonCentroid, resolveBuildingRoof, hippedRoofRing } from './building-geometry.js';
 import { planPoiSigns } from './poi-signs.js';
 import { planTraffic } from './traffic.js';
 import { NPC_FIXED, NPC_WALKERS } from './npcs.js';
@@ -775,10 +775,12 @@ export class World {
     geo.rotateX(-Math.PI / 2);
     const pos = geo.attributes.position;
     const colors = new Float32Array(pos.count * 3);
-    const cGrass = new THREE.Color('#6f8f56');
-    const cField = new THREE.Color('#9a9164');
-    const cHigh = new THREE.Color('#5f7f4c');
-    const cWater = new THREE.Color('#6c8d8b');
+    // Tinte chiare: il colore vero arriva dalla texture d'erba procedurale,
+    // queste variazioni servono solo a rompere la ripetizione su 9 km.
+    const cGrass = new THREE.Color('#d4e2bd');
+    const cField = new THREE.Color('#e7d9ac');
+    const cHigh = new THREE.Color('#b9cfae');
+    const cWater = new THREE.Color('#a9c6c2');
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i), z = pos.getZ(i);
       const y = groundHeightAt(this.terrain, x, z, 0);
@@ -794,7 +796,10 @@ export class World {
     }
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geo.computeVertexNormals();
-    const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+    // UV planari: una mattonella d'erba ogni 12 m, con mipmap e anisotropia.
+    // La risoluzione e' la stessa vicino e lontano, senza streaming.
+    assignBlockUV(geo, 12);
+    const mat = this.groundMaterial('grass', { vertexColors: true });
     const mesh = new THREE.Mesh(geo, mat);
     mesh.receiveShadow = true;
     mesh.name = 'terreno';
@@ -928,6 +933,9 @@ export class World {
     if (kind === 'farmland' || kind === 'cemetery') return 'soil';
     if (kind === 'parking') return 'asphalt';
     if (kind === 'square') return 'porphyry';
+    // Il tessuto urbano OSM e' un tappeto di cortili e passaggi: lo stile
+    // "urban" mescola ghiaia, erba e lastre invece di pavimentare tutto.
+    if (kind === 'urban') return 'urban';
     if (kind === 'industrial') return 'concrete';
     return 'concrete';
   }
@@ -943,11 +951,9 @@ export class World {
         if (g) this.addMaterialGeometry(waterBuckets, a.blocks?.surface || 'water', g);
         continue;
       }
-      // Con l'ortofoto e le tessere 0,5 m disponibili, TUTTE le superfici
-      // OSM non d'acqua restano la foto reale: prati, campi, piazzali,
-      // parcheggi e cortili industriali. Sovrapporre materiali opachi
-      // nasconderebbe l'ortofoto e creerebbe chiazze piatte.
-      if (this.groundImage) continue;
+      // Il suolo predefinito e' vettoriale: ogni area OSM (prati, campi,
+      // piazze, parcheggi, cortili) riceve il suo materiale PBR procedurale.
+      // L'ortofoto, se attivata con ?ortho=1, resta solo uno sfondo di debug.
       const y = greenKinds.has(a.kind) ? 0.034 : 0.032;
       const g = makePolygonGeometry(a.poly, y + (hashString(String(a.id)) % 5) * 0.0003, '#ffffff');
       if (!g) continue;
@@ -2224,15 +2230,12 @@ export class World {
 
     const addHippedRoof = (b, info, roofBlock) => {
       const poly = b.poly;
-      const centroid = polygonCentroid(poly);
       const steps = clamp(Math.ceil(info.ridgeHeight / 1), 2, 8);
       const stepHeight = info.ridgeHeight / steps;
       for (let k = 0; k < steps; k++) {
         const factor = 1 - (k / steps) * 0.94;
-        const ring = poly.map(([x, z]) => [
-          centroid.x + (x - centroid.x) * factor,
-          centroid.z + (z - centroid.z) * factor
-        ]);
+        // Coordinate Shape: la z e' gia' negata per compensare rotateX(-PI/2).
+        const ring = hippedRoofRing(poly, factor);
         let area = 0;
         for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
           area += ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
@@ -2418,16 +2421,11 @@ export class World {
 
       const roofBlock = blocks.roof || info?.roof || roofFallbackBlock(b);
       if (b.poly.length < 3 || b.h <= 1) continue;
-      const roofInfo = classifyBuildingRoof(b);
-      let roofStyle = roofInfo.style;
-      const roofType = blocks.roofType || info?.roofType;
-      if (roofType === 'flat') roofStyle = 'flat';
-      else if (roofType === 'stairs' || roofType === 'slab') {
-        if (roofStyle === 'flat') {
-          const rectangularity = b.area / Math.max(1, roofInfo.bounds.width * roofInfo.bounds.length);
-          roofStyle = rectangularity > 0.72 ? 'gabled' : 'hipped';
-        }
-      }
+      // resolveBuildingRoof() applica anche il roofType di Arnis, ma non
+      // trasforma piu' in falde i footprint irregolari gia' classificati
+      // come piatti: erano quelli i tetti che sembravano senza casa.
+      const roofInfo = resolveBuildingRoof(b, blocks.roofType || info?.roofType);
+      const roofStyle = roofInfo.style;
       if (roofStyle === 'gabled') addGabledRoof(b, roofInfo, roofBlock, detail);
       else if (roofStyle === 'hipped') addHippedRoof(b, roofInfo, roofBlock, detail);
       else addFlatRoof(b, roofInfo, roofBlock, detail);

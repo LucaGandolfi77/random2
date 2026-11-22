@@ -1,0 +1,1077 @@
+{
+  "generated": "2026-11-22T22:17:06.351Z",
+  "version": "3.5.0",
+  "origin": {
+    "lat": 44.8665,
+    "lon": 10.0612
+  },
+  "terrain": {
+    "provider": "aws-terrarium",
+    "grid": 512,
+    "bounds": {
+      "south": 44.805,
+      "west": 10.008000000000001,
+      "north": 44.914,
+      "east": 10.138
+    },
+    "min": 39.9,
+    "max": 249.9,
+    "mean": 81.5
+  },
+  "summary": {
+    "places": 24,
+    "landmarks": 12,
+    "facades": 7,
+    "warnings": 0,
+    "errors": 0
+  },
+  "landmarks": [
+    {
+      "id": "duomo",
+      "name": "Duomo di San Donnino",
+      "model": "duomo",
+      "placeId": "duomo",
+      "x": -267.47,
+      "z": 2.67,
+      "realAltitude": 80.1,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": {
+        "source": "osm",
+        "distance": 0.75,
+        "building": {
+          "id": 182278537,
+          "name": "Cattedrale di San Donnino",
+          "kind": "church",
+          "x": -267.8,
+          "z": 2,
+          "height": 18.18
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "piazza-duomo",
+      "name": "Piazza Duomo",
+      "model": "piazza-duomo",
+      "placeId": "piazza-duomo",
+      "x": -296.74,
+      "z": -4.11,
+      "realAltitude": 80.1,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "porta",
+      "name": "Porta di San Donnino",
+      "model": "porta",
+      "placeId": "porta",
+      "x": -305.18,
+      "z": -47.79,
+      "realAltitude": 79,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": {
+        "source": "osm",
+        "distance": 0.02,
+        "building": {
+          "id": 652879042,
+          "name": "Porta di San Donnino",
+          "kind": "yes",
+          "x": -305.2,
+          "z": -47.8,
+          "height": 8.73
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "ponte",
+      "name": "Ponte romano",
+      "model": "ponte",
+      "placeId": "ponte",
+      "x": -309.99,
+      "z": -60.23,
+      "realAltitude": 78.5,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "teatro",
+      "name": "Teatro Girolamo Magnani",
+      "model": "teatro",
+      "placeId": "teatro",
+      "x": -94.05,
+      "z": 72.01,
+      "realAltitude": 81.5,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": {
+        "source": "osm",
+        "distance": 0.75,
+        "building": {
+          "id": 652879035,
+          "name": "Teatro Girolamo Magnani",
+          "kind": "yes",
+          "x": -93.5,
+          "z": 71.5,
+          "height": 9.27
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "comunale",
+      "name": "Palazzo Comunale",
+      "model": "comunale",
+      "placeId": "comunale",
+      "x": -32.19,
+      "z": 70.01,
+      "realAltitude": 82,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": {
+        "source": "nearest",
+        "distance": 24.5,
+        "building": {
+          "id": 1507676126,
+          "name": "",
+          "kind": "yes",
+          "x": -9.1,
+          "z": 78.2,
+          "height": 9.18
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "granmadre",
+      "name": "Santuario della Gran Madre di Dio",
+      "model": "granmadre",
+      "placeId": "granmadre",
+      "x": 415.56,
+      "z": 147.81,
+      "realAltitude": 77.3,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": {
+        "source": "osm",
+        "distance": 1.15,
+        "building": {
+          "id": 182278306,
+          "name": "Santuario della Gran Madre di Dio",
+          "kind": "yes",
+          "x": 416.6,
+          "z": 148.3,
+          "height": 9.27
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "sanpietro",
+      "name": "Chiesa di San Pietro",
+      "model": "sanpietro",
+      "placeId": "sanpietro",
+      "x": -266.99,
+      "z": 198.48,
+      "realAltitude": 78.2,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": {
+        "source": "osm",
+        "distance": 0.94,
+        "building": {
+          "id": 182278235,
+          "name": "Chiesa di San Pietro",
+          "kind": "yes",
+          "x": -267.9,
+          "z": 198.7,
+          "height": 8.82
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "musini",
+      "name": "Museo civico del Risorgimento Luigi Musini",
+      "model": "musini",
+      "placeId": "musini",
+      "x": 379.58,
+      "z": 185.59,
+      "realAltitude": 77.6,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": {
+        "source": "nearest",
+        "distance": 31.02,
+        "building": {
+          "id": 182280078,
+          "name": "",
+          "kind": "yes",
+          "x": 366.2,
+          "z": 157.6,
+          "height": 9.18
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "stazione",
+      "name": "Stazione di Fidenza",
+      "model": "stazione",
+      "placeId": "stazione",
+      "x": 175.39,
+      "z": -124.58,
+      "realAltitude": 74.3,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": {
+        "source": "nearest",
+        "distance": 0.59,
+        "building": {
+          "id": 182278056,
+          "name": "Fidenza",
+          "kind": "train_station",
+          "x": 175.5,
+          "z": -124,
+          "height": 9.36
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "stirone",
+      "name": "Torrente Stirone",
+      "model": "stirone",
+      "placeId": "stirone",
+      "x": -1230.81,
+      "z": 0,
+      "realAltitude": 72.8,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "obelisco",
+      "name": "Obelisco",
+      "model": "obelisco",
+      "placeId": "obelisco",
+      "x": -13.1,
+      "z": 32.01,
+      "realAltitude": 82,
+      "groundY": 0,
+      "groupY": 0,
+      "offsetX": 0,
+      "offsetZ": 0,
+      "reference": null,
+      "notes": []
+    }
+  ],
+  "places": [
+    {
+      "id": "duomo",
+      "name": "Duomo di San Donnino",
+      "category": "church",
+      "osm": "way/182278537",
+      "lat": 44.866476,
+      "lon": 10.05781,
+      "gps": {
+        "lat": 44.866476,
+        "lon": 10.0578099
+      },
+      "x": -267.47,
+      "z": 2.67,
+      "realAltitude": 80.1,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0.01,
+      "beaconDrift": 28.53,
+      "reference": {
+        "source": "osm",
+        "distance": 0.75,
+        "building": {
+          "id": 182278537,
+          "name": "Cattedrale di San Donnino",
+          "kind": "church",
+          "x": -267.8,
+          "z": 2,
+          "height": 18.18
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "piazza-duomo",
+      "name": "Piazza Duomo",
+      "category": "square",
+      "osm": "way/488935098",
+      "lat": 44.866537,
+      "lon": 10.057439,
+      "gps": {
+        "lat": 44.866537,
+        "lon": 10.057439
+      },
+      "x": -296.74,
+      "z": -4.11,
+      "realAltitude": 80.1,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "porta",
+      "name": "Porta di San Donnino",
+      "category": "monument",
+      "osm": "way/652879042",
+      "lat": 44.86693,
+      "lon": 10.057332,
+      "gps": {
+        "lat": 44.86693,
+        "lon": 10.057332
+      },
+      "x": -305.18,
+      "z": -47.79,
+      "realAltitude": 79,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 10.73,
+      "reference": {
+        "source": "osm",
+        "distance": 0.02,
+        "building": {
+          "id": 652879042,
+          "name": "Porta di San Donnino",
+          "kind": "yes",
+          "x": -305.2,
+          "z": -47.8,
+          "height": 8.73
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "ponte",
+      "name": "Ponte romano",
+      "category": "monument",
+      "osm": "way/652879043",
+      "lat": 44.867042,
+      "lon": 10.057271,
+      "gps": {
+        "lat": 44.867042,
+        "lon": 10.057271
+      },
+      "x": -309.99,
+      "z": -60.23,
+      "realAltitude": 78.5,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 10.45,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "teatro",
+      "name": "Teatro Girolamo Magnani",
+      "category": "theatre",
+      "osm": "way/652879035",
+      "lat": 44.865852,
+      "lon": 10.060008,
+      "gps": {
+        "lat": 44.865852,
+        "lon": 10.060008
+      },
+      "x": -94.05,
+      "z": 72.01,
+      "realAltitude": 81.5,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 12.8,
+      "reference": {
+        "source": "osm",
+        "distance": 0.75,
+        "building": {
+          "id": 652879035,
+          "name": "Teatro Girolamo Magnani",
+          "kind": "yes",
+          "x": -93.5,
+          "z": 71.5,
+          "height": 9.27
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "comunale",
+      "name": "Palazzo Comunale",
+      "category": "civic",
+      "osm": "relation/2428450",
+      "lat": 44.86587,
+      "lon": 10.060792,
+      "gps": {
+        "lat": 44.86587,
+        "lon": 10.060792
+      },
+      "x": -32.19,
+      "z": 70.01,
+      "realAltitude": 82,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 23.94,
+      "reference": {
+        "source": "nearest",
+        "distance": 24.5,
+        "building": {
+          "id": 1507676126,
+          "name": "",
+          "kind": "yes",
+          "x": -9.1,
+          "z": 78.2,
+          "height": 9.18
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "granmadre",
+      "name": "Santuario della Gran Madre di Dio",
+      "category": "church",
+      "osm": "way/182278306",
+      "lat": 44.86517,
+      "lon": 10.066467,
+      "gps": {
+        "lat": 44.86517,
+        "lon": 10.066467
+      },
+      "x": 415.56,
+      "z": 147.81,
+      "realAltitude": 77.3,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0.01,
+      "beaconDrift": 21.18,
+      "reference": {
+        "source": "osm",
+        "distance": 1.15,
+        "building": {
+          "id": 182278306,
+          "name": "Santuario della Gran Madre di Dio",
+          "kind": "yes",
+          "x": 416.6,
+          "z": 148.3,
+          "height": 9.27
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "sanpietro",
+      "name": "Chiesa di San Pietro",
+      "category": "church",
+      "osm": "way/182278235",
+      "lat": 44.864714,
+      "lon": 10.057816,
+      "gps": {
+        "lat": 44.864714,
+        "lon": 10.057816
+      },
+      "x": -266.99,
+      "z": 198.48,
+      "realAltitude": 78.2,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 13.12,
+      "reference": {
+        "source": "osm",
+        "distance": 0.94,
+        "building": {
+          "id": 182278235,
+          "name": "Chiesa di San Pietro",
+          "kind": "yes",
+          "x": -267.9,
+          "z": 198.7,
+          "height": 8.82
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "musini",
+      "name": "Museo civico del Risorgimento Luigi Musini",
+      "category": "museum",
+      "osm": "node/3183577908",
+      "lat": 44.86483,
+      "lon": 10.066011,
+      "gps": {
+        "lat": 44.86483,
+        "lon": 10.066011
+      },
+      "x": 379.58,
+      "z": 185.59,
+      "realAltitude": 77.6,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0,
+      "reference": {
+        "source": "nearest",
+        "distance": 31.02,
+        "building": {
+          "id": 182280078,
+          "name": "",
+          "kind": "yes",
+          "x": 366.2,
+          "z": 157.6,
+          "height": 9.18
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "stazione",
+      "name": "Stazione di Fidenza",
+      "category": "station",
+      "osm": "node/13742535638",
+      "lat": 44.867621,
+      "lon": 10.063423,
+      "gps": {
+        "lat": 44.867621,
+        "lon": 10.063423
+      },
+      "x": 175.39,
+      "z": -124.58,
+      "realAltitude": 74.3,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 13.95,
+      "reference": {
+        "source": "nearest",
+        "distance": 0.59,
+        "building": {
+          "id": 182278056,
+          "name": "Fidenza",
+          "kind": "train_station",
+          "x": 175.5,
+          "z": -124,
+          "height": 9.36
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "stirone",
+      "name": "Torrente Stirone",
+      "category": "nature",
+      "osm": "way/167581729",
+      "lat": 44.8665,
+      "lon": 10.0456,
+      "gps": {
+        "lat": 44.8665,
+        "lon": 10.0456
+      },
+      "x": -1230.81,
+      "z": 0,
+      "realAltitude": 72.8,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0.01,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "obelisco",
+      "name": "Obelisco",
+      "category": "monument",
+      "osm": "way/652879039",
+      "lat": 44.866212,
+      "lon": 10.061034,
+      "gps": {
+        "lat": 44.866212,
+        "lon": 10.061034
+      },
+      "x": -13.1,
+      "z": 32.01,
+      "realAltitude": 82,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0.01,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "piazza-garibaldi",
+      "name": "Piazza Garibaldi",
+      "category": "square",
+      "osm": "way/445470949",
+      "lat": 44.866689,
+      "lon": 10.061385,
+      "gps": {
+        "lat": 44.866689,
+        "lon": 10.061385
+      },
+      "x": 14.6,
+      "z": -21,
+      "realAltitude": 81.7,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0.01,
+      "beaconDrift": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "piazza-verdi",
+      "name": "Piazza Giuseppe Verdi",
+      "category": "square",
+      "osm": "way/142546108",
+      "lat": 44.865555,
+      "lon": 10.060964,
+      "gps": {
+        "lat": 44.865555,
+        "lon": 10.060964
+      },
+      "x": -18.62,
+      "z": 105.02,
+      "realAltitude": 81.7,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "piazza-matteotti",
+      "name": "Piazza Giacomo Matteotti",
+      "category": "square",
+      "osm": "way/142546150",
+      "lat": 44.865519,
+      "lon": 10.06176,
+      "gps": {
+        "lat": 44.865519,
+        "lon": 10.06176
+      },
+      "x": 44.18,
+      "z": 109.02,
+      "realAltitude": 81.3,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "piazza-repubblica",
+      "name": "Piazza della Repubblica",
+      "category": "square",
+      "osm": "way/1304344561",
+      "lat": 44.86743,
+      "lon": 10.063671,
+      "gps": {
+        "lat": 44.86743,
+        "lon": 10.063671
+      },
+      "x": 194.96,
+      "z": -103.35,
+      "realAltitude": 74.7,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "comune-uffici",
+      "name": "Comune di Fidenza — uffici",
+      "category": "civic",
+      "osm": "node/1560440147",
+      "lat": 44.867118,
+      "lon": 10.061459,
+      "gps": {
+        "lat": 44.867118,
+        "lon": 10.0614589
+      },
+      "x": 20.43,
+      "z": -68.68,
+      "realAltitude": 80.3,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 28.63,
+      "reference": {
+        "source": "nearest",
+        "distance": 5.05,
+        "building": {
+          "id": 182280562,
+          "name": "",
+          "kind": "yes",
+          "x": 25.1,
+          "z": -70.6,
+          "height": 9.27
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "chiesa-santa-maria",
+      "name": "Chiesa di Santa Maria Annunziata",
+      "category": "church",
+      "osm": "way/182279850",
+      "lat": 44.866116,
+      "lon": 10.062568,
+      "gps": {
+        "lat": 44.866116,
+        "lon": 10.062568
+      },
+      "x": 107.93,
+      "z": 42.67,
+      "realAltitude": 81.5,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0.01,
+      "beaconDrift": 17.98,
+      "reference": {
+        "source": "osm",
+        "distance": 0.04,
+        "building": {
+          "id": 182279850,
+          "name": "Chiesa di Santa Maria Annunziata",
+          "kind": "yes",
+          "x": 107.9,
+          "z": 42.7,
+          "height": 9
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "chiesa-san-paolo",
+      "name": "Chiesa di San Paolo",
+      "category": "church",
+      "osm": "way/182278201",
+      "lat": 44.862992,
+      "lon": 10.052401,
+      "gps": {
+        "lat": 44.862992,
+        "lon": 10.052401
+      },
+      "x": -694.23,
+      "z": 389.85,
+      "realAltitude": 78.1,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 51.95,
+      "reference": {
+        "source": "osm",
+        "distance": 3.05,
+        "building": {
+          "id": 182278201,
+          "name": "San Paolo",
+          "kind": "church",
+          "x": -691.2,
+          "z": 390.2,
+          "height": 18.54
+        }
+      },
+      "notes": [
+        "beacon scostato di 52.0 m"
+      ]
+    },
+    {
+      "id": "chiesa-sant-antonio",
+      "name": "Chiesa di Sant'Antonio Abate",
+      "category": "church",
+      "osm": "way/652879054",
+      "lat": 44.868652,
+      "lon": 10.052631,
+      "gps": {
+        "lat": 44.868652,
+        "lon": 10.052631
+      },
+      "x": -676.08,
+      "z": -239.16,
+      "realAltitude": 76.4,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 11.95,
+      "reference": {
+        "source": "osm",
+        "distance": 0.64,
+        "building": {
+          "id": 652879054,
+          "name": "Chiesa di Sant'Antonio Abate",
+          "kind": "yes",
+          "x": -676,
+          "z": -239.8,
+          "height": 9.27
+        }
+      },
+      "notes": []
+    },
+    {
+      "id": "parco-vittorio-veneto",
+      "name": "Parco Vittorio Veneto",
+      "category": "park",
+      "osm": "way/759129986",
+      "lat": 44.860981,
+      "lon": 10.058233,
+      "gps": {
+        "lat": 44.860981,
+        "lon": 10.058233
+      },
+      "x": -234.09,
+      "z": 613.34,
+      "realAltitude": 78,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "parco-della-pace",
+      "name": "Parco della Pace",
+      "category": "park",
+      "osm": "way/1257168492",
+      "lat": 44.859331,
+      "lon": 10.06473,
+      "gps": {
+        "lat": 44.859331,
+        "lon": 10.06473
+      },
+      "x": 278.51,
+      "z": 796.71,
+      "realAltitude": 72.9,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 0,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "farmacia-cavour",
+      "name": "Farmacia Cavour",
+      "category": "service",
+      "osm": "node/4756787772",
+      "lat": 44.866563,
+      "lon": 10.0602203,
+      "gps": {
+        "lat": 44.866563,
+        "lon": 10.0602203
+      },
+      "x": -77.3,
+      "z": -7,
+      "realAltitude": 81,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 23.06,
+      "reference": null,
+      "notes": []
+    },
+    {
+      "id": "coduro",
+      "name": "Coduro",
+      "category": "civic",
+      "osm": "",
+      "lat": 44.8494,
+      "lon": 10.0891,
+      "gps": {
+        "lat": 44.8494,
+        "lon": 10.0891
+      },
+      "x": 2201.26,
+      "z": 1900.36,
+      "realAltitude": 70.1,
+      "groundY": 0,
+      "flatZone": true,
+      "sourceDrift": 0,
+      "beaconDrift": 10.14,
+      "reference": {
+        "source": "nearest",
+        "distance": 31.09,
+        "building": {
+          "id": 182266320,
+          "name": "",
+          "kind": "yes",
+          "x": 2216.6,
+          "z": 1927.4,
+          "height": 9
+        }
+      },
+      "notes": []
+    }
+  ],
+  "facades": [
+    {
+      "id": "duomo",
+      "name": "Duomo di San Donnino",
+      "x": -267.47,
+      "z": 2.67,
+      "realAltitude": 80.1,
+      "groundY": 0,
+      "nearestBuilding": {
+        "id": 182278537,
+        "name": "Cattedrale di San Donnino",
+        "kind": "church",
+        "x": -267.8,
+        "z": 2,
+        "height": 18.18
+      },
+      "distance": 0.75,
+      "notes": []
+    },
+    {
+      "id": "porta",
+      "name": "Porta di San Donnino",
+      "x": -305.18,
+      "z": -47.79,
+      "realAltitude": 79,
+      "groundY": 0,
+      "nearestBuilding": {
+        "id": 652879042,
+        "name": "Porta di San Donnino",
+        "kind": "yes",
+        "x": -305.2,
+        "z": -47.8,
+        "height": 8.73
+      },
+      "distance": 0.02,
+      "notes": []
+    },
+    {
+      "id": "teatro",
+      "name": "Teatro Girolamo Magnani",
+      "x": -94.05,
+      "z": 72.01,
+      "realAltitude": 81.5,
+      "groundY": 0,
+      "nearestBuilding": {
+        "id": 652879035,
+        "name": "Teatro Girolamo Magnani",
+        "kind": "yes",
+        "x": -93.5,
+        "z": 71.5,
+        "height": 9.27
+      },
+      "distance": 0.75,
+      "notes": []
+    },
+    {
+      "id": "comunale",
+      "name": "Palazzo Comunale",
+      "x": -32.19,
+      "z": 70.01,
+      "realAltitude": 82,
+      "groundY": 0,
+      "nearestBuilding": {
+        "id": 1507676126,
+        "name": "",
+        "kind": "yes",
+        "x": -9.1,
+        "z": 78.2,
+        "height": 9.18
+      },
+      "distance": 24.5,
+      "notes": []
+    },
+    {
+      "id": "stazione",
+      "name": "Stazione di Fidenza",
+      "x": 175.39,
+      "z": -124.58,
+      "realAltitude": 74.3,
+      "groundY": 0,
+      "nearestBuilding": {
+        "id": 182278056,
+        "name": "Fidenza",
+        "kind": "train_station",
+        "x": 175.5,
+        "z": -124,
+        "height": 9.36
+      },
+      "distance": 0.59,
+      "notes": []
+    },
+    {
+      "id": "sanpietro",
+      "name": "Chiesa di San Pietro",
+      "x": -266.99,
+      "z": 198.48,
+      "realAltitude": 78.2,
+      "groundY": 0,
+      "nearestBuilding": {
+        "id": 182278235,
+        "name": "Chiesa di San Pietro",
+        "kind": "yes",
+        "x": -267.9,
+        "z": 198.7,
+        "height": 8.82
+      },
+      "distance": 0.94,
+      "notes": []
+    },
+    {
+      "id": "granmadre",
+      "name": "Santuario della Gran Madre di Dio",
+      "x": 415.56,
+      "z": 147.81,
+      "realAltitude": 77.3,
+      "groundY": 0,
+      "nearestBuilding": {
+        "id": 182278306,
+        "name": "Santuario della Gran Madre di Dio",
+        "kind": "yes",
+        "x": 416.6,
+        "z": 148.3,
+        "height": 9.27
+      },
+      "distance": 1.15,
+      "notes": []
+    }
+  ]
+}

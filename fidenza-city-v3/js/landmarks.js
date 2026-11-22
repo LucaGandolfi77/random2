@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { blockColor } from './block-palette.js';
+import { groundHeightAt } from './utils.js';
 
 const STONE = '#d9c7a8';
 const STONE_LIGHT = '#e7d8bd';
@@ -554,8 +555,8 @@ function buildMuseo(g) {
 }
 
 function buildPiazzaDuomo(g, world) {
-  // Platea in porfido PBR: il vecchio box beige copriva l'ortofoto e
-  // spezzava il suolo della piazza.
+  // Platea in porfido PBR: il vecchio box beige copriva il suolo
+  // procedurale e spezzava la piazza.
   const material = world?.groundMaterial?.('porphyry');
   if (material) {
     const geometry = new THREE.PlaneGeometry(34, 28);
@@ -695,7 +696,10 @@ export function buildLandmarks({ world, scene, landmarks, city }) {
     const model = l.model || l.type;
     const fn = builders[model] || builders[l.type] || buildMuseo;
     const g = new THREE.Group();
-    g.position.set(l.x + (l.offsetX || 0), 0, l.z + (l.offsetZ || 0));
+    const x = l.x + (l.offsetX || 0);
+    const z = l.z + (l.offsetZ || 0);
+    // Dentro l'area piatta vale 0; fuori si appoggia alla quota del terreno.
+    g.position.set(x, groundHeightAt(world.terrain, x, z, 0), z);
     g.rotation.y = (l.rotation || 0) * Math.PI / 180;
     g.scale.setScalar(Number.isFinite(l.scale) ? l.scale : 1);
     g.name = `landmark-${l.id}`;
@@ -706,7 +710,7 @@ export function buildLandmarks({ world, scene, landmarks, city }) {
   // Tabellone missioni in Piazza Duomo
   const board = new THREE.Group();
   const boardSpot = world.missionBoardDef || world.findFreeSpot(-316, 20, 1.2) || { x: -316, z: 20 };
-  board.position.set(boardSpot.x, 0, boardSpot.z);
+  board.position.set(boardSpot.x, groundHeightAt(world.terrain, boardSpot.x, boardSpot.z, 0), boardSpot.z);
   buildMissionBoard(board);
   scene.add(board);
   world.missionBoard = { x: boardSpot.x, z: boardSpot.z, group: board };

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { WORLD, SCORE, PLAYER, VERSION, SAVE_KEY } from './config.js';
-import { clamp, formatDistance, normalizeAngle, angleDiff, formatNumber, formatTime, escapeHtml } from './utils.js';
+import { clamp, formatDistance, normalizeAngle, angleDiff, formatNumber, formatTime, escapeHtml, groundHeightAt, terrainHeightAt, unproject } from './utils.js';
 import { loadSave, getSave, setName, addScore, addStar, addPlace, resetSave, isAudioEnabled, getStats, getCareer, addStat, addUniqueStat, flush, markSeason, markDay, setStatFlag, persist } from './save.js';
 import { evaluateAchievements, achievementState } from './achievements.js';
 import { getDailySnapshot, recordDaily } from './daily.js';
@@ -34,7 +34,12 @@ audio.muted = !isAudioEnabled();
 hud.setAudioMuted(audio.muted);
 
 const isMobile = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints || 0) > 0;
-const qualityParam = new URLSearchParams(location.search).get('quality');
+const searchParams = new URLSearchParams(location.search);
+const qualityParam = searchParams.get('quality');
+// Il suolo predefinito e' vettoriale e procedurale. L'ortofoto RER resta
+// disponibile solo come confronto/diagnostica con ?ortho=1.
+const useOrthoGround = searchParams.get('ortho') === '1';
+const inspectEnabled = searchParams.get('inspect') === '1';
 const quality = ['low', 'medium', 'high'].includes(qualityParam)
   ? qualityParam
   : (isMobile
@@ -146,10 +151,13 @@ let pendingStart = false;
 let clockFrozen = false;
 
 const deepParams = new URLSearchParams(location.search);
+// Attenzione: Number(null) vale 0, quindi senza x/z il deep spawn sarebbe
+// (0,0) invece dello spawn della mappa. Controlliamo la presenza dei parametri.
+const hasDeepSpawn = deepParams.has('x') && deepParams.has('z');
 const deepX = Number(deepParams.get('x'));
 const deepZ = Number(deepParams.get('z'));
 const deepYaw = Number(deepParams.get('yaw'));
-const deepSpawn = Number.isFinite(deepX) && Number.isFinite(deepZ)
+const deepSpawn = hasDeepSpawn && Number.isFinite(deepX) && Number.isFinite(deepZ)
   ? { x: deepX, z: deepZ, yaw: Number.isFinite(deepYaw) ? deepYaw : WORLD.spawn.yaw }
   : null;
 
@@ -238,6 +246,15 @@ const ui = {
   confirmNo: document.getElementById('confirm-no'),
   mapbox: document.getElementById('mapbox'),
   rotateHint: document.getElementById('rotate-hint'),
+  inspector: document.getElementById('inspector'),
+  inspectPos: document.getElementById('inspect-pos'),
+  inspectGps: document.getElementById('inspect-gps'),
+  inspectAlt: document.getElementById('inspect-alt'),
+  inspectGround: document.getElementById('inspect-ground'),
+  inspectEye: document.getElementById('inspect-eye'),
+  inspectTarget: document.getElementById('inspect-target'),
+  inspectDist: document.getElementById('inspect-dist'),
+  inspectTargetAlt: document.getElementById('inspect-target-alt'),
   touchQuick: document.getElementById('touch-quick'),
   touchDrive: document.getElementById('touch-drive'),
   touchFly: document.getElementById('touch-fly'),
@@ -511,35 +528,39 @@ async function init() {
     })
   ]);
   let ground = null;
-  try {
-    hud.setLoading(0.06, 'Leggo l’ortofoto di Fidenza…');
-    const groundMeta = await fetchJSON('./data/ground/ground.json');
-    const baseLevels = groundMeta.base?.levels || [];
-    const wantedBase = quality === 'high' ? 'z0' : quality === 'medium' ? 'z1' : 'z2';
-    const baseLevel = baseLevels.find(level => level.id === wantedBase) || baseLevels[baseLevels.length - 1];
-    const groundImage = await loadImage(`./data/ground/${baseLevel?.src || 'ortho-z0.jpg'}`);
-    let groundCenterImage = null;
-    if (quality !== 'low' && groundMeta.center?.levels?.length) {
-      const wantedCenter = quality === 'high' ? 'z0' : 'z1';
-      const centerLevel = groundMeta.center.levels.find(level => level.id === wantedCenter)
-        || groundMeta.center.levels[groundMeta.center.levels.length - 1];
-      groundCenterImage = await loadImage(`./data/ground/${centerLevel.src}`);
+  if (useOrthoGround) {
+    try {
+      hud.setLoading(0.06, 'Leggo l’ortofoto di Fidenza…');
+      const groundMeta = await fetchJSON('./data/ground/ground.json');
+      const baseLevels = groundMeta.base?.levels || [];
+      const wantedBase = quality === 'high' ? 'z0' : quality === 'medium' ? 'z1' : 'z2';
+      const baseLevel = baseLevels.find(level => level.id === wantedBase) || baseLevels[baseLevels.length - 1];
+      const groundImage = await loadImage(`./data/ground/${baseLevel?.src || 'ortho-z0.jpg'}`);
+      let groundCenterImage = null;
+      if (quality !== 'low' && groundMeta.center?.levels?.length) {
+        const wantedCenter = quality === 'high' ? 'z0' : 'z1';
+        const centerLevel = groundMeta.center.levels.find(level => level.id === wantedCenter)
+          || groundMeta.center.levels[groundMeta.center.levels.length - 1];
+        groundCenterImage = await loadImage(`./data/ground/${centerLevel.src}`);
+      }
+      ground = { meta: groundMeta, image: groundImage, centerImage: groundCenterImage };
+    } catch (err) {
+      console.warn('Ortofoto non disponibile, uso la mappa dei blocchi Arnis', err);
+      if (arnisJson?.meta?.surface) {
+        const lods = arnisJson.meta.surface.lods || [];
+        const lod = lods.find(level => level.id === (quality === 'high' ? 'z0' : quality === 'medium' ? 'z1' : 'z2')) || lods[0];
+        const fallbackImage = await loadImage(`./data/arnis/${lod?.src || 'surface.png'}`);
+        ground = {
+          meta: {
+            base: { bounds: WORLD.bounds, levels: [] },
+            license: 'Mappa dei blocchi ArnisWorld3 (fallback)'
+          },
+          image: fallbackImage
+        };
+      }
     }
-    ground = { meta: groundMeta, image: groundImage, centerImage: groundCenterImage };
-  } catch (err) {
-    console.warn('Ortofoto non disponibile, uso la mappa dei blocchi Arnis', err);
-    if (arnisJson?.meta?.surface) {
-      const lods = arnisJson.meta.surface.lods || [];
-      const lod = lods.find(level => level.id === (quality === 'high' ? 'z0' : quality === 'medium' ? 'z1' : 'z2')) || lods[0];
-      const fallbackImage = await loadImage(`./data/arnis/${lod?.src || 'surface.png'}`);
-      ground = {
-        meta: {
-          base: { bounds: WORLD.bounds, levels: [] },
-          license: 'Mappa dei blocchi ArnisWorld3 (fallback)'
-        },
-        image: fallbackImage
-      };
-    }
+  } else {
+    hud.setLoading(0.06, 'Preparo il suolo vettoriale…');
   }
   mapData = mapJson;
   hud.setLoading(0.08, 'Preparo la città…');
@@ -569,6 +590,7 @@ async function init() {
   try {
     await loadFacades({
       scene,
+      terrain,
       onProgress: (p, label) => hud.setLoading(0.94 + p * 0.02, `Facciate: ${label}`)
     });
   } catch (err) {
@@ -607,6 +629,8 @@ async function init() {
   }
   const sp = deepSpawn || mapData?.spawn || WORLD.spawn;
   player.spawn(sp.x, sp.z, sp.yaw);
+  // Dopo lo spawn: il pannello mostra subito la posizione reale, non (0,0).
+  if (inspectEnabled) setInspectorVisible(true);
   vehicles = new VehicleManager({ scene, world, audio, player, input });
   vehicles.spawnAll();
 
@@ -705,7 +729,24 @@ async function init() {
   hud.setLoading(1, 'Fidenza è pronta');
   hud.setPlayReady(true, 'Gioca');
   hud.hideLoading();
-  window.__fidenza = { world, player, vehicles, missions, career, map, photoMode, hud, renderer, scene, camera, input, postfx, arnis: world.arnis, groundTiles: world.groundTiles, startGame, getState: () => state, setHour: h => applyGameTime({ hour: h }), setGameTime: (day, hour) => applyGameTime({ day, hour }), applySeason, enterPhoto, exitPhoto, freezeClock: (f = true) => { clockFrozen = !!f; } };
+  window.__fidenza = {
+    world, player, vehicles, missions, career, map, photoMode, hud, renderer, scene, camera, input, postfx,
+    arnis: world.arnis,
+    groundTiles: world.groundTiles,
+    groundMode: useOrthoGround ? 'ortho-debug' : 'vector',
+    altitudeAt: (x, z) => ({
+      real: terrainHeightAt(world.terrain, x, z),
+      ground: groundHeightAt(world.terrain, x, z, 0),
+      gps: unproject(x, z)
+    }),
+    setInspector: setInspectorVisible,
+    startGame,
+    getState: () => state,
+    setHour: h => applyGameTime({ hour: h }),
+    setGameTime: (day, hour) => applyGameTime({ day, hour }),
+    applySeason, enterPhoto, exitPhoto,
+    freezeClock: (f = true) => { clockFrozen = !!f; }
+  };
   camera.position.set(-40, 20, 100);
   camera.lookAt(-120, 8, 20);
   requestAnimationFrame(loop);
@@ -1399,6 +1440,11 @@ function bindUI() {
     if (e.code === 'Escape') {
       if (map?.isOpen) { e.preventDefault(); map.close(); requestPointerLock(); }
     }
+    if (e.code === 'KeyI' && !e.repeat) {
+      const tag = e.target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || document.querySelector('dialog[open]')) return;
+      setInspectorVisible(!!ui.inspector?.hidden);
+    }
   });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) input.exitPointerLock();
@@ -1546,6 +1592,8 @@ let groundPrefetchStarted = false;
 const OFFLINE_TILES_KEY = 'fidenza-offline-tiles-v1';
 
 async function prefetchGroundTiles() {
+  // Senza ortofoto non ci sono tessere da scaricare: il suolo e' procedurale.
+  if (!world?.groundTiles) return;
   const tilesMeta = world?.groundMeta?.tiles;
   if (!tilesMeta?.manifest || quality === 'low') return;
   if (shouldSkipPrefetch()) {
@@ -2244,6 +2292,46 @@ function openNpcDialog(npc) {
   audio.click?.();
 }
 
+function setInspectorVisible(visible) {
+  if (!ui.inspector) return;
+  ui.inspector.hidden = !visible;
+  if (visible) updateInspector();
+}
+
+function updateInspector() {
+  if (!ui.inspector || ui.inspector.hidden || !player || !world) return;
+  const p = player.position;
+  const realAlt = terrainHeightAt(world.terrain, p.x, p.z);
+  const groundY = groundHeightAt(world.terrain, p.x, p.z, 0);
+  const gps = unproject(p.x, p.z);
+  if (ui.inspectPos) ui.inspectPos.textContent = `x ${p.x.toFixed(1)} · y ${p.y.toFixed(2)} · z ${p.z.toFixed(1)}`;
+  if (ui.inspectGps) ui.inspectGps.textContent = `${gps.lat.toFixed(6)}, ${gps.lon.toFixed(6)}`;
+  if (ui.inspectAlt) ui.inspectAlt.textContent = `${realAlt.toFixed(1)} m s.l.m.`;
+  if (ui.inspectGround) ui.inspectGround.textContent = `${groundY.toFixed(2)} m`;
+  if (ui.inspectEye) ui.inspectEye.textContent = `${camera.position.y.toFixed(2)} m`;
+
+  let best = null;
+  for (const l of world.landmarks || []) {
+    if (l.hidden) continue;
+    const x = l.x + (l.offsetX || 0);
+    const z = l.z + (l.offsetZ || 0);
+    const d = Math.hypot(x - p.x, z - p.z);
+    if (!best || d < best.d) best = { l, x, z, d };
+  }
+  if (!best) {
+    if (ui.inspectTarget) ui.inspectTarget.textContent = '—';
+    if (ui.inspectDist) ui.inspectDist.textContent = '—';
+    if (ui.inspectTargetAlt) ui.inspectTargetAlt.textContent = '—';
+    return;
+  }
+  const place = world.placesById.get(best.l.placeId || best.l.place);
+  const alt = terrainHeightAt(world.terrain, best.x, best.z);
+  const gy = groundHeightAt(world.terrain, best.x, best.z, 0);
+  if (ui.inspectTarget) ui.inspectTarget.textContent = place?.short || place?.name || best.l.name || best.l.id;
+  if (ui.inspectDist) ui.inspectDist.textContent = `${best.d.toFixed(1)} m`;
+  if (ui.inspectTargetAlt) ui.inspectTargetAlt.textContent = `${alt.toFixed(1)} m s.l.m. · suolo ${gy.toFixed(2)} m`;
+}
+
 function updateHUD(dt) {
   if (!player || !world || !missions) return;
   const save = getSave();
@@ -2367,6 +2455,7 @@ function updateHUD(dt) {
     }
   }
 
+  updateInspector();
   updateTouchUI();
 
   // meteo/notte
