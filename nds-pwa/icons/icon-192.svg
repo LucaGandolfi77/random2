@@ -1,0 +1,22 @@
+<svg width="192" height="192" viewBox="0 0 192 192" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#26384c"/>
+      <stop offset="1" stop-color="#1b2b40"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1824"/>
+      <stop offset="1" stop-color="#070d14"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="38" fill="url(#shell)"/>
+  <rect x="34" y="32" width="124" height="52" rx="5" fill="url(#screen)" stroke="#4cc9f0" stroke-width="3"/>
+  <rect x="34" y="96" width="124" height="52" rx="5" fill="url(#screen)" stroke="#4cc9f0" stroke-width="3"/>
+  <rect x="34" y="87" width="124" height="5" fill="#0a1018"/>
+  <rect x="80" y="88" width="32" height="3" rx="1.5" fill="#6b7a8a"/>
+  <rect x="52" y="164" width="8" height="22" rx="2" fill="#a9b6c4"/>
+  <rect x="45" y="171" width="22" height="8" rx="2" fill="#a9b6c4"/>
+  <circle cx="132" cy="172" r="6" fill="#f72585"/>
+  <circle cx="148" cy="172" r="6" fill="#f72585"/>
+  <circle cx="158" cy="20" r="4" fill="#ff4d6d"/>
+</svg>

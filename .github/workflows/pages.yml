@@ -149,6 +149,12 @@ jobs:
           npm test
           npm run build
 
+      - name: Build Pocket DS (static PWA, published by rsync)
+        # Pocket DS needs no bundler: the assemble step copies the folder
+        # verbatim. This is its build gate — it aborts the deploy if any
+        # module, icon or service-worker precache entry is missing.
+        run: node nds-pwa/scripts/verify.mjs
+
       - name: Assemble site
         run: |
           mkdir -p _site
@@ -174,6 +180,10 @@ jobs:
           cp -R gigant-battle-pwa/dist/ _site/gigant-battle-pwa/
           cp -R bros-saga-pwa/dist/ _site/bros-saga-pwa/
           cp -R phone-or-die-fps/dist/ _site/phone-or-die-fps/
+          # Static PWAs (including nds-pwa) are copied verbatim by rsync.
+          test -f _site/nds-pwa/index.html
+          test -f _site/nds-pwa/manifest.json
+          test -f _site/nds-pwa/service-worker.js
           touch _site/.nojekyll
 
       - name: Stamp Fidenza build

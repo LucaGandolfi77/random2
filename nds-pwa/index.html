@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- ===== SEO ===== -->
+    <title>Pocket DS — Nintendo DS emulator for your browser</title>
+    <meta name="description" content="Pocket DS is an installable, offline-capable Nintendo DS emulator PWA for iPhone and mobile. Load your own BIOS and ROM files and play with authentic dual screens and touch controls.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="random2">
+    <meta name="theme-color" content="#1b2430">
+
+    <link rel="canonical" href="https://lucagandolfi77.github.io/random2/nds-pwa/">
+
+    <!-- ===== PWA ===== -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="theme-color" content="#1b2430">
+    <meta name="color-scheme" content="dark">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pocket DS">
+
+    <!-- ===== Social cards ===== -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Pocket DS">
+    <meta property="og:title" content="Pocket DS — Nintendo DS emulator for your browser">
+    <meta property="og:description" content="An installable, offline-capable Nintendo DS emulator PWA for iPhone and mobile.">
+    <meta property="og:url" content="https://lucagandolfi77.github.io/random2/nds-pwa/">
+    <meta property="og:image" content="https://lucagandolfi77.github.io/random2/nds-pwa/icons/icon-512.png">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app" class="app">
+    <!-- ===== Top toolbar ===== -->
+    <header class="toolbar">
+        <div class="brand">
+            <span class="brand-mark">PDS</span>
+            <span class="brand-name">Pocket DS</span>
+        </div>
+        <div class="toolbar-actions">
+            <span id="core-badge" class="badge">NO ROM</span>
+            <button id="btn-open-rom" class="btn ghost small open-rom" type="button" title="Select a local .nds ROM">Open .nds</button>
+            <button id="btn-help" class="icon-btn" type="button" aria-label="Controls help" title="Controls help">?</button>
+            <button id="btn-settings" class="icon-btn" type="button" aria-label="Settings" title="Settings">⚙</button>
+            <button id="btn-menu" class="icon-btn" type="button" aria-label="Load BIOS and ROM" title="Load BIOS and ROM">☰</button>
+        </div>
+    </header>
+
+    <!-- ===== The handheld ===== -->
+    <main class="stage">
+        <div id="console" class="console skin-graphite">
+
+            <!-- UPPER SHELL -->
+            <section class="shell shell-top" aria-label="Upper screen">
+                <div class="bezel bezel-top">
+                    <div class="screen-frame">
+                        <canvas id="screen-top" width="256" height="192" aria-label="Top screen"></canvas>
+                        <div class="glare" aria-hidden="true"></div>
+                    </div>
+                    <div class="bezel-caption">
+                        <span class="bezel-brand">POCKET<span>DS</span></span>
+                        <span class="bezel-led" aria-hidden="true"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HINGE -->
+            <div class="hinge" aria-hidden="true">
+                <span class="hinge-line"></span>
+                <span class="hinge-center"></span>
+            </div>
+
+            <!-- LOWER SHELL -->
+            <section class="shell shell-bottom" aria-label="Lower screen and controls">
+                <div class="shoulders">
+                    <button class="shoulder" data-button="L" type="button" aria-label="L button">L</button>
+                    <span class="shoulder-center" aria-hidden="true"></span>
+                    <button class="shoulder" data-button="R" type="button" aria-label="R button">R</button>
+                </div>
+
+                <div class="bezel bezel-bottom">
+                    <div id="touch-frame" class="screen-frame touch-frame">
+                        <canvas id="screen-bottom" width="256" height="192" aria-label="Bottom touch screen"></canvas>
+                        <div class="glare" aria-hidden="true"></div>
+                        <div class="touch-hint" id="touch-hint" aria-hidden="true">TOUCH SCREEN</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div class="dpad" role="group" aria-label="Direction pad">
+                        <button class="dpad-btn up" data-button="UP" type="button" aria-label="Up">▲</button>
+                        <button class="dpad-btn left" data-button="LEFT" type="button" aria-label="Left">◀</button>
+                        <span class="dpad-hub" aria-hidden="true"></span>
+                        <button class="dpad-btn right" data-button="RIGHT" type="button" aria-label="Right">▶</button>
+                        <button class="dpad-btn down" data-button="DOWN" type="button" aria-label="Down">▼</button>
+                    </div>
+
+                    <div class="system-controls">
+                        <button class="sys-btn" data-button="SELECT" type="button" aria-label="Select">SELECT</button>
+                        <button class="sys-btn" data-button="START" type="button" aria-label="Start">START</button>
+                    </div>
+
+                    <div class="face-buttons" role="group" aria-label="Action buttons">
+                        <button class="face-btn x" data-button="X" type="button" aria-label="X button">X</button>
+                        <button class="face-btn y" data-button="Y" type="button" aria-label="Y button">Y</button>
+                        <button class="face-btn a" data-button="A" type="button" aria-label="A button">A</button>
+                        <button class="face-btn b" data-button="B" type="button" aria-label="B button">B</button>
+                    </div>
+                </div>
+
+                <div class="deck-footer">
+                    <div class="speaker" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    <div class="power-row">
+                        <span class="power-led" id="power-led" aria-hidden="true"></span>
+                        <span class="power-label">POWER</span>
+                    </div>
+                    <div class="stylus" aria-hidden="true"><span></span></div>
+                </div>
+            </section>
+
+            <!-- Overlay shown when nothing is running -->
+            <div id="idle-overlay" class="screen-overlay">
+                <div class="idle-icon">▣</div>
+                <p class="idle-title">No game running</p>
+                <p class="idle-sub">Pick a local ROM, or load BIOS + ROM.</p>
+                <div class="idle-actions">
+                    <button id="btn-idle-quick" class="btn primary small" type="button">Open .nds file</button>
+                    <button id="btn-idle-load" class="btn ghost small" type="button">Load BIOS + ROM</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Status strip ===== -->
+        <div class="status-strip">
+            <span class="status-item"><span class="dot" id="status-dot"></span><span id="status-text">Idle</span></span>
+            <span class="status-item"><span id="rom-name">No ROM</span></span>
+            <span class="status-item"><span id="fps">-- FPS</span></span>
+            <button id="btn-states" class="mini-btn" type="button">States</button>
+            <button id="btn-pause" class="mini-btn" type="button">Pause</button>
+            <button id="btn-reset" class="mini-btn" type="button">Reset</button>
+        </div>
+    </main>
+</div>
+
+<!-- ===== Onboarding / loader ===== -->
+<div id="onboarding" class="overlay" role="dialog" aria-modal="true" aria-labelledby="onb-title">
+    <div class="panel">
+        <button class="panel-close" data-close="onboarding" type="button" aria-label="Close">×</button>
+        <h1 id="onb-title">Pocket <span>DS</span></h1>
+        <p class="lede">A Nintendo DS emulator for the browser. Load your own files — nothing is bundled or uploaded.</p>
+
+        <div class="file-grid">
+            <label class="file-row">
+                <span class="file-label">ARM9 BIOS <em>required</em></span>
+                <span class="file-status" id="st-arm9">not loaded</span>
+                <input id="file-arm9" type="file" accept=".bin,.rom,*/*">
+            </label>
+            <label class="file-row">
+                <span class="file-label">ARM7 BIOS <em>required</em></span>
+                <span class="file-status" id="st-arm7">not loaded</span>
+                <input id="file-arm7" type="file" accept=".bin,.rom,*/*">
+            </label>
+            <label class="file-row">
+                <span class="file-label">Firmware <em>optional</em></span>
+                <span class="file-status" id="st-fw">not loaded</span>
+                <input id="file-fw" type="file" accept=".bin,.rom,*/*">
+            </label>
+            <label class="file-row">
+                <span class="file-label">Game ROM (.nds) <em>required</em></span>
+                <span class="file-status" id="st-rom">not loaded</span>
+                <input id="file-rom" type="file" accept=".nds,.rom,*/*">
+            </label>
+        </div>
+
+        <div class="onb-actions">
+            <button id="btn-boot" class="btn primary" type="button" disabled>Boot game</button>
+            <button id="btn-demo" class="btn ghost" type="button">Try demo mode</button>
+        </div>
+
+        <p class="legal">Pocket DS does not include Nintendo BIOS, firmware, or games. You must supply your own legally obtained copies. Your files stay on this device.</p>
+    </div>
+</div>
+
+<!-- ===== Settings ===== -->
+<div id="settings-panel" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="set-title">
+    <div class="panel">
+        <button class="panel-close" data-close="settings-panel" type="button" aria-label="Close">×</button>
+        <h2 id="set-title">Settings</h2>
+        <div class="setting-row">
+            <label for="set-skin">Shell colour</label>
+            <select id="set-skin">
+                <option value="graphite">Graphite</option>
+                <option value="silver">Silver</option>
+                <option value="midnight">Midnight</option>
+                <option value="crimson">Crimson</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <label for="set-layout">Layout</label>
+            <select id="set-layout">
+                <option value="auto">Auto (device)</option>
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <label for="set-scale">Screen size</label>
+            <input id="set-scale" type="range" min="70" max="130" value="100">
+            <output id="set-scale-out">100%</output>
+        </div>
+        <div class="setting-row">
+            <label for="set-skip">Frame skip</label>
+            <select id="set-skip">
+                <option value="0">Off</option>
+                <option value="1">1 frame</option>
+                <option value="2">2 frames</option>
+            </select>
+        </div>
+        <div class="setting-row">
+            <label for="set-volume">Volume</label>
+            <input id="set-volume" type="range" min="0" max="100" value="50">
+            <output id="set-volume-out">50%</output>
+        </div>
+        <label class="check-row">
+            <input id="set-scanlines" type="checkbox" checked>
+            <span>CRT scanlines</span>
+        </label>
+        <label class="check-row">
+            <input id="set-hints" type="checkbox" checked>
+            <span>Show touch hint</span>
+        </label>
+        <div class="danger-zone">
+            <button id="btn-clear-files" class="btn danger small" type="button">Clear loaded files</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Save states ===== -->
+<div id="states-panel" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="states-title">
+    <div class="panel">
+        <button class="panel-close" data-close="states-panel" type="button" aria-label="Close">×</button>
+        <h2 id="states-title">Save states</h2>
+        <p class="lede">Stored privately on this device.</p>
+        <div id="state-list" class="state-list"></div>
+        <button id="btn-new-state" class="btn primary small" type="button">Save to new slot</button>
+    </div>
+</div>
+
+<!-- ===== Help ===== -->
+<div id="help-panel" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="panel">
+        <button class="panel-close" data-close="help-panel" type="button" aria-label="Close">×</button>
+        <h2 id="help-title">Controls</h2>
+        <div class="help-grid">
+            <div><strong>D-pad</strong><span>Arrow keys / WASD</span></div>
+            <div><strong>A</strong><span>Z</span></div>
+            <div><strong>B</strong><span>X</span></div>
+            <div><strong>X</strong><span>J</span></div>
+            <div><strong>Y</strong><span>K</span></div>
+            <div><strong>L / R</strong><span>Q / E</span></div>
+            <div><strong>Start</strong><span>Enter</span></div>
+            <div><strong>Select</strong><span>Shift / Backspace</span></div>
+            <div><strong>Touch</strong><span>Mouse / finger on lower screen</span></div>
+        </div>
+        <p class="legal">On a phone, use the on-screen buttons. The lower screen is the touchscreen — tap and drag with your finger or stylus.</p>
+    </div>
+</div>
+
+<!-- ===== Install prompt ===== -->
+<div id="install-prompt" class="install hidden" role="status">
+    <span>Install Pocket DS for offline play.</span>
+    <button id="btn-install" class="btn primary small" type="button">Install</button>
+    <button id="btn-install-later" class="btn ghost small" type="button">Later</button>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- Quick ROM picker used by the toolbar and idle screen. -->
+<input id="file-rom-quick" type="file" accept=".nds,.rom,*/*" hidden>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

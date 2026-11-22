@@ -118,6 +118,9 @@ jobs:
                      -not -path '*/node_modules/*' -not -path '*/.venv/*')
           [ "$found" -eq 1 ] || { echo "no manifests found"; exit 1; }
 
+      - name: Pocket DS (PWA contract check)
+        run: node nds-pwa/scripts/verify.mjs
+
       - name: Every PWA index.html links its manifest
         run: |
           set -euo pipefail
