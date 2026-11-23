@@ -1,0 +1,19 @@
+{
+  "name": "BORGO — La Passeggiata",
+  "short_name": "BORGO",
+  "description": "A golden-hour walk through a fictional Apulian hill town: four voices, six memories, one evening.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1d1a15",
+  "theme_color": "#1d1a15",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

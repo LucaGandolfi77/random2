@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="BORGO">
+  <rect width="512" height="512" fill="#1d1a15"/>
+  <circle cx="256" cy="214" r="118" fill="#d9a441"/>
+  <circle cx="256" cy="214" r="88" fill="#f0c46a"/>
+  <path d="M0 356h512v156H0z" fill="#6f7f4f"/>
+  <path d="M0 388c96-34 172-18 256 6 92 26 164 10 256-18v136H0z" fill="#4f5d3c"/>
+  <g fill="#f5ecd9">
+    <path d="M92 296h96v92H92z"/>
+    <path d="M76 296l64-42 64 42z" fill="#c2603f"/>
+    <path d="M214 330h84v58h-84z"/>
+    <path d="M202 330l54-34 54 34z" fill="#b25a3f"/>
+    <path d="M322 258h62v130h-62z"/>
+    <path d="M314 258l39-30 39 30z" fill="#c2603f"/>
+    <path d="M336 276h34v22h-34z" fill="#1d1a15"/>
+    <path d="M348 242v-34h8v34z"/>
+    <circle cx="352" cy="198" r="10" fill="#f0c46a"/>
+  </g>
+  <g fill="#1d1a15">
+    <rect x="112" y="322" width="18" height="30" rx="2"/>
+    <rect x="150" y="322" width="18" height="30" rx="2"/>
+    <rect x="236" y="346" width="14" height="22" rx="2"/>
+    <rect x="262" y="346" width="14" height="22" rx="2"/>
+    <rect x="340" y="318" width="24" height="70" rx="3"/>
+  </g>
+  <g fill="#f5ecd9">
+    <circle cx="352" cy="344" r="4"/>
+    <circle cx="352" cy="366" r="4"/>
+  </g>
+</svg>

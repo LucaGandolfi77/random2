@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1d1a15" />
+    <meta name="description" content="BORGO — La Passeggiata: an original third-person exploration game set in a fictional Apulian hill town at golden hour." />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <title>BORGO — La Passeggiata</title>
+  </head>
+  <body>
+    <div id="app">
+      <div id="scene" aria-hidden="true"><canvas id="canvas"></canvas></div>
+      <div class="vignette" aria-hidden="true"></div>
+
+      <div id="loading" class="screen loading">
+        <div class="loading-mark">BORGO</div>
+        <div class="loading-bar"><span></span></div>
+        <p data-i18n="loading">Il paese si sta svegliando…</p>
+      </div>
+
+      <div id="hud" hidden>
+        <div class="hud-topleft">
+          <div class="plaque">
+            <span class="plaque-eyebrow" data-i18n="hospitality">Ospitalità</span>
+            <span id="hud-rank" class="plaque-rank">Forestiero</span>
+            <span id="hud-points" class="plaque-points">0</span>
+          </div>
+          <canvas id="compass" width="220" height="30" aria-hidden="true"></canvas>
+        </div>
+
+        <div class="hud-topright">
+          <div id="hud-objective" class="objective" hidden>
+            <span class="objective-label" data-i18n="objective">In corso</span>
+            <strong id="hud-objective-name"></strong>
+            <span id="hud-objective-progress" class="objective-progress"></span>
+          </div>
+          <div class="hud-buttons">
+            <button id="btn-journal" class="icon-btn" type="button" data-i18n-aria="journal" aria-label="Diario">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v20H7.5A2.5 2.5 0 0 1 5 19.5v-15Zm2 0V19.5c0 .28.22.5.5.5H17V4H7.5a.5.5 0 0 0-.5.5Zm3 3h5v1.6H10V7.5Zm0 4h5v1.6h-5v-1.6Z"/></svg>
+            </button>
+            <button id="btn-map" class="icon-btn" type="button" data-i18n-aria="map" aria-label="Mappa">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 4 5 2v14l-5-2-6 2-5-2V4l5 2 6-2Zm-1 2.2-4 1.3v10.3l4-1.3V6.2Zm2 10.4 2 .7V6.7l-2-.7v10.6Zm-8-1 .8.3V5.3l-.8-.3v10.6Z"/></svg>
+            </button>
+            <button id="btn-pause" class="icon-btn" type="button" data-i18n-aria="menu" aria-label="Pausa">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7V5Zm7 0h3v14h-3V5Z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="hud-zone" class="zone" aria-live="polite"></div>
+
+        <div id="prompt" class="prompt" hidden>
+          <kbd id="prompt-key">E</kbd>
+          <span id="prompt-text"></span>
+        </div>
+
+        <div id="toasts" class="toasts" aria-live="polite"></div>
+
+        <div class="minimap-wrap" aria-hidden="true">
+          <canvas id="minimap" width="180" height="180"></canvas>
+          <span class="minimap-n">N</span>
+        </div>
+
+        <div id="touch" class="touch" hidden>
+          <div id="stick" class="stick" aria-hidden="true"><div id="stick-knob"></div></div>
+          <button id="btn-action" class="action-btn" type="button"><span id="action-label">E</span></button>
+        </div>
+      </div>
+
+      <div id="title" class="screen title-screen">
+        <div class="title-top">
+          <button id="title-lang" class="ghost-btn lang-btn" type="button" aria-label="Italiano / English">
+            <span class="lang-current">IT</span><span class="lang-sep">/</span><span class="lang-alt">EN</span>
+          </button>
+        </div>
+        <div class="title-inner">
+          <p class="title-eyebrow" data-i18n="titleEyebrow">Un paese immaginario, un'ora d'oro</p>
+          <h1>BORGO</h1>
+          <p class="title-sub">La Passeggiata</p>
+          <p class="title-tagline" data-i18n="titleTagline">Quattro voci, sei ricordi, una sera che comincia.</p>
+          <div class="title-actions">
+            <button id="title-continue" class="btn btn-primary" type="button" data-i18n="continueGame">Continua</button>
+            <button id="title-new" class="btn btn-ghost" type="button" data-i18n="newGame">Nuova partita</button>
+          </div>
+          <p id="title-save-note" class="title-save-note" hidden></p>
+          <div class="title-controls">
+            <div><kbd>W A S D</kbd><span data-i18n="controlMove">Cammina</span></div>
+            <div><kbd>Shift</kbd><span data-i18n="controlRun">Corri</span></div>
+            <div><kbd>E</kbd><span data-i18n="controlInteract">Interagisci</span></div>
+            <div><kbd>M</kbd><span data-i18n="controlMap">Mappa</span></div>
+          </div>
+          <p class="title-note" data-i18n="audioNote">L'audio si attiva al primo tocco. Nessuna rete, nessun download.</p>
+        </div>
+        <div class="title-foot">
+          <span>BORGO — La Passeggiata</span>
+          <span data-i18n="madeWith">Un racconto originale in tre dimensioni</span>
+        </div>
+      </div>
+
+      <div id="dialogue" class="dialogue" hidden aria-live="polite">
+        <div class="dialogue-head">
+          <span id="dialogue-name" class="dialogue-name"></span>
+          <span class="dialogue-rule"></span>
+        </div>
+        <p id="dialogue-text" class="dialogue-text"></p>
+        <div id="dialogue-choices" class="dialogue-choices"></div>
+        <div id="dialogue-hint" class="dialogue-hint">
+          <kbd id="dialogue-key">E</kbd><span data-i18n="continueHint">continua</span>
+        </div>
+      </div>
+
+      <div id="journal" class="panel journal-panel" hidden role="dialog" aria-modal="true" aria-labelledby="journal-title">
+        <div class="panel-head">
+          <div>
+            <p class="panel-eyebrow" data-i18n="journalEyebrow">Taccuino di viaggio</p>
+            <h2 id="journal-title" data-i18n="journalTitle">Diario</h2>
+          </div>
+          <button id="journal-close" class="icon-btn" type="button" data-i18n-aria="close" aria-label="Chiudi">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
+          </button>
+        </div>
+        <div class="journal-body">
+          <section class="journal-col">
+            <h3 data-i18n="activeQuests">In corso</h3>
+            <ul id="journal-quests" class="quest-list"></ul>
+            <p id="journal-empty" class="muted" data-i18n="noneYet">Nessun incarico. Parla con la gente del borgo.</p>
+            <h3 data-i18n="completedQuests">Completate</h3>
+            <ul id="journal-done" class="quest-list done-list"></ul>
+          </section>
+          <section class="journal-col mosaic-col">
+            <h3 data-i18n="mosaicTitle">Mosaico dei Ricordi</h3>
+            <canvas id="journal-mosaic" width="360" height="220"></canvas>
+            <p id="journal-tiles-count" class="muted"></p>
+            <p class="fine" data-i18n="mosaicHint">Le tessere brillano dove il paese ricorda.</p>
+          </section>
+        </div>
+        <p class="panel-foot"><kbd>J</kbd><span data-i18n="closeHint">chiudi</span></p>
+      </div>
+
+      <div id="map-panel" class="panel map-panel" hidden role="dialog" aria-modal="true" aria-labelledby="map-title">
+        <div class="panel-head">
+          <div>
+            <p class="panel-eyebrow" data-i18n="mapEyebrow">Il borgo dall'alto</p>
+            <h2 id="map-title" data-i18n="mapTitle">Mappa</h2>
+          </div>
+          <button id="map-close" class="icon-btn" type="button" data-i18n-aria="close" aria-label="Chiudi">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
+          </button>
+        </div>
+        <canvas id="map-canvas" width="720" height="720"></canvas>
+        <div class="map-legend">
+          <span><i class="dot dot-player"></i><span data-i18n="legendPlayer">Tu</span></span>
+          <span><i class="dot dot-npc"></i><span data-i18n="legendNpc">Paesani</span></span>
+          <span><i class="dot dot-tile"></i><span data-i18n="legendTile">Ricordi</span></span>
+          <span><i class="dot dot-target"></i><span data-i18n="legendTarget">Incarichi</span></span>
+        </div>
+        <p class="panel-foot"><kbd>M</kbd><span data-i18n="closeHint">chiudi</span></p>
+      </div>
+
+      <div id="pause" class="screen menu-screen" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title">
+        <div class="menu-card">
+          <p class="panel-eyebrow" data-i18n="pauseEyebrow">Una pausa all'ombra</p>
+          <h2 id="pause-title" data-i18n="paused">Pausa</h2>
+          <div class="menu-actions">
+            <button id="pause-resume" class="btn btn-primary" type="button" data-i18n="resume">Riprendi</button>
+            <button id="pause-settings" class="btn btn-ghost" type="button" data-i18n="settings">Impostazioni</button>
+            <button id="pause-new" class="btn btn-ghost" type="button" data-i18n="newGame">Nuova partita</button>
+            <button id="pause-title" class="btn btn-quiet" type="button" data-i18n="backToTitle">Torna al titolo</button>
+          </div>
+          <details class="controls-details">
+            <summary data-i18n="controlsTitle">Comandi</summary>
+            <div class="controls-grid">
+              <div><kbd>W A S D</kbd><span data-i18n="controlMove">Cammina</span></div>
+              <div><kbd>Shift</kbd><span data-i18n="controlRun">Corri</span></div>
+              <div><kbd>Space</kbd><span data-i18n="controlJump">Salta</span></div>
+              <div><kbd>E</kbd><span data-i18n="controlInteract">Interagisci</span></div>
+              <div><kbd>M</kbd><span data-i18n="controlMap">Mappa</span></div>
+              <div><kbd>J</kbd><span data-i18n="controlJournal">Diario</span></div>
+              <div><kbd>Esc</kbd><span data-i18n="controlPause">Pausa</span></div>
+              <div><kbd>Trascina</kbd><span data-i18n="controlLook">Guarda intorno</span></div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div id="settings" class="screen menu-screen" hidden role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="menu-card">
+          <p class="panel-eyebrow" data-i18n="settingsEyebrow">Come vuoi camminare</p>
+          <h2 id="settings-title" data-i18n="settingsTitle">Impostazioni</h2>
+          <div class="setting-row">
+            <label for="volume" data-i18n="volume">Volume</label>
+            <div class="range-wrap">
+              <input id="volume" type="range" min="0" max="100" step="1" value="70" />
+              <output id="volume-value" for="volume">70</output>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div>
+              <label for="reduced" data-i18n="reducedMotion">Movimento ridotto</label>
+              <p class="fine" data-i18n="reducedMotionHint">Meno oscillazioni e transizioni più rapide.</p>
+            </div>
+            <input id="reduced" type="checkbox" class="switch" />
+          </div>
+          <div class="setting-row">
+            <span data-i18n="languageLabel">Lingua</span>
+            <div class="segmented" role="group" aria-label="Italiano / English">
+              <button id="lang-it" class="seg-btn" type="button">Italiano</button>
+              <button id="lang-en" class="seg-btn" type="button">English</button>
+            </div>
+          </div>
+          <button id="settings-close" class="btn btn-primary" type="button" data-i18n="close">Chiudi</button>
+        </div>
+      </div>
+
+      <div id="confirm" class="screen menu-screen" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+        <div class="menu-card">
+          <h2 id="confirm-title" data-i18n="confirmTitle">Ricominciare?</h2>
+          <p class="confirm-text" data-i18n="confirmText">La passeggiata attuale andrà persa. Il diario ricomincerà da una pagina bianca.</p>
+          <div class="menu-actions row">
+            <button id="confirm-yes" class="btn btn-primary" type="button" data-i18n="confirmYes">Sì, ricomincia</button>
+            <button id="confirm-no" class="btn btn-ghost" type="button" data-i18n="cancel">Annulla</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="finale" class="screen finale" hidden>
+        <div class="finale-card">
+          <p class="title-eyebrow" data-i18n="finaleEyebrow">La campana ha suonato</p>
+          <h2 id="finale-title" data-i18n="finaleTitle">La passeggiata</h2>
+          <p id="finale-text" class="finale-text"></p>
+          <div id="finale-stats" class="finale-stats"></div>
+          <div class="menu-actions row">
+            <button id="finale-continue" class="btn btn-primary" type="button" data-i18n="keepPlaying">Resta un altro po'</button>
+            <button id="finale-new" class="btn btn-ghost" type="button" data-i18n="newGame">Nuova partita</button>
+          </div>
+        </div>
+      </div>
+
+      <noscript>BORGO — La Passeggiata richiede JavaScript e WebGL 2.</noscript>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

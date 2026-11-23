@@ -74,6 +74,13 @@ whiteout-survival-pwa/.vite/
 !phone-or-die-fps/tests/
 !phone-or-die-fps/tests/**
 
+# BORGO keeps its manifest, lockfile and tests in the repository.
+!borgo-pwa/package.json
+!borgo-pwa/package-lock.json
+!borgo-pwa/tests/
+!borgo-pwa/tests/**
+borgo-pwa/dist/
+
 # BROS. SAGA keeps its manifest, lockfile and tests in the repository.
 !bros-saga-pwa/package.json
 !bros-saga-pwa/package-lock.json
