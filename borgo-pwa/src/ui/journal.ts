@@ -1,4 +1,5 @@
 import { QUESTS, QUEST_ORDER } from '../data/quests';
+import { DISCOVERIES } from '../data/town';
 import { pick, t } from '../data/strings';
 import type { Language, QuestId } from '../data/types';
 import { questProgress, type GameState } from '../game/state';
@@ -16,6 +17,8 @@ export class JournalPanel {
   private list = byId<HTMLUListElement>('journal-quests');
   private done = byId<HTMLUListElement>('journal-done');
   private empty = byId<HTMLParagraphElement>('journal-empty');
+  private places = byId<HTMLUListElement>('journal-places');
+  private placesCount = byId<HTMLParagraphElement>('journal-places-count');
   private mosaic = byId<HTMLCanvasElement>('journal-mosaic');
   private count = byId<HTMLParagraphElement>('journal-tiles-count');
   private open = false;
@@ -49,6 +52,7 @@ export class JournalPanel {
     if (!this.open) return;
     this.list.textContent = '';
     this.done.textContent = '';
+    this.places.textContent = '';
 
     const active: QuestId[] = [];
     const completed: QuestId[] = [];
@@ -66,7 +70,19 @@ export class JournalPanel {
 
     this.empty.hidden = active.length > 0;
     this.done.parentElement?.classList.toggle('is-empty', completed.length === 0);
-    this.count.textContent = `${state.tiles.length}/6 · ${t('tilesFound', lang)}`;
+    this.count.textContent = `${state.tiles.length}/12 · ${t('tilesFound', lang)}`;
+    this.placesCount.textContent = `${state.discovered.length}/${DISCOVERIES.length} · ${t('placesFound', lang)}`;
+    for (const place of DISCOVERIES) {
+      const found = state.discovered.includes(place.id);
+      const item = document.createElement('li');
+      item.className = found ? 'place' : 'place place-locked';
+      const name = document.createElement('strong');
+      name.textContent = pick(place.name, lang);
+      const description = document.createElement('p');
+      description.textContent = found ? pick(place.description, lang) : t('undiscovered', lang);
+      item.append(name, description);
+      this.places.appendChild(item);
+    }
     this.drawMosaic(state.tiles);
   }
 
@@ -106,16 +122,16 @@ export class JournalPanel {
     const { width, height } = this.mosaic;
     ctx.clearRect(0, 0, width, height);
 
-    const cols = 3;
-    const rows = 2;
-    const gap = 12;
+    const cols = 4;
+    const rows = 3;
+    const gap = 10;
     const tile = Math.min((width - gap * (cols + 1)) / cols, (height - gap * (rows + 1)) / rows);
     const totalW = cols * tile + (cols - 1) * gap;
     const totalH = rows * tile + (rows - 1) * gap;
     const startX = (width - totalW) / 2;
     const startY = (height - totalH) / 2;
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 12; i++) {
       const col = i % cols;
       const row = Math.floor(i / cols);
       const x = startX + col * (tile + gap);

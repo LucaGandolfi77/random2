@@ -17,6 +17,7 @@ export class MapPanel {
     player: { x: number; z: number };
     heading: number;
     lang: Language;
+    waypoint: { x: number; z: number } | null;
   } | null = null;
 
   constructor(private onClose: () => void) {
@@ -31,18 +32,27 @@ export class MapPanel {
     state: GameState,
     player: { x: number; z: number },
     heading: number,
-    lang: Language
+    lang: Language,
+    waypoint: { x: number; z: number } | null
   ): void {
     this.open = true;
     this.root.hidden = false;
-    this.last = { state, player, heading, lang };
-    drawFullMap(this.canvas, state, player, heading, lang);
+    this.last = { state, player, heading, lang, waypoint };
+    drawFullMap(this.canvas, state, player, heading, lang, waypoint);
   }
 
-  refresh(lang: Language): void {
+  refresh(lang: Language, waypoint?: { x: number; z: number } | null): void {
     if (!this.open || !this.last) return;
     this.last.lang = lang;
-    drawFullMap(this.canvas, this.last.state, this.last.player, this.last.heading, lang);
+    if (waypoint !== undefined) this.last.waypoint = waypoint;
+    drawFullMap(
+      this.canvas,
+      this.last.state,
+      this.last.player,
+      this.last.heading,
+      lang,
+      this.last.waypoint
+    );
   }
 
   hide(): void {

@@ -5,37 +5,22 @@ export interface Localized {
   en: string;
 }
 
-export type NpcId = 'ada' | 'elio' | 'marta' | 'nino';
+export type NpcId = 'ada' | 'elio' | 'marta' | 'nino' | 'beppe' | 'lidia' | 'sara';
 
-export type QuestId = 'bread' | 'letters' | 'flowers' | 'bell';
+export type QuestId =
+  | 'bread'
+  | 'letters'
+  | 'flowers'
+  | 'newspaper'
+  | 'book'
+  | 'coffee'
+  | 'bell';
 
 export type QuestPhase = 'locked' | 'available' | 'active' | 'objective' | 'done';
 
-export type WallTone = 'cream' | 'white' | 'rose' | 'ochre' | 'stone';
-
-export type RoofTone = 'terracotta' | 'brown' | 'slate';
-
-export type BuildingStyle = 'house' | 'shop' | 'cafe' | 'hall' | 'church' | 'tower';
-
-export type DoorSide = 'n' | 's' | 'e' | 'w';
-
-export interface BuildingSpec {
-  id: string;
-  x: number;
-  z: number;
-  w: number;
-  d: number;
-  h: number;
-  style: BuildingStyle;
-  door: DoorSide;
-  wall: WallTone;
-  roof: RoofTone;
-  sign?: string;
-  chimney?: boolean;
-}
-
 export type PropKind =
   | 'olive'
+  | 'plane'
   | 'cypress'
   | 'lantern'
   | 'bench'
@@ -62,14 +47,6 @@ export interface PropSpec {
   scale?: number;
 }
 
-export interface PathSpec {
-  x: number;
-  z: number;
-  w: number;
-  d: number;
-  tone?: 'stone' | 'earth';
-}
-
 export interface ZoneSpec {
   id: string;
   name: Localized;
@@ -89,6 +66,24 @@ export interface NpcSpec {
   x: number;
   z: number;
   facing: number;
+}
+
+export interface DiscoverySpec {
+  id: string;
+  name: Localized;
+  description: Localized;
+  x: number;
+  z: number;
+  radius: number;
+}
+
+export interface DeliverySpec {
+  id: string;
+  quest: QuestId;
+  label: Localized;
+  x: number;
+  z: number;
+  radius: number;
 }
 
 export interface WorldBounds {
@@ -112,6 +107,9 @@ export type DialogueAction =
   | 'accept-bread'
   | 'accept-letters'
   | 'accept-flowers'
+  | 'accept-newspaper'
+  | 'accept-book'
+  | 'accept-coffee'
   | 'accept-bell'
   | 'complete-letters'
   | 'complete-flowers';

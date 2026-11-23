@@ -1,352 +1,273 @@
+import { FIDENZA_WORLD } from './fidenza';
 import type {
-  BuildingSpec,
+  DiscoverySpec,
+  DeliverySpec,
   NpcSpec,
-  PathSpec,
   PropSpec,
   Spot,
-  WorldBounds,
   ZoneSpec
 } from './types';
 
-export const WORLD: WorldBounds = {
-  minX: -49,
-  maxX: 48,
-  minZ: -39,
-  maxZ: 39
+export const WORLD = FIDENZA_WORLD;
+
+/** Piazza Duomo, looking east at the cathedral. */
+export const SPAWN = {
+  x: -300,
+  z: 2,
+  rot: Math.PI / 2,
+  yaw: -Math.PI / 2
 };
 
-export const SPAWN = { x: 0, z: 13, rot: Math.PI };
+export const TITLE_VIEW = {
+  x: -255,
+  z: 0,
+  radius: 60,
+  height: 36
+};
 
-export const BUILDINGS: BuildingSpec[] = [
-  {
-    id: 'bakery',
-    x: -22,
-    z: 1,
-    w: 8,
-    d: 6,
-    h: 4.2,
-    style: 'shop',
-    door: 's',
-    wall: 'cream',
-    roof: 'terracotta',
-    sign: 'FORNO',
-    chimney: true
-  },
-  {
-    id: 'neighbour',
-    x: -34.5,
-    z: 1,
-    w: 7,
-    d: 6,
-    h: 4,
-    style: 'house',
-    door: 's',
-    wall: 'white',
-    roof: 'terracotta',
-    chimney: true
-  },
-  {
-    id: 'cafe',
-    x: -12,
-    z: -12,
-    w: 9,
-    d: 6,
-    h: 4.4,
-    style: 'cafe',
-    door: 's',
-    wall: 'rose',
-    roof: 'brown',
-    sign: 'CAFFÈ'
-  },
-  {
-    id: 'townhall',
-    x: 8,
-    z: -11,
-    w: 8,
-    d: 8,
-    h: 6.2,
-    style: 'hall',
-    door: 'w',
-    wall: 'ochre',
-    roof: 'slate',
-    sign: 'COMUNE'
-  },
-  {
-    id: 'flowershop',
-    x: 22,
-    z: 3,
-    w: 8,
-    d: 6,
-    h: 4,
-    style: 'shop',
-    door: 'w',
-    wall: 'white',
-    roof: 'terracotta',
-    sign: 'FIORI'
-  },
-  {
-    id: 'north-house-a',
-    x: -4,
-    z: -22,
-    w: 9,
-    d: 6,
-    h: 4.6,
-    style: 'house',
-    door: 's',
-    wall: 'cream',
-    roof: 'terracotta',
-    chimney: true
-  },
-  {
-    id: 'north-house-b',
-    x: 5,
-    z: -24,
-    w: 7,
-    d: 6,
-    h: 4.2,
-    style: 'house',
-    door: 's',
-    wall: 'rose',
-    roof: 'brown',
-    chimney: true
-  },
-  {
-    id: 'south-house',
-    x: -18,
-    z: 17,
-    w: 8,
-    d: 6,
-    h: 4.4,
-    style: 'house',
-    door: 'n',
-    wall: 'ochre',
-    roof: 'terracotta'
-  },
-  {
-    id: 'church',
-    x: -41,
-    z: -19,
-    w: 10,
-    d: 18,
-    h: 7.5,
-    style: 'church',
-    door: 'e',
-    wall: 'white',
-    roof: 'terracotta',
-    sign: 'SANTA LENA'
-  },
-  {
-    id: 'tower',
-    x: -28,
-    z: -20,
-    w: 4,
-    d: 4,
-    h: 11,
-    style: 'tower',
-    door: 's',
-    wall: 'stone',
-    roof: 'slate'
-  },
-  {
-    id: 'east-house',
-    x: 36,
-    z: -6,
-    w: 8,
-    d: 6,
-    h: 4.2,
-    style: 'house',
-    door: 'w',
-    wall: 'cream',
-    roof: 'terracotta',
-    chimney: true
-  },
-  {
-    id: 'belvedere-house',
-    x: 40,
-    z: 16,
-    w: 7,
-    d: 6,
-    h: 4,
-    style: 'house',
-    door: 'w',
-    wall: 'white',
-    roof: 'brown'
-  },
-  {
-    id: 'garden-house',
-    x: 42,
-    z: -20,
-    w: 8,
-    d: 6,
-    h: 4.1,
-    style: 'house',
-    door: 'w',
-    wall: 'rose',
-    roof: 'terracotta'
-  }
-];
-
-export const PATHS: PathSpec[] = [
-  { x: -29, z: 6, w: 26, d: 5 },
-  { x: -28.5, z: -3, w: 5, d: 18 },
-  { x: -31, z: -16, w: 12, d: 20 },
-  { x: 14, z: -20, w: 4, d: 28 },
-  { x: 23, z: -18, w: 18, d: 4 },
-  { x: 28, z: -18.5, w: 4, d: 5 },
-  { x: 26, z: 10.5, w: 20, d: 5 },
-  { x: 33.5, z: 17, w: 5, d: 10 },
-  { x: 33.5, z: 23, w: 5, d: 2 },
-  { x: 34, z: 29, w: 16, d: 10 },
-  { x: -8, z: 22, w: 4, d: 16 },
-  { x: -15, z: 30, w: 18, d: 4 },
-  { x: -34, z: 30, w: 20, d: 4, tone: 'earth' }
-];
-
-export const PROPS: PropSpec[] = [
-  { id: 'fountain', kind: 'fountain', x: 0, z: 0, scale: 1 },
-  { id: 'olive-1', kind: 'olive', x: -26, z: 26, scale: 1.1 },
-  { id: 'olive-2', kind: 'olive', x: -31, z: 24.5, scale: 0.9 },
-  { id: 'olive-3', kind: 'olive', x: -36, z: 25, scale: 1.2 },
-  { id: 'olive-4', kind: 'olive', x: -42, z: 27, scale: 1 },
-  { id: 'olive-5', kind: 'olive', x: -28, z: 35, scale: 1.15 },
-  { id: 'olive-6', kind: 'olive', x: -35, z: 34.5, scale: 0.95 },
-  { id: 'olive-7', kind: 'olive', x: -43, z: 35, scale: 1.05 },
-  { id: 'olive-8', kind: 'olive', x: -39, z: 29.5, scale: 0.85 },
-  { id: 'olive-9', kind: 'olive', x: -24.5, z: 36, scale: 1 },
-  { id: 'olive-garden', kind: 'olive', x: 28, z: -29, scale: 1.15 },
-  { id: 'olive-piazza-w', kind: 'olive', x: -13, z: 11, scale: 0.8 },
-  { id: 'olive-piazza-e', kind: 'olive', x: 11, z: 12, scale: 0.8 },
-  { id: 'cypress-church-1', kind: 'cypress', x: -48, z: -30, scale: 1.1 },
-  { id: 'cypress-church-2', kind: 'cypress', x: -34, z: -31, scale: 0.9 },
-  { id: 'cypress-garden', kind: 'cypress', x: 21.5, z: -33.5, scale: 1 },
-  { id: 'cypress-east', kind: 'cypress', x: 41, z: -2, scale: 0.9 },
-  { id: 'cypress-south', kind: 'cypress', x: -13, z: 34, scale: 1 },
-  { id: 'lantern-piazza-nw', kind: 'lantern', x: -8, z: -8 },
-  { id: 'lantern-piazza-ne', kind: 'lantern', x: 8, z: -8 },
-  { id: 'lantern-piazza-sw', kind: 'lantern', x: -8, z: 8 },
-  { id: 'lantern-piazza-se', kind: 'lantern', x: 8, z: 8 },
-  { id: 'lantern-west-1', kind: 'lantern', x: -20, z: 7.6 },
-  { id: 'lantern-west-2', kind: 'lantern', x: -34, z: 7.6 },
-  { id: 'lantern-church', kind: 'lantern', x: -28.5, z: -10 },
-  { id: 'lantern-plaza', kind: 'lantern', x: -25, z: -22 },
-  { id: 'lantern-garden', kind: 'lantern', x: 28, z: -19.5 },
-  { id: 'lantern-belvedere', kind: 'lantern', x: 30, z: 26 },
-  { id: 'lantern-grove', kind: 'lantern', x: -24, z: 30 },
-  { id: 'bench-piazza', kind: 'bench', x: -7, z: 9.5, rot: 0 },
-  { id: 'bench-belvedere', kind: 'bench', x: 29, z: 27.5, rot: 0 },
-  { id: 'bench-garden', kind: 'bench', x: 24, z: -26, rot: Math.PI / 2 },
-  { id: 'bench-plaza', kind: 'bench', x: -34, z: -8.5, rot: Math.PI / 2 },
-  { id: 'table-cafe-1', kind: 'table', x: -10, z: -7, w: 1.2, d: 0.8 },
-  { id: 'table-cafe-2', kind: 'table', x: -14, z: -6.6, w: 1.2, d: 0.8 },
-  { id: 'chair-cafe-1', kind: 'chair', x: -9, z: -6.2, rot: 0.4 },
-  { id: 'chair-cafe-2', kind: 'chair', x: -11, z: -7.8, rot: -0.5 },
-  { id: 'chair-cafe-3', kind: 'chair', x: -14.9, z: -7.3, rot: 2 },
-  { id: 'festival-table', kind: 'table', x: 6, z: -3, w: 2.4, d: 1.1 },
-  { id: 'pot-bakery-1', kind: 'pot', x: -25.2, z: 4.6 },
-  { id: 'pot-bakery-2', kind: 'pot', x: -18.8, z: 4.6 },
-  { id: 'pot-shop-1', kind: 'pot', x: 17.4, z: 1 },
-  { id: 'pot-shop-2', kind: 'pot', x: 17.4, z: 5 },
-  { id: 'pot-cafe-1', kind: 'pot', x: -9, z: -8.7 },
-  { id: 'pot-cafe-2', kind: 'pot', x: -15.2, z: -8.7 },
-  { id: 'cart-grove', kind: 'cart', x: -27, z: 30, rot: 0.3, w: 2, d: 1.2 },
-  { id: 'telescope', kind: 'telescope', x: 39, z: 31 },
-  { id: 'laundry-north', kind: 'laundry', x: -4, z: -18.7, w: 6 },
-  { id: 'arch-west', kind: 'arch', x: -42.5, z: 6, w: 4.4 },
-  { id: 'planter-piazza', kind: 'planter', x: 2, z: 9, w: 1.4, d: 0.6 },
-  { id: 'wall-garden-s1', kind: 'wall', x: 23.5, z: -21, w: 7, d: 0.5, h: 1.8 },
-  { id: 'wall-garden-s2', kind: 'wall', x: 32.5, z: -21, w: 7, d: 0.5, h: 1.8 },
-  { id: 'wall-garden-n', kind: 'wall', x: 28, z: -35, w: 16, d: 0.5, h: 1.8 },
-  { id: 'wall-garden-w', kind: 'wall', x: 20, z: -28, w: 0.5, d: 14, h: 1.8 },
-  { id: 'wall-garden-e', kind: 'wall', x: 36, z: -28, w: 0.5, d: 14, h: 1.8 },
-  { id: 'wall-belvedere-s', kind: 'wall', x: 34, z: 34.2, w: 16, d: 0.5, h: 0.9 },
-  { id: 'wall-belvedere-e', kind: 'wall', x: 42, z: 29, w: 0.5, d: 10, h: 0.9 },
-  { id: 'wall-grove-w', kind: 'wall', x: -44.5, z: 31, w: 0.5, d: 14, h: 1.1 },
-  { id: 'wall-grove-s', kind: 'wall', x: -34, z: 38.4, w: 21, d: 0.5, h: 1.1 },
-  { id: 'wall-grove-e1', kind: 'wall', x: -23.5, z: 26, w: 0.5, d: 4, h: 1.1 },
-  { id: 'wall-grove-e2', kind: 'wall', x: -23.5, z: 35, w: 0.5, d: 6, h: 1.1 }
+export const NPCS: NpcSpec[] = [
+  { id: 'ada', x: -296, z: 8, facing: Math.PI },
+  { id: 'elio', x: 10, z: -25, facing: 0.2 },
+  { id: 'marta', x: -30, z: 92, facing: Math.PI },
+  { id: 'nino', x: -240, z: 25, facing: 0.1 },
+  { id: 'beppe', x: -20, z: 0, facing: 0.9 },
+  { id: 'lidia', x: -60, z: 80, facing: -0.8 },
+  { id: 'sara', x: 160, z: -100, facing: 0.3 }
 ];
 
 export const TILES: Spot[] = [
-  { id: 'tile-church', x: -26.5, z: -24.5 },
-  { id: 'tile-grove', x: -42, z: 36 },
-  { id: 'tile-bakery', x: -28.6, z: -5.2 },
-  { id: 'tile-garden', x: 34.5, z: -33 },
-  { id: 'tile-belvedere', x: 41, z: 26.5 },
-  { id: 'tile-cafe', x: -15.5, z: -16.5 }
+  { id: 'tile-duomo', x: -250, z: 15 },
+  { id: 'tile-porta', x: -320, z: -60 },
+  { id: 'tile-teatro', x: -82.1, z: 62.1 },
+  { id: 'tile-comunale', x: -45, z: 60 },
+  { id: 'tile-garibaldi', x: -2, z: 40 },
+  { id: 'tile-stazione', x: 186.5, z: -112.4 },
+  { id: 'tile-sanpietro', x: -275, z: 185 },
+  { id: 'tile-oratorio', x: -228, z: 90 },
+  { id: 'tile-verdi', x: -30, z: 120 },
+  { id: 'tile-parco', x: 40, z: 140 },
+  { id: 'tile-emilia', x: -150, z: 10 },
+  { id: 'tile-repubblica', x: 210, z: -90 }
 ];
 
 export const LETTERS: Spot[] = [
-  { id: 'letter-west', x: -30, z: 7 },
-  { id: 'letter-vicolo', x: 14, z: -30 },
-  { id: 'letter-belvedere', x: 33.5, z: 20 }
+  { id: 'letter-porta', x: -300, z: -30 },
+  { id: 'letter-garibaldi', x: 0, z: -30 },
+  { id: 'letter-stazione', x: 200, z: -95 }
 ];
 
 export const FLOWERS: Spot[] = [
-  { id: 'flower-south', x: -12, z: 23 },
-  { id: 'flower-grove-n', x: -32, z: 27 },
-  { id: 'flower-grove-s', x: -41, z: 33 },
-  { id: 'flower-garden-w', x: 23, z: -23.5 },
-  { id: 'flower-garden-e', x: 34.5, z: -25 }
+  { id: 'flower-parco-1', x: 20, z: 125 },
+  { id: 'flower-parco-2', x: 35, z: 140 },
+  { id: 'flower-parco-3', x: 15, z: 145 },
+  { id: 'flower-verdi-1', x: -25, z: 95 },
+  { id: 'flower-verdi-2', x: -40, z: 110 }
 ];
 
-export const NPCS: NpcSpec[] = [
-  { id: 'ada', x: -22, z: 4.7, facing: 0 },
-  { id: 'elio', x: -5, z: 9, facing: Math.PI },
-  { id: 'marta', x: 17.2, z: 3, facing: -Math.PI / 2 },
-  { id: 'nino', x: -24, z: -17, facing: 0.1 }
+export const DELIVERIES: DeliverySpec[] = [
+  {
+    id: 'delivery-bread',
+    quest: 'bread',
+    label: { it: 'Teatro Magnani', en: 'Teatro Magnani' },
+    x: -55,
+    z: 95,
+    radius: 2.5
+  },
+  {
+    id: 'delivery-newspaper',
+    quest: 'newspaper',
+    label: { it: 'Stazione di Fidenza', en: 'Fidenza station' },
+    x: 175,
+    z: -100,
+    radius: 2.5
+  },
+  {
+    id: 'delivery-book',
+    quest: 'book',
+    label: { it: 'Chiesa di San Pietro', en: 'San Pietro church' },
+    x: -267,
+    z: 182,
+    radius: 2.5
+  },
+  {
+    id: 'delivery-coffee',
+    quest: 'coffee',
+    label: { it: 'Palazzo Comunale', en: 'Town Hall' },
+    x: 25,
+    z: -52,
+    radius: 2.5
+  }
 ];
 
-export const FESTIVAL_TABLE = { x: 6, z: -3 };
-export const BELL_SPOT = { x: -28, z: -16.6 };
+export const BELL_SPOT = { x: -235, z: 34.5 };
+export const BELL_TOWER = { x: -235, z: 30, w: 4, d: 4, h: 20 };
+export const OBELISK = { x: 10, z: -25 };
+
+export const PROPS: PropSpec[] = [];
+
+export const DISCOVERIES: DiscoverySpec[] = [
+  {
+    id: 'duomo',
+    name: { it: 'Duomo di San Donnino', en: 'Cathedral of San Donnino' },
+    description: {
+      it: 'La facciata romanica guarda Piazza Duomo. La pietra racconta secoli di pellegrini sulla Via Francigena.',
+      en: 'The Romanesque façade faces Piazza Duomo. Its stone tells centuries of pilgrims on the Via Francigena.'
+    },
+    x: -267.5,
+    z: 2.7,
+    radius: 34
+  },
+  {
+    id: 'porta',
+    name: { it: 'Porta San Donnino', en: 'Porta San Donnino' },
+    description: {
+      it: 'La porta medievale segnava l’ingresso al borgo lungo la Via Emilia. Oggi è il confine simbolico del centro.',
+      en: 'The medieval gate marked the entrance to the town along the Via Emilia. Today it is the symbolic edge of the centre.'
+    },
+    x: -305.2,
+    z: -47.9,
+    radius: 18
+  },
+  {
+    id: 'teatro',
+    name: { it: 'Teatro Girolamo Magnani', en: 'Teatro Girolamo Magnani' },
+    description: {
+      it: 'Il teatro ottocentesco è il salotto della città: colonne, velluto e una platea che sa ancora applaudire.',
+      en: 'The nineteenth-century theatre is the town’s drawing room: columns, velvet and an audience that still knows how to applaud.'
+    },
+    x: -94,
+    z: 72.1,
+    radius: 26
+  },
+  {
+    id: 'comunale',
+    name: { it: 'Palazzo Comunale', en: 'Town Hall' },
+    description: {
+      it: 'Il palazzo civico affaccia su Piazza Garibaldi, tra l’obelisco e il viavai della città.',
+      en: 'The civic palace looks onto Piazza Garibaldi, between the obelisk and the bustle of the town.'
+    },
+    x: 20.4,
+    z: -68.6,
+    radius: 24
+  },
+  {
+    id: 'stazione',
+    name: { it: 'Stazione di Fidenza', en: 'Fidenza Station' },
+    description: {
+      it: 'La stazione sulla linea Milano–Bologna è la porta della città: binari, valigie e partenze.',
+      en: 'The station on the Milan–Bologna line is the town’s door: tracks, suitcases and departures.'
+    },
+    x: 175.4,
+    z: -124.8,
+    radius: 28
+  },
+  {
+    id: 'sanpietro',
+    name: { it: 'Chiesa di San Pietro', en: 'Church of San Pietro' },
+    description: {
+      it: 'Una delle chiese più antiche del centro, appartata rispetto alla Via Emilia e ancora piena di silenzio.',
+      en: 'One of the oldest churches in the centre, tucked away from the Via Emilia and still full of silence.'
+    },
+    x: -267,
+    z: 198.8,
+    radius: 22
+  },
+  {
+    id: 'garibaldi',
+    name: { it: 'Piazza Garibaldi', en: 'Piazza Garibaldi' },
+    description: {
+      it: 'Il cuore civile di Fidenza, con l’obelisco, il palazzo comunale e le ombre dei platani.',
+      en: 'The civic heart of Fidenza, with the obelisk, the town hall and the shadows of the plane trees.'
+    },
+    x: 14.6,
+    z: -21,
+    radius: 28
+  },
+  {
+    id: 'oratorio',
+    name: { it: 'Oratorio di San Giorgio', en: 'Oratory of San Giorgio' },
+    description: {
+      it: 'Una chiesa minore tra le case, con la facciata stretta e un campanile che sembra guardare i tetti.',
+      en: 'A smaller church among the houses, with a narrow façade and a bell tower that seems to watch the roofs.'
+    },
+    x: -215.6,
+    z: 97.5,
+    radius: 20
+  }
+];
 
 export const ZONES: ZoneSpec[] = [
   {
-    id: 'piazza',
-    name: { it: 'Piazza della Fontana', en: 'Piazza della Fontana' },
-    x: 0,
-    z: 4,
-    r: 20
+    id: 'piazza-duomo',
+    name: { it: 'Piazza Duomo', en: 'Piazza Duomo' },
+    x: -297,
+    z: -4,
+    r: 42
   },
   {
-    id: 'fornai',
-    name: { it: 'Via dei Fornai', en: 'Bakers’ Lane' },
-    x: -29,
-    z: 6,
-    r: 13
+    id: 'via-emilia',
+    name: { it: 'Via Emilia', en: 'Via Emilia' },
+    x: -140,
+    z: 10,
+    r: 70
   },
   {
-    id: 'chiesa',
-    name: { it: 'Chiesa di Santa Lena', en: 'Church of Santa Lena' },
-    x: -33,
-    z: -15,
-    r: 14
-  },
-  {
-    id: 'belvedere',
-    name: { it: 'Belvedere', en: 'Belvedere' },
-    x: 34,
-    z: 28,
-    r: 11
-  },
-  {
-    id: 'giardino',
-    name: { it: 'Giardino dei Ricordi', en: 'Garden of Memories' },
-    x: 28,
-    z: -28,
-    r: 11
-  },
-  {
-    id: 'oliveto',
-    name: { it: 'Oliveto', en: 'Olive Grove' },
-    x: -34,
-    z: 30,
-    r: 12
-  },
-  {
-    id: 'vicolo',
-    name: { it: 'Vicolo del Vento', en: 'Wind Alley' },
+    id: 'garibaldi',
+    name: { it: 'Piazza Garibaldi', en: 'Piazza Garibaldi' },
     x: 14,
-    z: -24,
-    r: 12
+    z: -21,
+    r: 44
+  },
+  {
+    id: 'teatro',
+    name: { it: 'Teatro e Comunale', en: 'Theatre and Town Hall' },
+    x: -48,
+    z: 82,
+    r: 52
+  },
+  {
+    id: 'stazione',
+    name: { it: 'Stazione', en: 'Station' },
+    x: 175,
+    z: -110,
+    r: 54
+  },
+  {
+    id: 'porta',
+    name: { it: 'Porta San Donnino', en: 'Porta San Donnino' },
+    x: -305,
+    z: -52,
+    r: 40
+  },
+  {
+    id: 'sanpietro',
+    name: { it: 'San Pietro', en: 'San Pietro' },
+    x: -267,
+    z: 190,
+    r: 34
+  },
+  {
+    id: 'parco',
+    name: { it: "Parco all'aperto", en: 'Open-air Park' },
+    x: 26,
+    z: 132,
+    r: 38
+  },
+  {
+    id: 'oratorio',
+    name: { it: 'San Giorgio', en: 'San Giorgio' },
+    x: -215,
+    z: 97,
+    r: 30
   }
 ];
+
+export const STREET_LABELS: Array<{ name: string; x: number; z: number }> = [
+  { name: 'Via Emilia', x: -120, z: 12 },
+  { name: 'Piazza Duomo', x: -297, z: -4 },
+  { name: 'Piazza Garibaldi', x: 14, z: -21 },
+  { name: 'Piazza Verdi', x: -19, z: 105 },
+  { name: 'Piazza Matteotti', x: 44, z: 109 },
+  { name: 'Piazza della Repubblica', x: 195, z: -103 }
+];
+

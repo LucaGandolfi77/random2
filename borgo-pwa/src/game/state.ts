@@ -1,4 +1,5 @@
-import { FLOWERS, LETTERS, SPAWN, TILES, WORLD } from '../data/town';
+import { DISCOVERIES, FLOWERS, LETTERS, SPAWN, TILES, WORLD } from '../data/town';
+import { CORE_QUESTS, DELIVERY_QUESTS, QUEST_ORDER } from '../data/quests';
 import type { Language, QuestId, QuestPhase } from '../data/types';
 
 export interface Settings {
@@ -16,13 +17,14 @@ export interface PlayerSnapshot {
 }
 
 export interface GameState {
-  v: 1;
+  v: 2;
   started: boolean;
   player: PlayerSnapshot;
   quests: Record<QuestId, QuestPhase>;
   letters: string[];
   flowers: string[];
   tiles: string[];
+  discovered: string[];
   flags: {
     dusk: boolean;
     finaleSeen: boolean;
@@ -38,33 +40,36 @@ export const DEFAULT_SETTINGS: Settings = {
   reducedMotion: false
 };
 
-const LETTER_IDS = new Set(LETTERS.map((l) => l.id));
-const FLOWER_IDS = new Set(FLOWERS.map((f) => f.id));
-const TILE_IDS = new Set(TILES.map((t) => t.id));
-
-const QUEST_IDS: QuestId[] = ['bread', 'letters', 'flowers', 'bell'];
+const LETTER_IDS = new Set(LETTERS.map((item) => item.id));
+const FLOWER_IDS = new Set(FLOWERS.map((item) => item.id));
+const TILE_IDS = new Set(TILES.map((item) => item.id));
+const DISCOVERY_IDS = new Set(DISCOVERIES.map((item) => item.id));
 const PHASES: QuestPhase[] = ['locked', 'available', 'active', 'objective', 'done'];
 
 export function createInitialState(now = Date.now()): GameState {
   return {
-    v: 1,
+    v: 2,
     started: false,
     player: {
       x: SPAWN.x,
       z: SPAWN.z,
       rot: SPAWN.rot,
-      yaw: 0,
-      pitch: 0.4
+      yaw: SPAWN.yaw,
+      pitch: 0.3
     },
     quests: {
       bread: 'available',
       letters: 'available',
       flowers: 'available',
+      newspaper: 'available',
+      book: 'available',
+      coffee: 'available',
       bell: 'locked'
     },
     letters: [],
     flowers: [],
     tiles: [],
+    discovered: [],
     flags: { dusk: false, finaleSeen: false },
     settings: { ...DEFAULT_SETTINGS },
     elapsed: 0,
@@ -80,21 +85,14 @@ export function cloneState(state: GameState): GameState {
     letters: [...state.letters],
     flowers: [...state.flowers],
     tiles: [...state.tiles],
+    discovered: [...state.discovered],
     flags: { ...state.flags },
     settings: { ...state.settings }
   };
 }
 
-export function questDoneCount(state: GameState): number {
-  return QUEST_IDS.filter((id) => state.quests[id] === 'done').length;
-}
-
 export function isTownReady(state: GameState): boolean {
-  return (
-    state.quests.bread === 'done' &&
-    state.quests.letters === 'done' &&
-    state.quests.flowers === 'done'
-  );
+  return CORE_QUESTS.every((id) => state.quests[id] === 'done');
 }
 
 export function refreshUnlocks(state: GameState): void {
@@ -103,6 +101,13 @@ export function refreshUnlocks(state: GameState): void {
     if (state.quests.bell === 'locked') state.quests.bell = 'available';
   } else {
     state.flags.dusk = false;
+    if (
+      state.quests.bell === 'active' ||
+      state.quests.bell === 'done' ||
+      state.quests.bell === 'available'
+    ) {
+      state.quests.bell = 'locked';
+    }
   }
 }
 
@@ -112,11 +117,16 @@ export function acceptQuest(state: GameState, id: QuestId): boolean {
   return true;
 }
 
-export function deliverBread(state: GameState): boolean {
-  if (state.quests.bread !== 'active') return false;
-  state.quests.bread = 'done';
+export function completeDelivery(state: GameState, id: QuestId): boolean {
+  if (!DELIVERY_QUESTS.includes(id)) return false;
+  if (state.quests[id] !== 'active') return false;
+  state.quests[id] = 'done';
   refreshUnlocks(state);
   return true;
+}
+
+export function deliverBread(state: GameState): boolean {
+  return completeDelivery(state, 'bread');
 }
 
 export function collectLetter(state: GameState, id: string): boolean {
@@ -155,6 +165,12 @@ export function collectTile(state: GameState, id: string): boolean {
   return true;
 }
 
+export function discover(state: GameState, id: string): boolean {
+  if (!DISCOVERY_IDS.has(id) || state.discovered.includes(id)) return false;
+  state.discovered.push(id);
+  return true;
+}
+
 export function acceptBell(state: GameState): boolean {
   if (state.quests.bell !== 'available') return false;
   state.quests.bell = 'active';
@@ -170,61 +186,59 @@ export function ringBell(state: GameState): boolean {
 }
 
 export function hospitality(state: GameState): number {
-  const errands =
-    (state.quests.bread === 'done' ? 2 : 0) +
-    (state.quests.letters === 'done' ? 2 : 0) +
-    (state.quests.flowers === 'done' ? 2 : 0) +
-    (state.quests.bell === 'done' ? 2 : 0);
+  const errands = QUEST_ORDER.filter((id) => state.quests[id] === 'done').length * 2;
   return errands + state.tiles.length;
 }
 
 export function rankIndex(state: GameState): number {
   const points = hospitality(state);
-  if (points >= 10) return 3;
-  if (points >= 6) return 2;
-  if (points >= 3) return 1;
+  if (points >= 18) return 3;
+  if (points >= 12) return 2;
+  if (points >= 6) return 1;
   return 0;
 }
 
 export function questProgress(state: GameState, id: QuestId): string {
   if (id === 'letters') return `${state.letters.length}/${LETTERS.length}`;
   if (id === 'flowers') return `${state.flowers.length}/${FLOWERS.length}`;
-  if (id === 'bread') return state.quests.bread === 'done' ? '1/1' : '0/1';
+  if (DELIVERY_QUESTS.includes(id)) return state.quests[id] === 'done' ? '1/1' : '0/1';
   return state.quests.bell === 'done' ? '1/1' : '0/1';
 }
 
 export function activeQuest(state: GameState): QuestId | null {
-  for (const id of QUEST_IDS) {
+  for (const id of QUEST_ORDER) {
     if (state.quests[id] === 'objective') return id;
   }
-  for (const id of QUEST_IDS) {
+  for (const id of QUEST_ORDER) {
     if (state.quests[id] === 'active') return id;
   }
   return null;
 }
 
+/* --------------------------------------------------------------- sanitising */
+
+interface RawState {
+  [key: string]: unknown;
+}
+
 export function sanitizeState(raw: unknown, now = Date.now()): GameState | null {
   if (!raw || typeof raw !== 'object') return null;
-  const data = raw as Record<string, unknown>;
-  if (data.v !== 1) return null;
+  const data = raw as RawState;
+  const version = data.v === 1 || data.v === 2 ? data.v : null;
+  if (version === null) return null;
 
   const state = createInitialState(now);
   state.started = true;
 
-  const player = data.player as Record<string, unknown> | undefined;
-  if (player && typeof player === 'object') {
-    const x = numberOr(player.x, SPAWN.x);
-    const z = numberOr(player.z, SPAWN.z);
-    state.player.x = clamp(x, WORLD.minX + 0.5, WORLD.maxX - 0.5);
-    state.player.z = clamp(z, WORLD.minZ + 0.5, WORLD.maxZ - 0.5);
-    state.player.rot = angle(numberOr(player.rot, SPAWN.rot));
-    state.player.yaw = angle(numberOr(player.yaw, 0));
-    state.player.pitch = clamp(numberOr(player.pitch, 0.4), 0.15, 1.15);
+  if (version === 2) {
+    readPlayer(state, data.player);
+  } else {
+    state.player = { ...createInitialState(now).player };
   }
 
   const quests = data.quests as Record<string, unknown> | undefined;
   if (quests && typeof quests === 'object') {
-    for (const id of QUEST_IDS) {
+    for (const id of QUEST_ORDER) {
       const value = quests[id];
       if (typeof value === 'string' && (PHASES as string[]).includes(value)) {
         state.quests[id] = value as QuestPhase;
@@ -236,11 +250,26 @@ export function sanitizeState(raw: unknown, now = Date.now()): GameState | null 
   state.flowers = uniqueKnown(data.flowers, FLOWER_IDS).slice(0, FLOWERS.length);
   state.tiles = uniqueKnown(data.tiles, TILE_IDS).slice(0, TILES.length);
 
+  if (version === 1) {
+    /* Old collectible ids belong to the fictional town. Preserve the count,
+       not the ids, and give the walker the first N memories of Fidenza. */
+    const oldLetters = arrayLength(data.letters);
+    const oldFlowers = arrayLength(data.flowers);
+    const oldTiles = arrayLength(data.tiles);
+    state.letters = LETTERS.slice(0, Math.min(oldLetters, LETTERS.length)).map((item) => item.id);
+    state.flowers = FLOWERS.slice(0, Math.min(oldFlowers, FLOWERS.length)).map((item) => item.id);
+    state.tiles = TILES.slice(0, Math.min(oldTiles, TILES.length)).map((item) => item.id);
+    state.discovered = [];
+    state.player = { ...createInitialState(now).player };
+  } else {
+    state.discovered = uniqueKnown(data.discovered, DISCOVERY_IDS).slice(0, DISCOVERIES.length);
+  }
+
   repairQuestChains(state);
 
   const flags = data.flags as Record<string, unknown> | undefined;
-  if (flags && typeof flags === 'object') {
-    state.flags.finaleSeen = flags.finaleSeen === true;
+  if (flags && typeof flags === 'object' && flags.finaleSeen === true) {
+    state.flags.finaleSeen = true;
   }
 
   const settings = data.settings as Record<string, unknown> | undefined;
@@ -254,9 +283,21 @@ export function sanitizeState(raw: unknown, now = Date.now()): GameState | null 
   state.savedAt = numberOr(data.savedAt, now);
 
   if (state.quests.bell !== 'done') state.flags.finaleSeen = false;
-  if (state.quests.bell === 'done') state.flags.finaleSeen = true;
+  else state.flags.finaleSeen = true;
 
   return state;
+}
+
+function readPlayer(state: GameState, raw: unknown): void {
+  if (!raw || typeof raw !== 'object') return;
+  const player = raw as Record<string, unknown>;
+  const x = numberOr(player.x, SPAWN.x);
+  const z = numberOr(player.z, SPAWN.z);
+  state.player.x = clamp(x, WORLD.minX + 0.5, WORLD.maxX - 0.5);
+  state.player.z = clamp(z, WORLD.minZ + 0.5, WORLD.maxZ - 0.5);
+  state.player.rot = angle(numberOr(player.rot, SPAWN.rot));
+  state.player.yaw = angle(numberOr(player.yaw, SPAWN.yaw));
+  state.player.pitch = clamp(numberOr(player.pitch, 0.3), 0.15, 1.15);
 }
 
 function repairQuestChains(state: GameState): void {
@@ -278,22 +319,19 @@ function repairQuestChains(state: GameState): void {
     state.quests.flowers = 'objective';
   }
 
-  if (state.quests.bread === 'objective') state.quests.bread = 'active';
+  for (const id of DELIVERY_QUESTS) {
+    if (state.quests[id] === 'objective') state.quests[id] = 'active';
+  }
+  if (state.quests.bell === 'objective') state.quests.bell = 'active';
 
   const ready = isTownReady(state);
   if (!ready && (state.quests.bell === 'active' || state.quests.bell === 'done')) {
     state.quests.bell = 'locked';
   }
-  if (!ready && state.quests.bell === 'available') {
-    state.quests.bell = 'locked';
-  }
-  if (ready && state.quests.bell === 'locked') {
-    state.quests.bell = 'available';
-  }
-  if (state.quests.bell === 'objective') state.quests.bell = 'active';
+  if (!ready && state.quests.bell === 'available') state.quests.bell = 'locked';
+  if (ready && state.quests.bell === 'locked') state.quests.bell = 'available';
 
   refreshUnlocks(state);
-  if (state.quests.bell === 'done') state.flags.finaleSeen = true;
 }
 
 function numberOr(value: unknown, fallback: number): number {
@@ -307,6 +345,10 @@ function clamp(value: number, min: number, max: number): number {
 function angle(value: number): number {
   const tau = Math.PI * 2;
   return ((value % tau) + tau) % tau;
+}
+
+function arrayLength(value: unknown): number {
+  return Array.isArray(value) ? value.length : 0;
 }
 
 function uniqueKnown(value: unknown, known: Set<string>): string[] {

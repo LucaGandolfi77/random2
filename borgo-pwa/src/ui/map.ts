@@ -1,16 +1,5 @@
-import {
-  BELL_SPOT,
-  BUILDINGS,
-  FESTIVAL_TABLE,
-  FLOWERS,
-  LETTERS,
-  NPCS,
-  PATHS,
-  PROPS,
-  TILES,
-  WORLD,
-  ZONES
-} from '../data/town';
+import { FIDENZA } from '../data/fidenza';
+import { DISCOVERIES, NPCS, STREET_LABELS, TILES, WORLD } from '../data/town';
 import type { Language } from '../data/types';
 import { pick } from '../data/strings';
 import type { GameState } from '../game/state';
@@ -22,39 +11,42 @@ export interface MapPoint {
 
 const INK = '#3a2f23';
 const PAPER = '#f2e6ce';
-const BUILDING = '#d7c5a3';
-const BUILDING_ROOF = '#b26043';
-const PATH = '#c9b794';
-const WALL = '#9c8b6d';
+const BUILDING = '#d8c7a5';
+const BUILDING_EDGE = 'rgba(58,47,35,0.45)';
 const GOLD = '#d9a441';
+const LOCAL_RADIUS = 105;
 
-interface Transform {
+interface View {
   scale: number;
   ox: number;
   oy: number;
   size: number;
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
 }
 
 export function drawMinimap(
   canvas: HTMLCanvasElement,
   state: GameState,
   player: MapPoint,
-  heading: number
+  heading: number,
+  waypoint: MapPoint | null
 ): void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const size = canvas.width;
-  const t = transform(size, 10);
+  const view = localView(size, 10, player);
   ctx.clearRect(0, 0, size, size);
-
   ctx.save();
   ctx.beginPath();
   ctx.arc(size / 2, size / 2, size / 2 - 2, 0, Math.PI * 2);
   ctx.clip();
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, size, size);
-  drawTown(ctx, t, state, false);
-  drawPlayer(ctx, player, heading, t, 5.5);
+  drawTown(ctx, view, state, false, waypoint);
+  drawPlayer(ctx, player, heading, view, 5.5);
   ctx.restore();
 
   ctx.beginPath();
@@ -69,180 +61,213 @@ export function drawFullMap(
   state: GameState,
   player: MapPoint,
   heading: number,
-  lang: Language
+  lang: Language,
+  waypoint: MapPoint | null
 ): void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const size = canvas.width;
-  const t = transform(size, 42);
+  const view = fullView(size, 34);
   ctx.clearRect(0, 0, size, size);
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, size, size);
 
-  drawTown(ctx, t, state, true);
+  drawTown(ctx, view, state, true, waypoint);
 
   ctx.save();
-  ctx.font = '600 16px Georgia, "Times New Roman", serif';
+  ctx.font = '600 13px Georgia, "Times New Roman", serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  for (const zone of ZONES) {
-    const x = t.ox + zone.x * t.scale;
-    const y = t.oy + zone.z * t.scale - 15;
-    const label = pick(zone.name, lang);
+  for (const street of STREET_LABELS) {
+    const x = view.ox + street.x * view.scale;
+    const y = view.oy + street.z * view.scale;
+    ctx.fillStyle = 'rgba(58,47,35,0.5)';
+    ctx.font = 'italic 11px Georgia, "Times New Roman", serif';
+    ctx.fillText(street.name, x, y);
+  }
+  ctx.font = '600 14px Georgia, "Times New Roman", serif';
+  for (const place of DISCOVERIES) {
+    const x = view.ox + place.x * view.scale;
+    const y = view.oy + place.z * view.scale - 9;
+    const label = pick(place.name, lang);
     const width = ctx.measureText(label).width;
     ctx.fillStyle = 'rgba(242,230,206,0.82)';
     ctx.fillRect(x - width / 2 - 5, y - 9, width + 10, 18);
-    ctx.fillStyle = 'rgba(58,47,35,0.86)';
+    ctx.fillStyle = 'rgba(58,47,35,0.88)';
     ctx.fillText(label, x, y);
   }
   ctx.restore();
 
-  drawPlayer(ctx, player, heading, t, 9);
+  drawPlayer(ctx, player, heading, view, 9);
 
   ctx.fillStyle = INK;
   ctx.font = '600 18px Georgia, serif';
   ctx.textAlign = 'center';
-  ctx.fillText('N', size - 34, 30);
+  ctx.fillText('N', size - 28, 24);
   ctx.beginPath();
-  ctx.moveTo(size - 34, 42);
-  ctx.lineTo(size - 40, 56);
-  ctx.lineTo(size - 28, 56);
+  ctx.moveTo(size - 28, 34);
+  ctx.lineTo(size - 34, 48);
+  ctx.lineTo(size - 22, 48);
   ctx.closePath();
   ctx.fill();
 }
 
 function drawTown(
   ctx: CanvasRenderingContext2D,
-  t: Transform,
+  view: View,
   state: GameState,
-  full: boolean
+  full: boolean,
+  waypoint: MapPoint | null
 ): void {
-  const rect = (
-    x: number,
-    z: number,
-    w: number,
-    d: number,
-    fill: string,
-    stroke?: string,
-    lineWidth = 1
-  ): void => {
-    const px = t.ox + (x - w / 2) * t.scale;
-    const py = t.oy + (z - d / 2) * t.scale;
-    ctx.fillStyle = fill;
-    ctx.fillRect(px, py, Math.max(1, w * t.scale), Math.max(1, d * t.scale));
-    if (stroke) {
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = lineWidth;
-      ctx.strokeRect(px, py, Math.max(1, w * t.scale), Math.max(1, d * t.scale));
+  const visible = (minX: number, maxX: number, minZ: number, maxZ: number): boolean =>
+    maxX >= view.minX && minX <= view.maxX && maxZ >= view.minZ && minZ <= view.maxZ;
+
+  /* Green areas and parking. */
+  for (const area of FIDENZA.areas) {
+    const points = area.poly;
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+    for (let i = 0; i < points.length; i += 2) {
+      minX = Math.min(minX, points[i]);
+      maxX = Math.max(maxX, points[i]);
+      minZ = Math.min(minZ, points[i + 1]);
+      maxZ = Math.max(maxZ, points[i + 1]);
     }
-  };
-
-  ctx.fillStyle = 'rgba(113,128,78,0.5)';
-  ctx.beginPath();
-  ctx.arc(t.ox + 28 * t.scale, t.oy + -28 * t.scale, 9 * t.scale, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(t.ox + -34 * t.scale, t.oy + 31 * t.scale, 14 * t.scale, 0, Math.PI * 2);
-  ctx.fill();
-
-  for (const path of PATHS) {
-    rect(path.x, path.z, path.w, path.d, path.tone === 'earth' ? '#bda77c' : PATH);
-  }
-
-  ctx.fillStyle = '#dccca8';
-  ctx.beginPath();
-  ctx.arc(t.ox, t.oy + 4 * t.scale, 17 * t.scale, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(156,139,109,0.7)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  for (const prop of PROPS) {
-    if (prop.kind === 'olive' || prop.kind === 'cypress') {
-      ctx.fillStyle = 'rgba(88,104,64,0.85)';
-      ctx.beginPath();
-      ctx.arc(
-        t.ox + prop.x * t.scale,
-        t.oy + prop.z * t.scale,
-        Math.max(1.2, (prop.scale ?? 1) * (full ? 2.6 : 1.4)),
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-    } else if (prop.kind === 'wall') {
-      rect(prop.x, prop.z, prop.w ?? 1, prop.d ?? 0.5, WALL);
-    }
-  }
-
-  ctx.fillStyle = '#78b1bd';
-  ctx.beginPath();
-  ctx.arc(t.ox, t.oy, 2.2 * t.scale, 0, Math.PI * 2);
-  ctx.fill();
-
-  for (const building of BUILDINGS) {
-    rect(building.x, building.z, building.w, building.d, BUILDING, 'rgba(58,47,35,0.75)', 1);
-    ctx.fillStyle = BUILDING_ROOF;
-    ctx.globalAlpha = 0.55;
-    ctx.fillRect(
-      t.ox + (building.x - building.w / 2) * t.scale,
-      t.oy + (building.z - building.d / 2) * t.scale,
-      Math.max(1, building.w * t.scale),
-      Math.max(1.2, 1.1 * t.scale)
-    );
-    ctx.globalAlpha = 1;
-  }
-
-  for (const npc of NPCS) {
-    const x = t.ox + npc.x * t.scale;
-    const y = t.oy + npc.z * t.scale;
-    const quest = npcHasQuestMark(state, npc.id);
-    if (quest) {
-      ctx.beginPath();
-      ctx.arc(x, y, full ? 11 : 5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(217,164,65,0.32)';
-      ctx.fill();
-    }
-    ctx.beginPath();
-    ctx.arc(x, y, full ? 5.5 : 2.8, 0, Math.PI * 2);
-    ctx.fillStyle = quest ? GOLD : '#f6eedb';
+    if (!visible(minX, maxX, minZ, maxZ)) continue;
+    tracePolygon(ctx, points, view);
+    ctx.fillStyle = hex(area.color);
     ctx.fill();
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = full ? 1.6 : 1;
+  }
+
+  /* Streets. */
+  const roadColors: Record<string, string> = {
+    primary: '#837b6a',
+    secondary: '#8a8170',
+    tertiary: '#908674',
+    residential: '#9a8f7b',
+    pedestrian: '#c2b18e',
+    footway: '#c5b695',
+    cycleway: '#a89b81',
+    service: '#998e7b',
+    unclassified: '#958a77',
+    living_street: '#9d927d'
+  };
+  for (const road of FIDENZA.roads) {
+    const width = Math.max(full ? 1 : 1.2, road.w * view.scale);
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < road.pts.length; i += 2) {
+      const x = view.ox + road.pts[i] * view.scale;
+      const y = view.oy + road.pts[i + 1] * view.scale;
+      if (!started) {
+        ctx.moveTo(x, y);
+        started = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.strokeStyle = roadColors[road.kind] ?? '#998e7b';
+    ctx.lineWidth = width;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
     ctx.stroke();
   }
 
+  /* Piazza discs. */
+  for (const [x, z, r] of [
+    [-296.7, -4.1, 27],
+    [14.6, -21, 31],
+    [-18.6, 105.2, 20],
+    [44.2, 109.2, 18],
+    [195, -103.5, 24]
+  ] as const) {
+    if (!visible(x - r, x + r, z - r, z + r)) continue;
+    ctx.beginPath();
+    ctx.arc(view.ox + x * view.scale, view.oy + z * view.scale, r * view.scale, 0, Math.PI * 2);
+    ctx.fillStyle = '#d8c7a5';
+    ctx.fill();
+  }
+
+  /* Buildings. */
+  for (const building of FIDENZA.buildings) {
+    const pts = building.poly;
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minZ = Infinity;
+    let maxZ = -Infinity;
+    for (let i = 0; i < pts.length; i += 2) {
+      minX = Math.min(minX, pts[i]);
+      maxX = Math.max(maxX, pts[i]);
+      minZ = Math.min(minZ, pts[i + 1]);
+      maxZ = Math.max(maxZ, pts[i + 1]);
+    }
+    if (!visible(minX, maxX, minZ, maxZ)) continue;
+    tracePolygon(ctx, pts, view);
+    ctx.fillStyle = BUILDING;
+    ctx.fill();
+    ctx.strokeStyle = BUILDING_EDGE;
+    ctx.lineWidth = full ? 0.8 : 0.7;
+    ctx.stroke();
+  }
+
+  /* Train tracks. */
+  for (const railway of FIDENZA.railways) {
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < railway.pts.length; i += 2) {
+      const x = view.ox + railway.pts[i] * view.scale;
+      const y = view.oy + railway.pts[i + 1] * view.scale;
+      if (!started) {
+        ctx.moveTo(x, y);
+        started = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.strokeStyle = 'rgba(70,68,62,0.55)';
+    ctx.lineWidth = Math.max(1, 2.4 * view.scale);
+    ctx.stroke();
+  }
+
+  /* NPCs. */
+  for (const npc of NPCS) {
+    if (!visible(npc.x - 4, npc.x + 4, npc.z - 4, npc.z + 4)) continue;
+    const x = view.ox + npc.x * view.scale;
+    const y = view.oy + npc.z * view.scale;
+    const quest = npcHasQuestMark(state, npc.id);
+    if (quest) {
+      ctx.beginPath();
+      ctx.arc(x, y, full ? 10 : 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(217,164,65,0.3)';
+      ctx.fill();
+    }
+    ctx.beginPath();
+    ctx.arc(x, y, full ? 5 : 2.8, 0, Math.PI * 2);
+    ctx.fillStyle = quest ? GOLD : '#f6eedb';
+    ctx.fill();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = full ? 1.4 : 1;
+    ctx.stroke();
+  }
+
+  /* Memories. */
   for (const tile of TILES) {
     const found = state.tiles.includes(tile.id);
     if (!found && !full) continue;
+    if (!visible(tile.x - 4, tile.x + 4, tile.z - 4, tile.z + 4)) continue;
     ctx.save();
-    ctx.translate(t.ox + tile.x * t.scale, t.oy + tile.z * t.scale);
+    ctx.translate(view.ox + tile.x * view.scale, view.oy + tile.z * view.scale);
     ctx.rotate(Math.PI / 4);
-    const r = full ? 4.5 : 3;
-    ctx.fillStyle = found ? GOLD : 'rgba(58,47,35,0.2)';
+    const r = full ? 4.2 : 3;
+    ctx.fillStyle = found ? GOLD : 'rgba(58,47,35,0.18)';
     ctx.fillRect(-r, -r, r * 2, r * 2);
-    if (found) {
-      ctx.strokeStyle = INK;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(-r, -r, r * 2, r * 2);
-    }
     ctx.restore();
   }
 
-  if (state.quests.bread === 'active') {
-    marker(ctx, t, FESTIVAL_TABLE.x, FESTIVAL_TABLE.z, full ? 6 : 3.5);
-  }
-  if (state.quests.letters === 'active') {
-    for (const letter of LETTERS) {
-      if (!state.letters.includes(letter.id)) marker(ctx, t, letter.x, letter.z, full ? 4.5 : 2.6);
-    }
-  }
-  if (state.quests.flowers === 'active') {
-    for (const flower of FLOWERS) {
-      if (!state.flowers.includes(flower.id)) marker(ctx, t, flower.x, flower.z, full ? 4.5 : 2.6);
-    }
-  }
-  if (state.quests.bell === 'active') {
-    marker(ctx, t, BELL_SPOT.x, BELL_SPOT.z, full ? 6 : 3.5);
+  if (waypoint) {
+    marker(ctx, view, waypoint.x, waypoint.z, full ? 7 : 4.5);
   }
 }
 
@@ -250,13 +275,22 @@ function npcHasQuestMark(state: GameState, id: string): boolean {
   if (id === 'ada') return state.quests.bread === 'available' || state.quests.bread === 'active';
   if (id === 'elio') return state.quests.letters === 'available' || state.quests.letters === 'objective';
   if (id === 'marta') return state.quests.flowers === 'available' || state.quests.flowers === 'objective';
+  if (id === 'beppe') return state.quests.newspaper === 'available' || state.quests.newspaper === 'active';
+  if (id === 'lidia') return state.quests.book === 'available' || state.quests.book === 'active';
+  if (id === 'sara') return state.quests.coffee === 'available' || state.quests.coffee === 'active';
   if (id === 'nino') return state.quests.bell === 'available' || state.quests.bell === 'active';
   return false;
 }
 
-function marker(ctx: CanvasRenderingContext2D, t: Transform, x: number, z: number, size: number): void {
+function marker(
+  ctx: CanvasRenderingContext2D,
+  view: View,
+  x: number,
+  z: number,
+  size: number
+): void {
   ctx.save();
-  ctx.translate(t.ox + x * t.scale, t.oy + z * t.scale);
+  ctx.translate(view.ox + x * view.scale, view.oy + z * view.scale);
   ctx.fillStyle = GOLD;
   ctx.strokeStyle = INK;
   ctx.lineWidth = 1.2;
@@ -276,15 +310,26 @@ function marker(ctx: CanvasRenderingContext2D, t: Transform, x: number, z: numbe
   ctx.restore();
 }
 
+function tracePolygon(ctx: CanvasRenderingContext2D, pts: number[], view: View): void {
+  ctx.beginPath();
+  for (let i = 0; i < pts.length; i += 2) {
+    const x = view.ox + pts[i] * view.scale;
+    const y = view.oy + pts[i + 1] * view.scale;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+}
+
 function drawPlayer(
   ctx: CanvasRenderingContext2D,
   player: MapPoint,
   heading: number,
-  t: Transform,
+  view: View,
   size: number
 ): void {
-  const x = t.ox + player.x * t.scale;
-  const y = t.oy + player.z * t.scale;
+  const x = view.ox + player.x * view.scale;
+  const y = view.oy + player.z * view.scale;
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(heading);
@@ -302,11 +347,41 @@ function drawPlayer(
   ctx.restore();
 }
 
-function transform(size: number, padding: number): Transform {
-  const worldWidth = WORLD.maxX - WORLD.minX;
-  const worldDepth = WORLD.maxZ - WORLD.minZ;
-  const scale = Math.min((size - padding * 2) / worldWidth, (size - padding * 2) / worldDepth);
+function fullView(size: number, padding: number): View {
+  const scale = Math.min(
+    (size - padding * 2) / (WORLD.maxX - WORLD.minX),
+    (size - padding * 2) / (WORLD.maxZ - WORLD.minZ)
+  );
   const ox = size / 2 - ((WORLD.minX + WORLD.maxX) / 2) * scale;
   const oy = size / 2 - ((WORLD.minZ + WORLD.maxZ) / 2) * scale;
-  return { scale, ox, oy, size };
+  return {
+    scale,
+    ox,
+    oy,
+    size,
+    minX: WORLD.minX,
+    maxX: WORLD.maxX,
+    minZ: WORLD.minZ,
+    maxZ: WORLD.maxZ
+  };
+}
+
+function localView(size: number, padding: number, player: MapPoint): View {
+  const scale = (size - padding * 2) / (LOCAL_RADIUS * 2);
+  const ox = size / 2 - player.x * scale;
+  const oy = size / 2 - player.z * scale;
+  return {
+    scale,
+    ox,
+    oy,
+    size,
+    minX: player.x - LOCAL_RADIUS,
+    maxX: player.x + LOCAL_RADIUS,
+    minZ: player.z - LOCAL_RADIUS,
+    maxZ: player.z + LOCAL_RADIUS
+  };
+}
+
+function hex(color: number): string {
+  return `#${color.toString(16).padStart(6, '0')}`;
 }

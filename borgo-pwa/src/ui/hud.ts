@@ -178,7 +178,12 @@ export class Hud {
     ctx.fill();
   }
 
-  drawMinimap(state: GameState, player: { x: number; z: number }, heading: number): void {
-    drawMinimap(this.minimap, state, player, heading);
+  drawMinimap(
+    state: GameState,
+    player: { x: number; z: number },
+    heading: number,
+    waypoint: { x: number; z: number } | null
+  ): void {
+    drawMinimap(this.minimap, state, player, heading, waypoint);
   }
 }

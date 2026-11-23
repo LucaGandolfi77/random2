@@ -4,6 +4,10 @@ function ready(phase: QuestPhase): boolean {
   return phase === 'objective';
 }
 
+function line(it: string, en: string): Localized {
+  return { it, en };
+}
+
 export function conversationFor(npc: NpcId, ctx: DialogueContext): Conversation {
   switch (npc) {
     case 'ada':
@@ -14,14 +18,13 @@ export function conversationFor(npc: NpcId, ctx: DialogueContext): Conversation 
       return martaConversation(ctx);
     case 'nino':
       return ninoConversation(ctx);
+    case 'beppe':
+      return beppeConversation(ctx);
+    case 'lidia':
+      return lidiaConversation(ctx);
+    case 'sara':
+      return saraConversation(ctx);
   }
-}
-
-/* Conversations carry both languages so a language switch never has to
-   rebuild the tree; the UI picks one at render time. */
-
-function line(it: string, en: string): Localized {
-  return { it, en };
 }
 
 function adaConversation(ctx: DialogueContext): Conversation {
@@ -33,12 +36,12 @@ function adaConversation(ctx: DialogueContext): Conversation {
       speaker,
       lines: [
         line(
-          'Sei tu il forestiero? Bene, sei arrivato giusto in tempo. Il pane della festa è pronto, ma io non posso lasciare il forno.',
-          "You're the visitor? Good, you came at the right time. The feast bread is ready, but I can't leave the oven."
+          'Sei arrivato col profumo del forno, vero? Il pane per il teatro è pronto, ma io non posso lasciare la madia.',
+          'You arrived with the smell of the oven, didn’t you? The bread for the theatre is ready, but I can’t leave the counter.'
         ),
         line(
-          'È sul bancone, ancora caldo. Portalo al tavolo grande in piazza, sotto il gelso.',
-          "It's on the counter, still warm. Take it to the big table in the piazza, under the mulberry."
+          'Portalo al Teatro Magnani, dall’altra parte del centro. Chiedi di Lidia, lei sa dove metterlo.',
+          'Take it to the Teatro Magnani, on the other side of the centre. Ask for Lidia, she’ll know where it goes.'
         )
       ],
       choices: [
@@ -53,35 +56,24 @@ function adaConversation(ctx: DialogueContext): Conversation {
       speaker,
       lines: [
         line(
-          'Il tavolo è in piazza, davanti alla fontana. Non farlo raffreddare, per favore.',
-          "The table is in the piazza, in front of the fountain. Don't let it go cold, please."
+          'Il teatro è oltre Piazza Garibaldi, verso sud-est. Non farlo raffreddare.',
+          'The theatre is past Piazza Garibaldi, to the south-east. Don’t let it go cold.'
         )
       ]
     };
   }
 
   if (phase === 'done') {
-    if (ctx.finaleSeen) {
-      return {
-        speaker,
-        lines: [
-          line(
-            'Hai sentito la campana? Adesso sì che è festa. Questa sera si balla, e tu hai un posto a tavola.',
-            'Did you hear the bell? Now it is a real feast. Tonight we dance, and you have a seat at the table.'
-          )
-        ]
-      };
-    }
     return {
       speaker,
       lines: [
         line(
-          "L'hai consegnato? Sento già il profumo da qui. Grazie, forestiero.",
-          'Delivered? I can smell it from here. Thank you, wayfarer.'
-        ),
-        line(
-          'Se trovi una tessera del mosaico, non lasciarla lì. Il paese ricorda chi lo guarda davvero.',
-          "If you find a mosaic tile, don't leave it lying there. The town remembers those who truly look."
+          ctx.finaleSeen
+            ? 'Hai sentito la campana? Adesso sì che è sera. Il pane è arrivato e il teatro è pieno.'
+            : 'L’hai consegnato? Sento già il profumo fin qui. Grazie, forestiero.',
+          ctx.finaleSeen
+            ? 'Did you hear the bell? Now it really is evening. The bread arrived and the theatre is full.'
+            : 'Delivered? I can smell it from here. Thank you, wayfarer.'
         )
       ]
     };
@@ -89,7 +81,7 @@ function adaConversation(ctx: DialogueContext): Conversation {
 
   return {
     speaker,
-    lines: [line('Il forno è caldo, ma la festa comincia quando arriva la gente.', 'The oven is warm, but the feast begins when the people arrive.')]
+    lines: [line('Il forno è caldo. La città comincia quando qualcuno ha fame.', 'The oven is warm. The town begins when someone is hungry.')]
   };
 }
 
@@ -102,12 +94,12 @@ function elioConversation(ctx: DialogueContext): Conversation {
       speaker,
       lines: [
         line(
-          'Tre lettere mi sono volate via dal cestino. Tre! E io ho le gambe di un altro secolo.',
-          'Three letters blew out of my basket. Three! And I have another century’s legs.'
+          'Tre lettere mi sono volate via dal cestino, tra la Porta e la stazione. Tre! E io ho le gambe di un altro secolo.',
+          'Three letters blew out of my basket, between the Porta and the station. Three! And I have another century’s legs.'
         ),
         line(
-          'Guarda nei vicoli, dove gira il vento. E se le trovi, non leggerle: sono storie di altri.',
-          "Look in the lanes where the wind turns. And if you find them, don't read them: they're other people's stories."
+          'Guarda lungo Via Emilia e intorno a Piazza Garibaldi. Non leggerle: sono storie di altri.',
+          'Look along the Via Emilia and around Piazza Garibaldi. Don’t read them: they’re other people’s stories.'
         )
       ],
       choices: [
@@ -123,7 +115,7 @@ function elioConversation(ctx: DialogueContext): Conversation {
       lines: [
         line(
           `Ne hai trovate ${ctx.letters} su tre. Il vento le porta sempre dove non guardi.`,
-          `You've found ${ctx.letters} of three. The wind always takes them where you aren't looking.`
+          `You’ve found ${ctx.letters} of three. The wind always takes them where you aren’t looking.`
         )
       ]
     };
@@ -134,8 +126,8 @@ function elioConversation(ctx: DialogueContext): Conversation {
       speaker,
       lines: [
         line(
-          'Tutte e tre? Anche quella per la signora De Vita? Sei meglio del servizio postale.',
-          'All three? Even the one for Signora De Vita? You’re better than the postal service.'
+          'Tutte e tre? Anche quella per la stazione? Sei meglio del servizio postale.',
+          'All three? Even the one for the station? You’re better than the postal service.'
         )
       ],
       choices: [
@@ -152,10 +144,10 @@ function elioConversation(ctx: DialogueContext): Conversation {
         line(
           ctx.finaleSeen
             ? 'Una lettera alla volta, il mondo resta in contatto. Buona passeggiata, forestiero.'
-            : 'Se passi dal belvedere, salutami il mare. Non si vede, ma c’è.',
+            : 'Se passi dalla stazione, salutami i treni. Partono sempre senza di me.',
           ctx.finaleSeen
             ? 'One letter at a time, the world stays in touch. Enjoy the walk, wayfarer.'
-            : "If you pass the belvedere, say hello to the sea for me. You can't see it, but it's there."
+            : 'If you pass the station, say hello to the trains for me. They always leave without me.'
         )
       ]
     };
@@ -163,7 +155,7 @@ function elioConversation(ctx: DialogueContext): Conversation {
 
   return {
     speaker,
-    lines: [line('Il vento di stasera ha una fretta strana.', 'Tonight’s wind is in a strange hurry.')]
+    lines: [line('Il vento di oggi ha una fretta strana.', 'Today’s wind is in a strange hurry.')]
   };
 }
 
@@ -180,8 +172,8 @@ function martaConversation(ctx: DialogueContext): Conversation {
           'The walk begins when the sun touches the roofs. I’m five wildflowers short.'
         ),
         line(
-          'Crescono lungo i muri e nell’oliveto. Raccogli quelli che profumano di sera.',
-          'They grow along the walls and in the olive grove. Pick the ones that smell of evening.'
+          'Crescono al Parco all’aperto e verso Piazza Verdi. Raccogli quelli che profumano di sera.',
+          'They grow in the open-air park and towards Piazza Verdi. Pick the ones that smell of evening.'
         )
       ],
       choices: [
@@ -197,7 +189,7 @@ function martaConversation(ctx: DialogueContext): Conversation {
       lines: [
         line(
           `Ne hai ${ctx.flowers} su cinque. Non serve che siano perfetti: serve che siano di stasera.`,
-          `You have ${ctx.flowers} of five. They don't need to be perfect: they need to be from tonight.`
+          `You have ${ctx.flowers} of five. They don’t need to be perfect: they need to be from tonight.`
         )
       ]
     };
@@ -208,8 +200,8 @@ function martaConversation(ctx: DialogueContext): Conversation {
       speaker,
       lines: [
         line(
-          'Cinque? Guarda che belle. La piazza sarà un quadro.',
-          'Five? Look how lovely. The piazza will be a painting.'
+          'Cinque? Guarda che belle. Piazza Verdi sarà un quadro.',
+          'Five? Look how lovely. Piazza Verdi will be a painting.'
         )
       ],
       choices: [
@@ -241,6 +233,159 @@ function martaConversation(ctx: DialogueContext): Conversation {
   };
 }
 
+function beppeConversation(ctx: DialogueContext): Conversation {
+  const speaker = 'Beppe';
+  const phase = ctx.quests.newspaper;
+
+  if (phase === 'available') {
+    return {
+      speaker,
+      lines: [
+        line(
+          'Edicola aperta, testa già altrove. Ho un giornale per il capostazione, ma se mi allontano chiudo il banco.',
+          'Newsstand open, head already elsewhere. I have a newspaper for the stationmaster, but if I leave the stall closes.'
+        ),
+        line(
+          'La stazione è in fondo a Piazza della Repubblica. Consegna e torna a raccontarmi la faccia che ha fatto.',
+          'The station is at the end of Piazza della Repubblica. Deliver it and come back to tell me the face he made.'
+        )
+      ],
+      choices: [
+        { label: line('Vado io.', "I'll go."), action: 'accept-newspaper' },
+        { label: line('Non ora.', 'Not now.'), action: 'close' }
+      ]
+    };
+  }
+
+  if (phase === 'active') {
+    return {
+      speaker,
+      lines: [
+        line(
+          'La stazione, binario uno. Se vedi Sara al bar, dille che il caffè è ancora mio.',
+          'The station, platform one. If you see Sara at the bar, tell her the coffee is still on me.'
+        )
+      ]
+    };
+  }
+
+  return {
+    speaker,
+    lines: [
+      line(
+        ctx.finaleSeen
+          ? 'La città stasera ha più notizie del giornale. Buona passeggiata.'
+          : 'Giornale consegnato? Allora la giornata può cominciare.',
+        ctx.finaleSeen
+          ? 'Tonight the town has more news than the paper. Enjoy the walk.'
+          : 'Paper delivered? Then the day can begin.'
+      )
+    ]
+  };
+}
+
+function lidiaConversation(ctx: DialogueContext): Conversation {
+  const speaker = 'Lidia';
+  const phase = ctx.quests.book;
+
+  if (phase === 'available') {
+    return {
+      speaker,
+      lines: [
+        line(
+          'Ho trovato un libro con una dedica sul retro. Non è mio, e non è della biblioteca.',
+          'I found a book with an inscription inside. It isn’t mine, and it isn’t the library’s.'
+        ),
+        line(
+          'La dedica parla di San Pietro. Portalo là, qualcuno lo sta aspettando da troppo tempo.',
+          'The inscription mentions San Pietro. Take it there, someone has been waiting far too long.'
+        )
+      ],
+      choices: [
+        { label: line('Lo riporto io.', "I'll take it back."), action: 'accept-book' },
+        { label: line('Più tardi.', 'Later.'), action: 'close' }
+      ]
+    };
+  }
+
+  if (phase === 'active') {
+    return {
+      speaker,
+      lines: [
+        line(
+          'San Pietro è a sud, oltre Via Emilia. La chiesa è silenziosa: bussa piano.',
+          'San Pietro is south, beyond the Via Emilia. The church is quiet: knock softly.'
+        )
+      ]
+    };
+  }
+
+  return {
+    speaker,
+    lines: [
+      line(
+        ctx.finaleSeen
+          ? 'Un libro torna a casa e la città ricorda una voce in più. Grazie.'
+          : 'Il libro è tornato? Allora stasera posso leggere qualcos’altro.',
+        ctx.finaleSeen
+          ? 'A book comes home and the town remembers one more voice. Thank you.'
+          : 'The book is back? Then tonight I can read something else.'
+      )
+    ]
+  };
+}
+
+function saraConversation(ctx: DialogueContext): Conversation {
+  const speaker = 'Sara';
+  const phase = ctx.quests.coffee;
+
+  if (phase === 'available') {
+    return {
+      speaker,
+      lines: [
+        line(
+          'Il treno delle sette ha portato ritardo e buone maniere. Il caffè per il Comune è pronto, ma il banco non si muove.',
+          'The seven o’clock train brought delays and good manners. The coffee for the Town Hall is ready, but the counter doesn’t move.'
+        ),
+        line(
+          'Palazzo Comunale, Piazza Garibaldi. Consegnalo ancora caldo, o tanto vale berlo io.',
+          'Town Hall, Piazza Garibaldi. Deliver it while it’s hot, or I might as well drink it.'
+        )
+      ],
+      choices: [
+        { label: line('Lo porto io.', "I'll take it."), action: 'accept-coffee' },
+        { label: line('Non ora.', 'Not now.'), action: 'close' }
+      ]
+    };
+  }
+
+  if (phase === 'active') {
+    return {
+      speaker,
+      lines: [
+        line(
+          'Il Comune è dietro Piazza Garibaldi. Se arrivi freddo, non dire che sei passato da me.',
+          'The Town Hall is behind Piazza Garibaldi. If it arrives cold, don’t say you came from me.'
+        )
+      ]
+    };
+  }
+
+  return {
+    speaker,
+    lines: [
+      line(
+        ctx.finaleSeen
+          ? 'La sera è lunga e il caffè è finito. Ne preparo un altro?'
+          : 'Caffè consegnato? Allora il Comune è sveglio. Per oggi.',
+        ctx.finaleSeen
+          ? 'The evening is long and the coffee is gone. Shall I make another?'
+          : 'Coffee delivered? Then the Town Hall is awake. For today.'
+      )
+    ]
+  };
+}
+
 function ninoConversation(ctx: DialogueContext): Conversation {
   const speaker = 'Nino';
   const phase = ctx.quests.bell;
@@ -250,8 +395,8 @@ function ninoConversation(ctx: DialogueContext): Conversation {
       speaker,
       lines: [
         line(
-          'La campana suona solo quando il paese è pronto. Prima Ada, Elio e Marta devono avere ciò che chiedono.',
-          'The bell only rings when the town is ready. First Ada, Elio and Marta must have what they ask for.'
+          'La campana suona solo quando il centro è pronto. Prima Ada, Elio e Marta devono avere ciò che chiedono.',
+          'The bell only rings when the centre is ready. First Ada, Elio and Marta must have what they ask for.'
         ),
         line(
           'Io scaldo la corda. Tu pensa al resto.',
@@ -266,8 +411,8 @@ function ninoConversation(ctx: DialogueContext): Conversation {
       speaker,
       lines: [
         line(
-          'Senti l’aria? È l’ora. La corda è lì, nella torre. Suona piano, poi lascia che faccia il resto.',
-          'Feel the air? It’s time. The rope is there, in the tower. Ring softly, then let it do the rest.'
+          'Senti l’aria? È l’ora. La corda è nel campanile accanto al Duomo. Suona piano, poi lascia che faccia il resto.',
+          'Feel the air? It’s time. The rope is in the bell tower beside the cathedral. Ring softly, then let it do the rest.'
         )
       ],
       choices: [
@@ -282,8 +427,8 @@ function ninoConversation(ctx: DialogueContext): Conversation {
       speaker,
       lines: [
         line(
-          'La corda ti aspetta. E il paese aspetta te.',
-          'The rope is waiting. And the town is waiting for you.'
+          'La corda ti aspetta. E il centro aspetta te.',
+          'The rope is waiting. And the centre is waiting for you.'
         )
       ]
     };
@@ -293,8 +438,8 @@ function ninoConversation(ctx: DialogueContext): Conversation {
     speaker,
     lines: [
       line(
-        'Hai sentito? Tutto il paese ha sentito. Adesso la sera è nostra.',
-        'Did you hear? The whole town heard. Now the evening is ours.'
+        'Hai sentito? Tutta Fidenza ha sentito. Adesso la sera è nostra.',
+        'Did you hear? All of Fidenza heard. Now the evening is ours.'
       )
     ]
   };

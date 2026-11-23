@@ -19,7 +19,7 @@ export interface LightingRig {
 }
 
 export function createLighting(scene: THREE.Scene, mobile: boolean): LightingRig {
-  scene.fog = new THREE.Fog(FOG_GOLDEN.getHex(), 46, 178);
+  scene.fog = new THREE.Fog(FOG_GOLDEN.getHex(), 70, 380);
 
   const hemi = new THREE.HemisphereLight(HEMI_SKY_GOLDEN, HEMI_GROUND_GOLDEN, 1.35);
   scene.add(hemi);
@@ -28,29 +28,29 @@ export function createLighting(scene: THREE.Scene, mobile: boolean): LightingRig
   scene.add(ambient);
 
   const sun = new THREE.DirectionalLight(SUN_GOLDEN, 2.9);
-  sun.position.copy(SKY_SUN_DIRECTION).multiplyScalar(90);
-  sun.target.position.set(0, 0, 0);
+  sun.position.copy(SKY_SUN_DIRECTION).multiplyScalar(180);
+  sun.target.position.set(-40, 0, 0);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
-  sun.shadow.camera.left = -64;
-  sun.shadow.camera.right = 64;
-  sun.shadow.camera.top = 64;
-  sun.shadow.camera.bottom = -64;
-  sun.shadow.camera.near = 10;
-  sun.shadow.camera.far = 190;
-  sun.shadow.bias = -0.0006;
-  sun.shadow.normalBias = 0.04;
+  sun.shadow.mapSize.set(mobile ? 2048 : 4096, mobile ? 2048 : 4096);
+  sun.shadow.camera.left = -330;
+  sun.shadow.camera.right = 330;
+  sun.shadow.camera.top = 310;
+  sun.shadow.camera.bottom = -310;
+  sun.shadow.camera.near = 20;
+  sun.shadow.camera.far = 520;
+  sun.shadow.bias = -0.0008;
+  sun.shadow.normalBias = 0.06;
   scene.add(sun);
   scene.add(sun.target);
 
   const lanterns: THREE.PointLight[] = [];
   for (const [x, z] of [
-    [0, 4],
-    [-28, -13],
-    [33, 27]
+    [-297, -4],
+    [15, -21],
+    [175, -110]
   ] as const) {
-    const light = new THREE.PointLight(0xffb46e, 0, 24, 2);
-    light.position.set(x, 3.2, z);
+    const light = new THREE.PointLight(0xffb46e, 0, 44, 2);
+    light.position.set(x, 4.2, z);
     scene.add(light);
     lanterns.push(light);
   }
@@ -66,7 +66,7 @@ export function createLighting(scene: THREE.Scene, mobile: boolean): LightingRig
     hemi.groundColor.copy(HEMI_GROUND_GOLDEN).lerp(HEMI_GROUND_DUSK, amount);
     hemi.intensity = THREE.MathUtils.lerp(1.35, 0.8, amount);
     ambient.intensity = THREE.MathUtils.lerp(0.22, 0.34, amount);
-    for (const light of lanterns) light.intensity = 16 * amount;
+    for (const light of lanterns) light.intensity = 28 * amount;
   };
 
   return { sun, hemi, ambient, lanterns, setDusk };

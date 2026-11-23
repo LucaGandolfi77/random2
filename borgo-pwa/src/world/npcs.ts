@@ -19,7 +19,10 @@ const NAMES: Record<NpcId, string> = {
   ada: 'Ada',
   elio: 'Elio',
   marta: 'Marta',
-  nino: 'Nino'
+  nino: 'Nino',
+  beppe: 'Beppe',
+  lidia: 'Lidia',
+  sara: 'Sara'
 };
 
 const textures = new Map<IndicatorKind, THREE.CanvasTexture>();
@@ -57,8 +60,7 @@ function indicatorTexture(kind: IndicatorKind): THREE.CanvasTexture | null {
 }
 
 export function createNpcActor(spec: NpcSpec): NpcActor {
-  const rig = createPerson(spec.id);
-  const group = rig.group;
+  const rig = createPerson(spec.id);  const group = rig.group;
   group.position.set(spec.x, 0, spec.z);
   group.rotation.y = spec.facing;
 

@@ -1,9 +1,9 @@
 {
   "name": "borgo-pwa",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
-  "description": "BORGO — La Passeggiata: a third-person golden-hour exploration game set in a fictional Apulian hill town.",
+  "description": "BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, built with Three.js.",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",

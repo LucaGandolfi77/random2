@@ -74,6 +74,29 @@ export function addProp(batch: GeoBatch, glow: GeoBatch, prop: PropSpec): THREE.
       return null;
     }
 
+    case 'plane': {
+      const trunk = 0.24 * scale;
+      cyl(trunk, trunk * 1.5, 3.2 * scale, 7, 0, 1.6 * scale, 0, 0x746a54);
+      cyl(0.12 * scale, 0.18 * scale, 2.2 * scale, 6, 0.5 * scale, 2.9 * scale, 0.1, 0x746a54, 0, -0.45);
+      cyl(0.12 * scale, 0.18 * scale, 2.0 * scale, 6, -0.5 * scale, 2.9 * scale, -0.1, 0x746a54, 0, 0.5);
+      const blobs = [
+        [0, 5.4, 0, 1.7, LEAF],
+        [1.35, 4.7, 0.3, 1.15, LEAF_LIGHT],
+        [-1.35, 4.8, -0.2, 1.15, LEAF_DARK],
+        [0.2, 5.0, 1.2, 1.1, LEAF_LIGHT],
+        [-0.2, 5.0, -1.2, 1.0, LEAF]
+      ] as const;
+      for (const [lx, ly, lz, r, color] of blobs) {
+        const [x, z] = place(lx * scale, lz * scale);
+        batch.sphere(r * scale, x, ly * scale, z, color, 0, 0.88);
+      }
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        box(0.42, 0.12, 0.3, Math.sin(angle) * 0.7, 0.06, Math.cos(angle) * 0.7, STONE_DARK, angle);
+      }
+      return null;
+    }
+
     case 'cypress': {
       cyl(0.1 * scale, 0.18 * scale, 1.6 * scale, 5, 0, 0.8 * scale, 0, OLIVE_BARK);
       const [x, z] = place(0, 0);

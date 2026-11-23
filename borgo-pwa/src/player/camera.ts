@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import type { Collider } from '../data/colliders';
+import type { CollisionWorld } from '../data/colliders';
+import { TITLE_VIEW } from '../data/town';
 import { clearDistance } from './collision';
 
 const MIN_PITCH = 0.12;
@@ -10,17 +11,17 @@ const MAX_DISTANCE = 10;
 export class ThirdPersonCamera {
   readonly camera: THREE.PerspectiveCamera;
   yaw = 0;
-  pitch = 0.4;
-  distance = 6.4;
+  pitch = 0.3;
+  distance = 7.2;
   instant = false;
-  private currentDistance = 6.4;
+  private currentDistance = 7.2;
   private currentPivot = new THREE.Vector3();
   private currentPosition = new THREE.Vector3();
   private targetPivot = new THREE.Vector3();
   private targetPosition = new THREE.Vector3();
-  private colliders: Collider[];
+  private colliders: CollisionWorld;
 
-  constructor(camera: THREE.PerspectiveCamera, colliders: Collider[]) {
+  constructor(camera: THREE.PerspectiveCamera, colliders: CollisionWorld) {
     this.camera = camera;
     this.colliders = colliders;
   }
@@ -109,14 +110,17 @@ export class ThirdPersonCamera {
     }
 
     this.camera.position.copy(this.currentPosition);
-    this.camera.lookAt(this.currentPivot.x, this.currentPivot.y + 0.18, this.currentPivot.z);
+    this.camera.lookAt(this.currentPivot.x, this.currentPivot.y + 0.95, this.currentPivot.z);
   }
 
   titleView(time: number): void {
     const angle = time * 0.045 + 0.4;
-    const radius = 16.5;
-    this.camera.position.set(Math.sin(angle) * radius, 7.2, 4 + Math.cos(angle) * radius);
-    this.camera.lookAt(0, 2.1, 2);
+    this.camera.position.set(
+      TITLE_VIEW.x + Math.sin(angle) * TITLE_VIEW.radius,
+      TITLE_VIEW.height,
+      TITLE_VIEW.z + Math.cos(angle) * TITLE_VIEW.radius
+    );
+    this.camera.lookAt(TITLE_VIEW.x, 2.2, TITLE_VIEW.z);
   }
 
   snapTo(playerPosition: THREE.Vector3): void {
@@ -128,7 +132,7 @@ export class ThirdPersonCamera {
       playerPosition.z + Math.cos(this.yaw) * horizontal
     );
     this.camera.position.copy(this.currentPosition);
-    this.camera.lookAt(this.currentPivot);
+    this.camera.lookAt(this.currentPivot.x, this.currentPivot.y + 0.95, this.currentPivot.z);
   }
 
   get heading(): number {

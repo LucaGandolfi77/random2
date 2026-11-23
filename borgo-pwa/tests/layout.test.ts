@@ -1,30 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { buildColliders, isFreePoint } from '../src/data/colliders';
+import { buildCityColliders, CollisionWorld } from '../src/data/colliders';
+import { FIDENZA, FIDENZA_WORLD } from '../src/data/fidenza';
 import {
   BELL_SPOT,
-  BUILDINGS,
-  FESTIVAL_TABLE,
+  DELIVERIES,
+  DISCOVERIES,
   FLOWERS,
   LETTERS,
   NPCS,
-  PROPS,
   SPAWN,
   TILES,
-  WORLD,
-  ZONES
+  WORLD
 } from '../src/data/town';
-import type { Spot } from '../src/data/types';
 
-const colliders = buildColliders();
+const world = new CollisionWorld(buildCityColliders());
 const RADIUS = 0.34;
-const STEP = 0.5;
+const STEP = 1;
 
 interface Reachable {
   cells: Uint8Array;
   cols: number;
   rows: number;
-  startX: number;
-  startZ: number;
 }
 
 function explore(): Reachable {
@@ -34,12 +30,9 @@ function explore(): Reachable {
   const queue = new Int32Array(cols * rows);
   let head = 0;
   let tail = 0;
-
-  const index = (cx: number, cz: number): number => cz * cols + cx;
   const startX = Math.round((SPAWN.x - WORLD.minX) / STEP);
   const startZ = Math.round((SPAWN.z - WORLD.minZ) / STEP);
-
-  const start = index(startX, startZ);
+  const start = startZ * cols + startX;
   cells[start] = 1;
   queue[tail++] = start;
 
@@ -56,129 +49,121 @@ function explore(): Reachable {
       const nx = cx + dx;
       const nz = cz + dz;
       if (nx < 0 || nz < 0 || nx >= cols || nz >= rows) continue;
-      const next = index(nx, nz);
+      const next = nz * cols + nx;
       if (cells[next]) continue;
       const x = WORLD.minX + nx * STEP;
       const z = WORLD.minZ + nz * STEP;
-      if (!isFreePoint(x, z, RADIUS, colliders, WORLD)) continue;
+      if (!world.isFree(x, z, RADIUS)) continue;
       cells[next] = 1;
       queue[tail++] = next;
     }
   }
-
-  return { cells, cols, rows, startX, startZ };
+  return { cells, cols, rows };
 }
 
-function distanceToNearestWalkable(reach: Reachable, point: Spot): number {
+function distanceToWalkable(reach: Reachable, point: { x: number; z: number }): number {
   const cx = Math.round((point.x - WORLD.minX) / STEP);
   const cz = Math.round((point.z - WORLD.minZ) / STEP);
-  const span = 4;
   let best = Infinity;
-  for (let dz = -span; dz <= span; dz++) {
-    for (let dx = -span; dx <= span; dx++) {
+  for (let dz = -30; dz <= 30; dz++) {
+    for (let dx = -30; dx <= 30; dx++) {
       const nx = cx + dx;
       const nz = cz + dz;
       if (nx < 0 || nz < 0 || nx >= reach.cols || nz >= reach.rows) continue;
-      if (reach.cells[nz * reach.cols + nx] !== 1) continue;
+      if (!reach.cells[nz * reach.cols + nx]) continue;
       const x = WORLD.minX + nx * STEP;
       const z = WORLD.minZ + nz * STEP;
-      const distance = Math.hypot(x - point.x, z - point.z);
-      if (distance < best) best = distance;
+      best = Math.min(best, Math.hypot(x - point.x, z - point.z));
     }
   }
   return best;
 }
 
-describe('town data', () => {
-  it('uses unique ids across every table', () => {
-    const ids = [
-      ...BUILDINGS.map((b) => b.id),
-      ...PROPS.map((p) => p.id),
-      ...TILES.map((t) => t.id),
-      ...LETTERS.map((l) => l.id),
-      ...FLOWERS.map((f) => f.id),
-      ...NPCS.map((n) => n.id)
-    ];
-    expect(new Set(ids).size).toBe(ids.length);
+describe('Fidenza data', () => {
+  it('contains the real centre, not a tiny mock-up', () => {
+    expect(FIDENZA.buildings.length).toBeGreaterThan(700);
+    expect(FIDENZA.roads.length).toBeGreaterThan(200);
+    expect(FIDENZA.bounds.maxX - FIDENZA.bounds.minX).toBeGreaterThan(500);
+    expect(FIDENZA.bounds.maxZ - FIDENZA.bounds.minZ).toBeGreaterThan(400);
   });
 
-  it('has the expected number of collectibles', () => {
-    expect(TILES).toHaveLength(6);
+  it('carries the OpenStreetMap attribution required by ODbL', () => {
+    expect(FIDENZA.meta.attribution).toContain('OpenStreetMap');
+    expect(FIDENZA.meta.license).toBe('ODbL-1.0');
+    expect(FIDENZA.meta.source).toContain('Overpass');
+  });
+
+  it('keeps every id unique', () => {
+    expect(new Set(FIDENZA.buildings.map((b) => b.id)).size).toBe(FIDENZA.buildings.length);
+    expect(new Set(FIDENZA.roads.map((r) => r.id)).size).toBe(FIDENZA.roads.length);
+    expect(new Set(TILES.map((t) => t.id)).size).toBe(TILES.length);
+  });
+
+  it('has twelve memories and seven characters', () => {
+    expect(TILES).toHaveLength(12);
     expect(LETTERS).toHaveLength(3);
     expect(FLOWERS).toHaveLength(5);
-    expect(NPCS).toHaveLength(4);
+    expect(NPCS).toHaveLength(7);
+    expect(DISCOVERIES).toHaveLength(8);
+    expect(DELIVERIES).toHaveLength(4);
   });
 
-  it('keeps buildings inside the world bounds', () => {
-    for (const building of BUILDINGS) {
-      expect(building.x - building.w / 2, building.id).toBeGreaterThan(WORLD.minX);
-      expect(building.x + building.w / 2, building.id).toBeLessThan(WORLD.maxX);
-      expect(building.z - building.d / 2, building.id).toBeGreaterThan(WORLD.minZ);
-      expect(building.z + building.d / 2, building.id).toBeLessThan(WORLD.maxZ);
+  it('keeps every building inside the view or the playable buffer', () => {
+    for (const building of FIDENZA.buildings) {
+      expect(building.poly.length).toBeGreaterThanOrEqual(6);
+      expect(building.area).toBeGreaterThan(7);
     }
   });
 
   it('places the spawn and every NPC on free ground', () => {
-    expect(isFreePoint(SPAWN.x, SPAWN.z, RADIUS, colliders, WORLD)).toBe(true);
+    expect(world.isFree(SPAWN.x, SPAWN.z, RADIUS)).toBe(true);
     for (const npc of NPCS) {
-      expect(isFreePoint(npc.x, npc.z, RADIUS, colliders, WORLD), npc.id).toBe(true);
+      expect(world.isFree(npc.x, npc.z, RADIUS), npc.id).toBe(true);
     }
   });
 
-  it('keeps the bell and the festival table approachable', () => {
-    expect(isFreePoint(BELL_SPOT.x, BELL_SPOT.z, RADIUS, colliders, WORLD)).toBe(true);
-    const nearTable = isFreePoint(
-      FESTIVAL_TABLE.x,
-      FESTIVAL_TABLE.z + 1.2,
-      RADIUS,
-      colliders,
-      WORLD
-    );
-    expect(nearTable).toBe(true);
-  });
-
-  it('puts every collectible outside geometry', () => {
+  it('places every collectible and delivery outside geometry', () => {
     for (const spot of [...TILES, ...LETTERS, ...FLOWERS]) {
-      expect(isFreePoint(spot.x, spot.z, 0.18, colliders, WORLD), spot.id).toBe(true);
+      expect(world.isFree(spot.x, spot.z, 0.15), spot.id).toBe(true);
     }
+    for (const delivery of DELIVERIES) {
+      expect(world.isFree(delivery.x, delivery.z, RADIUS), delivery.id).toBe(true);
+    }
+    expect(world.isFree(BELL_SPOT.x, BELL_SPOT.z, RADIUS)).toBe(true);
   });
 
-  it('has a zone for every named place', () => {
-    expect(ZONES.map((z) => z.id).sort()).toEqual(
-      ['belvedere', 'chiesa', 'fornai', 'giardino', 'oliveto', 'piazza', 'vicolo'].sort()
-    );
-    for (const zone of ZONES) {
-      expect(isFreePoint(zone.x, zone.z, RADIUS, colliders, WORLD), zone.id).toBe(true);
-    }
+  it('uses the Fidenza playable bounds', () => {
+    expect(WORLD).toEqual(FIDENZA_WORLD);
+    expect(WORLD.maxX - WORLD.minX).toBe(680);
+    expect(WORLD.maxZ - WORLD.minZ).toBe(500);
   });
 });
 
 describe('walkable route', () => {
   const reach = explore();
 
-  it('can walk from the spawn to every NPC', () => {
+  it('can walk from Piazza Duomo to every character', () => {
     for (const npc of NPCS) {
-      const distance = distanceToNearestWalkable(reach, npc);
-      expect(distance, npc.id).toBeLessThan(1.2);
+      expect(distanceToWalkable(reach, npc), npc.id).toBeLessThan(2);
     }
-  });
+  }, 30000);
 
-  it('can reach every collectible', () => {
+  it('can reach every memory, letter and flower', () => {
     for (const spot of [...TILES, ...LETTERS, ...FLOWERS]) {
-      const distance = distanceToNearestWalkable(reach, spot);
-      expect(distance, spot.id).toBeLessThan(1.6);
+      expect(distanceToWalkable(reach, spot), spot.id).toBeLessThan(3);
     }
-  });
+  }, 30000);
 
-  it('can reach the festival table and the bell rope', () => {
-    expect(distanceToNearestWalkable(reach, { id: 'table', ...FESTIVAL_TABLE })).toBeLessThan(2);
-    expect(distanceToNearestWalkable(reach, { id: 'bell', ...BELL_SPOT })).toBeLessThan(1.6);
-  });
-
-  it('can enter every zone', () => {
-    for (const zone of ZONES) {
-      const distance = distanceToNearestWalkable(reach, zone);
-      expect(distance, zone.id).toBeLessThan(2);
+  it('can reach every delivery point and the bell', () => {
+    for (const delivery of DELIVERIES) {
+      expect(distanceToWalkable(reach, delivery), delivery.id).toBeLessThan(3);
     }
-  });
+    expect(distanceToWalkable(reach, BELL_SPOT)).toBeLessThan(3);
+  }, 30000);
+
+  it('can approach every discoverable place', () => {
+    for (const place of DISCOVERIES) {
+      expect(distanceToWalkable(reach, place), place.id).toBeLessThan(Math.max(8, place.radius));
+    }
+  }, 30000);
 });

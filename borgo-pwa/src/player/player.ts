@@ -1,6 +1,5 @@
 import * as THREE from 'three';
-import type { Collider } from '../data/colliders';
-import type { WorldBounds } from '../data/types';
+import type { CollisionWorld } from '../data/colliders';
 import { moveAndCollide } from './collision';
 import { animateIdle, animateWalk, createBlobShadow, createPerson, type PersonRig } from '../world/person';
 
@@ -61,8 +60,7 @@ export class Player {
     axis: { x: number; z: number },
     run: boolean,
     cameraYaw: number,
-    colliders: Collider[],
-    bounds: WorldBounds
+    world: CollisionWorld
   ): void {
     let ax = axis.x;
     let az = axis.z;
@@ -97,8 +95,7 @@ export class Player {
         this.position,
         { x: dx / steps, z: dz / steps },
         this.radius,
-        colliders,
-        bounds
+        world
       );
       this.position.x = moved.x;
       this.position.z = moved.z;

@@ -1,6 +1,17 @@
 import * as THREE from 'three';
 
-export type PersonLook = 'ada' | 'elio' | 'marta' | 'nino' | 'player';
+export type PersonLook =
+  | 'ada'
+  | 'elio'
+  | 'marta'
+  | 'nino'
+  | 'beppe'
+  | 'lidia'
+  | 'sara'
+  | 'citizen1'
+  | 'citizen2'
+  | 'citizen3'
+  | 'player';
 
 export interface PersonRig {
   group: THREE.Group;
@@ -59,6 +70,61 @@ const OUTFITS: Record<PersonLook, Outfit> = {
     hat: 'cap',
     hatColor: 0x3f4a3a,
     hair: 0x2f2823
+  },
+  beppe: {
+    shirt: 0x8b6b45,
+    trousers: 0x4c4b43,
+    apron: 0xd9c39b,
+    scarf: 0x3f5b63,
+    hat: 'cap',
+    hatColor: 0x3f4a3a,
+    hair: 0x6a5a48,
+    moustache: true
+  },
+  lidia: {
+    shirt: 0x5f6f52,
+    trousers: 0x5a4a3c,
+    apron: 0xe6d9bd,
+    scarf: 0x8a4b3d,
+    hat: 'none',
+    hatColor: 0x5f6f52,
+    hair: 0x4d3829,
+    satchel: true
+  },
+  sara: {
+    shirt: 0xf0e6cf,
+    trousers: 0x44565c,
+    apron: 0xc2603f,
+    scarf: 0xd9a441,
+    hat: 'none',
+    hatColor: 0xc2603f,
+    hair: 0x3c2f26
+  },
+  citizen1: {
+    shirt: 0x6d7f8e,
+    trousers: 0x4f4a3d,
+    scarf: 0xd9c39b,
+    hat: 'cap',
+    hatColor: 0x3f4a3a,
+    hair: 0x4b3a2a
+  },
+  citizen2: {
+    shirt: 0x9a6b52,
+    trousers: 0x4e4650,
+    apron: 0xe6d9bd,
+    scarf: 0x6f7f4f,
+    hat: 'none',
+    hatColor: 0x9a6b52,
+    hair: 0x6d5a45
+  },
+  citizen3: {
+    shirt: 0x7a8560,
+    trousers: 0x3f4650,
+    scarf: 0xd9a441,
+    hat: 'straw',
+    hatColor: 0xc7a55e,
+    hair: 0x3c2f26,
+    satchel: true
   },
   player: {
     shirt: 0xf0e6cf,

@@ -8,7 +8,15 @@ import type { DialogueContext, NpcId } from '../src/data/types';
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
 const baseContext: DialogueContext = {
-  quests: { bread: 'available', letters: 'available', flowers: 'available', bell: 'locked' },
+  quests: {
+    bread: 'available',
+    letters: 'available',
+    flowers: 'available',
+    newspaper: 'available',
+    book: 'available',
+    coffee: 'available',
+    bell: 'locked'
+  },
   letters: 0,
   flowers: 0,
   tiles: 0,
@@ -17,10 +25,18 @@ const baseContext: DialogueContext = {
 };
 
 const readyContext: DialogueContext = {
-  quests: { bread: 'done', letters: 'objective', flowers: 'objective', bell: 'available' },
+  quests: {
+    bread: 'done',
+    letters: 'objective',
+    flowers: 'objective',
+    newspaper: 'available',
+    book: 'available',
+    coffee: 'available',
+    bell: 'available'
+  },
   letters: 3,
   flowers: 5,
-  tiles: 4,
+  tiles: 7,
   rank: 2,
   finaleSeen: false
 };
@@ -35,16 +51,13 @@ describe('UI strings', () => {
 
   it('covers every key used by the markup', () => {
     const keys = new Set<string>();
-    for (const match of html.matchAll(/data-i18n(?:-aria)?="([^"]+)"/g)) {
-      keys.add(match[1]);
-    }
-    expect(keys.size).toBeGreaterThan(20);
-    for (const key of keys) {
-      expect(UI, `missing UI.${key}`).toHaveProperty(key);
-    }
+    for (const match of html.matchAll(/data-i18n(?:-aria)?="([^"]+)"/g)) keys.add(match[1]);
+    expect(keys.size).toBeGreaterThan(25);
+    for (const key of keys) expect(UI, `missing UI.${key}`).toHaveProperty(key);
   });
 
   it('references no missing quest metadata', () => {
+    expect(QUEST_ORDER).toHaveLength(7);
     for (const id of QUEST_ORDER) {
       expect(QUESTS[id].name.it.length).toBeGreaterThan(0);
       expect(QUESTS[id].name.en.length).toBeGreaterThan(0);
@@ -55,7 +68,7 @@ describe('UI strings', () => {
 });
 
 describe('dialogue', () => {
-  const npcs: NpcId[] = ['ada', 'elio', 'marta', 'nino'];
+  const npcs: NpcId[] = ['ada', 'elio', 'marta', 'nino', 'beppe', 'lidia', 'sara'];
 
   it('always returns a line in both languages', () => {
     for (const npc of npcs) {
@@ -73,7 +86,6 @@ describe('dialogue', () => {
   it('offers acceptance only when the errand is available', () => {
     const ada = conversationFor('ada', baseContext);
     expect(ada.choices?.map((c) => c.action)).toContain('accept-bread');
-
     const adaActive = conversationFor('ada', {
       ...baseContext,
       quests: { ...baseContext.quests, bread: 'active' }
@@ -81,18 +93,31 @@ describe('dialogue', () => {
     expect(adaActive.choices).toBeUndefined();
   });
 
+  it('offers the three optional errands', () => {
+    expect(conversationFor('beppe', baseContext).choices?.map((c) => c.action)).toContain(
+      'accept-newspaper'
+    );
+    expect(conversationFor('lidia', baseContext).choices?.map((c) => c.action)).toContain(
+      'accept-book'
+    );
+    expect(conversationFor('sara', baseContext).choices?.map((c) => c.action)).toContain(
+      'accept-coffee'
+    );
+  });
+
   it('asks for the hand-over when an errand is ready', () => {
-    const elio = conversationFor('elio', readyContext);
-    expect(elio.choices?.map((c) => c.action)).toContain('complete-letters');
-    const marta = conversationFor('marta', readyContext);
-    expect(marta.choices?.map((c) => c.action)).toContain('complete-flowers');
+    expect(conversationFor('elio', readyContext).choices?.map((c) => c.action)).toContain(
+      'complete-letters'
+    );
+    expect(conversationFor('marta', readyContext).choices?.map((c) => c.action)).toContain(
+      'complete-flowers'
+    );
   });
 
   it('explains the bell prerequisite before the town is ready', () => {
     const nino = conversationFor('nino', baseContext);
     expect(nino.choices).toBeUndefined();
     expect(nino.lines[0].it).toContain('campana');
-
     const ready = conversationFor('nino', readyContext);
     expect(ready.choices?.map((c) => c.action)).toContain('accept-bell');
   });

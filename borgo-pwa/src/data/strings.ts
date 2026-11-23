@@ -2,36 +2,40 @@ import type { Language, Localized } from './types';
 
 export const UI = {
   loading: {
-    it: 'Il paese si sta svegliando…',
-    en: 'The town is waking up…'
+    it: 'Fidenza si sta svegliando…',
+    en: 'Fidenza is waking up…'
   },
   hospitality: { it: 'Ospitalità', en: 'Hospitality' },
   objective: { it: 'In corso', en: 'In progress' },
   objectiveReady: { it: 'Da consegnare', en: 'Ready to hand over' },
   questAvailable: { it: 'Disponibile', en: 'Available' },
   introHint: {
-    it: 'Parla con la gente del borgo. Qualcuno ha bisogno di te.',
-    en: 'Talk to the townsfolk. Someone needs you.'
+    it: 'Parla con la gente del centro. Qualcuno ha bisogno di te.',
+    en: 'Talk to the people in the centre. Someone needs you.'
   },
   bellReady: {
-    it: 'Il paese è pronto. La campana aspetta.',
-    en: 'The town is ready. The bell is waiting.'
+    it: 'Il centro è pronto. La campana aspetta.',
+    en: 'The centre is ready. The bell is waiting.'
   },
   itemTile: { it: 'Tessera del mosaico', en: 'Mosaic tile' },
   itemLetter: { it: 'Lettera', en: 'Letter' },
   itemFlower: { it: 'Fiore di campo', en: 'Wildflower' },
-  bellName: { it: 'Campana di Santa Lena', en: 'Bell of Santa Lena' },
+  itemNewspaper: { it: 'Giornale', en: 'Newspaper' },
+  itemBook: { it: 'Libro', en: 'Book' },
+  itemCoffee: { it: 'Caffè', en: 'Coffee' },
+  itemBread: { it: 'Pane', en: 'Bread' },
+  bellName: { it: 'Campana del Duomo', en: 'Cathedral bell' },
   tapHint: { it: 'Tocca', en: 'Tap' },
   journal: { it: 'Diario', en: 'Journal' },
   map: { it: 'Mappa', en: 'Map' },
   menu: { it: 'Pausa', en: 'Pause' },
   titleEyebrow: {
-    it: "Un paese immaginario, un'ora d'oro",
-    en: 'An imaginary town, one golden hour'
+    it: "Fidenza · un'ora d'oro",
+    en: 'Fidenza · one golden hour'
   },
   titleTagline: {
-    it: 'Quattro voci, sei ricordi, una sera che comincia.',
-    en: 'Four voices, six memories, one evening beginning.'
+    it: 'Sette voci, dodici ricordi, una sera che comincia.',
+    en: 'Seven voices, twelve memories, one evening beginning.'
   },
   continueGame: { it: 'Continua', en: 'Continue' },
   newGame: { it: 'Nuova partita', en: 'New game' },
@@ -40,8 +44,8 @@ export const UI = {
     en: 'A notebook is waiting: pick up where you left off.'
   },
   saveEmpty: {
-    it: 'Nessun salvataggio. La prima passeggiata comincia qui.',
-    en: 'No saved walk yet. Your first passeggiata starts here.'
+    it: 'Nessun salvataggio. La prima passeggiata a Fidenza comincia qui.',
+    en: 'No saved walk yet. Your first passeggiata in Fidenza starts here.'
   },
   controlMove: { it: 'Cammina', en: 'Walk' },
   controlRun: { it: 'Corri', en: 'Run' },
@@ -62,22 +66,30 @@ export const UI = {
   continueHint: { it: 'continua', en: 'continue' },
   journalEyebrow: { it: 'Taccuino di viaggio', en: 'Traveller’s notebook' },
   journalTitle: { it: 'Diario', en: 'Journal' },
+  journalPlaces: { it: 'Luoghi di Fidenza', en: 'Places of Fidenza' },
+  placeDiscovered: { it: 'Luogo scoperto', en: 'Place discovered' },
+  mapAttribution: {
+    it: 'Mappa: © OpenStreetMap contributors (ODbL)',
+    en: 'Map: © OpenStreetMap contributors (ODbL)'
+  },
   close: { it: 'Chiudi', en: 'Close' },
   activeQuests: { it: 'In corso', en: 'In progress' },
   completedQuests: { it: 'Completate', en: 'Completed' },
   noneYet: {
-    it: 'Nessun incarico. Parla con la gente del borgo.',
-    en: 'No errands yet. Talk to the townsfolk.'
+    it: 'Nessun incarico. Parla con la gente del centro.',
+    en: 'No errands yet. Talk to the people in the centre.'
   },
   mosaicTitle: { it: 'Mosaico dei Ricordi', en: 'Mosaic of Memories' },
   tilesFound: { it: 'tessere trovate', en: 'tiles found' },
   mosaicHint: {
-    it: 'Le tessere brillano dove il paese ricorda.',
-    en: 'The tiles shine where the town remembers.'
+    it: 'Le tessere brillano dove Fidenza ricorda.',
+    en: 'The tiles shine where Fidenza remembers.'
   },
+  undiscovered: { it: 'Non ancora scoperto', en: 'Not discovered yet' },
+  placesFound: { it: 'luoghi scoperti', en: 'places discovered' },
   closeHint: { it: 'chiudi', en: 'close' },
-  mapEyebrow: { it: "Il borgo dall'alto", en: 'The town from above' },
-  mapTitle: { it: 'Mappa', en: 'Map' },
+  mapEyebrow: { it: "Fidenza dall'alto", en: 'Fidenza from above' },
+  mapTitle: { it: 'Mappa di Fidenza', en: 'Map of Fidenza' },
   legendPlayer: { it: 'Tu', en: 'You' },
   legendNpc: { it: 'Paesani', en: 'Townsfolk' },
   legendTile: { it: 'Ricordi', en: 'Memories' },
@@ -108,14 +120,15 @@ export const UI = {
   finaleTitle: { it: 'La passeggiata', en: 'The evening walk' },
   keepPlaying: { it: "Resta un altro po'", en: 'Stay a little longer' },
   finaleBody: {
-    it: "Le lanterne si accendono una a una. Il paese esce di casa, e per un'ora non esiste altro che questa strada, questa luce, questo passo.",
-    en: 'The lanterns come on one by one. The town steps outside, and for an hour there is nothing but this street, this light, this walk.'
+    it: "Le lanterne si accendono una a una lungo la Via Emilia. Fidenza esce di casa, e per un'ora non esiste altro che questa strada, questa luce, questo passo.",
+    en: 'The lanterns come on one by one along the Via Emilia. Fidenza steps outside, and for an hour there is nothing but this street, this light, this walk.'
   },
   finaleBodyAll: {
-    it: 'Il tuo mosaico è completo: ogni tessera ha trovato il suo posto. Adesso il borgo ricorda anche te.',
-    en: 'Your mosaic is complete: every tile has found its place. Now the town remembers you too.'
+    it: 'Il tuo mosaico è completo: ogni tessera ha trovato il suo posto. Adesso Fidenza ricorda anche te.',
+    en: 'Your mosaic is complete: every tile has found its place. Now Fidenza remembers you too.'
   },
   finaleTiles: { it: 'Ricordi', en: 'Memories' },
+  finalePlaces: { it: 'Luoghi', en: 'Places' },
   finaleTime: { it: 'Tempo', en: 'Time' },
   finaleRank: { it: 'Rango', en: 'Rank' },
   promptTalk: { it: 'Parla con', en: 'Talk to' },
@@ -137,6 +150,18 @@ export const UI = {
   toastFlowers: {
     it: 'Marta ha i suoi fiori per la passeggiata.',
     en: 'Marta has her flowers for the walk.'
+  },
+  toastNewspaper: {
+    it: 'Il giornale è arrivato in stazione.',
+    en: 'The newspaper has reached the station.'
+  },
+  toastBook: {
+    it: 'Il libro è tornato a San Pietro.',
+    en: 'The book is back at San Pietro.'
+  },
+  toastCoffee: {
+    it: 'Il caffè è arrivato al Comune, ancora caldo.',
+    en: 'The coffee reached the Town Hall, still hot.'
   },
   toastBell: {
     it: 'La campana suona sopra i tetti.',

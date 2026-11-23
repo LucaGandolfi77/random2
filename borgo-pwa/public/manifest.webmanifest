@@ -1,7 +1,7 @@
 {
-  "name": "BORGO — La Passeggiata",
-  "short_name": "BORGO",
-  "description": "A golden-hour walk through a fictional Apulian hill town: four voices, six memories, one evening.",
+  "name": "BORGO SAN DONNINO — La Passeggiata",
+  "short_name": "BORGO S. DONNINO",
+  "description": "An open-world golden-hour walk through Fidenza: seven voices, twelve memories, one evening.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

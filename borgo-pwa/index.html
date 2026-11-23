@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#1d1a15" />
-    <meta name="description" content="BORGO — La Passeggiata: an original third-person exploration game set in a fictional Apulian hill town at golden hour." />
+    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world walk through Fidenza at golden hour." />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
-    <title>BORGO — La Passeggiata</title>
+    <title>BORGO SAN DONNINO — La Passeggiata</title>
   </head>
   <body>
     <div id="app">
@@ -18,7 +18,7 @@
       <div id="loading" class="screen loading">
         <div class="loading-mark">BORGO</div>
         <div class="loading-bar"><span></span></div>
-        <p data-i18n="loading">Il paese si sta svegliando…</p>
+        <p data-i18n="loading">Fidenza si sta svegliando…</p>
       </div>
 
       <div id="hud" hidden>
@@ -77,10 +77,10 @@
           </button>
         </div>
         <div class="title-inner">
-          <p class="title-eyebrow" data-i18n="titleEyebrow">Un paese immaginario, un'ora d'oro</p>
+          <p class="title-eyebrow" data-i18n="titleEyebrow">Fidenza · un'ora d'oro</p>
           <h1>BORGO</h1>
-          <p class="title-sub">La Passeggiata</p>
-          <p class="title-tagline" data-i18n="titleTagline">Quattro voci, sei ricordi, una sera che comincia.</p>
+          <p class="title-sub">San Donnino</p>
+          <p class="title-tagline" data-i18n="titleTagline">Sette voci, dodici ricordi, una sera che comincia.</p>
           <div class="title-actions">
             <button id="title-continue" class="btn btn-primary" type="button" data-i18n="continueGame">Continua</button>
             <button id="title-new" class="btn btn-ghost" type="button" data-i18n="newGame">Nuova partita</button>
@@ -95,8 +95,8 @@
           <p class="title-note" data-i18n="audioNote">L'audio si attiva al primo tocco. Nessuna rete, nessun download.</p>
         </div>
         <div class="title-foot">
-          <span>BORGO — La Passeggiata</span>
-          <span data-i18n="madeWith">Un racconto originale in tre dimensioni</span>
+          <span>BORGO SAN DONNINO — La Passeggiata</span>
+          <span data-i18n="mapAttribution">Mappa: © OpenStreetMap contributors (ODbL)</span>
         </div>
       </div>
 
@@ -126,9 +126,12 @@
           <section class="journal-col">
             <h3 data-i18n="activeQuests">In corso</h3>
             <ul id="journal-quests" class="quest-list"></ul>
-            <p id="journal-empty" class="muted" data-i18n="noneYet">Nessun incarico. Parla con la gente del borgo.</p>
+            <p id="journal-empty" class="muted" data-i18n="noneYet">Nessun incarico. Parla con la gente del centro.</p>
             <h3 data-i18n="completedQuests">Completate</h3>
             <ul id="journal-done" class="quest-list done-list"></ul>
+            <h3 data-i18n="journalPlaces">Luoghi di Fidenza</h3>
+            <p id="journal-places-count" class="muted"></p>
+            <ul id="journal-places" class="place-list"></ul>
           </section>
           <section class="journal-col mosaic-col">
             <h3 data-i18n="mosaicTitle">Mosaico dei Ricordi</h3>
@@ -143,8 +146,8 @@
       <div id="map-panel" class="panel map-panel" hidden role="dialog" aria-modal="true" aria-labelledby="map-title">
         <div class="panel-head">
           <div>
-            <p class="panel-eyebrow" data-i18n="mapEyebrow">Il borgo dall'alto</p>
-            <h2 id="map-title" data-i18n="mapTitle">Mappa</h2>
+            <p class="panel-eyebrow" data-i18n="mapEyebrow">Fidenza dall'alto</p>
+            <h2 id="map-title" data-i18n="mapTitle">Mappa di Fidenza</h2>
           </div>
           <button id="map-close" class="icon-btn" type="button" data-i18n-aria="close" aria-label="Chiudi">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
@@ -157,6 +160,7 @@
           <span><i class="dot dot-tile"></i><span data-i18n="legendTile">Ricordi</span></span>
           <span><i class="dot dot-target"></i><span data-i18n="legendTarget">Incarichi</span></span>
         </div>
+        <p class="map-attribution" data-i18n="mapAttribution">Mappa: © OpenStreetMap contributors (ODbL)</p>
         <p class="panel-foot"><kbd>M</kbd><span data-i18n="closeHint">chiudi</span></p>
       </div>
 
@@ -170,6 +174,7 @@
             <button id="pause-new" class="btn btn-ghost" type="button" data-i18n="newGame">Nuova partita</button>
             <button id="pause-title" class="btn btn-quiet" type="button" data-i18n="backToTitle">Torna al titolo</button>
           </div>
+          <p class="panel-credits" data-i18n="mapAttribution">Mappa: © OpenStreetMap contributors (ODbL)</p>
           <details class="controls-details">
             <summary data-i18n="controlsTitle">Comandi</summary>
             <div class="controls-grid">
@@ -239,7 +244,7 @@
         </div>
       </div>
 
-      <noscript>BORGO — La Passeggiata richiede JavaScript e WebGL 2.</noscript>
+      <noscript>BORGO SAN DONNINO — La Passeggiata richiede JavaScript e WebGL 2.</noscript>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

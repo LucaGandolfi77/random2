@@ -66,7 +66,7 @@ export function createSky(scene: THREE.Scene): SkyRig {
     fog: false
   });
 
-  const geometry = new THREE.SphereGeometry(320, 32, 18);
+  const geometry = new THREE.SphereGeometry(900, 32, 18);
   const mesh = new THREE.Mesh(geometry, material);
   mesh.frustumCulled = false;
   mesh.renderOrder = -10;

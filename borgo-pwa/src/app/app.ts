@@ -3,7 +3,7 @@ import { AudioEngine } from '../audio/audio';
 import { conversationFor } from '../data/dialogue';
 import { QUESTS } from '../data/quests';
 import { formatClock, pick, rankName, t, type UiKey } from '../data/strings';
-import { SPAWN, WORLD, ZONES } from '../data/town';
+import { SPAWN, BELL_SPOT, DELIVERIES, DISCOVERIES, FLOWERS, LETTERS, TILES, ZONES } from '../data/town';
 import type { DialogueAction, Language, NpcId, ZoneSpec } from '../data/types';
 import {
   acceptBell,
@@ -11,8 +11,9 @@ import {
   collectFlower,
   collectLetter,
   collectTile,
+  completeDelivery,
   createInitialState,
-  deliverBread,
+  discover,
   hospitality,
   rankIndex,
   returnFlowers,
@@ -35,7 +36,7 @@ import { buildWorld, type World, type WorldItem } from '../world/world';
 
 type Mode = 'title' | 'playing' | 'dialogue' | 'journal' | 'map' | 'paused' | 'settings' | 'confirm' | 'finale';
 
-type InteractionKind = 'npc' | 'tile' | 'letter' | 'flower' | 'table' | 'bell';
+type InteractionKind = 'npc' | 'tile' | 'letter' | 'flower' | 'delivery' | 'bell';
 
 interface Interaction {
   kind: InteractionKind;
@@ -46,6 +47,22 @@ interface Interaction {
 
 const ZERO_AXIS = { x: 0, z: 0 };
 const FIRST_GESTURE_EVENTS = ['pointerdown', 'keydown'] as const;
+
+function nearest<T extends { x: number; z: number }>(
+  items: T[],
+  position: { x: number; z: number }
+): { x: number; z: number } | null {
+  let best: T | null = null;
+  let bestDistance = Infinity;
+  for (const item of items) {
+    const distance = Math.hypot(item.x - position.x, item.z - position.z);
+    if (distance < bestDistance) {
+      best = item;
+      bestDistance = distance;
+    }
+  }
+  return best ? { x: best.x, z: best.z } : null;
+}
 
 function byId<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
@@ -123,7 +140,7 @@ export class BorgoApp {
       55,
       window.innerWidth / Math.max(1, window.innerHeight),
       0.1,
-      520
+      1400
     );
     this.scene.background = new THREE.Color(0x1d1a15);
 
@@ -275,7 +292,7 @@ export class BorgoApp {
     if (this.mode === 'title') {
       this.input.consumeLook();
       this.cameraRig.titleView(this.time);
-      this.player.update(dt, ZERO_AXIS, false, 0, this.world.colliders, WORLD);
+      this.player.update(dt, ZERO_AXIS, false, 0, this.world.colliders);
       this.world.update(dt, this.time, this.player.position);
       this.updatePlayerVisibility();
       this.updateDusk(dt);
@@ -287,14 +304,14 @@ export class BorgoApp {
         { x: this.input.moveX, z: this.input.moveZ },
         this.input.isRunning,
         this.cameraRig.yaw,
-        this.world.colliders,
-        WORLD
+        this.world.colliders
       );
       this.cameraRig.update(dt, this.player.position);
       this.world.update(dt, this.time, this.player.position);
       this.state.elapsed += dt;
       this.updatePlayerVisibility();
       this.updateInteraction();
+      this.checkDiscoveries();
       this.updateZone();
       this.updateDusk(dt);
       this.updateFootsteps(dt);
@@ -304,23 +321,23 @@ export class BorgoApp {
         this.persist();
       }
       this.hud.updateCompass(this.cameraRig.heading);
-      this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading);
+      this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
     } else if (this.mode === 'dialogue') {
       this.input.consumeLook();
-      this.player.update(dt, ZERO_AXIS, false, this.cameraRig.yaw, this.world.colliders, WORLD);
+      this.player.update(dt, ZERO_AXIS, false, this.cameraRig.yaw, this.world.colliders);
       this.cameraRig.update(dt, this.player.position);
       this.dialogue.update(dt);
       this.world.update(dt, this.time, this.player.position);
       this.updatePlayerVisibility();
       this.updateDusk(dt);
       this.hud.updateCompass(this.cameraRig.heading);
-      this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading);
+      this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
     } else {
       this.input.consumeLook();
       this.world.update(dt, this.time, this.player.position);
       this.updateDusk(dt);
       this.hud.updateCompass(this.cameraRig.heading);
-      this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading);
+      this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
     }
 
     this.renderer.render(this.scene, this.camera);
@@ -351,8 +368,8 @@ export class BorgoApp {
         }
         item.group!.visible = false;
         this.audio.pickup();
-        this.hud.toast(`${t('toastTile', this.lang)} · ${this.state.tiles.length}/6`);
-        if (this.state.tiles.length === 6) {
+        this.hud.toast(`${t('toastTile', this.lang)} · ${this.state.tiles.length}/${TILES.length}`);
+        if (this.state.tiles.length === TILES.length) {
           window.setTimeout(() => this.hud.toast(t('toastAllTiles', this.lang)), 400);
         }
         this.afterCollect();
@@ -365,7 +382,7 @@ export class BorgoApp {
         }
         item.group!.visible = false;
         this.audio.pickup();
-        this.hud.toast(`${t('toastLetter', this.lang)} · ${this.state.letters.length}/3`);
+        this.hud.toast(`${t('toastLetter', this.lang)} · ${this.state.letters.length}/${LETTERS.length}`);
         if (this.state.quests.letters === 'objective') {
           window.setTimeout(() => this.hud.toast(t('toastObjective', this.lang)), 420);
         }
@@ -379,20 +396,30 @@ export class BorgoApp {
         }
         item.group!.visible = false;
         this.audio.pickup();
-        this.hud.toast(`${t('toastFlower', this.lang)} · ${this.state.flowers.length}/5`);
+        this.hud.toast(`${t('toastFlower', this.lang)} · ${this.state.flowers.length}/${FLOWERS.length}`);
         if (this.state.quests.flowers === 'objective') {
           window.setTimeout(() => this.hud.toast(t('toastObjective', this.lang)), 420);
         }
         this.afterCollect();
         return;
       }
-      case 'table': {
-        if (!deliverBread(this.state)) {
+      case 'delivery': {
+        const quest = item.quest;
+        if (!quest || !completeDelivery(this.state, quest)) {
           this.audio.deny();
           return;
         }
+        item.group!.visible = false;
         this.audio.questComplete();
-        this.hud.toast(t('toastBread', this.lang));
+        const toast =
+          quest === 'bread'
+            ? 'toastBread'
+            : quest === 'newspaper'
+              ? 'toastNewspaper'
+              : quest === 'book'
+                ? 'toastBook'
+                : 'toastCoffee';
+        this.hud.toast(t(toast, this.lang));
         const ready = this.state.flags.dusk;
         this.afterCollect();
         if (ready) {
@@ -438,7 +465,13 @@ export class BorgoApp {
     this.hud.setPrompt(null);
     this.hud.setVisible(false);
     this.input.consumeLook();
-    this.mapPanel.show(this.state, this.player.position, this.cameraRig.heading, this.lang);
+    this.mapPanel.show(
+      this.state,
+      this.player.position,
+      this.cameraRig.heading,
+      this.lang,
+      this.currentWaypoint()
+    );
     this.audio.ui();
   }
 
@@ -554,9 +587,9 @@ export class BorgoApp {
     this.state.player.x = SPAWN.x;
     this.state.player.z = SPAWN.z;
     this.state.player.rot = SPAWN.rot;
-    this.state.player.yaw = 0;
-    this.state.player.pitch = 0.4;
-    this.cameraRig.reset(0, 0.4);
+    this.state.player.yaw = SPAWN.yaw;
+    this.state.player.pitch = 0.3;
+    this.cameraRig.reset(SPAWN.yaw, 0.3);
     this.cameraRig.snapTo(this.player.position);
     this.currentZone = '';
     this.stepAccumulator = 0;
@@ -579,8 +612,7 @@ export class BorgoApp {
     const resolved = resolveCircle(
       { x: this.state.player.x, z: this.state.player.z },
       this.player.radius,
-      this.world.colliders,
-      WORLD
+      this.world.colliders
     );
     this.state.player.x = resolved.x;
     this.state.player.z = resolved.z;
@@ -685,6 +717,18 @@ export class BorgoApp {
         changed = acceptQuest(this.state, 'flowers');
         if (changed) this.toastAccepted('flowers');
         break;
+      case 'accept-newspaper':
+        changed = acceptQuest(this.state, 'newspaper');
+        if (changed) this.toastAccepted('newspaper');
+        break;
+      case 'accept-book':
+        changed = acceptQuest(this.state, 'book');
+        if (changed) this.toastAccepted('book');
+        break;
+      case 'accept-coffee':
+        changed = acceptQuest(this.state, 'coffee');
+        if (changed) this.toastAccepted('coffee');
+        break;
       case 'accept-bell':
         changed = acceptBell(this.state);
         if (changed) this.toastAccepted('bell');
@@ -723,8 +767,9 @@ export class BorgoApp {
   private refreshUi(): void {
     this.hud.refresh(this.state);
     this.updateIndicators();
+    this.updateWaypoint();
     if (this.journal.isOpen) this.journal.refresh(this.state, this.lang);
-    if (this.mapPanel.isOpen) this.mapPanel.refresh(this.lang);
+    if (this.mapPanel.isOpen) this.mapPanel.refresh(this.lang, this.currentWaypoint());
     this.updateTitleNote();
   }
 
@@ -735,6 +780,9 @@ export class BorgoApp {
       if (item.kind === 'tile') collected = this.state.tiles.includes(item.id);
       if (item.kind === 'letter') collected = this.state.letters.includes(item.id);
       if (item.kind === 'flower') collected = this.state.flowers.includes(item.id);
+      if (item.kind === 'delivery' && item.quest) {
+        collected = this.state.quests[item.quest] === 'done';
+      }
       item.group.visible = !collected;
     }
   }
@@ -751,8 +799,67 @@ export class BorgoApp {
         if (this.state.quests.flowers === 'available') marker = 'quest';
         if (this.state.quests.flowers === 'objective') marker = 'ready';
       }
+      if (npc.id === 'beppe' && this.state.quests.newspaper === 'available') marker = 'quest';
+      if (npc.id === 'lidia' && this.state.quests.book === 'available') marker = 'quest';
+      if (npc.id === 'sara' && this.state.quests.coffee === 'available') marker = 'quest';
       if (npc.id === 'nino' && this.state.quests.bell === 'available') marker = 'quest';
       npc.setIndicator(marker);
+    }
+  }
+
+  private updateWaypoint(): void {
+    const point = this.currentWaypoint();
+    if (point) this.world.setWaypoint(point.x, point.z, true);
+    else this.world.setWaypoint(0, 0, false);
+  }
+
+  private currentWaypoint(): { x: number; z: number } | null {
+    const active = this.activeTarget();
+    if (active) return active;
+    if (this.state.quests.bell === 'available') {
+      const nino = this.world.npcs.find((npc) => npc.id === 'nino');
+      if (nino) return { x: nino.x, z: nino.z };
+    }
+    return null;
+  }
+
+  private activeTarget(): { x: number; z: number } | null {
+    const quests = this.state.quests;
+    if (quests.letters === 'active') {
+      const missing = LETTERS.filter((spot) => !this.state.letters.includes(spot.id));
+      return nearest(missing, this.player.position);
+    }
+    if (quests.letters === 'objective') {
+      const elio = this.world.npcs.find((npc) => npc.id === 'elio');
+      return elio ? { x: elio.x, z: elio.z } : null;
+    }
+    if (quests.flowers === 'active') {
+      const missing = FLOWERS.filter((spot) => !this.state.flowers.includes(spot.id));
+      return nearest(missing, this.player.position);
+    }
+    if (quests.flowers === 'objective') {
+      const marta = this.world.npcs.find((npc) => npc.id === 'marta');
+      return marta ? { x: marta.x, z: marta.z } : null;
+    }
+    for (const delivery of DELIVERIES) {
+      if (quests[delivery.quest] === 'active') return { x: delivery.x, z: delivery.z };
+    }
+    if (quests.bell === 'active') return { x: BELL_SPOT.x, z: BELL_SPOT.z };
+    return null;
+  }
+
+  private checkDiscoveries(): void {
+    for (const place of DISCOVERIES) {
+      if (this.state.discovered.includes(place.id)) continue;
+      if (Math.hypot(place.x - this.player.position.x, place.z - this.player.position.z) > place.radius) {
+        continue;
+      }
+      if (discover(this.state, place.id)) {
+        this.audio.pickup();
+        this.hud.toast(`${t('placeDiscovered', this.lang)} · ${pick(place.name, this.lang)}`);
+        this.refreshUi();
+        this.persist();
+      }
     }
   }
 
@@ -771,7 +878,7 @@ export class BorgoApp {
 
     for (const npc of this.world.npcs) {
       const distance = Math.hypot(npc.x - px, npc.z - pz);
-      if (distance <= 2.35) consider({ kind: 'npc', npc, distance });
+      if (distance <= 3) consider({ kind: 'npc', npc, distance });
     }
 
     for (const item of this.world.items) {
@@ -795,8 +902,13 @@ export class BorgoApp {
       ) {
         consider({ kind: 'flower', item, distance });
       }
-      if (item.kind === 'table' && this.state.quests.bread === 'active' && distance <= 2.3) {
-        consider({ kind: 'table', item, distance });
+      if (
+        item.kind === 'delivery' &&
+        item.quest &&
+        this.state.quests[item.quest] === 'active' &&
+        distance <= 2.5
+      ) {
+        consider({ kind: 'delivery', item, distance });
       }
       if (item.kind === 'bell' && this.state.quests.bell === 'active' && distance <= 2.2) {
         consider({ kind: 'bell', item, distance });
@@ -832,8 +944,19 @@ export class BorgoApp {
         return `${t('promptTake', this.lang)} · ${t('itemLetter', this.lang)}`;
       case 'flower':
         return `${t('promptTake', this.lang)} · ${t('itemFlower', this.lang)}`;
-      case 'table':
-        return `${t('promptDeliver', this.lang)} · ${pick(QUESTS.bread.name, this.lang)}`;
+      case 'delivery': {
+        const delivery = DELIVERIES.find((entry) => entry.id === target.item?.id);
+        const label = delivery ? pick(delivery.label, this.lang) : '';
+        const itemName =
+          target.item?.quest === 'newspaper'
+            ? t('itemNewspaper', this.lang)
+            : target.item?.quest === 'book'
+              ? t('itemBook', this.lang)
+              : target.item?.quest === 'coffee'
+                ? t('itemCoffee', this.lang)
+                : t('itemBread', this.lang);
+        return `${t('promptDeliver', this.lang)} · ${itemName} → ${label}`;
+      }
       case 'bell':
         return `${t('promptBell', this.lang)} · ${t('bellName', this.lang)}`;
     }
@@ -917,10 +1040,11 @@ export class BorgoApp {
   private renderFinale(): void {
     this.finaleBody.textContent =
       t('finaleBody', this.lang) +
-      (this.state.tiles.length === 6 ? ` ${t('finaleBodyAll', this.lang)}` : '');
+      (this.state.tiles.length === TILES.length ? ` ${t('finaleBodyAll', this.lang)}` : '');
     this.finaleStats.textContent = '';
     const stats: Array<[string, string]> = [
-      [t('finaleTiles', this.lang), `${this.state.tiles.length}/6`],
+      [t('finaleTiles', this.lang), `${this.state.tiles.length}/${TILES.length}`],
+      [t('finalePlaces', this.lang), `${this.state.discovered.length}/${DISCOVERIES.length}`],
       [t('finaleTime', this.lang), formatClock(this.state.elapsed, this.lang)],
       [t('finaleRank', this.lang), rankName(rankIndex(this.state), this.lang)]
     ];
@@ -995,7 +1119,7 @@ export class BorgoApp {
     this.hud.setLanguage(this.lang);
     this.updateTitleNote();
     if (this.journal.isOpen) this.journal.refresh(this.state, this.lang);
-    if (this.mapPanel.isOpen) this.mapPanel.refresh(this.lang);
+    if (this.mapPanel.isOpen) this.mapPanel.refresh(this.lang, this.currentWaypoint());
     if (!this.finaleEl.hidden) this.renderFinale();
     if (this.mode === 'playing') this.updateInteraction();
   }
@@ -1020,7 +1144,7 @@ export class BorgoApp {
     this.camera.updateProjectionMatrix();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.isMobile ? 1.75 : 2));
     this.renderer.setSize(width, height, false);
-    this.cameraRig.distance = width / height < 0.82 ? 7.6 : 6.4;
+    this.cameraRig.distance = width / height < 0.82 ? 8.5 : 7.2;
   };
 
   private onVisibility = (): void => {
