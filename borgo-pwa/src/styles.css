@@ -1592,6 +1592,19 @@ output {
   color: var(--rust);
 }
 
+.stamp-list .stamp strong {
+  color: var(--ink-soft);
+}
+
+.stamp-list .stamp-earned strong {
+  color: var(--gold);
+}
+
+.stamp-list .stamp-earned {
+  border-left: 3px solid var(--gold);
+  padding-left: 9px;
+}
+
 @media (max-width: 560px) {
   .festival-cards {
     grid-template-columns: 1fr;

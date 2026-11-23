@@ -20,8 +20,8 @@ const sourceCity = join(repo, 'fidenza-city-v3', 'data', 'city.json');
 const sourceMap = join(repo, 'fidenza-city-v3', 'maps', 'fidenza', 'map.json');
 const outFile = join(root, 'src', 'data', 'fidenza.json');
 
-const PLAY_BOUNDS = { minX: -380, maxX: 300, minZ: -250, maxZ: 250 };
-const BUFFER = 55;
+const PLAY_BOUNDS = { minX: -380, maxX: 780, minZ: -300, maxZ: 1000 };
+const BUFFER = 60;
 const VIEW = {
   minX: PLAY_BOUNDS.minX - BUFFER,
   maxX: PLAY_BOUNDS.maxX + BUFFER,
@@ -155,6 +155,7 @@ function round(value, digits = 1) {
 
 const LANDMARK_NAMES = new Map([
   ['Cattedrale di San Donnino', 'duomo'],
+  ['Santuario della Gran Madre di Dio', 'granmadre'],
   ['Porta di San Donnino', 'porta'],
   ['Teatro Girolamo Magnani', 'teatro'],
   ['Chiesa di San Pietro', 'sanpietro'],
@@ -249,9 +250,10 @@ const roads = [];
 for (const road of city.roads) {
   if (!ROAD_KINDS.has(road.kind)) continue;
   if (!Array.isArray(road.pts) || road.pts.length < 2) continue;
-  for (const run of clipRuns(road.pts)) {
+  const runs = clipRuns(road.pts);
+  for (const [runIndex, run] of runs.entries()) {
     roads.push({
-      id: String(road.id),
+      id: `${road.id}${runIndex ? `-${runIndex}` : ''}`,
       kind: road.kind,
       name: road.name || '',
       w: round(clamp(Number(road.w) || (road.kind === 'footway' ? 2.1 : 5), 1.4, 14), 1),
@@ -353,8 +355,8 @@ if (obelisco) {
 const bounds = bboxOf(buildings.map((b) => [b.x, b.z]));
 const output = {
   meta: {
-    id: 'fidenza-centro',
-    name: 'Fidenza — centro storico e stazione',
+    id: 'fidenza-est-sud',
+    name: 'Fidenza — centro storico, est e parchi del sud',
     source: 'OpenStreetMap via Overpass (snapshot fidenza-city-v3)',
     attribution: '© OpenStreetMap contributors (ODbL 1.0)',
     license: 'ODbL-1.0',

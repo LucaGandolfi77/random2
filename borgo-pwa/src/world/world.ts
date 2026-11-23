@@ -20,6 +20,7 @@ import { animateIdle, createPerson, type PersonRig } from './person';
 import { addProp } from './props';
 import { createSky } from './sky';
 import { createGround } from './terrain';
+import { createPeriphery } from './periphery';
 
 export type ItemKind = 'tile' | 'letter' | 'flower' | 'delivery' | 'bell';
 
@@ -36,7 +37,7 @@ export interface WorldItem {
 
 export interface World {
   colliders: CollisionWorld;
-  cityMesh: THREE.Mesh;
+  cityMeshes: THREE.Mesh[];
   groundMesh: THREE.Mesh;
   propsMesh: THREE.Mesh | null;
   glowMesh: THREE.Mesh | null;
@@ -52,10 +53,14 @@ export interface World {
 
 export function buildWorld(scene: THREE.Scene, mobile: boolean): World {
   createGround(scene);
+  createPeriphery(scene);
 
   const extras: Collider[] = [
     { kind: 'box', x: BELL_TOWER.x, z: BELL_TOWER.z, hw: BELL_TOWER.w / 2, hd: BELL_TOWER.d / 2 },
-    { kind: 'circle', x: OBELISK.x, z: OBELISK.z, r: 1.15 }
+    { kind: 'circle', x: OBELISK.x, z: OBELISK.z, r: 1.15 },
+    { kind: 'box', x: 379.6, z: 185.9, hw: 5.6, hd: 4.6 },
+    { kind: 'box', x: 776.5, z: 350, hw: 1.2, hd: 650 },
+    { kind: 'box', x: 200, z: 997.5, hw: 580, hd: 1.2 }
   ];
   const collision = new CollisionWorld(buildCityColliders(extras));
   const city = buildCity(scene, collision);
@@ -136,7 +141,7 @@ export function buildWorld(scene: THREE.Scene, mobile: boolean): World {
 
   return {
     colliders: collision,
-    cityMesh: city.buildings,
+    cityMeshes: city.buildings,
     groundMesh: city.ground,
     propsMesh,
     glowMesh,
@@ -216,13 +221,19 @@ function createAmbient(scene: THREE.Scene, mobile: boolean): PersonRig[] {
     { look: 'citizen2', x: -299, z: -10, rot: 2.1 },
     { look: 'citizen3', x: -2, z: -36, rot: -0.4, scale: 0.92 },
     { look: 'citizen1', x: 27, z: -44, rot: 1.8 },
+    { look: 'citizen2', x: 310, z: -145, rot: -1.1 },
+    { look: 'citizen3', x: 560, z: 150, rot: 0.5, scale: 0.9 },
     { look: 'citizen2', x: 155, z: -95, rot: -1.1 },
     { look: 'citizen3', x: -26, z: 98, rot: 0.5, scale: 0.9 },
     { look: 'citizen1', x: -4, z: 92, rot: 2.4 },
-    { look: 'citizen2', x: -142, z: 22, rot: 0.2 }
+    { look: 'citizen2', x: -142, z: 22, rot: 0.2 },
+    { look: 'citizen1', x: 415, z: 160, rot: 2.2 },
+    { look: 'citizen2', x: -230, z: 610, rot: 0.3 },
+    { look: 'citizen3', x: 278, z: 790, rot: -1.2 },
+    { look: 'citizen1', x: 600, z: 876, rot: 0.8 }
   ];
   const rigs: PersonRig[] = [];
-  for (const person of people.slice(0, mobile ? 4 : 8)) {
+  for (const person of people.slice(0, mobile ? 8 : 14)) {
     const rig = createPerson(person.look);
     rig.group.position.set(person.x, 0, person.z);
     rig.group.rotation.y = person.rot;

@@ -2,6 +2,7 @@ import { QUESTS, QUEST_ORDER } from '../data/quests';
 import { DISCOVERIES } from '../data/town';
 import { FESTIVAL_BRANCHES, FESTIVAL_LANTERNS, FESTIVAL_MUSICIANS, FESTIVAL_POSTCARDS } from '../data/festival';
 import { festivalTaskCount, lanternsDone, musiciansDone } from '../game/festival';
+import { STAMPS, stampEarned } from '../data/stamps';
 import { pick, t } from '../data/strings';
 import type { Language, QuestId } from '../data/types';
 import { questProgress, type GameState } from '../game/state';
@@ -24,6 +25,8 @@ export class JournalPanel {
   private festivalStatus = byId<HTMLParagraphElement>('journal-festival-status');
   private festivalList = byId<HTMLUListElement>('journal-festival');
   private postcards = byId<HTMLUListElement>('journal-postcards');
+  private stamps = byId<HTMLUListElement>('journal-stamps');
+  private stampsCount = byId<HTMLParagraphElement>('journal-stamps-count');
   private mosaic = byId<HTMLCanvasElement>('journal-mosaic');
   private count = byId<HTMLParagraphElement>('journal-tiles-count');
   private open = false;
@@ -60,6 +63,7 @@ export class JournalPanel {
     this.places.textContent = '';
     this.festivalList.textContent = '';
     this.postcards.textContent = '';
+    this.stamps.textContent = '';
 
     const active: QuestId[] = [];
     const completed: QuestId[] = [];
@@ -91,7 +95,25 @@ export class JournalPanel {
       this.places.appendChild(item);
     }
     this.refreshFestival(state, lang);
+    this.refreshStamps(state, lang);
     this.drawMosaic(state.tiles);
+  }
+
+  private refreshStamps(state: GameState, lang: Language): void {
+    let earned = 0;
+    for (const stamp of STAMPS) {
+      const found = stampEarned(stamp, state.discovered);
+      if (found) earned += 1;
+      const item = document.createElement('li');
+      item.className = found ? 'place stamp stamp-earned' : 'place place-locked stamp';
+      const name = document.createElement('strong');
+      name.textContent = pick(stamp.name, lang);
+      const description = document.createElement('p');
+      description.textContent = found ? pick(stamp.description, lang) : t('stampLocked', lang);
+      item.append(name, description);
+      this.stamps.appendChild(item);
+    }
+    this.stampsCount.textContent = `${earned}/${STAMPS.length} · ${t('stampsFound', lang)}`;
   }
 
   private refreshFestival(state: GameState, lang: Language): void {

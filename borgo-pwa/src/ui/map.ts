@@ -15,7 +15,7 @@ const PAPER = '#f2e6ce';
 const BUILDING = '#d8c7a5';
 const BUILDING_EDGE = 'rgba(58,47,35,0.45)';
 const GOLD = '#d9a441';
-const LOCAL_RADIUS = 105;
+const LOCAL_RADIUS = 120;
 
 interface View {
   scale: number;
@@ -87,15 +87,38 @@ export function drawFullMap(
     ctx.fillText(street.name, x, y);
   }
   ctx.font = '600 14px Georgia, "Times New Roman", serif';
+  const placed: Array<{ x: number; y: number; w: number; h: number }> = [];
   for (const place of DISCOVERIES) {
     const x = view.ox + place.x * view.scale;
     const y = view.oy + place.z * view.scale - 9;
+    ctx.beginPath();
+    ctx.arc(x, y + 9, 3.2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(58,47,35,0.7)';
+    ctx.fill();
     const label = pick(place.name, lang);
-    const width = ctx.measureText(label).width;
+    const width = ctx.measureText(label).width + 10;
+    let box: { x: number; y: number; w: number; h: number } | null = null;
+    for (const offset of [0, -20, 20, -38, 38]) {
+      const candidate = { x: x - width / 2, y: y - 9 + offset, w: width, h: 18 };
+      if (
+        !placed.some(
+          (other) =>
+            candidate.x < other.x + other.w &&
+            candidate.x + candidate.w > other.x &&
+            candidate.y < other.y + other.h &&
+            candidate.y + candidate.h > other.y
+        )
+      ) {
+        box = candidate;
+        break;
+      }
+    }
+    if (!box) continue;
+    placed.push(box);
     ctx.fillStyle = 'rgba(242,230,206,0.82)';
-    ctx.fillRect(x - width / 2 - 5, y - 9, width + 10, 18);
+    ctx.fillRect(box.x, box.y, box.w, box.h);
     ctx.fillStyle = 'rgba(58,47,35,0.88)';
-    ctx.fillText(label, x, y);
+    ctx.fillText(label, x, box.y + 9);
   }
   ctx.restore();
 
@@ -255,6 +278,21 @@ function drawTown(
     ctx.fill();
     ctx.strokeStyle = INK;
     ctx.lineWidth = full ? 1.4 : 1;
+    ctx.stroke();
+  }
+
+  /* Parked vehicles. */
+  for (const vehicle of state.vehicles) {
+    if (!visible(vehicle.x - 4, vehicle.x + 4, vehicle.z - 4, vehicle.z + 4)) continue;
+    const x = view.ox + vehicle.x * view.scale;
+    const y = view.oy + vehicle.z * view.scale;
+    const car = vehicle.id.startsWith('car');
+    ctx.beginPath();
+    ctx.arc(x, y, full ? 3.2 : 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = car ? '#557387' : '#8a6f55';
+    ctx.fill();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 0.8;
     ctx.stroke();
   }
 

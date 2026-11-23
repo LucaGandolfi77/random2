@@ -124,6 +124,9 @@ export const UI = {
   festivalLanternsProgress: { it: 'lanterne', en: 'lanterns' },
   festivalMusiciansProgress: { it: 'musicisti', en: 'musicians' },
   festivalBranchesProgress: { it: 'rami d’ulivo', en: 'olive branches' },
+  stampsTitle: { it: 'Timbri del Pellegrino', en: 'Pilgrim stamps' },
+  stampsFound: { it: 'timbri ottenuti', en: 'stamps earned' },
+  stampLocked: { it: 'Timbro non ancora ottenuto', en: 'Stamp not earned yet' },
   postcardsTitle: { it: 'Cartoline', en: 'Postcards' },
   postcardsEmpty: {
     it: 'Le cartoline arrivano con la festa.',

@@ -220,7 +220,7 @@ export class BorgoApp {
       55,
       window.innerWidth / Math.max(1, window.innerHeight),
       0.1,
-      1400
+      2400
     );
     this.scene.background = new THREE.Color(0x1d1a15);
 
@@ -467,6 +467,7 @@ export class BorgoApp {
       this.hud.setTrain(null);
     }
 
+    this.world.sky.mesh.position.copy(this.camera.position);
     this.renderer.render(this.scene, this.camera);
   };
 

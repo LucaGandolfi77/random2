@@ -15,7 +15,7 @@ const looseSigns: THREE.Mesh[] = [];
 
 export interface CityRender {
   ground: THREE.Mesh;
-  buildings: THREE.Mesh;
+  buildings: THREE.Mesh[];
   signs: THREE.Mesh[];
   trees: Array<{ x: number; z: number; h: number; kind: 'plane' }>;
   furniture: Array<{ type: string; x: number; z: number }>;
@@ -24,9 +24,20 @@ export interface CityRender {
 
 export function buildCity(scene: THREE.Scene, collision: CollisionWorld): CityRender {
   const groundBatch = new TriBatch();
-  const buildingBatch = new TriBatch();
+  const buildingChunks = new Map<string, TriBatch>();
+  const detailBatch = new TriBatch();
   const signs: THREE.Mesh[] = [];
   looseSigns.length = 0;
+
+  const chunkFor = (x: number, z: number): TriBatch => {
+    const key = `${Math.floor((x + 520) / 240)},${Math.floor((z + 440) / 240)}`;
+    let batch = buildingChunks.get(key);
+    if (!batch) {
+      batch = new TriBatch();
+      buildingChunks.set(key, batch);
+    }
+    return batch;
+  };
 
   addAreas(groundBatch);
   addRailways(groundBatch);
@@ -34,34 +45,54 @@ export function buildCity(scene: THREE.Scene, collision: CollisionWorld): CityRe
   addPiazzas(groundBatch);
 
   for (const building of FIDENZA.buildings) {
-    if (building.landmark === 'duomo') addDuomo(buildingBatch, building);
-    else if (building.landmark === 'porta') addPorta(buildingBatch, building);
+    const batch = chunkFor(building.x, building.z);
+    if (building.landmark === 'duomo') addDuomo(batch, building);
+    else if (building.landmark === 'porta') addPorta(batch, building);
     else {
-      addGenericBuilding(buildingBatch, building, collision);
-      if (building.landmark === 'teatro') addTeatroFacade(buildingBatch, building);
-      if (building.landmark === 'comunale') addComunaleFacade(buildingBatch, building);
-      if (building.landmark === 'stazione') addStazioneCanopy(buildingBatch, building);
+      addGenericBuilding(batch, building, collision);
+      if (building.landmark === 'teatro') addTeatroFacade(batch, building);
+      if (building.landmark === 'comunale') addComunaleFacade(batch, building);
+      if (building.landmark === 'stazione') addStazioneCanopy(batch, building);
+      if (building.landmark === 'granmadre') addGranMadre(batch, building);
     }
   }
 
-  addObelisk(buildingBatch);
-  addCampanile(buildingBatch);
-
-  addStreetSigns(scene, buildingBatch);
+  addObelisk(detailBatch);
+  addCampanile(detailBatch);
+  addMuseo(detailBatch);
+  addGranMadreDome(scene);
+  addStreetSigns(scene, detailBatch);
 
   const ground = groundBatch.build(
     new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide })
   );
-  const buildings = buildingBatch.build(
-    new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true, side: THREE.DoubleSide })
-  );
-  if (!ground || !buildings) throw new Error('Unable to build the Fidenza meshes');
-
+  if (!ground) throw new Error('Unable to build the Fidenza ground');
   ground.receiveShadow = true;
   ground.castShadow = false;
-  buildings.receiveShadow = true;
-  buildings.castShadow = true;
-  scene.add(ground, buildings);
+  scene.add(ground);
+
+  const buildingMaterial = new THREE.MeshLambertMaterial({
+    vertexColors: true,
+    flatShading: true,
+    side: THREE.DoubleSide
+  });
+  const buildings: THREE.Mesh[] = [];
+  for (const batch of buildingChunks.values()) {
+    const mesh = batch.build(buildingMaterial);
+    if (!mesh) continue;
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
+    scene.add(mesh);
+    buildings.push(mesh);
+  }
+  const detail = detailBatch.build(buildingMaterial);
+  if (detail) {
+    detail.receiveShadow = true;
+    detail.castShadow = true;
+    scene.add(detail);
+    buildings.push(detail);
+  }
+  if (buildings.length === 0) throw new Error('Unable to build the Fidenza meshes');
 
   for (const sign of looseSigns) scene.add(sign);
   addLandmarkSigns(scene, signs);
@@ -671,11 +702,22 @@ function addLandmarkSigns(scene: THREE.Scene, signs: THREE.Mesh[]): void {
     { text: 'PORTA SAN DONNINO', x: -305, y: 4.6, z: -39, ry: 0, w: 3.8 },
     { text: 'STAZIONE', x: 175, y: 4.4, z: -99, ry: 0, w: 3.2 },
     { text: 'SAN PIETRO', x: -267, y: 3.7, z: 174, ry: 0, w: 3.2 },
-    { text: 'PIAZZA GARIBALDI', x: 14.6, y: 3.1, z: -6, ry: 0, w: 3.8 }
+    { text: 'PIAZZA GARIBALDI', x: 14.6, y: 3.1, z: -6, ry: 0, w: 3.8 },
+    { text: 'GRAN MADRE', x: 410, y: 5.4, z: 138, ry: 0, w: 3.0 },
+    { text: 'MUSEO MUSINI', x: 379.6, y: 6.2, z: 190.5, ry: 0, w: 3.4 },
+    { text: 'SAN LAZZARO', x: 560, y: 4.0, z: 148, ry: 0, w: 3.2 },
+    { text: 'PARCO VITTORIO VENETO', x: -234, y: 3.0, z: 600, ry: 0, w: 4.4 },
+    { text: 'PARCO DELLA PACE', x: 278, y: 3.0, z: 784, ry: 0, w: 4.0 },
+    { text: 'COREA', x: 600, y: 3.0, z: 866, ry: 0, w: 2.8 }
   ];
   for (const entry of entries) {
     const sign = makeSign(entry.text, entry.w, 0.6, entry.x, entry.y, entry.z, entry.ry);
+    const material = sign.material as THREE.MeshBasicMaterial;
+    material.side = THREE.FrontSide;
     scene.add(sign);
+    const back = sign.clone();
+    back.rotation.y = entry.ry + Math.PI;
+    scene.add(back);
     signs.push(sign);
   }
 }
@@ -714,6 +756,69 @@ function makeSign(
   mesh.position.set(x, y, z);
   mesh.rotation.y = ry;
   return mesh;
+}
+
+function addGranMadre(batch: TriBatch, building: FidenzaBuilding): void {
+  const box = boundsOf(building.poly);
+  const west = box.minX;
+  const z = building.z;
+  batch.box(0.35, 4.4, 0.35, west - 2.4, 2.2, z - 4, STONE);
+  batch.box(0.35, 4.4, 0.35, west - 2.4, 2.2, z, STONE);
+  batch.box(0.35, 4.4, 0.35, west - 2.4, 2.2, z + 4, STONE);
+  batch.box(0.5, 0.35, 9, west - 2.4, 4.55, z, STONE_DARK);
+  batch.box(0.5, 0.35, 9, west - 2.4, 0.25, z, STONE_DARK);
+  batch.box(1.2, 0.18, 5.2, west - 3, 0.12, z, STONE_DARK);
+  batch.tri(west - 2.8, 4.72, z - 4.8, west - 2.8, 4.72, z + 4.8, west - 2.8, 6.2, z, STONE);
+}
+
+function addGranMadreDome(scene: THREE.Scene): void {
+  const building = FIDENZA.buildings.find((item) => item.landmark === 'granmadre');
+  if (!building) return;
+  const group = new THREE.Group();
+  group.position.set(building.x, building.h + 0.8, building.z);
+  const stone = new THREE.MeshLambertMaterial({ color: 0xd7c7ab, flatShading: true });
+  const dark = new THREE.MeshLambertMaterial({ color: 0x9a8a73, flatShading: true });
+  const drum = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 4.2, 2.1, 12), stone);
+  drum.position.y = 1.05;
+  group.add(drum);
+  const dome = new THREE.Mesh(
+    new THREE.SphereGeometry(3.75, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.MeshLambertMaterial({ color: 0x8d9a93, flatShading: true, side: THREE.DoubleSide })
+  );
+  dome.position.y = 2.1;
+  group.add(dome);
+  const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, 1.4, 8), stone);
+  lantern.position.y = 5.6;
+  group.add(lantern);
+  const cap = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.0, 8), dark);
+  cap.position.y = 6.8;
+  group.add(cap);
+  const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.1, 0.08), dark);
+  crossV.position.y = 7.8;
+  group.add(crossV);
+  const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.08), dark);
+  crossH.position.y = 7.92;
+  group.add(crossH);
+  group.traverse((object) => {
+    if (object instanceof THREE.Mesh) {
+      object.castShadow = true;
+      object.receiveShadow = true;
+    }
+  });
+  scene.add(group);
+}
+
+function addMuseo(batch: TriBatch): void {
+  const x = 379.6;
+  const z = 185.9;
+  batch.box(11.2, 5.4, 8.8, x, 2.7, z, 0xe0d0b4);
+  batch.box(10.6, 0.3, 8.2, x, 5.5, z, 0xb5684a);
+  batch.box(11.8, 0.22, 9.4, x, 5.7, z, 0xd8c7a5);
+  for (const offset of [-4.1, 0, 4.1]) {
+    batch.box(0.35, 4.1, 0.35, x - 5.75, 2.05, z + offset, 0xc9b99e);
+  }
+  batch.box(1.5, 0.18, 3.6, x - 6.1, 0.12, z, STONE_DARK);
+  batch.box(2.6, 0.08, 0.45, x - 5.75, 3.8, z, 0x3b3126);
 }
 
 /* ------------------------------------------------------------- small utils */

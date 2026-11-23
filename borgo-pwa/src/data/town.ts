@@ -158,6 +158,42 @@ export const VEHICLES: VehicleSpec[] = [
     z: -105,
     heading: Math.PI / 2,
     color: 0x4f7e93
+  },
+  {
+    id: 'car-sanlazzaro',
+    kind: 'car',
+    name: { it: 'Auto di San Lazzaro', en: 'San Lazzaro car' },
+    x: 540,
+    z: 150,
+    heading: Math.PI / 2,
+    color: 0x8a6f55
+  },
+  {
+    id: 'car-corea',
+    kind: 'car',
+    name: { it: 'Auto di Corea', en: 'Corea car' },
+    x: 600,
+    z: 860,
+    heading: 0,
+    color: 0x5f766a
+  },
+  {
+    id: 'bike-pace',
+    kind: 'bike',
+    name: { it: 'Bici del Parco', en: 'Park bike' },
+    x: 260,
+    z: 780,
+    heading: -Math.PI / 2,
+    color: 0xc2a23f
+  },
+  {
+    id: 'bike-monica',
+    kind: 'bike',
+    name: { it: 'Bici di Monica', en: 'Monica bike' },
+    x: 300,
+    z: -150,
+    heading: Math.PI,
+    color: 0x4f7e93
   }
 ];
 
@@ -251,6 +287,83 @@ export const DISCOVERIES: DiscoverySpec[] = [
     x: -215.6,
     z: 97.5,
     radius: 20
+  },
+  {
+    id: 'monica',
+    name: { it: 'Monica e la stazione est', en: 'Monica and the east station' },
+    description: {
+      it: 'Oltre i binari, Fidenza cambia passo: valigie, officine e le prime case del quartiere Monica.',
+      en: 'Beyond the tracks, Fidenza changes pace: suitcases, workshops and the first houses of Monica.'
+    },
+    x: 300,
+    z: -160,
+    radius: 34
+  },
+  {
+    id: 'sanlazzaro',
+    name: { it: 'San Lazzaro', en: 'San Lazzaro' },
+    description: {
+      it: 'Villette con giardino, la scuola e i negozi di quartiere: la periferia est che sembra un paese.',
+      en: 'Houses with gardens, the school and local shops: the eastern outskirts that feel like a village.'
+    },
+    x: 560,
+    z: 160,
+    radius: 34
+  },
+  {
+    id: 'granmadre',
+    name: { it: 'Santuario della Gran Madre', en: 'Sanctuary of the Gran Madre' },
+    description: {
+      it: 'La cupola del santuario si alza sopra il quartiere. Qui la città si raccoglie e guarda verso est.',
+      en: 'The sanctuary dome rises above the neighbourhood. Here the town gathers and looks east.'
+    },
+    x: 415.6,
+    z: 148.1,
+    radius: 24
+  },
+  {
+    id: 'musini',
+    name: { it: 'Museo civico Musini', en: 'Musini Civic Museum' },
+    description: {
+      it: 'Una stanza della memoria fidentina, tra Risorgimento, fotografie e storie di famiglia.',
+      en: 'A room of Fidenza’s memory, between the Risorgimento, photographs and family stories.'
+    },
+    x: 379.6,
+    z: 185.9,
+    radius: 20
+  },
+  {
+    id: 'parco-vittorio',
+    name: { it: 'Parco Vittorio Veneto', en: 'Vittorio Veneto Park' },
+    description: {
+      it: 'Un polmone verde a sud del centro, con vialetti, panchine e il rumore lontano della città.',
+      en: 'A green lung south of the centre, with paths, benches and the distant sound of the town.'
+    },
+    x: -234.1,
+    z: 614.4,
+    radius: 36
+  },
+  {
+    id: 'parco-pace',
+    name: { it: 'Parco della Pace', en: 'Peace Park' },
+    description: {
+      it: 'Prato, giochi e filari: il parco largo della periferia sud-est, dove il cielo sembra più grande.',
+      en: 'Lawns, play areas and tree rows: the wide south-eastern park where the sky seems larger.'
+    },
+    x: 278.5,
+    z: 798.1,
+    radius: 40
+  },
+  {
+    id: 'corea',
+    name: { it: 'Corea', en: 'Corea' },
+    description: {
+      it: 'Viali alberati e case basse ai margini della pianura. La fermata della corriera è il centro del quartiere.',
+      en: 'Tree-lined avenues and low houses at the edge of the plain. The bus stop is the heart of the neighbourhood.'
+    },
+    x: 600,
+    z: 880,
+    radius: 34
   }
 ];
 
@@ -317,6 +430,48 @@ export const ZONES: ZoneSpec[] = [
     x: -215,
     z: 97,
     r: 30
+  },
+  {
+    id: 'monica',
+    name: { it: 'Monica e Stazione Est', en: 'Monica and East Station' },
+    x: 300,
+    z: -165,
+    r: 72
+  },
+  {
+    id: 'san-lazzaro',
+    name: { it: 'San Lazzaro', en: 'San Lazzaro' },
+    x: 560,
+    z: 160,
+    r: 72
+  },
+  {
+    id: 'gran-madre',
+    name: { it: 'Gran Madre e Museo', en: 'Gran Madre and Museum' },
+    x: 405,
+    z: 165,
+    r: 54
+  },
+  {
+    id: 'parco-vittorio',
+    name: { it: 'Parco Vittorio Veneto', en: 'Vittorio Veneto Park' },
+    x: -234,
+    z: 614,
+    r: 62
+  },
+  {
+    id: 'parco-pace',
+    name: { it: 'Parco della Pace', en: 'Peace Park' },
+    x: 278,
+    z: 798,
+    r: 66
+  },
+  {
+    id: 'corea',
+    name: { it: 'Corea', en: 'Corea' },
+    x: 600,
+    z: 880,
+    r: 72
   }
 ];
 
