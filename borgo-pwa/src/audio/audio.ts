@@ -5,9 +5,13 @@ export class AudioEngine {
   private noise: AudioBuffer | null = null;
   private windGain: GainNode | null = null;
   private windFilter: BiquadFilterNode | null = null;
+  private engineOsc: OscillatorNode | null = null;
+  private engineGain: GainNode | null = null;
+  private engineFilter: BiquadFilterNode | null = null;
   private started = false;
   private volume = 0.7;
   private dusk = 0;
+  private flying = 0;
   private birdTimer = 2.5;
   private stepFlip = false;
 
@@ -47,6 +51,18 @@ export class AudioEngine {
       this.windGain.gain.value = 0.03;
       source.connect(this.windFilter).connect(this.windGain).connect(this.master);
       source.start();
+
+      this.engineOsc = this.context.createOscillator();
+      this.engineOsc.type = 'sawtooth';
+      this.engineOsc.frequency.value = 58;
+      this.engineFilter = this.context.createBiquadFilter();
+      this.engineFilter.type = 'lowpass';
+      this.engineFilter.frequency.value = 320;
+      this.engineGain = this.context.createGain();
+      this.engineGain.gain.value = 0.0001;
+      this.engineOsc.connect(this.engineFilter).connect(this.engineGain).connect(this.master);
+      this.engineOsc.start();
+
       void this.context.resume();
     } catch {
       this.context = null;
@@ -63,11 +79,75 @@ export class AudioEngine {
 
   setDusk(t: number): void {
     this.dusk = Math.max(0, Math.min(1, t));
-    if (this.windGain && this.context) {
-      this.windGain.gain.setTargetAtTime(0.03 + this.dusk * 0.012, this.context.currentTime, 1.5);
+    this.applyAmbience();
+  }
+
+  setFlight(active: boolean, ratio: number): void {
+    this.flying = active ? 0.4 + Math.max(0, Math.min(1, ratio)) * 0.6 : 0;
+    this.applyAmbience();
+  }
+
+  setEngine(active: boolean, ratio: number, kind: 'car' | 'bike'): void {
+    if (!this.context || !this.engineGain || !this.engineOsc || !this.engineFilter) return;
+    const now = this.context.currentTime;
+    const speed = Math.max(0, Math.min(1, ratio));
+    const target = active ? (kind === 'car' ? 0.014 + speed * 0.04 : 0.005 + speed * 0.014) : 0.0001;
+    this.engineGain.gain.setTargetAtTime(target, now, 0.09);
+    this.engineOsc.frequency.setTargetAtTime(
+      (kind === 'car' ? 52 : 88) + speed * (kind === 'car' ? 96 : 62),
+      now,
+      0.12
+    );
+    this.engineFilter.frequency.setTargetAtTime(260 + speed * 620, now, 0.14);
+  }
+
+  horn(): void {
+    this.tone(392, 0.34, 'sawtooth', 0.032, 0);
+    this.tone(494, 0.32, 'sawtooth', 0.026, 0.015);
+  }
+
+  bikeBell(): void {
+    this.tone(1500, 0.13, 'triangle', 0.045, 0);
+    this.tone(1770, 0.18, 'triangle', 0.035, 0.16);
+  }
+
+  trainWhistle(): void {
+    this.tone(311, 0.8, 'sawtooth', 0.025, 0);
+    this.tone(392, 0.78, 'sawtooth', 0.022, 0.07);
+    this.tone(466, 0.72, 'sine', 0.018, 0.14);
+  }
+
+  bump(): void {
+    if (!this.context || !this.noise || !this.master) return;
+    const ctx = this.context;
+    const now = ctx.currentTime;
+    const source = ctx.createBufferSource();
+    source.buffer = this.noise;
+    source.playbackRate.value = 0.52;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 170;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.09, now + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.26);
+    source.connect(filter).connect(gain).connect(this.master);
+    source.start(now);
+    source.stop(now + 0.28);
+  }
+
+  private applyAmbience(): void {
+    if (!this.context) return;
+    const now = this.context.currentTime;
+    if (this.windGain) {
+      this.windGain.gain.setTargetAtTime(
+        0.03 + this.dusk * 0.012 + this.flying * 0.045,
+        now,
+        0.35
+      );
     }
-    if (this.windFilter && this.context) {
-      this.windFilter.frequency.setTargetAtTime(420 - this.dusk * 130, this.context.currentTime, 1.5);
+    if (this.windFilter) {
+      this.windFilter.frequency.setTargetAtTime(420 - this.dusk * 130 + this.flying * 260, now, 0.35);
     }
   }
 

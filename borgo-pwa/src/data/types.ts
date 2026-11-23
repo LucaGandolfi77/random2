@@ -7,6 +7,8 @@ export interface Localized {
 
 export type NpcId = 'ada' | 'elio' | 'marta' | 'nino' | 'beppe' | 'lidia' | 'sara';
 
+export type VehicleKind = 'car' | 'bike';
+
 export type QuestId =
   | 'bread'
   | 'letters'
@@ -59,6 +61,16 @@ export interface Spot {
   id: string;
   x: number;
   z: number;
+}
+
+export interface VehicleSpec {
+  id: string;
+  kind: VehicleKind;
+  name: Localized;
+  x: number;
+  z: number;
+  heading: number;
+  color: number;
 }
 
 export interface NpcSpec {

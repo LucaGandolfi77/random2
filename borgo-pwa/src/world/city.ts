@@ -30,7 +30,6 @@ export function buildCity(scene: THREE.Scene, collision: CollisionWorld): CityRe
 
   addAreas(groundBatch);
   addRailways(groundBatch);
-  addTrain(buildingBatch);
   addRoads(groundBatch);
   addPiazzas(groundBatch);
 
@@ -107,31 +106,6 @@ const ROAD_COLORS: Record<string, number> = {
   cycleway: 0x8d846f
 };
 
-
-function addTrain(batch: TriBatch): void {
-  /* A stationary regional train on the track south of the station. */
-  const ax = 203.6;
-  const az = -175.5;
-  const bx = 252.4;
-  const bz = -156.9;
-  const length = Math.hypot(bx - ax, bz - az);
-  const dx = (bx - ax) / length;
-  const dz = (bz - az) / length;
-  const ry = Math.atan2(-dz, dx);
-  const colors = [0x8a8f7a, 0x9a9d88, 0x7d8472];
-  for (let car = 0; car < 3; car++) {
-    const t = 10 + car * 14;
-    const x = ax + dx * t;
-    const z = az + dz * t;
-    batch.box(13, 3.2, 3, x, 1.9, z, colors[car], ry);
-    batch.box(13.2, 0.35, 3.15, x, 3.55, z, 0x5d6256, ry);
-    for (let i = 0; i < 5; i++) {
-      const offset = -4.8 + i * 2.4;
-      batch.box(1.5, 1.0, 0.08, x + dx * offset - dz * 1.53, 2.2, z + dz * offset + dx * 1.53, 0x2b3234, ry);
-      batch.box(1.5, 1.0, 0.08, x + dx * offset + dz * 1.53, 2.2, z + dz * offset - dx * 1.53, 0x2b3234, ry);
-    }
-  }
-}
 
 function addRoads(batch: TriBatch): void {
   FIDENZA.roads.forEach((road, index) => {

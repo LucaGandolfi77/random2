@@ -154,6 +154,7 @@ export class CollisionWorld {
   readonly bounds: WorldBounds;
   readonly colliders: Collider[];
   private grid = new Map<string, Collider[]>();
+  private dynamicColliders: Collider[] = [];
 
   constructor(colliders: Collider[], bounds: WorldBounds = FIDENZA_WORLD) {
     this.bounds = bounds;
@@ -175,6 +176,11 @@ export class CollisionWorld {
     }
   }
 
+  /** Parked vehicles and other moving obstacles. They are few, so a linear scan is cheap. */
+  setDynamic(colliders: Collider[]): void {
+    this.dynamicColliders = colliders;
+  }
+
   near(x: number, z: number, radius: number): Collider[] {
     const minX = Math.floor((x - radius) / GRID);
     const maxX = Math.floor((x + radius) / GRID);
@@ -184,6 +190,17 @@ export class CollisionWorld {
     for (let ix = minX; ix <= maxX; ix++) {
       for (let iz = minZ; iz <= maxZ; iz++) {
         for (const collider of this.grid.get(`${ix},${iz}`) ?? []) found.add(collider);
+      }
+    }
+    for (const collider of this.dynamicColliders) {
+      const box = colliderBounds(collider);
+      if (
+        box.maxX >= x - radius &&
+        box.minX <= x + radius &&
+        box.maxZ >= z - radius &&
+        box.minZ <= z + radius
+      ) {
+        found.add(collider);
       }
     }
     return [...found];
@@ -251,6 +268,8 @@ export class CollisionWorld {
         for (const collider of this.grid.get(`${ix},${iz}`) ?? []) found.add(collider);
       }
     }
+
+    for (const collider of this.dynamicColliders) found.add(collider);
 
     let nearest = maxDistance;
     for (const collider of found) {

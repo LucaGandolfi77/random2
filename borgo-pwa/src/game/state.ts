@@ -1,4 +1,4 @@
-import { DISCOVERIES, FLOWERS, LETTERS, SPAWN, TILES, WORLD } from '../data/town';
+import { DISCOVERIES, FLOWERS, LETTERS, SPAWN, TILES, VEHICLES, WORLD } from '../data/town';
 import { CORE_QUESTS, DELIVERY_QUESTS, QUEST_ORDER } from '../data/quests';
 import type { Language, QuestId, QuestPhase } from '../data/types';
 
@@ -16,8 +16,15 @@ export interface PlayerSnapshot {
   pitch: number;
 }
 
+export interface VehicleSnapshot {
+  id: string;
+  x: number;
+  z: number;
+  heading: number;
+}
+
 export interface GameState {
-  v: 2;
+  v: 3;
   started: boolean;
   player: PlayerSnapshot;
   quests: Record<QuestId, QuestPhase>;
@@ -25,6 +32,7 @@ export interface GameState {
   flowers: string[];
   tiles: string[];
   discovered: string[];
+  vehicles: VehicleSnapshot[];
   flags: {
     dusk: boolean;
     finaleSeen: boolean;
@@ -48,7 +56,7 @@ const PHASES: QuestPhase[] = ['locked', 'available', 'active', 'objective', 'don
 
 export function createInitialState(now = Date.now()): GameState {
   return {
-    v: 2,
+    v: 3,
     started: false,
     player: {
       x: SPAWN.x,
@@ -70,6 +78,12 @@ export function createInitialState(now = Date.now()): GameState {
     flowers: [],
     tiles: [],
     discovered: [],
+    vehicles: VEHICLES.map((vehicle) => ({
+      id: vehicle.id,
+      x: vehicle.x,
+      z: vehicle.z,
+      heading: angle(vehicle.heading)
+    })),
     flags: { dusk: false, finaleSeen: false },
     settings: { ...DEFAULT_SETTINGS },
     elapsed: 0,
@@ -86,6 +100,7 @@ export function cloneState(state: GameState): GameState {
     flowers: [...state.flowers],
     tiles: [...state.tiles],
     discovered: [...state.discovered],
+    vehicles: state.vehicles.map((vehicle) => ({ ...vehicle })),
     flags: { ...state.flags },
     settings: { ...state.settings }
   };
@@ -224,13 +239,13 @@ interface RawState {
 export function sanitizeState(raw: unknown, now = Date.now()): GameState | null {
   if (!raw || typeof raw !== 'object') return null;
   const data = raw as RawState;
-  const version = data.v === 1 || data.v === 2 ? data.v : null;
+  const version = data.v === 1 || data.v === 2 || data.v === 3 ? data.v : null;
   if (version === null) return null;
 
   const state = createInitialState(now);
   state.started = true;
 
-  if (version === 2) {
+  if (version >= 2) {
     readPlayer(state, data.player);
   } else {
     state.player = { ...createInitialState(now).player };
@@ -265,6 +280,8 @@ export function sanitizeState(raw: unknown, now = Date.now()): GameState | null 
     state.discovered = uniqueKnown(data.discovered, DISCOVERY_IDS).slice(0, DISCOVERIES.length);
   }
 
+  if (version === 3) readVehicles(state, data.vehicles);
+
   repairQuestChains(state);
 
   const flags = data.flags as Record<string, unknown> | undefined;
@@ -286,6 +303,34 @@ export function sanitizeState(raw: unknown, now = Date.now()): GameState | null 
   else state.flags.finaleSeen = true;
 
   return state;
+}
+
+
+function readVehicles(state: GameState, raw: unknown): void {
+  const snapshots = new Map<string, VehicleSnapshot>();
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      if (!item || typeof item !== 'object') continue;
+      const data = item as Record<string, unknown>;
+      const id = typeof data.id === 'string' ? data.id : '';
+      const spec = VEHICLES.find((vehicle) => vehicle.id === id);
+      if (!spec) continue;
+      snapshots.set(id, {
+        id,
+        x: clamp(numberOr(data.x, spec.x), WORLD.minX + 1, WORLD.maxX - 1),
+        z: clamp(numberOr(data.z, spec.z), WORLD.minZ + 1, WORLD.maxZ - 1),
+        heading: angle(numberOr(data.heading, spec.heading))
+      });
+    }
+  }
+  state.vehicles = VEHICLES.map(
+    (vehicle) => snapshots.get(vehicle.id) ?? {
+      id: vehicle.id,
+      x: vehicle.x,
+      z: vehicle.z,
+      heading: angle(vehicle.heading)
+    }
+  );
 }
 
 function readPlayer(state: GameState, raw: unknown): void {

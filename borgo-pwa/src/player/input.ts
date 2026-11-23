@@ -5,6 +5,9 @@ export interface InputHandlers {
   journal(): void;
   pause(): void;
   zoom(delta: number): void;
+  fly(): void;
+  horn(): void;
+  reset(): void;
 }
 
 export class Input {
@@ -16,6 +19,8 @@ export class Input {
   private joystickZ = 0;
   private lookX = 0;
   private lookY = 0;
+  private touchBrake = false;
+  private touchVertical = 0;
   private pointerId: number | null = null;
   private pointerX = 0;
   private pointerY = 0;
@@ -58,6 +63,29 @@ export class Input {
     return this.run || this.keys.has('ShiftLeft') || this.keys.has('ShiftRight');
   }
 
+  get isBraking(): boolean {
+    return this.touchBrake || this.keys.has('Space');
+  }
+
+  get vertical(): number {
+    if (this.touchVertical !== 0) return this.touchVertical;
+    if (this.keys.has('Space')) return 1;
+    if (this.keys.has('ShiftLeft') || this.keys.has('ShiftRight')) return -1;
+    return 0;
+  }
+
+  setRun(value: boolean): void {
+    this.run = value;
+  }
+
+  setBrake(value: boolean): void {
+    this.touchBrake = value;
+  }
+
+  setVertical(value: number): void {
+    this.touchVertical = value;
+  }
+
   setJoystick(x: number, z: number): void {
     this.joystickX = x;
     this.joystickZ = z;
@@ -78,6 +106,9 @@ export class Input {
       this.joystickZ = 0;
       this.lookX = 0;
       this.lookY = 0;
+      this.touchBrake = false;
+      this.touchVertical = 0;
+      this.run = false;
       this.pointerId = null;
     }
   }
@@ -89,9 +120,20 @@ export class Input {
       return;
     }
     if (
-      ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyE', 'KeyM', 'KeyJ', 'Escape'].includes(
-        event.code
-      )
+      [
+        'Space',
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'KeyE',
+        'KeyM',
+        'KeyJ',
+        'KeyF',
+        'KeyH',
+        'KeyR',
+        'Escape'
+      ].includes(event.code)
     ) {
       event.preventDefault();
     }
@@ -114,6 +156,15 @@ export class Input {
         break;
       case 'KeyJ':
         this.handlers.journal();
+        break;
+      case 'KeyF':
+        this.handlers.fly();
+        break;
+      case 'KeyH':
+        this.handlers.horn();
+        break;
+      case 'KeyR':
+        this.handlers.reset();
         break;
       case 'Escape':
         this.handlers.pause();

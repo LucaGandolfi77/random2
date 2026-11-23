@@ -14,6 +14,7 @@ export class ThirdPersonCamera {
   pitch = 0.3;
   distance = 7.2;
   instant = false;
+  flight = false;
   private currentDistance = 7.2;
   private currentPivot = new THREE.Vector3();
   private currentPosition = new THREE.Vector3();
@@ -28,7 +29,16 @@ export class ThirdPersonCamera {
 
   look(dx: number, dy: number): void {
     this.yaw -= dx * 0.0042;
-    this.pitch = THREE.MathUtils.clamp(this.pitch + dy * 0.0028, MIN_PITCH, MAX_PITCH);
+    const minPitch = this.flight ? -0.42 : MIN_PITCH;
+    const maxPitch = this.flight ? 1.3 : MAX_PITCH;
+    this.pitch = THREE.MathUtils.clamp(this.pitch + dy * 0.0028, minPitch, maxPitch);
+  }
+
+  setFlight(on: boolean): void {
+    this.flight = on;
+    this.distance = on ? 9.5 : 7.2;
+    if (on) this.pitch = THREE.MathUtils.clamp(this.pitch, -0.42, 1.3);
+    else this.pitch = THREE.MathUtils.clamp(this.pitch, MIN_PITCH, MAX_PITCH);
   }
 
   zoom(delta: number): void {
@@ -37,7 +47,9 @@ export class ThirdPersonCamera {
 
   reset(yaw: number, pitch: number): void {
     this.yaw = yaw;
-    this.pitch = THREE.MathUtils.clamp(pitch, MIN_PITCH, MAX_PITCH);
+    const minPitch = this.flight ? -0.42 : MIN_PITCH;
+    const maxPitch = this.flight ? 1.3 : MAX_PITCH;
+    this.pitch = THREE.MathUtils.clamp(pitch, minPitch, maxPitch);
     this.currentDistance = this.distance;
   }
 
@@ -48,18 +60,20 @@ export class ThirdPersonCamera {
     const horizontal = this.distance * Math.cos(this.pitch);
     let directionX = Math.sin(this.yaw);
     let directionZ = Math.cos(this.yaw);
-    let clear = clearDistance(
-      { x: playerPosition.x, z: playerPosition.z },
-      { x: directionX, z: directionZ },
-      horizontal,
-      this.colliders,
-      0.42
-    );
+    let clear = this.flight
+      ? horizontal
+      : clearDistance(
+          { x: playerPosition.x, z: playerPosition.z },
+          { x: directionX, z: directionZ },
+          horizontal,
+          this.colliders,
+          0.42
+        );
 
     /* In a narrow alley the boom can be swallowed by a wall. Swing it to the
        side before collapsing into the player's back. */
     const comfortable = Math.min(horizontal * 0.72, 3.4);
-    if (clear < comfortable) {
+    if (!this.flight && clear < comfortable) {
       let bestClear = clear;
       let bestX = directionX;
       let bestZ = directionZ;

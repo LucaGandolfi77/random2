@@ -1,6 +1,6 @@
 # BORGO SAN DONNINO — La Passeggiata
 
-An open-world walk through the centre of **Fidenza** at golden hour, built with the same low-poly visual language as the original BORGO. You arrive in Piazza Duomo, meet seven townsfolk, run six errands, collect twelve mosaic tiles and help the town prepare its evening walk.
+An open-world walk through the centre of **Fidenza** at golden hour, built with the same low-poly visual language as the original BORGO. You arrive in Piazza Duomo, meet seven townsfolk, run six errands, collect twelve mosaic tiles and help the town prepare its evening walk — on foot, by bicycle, by car, over the rooftops in free flight, or beside the scheduled train at the station.
 
 The city layout, street names and public landmarks are derived from **OpenStreetMap** data (© OpenStreetMap contributors, **ODbL 1.0**). Characters, dialogue, descriptions, code, textures and all 3D geometry are original.
 
@@ -23,13 +23,19 @@ The city layout, street names and public landmarks are derived from **OpenStreet
 | Action | Keyboard / mouse | Touch |
 | --- | --- | --- |
 | Walk | `WASD` / arrows | left joystick |
-| Run | `Shift` | push the joystick fully |
+| Run | hold `Shift` | `CORRI` toggle |
 | Jump | `Space` | — |
-| Interact / advance | `E` or `Enter` | `OK` button |
+| Interact / advance / get on / get off / land | `E` or `Enter` | `OK` button |
+| Drive or cycle | `W` `S` accelerate/reverse, `A` `D` steer, `Space` brake | joystick + `FRENO` |
+| Horn / bicycle bell | `H` | — |
+| Reset a stuck vehicle | `R` | `RIPARA` |
+| Free flight | `F` to take off or land; `Space` climb, `Shift` descend, `WASD` steer | `VOLO`, then `SU` / `GIÙ` and joystick |
 | Map | `M` | map button |
 | Journal | `J` | journal button |
 | Pause | `Esc` | pause button |
 | Look around | drag / scroll | drag the scene |
+
+Cars, bicycles and the jetpack are always available. Vehicles are parked around the centre and their position is saved. The train is an ambient service on the real Fidenza siding: it dwells at the platform, departs, returns on a deterministic timetable, and shows the next departure on a 3D board and the HUD when you are near the station. Flight ignores building collisions above the rooftops but never allows landing inside geometry.
 
 ## Tech
 
@@ -39,7 +45,10 @@ The city layout, street names and public landmarks are derived from **OpenStreet
 - City geometry: extruded footprints, hip/flat roofs, street-facing windows and doors, landmark models, real street ribbons, piazza paving, trees and furniture.
 - Static shadow map, merged triangle batches and an adaptive camera that avoids façades.
 - Procedural canvas textures and WebAudio synthesis — no downloaded game assets.
-- Versioned `localStorage` save (`borgo.save.v2`) with migration from the original `borgo.save.v1`.
+- **3 cars and 3 bicycles** with arcade physics, dynamic parked-vehicle colliders and saved positions.
+- **Free jetpack flight** with altitude HUD, map bounds, rooftop-safe landing checks and a custom low-poly pack.
+- **Animated regional train** with a 76-second dwell/depart/arrive cycle, platform, shelter, waiting passengers, synthesized whistle and a canvas departure board.
+- Versioned `localStorage` save (`borgo.save.v3`) with migration from `borgo.save.v2` and the original `borgo.save.v1`; quest progress survives, while an in-progress drive or flight restarts safely on the ground.
 - Installable PWA with an offline service worker.
 - Bilingual UI and dialogue (Italian default, English toggle).
 
@@ -87,7 +96,7 @@ npm run build
 npm run preview
 ```
 
-The layout tests perform a breadth-first walk over the real collision grid, from Piazza Duomo to every character, collectible, delivery point and landmark.
+The layout tests perform a breadth-first walk over the real collision grid, from Piazza Duomo to every character, collectible, delivery point and landmark, and check that every parked vehicle sits on free ground. The physics tests cover acceleration, braking, steering, walls, map bounds, jetpack ceiling and the deterministic train cycle.
 
 ## PWA
 

@@ -10,6 +10,7 @@ import {
   NPCS,
   SPAWN,
   TILES,
+  VEHICLES,
   WORLD
 } from '../src/data/town';
 
@@ -119,6 +120,12 @@ describe('Fidenza data', () => {
     expect(world.isFree(SPAWN.x, SPAWN.z, RADIUS)).toBe(true);
     for (const npc of NPCS) {
       expect(world.isFree(npc.x, npc.z, RADIUS), npc.id).toBe(true);
+    }
+  });
+
+  it('parks every vehicle on free ground', () => {
+    for (const vehicle of VEHICLES) {
+      expect(world.isFree(vehicle.x, vehicle.z, 1.2), vehicle.id).toBe(true);
     }
   });
 

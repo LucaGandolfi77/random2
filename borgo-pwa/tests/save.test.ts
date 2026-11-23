@@ -6,7 +6,7 @@ import {
   sanitizeState,
   type GameState
 } from '../src/game/state';
-import { DISCOVERIES, FLOWERS, LETTERS, SPAWN, TILES, WORLD } from '../src/data/town';
+import { DISCOVERIES, FLOWERS, LETTERS, SPAWN, TILES, VEHICLES, WORLD } from '../src/data/town';
 
 class MemoryStorage implements StorageLike {
   readonly data = new Map<string, string>();
@@ -41,20 +41,28 @@ function completeState(): GameState {
 }
 
 describe('save round trip', () => {
-  it('writes and reads the whole v2 state', () => {
+  it('writes and reads the whole v3 state, vehicles included', () => {
     const storage = new MemoryStorage();
     const state = completeState();
+    state.vehicles[0] = { id: 'car-station', x: -130, z: 20, heading: 0.7 };
     expect(saveGame(state, storage)).toBe(true);
     expect(storage.getItem(SAVE_KEY)).toBeTruthy();
     const loaded = loadGame(storage);
     expect(loaded).not.toBeNull();
     if (!loaded) return;
-    expect(loaded.v).toBe(2);
+    expect(loaded.v).toBe(3);
     expect(loaded.quests).toEqual(state.quests);
     expect(loaded.letters).toEqual(state.letters);
     expect(loaded.flowers).toEqual(state.flowers);
     expect(loaded.tiles).toEqual(state.tiles);
     expect(loaded.discovered).toEqual(state.discovered);
+    expect(loaded.vehicles).toHaveLength(state.vehicles.length);
+    loaded.vehicles.forEach((vehicle, index) => {
+      expect(vehicle.id).toBe(state.vehicles[index].id);
+      expect(vehicle.x).toBeCloseTo(state.vehicles[index].x);
+      expect(vehicle.z).toBeCloseTo(state.vehicles[index].z);
+      expect(vehicle.heading).toBeCloseTo(state.vehicles[index].heading);
+    });
     expect(loaded.settings).toEqual(state.settings);
     expect(loaded.elapsed).toBeCloseTo(123.5);
     expect(loaded.flags.dusk).toBe(true);
@@ -102,7 +110,7 @@ describe('legacy migration', () => {
     const loaded = loadGame(storage);
     expect(loaded).not.toBeNull();
     if (!loaded) return;
-    expect(loaded.v).toBe(2);
+    expect(loaded.v).toBe(3);
     expect(loaded.player.x).toBe(SPAWN.x);
     expect(loaded.player.z).toBe(SPAWN.z);
     expect(loaded.quests.bread).toBe('done');
@@ -124,13 +132,59 @@ describe('legacy migration', () => {
     expect(migrated?.player.x).toBe(SPAWN.x);
     expect(migrated?.player.z).toBe(SPAWN.z);
   });
+
+  it('turns a v2 notebook into a v3 save with default parking spots', () => {
+    const storage = new MemoryStorage();
+    storage.setItem(
+      LEGACY_SAVE_KEY,
+      JSON.stringify({
+        v: 2,
+        started: true,
+        player: { x: -140, z: 20, rot: 1, yaw: 0, pitch: 0.3 },
+        quests: { bread: 'done', letters: 'done', flowers: 'done', bell: 'available' },
+        letters: LETTERS.map((l) => l.id),
+        flowers: FLOWERS.map((f) => f.id),
+        tiles: TILES.slice(0, 2).map((t) => t.id),
+        discovered: [],
+        flags: { dusk: true, finaleSeen: false },
+        settings: { lang: 'it', volume: 0.7, reducedMotion: false },
+        elapsed: 42
+      })
+    );
+    const loaded = loadGame(storage);
+    expect(loaded?.v).toBe(3);
+    expect(loaded?.vehicles).toHaveLength(VEHICLES.length);
+    expect(loaded?.vehicles[0].id).toBe(VEHICLES[0].id);
+    expect(storage.getItem(SAVE_KEY)).toBeTruthy();
+  });
+
+  it('drops unknown vehicles and clamps the rest to the map', () => {
+    const state = sanitizeState({
+      v: 3,
+      vehicles: [
+        { id: 'car-station', x: 9999, z: -9999, heading: 0.4 },
+        { id: 'ghost-car', x: 0, z: 0, heading: 0 },
+        { id: 'bike-duomo', x: 3, z: 4, heading: 8 }
+      ]
+    });
+    expect(state?.vehicles).toHaveLength(VEHICLES.length);
+    const car = state?.vehicles.find((vehicle) => vehicle.id === 'car-station');
+    const bike = state?.vehicles.find((vehicle) => vehicle.id === 'bike-duomo');
+    expect(car?.x).toBeLessThanOrEqual(WORLD.maxX);
+    expect(car?.z).toBeGreaterThanOrEqual(WORLD.minZ);
+    expect(bike?.x).toBe(3);
+    expect(bike?.z).toBe(4);
+    expect(bike?.heading).toBeGreaterThanOrEqual(0);
+    expect(state?.vehicles.some((vehicle) => vehicle.id === 'ghost-car')).toBe(false);
+  });
 });
 
 describe('save sanitising', () => {
   it('rejects unknown versions and non-objects', () => {
     expect(sanitizeState(null)).toBeNull();
     expect(sanitizeState('x')).toBeNull();
-    expect(sanitizeState({ v: 3 })).toBeNull();
+    expect(sanitizeState({ v: 4 })).toBeNull();
+    expect(sanitizeState({ v: '3' })).toBeNull();
   });
 
   it('clamps a position outside the world', () => {

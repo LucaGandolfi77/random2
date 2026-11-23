@@ -33,6 +33,10 @@ export class Hud {
   private toasts = byId<HTMLDivElement>('toasts');
   private compass = byId<HTMLCanvasElement>('compass');
   private minimap = byId<HTMLCanvasElement>('minimap');
+  private travelEl = byId<HTMLDivElement>('travel-status');
+  private travelValue = byId<HTMLElement>('travel-value');
+  private travelDetail = byId<HTMLElement>('travel-detail');
+  private trainEl = byId<HTMLDivElement>('train-status');
   private zoneTimer: number | undefined;
   private zoneName = '';
 
@@ -57,9 +61,30 @@ export class Hud {
     this.root.hidden = !visible;
     if (!visible) {
       this.setPrompt(null);
+      this.setTravel(null);
+      this.setTrain(null);
       this.zoneEl.classList.remove('visible');
       this.toasts.textContent = '';
     }
+  }
+
+  setTravel(value: string | null, detail = ''): void {
+    if (!value) {
+      this.travelEl.hidden = true;
+      return;
+    }
+    this.travelEl.hidden = false;
+    this.travelValue.textContent = value;
+    this.travelDetail.textContent = detail;
+  }
+
+  setTrain(text: string | null): void {
+    if (!text) {
+      this.trainEl.hidden = true;
+      return;
+    }
+    this.trainEl.hidden = false;
+    this.trainEl.textContent = text;
   }
 
   private lastState: GameState | null = null;

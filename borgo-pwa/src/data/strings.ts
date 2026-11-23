@@ -55,6 +55,13 @@ export const UI = {
   controlJournal: { it: 'Diario', en: 'Journal' },
   controlPause: { it: 'Pausa', en: 'Pause' },
   controlLook: { it: 'Guarda intorno', en: 'Look around' },
+  controlFly: { it: 'Volo', en: 'Fly' },
+  controlHorn: { it: 'Clacson / campanello', en: 'Horn / bell' },
+  controlReset: { it: 'Rimetti in strada', en: 'Reset vehicle' },
+  controlsTravel: {
+    it: 'Auto e bici: W/S accelera e retromarcia, A/D sterza, Space frena. In volo: Space sale, Shift scende, F atterra.',
+    en: 'Cars and bikes: W/S accelerate and reverse, A/D steer, Space brakes. In flight: Space climbs, Shift descends, F lands.'
+  },
   audioNote: {
     it: "L'audio si attiva al primo tocco. Nessuna rete, nessun download.",
     en: 'Sound starts on your first tap. No network, no downloads.'
@@ -135,6 +142,41 @@ export const UI = {
   promptTake: { it: 'Raccogli', en: 'Pick up' },
   promptDeliver: { it: 'Consegna', en: 'Deliver' },
   promptBell: { it: 'Suona', en: 'Ring' },
+  promptEnter: { it: 'Sali su', en: 'Get on' },
+  promptExit: { it: 'Scendi da', en: 'Get off' },
+  promptLand: { it: 'Atterra', en: 'Land' },
+  promptFly: { it: 'Vola', en: 'Fly' },
+  promptFlyBlocked: { it: 'Scendi dal veicolo per volare', en: 'Get off the vehicle to fly' },
+  actionEnter: { it: 'SALI', en: 'GET ON' },
+  actionExit: { it: 'SCENDI', en: 'GET OFF' },
+  actionLand: { it: 'ATTERRA', en: 'LAND' },
+  actionFly: { it: 'VOLO', en: 'FLY' },
+  touchRun: { it: 'CORRI', en: 'RUN' },
+  touchBrake: { it: 'FRENO', en: 'BRAKE' },
+  touchFly: { it: 'VOLO', en: 'FLY' },
+  touchReset: { it: 'RIPARA', en: 'RESET' },
+  toastFlight: { it: 'Volo libero. F per atterrare.', en: 'Free flight. F to land.' },
+  toastLand: { it: 'Atterrato.', en: 'Landed.' },
+  toastLandBlocked: {
+    it: 'Qui non c’è spazio per atterrare: cerca una strada o una piazza.',
+    en: 'No room to land here: find a street or a square.'
+  },
+  toastVehicleReset: { it: 'Veicolo riportato in strada.', en: 'Vehicle returned to the road.' },
+  toastVehicleBlocked: {
+    it: 'Il veicolo è bloccato: premi R per rimetterlo in strada.',
+    en: 'The vehicle is stuck: press R to put it back on the road.'
+  },
+  toastExitBlocked: {
+    it: 'Non c’è spazio per scendere qui.',
+    en: 'There is no room to get off here.'
+  },
+  hudFlight: { it: 'Quota', en: 'Altitude' },
+  trainTrack: { it: 'Binario 1', en: 'Track 1' },
+  trainDepartsIn: { it: 'parte tra', en: 'departs in' },
+  trainDeparting: { it: 'in partenza', en: 'departing' },
+  trainNext: { it: 'prossimo treno', en: 'next train' },
+  trainArriving: { it: 'in arrivo tra', en: 'arriving in' },
+  trainBoardName: { it: 'Fidenza · Regionale', en: 'Fidenza · Regional' },
   promptRead: { it: 'Leggi', en: 'Read' },
   toastTile: { it: 'Tessera del mosaico', en: 'Mosaic tile' },
   toastLetter: { it: 'Lettera recuperata', en: 'Letter recovered' },

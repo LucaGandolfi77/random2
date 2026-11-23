@@ -3,7 +3,18 @@ import { AudioEngine } from '../audio/audio';
 import { conversationFor } from '../data/dialogue';
 import { QUESTS } from '../data/quests';
 import { formatClock, pick, rankName, t, type UiKey } from '../data/strings';
-import { SPAWN, BELL_SPOT, DELIVERIES, DISCOVERIES, FLOWERS, LETTERS, TILES, ZONES } from '../data/town';
+import {
+  SPAWN,
+  BELL_SPOT,
+  DELIVERIES,
+  DISCOVERIES,
+  FLOWERS,
+  LETTERS,
+  TILES,
+  TRAIN_PLATFORM,
+  VEHICLES,
+  ZONES
+} from '../data/town';
 import type { DialogueAction, Language, NpcId, ZoneSpec } from '../data/types';
 import {
   acceptBell,
@@ -22,6 +33,8 @@ import {
   type GameState
 } from '../game/state';
 import { loadGame, saveGame } from '../game/save';
+import { FLIGHT, VEHICLE_CONFIG, stepVehicle, type TravelMode } from '../game/travel';
+import type { TrainPhase, TrainStatus } from '../game/train';
 import { ThirdPersonCamera } from '../player/camera';
 import { resolveCircle } from '../player/collision';
 import { Input } from '../player/input';
@@ -32,16 +45,19 @@ import { JournalPanel } from '../ui/journal';
 import { MapPanel } from '../ui/mappanel';
 import { TouchControls } from '../ui/touch';
 import type { NpcActor } from '../world/npcs';
+import { createTrain, type TrainActor } from '../world/train';
+import { VehicleFleet, type VehicleActor } from '../world/vehicles';
 import { buildWorld, type World, type WorldItem } from '../world/world';
 
 type Mode = 'title' | 'playing' | 'dialogue' | 'journal' | 'map' | 'paused' | 'settings' | 'confirm' | 'finale';
 
-type InteractionKind = 'npc' | 'tile' | 'letter' | 'flower' | 'delivery' | 'bell';
+type InteractionKind = 'npc' | 'tile' | 'letter' | 'flower' | 'delivery' | 'bell' | 'vehicle';
 
 interface Interaction {
   kind: InteractionKind;
   npc?: NpcActor;
   item?: WorldItem;
+  vehicle?: VehicleActor;
   distance: number;
 }
 
@@ -86,6 +102,14 @@ export class BorgoApp {
   private readonly dialogue: DialogueUI;
   private readonly journal: JournalPanel;
   private readonly mapPanel: MapPanel;
+  private readonly fleet: VehicleFleet;
+  private readonly train: TrainActor;
+  private readonly touch: TouchControls;
+
+  private travel: TravelMode = 'walk';
+  private activeVehicle: VehicleActor | null = null;
+  private lastTrainPhase: TrainPhase | null = null;
+  private bumpCooldown = 0;
 
   private readonly clock = new THREE.Clock();
   private readonly titleEl = byId<HTMLDivElement>('title');
@@ -145,6 +169,9 @@ export class BorgoApp {
     this.scene.background = new THREE.Color(0x1d1a15);
 
     this.world = buildWorld(this.scene, this.isMobile);
+    this.fleet = new VehicleFleet(this.scene, this.state.vehicles, VEHICLES);
+    this.world.colliders.setDynamic(this.fleet.parkedObstacles());
+    this.train = createTrain(this.scene);
     this.player = new Player(
       this.scene,
       this.state.player.x,
@@ -181,9 +208,17 @@ export class BorgoApp {
       map: () => this.handleMap(),
       journal: () => this.handleJournal(),
       pause: () => this.handlePause(),
-      zoom: (delta) => this.cameraRig.zoom(delta)
+      zoom: (delta) => this.cameraRig.zoom(delta),
+      fly: () => this.handleFly(),
+      horn: () => this.handleHorn(),
+      reset: () => this.handleReset()
     });
-    new TouchControls(this.input, () => this.handleInteract());
+    this.touch = new TouchControls(this.input, {
+      interact: () => this.handleInteract(),
+      fly: () => this.handleFly(),
+      reset: () => this.handleReset()
+    });
+    this.touch.setLanguage(this.lang);
 
     this.audio.setVolume(this.state.settings.volume);
     this.bindDom();
@@ -288,6 +323,8 @@ export class BorgoApp {
     const dt = Math.min(this.clock.getDelta(), 0.05);
     this.time += dt;
     this.audio.update(dt);
+    this.bumpCooldown = Math.max(0, this.bumpCooldown - dt);
+    const train = this.train.update(dt, this.time, this.lang);
 
     if (this.mode === 'title') {
       this.input.consumeLook();
@@ -299,14 +336,31 @@ export class BorgoApp {
     } else if (this.mode === 'playing') {
       const look = this.input.consumeLook();
       this.cameraRig.look(look.x, look.y);
-      this.player.update(
-        dt,
-        { x: this.input.moveX, z: this.input.moveZ },
-        this.input.isRunning,
-        this.cameraRig.yaw,
-        this.world.colliders
-      );
-      this.cameraRig.update(dt, this.player.position);
+      this.world.colliders.setDynamic(this.fleet.parkedObstacles());
+
+      if (this.travel === 'fly') {
+        this.player.updateFlight(
+          dt,
+          { x: this.input.moveX, z: this.input.moveZ },
+          this.input.vertical,
+          this.cameraRig.yaw,
+          this.world.colliders.bounds
+        );
+        this.cameraRig.update(dt, this.player.position);
+      } else if (this.activeVehicle) {
+        this.updateDriving(dt);
+        this.cameraRig.update(dt, this.player.position);
+      } else {
+        this.player.update(
+          dt,
+          { x: this.input.moveX, z: this.input.moveZ },
+          this.input.isRunning,
+          this.cameraRig.yaw,
+          this.world.colliders
+        );
+        this.cameraRig.update(dt, this.player.position);
+      }
+
       this.world.update(dt, this.time, this.player.position);
       this.state.elapsed += dt;
       this.updatePlayerVisibility();
@@ -314,7 +368,10 @@ export class BorgoApp {
       this.checkDiscoveries();
       this.updateZone();
       this.updateDusk(dt);
-      this.updateFootsteps(dt);
+      if (this.travel === 'walk') this.updateFootsteps(dt);
+      else this.stepAccumulator = 0;
+      this.updateTravelHud();
+      this.updateStation(train);
       this.autoSaveTimer += dt;
       if (this.autoSaveTimer >= 18) {
         this.autoSaveTimer = 0;
@@ -324,6 +381,7 @@ export class BorgoApp {
       this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
     } else if (this.mode === 'dialogue') {
       this.input.consumeLook();
+      this.world.colliders.setDynamic(this.fleet.parkedObstacles());
       this.player.update(dt, ZERO_AXIS, false, this.cameraRig.yaw, this.world.colliders);
       this.cameraRig.update(dt, this.player.position);
       this.dialogue.update(dt);
@@ -340,8 +398,249 @@ export class BorgoApp {
       this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
     }
 
+    if (this.mode !== 'playing') {
+      this.audio.setEngine(false, 0, 'car');
+      this.audio.setFlight(false, 0);
+      this.hud.setTravel(null);
+      this.hud.setTrain(null);
+    }
+
     this.renderer.render(this.scene, this.camera);
   };
+
+  private updateDriving(dt: number): void {
+    const vehicle = this.activeVehicle;
+    if (!vehicle) return;
+    const collided = stepVehicle(
+      vehicle.motion,
+      vehicle.kind,
+      {
+        throttle: this.input.moveZ,
+        steer: this.input.moveX,
+        brake: this.input.isBraking
+      },
+      dt,
+      this.world.colliders
+    );
+    vehicle.syncVisual(dt);
+    this.player.position.set(vehicle.motion.x, 0, vehicle.motion.z);
+    this.player.facing = vehicle.motion.heading;
+    this.player.group.position.set(vehicle.motion.x, 0, vehicle.motion.z);
+    this.player.group.rotation.y = vehicle.motion.heading;
+    if (Math.abs(this.input.moveX) > 0.08 && Math.abs(vehicle.motion.speed) > 0.5) {
+      const targetYaw = vehicle.motion.heading + Math.PI;
+      const delta = Math.atan2(
+        Math.sin(targetYaw - this.cameraRig.yaw),
+        Math.cos(targetYaw - this.cameraRig.yaw)
+      );
+      this.cameraRig.yaw += delta * Math.min(1, dt * 3.2);
+    }
+    if (collided && this.bumpCooldown <= 0 && Math.abs(vehicle.motion.speed) > 0.4) {
+      this.audio.bump();
+      this.bumpCooldown = 0.85;
+    }
+  }
+
+  private updateTravelHud(): void {
+    if (this.travel === 'fly') {
+      const altitude = Math.round(this.player.position.y);
+      const speed = Math.round(this.player.speed * 3.6);
+      this.hud.setTravel(`${altitude} m`, `${speed} km/h`);
+      this.audio.setEngine(false, 0, 'car');
+      this.audio.setFlight(true, this.player.speed / FLIGHT.speed);
+      return;
+    }
+    if (this.activeVehicle) {
+      const vehicle = this.activeVehicle;
+      const config = VEHICLE_CONFIG[vehicle.kind];
+      const speed = Math.round(Math.abs(vehicle.motion.speed) * 3.6);
+      this.hud.setTravel(`${speed} km/h`, pick(vehicle.spec.name, this.lang));
+      this.audio.setEngine(true, Math.abs(vehicle.motion.speed) / config.maxSpeed, vehicle.kind);
+      this.audio.setFlight(false, 0);
+      return;
+    }
+    this.hud.setTravel(null);
+    this.audio.setEngine(false, 0, 'car');
+    this.audio.setFlight(false, 0);
+  }
+
+  private updateStation(status: TrainStatus): void {
+    const distance = Math.hypot(
+      TRAIN_PLATFORM.x - this.player.position.x,
+      TRAIN_PLATFORM.z - this.player.position.z
+    );
+    this.hud.setTrain(distance <= TRAIN_PLATFORM.radius ? this.train.statusLine(status, this.lang) : null);
+
+    if (this.lastTrainPhase !== status.phase) {
+      const previous = this.lastTrainPhase;
+      this.lastTrainPhase = status.phase;
+      if (
+        previous !== null &&
+        distance < 130 &&
+        (status.phase === 'arriving' || status.phase === 'departing')
+      ) {
+        this.audio.trainWhistle();
+      }
+    }
+  }
+
+  private handleFly(): void {
+    if (this.mode !== 'playing') return;
+    if (this.travel === 'fly') {
+      this.tryLand();
+      return;
+    }
+    if (this.activeVehicle) {
+      this.audio.deny();
+      this.hud.toast(t('promptFlyBlocked', this.lang));
+      return;
+    }
+    if (this.travel !== 'walk') return;
+    this.startFlight();
+  }
+
+  private startFlight(): void {
+    this.travel = 'fly';
+    this.player.setFlying(true);
+    this.cameraRig.setFlight(true);
+    this.cameraRig.pitch = Math.max(0.26, this.cameraRig.pitch);
+    this.cameraRig.snapTo(this.player.position);
+    this.input.setRun(false);
+    this.touch.setTravel('fly');
+    this.touch.setActionLabel(t('actionLand', this.lang));
+    this.hud.setPrompt(null);
+    this.hud.toast(t('toastFlight', this.lang));
+    this.audio.ui();
+  }
+
+  private tryLand(): void {
+    if (this.travel !== 'fly') return;
+    if (!this.world.colliders.isFree(this.player.position.x, this.player.position.z, this.player.radius + 0.06)) {
+      this.audio.deny();
+      this.hud.toast(t('toastLandBlocked', this.lang));
+      return;
+    }
+    this.player.setFlying(false);
+    this.player.teleport(this.player.position.x, this.player.position.z, this.player.facing);
+    this.travel = 'walk';
+    this.cameraRig.setFlight(false);
+    this.onResize();
+    this.cameraRig.snapTo(this.player.position);
+    this.touch.setTravel('walk');
+    this.touch.setActionLabel('OK');
+    this.hud.toast(t('toastLand', this.lang));
+    this.audio.setFlight(false, 0);
+    this.audio.ui();
+    this.updateInteraction();
+  }
+
+  private handleHorn(): void {
+    if (this.mode !== 'playing' || !this.activeVehicle) return;
+    if (this.activeVehicle.kind === 'car') this.audio.horn();
+    else this.audio.bikeBell();
+  }
+
+  private handleReset(): void {
+    if (this.mode !== 'playing' || !this.activeVehicle) return;
+    const vehicle = this.activeVehicle;
+    vehicle.setPose(vehicle.spec.x, vehicle.spec.z, vehicle.spec.heading);
+    vehicle.syncVisual(0);
+    this.player.position.set(vehicle.motion.x, 0, vehicle.motion.z);
+    this.player.facing = vehicle.motion.heading;
+    this.cameraRig.yaw = vehicle.motion.heading + Math.PI;
+    this.cameraRig.pitch = 0.34;
+    this.cameraRig.snapTo(this.player.position);
+    this.audio.ui();
+    this.hud.toast(t('toastVehicleReset', this.lang));
+  }
+
+  private enterVehicle(vehicle: VehicleActor): void {
+    if (this.mode !== 'playing' || this.travel !== 'walk') return;
+    this.activeVehicle = vehicle;
+    this.fleet.setOccupied(vehicle.spec.id);
+    this.travel = vehicle.kind;
+    this.player.velocity.set(0, 0, 0);
+    this.player.position.set(vehicle.motion.x, 0, vehicle.motion.z);
+    this.player.facing = vehicle.motion.heading;
+    this.player.group.visible = false;
+    this.player.shadow.visible = false;
+    this.cameraRig.setFlight(false);
+    this.cameraRig.yaw = vehicle.motion.heading + Math.PI;
+    this.cameraRig.pitch = 0.34;
+    this.cameraRig.distance = 8.8;
+    this.cameraRig.snapTo(this.player.position);
+    this.input.setRun(false);
+    this.touch.setTravel(vehicle.kind);
+    this.touch.setActionLabel(t('actionExit', this.lang));
+    this.hud.setPrompt(null);
+    this.audio.ui();
+    this.updateInteraction();
+  }
+
+  private exitVehicle(): void {
+    const vehicle = this.activeVehicle;
+    if (!vehicle) return;
+    const spot = this.findExitSpot(vehicle);
+    if (!spot) {
+      this.audio.deny();
+      this.hud.toast(t('toastExitBlocked', this.lang));
+      return;
+    }
+    vehicle.motion.speed = 0;
+    vehicle.setRiderVisible(false);
+    this.fleet.setOccupied(null);
+    this.activeVehicle = null;
+    this.travel = 'walk';
+    this.player.teleport(spot.x, spot.z, vehicle.motion.heading);
+    this.player.group.visible = true;
+    this.player.shadow.visible = true;
+    this.cameraRig.setFlight(false);
+    this.onResize();
+    this.cameraRig.snapTo(this.player.position);
+    this.touch.setTravel('walk');
+    this.touch.setActionLabel('OK');
+    this.audio.ui();
+    this.persist();
+    this.updateInteraction();
+  }
+
+  private findExitSpot(vehicle: VehicleActor): { x: number; z: number } | null {
+    const base = VEHICLE_CONFIG[vehicle.kind].radius + 1.05;
+    const angles = [
+      vehicle.motion.heading + Math.PI / 2,
+      vehicle.motion.heading - Math.PI / 2,
+      vehicle.motion.heading + Math.PI,
+      vehicle.motion.heading,
+      vehicle.motion.heading + Math.PI * 0.75,
+      vehicle.motion.heading - Math.PI * 0.75
+    ];
+    for (const extra of [0, 0.8, 1.6]) {
+      for (const angle of angles) {
+        const x = vehicle.motion.x + Math.sin(angle) * (base + extra);
+        const z = vehicle.motion.z + Math.cos(angle) * (base + extra);
+        if (this.world.colliders.isFree(x, z, this.player.radius + 0.04)) return { x, z };
+      }
+    }
+    return null;
+  }
+
+  private resetTravel(): void {
+    if (this.activeVehicle) {
+      this.activeVehicle.motion.speed = 0;
+      this.activeVehicle.setRiderVisible(false);
+      this.fleet.setOccupied(null);
+      this.activeVehicle = null;
+    }
+    this.travel = 'walk';
+    this.player.setFlying(false);
+    this.cameraRig.setFlight(false);
+    this.touch.setTravel('walk');
+    this.touch.setActionLabel('OK');
+    this.hud.setTravel(null);
+    this.hud.setTrain(null);
+    this.audio.setEngine(false, 0, 'car');
+    this.audio.setFlight(false, 0);
+  }
 
   private handleInteract(): void {
     if (this.mode === 'dialogue') {
@@ -349,9 +648,21 @@ export class BorgoApp {
       return;
     }
     if (this.mode !== 'playing') return;
+    if (this.travel === 'fly') {
+      this.tryLand();
+      return;
+    }
+    if (this.activeVehicle) {
+      this.exitVehicle();
+      return;
+    }
 
     const target = this.findInteraction();
     if (!target) return;
+    if (target.kind === 'vehicle' && target.vehicle) {
+      this.enterVehicle(target.vehicle);
+      return;
+    }
     if (target.kind === 'npc' && target.npc) {
       this.startConversation(target.npc);
       return;
@@ -452,7 +763,7 @@ export class BorgoApp {
   }
 
   private handleJump(): void {
-    if (this.mode === 'playing') this.player.jump();
+    if (this.mode === 'playing' && this.travel === 'walk') this.player.jump();
   }
 
   private handleMap(): void {
@@ -580,9 +891,12 @@ export class BorgoApp {
 
   private startNewGame(): void {
     const settings = { ...this.state.settings };
+    this.resetTravel();
     this.state = createInitialState();
     this.state.settings = settings;
     this.state.started = true;
+    this.fleet.apply(this.state.vehicles);
+    this.lastTrainPhase = null;
     this.player.teleport(SPAWN.x, SPAWN.z, SPAWN.rot);
     this.state.player.x = SPAWN.x;
     this.state.player.z = SPAWN.z;
@@ -609,6 +923,10 @@ export class BorgoApp {
   }
 
   private startFromState(fromNewGame = false): void {
+    this.resetTravel();
+    this.fleet.apply(this.state.vehicles);
+    this.lastTrainPhase = null;
+    this.world.colliders.setDynamic(this.fleet.parkedObstacles());
     const resolved = resolveCircle(
       { x: this.state.player.x, z: this.state.player.z },
       this.player.radius,
@@ -655,6 +973,7 @@ export class BorgoApp {
 
   private returnToTitle(): void {
     this.persist();
+    this.resetTravel();
     this.pauseEl.hidden = true;
     this.settingsEl.hidden = true;
     this.confirmEl.hidden = true;
@@ -864,7 +1183,7 @@ export class BorgoApp {
   }
 
   private findInteraction(): Interaction | null {
-    if (this.mode !== 'playing') return null;
+    if (this.mode !== 'playing' || this.travel !== 'walk') return null;
     const px = this.player.position.x;
     const pz = this.player.position.z;
     let best: Interaction | null = null;
@@ -875,6 +1194,12 @@ export class BorgoApp {
         best = candidate;
       }
     };
+
+    for (const vehicle of this.fleet.actors) {
+      if (vehicle.occupied) continue;
+      const distance = Math.hypot(vehicle.motion.x - px, vehicle.motion.z - pz);
+      if (distance <= 2.8) consider({ kind: 'vehicle', vehicle, distance });
+    }
 
     for (const npc of this.world.npcs) {
       const distance = Math.hypot(npc.x - px, npc.z - pz);
@@ -923,11 +1248,32 @@ export class BorgoApp {
       this.hud.setPrompt(null);
       return;
     }
+    if (this.travel === 'fly') {
+      this.touch.setActionLabel(t('actionLand', this.lang));
+      if (this.input.isTouch) this.hud.setPrompt(null);
+      else this.hud.setPrompt(`${t('promptLand', this.lang)} · ${Math.round(this.player.position.y)} m`, 'F');
+      return;
+    }
+    if (this.activeVehicle) {
+      this.touch.setActionLabel(t('actionExit', this.lang));
+      if (this.input.isTouch) this.hud.setPrompt(null);
+      else {
+        this.hud.setPrompt(
+          `${t('promptExit', this.lang)} ${pick(this.activeVehicle.spec.name, this.lang)}`,
+          'E'
+        );
+      }
+      return;
+    }
     const target = this.findInteraction();
     if (!target) {
+      this.touch.setActionLabel('OK');
       this.hud.setPrompt(null);
       return;
     }
+    this.touch.setActionLabel(
+      target.kind === 'vehicle' ? t('actionEnter', this.lang) : 'OK'
+    );
     this.hud.setPrompt(
       this.promptFor(target),
       this.input.isTouch ? t('tapHint', this.lang) : 'E'
@@ -938,6 +1284,8 @@ export class BorgoApp {
     switch (target.kind) {
       case 'npc':
         return `${t('promptTalk', this.lang)} ${target.npc?.name ?? ''}`;
+      case 'vehicle':
+        return `${t('promptEnter', this.lang)} ${pick(target.vehicle?.spec.name ?? { it: '', en: '' }, this.lang)}`;
       case 'tile':
         return `${t('promptTake', this.lang)} · ${t('itemTile', this.lang)}`;
       case 'letter':
@@ -980,6 +1328,16 @@ export class BorgoApp {
   }
 
   private updatePlayerVisibility(): void {
+    if (this.travel === 'car' || this.travel === 'bike') {
+      this.player.group.visible = false;
+      this.player.shadow.visible = false;
+      return;
+    }
+    if (this.travel === 'fly') {
+      this.player.group.visible = true;
+      this.player.shadow.visible = true;
+      return;
+    }
     const horizontal = Math.hypot(
       this.camera.position.x - this.player.position.x,
       this.camera.position.z - this.player.position.z
@@ -1067,6 +1425,12 @@ export class BorgoApp {
     this.state.player.rot = this.player.facing;
     this.state.player.yaw = this.cameraRig.yaw;
     this.state.player.pitch = this.cameraRig.pitch;
+    this.state.vehicles = this.fleet.actors.map((vehicle) => ({
+      id: vehicle.spec.id,
+      x: vehicle.motion.x,
+      z: vehicle.motion.z,
+      heading: vehicle.motion.heading
+    }));
     const saved = saveGame(this.state);
     if (saved) this.saveAvailable = true;
     return saved;
@@ -1117,6 +1481,8 @@ export class BorgoApp {
 
     this.dialogue.setKeyLabel(this.input?.isTouch ? t('tapHint', this.lang) : 'E');
     this.hud.setLanguage(this.lang);
+    this.touch.setLanguage(this.lang);
+    this.train.setLanguage(this.lang);
     this.updateTitleNote();
     if (this.journal.isOpen) this.journal.refresh(this.state, this.lang);
     if (this.mapPanel.isOpen) this.mapPanel.refresh(this.lang, this.currentWaypoint());
@@ -1144,7 +1510,9 @@ export class BorgoApp {
     this.camera.updateProjectionMatrix();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.isMobile ? 1.75 : 2));
     this.renderer.setSize(width, height, false);
-    this.cameraRig.distance = width / height < 0.82 ? 8.5 : 7.2;
+    if (this.travel === 'fly') this.cameraRig.distance = 9.5;
+    else if (this.activeVehicle) this.cameraRig.distance = width / height < 0.82 ? 9.5 : 8.8;
+    else this.cameraRig.distance = width / height < 0.82 ? 8.5 : 7.2;
   };
 
   private onVisibility = (): void => {

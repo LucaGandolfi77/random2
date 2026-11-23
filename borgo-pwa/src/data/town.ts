@@ -5,6 +5,7 @@ import type {
   NpcSpec,
   PropSpec,
   Spot,
+  VehicleSpec,
   ZoneSpec
 } from './types';
 
@@ -102,6 +103,63 @@ export const DELIVERIES: DeliverySpec[] = [
 export const BELL_SPOT = { x: -235, z: 34.5 };
 export const BELL_TOWER = { x: -235, z: 30, w: 4, d: 4, h: 20 };
 export const OBELISK = { x: 10, z: -25 };
+
+export const VEHICLES: VehicleSpec[] = [
+  {
+    id: 'car-station',
+    kind: 'car',
+    name: { it: 'Auto crema', en: 'Cream car' },
+    x: 150,
+    z: -95,
+    heading: Math.PI / 2,
+    color: 0xd8c9a8
+  },
+  {
+    id: 'car-garibaldi',
+    kind: 'car',
+    name: { it: 'Auto blu', en: 'Blue car' },
+    x: -2,
+    z: -48,
+    heading: 0.15,
+    color: 0x557387
+  },
+  {
+    id: 'car-emilia',
+    kind: 'car',
+    name: { it: 'Auto verde', en: 'Green car' },
+    x: -140,
+    z: 20,
+    heading: Math.PI / 2,
+    color: 0x6f7f58
+  },
+  {
+    id: 'bike-duomo',
+    kind: 'bike',
+    name: { it: 'Bici rossa', en: 'Red bike' },
+    x: -305,
+    z: 10,
+    heading: Math.PI / 2,
+    color: 0xb9553b
+  },
+  {
+    id: 'bike-teatro',
+    kind: 'bike',
+    name: { it: 'Bici gialla', en: 'Yellow bike' },
+    x: -45,
+    z: 100,
+    heading: -Math.PI / 2,
+    color: 0xc2a23f
+  },
+  {
+    id: 'bike-station',
+    kind: 'bike',
+    name: { it: 'Bici blu', en: 'Blue bike' },
+    x: 155,
+    z: -105,
+    heading: Math.PI / 2,
+    color: 0x4f7e93
+  }
+];
 
 export const PROPS: PropSpec[] = [];
 
@@ -271,3 +329,6 @@ export const STREET_LABELS: Array<{ name: string; x: number; z: number }> = [
   { name: 'Piazza della Repubblica', x: 195, z: -103 }
 ];
 
+
+/** Platform beside the OSM siding east of the station. */
+export const TRAIN_PLATFORM = { x: 230.1, z: -161.9, radius: 58 };
