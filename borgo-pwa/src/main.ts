@@ -34,6 +34,19 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('./sw.js')
+      .then(async () => {
+        const registration = await navigator.serviceWorker.ready;
+        const urls = new Set<string>([location.href]);
+        for (const entry of performance.getEntriesByType('resource')) {
+          try {
+            const url = new URL(entry.name);
+            if (url.origin === location.origin) urls.add(url.href);
+          } catch {
+            /* A malformed resource entry is not worth failing the boot for. */
+          }
+        }
+        registration.active?.postMessage({ type: 'cache-assets', urls: [...urls] });
+      })
       .catch((error) => console.warn('[BORGO] offline cache unavailable', error));
   });
 }

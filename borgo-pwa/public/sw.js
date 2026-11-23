@@ -22,6 +22,23 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+/* The first visit happens before the worker controls the page, so the hashed
+   bundle would otherwise be missing from the cache until a second load. The
+   page reports what it used and the worker stores it. */
+self.addEventListener('message', (event) => {
+  const data = event.data;
+  if (!data || data.type !== 'cache-assets' || !Array.isArray(data.urls)) return;
+  const urls = data.urls.filter((url) => typeof url === 'string');
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(urls))
+      .catch(() => {
+        /* A single unavailable resource must not reject the whole install. */
+      })
+  );
+});
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
