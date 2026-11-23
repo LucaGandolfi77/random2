@@ -9,6 +9,7 @@ import {
   LETTERS,
   NPCS,
   SPAWN,
+  STIRONE_BRIDGE,
   TILES,
   VEHICLES,
   WORLD
@@ -105,7 +106,7 @@ describe('Fidenza data', () => {
     expect(LETTERS).toHaveLength(3);
     expect(FLOWERS).toHaveLength(5);
     expect(NPCS).toHaveLength(7);
-    expect(DISCOVERIES).toHaveLength(18);
+    expect(DISCOVERIES).toHaveLength(20);
     expect(DELIVERIES).toHaveLength(4);
   });
 
@@ -139,9 +140,17 @@ describe('Fidenza data', () => {
     expect(world.isFree(BELL_SPOT.x, BELL_SPOT.z, RADIUS)).toBe(true);
   });
 
+  it('contains the Stirone waterway with a walkable bridge gap', () => {
+    expect(FIDENZA.waterways.some((water) => water.name === 'Torrente Stirone')).toBe(true);
+    expect(world.isFree(STIRONE_BRIDGE.x, STIRONE_BRIDGE.z, 0.34)).toBe(true);
+    expect(world.isFree(STIRONE_BRIDGE.x - STIRONE_BRIDGE.halfWidth - 2, STIRONE_BRIDGE.z, 0.34)).toBe(true);
+    expect(world.isFree(STIRONE_BRIDGE.x + STIRONE_BRIDGE.halfWidth + 2, STIRONE_BRIDGE.z, 0.34)).toBe(true);
+    expect(world.isFree(-1230.4, -55, 0.34)).toBe(false);
+  });
+
   it('uses the Fidenza playable bounds', () => {
     expect(WORLD).toEqual(FIDENZA_WORLD);
-    expect(WORLD.maxX - WORLD.minX).toBe(1780);
+    expect(WORLD.maxX - WORLD.minX).toBe(2230);
     expect(WORLD.maxZ - WORLD.minZ).toBe(1300);
   });
 });

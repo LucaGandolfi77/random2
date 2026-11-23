@@ -61,7 +61,7 @@ export function buildWorld(scene: THREE.Scene, mobile: boolean): World {
     { kind: 'box', x: 379.6, z: 185.9, hw: 5.6, hd: 4.6 },
     { kind: 'box', x: 776.5, z: 350, hw: 1.2, hd: 650 },
     { kind: 'box', x: 200, z: 997.5, hw: 580, hd: 1.2 },
-    { kind: 'box', x: -996.5, z: 350, hw: 1.2, hd: 650 }
+    { kind: 'box', x: -1446.5, z: 350, hw: 1.2, hd: 650 }
   ];
   const collision = new CollisionWorld(buildCityColliders(extras));
   const city = buildCity(scene, collision);
@@ -235,10 +235,12 @@ function createAmbient(scene: THREE.Scene, mobile: boolean): PersonRig[] {
     { look: 'citizen2', x: -800, z: 260, rot: -0.5 },
     { look: 'citizen3', x: -680, z: 350, rot: 1.1 },
     { look: 'citizen1', x: -680, z: -250, rot: 0.4 },
-    { look: 'citizen2', x: -620, z: -176, rot: -1.3 }
+    { look: 'citizen2', x: -620, z: -176, rot: -1.3 },
+    { look: 'citizen3', x: -1270, z: -25, rot: 1.5 },
+    { look: 'citizen1', x: -1310, z: 95, rot: -0.7 }
   ];
   const rigs: PersonRig[] = [];
-  for (const person of people.slice(0, mobile ? 10 : 18)) {
+  for (const person of people.slice(0, mobile ? 10 : 20)) {
     const rig = createPerson(person.look);
     rig.group.position.set(person.x, 0, person.z);
     rig.group.rotation.y = person.rot;

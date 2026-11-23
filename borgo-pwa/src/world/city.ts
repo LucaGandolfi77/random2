@@ -40,6 +40,7 @@ export function buildCity(scene: THREE.Scene, collision: CollisionWorld): CityRe
   };
 
   addAreas(groundBatch);
+  addWaterways(groundBatch);
   addRailways(groundBatch);
   addRoads(groundBatch);
   addPiazzas(groundBatch);
@@ -117,6 +118,65 @@ function addAreas(batch: TriBatch): void {
   for (const area of FIDENZA.areas) {
     batch.polygonTop(area.poly, 0.015, area.color);
   }
+}
+
+function addWaterways(batch: TriBatch): void {
+  for (const water of FIDENZA.waterways) {
+    if (water.name === 'Torrente Stirone') {
+      batch.polygonTop(stironeBand(water.pts, 66, 58), 0.0138, 0x74834c);
+      batch.polygonTop(stironeBand(water.pts, 42, 36), 0.0142, 0x849356);
+      for (const [x, z, r] of STIRONE_GLADES) {
+        batch.polygonTop(irregularPatch(x, z, r), 0.0144, 0x8d9a5b);
+      }
+    }
+    ribbon(batch, water.pts, water.w + 5.5, 0.0175, 0xb3a078);
+    ribbon(batch, water.pts, water.w, 0.0185, 0x4f8795);
+    ribbon(batch, water.pts, Math.max(1.2, water.w * 0.3), 0.0192, 0x7babb0);
+  }
+}
+
+const STIRONE_GLADES: ReadonlyArray<readonly [number, number, number]> = [
+  [-1306, 18, 16],
+  [-1262, -132, 22],
+  [-1198, -86, 14],
+  [-1328, 142, 18],
+  [-1168, 38, 12]
+];
+
+function irregularPatch(x: number, z: number, radius: number): number[] {
+  const points: number[] = [];
+  const steps = 9;
+  for (let i = 0; i < steps; i++) {
+    const angle = (i / steps) * Math.PI * 2;
+    const wobble = 1 + Math.sin(i * 2.7 + x * 0.02) * 0.22 + Math.cos(i * 1.9 + z * 0.03) * 0.14;
+    points.push(x + Math.cos(angle) * radius * wobble, z + Math.sin(angle) * radius * wobble);
+  }
+  return points;
+}
+
+function stironeBand(flat: number[], westBase: number, eastBase: number): number[] {
+  const count = flat.length / 2;
+  const left: number[] = [];
+  const right: number[] = [];
+  for (let i = 0; i < count; i++) {
+    const px = flat[i * 2];
+    const pz = flat[i * 2 + 1];
+    const a = Math.max(0, i - 1);
+    const b = Math.min(count - 1, i + 1);
+    const dx = flat[b * 2] - flat[a * 2];
+    const dz = flat[b * 2 + 1] - flat[a * 2 + 1];
+    const length = Math.hypot(dx, dz) || 1;
+    const nx = dz / length;
+    const nz = -dx / length;
+    const t = count > 1 ? i / (count - 1) : 0;
+    const west = westBase + 15 * Math.sin(t * 8.4 + 0.8) + 7 * Math.sin(t * 19.3 + 2.1);
+    const east = eastBase + 13 * Math.sin(t * 7.1 + 2.5) + 6 * Math.sin(t * 17.6 + 0.4);
+    left.push(px + nx * west, pz + nz * west);
+    right.push(px - nx * east, pz - nz * east);
+  }
+  const poly = [...left];
+  for (let i = right.length - 2; i >= 0; i -= 2) poly.push(right[i], right[i + 1]);
+  return poly;
 }
 
 function addRailways(batch: TriBatch): void {

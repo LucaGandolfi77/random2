@@ -11,6 +11,7 @@ import {
   FLOWERS,
   LETTERS,
   TILES,
+  STIRONE_CENTER,
   TRAIN_PLATFORM,
   VEHICLES,
   ZONES
@@ -460,6 +461,16 @@ export class BorgoApp {
       this.updateDusk(dt);
       this.hud.updateCompass(this.cameraRig.heading);
       this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
+    }
+
+    if (this.mode === 'playing') {
+      const distance = Math.hypot(
+        this.player.position.x - STIRONE_CENTER.x,
+        this.player.position.z - STIRONE_CENTER.z
+      );
+      this.audio.setWater(Math.max(0, 1 - distance / 150));
+    } else {
+      this.audio.setWater(0);
     }
 
     if (this.mode !== 'playing') {

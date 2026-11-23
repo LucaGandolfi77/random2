@@ -1,4 +1,5 @@
 import { FIDENZA, FIDENZA_WORLD } from './fidenza';
+import { STIRONE_BRIDGE } from './town';
 import type { PropSpec, WorldBounds } from './types';
 
 export interface CircleCollider {
@@ -102,6 +103,31 @@ export function buildCityColliders(extra: Collider[] = []): Collider[] {
 
   for (const tree of FIDENZA.trees) {
     colliders.push({ kind: 'circle', x: tree.x, z: tree.z, r: 0.42 });
+  }
+
+  for (const water of FIDENZA.waterways) {
+    const radius = Math.max(0.9, water.w / 2 - 0.6);
+    const pts = water.pts;
+    for (let i = 0; i < pts.length - 2; i += 2) {
+      const ax = pts[i];
+      const az = pts[i + 1];
+      const bx = pts[i + 2];
+      const bz = pts[i + 3];
+      const length = Math.hypot(bx - ax, bz - az);
+      const steps = Math.max(1, Math.ceil(length / 3));
+      for (let step = 0; step <= steps; step++) {
+        const t = step / steps;
+        const x = ax + (bx - ax) * t;
+        const z = az + (bz - az) * t;
+        if (
+          Math.abs(x - STIRONE_BRIDGE.x) < STIRONE_BRIDGE.halfWidth + radius &&
+          Math.abs(z - STIRONE_BRIDGE.z) < STIRONE_BRIDGE.halfDepth
+        ) {
+          continue;
+        }
+        colliders.push({ kind: 'circle', x, z, r: radius });
+      }
+    }
   }
 
   for (const item of FIDENZA.furniture) {

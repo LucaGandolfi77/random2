@@ -5,10 +5,10 @@ import * as THREE from 'three';
 export function createGround(scene: THREE.Scene): THREE.Mesh {
   const texture = makeGroundTexture();
   const material = new THREE.MeshLambertMaterial({ map: texture, color: 0xffffff });
-  const geometry = new THREE.PlaneGeometry(2800, 3000);
+  const geometry = new THREE.PlaneGeometry(3600, 3200);
   geometry.rotateX(-Math.PI / 2);
   const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(200, 0, 350);
+  mesh.position.set(100, 0, 350);
   mesh.receiveShadow = true;
   scene.add(mesh);
   return mesh;
@@ -69,7 +69,7 @@ function makeGroundTexture(): THREE.CanvasTexture {
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(300, 320);
+  texture.repeat.set(380, 340);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 4;
   return texture;

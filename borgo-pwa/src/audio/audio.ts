@@ -5,6 +5,9 @@ export class AudioEngine {
   private noise: AudioBuffer | null = null;
   private windGain: GainNode | null = null;
   private windFilter: BiquadFilterNode | null = null;
+  private waterGain: GainNode | null = null;
+  private waterFilter: BiquadFilterNode | null = null;
+  private waterLevel = 0;
   private engineOsc: OscillatorNode | null = null;
   private engineGain: GainNode | null = null;
   private engineFilter: BiquadFilterNode | null = null;
@@ -55,6 +58,19 @@ export class AudioEngine {
       source.connect(this.windFilter).connect(this.windGain).connect(this.master);
       source.start();
 
+      const waterSource = this.context.createBufferSource();
+      waterSource.buffer = this.noise;
+      waterSource.loop = true;
+      this.waterFilter = this.context.createBiquadFilter();
+      this.waterFilter.type = 'bandpass';
+      this.waterFilter.frequency.value = 620;
+      this.waterFilter.Q.value = 0.7;
+      this.waterGain = this.context.createGain();
+      this.waterGain.gain.value = 0.0001;
+      waterSource.connect(this.waterFilter).connect(this.waterGain).connect(this.master);
+      waterSource.start();
+      this.waterGain.gain.setTargetAtTime(0.0001 + this.waterLevel * 0.045, this.context.currentTime, 0.2);
+
       this.engineOsc = this.context.createOscillator();
       this.engineOsc.type = 'sawtooth';
       this.engineOsc.frequency.value = 58;
@@ -83,6 +99,12 @@ export class AudioEngine {
   setDusk(t: number): void {
     this.dusk = Math.max(0, Math.min(1, t));
     this.applyAmbience();
+  }
+
+  setWater(level: number): void {
+    this.waterLevel = Math.max(0, Math.min(1, level));
+    if (!this.context || !this.waterGain) return;
+    this.waterGain.gain.setTargetAtTime(0.0001 + this.waterLevel * 0.045, this.context.currentTime, 0.25);
   }
 
   setFlight(active: boolean, ratio: number): void {

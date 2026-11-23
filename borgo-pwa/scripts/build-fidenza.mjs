@@ -20,7 +20,7 @@ const sourceCity = join(repo, 'fidenza-city-v3', 'data', 'city.json');
 const sourceMap = join(repo, 'fidenza-city-v3', 'maps', 'fidenza', 'map.json');
 const outFile = join(root, 'src', 'data', 'fidenza.json');
 
-const PLAY_BOUNDS = { minX: -1000, maxX: 780, minZ: -300, maxZ: 1000 };
+const PLAY_BOUNDS = { minX: -1450, maxX: 780, minZ: -300, maxZ: 1000 };
 const BUFFER = 60;
 const VIEW = {
   minX: PLAY_BOUNDS.minX - BUFFER,
@@ -276,6 +276,31 @@ for (const railway of city.railways || []) {
   }
 }
 
+const WATER_KINDS = new Set(['stream', 'ditch', 'river', 'canal']);
+const WATER_WIDTHS = {
+  'Torrente Stirone': 18,
+  'Torrente Rovacchia': 8,
+  stream: 3.5,
+  ditch: 2.2,
+  river: 8,
+  canal: 4
+};
+const waterways = [];
+for (const water of city.waterways || []) {
+  if (!WATER_KINDS.has(water.kind)) continue;
+  if (!Array.isArray(water.pts) || water.pts.length < 2) continue;
+  const runs = clipRuns(water.pts);
+  for (const [runIndex, run] of runs.entries()) {
+    waterways.push({
+      id: `${water.id}${runIndex ? `-${runIndex}` : ''}`,
+      kind: water.kind,
+      name: water.name || '',
+      w: WATER_WIDTHS[water.name] ?? WATER_WIDTHS[water.kind] ?? 3,
+      pts: flat(run)
+    });
+  }
+}
+
 const AREA_COLORS = {
   park: 0x74844e,
   grass: 0x7f8a54,
@@ -357,8 +382,8 @@ if (obelisco) {
 const bounds = bboxOf(buildings.map((b) => [b.x, b.z]));
 const output = {
   meta: {
-    id: 'fidenza-ovest-est-sud',
-    name: 'Fidenza — centro, est, sud e quartiere Luce',
+    id: 'fidenza-con-stirone',
+    name: 'Fidenza — centro, quartieri e Parco dello Stirone',
     source: 'OpenStreetMap via Overpass (snapshot fidenza-city-v3)',
     attribution: '© OpenStreetMap contributors (ODbL 1.0)',
     license: 'ODbL-1.0',
@@ -373,21 +398,24 @@ const output = {
       trees: trees.length,
       furniture: furniture.length,
       places: places.length,
-      railways: railways.length
+      railways: railways.length,
+      waterways: waterways.length
     }
   },
   bounds,
   buildings,
   roads,
   areas,
+  waterways,
   railways,
   trees,
   furniture,
-  places
+  places,
+  waterways
 };
 
 mkdirSync(dirname(outFile), { recursive: true });
 writeFileSync(outFile, JSON.stringify(output));
 console.log(
-  `wrote ${outFile}: ${buildings.length} buildings, ${roads.length} road runs, ${areas.length} areas, ${trees.length} trees, ${places.length} places`
+  `wrote ${outFile}: ${buildings.length} buildings, ${roads.length} road runs, ${areas.length} areas, ${trees.length} trees, ${places.length} places, ${waterways.length} waterway runs`
 );

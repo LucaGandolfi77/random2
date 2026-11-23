@@ -89,6 +89,24 @@ export const STAMPS: StampSpec[] = [
       en: 'A small church among houses and fields looking towards the Stirone.'
     },
     placeIds: ['santantonio']
+  },
+  {
+    id: 'stamp-stirone',
+    name: { it: 'Timbro dello Stirone', en: 'Stirone stamp' },
+    description: {
+      it: 'Il fiume, il ponte di legno e il rumore dell’acqua tra gli argini.',
+      en: 'The river, the wooden bridge and the sound of water between the banks.'
+    },
+    placeIds: ['stirone']
+  },
+  {
+    id: 'stamp-pioppi',
+    name: { it: 'Timbro dei Pioppi', en: 'Poplar stamp' },
+    description: {
+      it: 'Il bosco leggero, le radure e la torretta che guarda la pianura.',
+      en: 'The light wood, its clearings and the outlook over the plain.'
+    },
+    placeIds: ['pioppi']
   }
 ];
 

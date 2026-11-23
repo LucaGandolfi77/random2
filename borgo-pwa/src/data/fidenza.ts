@@ -19,6 +19,7 @@ export interface FidenzaMeta {
     furniture: number;
     places: number;
     railways: number;
+    waterways?: number;
   };
 }
 
@@ -66,6 +67,15 @@ export interface FidenzaFurniture {
   z: number;
 }
 
+export interface FidenzaWaterway {
+  id: string;
+  kind: string;
+  name: string;
+  w: number;
+  /** Flat [x,z,x,z,…] polyline. */
+  pts: number[];
+}
+
 export interface FidenzaRailway {
   id: string;
   name: string;
@@ -88,6 +98,7 @@ export interface FidenzaData {
   buildings: FidenzaBuilding[];
   roads: FidenzaRoad[];
   areas: FidenzaArea[];
+  waterways: FidenzaWaterway[];
   railways: FidenzaRailway[];
   trees: FidenzaTree[];
   furniture: FidenzaFurniture[];

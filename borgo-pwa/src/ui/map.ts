@@ -166,6 +166,28 @@ function drawTown(
     ctx.fill();
   }
 
+  /* Waterways. */
+  for (const water of FIDENZA.waterways) {
+    const pts = water.pts;
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < pts.length; i += 2) {
+      const x = view.ox + pts[i] * view.scale;
+      const y = view.oy + pts[i + 1] * view.scale;
+      if (!started) {
+        ctx.moveTo(x, y);
+        started = true;
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.strokeStyle = '#6d9fa8';
+    ctx.lineWidth = Math.max(1, water.w * view.scale);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+
   /* Streets. */
   const roadColors: Record<string, string> = {
     primary: '#837b6a',

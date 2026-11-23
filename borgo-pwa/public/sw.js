@@ -1,7 +1,7 @@
 /* BORGO — offline service worker.
    The shell is precached; every same-origin asset is cached on first use, so
    the hashed Vite bundle works offline without a build-time manifest. */
-const CACHE = 'borgo-san-donnino-v5';
+const CACHE = 'borgo-san-donnino-v6';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (event) => {

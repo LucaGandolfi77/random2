@@ -104,6 +104,9 @@ export const BELL_SPOT = { x: -235, z: 34.5 };
 export const BELL_TOWER = { x: -235, z: 30, w: 4, d: 4, h: 20 };
 export const OBELISK = { x: 10, z: -25 };
 
+export const STIRONE_BRIDGE = { x: -1231.6, z: -40, halfWidth: 15, halfDepth: 11.5 };
+export const STIRONE_CENTER = { x: -1230, z: -40 };
+
 export const VEHICLES: VehicleSpec[] = [
   {
     id: 'car-station',
@@ -230,6 +233,24 @@ export const VEHICLES: VehicleSpec[] = [
     z: 300,
     heading: Math.PI / 2,
     color: 0xc2a23f
+  },
+  {
+    id: 'car-stirone',
+    kind: 'car',
+    name: { it: 'Auto del Parco', en: 'Park car' },
+    x: -1150,
+    z: -20,
+    heading: Math.PI / 2,
+    color: 0x6f7a5f
+  },
+  {
+    id: 'bike-stirone',
+    kind: 'bike',
+    name: { it: 'Bici dello Stirone', en: 'Stirone bike' },
+    x: -1120,
+    z: -30,
+    heading: -Math.PI / 2,
+    color: 0xb9553b
   }
 ];
 
@@ -433,6 +454,28 @@ export const DISCOVERIES: DiscoverySpec[] = [
     x: -676.1,
     z: -239.6,
     radius: 24
+  },
+  {
+    id: 'stirone',
+    name: { it: 'Parco dello Stirone', en: 'Stirone Park' },
+    description: {
+      it: 'Il torrente scorre tra argini, pioppi e sentieri. Un ponte di legno collega le due rive e il rumore dell’acqua accompagna il cammino.',
+      en: 'The stream runs between banks, poplars and paths. A wooden bridge links the two banks and the sound of water follows the walk.'
+    },
+    x: -1270,
+    z: -40,
+    radius: 58
+  },
+  {
+    id: 'pioppi',
+    name: { it: 'Bosco dei Pioppi', en: 'Poplar Grove' },
+    description: {
+      it: 'Un bosco leggero di pioppi e salici, con radure, panche e una piccola torretta per guardare la pianura.',
+      en: 'A light wood of poplars and willows, with clearings, benches and a small outlook over the plain.'
+    },
+    x: -1320,
+    z: 110,
+    radius: 56
   }
 ];
 
@@ -562,6 +605,20 @@ export const ZONES: ZoneSpec[] = [
     x: -676,
     z: -240,
     r: 52
+  },
+  {
+    id: 'stirone',
+    name: { it: 'Parco dello Stirone', en: 'Stirone Park' },
+    x: -1250,
+    z: -30,
+    r: 120
+  },
+  {
+    id: 'pioppi',
+    name: { it: 'Bosco dei Pioppi', en: 'Poplar Grove' },
+    x: -1320,
+    z: 110,
+    r: 72
   }
 ];
 
