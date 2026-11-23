@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { loadGame, saveGame, clearSave, SAVE_KEY, LEGACY_SAVE_KEY, type StorageLike } from '../src/game/save';
+import {
+  loadGame,
+  saveGame,
+  clearSave,
+  SAVE_KEY,
+  LEGACY_SAVE_KEY,
+  OLDER_SAVE_KEY,
+  OLD_SAVE_KEY,
+  type StorageLike
+} from '../src/game/save';
 import {
   createInitialState,
   hospitality,
@@ -7,6 +16,7 @@ import {
   type GameState
 } from '../src/game/state';
 import { DISCOVERIES, FLOWERS, LETTERS, SPAWN, TILES, VEHICLES, WORLD } from '../src/data/town';
+import { FESTIVAL_POSTCARDS } from '../src/data/festival';
 
 class MemoryStorage implements StorageLike {
   readonly data = new Map<string, string>();
@@ -41,7 +51,7 @@ function completeState(): GameState {
 }
 
 describe('save round trip', () => {
-  it('writes and reads the whole v3 state, vehicles included', () => {
+  it('writes and reads the whole v4 state, vehicles included', () => {
     const storage = new MemoryStorage();
     const state = completeState();
     state.vehicles[0] = { id: 'car-station', x: -130, z: 20, heading: 0.7 };
@@ -50,7 +60,7 @@ describe('save round trip', () => {
     const loaded = loadGame(storage);
     expect(loaded).not.toBeNull();
     if (!loaded) return;
-    expect(loaded.v).toBe(3);
+    expect(loaded.v).toBe(4);
     expect(loaded.quests).toEqual(state.quests);
     expect(loaded.letters).toEqual(state.letters);
     expect(loaded.flowers).toEqual(state.flowers);
@@ -66,15 +76,21 @@ describe('save round trip', () => {
     expect(loaded.settings).toEqual(state.settings);
     expect(loaded.elapsed).toBeCloseTo(123.5);
     expect(loaded.flags.dusk).toBe(true);
+    expect(loaded.festival.phase).toBe('locked');
+    expect(loaded.postcards).toEqual([]);
   });
 
   it('clears both current and legacy saves', () => {
     const storage = new MemoryStorage();
     saveGame(createInitialState(), storage);
     storage.setItem(LEGACY_SAVE_KEY, '{}');
+    storage.setItem(OLDER_SAVE_KEY, '{}');
+    storage.setItem(OLD_SAVE_KEY, '{}');
     clearSave(storage);
     expect(storage.getItem(SAVE_KEY)).toBeNull();
     expect(storage.getItem(LEGACY_SAVE_KEY)).toBeNull();
+    expect(storage.getItem(OLDER_SAVE_KEY)).toBeNull();
+    expect(storage.getItem(OLD_SAVE_KEY)).toBeNull();
   });
 
   it('survives a broken JSON payload', () => {
@@ -110,7 +126,7 @@ describe('legacy migration', () => {
     const loaded = loadGame(storage);
     expect(loaded).not.toBeNull();
     if (!loaded) return;
-    expect(loaded.v).toBe(3);
+    expect(loaded.v).toBe(4);
     expect(loaded.player.x).toBe(SPAWN.x);
     expect(loaded.player.z).toBe(SPAWN.z);
     expect(loaded.quests.bread).toBe('done');
@@ -133,7 +149,7 @@ describe('legacy migration', () => {
     expect(migrated?.player.z).toBe(SPAWN.z);
   });
 
-  it('turns a v2 notebook into a v3 save with default parking spots', () => {
+  it('turns a v2 notebook into a v4 save with default parking spots', () => {
     const storage = new MemoryStorage();
     storage.setItem(
       LEGACY_SAVE_KEY,
@@ -152,7 +168,7 @@ describe('legacy migration', () => {
       })
     );
     const loaded = loadGame(storage);
-    expect(loaded?.v).toBe(3);
+    expect(loaded?.v).toBe(4);
     expect(loaded?.vehicles).toHaveLength(VEHICLES.length);
     expect(loaded?.vehicles[0].id).toBe(VEHICLES[0].id);
     expect(storage.getItem(SAVE_KEY)).toBeTruthy();
@@ -177,13 +193,59 @@ describe('legacy migration', () => {
     expect(bike?.heading).toBeGreaterThanOrEqual(0);
     expect(state?.vehicles.some((vehicle) => vehicle.id === 'ghost-car')).toBe(false);
   });
+
+  it('unlocks the feast after a v3 save with the bell rung', () => {
+    const state = sanitizeState({
+      v: 3,
+      quests: { bread: 'done', letters: 'done', flowers: 'done', bell: 'done' },
+      letters: LETTERS.map((letter) => letter.id),
+      flowers: FLOWERS.map((flower) => flower.id)
+    });
+    expect(state?.festival.phase).toBe('ready');
+  });
+
+  it('keeps v4 feast progress and drops unknown postcards', () => {
+    const state = sanitizeState({
+      v: 4,
+      quests: { bread: 'done', letters: 'done', flowers: 'done', bell: 'done' },
+      letters: LETTERS.map((letter) => letter.id),
+      flowers: FLOWERS.map((flower) => flower.id),
+      festival: {
+        phase: 'active',
+        lanterns: ['lantern-west', 'lantern-ghost'],
+        musicians: ['musician-porta'],
+        branches: ['branch-parco', 'branch-parco'],
+        garland: false,
+        guest: true,
+        guestArrived: true
+      },
+      postcards: [FESTIVAL_POSTCARDS[0].id, 'postcard-ghost']
+    });
+    expect(state?.festival.phase).toBe('active');
+    expect(state?.festival.lanterns).toEqual(['lantern-west']);
+    expect(state?.festival.musicians).toEqual(['musician-porta']);
+    expect(state?.festival.branches).toEqual(['branch-parco']);
+    expect(state?.festival.guest).toBe(true);
+    expect(state?.postcards).toEqual([FESTIVAL_POSTCARDS[0].id]);
+  });
+
+  it('resumes a v4 procession as a safe active feast', () => {
+    const state = sanitizeState({
+      v: 4,
+      quests: { bread: 'done', letters: 'done', flowers: 'done', bell: 'done' },
+      letters: LETTERS.map((letter) => letter.id),
+      flowers: FLOWERS.map((flower) => flower.id),
+      festival: { phase: 'procession' }
+    });
+    expect(state?.festival.phase).toBe('active');
+  });
 });
 
 describe('save sanitising', () => {
   it('rejects unknown versions and non-objects', () => {
     expect(sanitizeState(null)).toBeNull();
     expect(sanitizeState('x')).toBeNull();
-    expect(sanitizeState({ v: 4 })).toBeNull();
+    expect(sanitizeState({ v: 5 })).toBeNull();
     expect(sanitizeState({ v: '3' })).toBeNull();
   });
 

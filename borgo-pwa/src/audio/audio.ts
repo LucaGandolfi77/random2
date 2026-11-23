@@ -14,6 +14,9 @@ export class AudioEngine {
   private flying = 0;
   private birdTimer = 2.5;
   private stepFlip = false;
+  private festivalActive = false;
+  private festivalTimer = 0;
+  private festivalStep = 0;
 
   start(): void {
     if (this.started) {
@@ -159,6 +162,75 @@ export class AudioEngine {
       const base = 3.4 + Math.random() * 6;
       this.birdTimer = base * (1 + this.dusk * 1.8);
     }
+    if (this.festivalActive) {
+      this.festivalTimer -= dt;
+      if (this.festivalTimer <= 0) {
+        const melody = [392, 523.25, 659.25, 523.25, 440, 587.33, 698.46, 587.33];
+        this.tone(melody[this.festivalStep % melody.length], 0.32, 'triangle', 0.012, 0);
+        if (this.festivalStep % 4 === 0) {
+          this.tone(melody[this.festivalStep % melody.length] / 2, 0.5, 'sine', 0.008, 0.02);
+        }
+        this.festivalStep += 1;
+        this.festivalTimer = 0.58;
+      }
+    }
+  }
+
+  setFestival(active: boolean): void {
+    if (active && !this.festivalActive) {
+      this.festivalTimer = 0;
+      this.festivalStep = 0;
+    }
+    this.festivalActive = active;
+  }
+
+  festivalStart(): void {
+    const notes = [261.63, 329.63, 392, 523.25];
+    notes.forEach((frequency, index) => {
+      this.tone(frequency, 0.6, 'triangle', 0.045, index * 0.08);
+    });
+  }
+
+  applause(): void {
+    if (!this.context || !this.noise || !this.master) return;
+    const ctx = this.context;
+    const now = ctx.currentTime;
+    for (let burst = 0; burst < 3; burst++) {
+      const source = ctx.createBufferSource();
+      source.buffer = this.noise;
+      source.playbackRate.value = 1.2 + burst * 0.12;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1000 + burst * 220;
+      filter.Q.value = 0.8;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, now + burst * 0.18);
+      gain.gain.exponentialRampToValueAtTime(0.05, now + burst * 0.18 + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + burst * 0.18 + 0.7);
+      source.connect(filter).connect(gain).connect(this.master);
+      source.start(now + burst * 0.18);
+      source.stop(now + burst * 0.18 + 0.75);
+    }
+  }
+
+  firework(): void {
+    this.tone(72, 0.7, 'sine', 0.06, 0);
+    if (!this.context || !this.noise || !this.master) return;
+    const ctx = this.context;
+    const now = ctx.currentTime;
+    const source = ctx.createBufferSource();
+    source.buffer = this.noise;
+    source.playbackRate.value = 0.42;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 320;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+    source.connect(filter).connect(gain).connect(this.master);
+    source.start(now);
+    source.stop(now + 0.95);
   }
 
   footstep(running: boolean): void {

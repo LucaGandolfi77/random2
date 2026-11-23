@@ -1,7 +1,7 @@
 {
   "name": "BORGO SAN DONNINO — La Passeggiata",
   "short_name": "BORGO S. DONNINO",
-  "description": "An open-world golden-hour walk through Fidenza: seven voices, twelve memories, cars, bicycles, a station train and free flight.",
+  "description": "An open-world golden-hour walk through Fidenza: quests, cars, bicycles, a station train, free flight and the Festa di San Donnino.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

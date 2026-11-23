@@ -1,5 +1,7 @@
 import type { Language } from '../data/types';
 import { QUESTS } from '../data/quests';
+import { FESTIVAL_BRANCHES, FESTIVAL_LANTERNS, FESTIVAL_MUSICIANS } from '../data/festival';
+import { canStartProcession, lanternsDone, musiciansDone } from '../game/festival';
 import {
   activeQuest,
   hospitality,
@@ -97,12 +99,60 @@ export class Hud {
     this.refreshObjective(state);
   }
 
+  private festivalObjective(state: GameState): { name: string; progress: string } | null {
+    const festival = state.festival;
+    if (festival.phase === 'ready') {
+      return { name: t('festivalReadyName', this.lang), progress: '' };
+    }
+    if (festival.phase === 'active') {
+      if (!lanternsDone(festival)) {
+        return {
+          name: t('festivalTaskLanterns', this.lang),
+          progress: `${festival.lanterns.length}/${FESTIVAL_LANTERNS.length}`
+        };
+      }
+      if (!musiciansDone(festival)) {
+        return {
+          name: t('festivalTaskMusicians', this.lang),
+          progress: `${festival.musicians.length}/${FESTIVAL_MUSICIANS.length}`
+        };
+      }
+      if (!festival.garland) {
+        return {
+          name: t('festivalTaskGarland', this.lang),
+          progress: `${festival.branches.length}/${FESTIVAL_BRANCHES.length}`
+        };
+      }
+      if (!festival.guest) {
+        return { name: t('festivalTaskGuest', this.lang), progress: '' };
+      }
+      if (canStartProcession(festival)) {
+        return { name: t('festivalProcessionReady', this.lang), progress: '' };
+      }
+      return null;
+    }
+    if (festival.phase === 'procession') {
+      return { name: t('festivalProcession', this.lang), progress: '' };
+    }
+    return null;
+  }
+
   private refreshObjective(state: GameState | null): void {
     if (!state) {
       this.objective.hidden = true;
       return;
     }
     const active = activeQuest(state);
+    if (!active) {
+      const festival = this.festivalObjective(state);
+      if (festival) {
+        this.objective.hidden = false;
+        this.objectiveName.textContent = festival.name;
+        this.objectiveProgress.textContent = festival.progress;
+        if (this.objectiveLabel) this.objectiveLabel.textContent = t('objectiveFestival', this.lang);
+        return;
+      }
+    }
     const id = active ?? (state.quests.bell === 'available' ? 'bell' : null);
     if (!id) {
       this.objective.hidden = true;

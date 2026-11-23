@@ -1,5 +1,7 @@
 import { QUESTS, QUEST_ORDER } from '../data/quests';
 import { DISCOVERIES } from '../data/town';
+import { FESTIVAL_BRANCHES, FESTIVAL_LANTERNS, FESTIVAL_MUSICIANS, FESTIVAL_POSTCARDS } from '../data/festival';
+import { festivalTaskCount, lanternsDone, musiciansDone } from '../game/festival';
 import { pick, t } from '../data/strings';
 import type { Language, QuestId } from '../data/types';
 import { questProgress, type GameState } from '../game/state';
@@ -19,6 +21,9 @@ export class JournalPanel {
   private empty = byId<HTMLParagraphElement>('journal-empty');
   private places = byId<HTMLUListElement>('journal-places');
   private placesCount = byId<HTMLParagraphElement>('journal-places-count');
+  private festivalStatus = byId<HTMLParagraphElement>('journal-festival-status');
+  private festivalList = byId<HTMLUListElement>('journal-festival');
+  private postcards = byId<HTMLUListElement>('journal-postcards');
   private mosaic = byId<HTMLCanvasElement>('journal-mosaic');
   private count = byId<HTMLParagraphElement>('journal-tiles-count');
   private open = false;
@@ -53,6 +58,8 @@ export class JournalPanel {
     this.list.textContent = '';
     this.done.textContent = '';
     this.places.textContent = '';
+    this.festivalList.textContent = '';
+    this.postcards.textContent = '';
 
     const active: QuestId[] = [];
     const completed: QuestId[] = [];
@@ -83,7 +90,71 @@ export class JournalPanel {
       item.append(name, description);
       this.places.appendChild(item);
     }
+    this.refreshFestival(state, lang);
     this.drawMosaic(state.tiles);
+  }
+
+  private refreshFestival(state: GameState, lang: Language): void {
+    const festival = state.festival;
+    const count = festivalTaskCount(festival);
+    this.festivalStatus.textContent =
+      festival.phase === 'locked'
+        ? t('festivalLockedJournal', lang)
+        : festival.phase === 'ready'
+          ? t('festivalReadyJournal', lang)
+          : festival.phase === 'done'
+            ? t('festivalCompleted', lang)
+            : festival.phase === 'procession'
+              ? t('festivalProcession', lang)
+              : `${count}/4 · ${t('festivalProgress', lang)}`;
+
+    if (festival.phase === 'active' || festival.phase === 'procession' || festival.phase === 'done') {
+      const tasks: Array<{ label: string; progress: string; done: boolean }> = [
+        {
+          label: t('festivalTaskLanterns', lang),
+          progress: `${festival.lanterns.length}/${FESTIVAL_LANTERNS.length}`,
+          done: lanternsDone(festival)
+        },
+        {
+          label: t('festivalTaskMusicians', lang),
+          progress: `${festival.musicians.length}/${FESTIVAL_MUSICIANS.length}`,
+          done: musiciansDone(festival)
+        },
+        {
+          label: t('festivalTaskGarland', lang),
+          progress: `${festival.branches.length}/${FESTIVAL_BRANCHES.length}`,
+          done: festival.garland
+        },
+        {
+          label: t('festivalTaskGuest', lang),
+          progress: festival.guest ? '1/1' : '0/1',
+          done: festival.guest
+        }
+      ];
+      for (const task of tasks) {
+        const item = document.createElement('li');
+        item.className = 'festival-task' + (task.done ? ' festival-task-done' : '');
+        const name = document.createElement('strong');
+        name.textContent = task.label;
+        const progress = document.createElement('span');
+        progress.className = 'festival-task-progress';
+        progress.textContent = task.progress;
+        item.append(name, progress);
+        this.festivalList.appendChild(item);
+      }
+    }
+
+    for (const card of FESTIVAL_POSTCARDS) {
+      const found = state.postcards.includes(card.id);
+      const item = document.createElement('li');
+      item.className = found ? 'place postcard' : 'place place-locked postcard';
+      const title = document.createElement('strong');
+      title.textContent = pick(card.title, lang);
+      const description = document.createElement('p');
+      description.textContent = found ? pick(card.description, lang) : t('postcardLocked', lang);
+      item.append(title, description);
+      this.postcards.appendChild(item);
+    }
   }
 
   private questItem(id: QuestId, state: GameState, lang: Language, done: boolean): HTMLLIElement {

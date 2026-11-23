@@ -28,6 +28,7 @@ describe('Fidenza quest flow', () => {
     expect(state.quests.coffee).toBe('available');
     expect(state.quests.bell).toBe('locked');
     expect(state.flags.dusk).toBe(false);
+    expect(state.festival.phase).toBe('locked');
   });
 
   it('accepts a quest only once', () => {
@@ -83,6 +84,7 @@ describe('Fidenza quest flow', () => {
     completeDelivery(state, 'book');
     expect(state.quests.bell).toBe('locked');
     expect(state.flags.dusk).toBe(false);
+    expect(state.festival.phase).toBe('locked');
 
     acceptQuest(state, 'flowers');
     for (const flower of FLOWERS) collectFlower(state, flower.id);
@@ -94,6 +96,7 @@ describe('Fidenza quest flow', () => {
     expect(ringBell(state)).toBe(true);
     expect(state.quests.bell).toBe('done');
     expect(state.flags.finaleSeen).toBe(true);
+    expect(state.festival.phase).toBe('ready');
     expect(ringBell(state)).toBe(false);
   });
 

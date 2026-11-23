@@ -15,6 +15,16 @@ import {
   VEHICLES,
   ZONES
 } from '../data/town';
+import {
+  FESTIVAL_BRANCHES,
+  FESTIVAL_GUEST,
+  FESTIVAL_LANTERNS,
+  FESTIVAL_MUSICIANS,
+  FESTIVAL_NPC_POSITIONS,
+  FESTIVAL_POSTCARDS,
+  FESTIVAL_STAGE,
+  FESTIVAL_STARTER
+} from '../data/festival';
 import type { DialogueAction, Language, NpcId, ZoneSpec } from '../data/types';
 import {
   acceptBell,
@@ -33,6 +43,22 @@ import {
   type GameState
 } from '../game/state';
 import { loadGame, saveGame } from '../game/save';
+import {
+  addPostcard,
+  canStartProcession,
+  collectBranch,
+  festivalPathLength,
+  festivalPathPoint,
+  finishGarland,
+  finishProcession,
+  inviteMusician,
+  lanternsDone,
+  lightLantern,
+  musiciansDone,
+  startFestival,
+  startProcession,
+  welcomeGuest
+} from '../game/festival';
 import { FLIGHT, VEHICLE_CONFIG, stepVehicle, type TravelMode } from '../game/travel';
 import type { TrainPhase, TrainStatus } from '../game/train';
 import { ThirdPersonCamera } from '../player/camera';
@@ -45,19 +71,44 @@ import { JournalPanel } from '../ui/journal';
 import { MapPanel } from '../ui/mappanel';
 import { TouchControls } from '../ui/touch';
 import type { NpcActor } from '../world/npcs';
+import { createFestival, type FestivalActor } from '../world/festival';
 import { createTrain, type TrainActor } from '../world/train';
 import { VehicleFleet, type VehicleActor } from '../world/vehicles';
 import { buildWorld, type World, type WorldItem } from '../world/world';
 
-type Mode = 'title' | 'playing' | 'dialogue' | 'journal' | 'map' | 'paused' | 'settings' | 'confirm' | 'finale';
+type Mode =
+  | 'title'
+  | 'playing'
+  | 'dialogue'
+  | 'journal'
+  | 'map'
+  | 'paused'
+  | 'settings'
+  | 'confirm'
+  | 'finale'
+  | 'festivalEnd';
 
-type InteractionKind = 'npc' | 'tile' | 'letter' | 'flower' | 'delivery' | 'bell' | 'vehicle';
+type InteractionKind =
+  | 'npc'
+  | 'tile'
+  | 'letter'
+  | 'flower'
+  | 'delivery'
+  | 'bell'
+  | 'vehicle'
+  | 'festival-starter'
+  | 'festival-lantern'
+  | 'festival-branch'
+  | 'festival-musician'
+  | 'festival-guest'
+  | 'festival-procession';
 
 interface Interaction {
   kind: InteractionKind;
   npc?: NpcActor;
   item?: WorldItem;
   vehicle?: VehicleActor;
+  festivalId?: string;
   distance: number;
 }
 
@@ -104,12 +155,14 @@ export class BorgoApp {
   private readonly mapPanel: MapPanel;
   private readonly fleet: VehicleFleet;
   private readonly train: TrainActor;
+  private readonly festival: FestivalActor;
   private readonly touch: TouchControls;
 
   private travel: TravelMode = 'walk';
   private activeVehicle: VehicleActor | null = null;
   private lastTrainPhase: TrainPhase | null = null;
   private bumpCooldown = 0;
+  private processionTime = 0;
 
   private readonly clock = new THREE.Clock();
   private readonly titleEl = byId<HTMLDivElement>('title');
@@ -120,6 +173,9 @@ export class BorgoApp {
   private readonly finaleEl = byId<HTMLDivElement>('finale');
   private readonly finaleBody = byId<HTMLParagraphElement>('finale-text');
   private readonly finaleStats = byId<HTMLDivElement>('finale-stats');
+  private readonly festivalEndEl = byId<HTMLDivElement>('festival-end');
+  private readonly festivalEndBody = byId<HTMLParagraphElement>('festival-end-text');
+  private readonly festivalEndCards = byId<HTMLDivElement>('festival-end-cards');
   private readonly titleContinue = byId<HTMLButtonElement>('title-continue');
   private readonly titleSaveNote = byId<HTMLParagraphElement>('title-save-note');
   private readonly titleLang = byId<HTMLButtonElement>('title-lang');
@@ -172,6 +228,8 @@ export class BorgoApp {
     this.fleet = new VehicleFleet(this.scene, this.state.vehicles, VEHICLES);
     this.world.colliders.setDynamic(this.fleet.parkedObstacles());
     this.train = createTrain(this.scene);
+    this.festival = createFestival(this.scene, this.isMobile);
+    this.festival.setState(this.state.festival);
     this.player = new Player(
       this.scene,
       this.state.player.x,
@@ -223,6 +281,7 @@ export class BorgoApp {
     this.audio.setVolume(this.state.settings.volume);
     this.bindDom();
     this.applyWorldState();
+    this.applyFestivalState();
     this.syncSettings();
     this.applyReducedMotion();
     this.applyLanguage();
@@ -284,6 +343,7 @@ export class BorgoApp {
     });
     byId<HTMLButtonElement>('confirm-no').addEventListener('click', () => this.cancelConfirm());
     byId<HTMLButtonElement>('finale-continue').addEventListener('click', () => this.leaveFinale());
+    byId<HTMLButtonElement>('festival-end-close').addEventListener('click', () => this.closeFestivalEnd());
     byId<HTMLButtonElement>('finale-new').addEventListener('click', () => {
       this.finaleEl.hidden = true;
       this.startNewGame();
@@ -325,6 +385,7 @@ export class BorgoApp {
     this.audio.update(dt);
     this.bumpCooldown = Math.max(0, this.bumpCooldown - dt);
     const train = this.train.update(dt, this.time, this.lang);
+    this.festival.update(dt, this.time);
 
     if (this.mode === 'title') {
       this.input.consumeLook();
@@ -336,7 +397,7 @@ export class BorgoApp {
     } else if (this.mode === 'playing') {
       const look = this.input.consumeLook();
       this.cameraRig.look(look.x, look.y);
-      this.world.colliders.setDynamic(this.fleet.parkedObstacles());
+      this.syncDynamicColliders();
 
       if (this.travel === 'fly') {
         this.player.updateFlight(
@@ -361,6 +422,7 @@ export class BorgoApp {
         this.cameraRig.update(dt, this.player.position);
       }
 
+      if (this.state.festival.phase === 'procession') this.updateProcession(dt);
       this.world.update(dt, this.time, this.player.position);
       this.state.elapsed += dt;
       this.updatePlayerVisibility();
@@ -381,7 +443,7 @@ export class BorgoApp {
       this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
     } else if (this.mode === 'dialogue') {
       this.input.consumeLook();
-      this.world.colliders.setDynamic(this.fleet.parkedObstacles());
+      this.syncDynamicColliders();
       this.player.update(dt, ZERO_AXIS, false, this.cameraRig.yaw, this.world.colliders);
       this.cameraRig.update(dt, this.player.position);
       this.dialogue.update(dt);
@@ -439,6 +501,124 @@ export class BorgoApp {
       this.audio.bump();
       this.bumpCooldown = 0.85;
     }
+  }
+
+  private syncDynamicColliders(): void {
+    this.world.colliders.setDynamic([
+      ...this.fleet.parkedObstacles(),
+      ...this.festival.obstacles(this.state.festival)
+    ]);
+  }
+
+  private applyFestivalState(resetNpcs = false): void {
+    this.festival.setState(this.state.festival);
+    const open =
+      this.state.festival.phase === 'active' ||
+      this.state.festival.phase === 'procession' ||
+      this.state.festival.phase === 'done';
+    for (const npc of this.world.npcs) {
+      if (open) {
+        const spot = FESTIVAL_NPC_POSITIONS[npc.id];
+        npc.setHome(spot.x, spot.z, spot.facing);
+        npc.setWalking(false);
+      } else if (resetNpcs) {
+        npc.resetHome();
+      }
+    }
+    this.audio.setFestival(open);
+    this.syncDynamicColliders();
+  }
+
+  private beginFestivalEvent(): void {
+    if (!startFestival(this.state.festival)) return;
+    addPostcard(this.state.postcards, 'postcard-piazza');
+    this.applyFestivalState();
+    this.renderer.shadowMap.needsUpdate = true;
+    this.audio.festivalStart();
+    this.hud.toast(t('festivalStarted', this.lang));
+    const card = FESTIVAL_POSTCARDS.find((item) => item.id === 'postcard-piazza');
+    if (card) {
+      window.setTimeout(() => {
+        if (this.mode === 'playing') {
+          this.hud.toast(`${t('postcardsTitle', this.lang)} · ${pick(card.title, this.lang)}`);
+        }
+      }, 700);
+    }
+    this.persist();
+    this.refreshUi();
+    this.updateInteraction();
+  }
+
+  private updateProcession(dt: number): void {
+    if (this.state.festival.phase !== 'procession') return;
+    this.processionTime += dt;
+    const speed = 3.2;
+    const length = festivalPathLength();
+    for (const [index, npc] of this.world.npcs.entries()) {
+      const point = festivalPathPoint(this.processionTime * speed + index * 2.6);
+      npc.moveTo(point.x, point.z);
+      npc.face(point.heading);
+      npc.setWalking(true);
+    }
+    if (this.processionTime >= length / speed + 3) this.finishFestivalEvent();
+  }
+
+  private startProcessionEvent(): void {
+    if (!startProcession(this.state.festival)) return;
+    this.processionTime = 0;
+    this.festival.setState(this.state.festival);
+    for (const npc of this.world.npcs) npc.setWalking(true);
+    this.hud.toast(t('festivalProcessionStart', this.lang));
+    this.audio.questComplete();
+    this.persist();
+    this.refreshUi();
+    this.updateInteraction();
+  }
+
+  private finishFestivalEvent(): void {
+    if (!finishProcession(this.state.festival)) return;
+    addPostcard(this.state.postcards, 'postcard-procession');
+    addPostcard(this.state.postcards, 'postcard-group');
+    this.applyFestivalState();
+    this.renderer.shadowMap.needsUpdate = true;
+    this.festival.startFinale();
+    this.audio.applause();
+    this.audio.firework();
+    this.hud.toast(t('festivalDone', this.lang));
+    this.persist();
+    this.refreshUi();
+    this.showFestivalEnd();
+  }
+
+  private showFestivalEnd(): void {
+    this.mode = 'festivalEnd';
+    this.hud.setPrompt(null);
+    this.hud.setVisible(false);
+    this.festivalEndBody.textContent = t('festivalEndBody', this.lang);
+    this.festivalEndCards.textContent = '';
+    for (const card of FESTIVAL_POSTCARDS) {
+      if (!this.state.postcards.includes(card.id)) continue;
+      const item = document.createElement('div');
+      item.className = 'festival-card';
+      item.style.setProperty('--festival-card', card.color);
+      const title = document.createElement('strong');
+      title.textContent = pick(card.title, this.lang);
+      const body = document.createElement('span');
+      body.textContent = pick(card.description, this.lang);
+      item.append(title, body);
+      this.festivalEndCards.appendChild(item);
+    }
+    this.festivalEndEl.hidden = false;
+  }
+
+  private closeFestivalEnd(): void {
+    this.festivalEndEl.hidden = true;
+    this.hud.setVisible(true);
+    this.mode = 'playing';
+    this.input.consumeLook();
+    this.refreshUi();
+    this.updateInteraction();
+    this.audio.ui();
   }
 
   private updateTravelHud(): void {
@@ -642,6 +822,93 @@ export class BorgoApp {
     this.audio.setFlight(false, 0);
   }
 
+  private handleFestivalInteraction(target: Interaction): void {
+    const id = target.festivalId ?? '';
+    switch (target.kind) {
+      case 'festival-starter':
+        this.beginFestivalEvent();
+        return;
+      case 'festival-lantern': {
+        if (!lightLantern(this.state.festival, id)) {
+          this.audio.deny();
+          return;
+        }
+        this.festival.setState(this.state.festival);
+        this.audio.pickup();
+        this.hud.toast(`${t('festivalLanternToast', this.lang)} · ${this.state.festival.lanterns.length}/5`);
+        if (lanternsDone(this.state.festival)) {
+          const card = FESTIVAL_POSTCARDS.find((item) => item.id === 'postcard-lanterns');
+          addPostcard(this.state.postcards, 'postcard-lanterns');
+          this.audio.questComplete();
+          this.hud.toast(t('festivalLanternsDone', this.lang));
+          if (card) {
+            window.setTimeout(() => {
+              if (this.mode === 'playing') {
+                this.hud.toast(`${t('postcardsTitle', this.lang)} · ${pick(card.title, this.lang)}`);
+              }
+            }, 500);
+          }
+        }
+        this.persist();
+        this.refreshUi();
+        this.updateInteraction();
+        return;
+      }
+      case 'festival-branch': {
+        if (!collectBranch(this.state.festival, id)) {
+          this.audio.deny();
+          return;
+        }
+        this.audio.pickup();
+        this.hud.toast(`${t('festivalBranchToast', this.lang)} · ${this.state.festival.branches.length}/3`);
+        if (this.state.festival.branches.length >= 3 && finishGarland(this.state.festival)) {
+          this.audio.questComplete();
+          this.hud.toast(t('festivalGarlandDone', this.lang));
+        }
+        this.festival.setState(this.state.festival);
+        this.persist();
+        this.refreshUi();
+        this.updateInteraction();
+        return;
+      }
+      case 'festival-musician': {
+        if (!inviteMusician(this.state.festival, id)) {
+          this.audio.deny();
+          return;
+        }
+        this.festival.setState(this.state.festival);
+        this.audio.ui();
+        this.hud.toast(`${t('festivalMusicianToast', this.lang)} · ${this.state.festival.musicians.length}/3`);
+        if (musiciansDone(this.state.festival)) {
+          this.audio.questComplete();
+          this.hud.toast(t('festivalMusiciansDone', this.lang));
+        }
+        this.persist();
+        this.refreshUi();
+        this.updateInteraction();
+        return;
+      }
+      case 'festival-guest': {
+        if (!welcomeGuest(this.state.festival)) {
+          this.audio.deny();
+          return;
+        }
+        this.festival.setState(this.state.festival);
+        this.audio.trainWhistle();
+        this.hud.toast(t('festivalGuestToast', this.lang));
+        this.persist();
+        this.refreshUi();
+        this.updateInteraction();
+        return;
+      }
+      case 'festival-procession':
+        this.startProcessionEvent();
+        return;
+      default:
+        return;
+    }
+  }
+
   private handleInteract(): void {
     if (this.mode === 'dialogue') {
       this.dialogue.advance();
@@ -665,6 +932,10 @@ export class BorgoApp {
     }
     if (target.kind === 'npc' && target.npc) {
       this.startConversation(target.npc);
+      return;
+    }
+    if (target.kind.startsWith('festival-')) {
+      this.handleFestivalInteraction(target);
       return;
     }
 
@@ -746,6 +1017,7 @@ export class BorgoApp {
         this.audio.bell();
         this.world.ringBell();
         this.applyDusk(1, true);
+        this.applyFestivalState();
         this.refreshUi();
         this.persist();
         this.showFinale();
@@ -823,6 +1095,9 @@ export class BorgoApp {
       case 'confirm':
         this.cancelConfirm();
         break;
+      case 'festivalEnd':
+        this.closeFestivalEnd();
+        break;
       default:
         break;
     }
@@ -897,6 +1172,7 @@ export class BorgoApp {
     this.state.started = true;
     this.fleet.apply(this.state.vehicles);
     this.lastTrainPhase = null;
+    this.applyFestivalState(true);
     this.player.teleport(SPAWN.x, SPAWN.z, SPAWN.rot);
     this.state.player.x = SPAWN.x;
     this.state.player.z = SPAWN.z;
@@ -914,6 +1190,7 @@ export class BorgoApp {
     this.settingsEl.hidden = true;
     this.confirmEl.hidden = true;
     this.finaleEl.hidden = true;
+    this.festivalEndEl.hidden = true;
     this.journal.hide();
     this.mapPanel.hide();
     this.applyWorldState();
@@ -926,7 +1203,7 @@ export class BorgoApp {
     this.resetTravel();
     this.fleet.apply(this.state.vehicles);
     this.lastTrainPhase = null;
-    this.world.colliders.setDynamic(this.fleet.parkedObstacles());
+    this.applyFestivalState(true);
     const resolved = resolveCircle(
       { x: this.state.player.x, z: this.state.player.z },
       this.player.radius,
@@ -950,6 +1227,7 @@ export class BorgoApp {
     this.settingsEl.hidden = true;
     this.confirmEl.hidden = true;
     this.finaleEl.hidden = true;
+    this.festivalEndEl.hidden = true;
     this.journal.hide();
     this.mapPanel.hide();
     this.hud.setVisible(true);
@@ -974,10 +1252,12 @@ export class BorgoApp {
   private returnToTitle(): void {
     this.persist();
     this.resetTravel();
+    this.audio.setFestival(false);
     this.pauseEl.hidden = true;
     this.settingsEl.hidden = true;
     this.confirmEl.hidden = true;
     this.finaleEl.hidden = true;
+    this.festivalEndEl.hidden = true;
     this.journal.hide();
     this.mapPanel.hide();
     this.hud.setVisible(false);
@@ -998,7 +1278,16 @@ export class BorgoApp {
       flowers: this.state.flowers.length,
       tiles: this.state.tiles.length,
       rank: rankIndex(this.state),
-      finaleSeen: this.state.flags.finaleSeen
+      finaleSeen: this.state.flags.finaleSeen,
+      festival: {
+        phase: this.state.festival.phase,
+        lanterns: this.state.festival.lanterns.length,
+        musicians: this.state.festival.musicians.length,
+        branches: this.state.festival.branches.length,
+        garland: this.state.festival.garland,
+        guest: this.state.festival.guest,
+        canStartProcession: canStartProcession(this.state.festival)
+      }
     });
 
     const angle = Math.atan2(npc.x - this.player.position.x, npc.z - this.player.position.z);
@@ -1135,10 +1424,40 @@ export class BorgoApp {
   private currentWaypoint(): { x: number; z: number } | null {
     const active = this.activeTarget();
     if (active) return active;
+    const festival = this.festivalWaypoint();
+    if (festival) return festival;
     if (this.state.quests.bell === 'available') {
       const nino = this.world.npcs.find((npc) => npc.id === 'nino');
       if (nino) return { x: nino.x, z: nino.z };
     }
+    return null;
+  }
+
+  private festivalWaypoint(): { x: number; z: number } | null {
+    const festival = this.state.festival;
+    if (festival.phase === 'ready') return { x: FESTIVAL_STARTER.x, z: FESTIVAL_STARTER.z };
+    if (festival.phase !== 'active') return null;
+
+    if (festival.lanterns.length < FESTIVAL_LANTERNS.length) {
+      return nearest(
+        FESTIVAL_LANTERNS.filter((lantern) => !festival.lanterns.includes(lantern.id)),
+        this.player.position
+      );
+    }
+    if (festival.musicians.length < FESTIVAL_MUSICIANS.length) {
+      return nearest(
+        FESTIVAL_MUSICIANS.filter((musician) => !festival.musicians.includes(musician.id)),
+        this.player.position
+      );
+    }
+    if (!festival.garland) {
+      return nearest(
+        FESTIVAL_BRANCHES.filter((branch) => !festival.branches.includes(branch.id)),
+        this.player.position
+      );
+    }
+    if (!festival.guest) return { x: FESTIVAL_GUEST.x, z: FESTIVAL_GUEST.z };
+    if (canStartProcession(festival)) return { x: FESTIVAL_STAGE.x, z: FESTIVAL_STAGE.z - 2.8 };
     return null;
   }
 
@@ -1195,6 +1514,39 @@ export class BorgoApp {
       }
     };
 
+    if (this.state.festival.phase === 'procession') return null;
+
+    if (this.state.festival.phase === 'ready') {
+      const distance = Math.hypot(FESTIVAL_STARTER.x - px, FESTIVAL_STARTER.z - pz);
+      if (distance <= 2.7) consider({ kind: 'festival-starter', distance });
+    }
+
+    if (this.state.festival.phase === 'active') {
+      for (const lantern of FESTIVAL_LANTERNS) {
+        if (this.state.festival.lanterns.includes(lantern.id)) continue;
+        const distance = Math.hypot(lantern.x - px, lantern.z - pz);
+        if (distance <= 2.3) consider({ kind: 'festival-lantern', festivalId: lantern.id, distance });
+      }
+      for (const branch of FESTIVAL_BRANCHES) {
+        if (this.state.festival.branches.includes(branch.id)) continue;
+        const distance = Math.hypot(branch.x - px, branch.z - pz);
+        if (distance <= 2.3) consider({ kind: 'festival-branch', festivalId: branch.id, distance });
+      }
+      for (const musician of FESTIVAL_MUSICIANS) {
+        if (this.state.festival.musicians.includes(musician.id)) continue;
+        const distance = Math.hypot(musician.x - px, musician.z - pz);
+        if (distance <= 2.8) consider({ kind: 'festival-musician', festivalId: musician.id, distance });
+      }
+      if (!this.state.festival.guest) {
+        const distance = Math.hypot(FESTIVAL_GUEST.x - px, FESTIVAL_GUEST.z - pz);
+        if (distance <= 2.8) consider({ kind: 'festival-guest', distance });
+      }
+      if (canStartProcession(this.state.festival)) {
+        const distance = Math.hypot(FESTIVAL_STAGE.x - px, FESTIVAL_STAGE.z - 2.8 - pz);
+        if (distance <= 2.2) consider({ kind: 'festival-procession', distance });
+      }
+    }
+
     for (const vehicle of this.fleet.actors) {
       if (vehicle.occupied) continue;
       const distance = Math.hypot(vehicle.motion.x - px, vehicle.motion.z - pz);
@@ -1248,6 +1600,11 @@ export class BorgoApp {
       this.hud.setPrompt(null);
       return;
     }
+    if (this.state.festival.phase === 'procession') {
+      this.touch.setActionLabel('OK');
+      this.hud.setPrompt(null);
+      return;
+    }
     if (this.travel === 'fly') {
       this.touch.setActionLabel(t('actionLand', this.lang));
       if (this.input.isTouch) this.hud.setPrompt(null);
@@ -1271,13 +1628,27 @@ export class BorgoApp {
       this.hud.setPrompt(null);
       return;
     }
-    this.touch.setActionLabel(
-      target.kind === 'vehicle' ? t('actionEnter', this.lang) : 'OK'
-    );
-    this.hud.setPrompt(
-      this.promptFor(target),
-      this.input.isTouch ? t('tapHint', this.lang) : 'E'
-    );
+    this.touch.setActionLabel(this.actionForTarget(target));
+    if (this.input.isTouch && target.kind.startsWith('festival-')) {
+      this.hud.setPrompt(null);
+    } else {
+      this.hud.setPrompt(
+        this.promptFor(target),
+        this.input.isTouch ? t('tapHint', this.lang) : 'E'
+      );
+    }
+  }
+
+  private actionForTarget(target: Interaction): string {
+    if (target.kind === 'vehicle') return t('actionEnter', this.lang);
+    if (target.kind === 'festival-starter' || target.kind === 'festival-lantern') {
+      return t('actionLight', this.lang);
+    }
+    if (target.kind === 'festival-musician') return t('actionInvite', this.lang);
+    if (target.kind === 'festival-branch') return t('actionPick', this.lang);
+    if (target.kind === 'festival-guest') return t('actionWelcome', this.lang);
+    if (target.kind === 'festival-procession') return t('actionGather', this.lang);
+    return 'OK';
   }
 
   private promptFor(target: Interaction): string {
@@ -1307,6 +1678,24 @@ export class BorgoApp {
       }
       case 'bell':
         return `${t('promptBell', this.lang)} · ${t('bellName', this.lang)}`;
+      case 'festival-starter':
+        return t('festivalStarter', this.lang);
+      case 'festival-lantern': {
+        const spot = FESTIVAL_LANTERNS.find((item) => item.id === target.festivalId);
+        return `${t('festivalLantern', this.lang)}${spot ? ` · ${pick(spot.label, this.lang)}` : ''}`;
+      }
+      case 'festival-branch': {
+        const spot = FESTIVAL_BRANCHES.find((item) => item.id === target.festivalId);
+        return `${t('festivalBranch', this.lang)}${spot ? ` · ${pick(spot.label, this.lang)}` : ''}`;
+      }
+      case 'festival-musician': {
+        const spot = FESTIVAL_MUSICIANS.find((item) => item.id === target.festivalId);
+        return `${t('festivalMusician', this.lang)}${spot ? ` · ${pick(spot.label, this.lang)}` : ''}`;
+      }
+      case 'festival-guest':
+        return `${t('festivalGuest', this.lang)} · ${pick(FESTIVAL_GUEST.label, this.lang)}`;
+      case 'festival-procession':
+        return t('festivalProcessionPrompt', this.lang);
     }
   }
 
@@ -1393,6 +1782,11 @@ export class BorgoApp {
     this.refreshUi();
     this.updateInteraction();
     this.audio.ui();
+    if (this.state.festival.phase === 'ready') {
+      window.setTimeout(() => {
+        if (this.mode === 'playing') this.hud.toast(t('festivalReadyHint', this.lang));
+      }, 900);
+    }
   }
 
   private renderFinale(): void {
@@ -1487,6 +1881,7 @@ export class BorgoApp {
     if (this.journal.isOpen) this.journal.refresh(this.state, this.lang);
     if (this.mapPanel.isOpen) this.mapPanel.refresh(this.lang, this.currentWaypoint());
     if (!this.finaleEl.hidden) this.renderFinale();
+    if (!this.festivalEndEl.hidden) this.showFestivalEnd();
     if (this.mode === 'playing') this.updateInteraction();
   }
 

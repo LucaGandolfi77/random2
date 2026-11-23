@@ -1,9 +1,9 @@
 {
   "name": "borgo-pwa",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.2.0",
   "type": "module",
-  "description": "BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza with cars, bicycles, a station train and free flight, built with Three.js.",
+  "description": "BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza with cars, bicycles, a station train, free flight and the Festa di San Donnino.",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",

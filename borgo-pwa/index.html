@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#1d1a15" />
-    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world walk through Fidenza at golden hour." />
+    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza with quests, vehicles, a station train, free flight and the Festa di San Donnino." />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
@@ -147,6 +147,11 @@
             <h3 data-i18n="journalPlaces">Luoghi di Fidenza</h3>
             <p id="journal-places-count" class="muted"></p>
             <ul id="journal-places" class="place-list"></ul>
+            <h3 data-i18n="festivalTitle">La Festa di San Donnino</h3>
+            <p id="journal-festival-status" class="muted"></p>
+            <ul id="journal-festival" class="quest-list"></ul>
+            <h3 data-i18n="postcardsTitle">Cartoline</h3>
+            <ul id="journal-postcards" class="place-list postcard-list"></ul>
           </section>
           <section class="journal-col mosaic-col">
             <h3 data-i18n="mosaicTitle">Mosaico dei Ricordi</h3>
@@ -259,6 +264,18 @@
           <div class="menu-actions row">
             <button id="finale-continue" class="btn btn-primary" type="button" data-i18n="keepPlaying">Resta un altro po'</button>
             <button id="finale-new" class="btn btn-ghost" type="button" data-i18n="newGame">Nuova partita</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="festival-end" class="screen finale" hidden role="dialog" aria-modal="true" aria-labelledby="festival-end-title">
+        <div class="finale-card">
+          <p class="title-eyebrow" data-i18n="festivalEndEyebrow">La sera più lunga</p>
+          <h2 id="festival-end-title" data-i18n="festivalEndTitle">La festa</h2>
+          <p id="festival-end-text" class="finale-text"></p>
+          <div id="festival-end-cards" class="festival-cards"></div>
+          <div class="menu-actions row">
+            <button id="festival-end-close" class="btn btn-primary" type="button" data-i18n="festivalStay">Resta in piazza</button>
           </div>
         </div>
       </div>

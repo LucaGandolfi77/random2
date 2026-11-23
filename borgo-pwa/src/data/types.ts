@@ -9,6 +9,8 @@ export type NpcId = 'ada' | 'elio' | 'marta' | 'nino' | 'beppe' | 'lidia' | 'sar
 
 export type VehicleKind = 'car' | 'bike';
 
+export type FestivalPhase = 'locked' | 'ready' | 'active' | 'procession' | 'done';
+
 export type QuestId =
   | 'bread'
   | 'letters'
@@ -105,6 +107,16 @@ export interface WorldBounds {
   maxZ: number;
 }
 
+export interface FestivalContext {
+  phase: FestivalPhase;
+  lanterns: number;
+  musicians: number;
+  branches: number;
+  garland: boolean;
+  guest: boolean;
+  canStartProcession: boolean;
+}
+
 export interface DialogueContext {
   quests: Record<QuestId, QuestPhase>;
   letters: number;
@@ -112,6 +124,7 @@ export interface DialogueContext {
   tiles: number;
   rank: number;
   finaleSeen: boolean;
+  festival: FestivalContext;
 }
 
 export type DialogueAction =

@@ -1,4 +1,12 @@
 import { DISCOVERIES, FLOWERS, LETTERS, SPAWN, TILES, VEHICLES, WORLD } from '../data/town';
+import { FESTIVAL_POSTCARDS } from '../data/festival';
+import {
+  createFestivalState,
+  sanitizeFestival,
+  unlockFestival,
+  uniqueKnown as uniqueFestivalKnown,
+  type FestivalState
+} from './festival';
 import { CORE_QUESTS, DELIVERY_QUESTS, QUEST_ORDER } from '../data/quests';
 import type { Language, QuestId, QuestPhase } from '../data/types';
 
@@ -24,7 +32,7 @@ export interface VehicleSnapshot {
 }
 
 export interface GameState {
-  v: 3;
+  v: 4;
   started: boolean;
   player: PlayerSnapshot;
   quests: Record<QuestId, QuestPhase>;
@@ -33,6 +41,8 @@ export interface GameState {
   tiles: string[];
   discovered: string[];
   vehicles: VehicleSnapshot[];
+  postcards: string[];
+  festival: FestivalState;
   flags: {
     dusk: boolean;
     finaleSeen: boolean;
@@ -52,11 +62,12 @@ const LETTER_IDS = new Set(LETTERS.map((item) => item.id));
 const FLOWER_IDS = new Set(FLOWERS.map((item) => item.id));
 const TILE_IDS = new Set(TILES.map((item) => item.id));
 const DISCOVERY_IDS = new Set(DISCOVERIES.map((item) => item.id));
+const POSTCARD_IDS = new Set(FESTIVAL_POSTCARDS.map((item) => item.id));
 const PHASES: QuestPhase[] = ['locked', 'available', 'active', 'objective', 'done'];
 
 export function createInitialState(now = Date.now()): GameState {
   return {
-    v: 3,
+    v: 4,
     started: false,
     player: {
       x: SPAWN.x,
@@ -84,6 +95,8 @@ export function createInitialState(now = Date.now()): GameState {
       z: vehicle.z,
       heading: angle(vehicle.heading)
     })),
+    postcards: [],
+    festival: createFestivalState(false),
     flags: { dusk: false, finaleSeen: false },
     settings: { ...DEFAULT_SETTINGS },
     elapsed: 0,
@@ -101,6 +114,13 @@ export function cloneState(state: GameState): GameState {
     tiles: [...state.tiles],
     discovered: [...state.discovered],
     vehicles: state.vehicles.map((vehicle) => ({ ...vehicle })),
+    postcards: [...state.postcards],
+    festival: {
+      ...state.festival,
+      lanterns: [...state.festival.lanterns],
+      musicians: [...state.festival.musicians],
+      branches: [...state.festival.branches]
+    },
     flags: { ...state.flags },
     settings: { ...state.settings }
   };
@@ -197,12 +217,14 @@ export function ringBell(state: GameState): boolean {
   state.quests.bell = 'done';
   state.flags.finaleSeen = true;
   refreshUnlocks(state);
+  unlockFestival(state.festival);
   return true;
 }
 
 export function hospitality(state: GameState): number {
   const errands = QUEST_ORDER.filter((id) => state.quests[id] === 'done').length * 2;
-  return errands + state.tiles.length;
+  const festival = state.festival.phase === 'done' ? 4 : 0;
+  return errands + state.tiles.length + festival;
 }
 
 export function rankIndex(state: GameState): number {
@@ -239,7 +261,7 @@ interface RawState {
 export function sanitizeState(raw: unknown, now = Date.now()): GameState | null {
   if (!raw || typeof raw !== 'object') return null;
   const data = raw as RawState;
-  const version = data.v === 1 || data.v === 2 || data.v === 3 ? data.v : null;
+  const version = data.v === 1 || data.v === 2 || data.v === 3 || data.v === 4 ? data.v : null;
   if (version === null) return null;
 
   const state = createInitialState(now);
@@ -280,9 +302,15 @@ export function sanitizeState(raw: unknown, now = Date.now()): GameState | null 
     state.discovered = uniqueKnown(data.discovered, DISCOVERY_IDS).slice(0, DISCOVERIES.length);
   }
 
-  if (version === 3) readVehicles(state, data.vehicles);
+  if (version >= 3) readVehicles(state, data.vehicles);
 
   repairQuestChains(state);
+
+  const festivalRaw = version === 4 ? data.festival : undefined;
+  state.festival = sanitizeFestival(festivalRaw, state.quests.bell === 'done');
+  state.postcards = version === 4
+    ? uniqueFestivalKnown(data.postcards, POSTCARD_IDS)
+    : [];
 
   const flags = data.flags as Record<string, unknown> | undefined;
   if (flags && typeof flags === 'object' && flags.finaleSeen === true) {

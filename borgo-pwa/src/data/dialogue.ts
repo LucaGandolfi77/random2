@@ -9,6 +9,15 @@ function line(it: string, en: string): Localized {
 }
 
 export function conversationFor(npc: NpcId, ctx: DialogueContext): Conversation {
+  const conversation = baseConversation(npc, ctx);
+  if (ctx.festival.phase !== 'active' && ctx.festival.phase !== 'done') return conversation;
+  return {
+    ...conversation,
+    lines: [...conversation.lines, festivalLine(npc, ctx)]
+  };
+}
+
+function baseConversation(npc: NpcId, ctx: DialogueContext): Conversation {
   switch (npc) {
     case 'ada':
       return adaConversation(ctx);
@@ -24,6 +33,84 @@ export function conversationFor(npc: NpcId, ctx: DialogueContext): Conversation 
       return lidiaConversation(ctx);
     case 'sara':
       return saraConversation(ctx);
+  }
+}
+
+function festivalLine(npc: NpcId, ctx: DialogueContext): Localized {
+  const festival = ctx.festival;
+  const done = festival.phase === 'done';
+  switch (npc) {
+    case 'ada':
+      return line(
+        done
+          ? 'La festa ha mangiato tutto il pane. Per fortuna domani il forno ricomincia.'
+          : 'Il pane della festa è sul tavolo. Non lasciarlo raffreddare.',
+        done
+          ? 'The feast ate all the bread. Luckily the oven starts again tomorrow.'
+          : 'The feast bread is on the table. Don’t let it go cold.'
+      );
+    case 'elio':
+      return line(
+        done
+          ? 'Ho scritto tutto sul giornale di domani: “Fidenza non ha dormito”.'
+          : 'Ho consegnato l’invito alla stazione. Il viaggiatore arriverà col prossimo treno.',
+        done
+          ? 'I’ve written it all for tomorrow’s paper: “Fidenza did not sleep”.'
+          : 'I delivered the invitation to the station. The traveller will arrive with the next train.'
+      );
+    case 'marta':
+      return line(
+        done
+          ? 'La ghirlanda resterà sul Duomo finché non torna il sole.'
+          : festival.garland
+            ? 'La ghirlanda è al suo posto. Il Duomo sembra vestito a festa.'
+            : `Mi servono ancora ${3 - festival.branches} rami d’ulivo per la ghirlanda.`,
+        done
+          ? 'The garland will stay on the cathedral until the sun returns.'
+          : festival.garland
+            ? 'The garland is in place. The cathedral looks dressed for a feast.'
+            : `I still need ${3 - festival.branches} olive branches for the garland.`
+      );
+    case 'nino':
+      return line(
+        done
+          ? 'La campana ha chiamato, la processione ha risposto. Buona notte, Fidenza.'
+          : festival.canStartProcession
+            ? 'La processione può partire. Radunati davanti al palco quando vuoi.'
+            : 'La festa aspetta ancora qualche lanterna e qualche voce.',
+        done
+          ? 'The bell called, the procession answered. Good night, Fidenza.'
+          : festival.canStartProcession
+            ? 'The procession can begin. Gather in front of the stage when you are ready.'
+            : 'The feast is still waiting for a few lanterns and a few voices.'
+      );
+    case 'beppe':
+      return line(
+        done
+          ? 'La banda ha suonato meglio del mio giornale. E questo è dire molto.'
+          : `Ho mandato ${festival.musicians}/3 musicisti al palco. La festa ha bisogno di fiato.`,
+        done
+          ? 'The band played better than my newspaper. And that says a lot.'
+          : `I’ve sent ${festival.musicians}/3 musicians to the stage. The feast needs breath.`
+      );
+    case 'lidia':
+      return line(
+        done
+          ? 'Stanotte la piazza è una biblioteca a cielo aperto. Nessuno legge, tutti ascoltano.'
+          : 'I libri della festa sono sul banco. Stasera si legge con le lanterne.',
+        done
+          ? 'Tonight the square is an open-air library. Nobody reads, everybody listens.'
+          : 'The feast books are on the stall. Tonight we read by lantern light.'
+      );
+    case 'sara':
+      return line(
+        done
+          ? 'Il caffè è finito, ma la festa è ancora calda.'
+          : `Ho acceso ${festival.lanterns}/5 lanterne. Il caffè può aspettare.`,
+        done
+          ? 'The coffee is gone, but the feast is still warm.'
+          : `I’ve lit ${festival.lanterns}/5 lanterns. The coffee can wait.`
+      );
   }
 }
 

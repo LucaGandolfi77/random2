@@ -21,7 +21,16 @@ const baseContext: DialogueContext = {
   flowers: 0,
   tiles: 0,
   rank: 0,
-  finaleSeen: false
+  finaleSeen: false,
+  festival: {
+    phase: 'locked',
+    lanterns: 0,
+    musicians: 0,
+    branches: 0,
+    garland: false,
+    guest: false,
+    canStartProcession: false
+  }
 };
 
 const readyContext: DialogueContext = {
@@ -38,7 +47,16 @@ const readyContext: DialogueContext = {
   flowers: 5,
   tiles: 7,
   rank: 2,
-  finaleSeen: false
+  finaleSeen: false,
+  festival: {
+    phase: 'active',
+    lanterns: 2,
+    musicians: 1,
+    branches: 0,
+    garland: false,
+    guest: false,
+    canStartProcession: false
+  }
 };
 
 describe('UI strings', () => {
@@ -103,6 +121,25 @@ describe('dialogue', () => {
     expect(conversationFor('sara', baseContext).choices?.map((c) => c.action)).toContain(
       'accept-coffee'
     );
+  });
+
+  it('adds feast chatter while the square is open', () => {
+    const festivalContext: DialogueContext = {
+      ...baseContext,
+      festival: {
+        phase: 'active',
+        lanterns: 2,
+        musicians: 1,
+        branches: 0,
+        garland: false,
+        guest: false,
+        canStartProcession: false
+      }
+    };
+    const sara = conversationFor('sara', festivalContext);
+    expect(sara.lines.some((entry) => entry.it.includes('lantern'))).toBe(true);
+    const nino = conversationFor('nino', festivalContext);
+    expect(nino.lines.some((entry) => entry.it.includes('festa'))).toBe(true);
   });
 
   it('asks for the hand-over when an errand is ready', () => {

@@ -54,6 +54,87 @@ export const UI = {
   controlMap: { it: 'Mappa', en: 'Map' },
   controlJournal: { it: 'Diario', en: 'Journal' },
   controlPause: { it: 'Pausa', en: 'Pause' },
+  festivalTitle: { it: 'La Festa di San Donnino', en: 'The Feast of San Donnino' },
+  objectiveFestival: { it: 'La festa', en: 'The feast' },
+  festivalReadyName: {
+    it: 'Accendi la festa in Piazza Duomo',
+    en: 'Light the feast in Piazza Duomo'
+  },
+  festivalTaskLanterns: { it: 'Accendi le lanterne', en: 'Light the lanterns' },
+  festivalTaskMusicians: { it: 'Trova i musicisti', en: 'Find the musicians' },
+  festivalTaskGarland: { it: 'Intreccia la ghirlanda', en: 'Weave the garland' },
+  festivalTaskGuest: { it: 'Accogli l’ospite del treno', en: 'Welcome the train guest' },
+  festivalProcession: { it: 'Segui la processione', en: 'Follow the procession' },
+  festivalProcessionReady: {
+    it: 'Raduna la processione al palco',
+    en: 'Gather the procession at the stage'
+  },
+  festivalCompleted: { it: 'Festa conclusa', en: 'Feast complete' },
+  festivalStarter: { it: 'Accendi la festa', en: 'Light the feast' },
+  festivalLantern: { it: 'Accendi la lanterna', en: 'Light the lantern' },
+  festivalBranch: { it: 'Raccogli il ramo d’ulivo', en: 'Pick up the olive branch' },
+  festivalMusician: { it: 'Invita il musicista', en: 'Invite the musician' },
+  festivalGuest: { it: 'Accogli il viaggiatore', en: 'Welcome the traveller' },
+  festivalProcessionPrompt: { it: 'Raduna la processione', en: 'Gather the procession' },
+  festivalStarted: {
+    it: 'La festa comincia. Fidenza si stringe intorno al Duomo.',
+    en: 'The feast begins. Fidenza gathers around the cathedral.'
+  },
+  festivalLanternToast: { it: 'Lanterna accesa', en: 'Lantern lit' },
+  festivalLanternsDone: { it: 'Tutte le lanterne brillano.', en: 'All the lanterns are shining.' },
+  festivalBranchToast: { it: 'Ramo d’ulivo raccolto', en: 'Olive branch collected' },
+  festivalGarlandDone: {
+    it: 'Marta intreccia la ghirlanda al Duomo.',
+    en: 'Marta weaves the garland at the cathedral.'
+  },
+  festivalMusicianToast: { it: 'Musicista invitato al palco', en: 'Musician invited to the stage' },
+  festivalMusiciansDone: { it: 'La banda è pronta.', en: 'The band is ready.' },
+  festivalGuestToast: {
+    it: 'Il viaggiatore ti ringrazia e si unisce alla festa.',
+    en: 'The traveller thanks you and joins the feast.'
+  },
+  festivalProcessionStart: {
+    it: 'La processione parte dal Duomo.',
+    en: 'The procession leaves the cathedral.'
+  },
+  festivalDone: {
+    it: 'La festa è finita, ma le lanterne restano accese.',
+    en: 'The feast is over, but the lanterns stay lit.'
+  },
+  festivalReadyHint: {
+    it: 'La festa ti aspetta in Piazza Duomo.',
+    en: 'The feast is waiting for you in Piazza Duomo.'
+  },
+  festivalEndEyebrow: { it: 'La sera più lunga', en: 'The longest evening' },
+  festivalEndTitle: { it: 'La festa', en: 'The feast' },
+  festivalEndBody: {
+    it: 'La processione è tornata al Duomo. La banda suona ancora, le lanterne salgono sopra i tetti e Fidenza resta in piazza un po’ più a lungo.',
+    en: 'The procession has returned to the cathedral. The band still plays, the lanterns rise above the roofs and Fidenza stays in the square a little longer.'
+  },
+  festivalStay: { it: 'Resta in piazza', en: 'Stay in the square' },
+  festivalLockedJournal: {
+    it: 'La festa si accende dopo la campana dell’imbrunire.',
+    en: 'The feast begins after the dusk bell.'
+  },
+  festivalReadyJournal: {
+    it: 'Cerca il lanternone dorato in Piazza Duomo e accendi la festa.',
+    en: 'Find the golden lantern in Piazza Duomo and light the feast.'
+  },
+  festivalProgress: { it: 'attività', en: 'activities' },
+  festivalLanternsProgress: { it: 'lanterne', en: 'lanterns' },
+  festivalMusiciansProgress: { it: 'musicisti', en: 'musicians' },
+  festivalBranchesProgress: { it: 'rami d’ulivo', en: 'olive branches' },
+  postcardsTitle: { it: 'Cartoline', en: 'Postcards' },
+  postcardsEmpty: {
+    it: 'Le cartoline arrivano con la festa.',
+    en: 'Postcards arrive with the feast.'
+  },
+  postcardLocked: { it: 'Non ancora trovata', en: 'Not found yet' },
+  actionLight: { it: 'ACCENDI', en: 'LIGHT' },
+  actionInvite: { it: 'INVITA', en: 'INVITE' },
+  actionGather: { it: 'RADUNA', en: 'GATHER' },
+  actionPick: { it: 'RACCOGLI', en: 'PICK' },
+  actionWelcome: { it: 'ACCOGLI', en: 'WELCOME' },
   controlLook: { it: 'Guarda intorno', en: 'Look around' },
   controlFly: { it: 'Volo', en: 'Fly' },
   controlHorn: { it: 'Clacson / campanello', en: 'Horn / bell' },

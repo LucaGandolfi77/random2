@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { NpcId, NpcSpec } from '../data/types';
-import { animateIdle, createBlobShadow, createPerson } from './person';
+import { animateIdle, animateWalk, createBlobShadow, createPerson } from './person';
 
 export type IndicatorKind = 'none' | 'quest' | 'ready';
 
@@ -12,6 +12,11 @@ export interface NpcActor {
   group: THREE.Group;
   indicator: THREE.Sprite;
   setIndicator(kind: IndicatorKind): void;
+  setHome(x: number, z: number, facing: number): void;
+  resetHome(): void;
+  moveTo(x: number, z: number): void;
+  face(angle: number | null): void;
+  setWalking(walking: boolean): void;
   update(dt: number, time: number, player: THREE.Vector3): void;
 }
 
@@ -80,8 +85,14 @@ export function createNpcActor(spec: NpcSpec): NpcActor {
   indicator.visible = false;
   group.add(indicator);
 
+  const home = { x: spec.x, z: spec.z, facing: spec.facing };
+  let currentX = spec.x;
+  let currentZ = spec.z;
   let targetFacing = spec.facing;
   let currentFacing = spec.facing;
+  let facingOverride: number | null = null;
+  let walking = false;
+  let walkPhase = 0;
 
   return {
     id: spec.id,
@@ -104,15 +115,62 @@ export function createNpcActor(spec: NpcSpec): NpcActor {
       material.needsUpdate = true;
       indicator.visible = true;
     },
+    setHome(x: number, z: number, facing: number): void {
+      home.x = x;
+      home.z = z;
+      home.facing = facing;
+      currentX = x;
+      currentZ = z;
+      currentFacing = facing;
+      targetFacing = facing;
+      facingOverride = null;
+      group.position.set(x, 0, z);
+      group.rotation.y = facing;
+      this.x = x;
+      this.z = z;
+    },
+    resetHome(): void {
+      this.setHome(spec.x, spec.z, spec.facing);
+      facingOverride = null;
+      walking = false;
+    },
+    moveTo(x: number, z: number): void {
+      currentX = x;
+      currentZ = z;
+      this.x = x;
+      this.z = z;
+      group.position.set(x, 0, z);
+    },
+    face(angle: number | null): void {
+      facingOverride = angle;
+      if (angle !== null) {
+        currentFacing = angle;
+        targetFacing = angle;
+        group.rotation.y = angle;
+      }
+    },
+    setWalking(value: boolean): void {
+      walking = value;
+      if (!value) walkPhase = 0;
+    },
     update(dt: number, time: number, player: THREE.Vector3): void {
-      animateIdle(rig, time);
-      const dx = player.x - spec.x;
-      const dz = player.z - spec.z;
+      const dx = player.x - currentX;
+      const dz = player.z - currentZ;
       const distance = Math.hypot(dx, dz);
-      if (distance < 6.5) {
-        targetFacing = Math.atan2(dx, dz);
+      if (walking) {
+        walkPhase += dt * 7.2;
+        animateWalk(rig, walkPhase, 1);
       } else {
-        targetFacing = spec.facing;
+        animateIdle(rig, time);
+      }
+      if (facingOverride === null) {
+        if (distance < 6.5) {
+          targetFacing = Math.atan2(dx, dz);
+        } else {
+          targetFacing = home.facing;
+        }
+      } else {
+        targetFacing = facingOverride;
       }
       let delta = targetFacing - currentFacing;
       delta = Math.atan2(Math.sin(delta), Math.cos(delta));

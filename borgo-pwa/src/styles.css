@@ -1522,6 +1522,82 @@ output {
   color: var(--ink);
 }
 
+/* --------------------------------------------------------------- festival */
+
+.festival-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 22px;
+}
+
+.festival-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 92px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 236, 217, 0.18);
+  border-left: 4px solid var(--festival-card);
+  background: rgba(245, 236, 217, 0.06);
+}
+
+.festival-card strong {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--festival-card);
+}
+
+.festival-card span {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: rgba(245, 236, 217, 0.7);
+}
+
+.festival-task {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(58, 47, 35, 0.12);
+  list-style: none;
+}
+
+.festival-task strong {
+  font-family: var(--serif);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.festival-task-progress {
+  color: var(--rust);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.festival-task-done {
+  opacity: 0.58;
+}
+
+.festival-task-done strong {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.postcard-list .postcard strong {
+  color: var(--rust);
+}
+
+@media (max-width: 560px) {
+  .festival-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ------------------------------------------------------------- responsive */
 
 @media (max-width: 760px) {

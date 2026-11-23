@@ -1,5 +1,6 @@
 import { FIDENZA } from '../data/fidenza';
 import { DISCOVERIES, NPCS, STREET_LABELS, TILES, WORLD } from '../data/town';
+import { FESTIVAL_NPC_POSITIONS, FESTIVAL_STAGE, FESTIVAL_STARTER } from '../data/festival';
 import type { Language } from '../data/types';
 import { pick } from '../data/strings';
 import type { GameState } from '../game/state';
@@ -232,10 +233,15 @@ function drawTown(
   }
 
   /* NPCs. */
+  const festivalOpen =
+    state.festival.phase === 'active' ||
+    state.festival.phase === 'procession' ||
+    state.festival.phase === 'done';
   for (const npc of NPCS) {
-    if (!visible(npc.x - 4, npc.x + 4, npc.z - 4, npc.z + 4)) continue;
-    const x = view.ox + npc.x * view.scale;
-    const y = view.oy + npc.z * view.scale;
+    const position = festivalOpen ? FESTIVAL_NPC_POSITIONS[npc.id] ?? npc : npc;
+    if (!visible(position.x - 4, position.x + 4, position.z - 4, position.z + 4)) continue;
+    const x = view.ox + position.x * view.scale;
+    const y = view.oy + position.z * view.scale;
     const quest = npcHasQuestMark(state, npc.id);
     if (quest) {
       ctx.beginPath();
@@ -264,6 +270,15 @@ function drawTown(
     ctx.fillStyle = found ? GOLD : 'rgba(58,47,35,0.18)';
     ctx.fillRect(-r, -r, r * 2, r * 2);
     ctx.restore();
+  }
+
+  if (state.festival.phase === 'ready' || state.festival.phase === 'active') {
+    const point = state.festival.phase === 'ready'
+      ? FESTIVAL_STARTER
+      : { x: FESTIVAL_STAGE.x, z: FESTIVAL_STAGE.z };
+    if (visible(point.x - 6, point.x + 6, point.z - 6, point.z + 6)) {
+      marker(ctx, view, point.x, point.z, full ? 6 : 4);
+    }
   }
 
   if (waypoint) {
