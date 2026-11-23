@@ -181,6 +181,7 @@ export const UI = {
   closeHint: { it: 'chiudi', en: 'close' },
   mapEyebrow: { it: "Fidenza dall'alto", en: 'Fidenza from above' },
   mapTitle: { it: 'Mappa di Fidenza', en: 'Map of Fidenza' },
+  mapZoom: { it: 'Zoom mappa', en: 'Map zoom' },
   legendPlayer: { it: 'Tu', en: 'You' },
   legendNpc: { it: 'Paesani', en: 'Townsfolk' },
   legendTile: { it: 'Ricordi', en: 'Memories' },

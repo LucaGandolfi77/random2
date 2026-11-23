@@ -54,6 +54,9 @@ export function buildCity(scene: THREE.Scene, collision: CollisionWorld): CityRe
       if (building.landmark === 'comunale') addComunaleFacade(batch, building);
       if (building.landmark === 'stazione') addStazioneCanopy(batch, building);
       if (building.landmark === 'granmadre') addGranMadre(batch, building);
+      if (building.landmark === 'sanpaolo' || building.landmark === 'santantonio') {
+        addChurchTower(batch, building, building.landmark === 'sanpaolo' ? 0xd7c7ab : 0xd0bea2);
+      }
     }
   }
 
@@ -188,7 +191,12 @@ function addPiazzas(batch: TriBatch): void {
     { x: 14.6, z: -21, r: 31 },
     { x: -18.6, z: 105.2, r: 20 },
     { x: 44.2, z: 109.2, r: 18 },
-    { x: 195, z: -103.5, r: 24 }
+    { x: 195, z: -103.5, r: 24 },
+    { x: -800, z: 260, r: 20 },
+    { x: -700, z: 405, r: 17 },
+    { x: -680, z: -215, r: 16 },
+    { x: 560, z: 160, r: 18 },
+    { x: 600, z: 880, r: 18 }
   ];
   for (const square of squares) {
     batch.disc(square.x, 0.03, square.z, square.r + 1.6, 36, 0xb9a67f);
@@ -708,7 +716,11 @@ function addLandmarkSigns(scene: THREE.Scene, signs: THREE.Mesh[]): void {
     { text: 'SAN LAZZARO', x: 560, y: 4.0, z: 148, ry: 0, w: 3.2 },
     { text: 'PARCO VITTORIO VENETO', x: -234, y: 3.0, z: 600, ry: 0, w: 4.4 },
     { text: 'PARCO DELLA PACE', x: 278, y: 3.0, z: 784, ry: 0, w: 4.0 },
-    { text: 'COREA', x: 600, y: 3.0, z: 866, ry: 0, w: 2.8 }
+    { text: 'COREA', x: 600, y: 3.0, z: 866, ry: 0, w: 2.8 },
+    { text: 'LUCE', x: -800, y: 3.4, z: 240, ry: Math.PI, w: 2.4 },
+    { text: 'SAN PAOLO', x: -694, y: 4.2, z: 374, ry: Math.PI, w: 3.2 },
+    { text: "SANT'ANTONIO", x: -676, y: 4.2, z: -224, ry: Math.PI, w: 3.6 },
+    { text: 'LA LUCE', x: -620, y: 3.2, z: -162, ry: Math.PI, w: 2.8 }
   ];
   for (const entry of entries) {
     const sign = makeSign(entry.text, entry.w, 0.6, entry.x, entry.y, entry.z, entry.ry);
@@ -806,6 +818,21 @@ function addGranMadreDome(scene: THREE.Scene): void {
     }
   });
   scene.add(group);
+}
+
+function addChurchTower(batch: TriBatch, building: FidenzaBuilding, stone: number): void {
+  const box = boundsOf(building.poly);
+  const height = building.h;
+  const towerX = box.minX + 2.1;
+  const towerZ = box.minZ + 2.1;
+  batch.box(2.2, height + 2.6, 2.2, towerX, (height + 2.6) / 2, towerZ, stone);
+  batch.box(2.5, 0.3, 2.5, towerX, height + 2.8, towerZ, STONE_DARK);
+  batch.tri(towerX - 1.2, height + 2.95, towerZ - 1.2, towerX + 1.2, height + 2.95, towerZ - 1.2, towerX, height + 4.5, towerZ, 0x7b7a70);
+  batch.tri(towerX + 1.2, height + 2.95, towerZ - 1.2, towerX + 1.2, height + 2.95, towerZ + 1.2, towerX, height + 4.5, towerZ, 0x7b7a70);
+  batch.tri(towerX + 1.2, height + 2.95, towerZ + 1.2, towerX - 1.2, height + 2.95, towerZ + 1.2, towerX, height + 4.5, towerZ, 0x7b7a70);
+  batch.tri(towerX - 1.2, height + 2.95, towerZ + 1.2, towerX - 1.2, height + 2.95, towerZ - 1.2, towerX, height + 4.5, towerZ, 0x7b7a70);
+  batch.box(0.1, 1.6, 0.1, towerX, height + 5.3, towerZ, 0x4a4035);
+  batch.box(0.8, 0.1, 0.1, towerX, height + 5.7, towerZ, 0x4a4035);
 }
 
 function addMuseo(batch: TriBatch): void {

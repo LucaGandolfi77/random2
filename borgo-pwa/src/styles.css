@@ -1215,6 +1215,24 @@ kbd {
   background: var(--paper-deep);
 }
 
+.map-zoom-btn {
+  min-width: 58px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 99px;
+  border: 1px solid rgba(58, 47, 35, 0.35);
+  background: var(--paper-glass);
+  color: var(--ink);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.map-zoom-btn[aria-pressed='true'] {
+  background: var(--gold);
+}
+
 .map-legend {
   display: flex;
   flex-wrap: wrap;

@@ -162,6 +162,8 @@ export class BorgoApp {
   private activeVehicle: VehicleActor | null = null;
   private lastTrainPhase: TrainPhase | null = null;
   private bumpCooldown = 0;
+  private shadowX = Number.NaN;
+  private shadowZ = Number.NaN;
   private processionTime = 0;
 
   private readonly clock = new THREE.Clock();
@@ -467,6 +469,7 @@ export class BorgoApp {
       this.hud.setTrain(null);
     }
 
+    if (this.mode !== 'title') this.refreshShadow();
     this.world.sky.mesh.position.copy(this.camera.position);
     this.renderer.render(this.scene, this.camera);
   };
@@ -509,6 +512,16 @@ export class BorgoApp {
       ...this.fleet.parkedObstacles(),
       ...this.festival.obstacles(this.state.festival)
     ]);
+  }
+
+  private refreshShadow(force = false): void {
+    const x = this.player.position.x;
+    const z = this.player.position.z;
+    if (!force && Math.hypot(x - this.shadowX, z - this.shadowZ) < 55) return;
+    this.shadowX = x;
+    this.shadowZ = z;
+    this.world.lighting.setShadowCenter(x, z);
+    this.renderer.shadowMap.needsUpdate = true;
   }
 
   private applyFestivalState(resetNpcs = false): void {
@@ -1241,6 +1254,7 @@ export class BorgoApp {
     this.persist();
     this.updateZone(true);
     this.updateInteraction();
+    this.refreshShadow(true);
     this.onResize();
 
     if (fromNewGame) {

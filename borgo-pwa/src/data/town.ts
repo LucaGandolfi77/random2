@@ -194,6 +194,42 @@ export const VEHICLES: VehicleSpec[] = [
     z: -150,
     heading: Math.PI,
     color: 0x4f7e93
+  },
+  {
+    id: 'car-luce',
+    kind: 'car',
+    name: { it: 'Auto di Luce', en: 'Luce car' },
+    x: -760,
+    z: 240,
+    heading: Math.PI / 2,
+    color: 0x8a7b61
+  },
+  {
+    id: 'car-santantonio',
+    kind: 'car',
+    name: { it: "Auto di Sant'Antonio", en: "Sant'Antonio car" },
+    x: -660,
+    z: -250,
+    heading: 0,
+    color: 0x5f766a
+  },
+  {
+    id: 'bike-sanpaolo',
+    kind: 'bike',
+    name: { it: 'Bici di San Paolo', en: 'San Paolo bike' },
+    x: -680,
+    z: 370,
+    heading: -Math.PI / 2,
+    color: 0xb9553b
+  },
+  {
+    id: 'bike-luce',
+    kind: 'bike',
+    name: { it: 'Bici di Luce', en: 'Luce bike' },
+    x: -730,
+    z: 300,
+    heading: Math.PI / 2,
+    color: 0xc2a23f
   }
 ];
 
@@ -364,6 +400,39 @@ export const DISCOVERIES: DiscoverySpec[] = [
     x: 600,
     z: 880,
     radius: 34
+  },
+  {
+    id: 'luce',
+    name: { it: 'Luce', en: 'Luce' },
+    description: {
+      it: 'Il quartiere a ovest, tra viali larghi, scuole, negozi e piccoli giardini. La città qui rallenta.',
+      en: 'The western neighbourhood, among wide avenues, schools, shops and small gardens. The town slows down here.'
+    },
+    x: -800,
+    z: 260,
+    radius: 62
+  },
+  {
+    id: 'sanpaolo',
+    name: { it: 'San Paolo', en: 'San Paolo' },
+    description: {
+      it: 'La chiesa di San Paolo e il suo sagrato, punto di ritrovo del quartiere sud-ovest.',
+      en: 'The church of San Paolo and its parvis, the meeting point of the south-western neighbourhood.'
+    },
+    x: -694.2,
+    z: 390.5,
+    radius: 26
+  },
+  {
+    id: 'santantonio',
+    name: { it: "Sant'Antonio Abate", en: "Sant'Antonio Abate" },
+    description: {
+      it: 'Una chiesa raccolta a nord-ovest, tra le case e i campi che portano verso lo Stirone.',
+      en: 'A small church in the north-west, among houses and fields leading towards the Stirone.'
+    },
+    x: -676.1,
+    z: -239.6,
+    radius: 24
   }
 ];
 
@@ -472,6 +541,27 @@ export const ZONES: ZoneSpec[] = [
     x: 600,
     z: 880,
     r: 72
+  },
+  {
+    id: 'luce',
+    name: { it: 'Luce', en: 'Luce' },
+    x: -780,
+    z: 260,
+    r: 105
+  },
+  {
+    id: 'san-paolo',
+    name: { it: 'San Paolo', en: 'San Paolo' },
+    x: -694,
+    z: 390,
+    r: 58
+  },
+  {
+    id: 'sant-antonio',
+    name: { it: "Sant'Antonio", en: "Sant'Antonio" },
+    x: -676,
+    z: -240,
+    r: 52
   }
 ];
 

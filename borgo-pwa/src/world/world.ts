@@ -60,7 +60,8 @@ export function buildWorld(scene: THREE.Scene, mobile: boolean): World {
     { kind: 'circle', x: OBELISK.x, z: OBELISK.z, r: 1.15 },
     { kind: 'box', x: 379.6, z: 185.9, hw: 5.6, hd: 4.6 },
     { kind: 'box', x: 776.5, z: 350, hw: 1.2, hd: 650 },
-    { kind: 'box', x: 200, z: 997.5, hw: 580, hd: 1.2 }
+    { kind: 'box', x: 200, z: 997.5, hw: 580, hd: 1.2 },
+    { kind: 'box', x: -996.5, z: 350, hw: 1.2, hd: 650 }
   ];
   const collision = new CollisionWorld(buildCityColliders(extras));
   const city = buildCity(scene, collision);
@@ -230,10 +231,14 @@ function createAmbient(scene: THREE.Scene, mobile: boolean): PersonRig[] {
     { look: 'citizen1', x: 415, z: 160, rot: 2.2 },
     { look: 'citizen2', x: -230, z: 610, rot: 0.3 },
     { look: 'citizen3', x: 278, z: 790, rot: -1.2 },
-    { look: 'citizen1', x: 600, z: 876, rot: 0.8 }
+    { look: 'citizen1', x: 600, z: 876, rot: 0.8 },
+    { look: 'citizen2', x: -800, z: 260, rot: -0.5 },
+    { look: 'citizen3', x: -680, z: 350, rot: 1.1 },
+    { look: 'citizen1', x: -680, z: -250, rot: 0.4 },
+    { look: 'citizen2', x: -620, z: -176, rot: -1.3 }
   ];
   const rigs: PersonRig[] = [];
-  for (const person of people.slice(0, mobile ? 8 : 14)) {
+  for (const person of people.slice(0, mobile ? 10 : 18)) {
     const rig = createPerson(person.look);
     rig.group.position.set(person.x, 0, person.z);
     rig.group.rotation.y = person.rot;

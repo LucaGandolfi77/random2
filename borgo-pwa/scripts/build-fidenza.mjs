@@ -20,7 +20,7 @@ const sourceCity = join(repo, 'fidenza-city-v3', 'data', 'city.json');
 const sourceMap = join(repo, 'fidenza-city-v3', 'maps', 'fidenza', 'map.json');
 const outFile = join(root, 'src', 'data', 'fidenza.json');
 
-const PLAY_BOUNDS = { minX: -380, maxX: 780, minZ: -300, maxZ: 1000 };
+const PLAY_BOUNDS = { minX: -1000, maxX: 780, minZ: -300, maxZ: 1000 };
 const BUFFER = 60;
 const VIEW = {
   minX: PLAY_BOUNDS.minX - BUFFER,
@@ -156,6 +156,8 @@ function round(value, digits = 1) {
 const LANDMARK_NAMES = new Map([
   ['Cattedrale di San Donnino', 'duomo'],
   ['Santuario della Gran Madre di Dio', 'granmadre'],
+  ['Chiesa di San Paolo', 'sanpaolo'],
+  ["Chiesa di Sant'Antonio Abate", 'santantonio'],
   ['Porta di San Donnino', 'porta'],
   ['Teatro Girolamo Magnani', 'teatro'],
   ['Chiesa di San Pietro', 'sanpietro'],
@@ -355,8 +357,8 @@ if (obelisco) {
 const bounds = bboxOf(buildings.map((b) => [b.x, b.z]));
 const output = {
   meta: {
-    id: 'fidenza-est-sud',
-    name: 'Fidenza — centro storico, est e parchi del sud',
+    id: 'fidenza-ovest-est-sud',
+    name: 'Fidenza — centro, est, sud e quartiere Luce',
     source: 'OpenStreetMap via Overpass (snapshot fidenza-city-v3)',
     attribution: '© OpenStreetMap contributors (ODbL 1.0)',
     license: 'ODbL-1.0',

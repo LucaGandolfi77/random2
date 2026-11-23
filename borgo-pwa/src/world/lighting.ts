@@ -16,6 +16,7 @@ export interface LightingRig {
   ambient: THREE.AmbientLight;
   lanterns: THREE.PointLight[];
   setDusk(t: number): void;
+  setShadowCenter(x: number, z: number): void;
 }
 
 export function createLighting(scene: THREE.Scene, mobile: boolean): LightingRig {
@@ -28,20 +29,27 @@ export function createLighting(scene: THREE.Scene, mobile: boolean): LightingRig
   scene.add(ambient);
 
   const sun = new THREE.DirectionalLight(SUN_GOLDEN, 2.9);
-  sun.target.position.set(200, 0, 350);
+  sun.target.position.set(-160, 0, 100);
   sun.position.copy(SKY_SUN_DIRECTION).multiplyScalar(300).add(sun.target.position);
   sun.castShadow = true;
   sun.shadow.mapSize.set(mobile ? 2048 : 4096, mobile ? 2048 : 4096);
-  sun.shadow.camera.left = -720;
-  sun.shadow.camera.right = 720;
-  sun.shadow.camera.top = 760;
-  sun.shadow.camera.bottom = -760;
+  sun.shadow.camera.left = -360;
+  sun.shadow.camera.right = 360;
+  sun.shadow.camera.top = 340;
+  sun.shadow.camera.bottom = -340;
   sun.shadow.camera.near = 20;
-  sun.shadow.camera.far = 1100;
+  sun.shadow.camera.far = 760;
   sun.shadow.bias = -0.0008;
   sun.shadow.normalBias = 0.06;
   scene.add(sun);
   scene.add(sun.target);
+
+  const setShadowCenter = (x: number, z: number): void => {
+    sun.target.position.set(x, 0, z);
+    sun.position.copy(SKY_SUN_DIRECTION).multiplyScalar(300).add(sun.target.position);
+    sun.shadow.camera.updateProjectionMatrix();
+  };
+  setShadowCenter(-160, 100);
 
   const lanterns: THREE.PointLight[] = [];
   for (const [x, z] of [
@@ -69,5 +77,5 @@ export function createLighting(scene: THREE.Scene, mobile: boolean): LightingRig
     for (const light of lanterns) light.intensity = 28 * amount;
   };
 
-  return { sun, hemi, ambient, lanterns, setDusk };
+  return { sun, hemi, ambient, lanterns, setDusk, setShadowCenter };
 }

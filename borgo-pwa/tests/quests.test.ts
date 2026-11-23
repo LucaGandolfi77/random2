@@ -158,7 +158,7 @@ describe('progression', () => {
   it('records discovered places once', () => {
     const state = createInitialState();
     expect(state.discovered).toEqual([]);
-    expect(DISCOVERIES.length).toBe(15);
+    expect(DISCOVERIES.length).toBe(18);
   });
 
   it('reports the hand-over errand before an ordinary one', () => {

@@ -16,8 +16,12 @@ export function createPeriphery(scene: THREE.Scene): void {
   for (let x = -350; x <= 735; x += 34) {
     buildings.box(26, 1.3 + ((x / 34) % 4) * 0.12, 2.4, x, 0.65, 997.5, 0x66764a, -0.03);
   }
+  for (let z = -280; z <= 970; z += 30) {
+    buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, -996.5, 0.68, z, 0x5f7247, 0.04);
+  }
   for (let z = -240; z <= 930; z += 42) {
     addPoplar(trees, 781, z);
+    addPoplar(trees, -1002, z);
   }
   for (let x = -340; x <= 720; x += 42) {
     addPoplar(trees, x, 1001);
@@ -26,6 +30,7 @@ export function createPeriphery(scene: THREE.Scene): void {
   addBusShelter(buildings, 596, 878);
   addParkGate(buildings, -234, 600, 0);
   addParkGate(buildings, 278, 784, 0);
+  addLuceArtwork(buildings);
 
   const staticMesh = buildings.build(staticMaterial());
   if (staticMesh) {
@@ -44,11 +49,24 @@ export function createPeriphery(scene: THREE.Scene): void {
 
   addEdgeSign(scene, 'FIDENZA', 600, 994, Math.PI);
   addEdgeSign(scene, 'FIDENZA', 775, 360, -Math.PI / 2);
+  addEdgeSign(scene, 'FIDENZA', -994, 360, Math.PI / 2);
 }
 
 function addPoplar(batch: GeoBatch, x: number, z: number): void {
   batch.cylinder(0.18, 0.28, 3.8, 6, x, 1.9, z, 0x6b5338);
   batch.sphere(1.25, x, 6.2, z, 0x697c4d, 0, 2.8);
+}
+
+function addLuceArtwork(batch: TriBatch): void {
+  const x = -620;
+  const z = -176;
+  batch.box(2.2, 0.35, 2.2, x, 0.18, z, 0x5b4a37);
+  batch.box(0.28, 4.8, 0.28, x, 2.55, z, 0xb58a44);
+  for (let i = 0; i < 5; i++) {
+    batch.box(0.45, 0.45, 0.45, x, 1.4 + i * 0.72, z, i % 2 ? 0xd9a441 : 0xf0d489, 0.6 + i * 0.2);
+  }
+  batch.box(0.08, 1.1, 0.08, x, 5.55, z, 0x4a4035);
+  batch.box(0.7, 0.08, 0.08, x, 5.85, z, 0x4a4035);
 }
 
 function addBusShelter(batch: TriBatch, x: number, z: number): void {

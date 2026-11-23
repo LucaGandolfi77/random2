@@ -63,12 +63,13 @@ export function drawFullMap(
   player: MapPoint,
   heading: number,
   lang: Language,
-  waypoint: MapPoint | null
+  waypoint: MapPoint | null,
+  detail = false
 ): void {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const size = canvas.width;
-  const view = fullView(size, 34);
+  const view = detail ? detailView(size, 34, player) : fullView(size, 34);
   ctx.clearRect(0, 0, size, size);
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, size, size);
@@ -432,6 +433,23 @@ function localView(size: number, padding: number, player: MapPoint): View {
     maxX: player.x + LOCAL_RADIUS,
     minZ: player.z - LOCAL_RADIUS,
     maxZ: player.z + LOCAL_RADIUS
+  };
+}
+
+function detailView(size: number, padding: number, player: MapPoint): View {
+  const radius = 280;
+  const scale = (size - padding * 2) / (radius * 2);
+  const ox = size / 2 - player.x * scale;
+  const oy = size / 2 - player.z * scale;
+  return {
+    scale,
+    ox,
+    oy,
+    size,
+    minX: player.x - radius,
+    maxX: player.x + radius,
+    minZ: player.z - radius,
+    maxZ: player.z + radius
   };
 }
 
