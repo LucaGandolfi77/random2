@@ -66,7 +66,9 @@ const FULL_MAP_MINOR = new Set([
   'centro-ballotta',
   'pala',
   'piscina',
-  'giardino-charlie'
+  'giardino-charlie',
+  'scalo',
+  'parco-nord'
 ]);
 
 export function drawFullMap(

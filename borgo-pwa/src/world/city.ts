@@ -795,7 +795,10 @@ function addLandmarkSigns(scene: THREE.Scene, signs: THREE.Mesh[]): void {
     { text: 'PALAPRATIZZOLI', x: -502, y: 3.2, z: 1306, ry: Math.PI / 2, w: 5.6 },
     { text: 'PISCINA', x: -466, y: 3.0, z: 1292, ry: -Math.PI / 2, w: 3.2 },
     { text: 'PIAZZA LA PIRA', x: 261, y: 3.2, z: 1186, ry: 0, w: 4.2 },
-    { text: 'GIARDINO DI CHARLIE', x: 46, y: 3.0, z: 1165, ry: 0, w: 5.2 }
+    { text: 'GIARDINO DI CHARLIE', x: 46, y: 3.0, z: 1165, ry: 0, w: 5.2 },
+    { text: 'ISTITUTO AGRARIO', x: -5, y: 4.0, z: -292, ry: 0, w: 5.2 },
+    { text: 'SCALO', x: -350, y: 3.2, z: -408, ry: 0, w: 3.2 },
+    { text: 'PARCO NORD', x: 0, y: 3.0, z: -500, ry: 0, w: 3.2 }
   ];
   for (const entry of entries) {
     const sign = makeSign(entry.text, entry.w, 0.6, entry.x, entry.y, entry.z, entry.ry);
@@ -967,7 +970,8 @@ function generateLamps(collision: CollisionWorld): Array<{ x: number; z: number 
       const centre = mx >= -360 && mx <= 290 && mz >= -230 && mz <= 235;
       const east = mx >= 780 && mx <= 1380 && mz >= -280 && mz <= 1110;
       const south = mx >= -700 && mx <= 420 && mz >= 1050 && mz <= 1390;
-      if (!centre && !east && !south) continue;
+      const north = mx >= -800 && mx <= 400 && mz >= -590 && mz <= -250;
+      if (!centre && !east && !south && !north) continue;
       const nx = (bz - az) / length;
       const nz = -(bx - ax) / length;
       const x = Math.round((mx + nx * (road.w / 2 + 1.6)) * 2) / 2;

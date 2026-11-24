@@ -161,6 +161,24 @@ export const STAMPS: StampSpec[] = [
       en: 'The neighbourhood square and Charlie’s Garden, among trees and playgrounds.'
     },
     placeIds: ['piazza-la-pira', 'giardino-charlie']
+  },
+  {
+    id: 'stamp-agrario',
+    name: { it: 'Timbro dell’Istituto Agrario', en: 'Agricultural Institute stamp' },
+    description: {
+      it: 'Le serre, i campi sperimentali e gli orti del Parco Nord.',
+      en: 'The greenhouses, experimental fields and community gardens of North Park.'
+    },
+    placeIds: ['istituto-agrario', 'parco-nord']
+  },
+  {
+    id: 'stamp-binari',
+    name: { it: 'Timbro dei Binari', en: 'Railway stamp' },
+    description: {
+      it: 'Dai binari della stazione ai carri merci dello scalo.',
+      en: 'From the station tracks to the freight wagons of the goods yard.'
+    },
+    placeIds: ['scalo', 'stazione']
   }
 ];
 

@@ -11,21 +11,25 @@ export function createPeriphery(scene: THREE.Scene): void {
   const buildings = new TriBatch();
   const trees = new GeoBatch();
 
-  for (let z = -250; z <= 1380; z += 30) {
+  for (let z = -590; z <= 1380; z += 30) {
     buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, 1386.5, 0.68, z, 0x5f7247, 0.04);
   }
   for (let x = -1440; x <= 1380; x += 34) {
     buildings.box(26, 1.3 + ((x / 34) % 4) * 0.12, 2.4, x, 0.65, 1396.5, 0x66764a, -0.03);
   }
-  for (let z = -280; z <= 1380; z += 30) {
+  for (let x = -1440; x <= 1380; x += 34) {
+    buildings.box(26, 1.3 + ((x / 34) % 4) * 0.12, 2.4, x, 0.65, -596.5, 0x66764a, -0.03);
+  }
+  for (let z = -590; z <= 1380; z += 30) {
     buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, -1446.5, 0.68, z, 0x5f7247, 0.04);
   }
-  for (let z = -240; z <= 1380; z += 42) {
+  for (let z = -580; z <= 1380; z += 42) {
     addPoplar(trees, 1391, z);
     addPoplar(trees, -1452, z);
   }
   for (let x = -1440; x <= 1380; x += 42) {
     addPoplar(trees, x, 1401);
+    addPoplar(trees, x, -601);
   }
 
   addBusShelter(buildings, 596, 878);
@@ -39,6 +43,8 @@ export function createPeriphery(scene: THREE.Scene): void {
   addAermacchi(scene);
   addSouthDistrict(buildings);
   addSouthVegetation(trees);
+  addNorthDistrict(buildings, trees);
+  addNorthVegetation(trees);
   addHeron(scene, -1214, -104, 0.6);
   addHeron(scene, -1262, 62, -2.1);
   addHeron(scene, -1206, -52, 1.4);
@@ -61,6 +67,7 @@ export function createPeriphery(scene: THREE.Scene): void {
   }
 
   addEdgeSign(scene, 'FIDENZA', 600, 1394, Math.PI);
+  addEdgeSign(scene, 'FIDENZA', 0, -594, 0);
   addEdgeSign(scene, 'FIDENZA', 1384, 360, -Math.PI / 2);
   addEdgeSign(scene, 'LE AZALEE', 790, 620, -Math.PI / 2);
   addEdgeSign(scene, 'CENTRO COMMERCIALE', 930, 900, 0);
@@ -572,6 +579,163 @@ function addSouthVegetation(batch: GeoBatch): void {
     [279, 1192, 0.8],
     [30, 1204, 0.7],
     [64, 1180, 0.75]
+  ] as const) {
+    batch.sphere(0.85 * scale, x, 0.5, z, 0x5f7046, 0, 0.8);
+    batch.sphere(0.58 * scale, x + 0.6, 0.42, z + 0.3, 0x697b4c, 0, 0.8);
+  }
+}
+
+function addNorthDistrict(batch: TriBatch, trees: GeoBatch): void {
+  const plots = [
+    [-58, -395, 38, 22, 0x8a9a55],
+    [24, -396, 40, 24, 0x9b9a63],
+    [-4, -390, 28, 12, 0x74844e]
+  ] as const;
+  for (const [x, z, w, d, color] of plots) {
+    batch.box(w, 0.02, d, x, 0.019, z, color);
+  }
+  addTrail(batch, [[-5, -410], [0, -440], [0, -470]], 2.6, 0xc5b087);
+  addTrail(batch, [[-42, -380], [-5, -380], [24, -380], [55, -380]], 2.2, 0xc5b087);
+
+  for (const z of [-340, -360]) {
+    batch.box(6, 2.2, 16, -68, 1.1, z, 0xb9c7c2);
+    batch.box(7.2, 0.2, 17, -68, 2.25, z, 0xd8c7a5);
+    batch.box(0.25, 2.0, 3, -64.9, 1.0, z, 0x35474d);
+  }
+  batch.box(6, 2.2, 12, 60, 1.1, -330, 0xb9c7c2);
+  batch.box(7.2, 0.2, 13, 60, 2.25, -330, 0xd8c7a5);
+  batch.box(0.25, 2.0, 3, 63.1, 1.0, -330, 0x35474d);
+  for (const x of [-40, -26, -12, 12, 26, 40]) {
+    for (const y of [2.4, 5.2]) {
+      batch.box(2.2, 1.7, 0.14, x, y, -301.85, 0x283033);
+    }
+  }
+  batch.box(3.2, 3.2, 0.18, -5, 1.6, -301.8, 0x4b3b28);
+  batch.box(11, 0.3, 3, -5, 4.2, -299.5, 0xd8c7a5);
+  batch.box(0.7, 3.6, 0.7, -11, 1.8, -294, 0xb9553b);
+  batch.box(0.7, 3.6, 0.7, 1, 1.8, -294, 0xb9553b);
+  batch.box(12, 0.25, 0.7, -5, 3.6, -294, 0xb9553b);
+  batch.box(6, 0.8, 0.12, -5, 2.8, -293.6, 0xf1e6d0);
+  for (const x of [60, 70]) {
+    trees.cylinder(1.2, 1.4, 6, 8, x, 3, -390, 0xcabda6);
+    trees.cone(1.4, 1.2, 8, x, 6.6, -390, 0x8a6a45);
+  }
+  batch.box(2.4, 1.4, 1.6, -30, 0.9, -390, 0x6f7a5f);
+  batch.box(1.1, 1.0, 1.0, -29.4, 1.9, -390, 0x3b4b3e);
+  batch.box(2.6, 0.18, 0.18, -30, 0.5, -388.9, 0x4b4034);
+  batch.box(2.6, 0.18, 0.18, -30, 0.5, -391.1, 0x4b4034);
+
+  for (let i = 0; i < 6; i++) {
+    batch.box(18, 1.6, 1.8, -350, 1.0, -420 - i * 2.2, 0x8e8a80);
+  }
+  batch.box(24, 1.0, 6, -350, 0.5, -455, 0x8a6a45);
+  batch.box(16, 4.5, 10, -390, 2.25, -460, 0xd7c7ab);
+  batch.box(17, 0.35, 11, -390, 4.65, -460, 0x9e5b45);
+  batch.box(2.5, 2.0, 0.2, -390, 1.2, -454.9, 0x35474d);
+  batch.box(0.3, 0.02, 50, -370, 0.13, -430, 0x4b4034);
+  batch.box(0.3, 0.02, 50, -363, 0.13, -430, 0x4b4034);
+  batch.box(0.3, 0.02, 50, -328, 0.13, -430, 0x4b4034);
+  for (let i = 0; i < 12; i++) {
+    const z = -454 + i * 4;
+    batch.box(10, 0.14, 0.5, -366.5, 0.12, z, 0x5b4632);
+    batch.box(10, 0.14, 0.5, -324.5, 0.12, z, 0x5b4632);
+  }
+  const wagons = [
+    [-336, -422, 0x8a4f3a],
+    [-366, -434, 0x6f4a3a],
+    [-336, -446, 0x8a4f3a]
+  ] as const;
+  for (const [x, z, color] of wagons) {
+    batch.box(10, 2.6, 3, x, 1.5, z, color);
+    batch.box(10, 0.15, 3.2, x, 2.85, z, 0x5b4632);
+    batch.box(7, 0.55, 0.08, x, 1.7, z + 1.52, 0xd8c9a4);
+    for (const dx of [-3.2, 3.2]) {
+      for (const dz of [-1, 1]) {
+        trees.cylinder(0.45, 0.45, 0.5, 8, x + dx, 0.5, z + dz, 0x3b3b36, Math.PI / 2, 0, 0);
+      }
+    }
+  }
+  batch.box(12, 3.2, 3.2, -366, 1.9, -458, 0x6b4a3c);
+  batch.box(4, 3.8, 3.2, -370, 2.1, -458, 0x7c5a3b);
+  batch.box(0.4, 1.6, 0.4, -364, 4.0, -458, 0x3b3b36);
+  batch.box(12, 0.3, 3.4, -366, 3.65, -458, 0x5b4632);
+  batch.box(11, 0.35, 0.12, -366, 1.4, -456.45, 0xd9a441);
+  batch.box(0.35, 8, 0.35, -315, 4, -462, 0x55554f);
+  batch.box(12, 0.35, 0.35, -321, 7.8, -462, 0x55554f);
+  batch.box(0.18, 2.2, 0.18, -327, 6.7, -462, 0x3b3b36);
+  batch.box(3, 4, 3, -300, 2, -455, 0xd7c7ab);
+  batch.box(3.6, 0.3, 3.6, -300, 4.15, -455, 0x9e5b45);
+  batch.box(1.1, 0.8, 0.1, -300, 3.1, -453.45, 0x35474d);
+  batch.box(1.2, 1.0, 0.5, -370, 0.6, -408, 0x9e5b45);
+
+  flatDisc(batch, 0, -470, 38, 30, 0.0174, 0x74844e);
+  flatDisc(batch, 0, -470, 34, 28, 0.0178, 0x849356);
+  addTrail(batch, [[-35, -470], [-10, -465], [20, -472], [35, -470]], 2.3, 0xc5b087);
+  addTrail(batch, [[0, -442], [0, -470], [0, -505]], 2.2, 0xc5b087);
+  for (const [x, z] of [
+    [-24, -455],
+    [10, -455],
+    [-24, -485],
+    [10, -485]
+  ] as const) {
+    batch.box(14, 0.02, 9, x, 0.019, z, 0x8e9a5b);
+    batch.box(13.2, 0.02, 8.2, x, 0.021, z, 0x9b9a63);
+  }
+  batch.box(48, 0.02, 1.4, 0, 0.022, -500, 0x6f9fae);
+  for (const [x, z] of [
+    [-18, -478],
+    [18, -478]
+  ] as const) {
+    batch.box(3.2, 0.12, 2.2, x, 0.55, z, 0x79563a);
+    for (const dx of [-1.2, 1.2]) {
+      batch.box(0.12, 0.55, 0.12, x + dx, 0.28, z + 0.7, 0x5b4632);
+      batch.box(0.12, 0.55, 0.12, x + dx, 0.28, z - 0.7, 0x5b4632);
+    }
+  }
+  for (const x of [28, 38, 48]) {
+    batch.box(6, 2.2, 3, x, 1.1, -452, 0xc7a56b);
+    batch.box(6.8, 0.2, 3.8, x, 2.35, -452, 0x9e5b45);
+  }
+  addBench(batch, -30, -435, Math.PI / 2);
+  addBench(batch, 30, -500, -Math.PI / 2);
+}
+
+function addNorthVegetation(batch: GeoBatch): void {
+  const campus = [
+    [-75, -310],
+    [-75, -382],
+    [75, -300],
+    [75, -380],
+    [30, -408],
+    [-35, -408]
+  ] as const;
+  for (const [x, z] of campus) addBroadTree(batch, x, z);
+  for (let i = 0; i < 5; i++) {
+    addPoplar(batch, -45 + i * 22, -410);
+  }
+  const park = [
+    [-28, -445],
+    [28, -445],
+    [-28, -496],
+    [28, -496],
+    [-55, -470],
+    [55, -470],
+    [0, -512]
+  ] as const;
+  for (const [x, z] of park) addBroadTree(batch, x, z);
+  for (const [x, z] of [
+    [-410, -430],
+    [-300, -415],
+    [-300, -475],
+    [-390, -490]
+  ] as const) {
+    addBroadTree(batch, x, z);
+  }
+  for (const [x, z, scale] of [
+    [-12, -458, 0.8],
+    [14, -490, 0.75],
+    [-40, -488, 0.7],
+    [42, -452, 0.8]
   ] as const) {
     batch.sphere(0.85 * scale, x, 0.5, z, 0x5f7046, 0, 0.8);
     batch.sphere(0.58 * scale, x + 0.6, 0.42, z + 0.3, 0x697b4c, 0, 0.8);

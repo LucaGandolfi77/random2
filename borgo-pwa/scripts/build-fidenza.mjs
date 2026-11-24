@@ -20,7 +20,7 @@ const sourceCity = join(repo, 'fidenza-city-v3', 'data', 'city.json');
 const sourceMap = join(repo, 'fidenza-city-v3', 'maps', 'fidenza', 'map.json');
 const outFile = join(root, 'src', 'data', 'fidenza.json');
 
-const PLAY_BOUNDS = { minX: -1450, maxX: 1390, minZ: -300, maxZ: 1400 };
+const PLAY_BOUNDS = { minX: -1450, maxX: 1390, minZ: -600, maxZ: 1400 };
 const EAST_EDGE = 780;
 const WEST_MAX_Z = 1400;
 const BUFFER = 60;
@@ -410,8 +410,8 @@ if (obelisco) {
 const bounds = bboxOf(buildings.map((b) => [b.x, b.z]));
 const output = {
   meta: {
-    id: 'fidenza-sud-completo',
-    name: 'Fidenza — centro, quartieri, Le Azalee e il distretto sud',
+    id: 'fidenza-nord-sud',
+    name: 'Fidenza — centro, quartieri, Le Azalee, il sud e il nord agrario',
     source: 'OpenStreetMap via Overpass (snapshot fidenza-city-v3)',
     attribution: '© OpenStreetMap contributors (ODbL 1.0)',
     license: 'ODbL-1.0',

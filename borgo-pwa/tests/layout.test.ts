@@ -106,7 +106,7 @@ describe('Fidenza data', () => {
     expect(LETTERS).toHaveLength(3);
     expect(FLOWERS).toHaveLength(5);
     expect(NPCS).toHaveLength(7);
-    expect(DISCOVERIES).toHaveLength(32);
+    expect(DISCOVERIES).toHaveLength(35);
     expect(DELIVERIES).toHaveLength(4);
   });
 
@@ -158,12 +158,15 @@ describe('Fidenza data', () => {
     expect(world.isFree(-362, 1220, 0.34)).toBe(true);
     expect(world.isFree(261, 1205, 0.34)).toBe(true);
     expect(world.isFree(46, 1190, 0.34)).toBe(true);
+    expect(world.isFree(-5, -290, 0.34)).toBe(true);
+    expect(world.isFree(-350, -430, 0.34)).toBe(true);
+    expect(world.isFree(0, -470, 0.34)).toBe(true);
   });
 
   it('uses the Fidenza playable bounds', () => {
     expect(WORLD).toEqual(FIDENZA_WORLD);
     expect(WORLD.maxX - WORLD.minX).toBe(2840);
-    expect(WORLD.maxZ - WORLD.minZ).toBe(1700);
+    expect(WORLD.maxZ - WORLD.minZ).toBe(2000);
   });
 });
 

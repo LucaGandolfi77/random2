@@ -305,6 +305,24 @@ export const VEHICLES: VehicleSpec[] = [
     z: 1180,
     heading: -Math.PI / 2,
     color: 0x4f8a8b
+  },
+  {
+    id: 'car-agrario',
+    kind: 'car',
+    name: { it: 'Auto dell’Istituto Agrario', en: 'Agricultural Institute car' },
+    x: -50,
+    z: -380,
+    heading: 0,
+    color: 0x6f7a5f
+  },
+  {
+    id: 'bike-parco-nord',
+    kind: 'bike',
+    name: { it: 'Bici del Parco Nord', en: 'North Park bike' },
+    x: 0,
+    z: -435,
+    heading: Math.PI / 2,
+    color: 0xc2a23f
   }
 ];
 
@@ -662,6 +680,39 @@ export const DISCOVERIES: DiscoverySpec[] = [
     x: 46,
     z: 1190,
     radius: 50
+  },
+  {
+    id: 'istituto-agrario',
+    name: { it: 'Istituto Agrario “S.Solari”', en: 'S.Solari Agricultural Institute' },
+    description: {
+      it: 'Aule, serre, campi sperimentali e frutteti: la scuola agraria che forma i contadini del domani.',
+      en: 'Classrooms, greenhouses, experimental fields and orchards: the agricultural school training tomorrow’s farmers.'
+    },
+    x: -5,
+    z: -290,
+    radius: 58
+  },
+  {
+    id: 'scalo',
+    name: { it: 'Scalo di Fidenza', en: 'Fidenza Goods Yard' },
+    description: {
+      it: 'Vecchi binari, carri merci, il piano caricatore e il magazzino: il lato ferroviario della città.',
+      en: 'Old tracks, freight wagons, the loading dock and the warehouse: the railway side of town.'
+    },
+    x: -350,
+    z: -430,
+    radius: 62
+  },
+  {
+    id: 'parco-nord',
+    name: { it: 'Parco Nord', en: 'North Park' },
+    description: {
+      it: 'Orti urbani, filari, canale irriguo e pista ciclabile: la campagna entra in città.',
+      en: 'Community gardens, tree rows, an irrigation channel and a cycle path: the countryside enters the town.'
+    },
+    x: 0,
+    z: -470,
+    radius: 62
   }
 ];
 
@@ -861,6 +912,27 @@ export const ZONES: ZoneSpec[] = [
     x: 46,
     z: 1190,
     r: 60
+  },
+  {
+    id: 'istituto-agrario',
+    name: { it: 'Istituto Agrario', en: 'Agricultural Institute' },
+    x: -5,
+    z: -340,
+    r: 120
+  },
+  {
+    id: 'scalo',
+    name: { it: 'Scalo di Fidenza', en: 'Fidenza Goods Yard' },
+    x: -350,
+    z: -430,
+    r: 120
+  },
+  {
+    id: 'parco-nord',
+    name: { it: 'Parco Nord', en: 'North Park' },
+    x: 0,
+    z: -470,
+    r: 110
   }
 ];
 
