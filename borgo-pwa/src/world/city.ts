@@ -258,7 +258,8 @@ function addPiazzas(batch: TriBatch): void {
     { x: -680, z: -215, r: 16 },
     { x: 560, z: 160, r: 18 },
     { x: 600, z: 880, r: 18 },
-    { x: 900, z: 420, r: 15 }
+    { x: 900, z: 420, r: 15 },
+    { x: 261, z: 1205, r: 12 }
   ];
   for (const square of squares) {
     batch.disc(square.x, 0.03, square.z, square.r + 1.6, 36, 0xb9a67f);
@@ -788,7 +789,13 @@ function addLandmarkSigns(scene: THREE.Scene, signs: THREE.Mesh[]): void {
     { text: 'PARCO DELLE AZALEE', x: 900, y: 3.0, z: 758, ry: 0, w: 4.6 },
     { text: 'SKATEPARK', x: 1045, y: 3.0, z: 650, ry: 0, w: 3.2 },
     { text: 'AERMACCHI MB-326', x: 978, y: 3.4, z: 650, ry: 0, w: 4.8 },
-    { text: 'CIGALA', x: 1053, y: 3.4, z: 1016, ry: 0, w: 3.0 }
+    { text: 'CIGALA', x: 1053, y: 3.4, z: 1016, ry: 0, w: 3.0 },
+    { text: 'STADIO BALLOTTA', x: -362, y: 3.4, z: 1122, ry: 0, w: 4.8 },
+    { text: 'CENTRO BALLOTTA', x: -610, y: 3.2, z: 1176, ry: 0, w: 4.4 },
+    { text: 'PALAPRATIZZOLI', x: -502, y: 3.2, z: 1306, ry: Math.PI / 2, w: 5.6 },
+    { text: 'PISCINA', x: -466, y: 3.0, z: 1292, ry: -Math.PI / 2, w: 3.2 },
+    { text: 'PIAZZA LA PIRA', x: 261, y: 3.2, z: 1186, ry: 0, w: 4.2 },
+    { text: 'GIARDINO DI CHARLIE', x: 46, y: 3.0, z: 1165, ry: 0, w: 5.2 }
   ];
   for (const entry of entries) {
     const sign = makeSign(entry.text, entry.w, 0.6, entry.x, entry.y, entry.z, entry.ry);
@@ -959,7 +966,8 @@ function generateLamps(collision: CollisionWorld): Array<{ x: number; z: number 
       const mz = (az + bz) / 2;
       const centre = mx >= -360 && mx <= 290 && mz >= -230 && mz <= 235;
       const east = mx >= 780 && mx <= 1380 && mz >= -280 && mz <= 1110;
-      if (!centre && !east) continue;
+      const south = mx >= -700 && mx <= 420 && mz >= 1050 && mz <= 1390;
+      if (!centre && !east && !south) continue;
       const nx = (bz - az) / length;
       const nz = -(bx - ax) / length;
       const x = Math.round((mx + nx * (road.w / 2 + 1.6)) * 2) / 2;

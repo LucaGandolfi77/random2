@@ -20,9 +20,9 @@ const sourceCity = join(repo, 'fidenza-city-v3', 'data', 'city.json');
 const sourceMap = join(repo, 'fidenza-city-v3', 'maps', 'fidenza', 'map.json');
 const outFile = join(root, 'src', 'data', 'fidenza.json');
 
-const PLAY_BOUNDS = { minX: -1450, maxX: 1390, minZ: -300, maxZ: 1120 };
+const PLAY_BOUNDS = { minX: -1450, maxX: 1390, minZ: -300, maxZ: 1400 };
 const EAST_EDGE = 780;
-const WEST_MAX_Z = 1000;
+const WEST_MAX_Z = 1400;
 const BUFFER = 60;
 const VIEW = {
   minX: PLAY_BOUNDS.minX - BUFFER,
@@ -48,8 +48,8 @@ function inside(point, bounds) {
   return point.x >= bounds.minX && point.x <= bounds.maxX && point.z >= bounds.minZ && point.z <= bounds.maxZ;
 }
 
-/* The playable city is L-shaped: the historic centre ends at z=1000, while
-   the eastern district continues south to include the Cigala sports centre. */
+/* The southern district completes the map into one rectangle. The helper
+   stays so data around the edge can still be clipped consistently. */
 function insidePlayable(point, margin = 0) {
   if (!inside(point, {
     minX: PLAY_BOUNDS.minX - margin,
@@ -187,7 +187,9 @@ const LANDMARK_NAMES = new Map([
   ['Oratorio di San Giorgio', 'oratorio'],
   ['Chiesa di Santa Maria Annunziata', 'santamaria'],
   ['Fidenza', 'stazione'],
-  ['Centro Commerciale Fidenza', 'centro-commerciale']
+  ['Centro Commerciale Fidenza', 'centro-commerciale'],
+  ['PalaPratizzoli', 'pala'],
+  ['Piscina coperta', 'piscina']
 ]);
 
 const buildings = [];
@@ -408,8 +410,8 @@ if (obelisco) {
 const bounds = bboxOf(buildings.map((b) => [b.x, b.z]));
 const output = {
   meta: {
-    id: 'fidenza-con-azalee',
-    name: 'Fidenza — centro, quartieri, Stirone e Le Azalee',
+    id: 'fidenza-sud-completo',
+    name: 'Fidenza — centro, quartieri, Le Azalee e il distretto sud',
     source: 'OpenStreetMap via Overpass (snapshot fidenza-city-v3)',
     attribution: '© OpenStreetMap contributors (ODbL 1.0)',
     license: 'ODbL-1.0',

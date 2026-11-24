@@ -287,6 +287,24 @@ export const VEHICLES: VehicleSpec[] = [
     z: 650,
     heading: 0,
     color: 0xc2603f
+  },
+  {
+    id: 'car-stadio',
+    kind: 'car',
+    name: { it: 'Auto dello Stadio', en: 'Stadium car' },
+    x: -270,
+    z: 1200,
+    heading: 0,
+    color: 0x8e6b4a
+  },
+  {
+    id: 'bike-piazzalapira',
+    kind: 'bike',
+    name: { it: 'Bici di Piazza La Pira', en: 'Piazza La Pira bike' },
+    x: 240,
+    z: 1180,
+    heading: -Math.PI / 2,
+    color: 0x4f8a8b
   }
 ];
 
@@ -578,6 +596,72 @@ export const DISCOVERIES: DiscoverySpec[] = [
     x: 1053,
     z: 1040,
     radius: 50
+  },
+  {
+    id: 'stadio',
+    name: { it: 'Stadio Dario Ballotta', en: 'Dario Ballotta Stadium' },
+    description: {
+      it: 'Il campo sportivo della città, con tribune, torri faro e il rumore delle partite della domenica.',
+      en: 'The town’s stadium, with stands, floodlights and the noise of Sunday matches.'
+    },
+    x: -362,
+    z: 1220,
+    radius: 90
+  },
+  {
+    id: 'centro-ballotta',
+    name: { it: 'Centro Sportivo Ballotta', en: 'Ballotta Sports Centre' },
+    description: {
+      it: 'Campi di allenamento, spogliatoi e parcheggi: il cuore sportivo del sud di Fidenza.',
+      en: 'Training pitches, changing rooms and parking: the sporting heart of southern Fidenza.'
+    },
+    x: -500,
+    z: 1200,
+    radius: 82
+  },
+  {
+    id: 'pala',
+    name: { it: 'PalaPratizzoli', en: 'PalaPratizzoli' },
+    description: {
+      it: 'Il palazzetto dello sport, con il tetto basso e le luci accese anche nelle sere d’inverno.',
+      en: 'The indoor sports hall, with its low roof and lights on even on winter evenings.'
+    },
+    x: -540,
+    z: 1290,
+    radius: 70
+  },
+  {
+    id: 'piscina',
+    name: { it: 'Piscina coperta', en: 'Indoor Swimming Pool' },
+    description: {
+      it: 'La piscina coperta del quartiere sud, tra corsie, cuffie colorate e il vapore sulle vetrate.',
+      en: 'The indoor pool of the southern district, with lanes, coloured caps and steam on the windows.'
+    },
+    x: -442,
+    z: 1275,
+    radius: 60
+  },
+  {
+    id: 'piazza-la-pira',
+    name: { it: 'Piazza La Pira', en: 'Piazza La Pira' },
+    description: {
+      it: 'Una piazza di quartiere con alberi, panchine e negozi, punto di incontro tra il centro e lo stadio.',
+      en: 'A neighbourhood square with trees, benches and shops, a meeting point between the centre and the stadium.'
+    },
+    x: 261,
+    z: 1205,
+    radius: 42
+  },
+  {
+    id: 'giardino-charlie',
+    name: { it: 'Il giardino di Charlie', en: 'Charlie’s Garden' },
+    description: {
+      it: 'Un giardino pubblico con giochi, prato e panchine, dove le famiglie portano i bambini nel pomeriggio.',
+      en: 'A public garden with play equipment, lawn and benches, where families bring children in the afternoon.'
+    },
+    x: 46,
+    z: 1190,
+    radius: 50
   }
 ];
 
@@ -742,6 +826,41 @@ export const ZONES: ZoneSpec[] = [
     x: 1053,
     z: 1020,
     r: 82
+  },
+  {
+    id: 'stadio',
+    name: { it: 'Stadio Ballotta', en: 'Ballotta Stadium' },
+    x: -362,
+    z: 1220,
+    r: 160
+  },
+  {
+    id: 'centro-ballotta',
+    name: { it: 'Centro Sportivo Ballotta', en: 'Ballotta Sports Centre' },
+    x: -520,
+    z: 1200,
+    r: 92
+  },
+  {
+    id: 'pala',
+    name: { it: 'Pala e Piscina', en: 'Sports Hall and Pool' },
+    x: -490,
+    z: 1295,
+    r: 78
+  },
+  {
+    id: 'piazza-la-pira',
+    name: { it: 'Piazza La Pira', en: 'Piazza La Pira' },
+    x: 261,
+    z: 1205,
+    r: 76
+  },
+  {
+    id: 'giardino-charlie',
+    name: { it: 'Giardino di Charlie', en: 'Charlie’s Garden' },
+    x: 46,
+    z: 1190,
+    r: 60
   }
 ];
 

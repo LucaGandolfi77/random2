@@ -11,30 +11,21 @@ export function createPeriphery(scene: THREE.Scene): void {
   const buildings = new TriBatch();
   const trees = new GeoBatch();
 
-  for (let z = -250; z <= 1100; z += 30) {
+  for (let z = -250; z <= 1380; z += 30) {
     buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, 1386.5, 0.68, z, 0x5f7247, 0.04);
   }
-  for (let z = 1000; z <= 1100; z += 30) {
-    buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, 776.5, 0.68, z, 0x5f7247, 0.04);
+  for (let x = -1440; x <= 1380; x += 34) {
+    buildings.box(26, 1.3 + ((x / 34) % 4) * 0.12, 2.4, x, 0.65, 1396.5, 0x66764a, -0.03);
   }
-  for (let x = 780; x <= 1370; x += 34) {
-    buildings.box(26, 1.3 + ((x / 34) % 4) * 0.12, 2.4, x, 0.65, 1117.5, 0x66764a, -0.03);
-  }
-  for (let x = -350; x <= 735; x += 34) {
-    buildings.box(26, 1.3 + ((x / 34) % 4) * 0.12, 2.4, x, 0.65, 997.5, 0x66764a, -0.03);
-  }
-  for (let z = -280; z <= 970; z += 30) {
+  for (let z = -280; z <= 1380; z += 30) {
     buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, -1446.5, 0.68, z, 0x5f7247, 0.04);
   }
-  for (let z = -240; z <= 1100; z += 42) {
+  for (let z = -240; z <= 1380; z += 42) {
     addPoplar(trees, 1391, z);
     addPoplar(trees, -1452, z);
   }
-  for (let z = 1000; z <= 1100; z += 42) {
-    addPoplar(trees, 781, z);
-  }
-  for (let x = -340; x <= 720; x += 42) {
-    addPoplar(trees, x, 1001);
+  for (let x = -1440; x <= 1380; x += 42) {
+    addPoplar(trees, x, 1401);
   }
 
   addBusShelter(buildings, 596, 878);
@@ -46,6 +37,8 @@ export function createPeriphery(scene: THREE.Scene): void {
   addAzaleeDistrict(buildings);
   addAzaleeVegetation(trees);
   addAermacchi(scene);
+  addSouthDistrict(buildings);
+  addSouthVegetation(trees);
   addHeron(scene, -1214, -104, 0.6);
   addHeron(scene, -1262, 62, -2.1);
   addHeron(scene, -1206, -52, 1.4);
@@ -67,7 +60,7 @@ export function createPeriphery(scene: THREE.Scene): void {
     scene.add(treeMesh);
   }
 
-  addEdgeSign(scene, 'FIDENZA', 600, 994, Math.PI);
+  addEdgeSign(scene, 'FIDENZA', 600, 1394, Math.PI);
   addEdgeSign(scene, 'FIDENZA', 1384, 360, -Math.PI / 2);
   addEdgeSign(scene, 'LE AZALEE', 790, 620, -Math.PI / 2);
   addEdgeSign(scene, 'CENTRO COMMERCIALE', 930, 900, 0);
@@ -451,6 +444,138 @@ function addAermacchi(scene: THREE.Scene): void {
     }
   });
   scene.add(group);
+}
+
+function addSouthDistrict(batch: TriBatch): void {
+  const sx = -362;
+  const sz = 1220;
+  addFootballField(batch, sx, sz, 64, 100);
+  addGoal(batch, sx, sz - 50);
+  addGoal(batch, sx, sz + 50);
+  for (let i = 0; i < 4; i++) {
+    batch.box(62, 0.35, 1.5, sx, 0.2 + i * 0.35, 1139 - i * 1.4, 0x9a5a46);
+    batch.box(62, 0.35, 1.5, sx, 0.2 + i * 0.35, 1301 + i * 1.4, 0x9a5a46);
+  }
+  batch.box(7, 3.0, 0.4, sx, 4.4, 1312, 0x2b3336);
+  batch.box(7.6, 0.18, 0.6, sx, 6.05, 1312, 0xd8c9a4);
+  for (const [fx, fz] of [
+    [-425, 1158],
+    [-299, 1158],
+    [-425, 1282],
+    [-299, 1282]
+  ] as const) {
+    batch.box(0.22, 10, 0.22, fx, 5, fz, 0x55554f);
+    batch.box(2.6, 0.16, 0.16, fx, 9.8, fz, 0xd8c9a4);
+    batch.box(2.2, 1.0, 0.16, fx, 10.35, fz, 0xf3ead0);
+  }
+
+  addFootballField(batch, -510, 1200, 50, 80);
+  addGoal(batch, -510, 1160);
+  addGoal(batch, -510, 1240);
+
+  batch.box(0.3, 3.6, 8, -503.8, 1.8, 1306, 0x9bbfc5);
+  batch.box(2.0, 0.3, 10, -501.8, 4.0, 1306, 0xd8c7a5);
+  batch.box(0.2, 2.2, 2.4, -503.6, 1.1, 1306, 0x2b3a3e);
+  batch.box(0.3, 3.2, 6, -465.8, 1.6, 1292, 0x9bbfc5);
+  batch.box(2.0, 0.3, 8, -467.8, 3.4, 1292, 0xd8c7a5);
+  batch.box(0.2, 2.2, 2.2, -465.6, 1.1, 1292, 0x2b3a3e);
+
+  flatDisc(batch, 261, 1205, 4.0, 24, 0.052, 0xb9a67f);
+  flatDisc(batch, 261, 1205, 3.2, 24, 0.058, 0x6f9fae);
+  batch.box(0.5, 1.0, 0.5, 261, 0.5, 1205, 0xd3c29e);
+  addBench(batch, 247, 1205, Math.PI / 2);
+  addBench(batch, 275, 1205, -Math.PI / 2);
+  addBench(batch, 261, 1190, 0);
+  addBench(batch, 261, 1220, Math.PI);
+  addFlowerBed(batch, 245, 1188);
+  addFlowerBed(batch, 277, 1222);
+
+  const gx = 46;
+  const gz = 1190;
+  flatDisc(batch, gx, gz, 28, 30, 0.0174, 0x74844e);
+  flatDisc(batch, gx, gz, 25, 28, 0.0178, 0x849356);
+  addTrail(
+    batch,
+    [
+      [gx - 26, gz - 10],
+      [gx - 8, gz - 2],
+      [gx + 10, gz + 5],
+      [gx + 26, gz + 10]
+    ],
+    2.2,
+    0xc5b087
+  );
+  addTrail(
+    batch,
+    [
+      [gx - 12, gz + 20],
+      [gx - 2, gz + 8],
+      [gx + 8, gz - 4],
+      [gx + 18, gz - 18]
+    ],
+    1.9,
+    0xc5b087
+  );
+  flatDisc(batch, gx - 8, gz + 5, 6, 20, 0.0182, 0xd8c9a4);
+  batch.box(0.22, 2.8, 0.22, gx - 11, 1.4, gz + 5, 0x6b5338);
+  batch.box(0.22, 2.8, 0.22, gx - 5, 1.4, gz + 5, 0x6b5338);
+  batch.box(6, 0.12, 0.12, gx - 8, 2.7, gz + 5, 0x6b5338);
+  batch.box(1.0, 0.1, 3.6, gx - 10, 1.2, gz + 8, 0xc2603f);
+  addBench(batch, gx + 13, gz + 9, Math.PI / 2);
+  addBench(batch, gx - 15, gz - 12, -Math.PI / 2);
+  addFlowerBed(batch, gx + 9, gz - 15);
+  addFlowerBed(batch, gx - 10, gz + 16);
+
+  for (let i = 0; i < 6; i++) {
+    const z = 1178 + i * 8;
+    batch.quadUp(-300, 0.021, z - 3.2, -286, 0.021, z - 3.2, -286, 0.021, z + 3.2, -300, 0.021, z + 3.2, 0xd8d0bb);
+  }
+}
+
+function addSouthVegetation(batch: GeoBatch): void {
+  const stadium = [
+    [-430, 1132],
+    [-294, 1132],
+    [-430, 1318],
+    [-294, 1318],
+    [-448, 1200],
+    [-276, 1200]
+  ] as const;
+  for (const [x, z] of stadium) addBroadTree(batch, x, z);
+  for (const [x, z] of [
+    [-620, 1148],
+    [-622, 1260],
+    [-456, 1124],
+    [-590, 1272],
+    [-410, 1272]
+  ] as const) {
+    addBroadTree(batch, x, z);
+  }
+  const piazza = [
+    [244, 1186],
+    [278, 1186],
+    [244, 1224],
+    [278, 1224]
+  ] as const;
+  for (const [x, z] of piazza) addBroadTree(batch, x, z);
+  const garden = [
+    [22, 1166],
+    [72, 1166],
+    [22, 1214],
+    [72, 1214],
+    [46, 1158],
+    [46, 1222]
+  ] as const;
+  for (const [x, z] of garden) addBroadTree(batch, x, z);
+  for (const [x, z, scale] of [
+    [243, 1218, 0.8],
+    [279, 1192, 0.8],
+    [30, 1204, 0.7],
+    [64, 1180, 0.75]
+  ] as const) {
+    batch.sphere(0.85 * scale, x, 0.5, z, 0x5f7046, 0, 0.8);
+    batch.sphere(0.58 * scale, x + 0.6, 0.42, z + 0.3, 0x697b4c, 0, 0.8);
+  }
 }
 
 function addBench(batch: TriBatch, x: number, z: number, ry: number): void {

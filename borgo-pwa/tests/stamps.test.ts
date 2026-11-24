@@ -5,8 +5,8 @@ import { STAMPS, stampEarned } from '../src/data/stamps';
 const ids = new Set(DISCOVERIES.map((place) => place.id));
 
 describe('pilgrim stamps', () => {
-  it('has six stamps and references only real discoveries', () => {
-    expect(STAMPS).toHaveLength(14);
+  it('has stamps for every district and references only real discoveries', () => {
+    expect(STAMPS).toHaveLength(17);
     expect(new Set(STAMPS.map((stamp) => stamp.id)).size).toBe(STAMPS.length);
     for (const stamp of STAMPS) {
       expect(stamp.name.it.length).toBeGreaterThan(0);

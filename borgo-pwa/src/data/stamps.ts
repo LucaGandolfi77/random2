@@ -134,6 +134,33 @@ export const STAMPS: StampSpec[] = [
       en: 'From the skatepark ramps to the Cigala pitches: local sport.'
     },
     placeIds: ['skatepark', 'cigala']
+  },
+  {
+    id: 'stamp-stadio',
+    name: { it: 'Timbro dello Stadio', en: 'Stadium stamp' },
+    description: {
+      it: 'Il campo, le tribune e le torri faro dello stadio Ballotta.',
+      en: 'The pitch, the stands and the floodlights of Ballotta Stadium.'
+    },
+    placeIds: ['stadio', 'centro-ballotta']
+  },
+  {
+    id: 'stamp-pala',
+    name: { it: 'Timbro del Pala', en: 'Sports Hall stamp' },
+    description: {
+      it: 'Il palazzetto e la piscina coperta, luci accese e corsie d’acqua.',
+      en: 'The sports hall and the indoor pool, lights on and swimming lanes.'
+    },
+    placeIds: ['pala', 'piscina']
+  },
+  {
+    id: 'stamp-piazzalapira',
+    name: { it: 'Timbro di Piazza La Pira', en: 'Piazza La Pira stamp' },
+    description: {
+      it: 'La piazza di quartiere e il giardino di Charlie, tra alberi e giochi.',
+      en: 'The neighbourhood square and Charlie’s Garden, among trees and playgrounds.'
+    },
+    placeIds: ['piazza-la-pira', 'giardino-charlie']
   }
 ];
 

@@ -62,7 +62,11 @@ const FULL_MAP_MINOR = new Set([
   'parco-azalee',
   'skatepark',
   'aermacchi',
-  'cigala'
+  'cigala',
+  'centro-ballotta',
+  'pala',
+  'piscina',
+  'giardino-charlie'
 ]);
 
 export function drawFullMap(

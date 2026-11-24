@@ -106,7 +106,7 @@ describe('Fidenza data', () => {
     expect(LETTERS).toHaveLength(3);
     expect(FLOWERS).toHaveLength(5);
     expect(NPCS).toHaveLength(7);
-    expect(DISCOVERIES).toHaveLength(26);
+    expect(DISCOVERIES).toHaveLength(32);
     expect(DELIVERIES).toHaveLength(4);
   });
 
@@ -148,19 +148,22 @@ describe('Fidenza data', () => {
     expect(world.isFree(-1230.4, -55, 0.34)).toBe(false);
   });
 
-  it('contains the eastern district landmarks', () => {
+  it('contains the eastern and southern district landmarks', () => {
     expect(FIDENZA.buildings.some((building) => building.landmark === 'centro-commerciale')).toBe(true);
     expect(world.isFree(900, 420, 0.34)).toBe(true);
     expect(world.isFree(1045, 676, 0.34)).toBe(true);
     expect(world.isFree(1053, 1040, 0.34)).toBe(true);
     expect(FIDENZA_WORLD.maxX).toBe(1390);
-    expect(FIDENZA_WORLD.maxZ).toBe(1120);
+    expect(FIDENZA_WORLD.maxZ).toBe(1400);
+    expect(world.isFree(-362, 1220, 0.34)).toBe(true);
+    expect(world.isFree(261, 1205, 0.34)).toBe(true);
+    expect(world.isFree(46, 1190, 0.34)).toBe(true);
   });
 
   it('uses the Fidenza playable bounds', () => {
     expect(WORLD).toEqual(FIDENZA_WORLD);
     expect(WORLD.maxX - WORLD.minX).toBe(2840);
-    expect(WORLD.maxZ - WORLD.minZ).toBe(1420);
+    expect(WORLD.maxZ - WORLD.minZ).toBe(1700);
   });
 });
 
