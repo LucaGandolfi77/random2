@@ -179,6 +179,33 @@ export const STAMPS: StampSpec[] = [
       en: 'From the station tracks to the freight wagons of the goods yard.'
     },
     placeIds: ['scalo', 'stazione']
+  },
+  {
+    id: 'stamp-sacrocuore',
+    name: { it: 'Timbro del Sacro Cuore', en: 'Sacred Heart stamp' },
+    description: {
+      it: 'Il sagrato tranquillo e gli alberi intorno alla chiesa del sud-ovest.',
+      en: 'The quiet parvis and the trees around the south-western church.'
+    },
+    placeIds: ['sacro-cuore']
+  },
+  {
+    id: 'stamp-giardini',
+    name: { it: 'Timbro dei Giardini', en: 'Gardens stamp' },
+    description: {
+      it: 'Tre parchi, tre ombre diverse: Olmi, De Gasperi e Parcobaleno.',
+      en: 'Three parks, three kinds of shade: Olmi, De Gasperi and Rainbow Park.'
+    },
+    placeIds: ['parco-olmi', 'parco-degasperi', 'parcobaleno']
+  },
+  {
+    id: 'stamp-chieseminori',
+    name: { it: 'Timbro delle Chiese Minori', en: 'Minor Churches stamp' },
+    description: {
+      it: 'Santa Maria Annunziata e San Michele: due chiese discrete nel tessuto della città.',
+      en: 'Santa Maria Annunziata and San Michele: two quiet churches woven into the town.'
+    },
+    placeIds: ['santa-maria', 'san-michele']
   }
 ];
 

@@ -45,6 +45,8 @@ export function createPeriphery(scene: THREE.Scene): void {
   addSouthVegetation(trees);
   addNorthDistrict(buildings, trees);
   addNorthVegetation(trees);
+  addFoundPlaces(buildings);
+  addFoundVegetation(trees);
   addHeron(scene, -1214, -104, 0.6);
   addHeron(scene, -1262, 62, -2.1);
   addHeron(scene, -1206, -52, 1.4);
@@ -736,6 +738,108 @@ function addNorthVegetation(batch: GeoBatch): void {
     [14, -490, 0.75],
     [-40, -488, 0.7],
     [42, -452, 0.8]
+  ] as const) {
+    batch.sphere(0.85 * scale, x, 0.5, z, 0x5f7046, 0, 0.8);
+    batch.sphere(0.58 * scale, x + 0.6, 0.42, z + 0.3, 0x697b4c, 0, 0.8);
+  }
+}
+
+function addFoundPlaces(batch: TriBatch): void {
+  batch.box(58, 0.004, 58, -880, 0.017, 940, 0x74844e);
+  batch.box(50, 0.004, 50, -880, 0.0175, 940, 0x849356);
+  batch.box(58, 0.004, 58, -451, 0.017, 940, 0x74844e);
+  batch.box(50, 0.004, 50, -451, 0.0175, 940, 0x849356);
+  batch.box(54, 0.004, 54, 30, 0.017, 900, 0x74844e);
+  batch.box(46, 0.004, 46, 30, 0.0175, 900, 0x849356);
+  addTrail(batch, [[-648, 858], [-648, 878]], 3.2, 0xc5b087);
+  addBench(batch, -660, 870, Math.PI / 2);
+  addBench(batch, -636, 870, -Math.PI / 2);
+  addFlowerBed(batch, -664, 884);
+  addFlowerBed(batch, -632, 884);
+
+  addTrail(batch, [[-934, 940], [-806, 940]], 2.6, 0xc5b087);
+  addTrail(batch, [[-870, 878], [-870, 1000]], 2.4, 0xc5b087);
+  addBench(batch, -892, 918, Math.PI / 2);
+  addBench(batch, -848, 918, -Math.PI / 2);
+  addBench(batch, -892, 962, Math.PI / 2);
+  addBench(batch, -848, 962, -Math.PI / 2);
+  flatDisc(batch, -870, 970, 6, 20, 0.018, 0xd8c9a4);
+  batch.box(0.22, 2.8, 0.22, -874, 1.4, 970, 0x6b5338);
+  batch.box(0.22, 2.8, 0.22, -866, 1.4, 970, 0x6b5338);
+  batch.box(8, 0.12, 0.12, -870, 2.7, 970, 0x6b5338);
+  flatDisc(batch, -870, 970, 7, 20, 0.0174, 0x849356);
+
+  addTrail(batch, [[0, 900], [60, 900]], 2.4, 0xc5b087);
+  addTrail(batch, [[30, 855], [30, 950]], 2.2, 0xc5b087);
+  addBench(batch, 10, 882, Math.PI / 2);
+  addBench(batch, 50, 918, -Math.PI / 2);
+  addFlowerBed(batch, 30, 860);
+  flatDisc(batch, 30, 925, 6, 20, 0.018, 0xd8c9a4);
+  batch.box(0.22, 2.8, 0.22, 25, 1.4, 925, 0x6b5338);
+  batch.box(0.22, 2.8, 0.22, 35, 1.4, 925, 0x6b5338);
+  batch.box(10, 0.12, 0.12, 30, 2.7, 925, 0x6b5338);
+
+  addTrail(batch, [[-500, 947], [-402, 947]], 2.4, 0xc5b087);
+  addTrail(batch, [[-451, 895], [-451, 1000]], 2.2, 0xc5b087);
+  addBench(batch, -470, 920, Math.PI / 2);
+  addBench(batch, -432, 920, -Math.PI / 2);
+  flatDisc(batch, -451, 970, 7, 20, 0.018, 0xd8c9a4);
+  const colors = [0xc2603f, 0xd9a441, 0x7f8e56, 0x4f8a8b];
+  for (const [i, color] of colors.entries()) {
+    batch.box(4.5, 2.0, 0.15, -462 + i * 7, 1.0, 977, color);
+  }
+  addFlowerBed(batch, -451, 1005);
+  addBench(batch, 108, 28, 0);
+  addFlowerBed(batch, 108, 58);
+  addBench(batch, 359, 134, 0);
+  addFlowerBed(batch, 359, 164);
+  batch.box(3.2, 13, 3.2, -648, 6.5, 892, 0xd7c7ab);
+  batch.box(3.6, 0.3, 3.6, -648, 13.1, 892, 0xb7aa91);
+  batch.tri(-649.8, 13.25, 890.2, -646.2, 13.25, 890.2, -648, 14.8, 892, 0x7b7a70);
+  batch.tri(-646.2, 13.25, 890.2, -646.2, 13.25, 893.8, -648, 14.8, 892, 0x7b7a70);
+  batch.tri(-646.2, 13.25, 893.8, -649.8, 13.25, 893.8, -648, 14.8, 892, 0x7b7a70);
+  batch.tri(-649.8, 13.25, 893.8, -649.8, 13.25, 890.2, -648, 14.8, 892, 0x7b7a70);
+  batch.box(0.16, 2.4, 0.16, -648, 16, 892, 0x4a4035);
+  batch.box(1.2, 0.16, 0.16, -648, 16.7, 892, 0x4a4035);
+  batch.box(0.16, 2.4, 0.16, 359, 18.8, 148, 0x4a4035);
+  batch.box(1.2, 0.16, 0.16, 359, 19.5, 148, 0x4a4035);
+}
+
+function addFoundVegetation(batch: GeoBatch): void {
+  for (const [x, z] of [
+    [-668, 860],
+    [-628, 860],
+    [-660, 842],
+    [-930, 892],
+    [-810, 892],
+    [-930, 988],
+    [-810, 988],
+    [-870, 890],
+    [-870, 992],
+    [0, 880],
+    [60, 880],
+    [0, 920],
+    [60, 920],
+    [-500, 920],
+    [-402, 920],
+    [-500, 975],
+    [-402, 975],
+    [95, 22],
+    [122, 52],
+    [340, 132],
+    [380, 160]
+  ] as const) {
+    addBroadTree(batch, x, z);
+  }
+  for (const [x, z, scale] of [
+    [-660, 878, 0.8],
+    [-636, 878, 0.75],
+    [-890, 930, 0.8],
+    [-850, 950, 0.75],
+    [12, 908, 0.7],
+    [48, 892, 0.75],
+    [-470, 958, 0.8],
+    [-432, 958, 0.7]
   ] as const) {
     batch.sphere(0.85 * scale, x, 0.5, z, 0x5f7046, 0, 0.8);
     batch.sphere(0.58 * scale, x + 0.6, 0.42, z + 0.3, 0x697b4c, 0, 0.8);

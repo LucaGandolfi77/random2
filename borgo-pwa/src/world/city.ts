@@ -115,9 +115,27 @@ export function buildCity(scene: THREE.Scene, collision: CollisionWorld): CityRe
 
 /* ------------------------------------------------------------------ roads */
 
+const AREA_LIFT: Record<string, number> = {
+  urban: 0,
+  industrial: 0.0002,
+  farmland: 0.0005,
+  parking: 0.0008,
+  school: 0.0009,
+  hospital: 0.0009,
+  platform: 0.001,
+  sport: 0.0011,
+  square: 0.0012,
+  water: 0.0013,
+  park: 0.0015,
+  grass: 0.0015,
+  forest: 0.0015,
+  cemetery: 0.0015
+};
+
 function addAreas(batch: TriBatch): void {
   FIDENZA.areas.forEach((area, index) => {
-    batch.polygonTop(area.poly, 0.0146 + (index % 6) * 0.0003, area.color);
+    const lift = AREA_LIFT[area.kind] ?? 0.0008;
+    batch.polygonTop(area.poly, 0.0146 + lift + (index % 5) * 0.0001, area.color);
   });
 }
 
@@ -798,7 +816,13 @@ function addLandmarkSigns(scene: THREE.Scene, signs: THREE.Mesh[]): void {
     { text: 'GIARDINO DI CHARLIE', x: 46, y: 3.0, z: 1165, ry: 0, w: 5.2 },
     { text: 'ISTITUTO AGRARIO', x: -5, y: 4.0, z: -292, ry: 0, w: 5.2 },
     { text: 'SCALO', x: -350, y: 3.2, z: -408, ry: 0, w: 3.2 },
-    { text: 'PARCO NORD', x: 0, y: 3.0, z: -500, ry: 0, w: 3.2 }
+    { text: 'PARCO NORD', x: 0, y: 3.0, z: -500, ry: 0, w: 3.2 },
+    { text: 'SACRO CUORE', x: -648, y: 4.4, z: 874, ry: 0, w: 3.4 },
+    { text: 'PARCO DEGLI OLMI', x: -870, y: 3.0, z: 920, ry: 0, w: 4.6 },
+    { text: 'SANTA MARIA', x: 108, y: 3.8, z: 28, ry: 0, w: 3.2 },
+    { text: 'SAN MICHELE', x: 359, y: 3.8, z: 135, ry: 0, w: 3.4 },
+    { text: 'PARCO DE GASPERI', x: 30, y: 3.0, z: 860, ry: 0, w: 4.4 },
+    { text: 'PARCOBALENO', x: -451, y: 3.0, z: 930, ry: 0, w: 3.6 }
   ];
   for (const entry of entries) {
     const sign = makeSign(entry.text, entry.w, 0.6, entry.x, entry.y, entry.z, entry.ry);

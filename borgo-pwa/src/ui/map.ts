@@ -68,7 +68,11 @@ const FULL_MAP_MINOR = new Set([
   'piscina',
   'giardino-charlie',
   'scalo',
-  'parco-nord'
+  'parco-nord',
+  'parco-degasperi',
+  'parcobaleno',
+  'santa-maria',
+  'san-michele'
 ]);
 
 export function drawFullMap(

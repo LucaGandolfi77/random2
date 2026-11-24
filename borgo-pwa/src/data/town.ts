@@ -713,6 +713,72 @@ export const DISCOVERIES: DiscoverySpec[] = [
     x: 0,
     z: -470,
     radius: 62
+  },
+  {
+    id: 'sacro-cuore',
+    name: { it: 'Chiesa del Sacro Cuore', en: 'Sacred Heart Church' },
+    description: {
+      it: 'Una chiesa del sud-ovest tra il quartiere Luce e i giardini, con un sagrato raccolto e alberi intorno.',
+      en: 'A south-western church between the Luce district and the gardens, with a small parvis and trees around it.'
+    },
+    x: -648,
+    z: 892,
+    radius: 45
+  },
+  {
+    id: 'parco-olmi',
+    name: { it: 'Parco gli Olmi', en: 'Elm Park' },
+    description: {
+      it: 'Il grande parco a ovest, con sentieri larghi, ombra e panchine lontane dal traffico.',
+      en: 'The large western park, with wide paths, shade and benches far from the traffic.'
+    },
+    x: -870,
+    z: 940,
+    radius: 58
+  },
+  {
+    id: 'santa-maria',
+    name: { it: 'Chiesa di Santa Maria Annunziata', en: 'Church of Santa Maria Annunziata' },
+    description: {
+      it: 'Una chiesa del centro, stretta tra le case e vicina al viavai di Piazza Garibaldi.',
+      en: 'A church in the centre, tucked between the houses and close to the bustle of Piazza Garibaldi.'
+    },
+    x: 108,
+    z: 43,
+    radius: 30
+  },
+  {
+    id: 'san-michele',
+    name: { it: 'Ex Chiesa di San Michele Arcangelo', en: 'Former Church of San Michele Arcangelo' },
+    description: {
+      it: 'Una chiesa sconsacrata vicino alla Gran Madre, con la facciata stretta e il campanile che guarda il quartiere.',
+      en: 'A deconsecrated church near the Gran Madre, with a narrow façade and a bell tower overlooking the district.'
+    },
+    x: 359,
+    z: 148,
+    radius: 38
+  },
+  {
+    id: 'parco-degasperi',
+    name: { it: 'Parco De Gasperi', en: 'De Gasperi Park' },
+    description: {
+      it: 'Un parco di quartiere a sud, con prato, giochi e panchine sotto gli alberi.',
+      en: 'A neighbourhood park to the south, with lawn, play equipment and benches under the trees.'
+    },
+    x: 30,
+    z: 900,
+    radius: 58
+  },
+  {
+    id: 'parcobaleno',
+    name: { it: 'Parcobaleno', en: 'Rainbow Park' },
+    description: {
+      it: 'Il parco colorato del sud-ovest, con giochi vivaci e prato aperto verso la campagna.',
+      en: 'The colourful south-western park, with bright play equipment and open lawn towards the countryside.'
+    },
+    x: -451,
+    z: 947,
+    radius: 70
   }
 ];
 
@@ -933,6 +999,48 @@ export const ZONES: ZoneSpec[] = [
     x: 0,
     z: -470,
     r: 110
+  },
+  {
+    id: 'sacro-cuore',
+    name: { it: 'Sacro Cuore', en: 'Sacred Heart' },
+    x: -648,
+    z: 882,
+    r: 76
+  },
+  {
+    id: 'parco-olmi',
+    name: { it: 'Parco gli Olmi', en: 'Elm Park' },
+    x: -870,
+    z: 940,
+    r: 105
+  },
+  {
+    id: 'santa-maria',
+    name: { it: 'Santa Maria Annunziata', en: 'Santa Maria Annunziata' },
+    x: 108,
+    z: 43,
+    r: 48
+  },
+  {
+    id: 'san-michele',
+    name: { it: 'San Michele', en: 'San Michele' },
+    x: 359,
+    z: 148,
+    r: 48
+  },
+  {
+    id: 'parco-degasperi',
+    name: { it: 'Parco De Gasperi', en: 'De Gasperi Park' },
+    x: 30,
+    z: 900,
+    r: 78
+  },
+  {
+    id: 'parcobaleno',
+    name: { it: 'Parcobaleno', en: 'Rainbow Park' },
+    x: -451,
+    z: 947,
+    r: 82
   }
 ];
 

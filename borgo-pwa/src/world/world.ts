@@ -256,10 +256,16 @@ function createAmbient(scene: THREE.Scene, mobile: boolean): PersonRig[] {
     { look: 'citizen2', x: -60, z: -395, rot: -0.4 },
     { look: 'citizen3', x: -350, z: -445, rot: 2.0 },
     { look: 'citizen1', x: 0, z: -470, rot: -1.2 },
-    { look: 'citizen2', x: 12, z: -440, rot: 0.4 }
+    { look: 'citizen2', x: 12, z: -440, rot: 0.4 },
+    { look: 'citizen1', x: -648, z: 865, rot: 0.2 },
+    { look: 'citizen3', x: -870, z: 910, rot: -1.1 },
+    { look: 'citizen2', x: 30, z: 910, rot: 1.4 },
+    { look: 'citizen1', x: -451, z: 955, rot: -0.6 },
+    { look: 'citizen3', x: 359, z: 135, rot: 2.0 },
+    { look: 'citizen2', x: 108, z: 55, rot: -1.8 }
   ];
   const rigs: PersonRig[] = [];
-  for (const person of people.slice(0, mobile ? 10 : 34)) {
+  for (const person of people.slice(0, mobile ? 10 : 40)) {
     const rig = createPerson(person.look);
     rig.group.position.set(person.x, 0, person.z);
     rig.group.rotation.y = person.rot;
