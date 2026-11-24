@@ -20,7 +20,9 @@ const sourceCity = join(repo, 'fidenza-city-v3', 'data', 'city.json');
 const sourceMap = join(repo, 'fidenza-city-v3', 'maps', 'fidenza', 'map.json');
 const outFile = join(root, 'src', 'data', 'fidenza.json');
 
-const PLAY_BOUNDS = { minX: -1450, maxX: 780, minZ: -300, maxZ: 1000 };
+const PLAY_BOUNDS = { minX: -1450, maxX: 1390, minZ: -300, maxZ: 1120 };
+const EAST_EDGE = 780;
+const WEST_MAX_Z = 1000;
 const BUFFER = 60;
 const VIEW = {
   minX: PLAY_BOUNDS.minX - BUFFER,
@@ -44,6 +46,27 @@ function project(lat, lon) {
 
 function inside(point, bounds) {
   return point.x >= bounds.minX && point.x <= bounds.maxX && point.z >= bounds.minZ && point.z <= bounds.maxZ;
+}
+
+/* The playable city is L-shaped: the historic centre ends at z=1000, while
+   the eastern district continues south to include the Cigala sports centre. */
+function insidePlayable(point, margin = 0) {
+  if (!inside(point, {
+    minX: PLAY_BOUNDS.minX - margin,
+    maxX: PLAY_BOUNDS.maxX + margin,
+    minZ: PLAY_BOUNDS.minZ - margin,
+    maxZ: PLAY_BOUNDS.maxZ + margin
+  })) {
+    return false;
+  }
+  if (point.x <= EAST_EDGE + margin) return point.z <= WEST_MAX_Z + margin;
+  return true;
+}
+
+function insideView(point) {
+  if (point.x < VIEW.minX || point.x > VIEW.maxX || point.z < VIEW.minZ || point.z > VIEW.maxZ) return false;
+  if (point.x <= EAST_EDGE) return point.z <= WEST_MAX_Z + BUFFER;
+  return true;
 }
 
 function bboxOf(poly) {
@@ -163,7 +186,8 @@ const LANDMARK_NAMES = new Map([
   ['Chiesa di San Pietro', 'sanpietro'],
   ['Oratorio di San Giorgio', 'oratorio'],
   ['Chiesa di Santa Maria Annunziata', 'santamaria'],
-  ['Fidenza', 'stazione']
+  ['Fidenza', 'stazione'],
+  ['Centro Commerciale Fidenza', 'centro-commerciale']
 ]);
 
 const buildings = [];
@@ -173,13 +197,15 @@ for (const building of city.buildings) {
   const box = bboxOf(raw);
   if (!intersects(box, VIEW)) continue;
   const center = centroid(raw);
-  if (!inside(center, VIEW)) continue;
+  if (!insideView(center)) continue;
   const area = building.area || shoelace(raw);
   if (area < 9) continue;
   const poly = cleanPoly(raw, 0.35);
   if (poly.length < 3) continue;
   const finalArea = shoelace(poly);
   if (finalArea < 8) continue;
+  /* The new Piazza delle Azalee replaces a dense residential block. */
+  if (Math.hypot(center.x - 900, center.z - 420) < 30) continue;
   const landmark = LANDMARK_NAMES.get(building.name || '') || null;
   const height = clamp(Number(building.h) || 8.5, 3, 24);
   buildings.push({
@@ -231,7 +257,7 @@ function clipRuns(points) {
   let run = [];
   for (const [x, z] of points) {
     const p = { x, z };
-    if (inside(p, VIEW)) {
+    if (insideView(p)) {
       run.push([round(x), round(z)]);
     } else if (run.length) {
       if (run.length >= 2) runs.push(run);
@@ -327,7 +353,7 @@ for (const area of city.areas) {
   const box = bboxOf(raw);
   if (!intersects(box, VIEW)) continue;
   const center = area.x != null && area.z != null ? { x: area.x, z: area.z } : centroid(raw);
-  if (!inside(center, VIEW)) continue;
+  if (!insideView(center)) continue;
   if ((area.area || shoelace(raw)) < 80) continue;
   const poly = cleanPoly(raw, 0.6);
   if (poly.length < 3) continue;
@@ -341,7 +367,7 @@ for (const area of city.areas) {
 }
 
 const trees = city.trees
-  .filter((tree) => inside({ x: tree.x, z: tree.z }, VIEW))
+  .filter((tree) => insideView({ x: tree.x, z: tree.z }))
   .map((tree) => ({
     x: round(tree.x),
     z: round(tree.z),
@@ -350,7 +376,7 @@ const trees = city.trees
   }));
 
 const furniture = (city.streetFurniture || [])
-  .filter((item) => inside({ x: item.x, z: item.z }, PLAY_BOUNDS))
+  .filter((item) => insidePlayable({ x: item.x, z: item.z }))
   .map((item) => ({ type: item.type, x: round(item.x), z: round(item.z) }));
 
 const places = (manifest.places || [])
@@ -365,7 +391,7 @@ const places = (manifest.places || [])
       radius: place.radius || 8
     };
   })
-  .filter((place) => inside(place, VIEW));
+  .filter((place) => insideView(place));
 
 /* Correct two stale manifest coordinates using the OSM POI / square. */
 const comunale = places.find((place) => place.id === 'comunale');
@@ -382,8 +408,8 @@ if (obelisco) {
 const bounds = bboxOf(buildings.map((b) => [b.x, b.z]));
 const output = {
   meta: {
-    id: 'fidenza-con-stirone',
-    name: 'Fidenza — centro, quartieri e Parco dello Stirone',
+    id: 'fidenza-con-azalee',
+    name: 'Fidenza — centro, quartieri, Stirone e Le Azalee',
     source: 'OpenStreetMap via Overpass (snapshot fidenza-city-v3)',
     attribution: '© OpenStreetMap contributors (ODbL 1.0)',
     license: 'ODbL-1.0',
@@ -410,8 +436,7 @@ const output = {
   railways,
   trees,
   furniture,
-  places,
-  waterways
+  places
 };
 
 mkdirSync(dirname(outFile), { recursive: true });

@@ -11,8 +11,14 @@ export function createPeriphery(scene: THREE.Scene): void {
   const buildings = new TriBatch();
   const trees = new GeoBatch();
 
-  for (let z = -250; z <= 950; z += 30) {
+  for (let z = -250; z <= 1100; z += 30) {
+    buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, 1386.5, 0.68, z, 0x5f7247, 0.04);
+  }
+  for (let z = 1000; z <= 1100; z += 30) {
     buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, 776.5, 0.68, z, 0x5f7247, 0.04);
+  }
+  for (let x = 780; x <= 1370; x += 34) {
+    buildings.box(26, 1.3 + ((x / 34) % 4) * 0.12, 2.4, x, 0.65, 1117.5, 0x66764a, -0.03);
   }
   for (let x = -350; x <= 735; x += 34) {
     buildings.box(26, 1.3 + ((x / 34) % 4) * 0.12, 2.4, x, 0.65, 997.5, 0x66764a, -0.03);
@@ -20,9 +26,12 @@ export function createPeriphery(scene: THREE.Scene): void {
   for (let z = -280; z <= 970; z += 30) {
     buildings.box(2.4, 1.35 + ((z / 30) % 3) * 0.15, 24, -1446.5, 0.68, z, 0x5f7247, 0.04);
   }
-  for (let z = -240; z <= 930; z += 42) {
-    addPoplar(trees, 781, z);
+  for (let z = -240; z <= 1100; z += 42) {
+    addPoplar(trees, 1391, z);
     addPoplar(trees, -1452, z);
+  }
+  for (let z = 1000; z <= 1100; z += 42) {
+    addPoplar(trees, 781, z);
   }
   for (let x = -340; x <= 720; x += 42) {
     addPoplar(trees, x, 1001);
@@ -34,6 +43,9 @@ export function createPeriphery(scene: THREE.Scene): void {
   addLuceArtwork(buildings);
   addStironePark(buildings);
   addStironeVegetation(trees);
+  addAzaleeDistrict(buildings);
+  addAzaleeVegetation(trees);
+  addAermacchi(scene);
   addHeron(scene, -1214, -104, 0.6);
   addHeron(scene, -1262, 62, -2.1);
   addHeron(scene, -1206, -52, 1.4);
@@ -56,7 +68,9 @@ export function createPeriphery(scene: THREE.Scene): void {
   }
 
   addEdgeSign(scene, 'FIDENZA', 600, 994, Math.PI);
-  addEdgeSign(scene, 'FIDENZA', 775, 360, -Math.PI / 2);
+  addEdgeSign(scene, 'FIDENZA', 1384, 360, -Math.PI / 2);
+  addEdgeSign(scene, 'LE AZALEE', 790, 620, -Math.PI / 2);
+  addEdgeSign(scene, 'CENTRO COMMERCIALE', 930, 900, 0);
   addEdgeSign(scene, 'FIDENZA', -1444, 360, Math.PI / 2);
 }
 
@@ -219,6 +233,224 @@ function addTrail(
     const nz = (-dx / length) * half;
     batch.quadUp(ax + nx, 0.0196, az + nz, bx + nx, 0.0196, bz + nz, bx - nx, 0.0196, bz - nz, ax - nx, 0.0196, az - nz, color);
   }
+}
+
+function flatDisc(
+  batch: TriBatch,
+  x: number,
+  z: number,
+  radius: number,
+  segments: number,
+  y: number,
+  color: number
+): void {
+  const points: number[] = [];
+  for (let i = 0; i < segments; i++) {
+    const angle = (i / segments) * Math.PI * 2;
+    points.push(x + Math.cos(angle) * radius, z + Math.sin(angle) * radius);
+  }
+  batch.polygonTop(points, y, color);
+}
+
+function addAzaleeDistrict(batch: TriBatch): void {
+  const px = 900;
+  const pz = 420;
+  flatDisc(batch, px, pz, 4.2, 24, 0.052, 0xb9a67f);
+  flatDisc(batch, px, pz, 3.4, 24, 0.058, 0x6f9fae);
+  batch.box(0.55, 1.1, 0.55, px, 0.55, pz, 0xd3c29e);
+  flatDisc(batch, px, pz, 1.15, 16, 1.14, 0xd9c9a6);
+  addBench(batch, px - 12, pz, Math.PI / 2);
+  addBench(batch, px + 12, pz, -Math.PI / 2);
+  addBench(batch, px, pz - 12, 0);
+  addBench(batch, px, pz + 12, Math.PI);
+  addFlowerBed(batch, px - 13, pz + 10);
+  addFlowerBed(batch, px + 13, pz - 10);
+  addTrail(batch, [[864, 420], [900, 420]], 3.4, 0xc5b087);
+  addTrail(batch, [[900, 420], [936, 444]], 3.4, 0xc5b087);
+
+  const gx = 900;
+  const gz = 790;
+  flatDisc(batch, gx, gz, 30, 30, 0.0174, 0x74844e);
+  flatDisc(batch, gx, gz, 27, 28, 0.0178, 0x849356);
+  addTrail(
+    batch,
+    [
+      [gx - 27, gz - 17],
+      [gx - 8, gz - 5],
+      [gx + 10, gz + 7],
+      [gx + 27, gz + 17]
+    ],
+    2.4,
+    0xc5b087
+  );
+  addTrail(
+    batch,
+    [
+      [gx - 19, gz + 19],
+      [gx - 4, gz + 8],
+      [gx + 9, gz - 5],
+      [gx + 21, gz - 19]
+    ],
+    2.0,
+    0xc5b087
+  );
+  flatDisc(batch, gx - 8, gz + 6, 7, 20, 0.0182, 0xd8c9a4);
+  batch.box(0.25, 3.0, 0.25, gx - 12, 1.5, gz + 6, 0x6b5338);
+  batch.box(0.25, 3.0, 0.25, gx - 4, 1.5, gz + 6, 0x6b5338);
+  batch.box(8, 0.12, 0.12, gx - 8, 2.9, gz + 6, 0x6b5338);
+  batch.box(1.2, 0.1, 4.2, gx - 10, 1.4, gz + 9, 0xc2603f);
+  batch.box(0.1, 1.4, 0.1, gx - 10.5, 0.7, gz + 11, 0x6b5338);
+  addBench(batch, gx + 14, gz + 10, Math.PI / 2);
+  addBench(batch, gx - 16, gz - 14, -Math.PI / 2);
+  addFlowerBed(batch, gx + 10, gz - 16);
+  addFlowerBed(batch, gx - 12, gz + 17);
+
+  for (let i = 0; i < 7; i++) {
+    const z = 800 + i * 16;
+    batch.quadUp(930, 0.021, z - 5, 944, 0.021, z - 5, 944, 0.021, z + 5, 930, 0.021, z + 5, 0xd8d0bb);
+  }
+  addBench(batch, 946, 860, Math.PI / 2);
+
+  const sx = 1045;
+  const sz = 676;
+  batch.box(28, 0.12, 20, sx, 0.06, sz, 0xb7b3a8);
+  batch.box(10, 1.4, 4, sx - 7, 0.7, sz - 5, 0x9a958b);
+  batch.box(8, 1.0, 5, sx + 5, 0.5, sz + 5, 0x9a958b);
+  batch.box(5, 1.8, 3, sx + 9, 0.9, sz - 6, 0x8f8a80);
+  batch.box(7, 0.8, 3, sx - 4, 0.4, sz + 6, 0x9a958b);
+  for (let i = 0; i < 5; i++) {
+    batch.box(12 - i * 1.8, 0.45, 2.0, sx, 0.22 + i * 0.45, sz - 8 + i * 2, 0x9a958b);
+  }
+  for (const side of [-6, 6]) {
+    batch.box(0.14, 1.1, 0.14, sx + side, 0.55, sz + 2, 0x4b4034);
+  }
+  batch.box(12, 0.12, 0.12, sx, 1.05, sz + 2, 0xd8c9a4);
+  const graffiti = [0xc2603f, 0x4f8a8b, 0xd9a441, 0x7f8e56];
+  for (const [i, color] of graffiti.entries()) {
+    batch.box(5, 2.2, 0.12, sx - 8 + i * 6, 1.1, sz - 9.8, color);
+  }
+
+  const ax = 978;
+  const az = 672;
+  batch.box(8.6, 0.5, 6.4, ax, 0.25, az, 0xcabda6);
+  batch.box(8.0, 0.16, 5.8, ax, 0.58, az, 0xb7aa91);
+  batch.box(1.6, 1.4, 1.6, ax, 1.25, az, 0xb7aa91);
+  batch.box(0.8, 1.4, 0.8, ax, 2.55, az, 0xb7aa91);
+
+  const cx = 1053;
+  const cz = 1040;
+  addFootballField(batch, cx, cz, 44, 64);
+  addGoal(batch, cx, cz - 32);
+  addGoal(batch, cx, cz + 32);
+  batch.box(12, 3.8, 8, 1120, 1.9, 990, 0xe3d3b8);
+  batch.box(12.6, 0.25, 8.6, 1120, 3.95, 990, 0xb5684a);
+  batch.box(2.2, 2.2, 0.12, 1120, 1.1, 986, 0x35474d);
+  addBench(batch, 1010, 950, 0);
+}
+
+function addFlowerBed(batch: TriBatch, x: number, z: number): void {
+  batch.box(4.4, 0.25, 1.8, x, 0.12, z, 0x6b5338);
+  for (let i = 0; i < 7; i++) {
+    batch.box(0.45, 0.18, 0.45, x - 1.8 + i * 0.6, 0.27, z, i % 2 ? 0xd9a441 : 0xc2603f);
+  }
+}
+
+function addFootballField(batch: TriBatch, x: number, z: number, w: number, d: number): void {
+  const y = 0.035;
+  batch.polygonTop([x - w / 2, z - d / 2, x + w / 2, z - d / 2, x + w / 2, z + d / 2, x - w / 2, z + d / 2], 0.0175, 0x6f8448);
+  batch.box(0.16, 0.02, d, x - w / 2, y, z, 0xf1ead7);
+  batch.box(0.16, 0.02, d, x + w / 2, y, z, 0xf1ead7);
+  batch.box(w, 0.02, 0.16, x, y, z - d / 2, 0xf1ead7);
+  batch.box(w, 0.02, 0.16, x, y, z + d / 2, 0xf1ead7);
+  batch.box(w, 0.02, 0.16, x, y, z, 0xf1ead7);
+  flatDisc(batch, x, z, 3.2, 20, y + 0.001, 0xbcb4a1);
+  flatDisc(batch, x, z, 2.9, 20, y + 0.002, 0x9a8f7a);
+}
+
+function addGoal(batch: TriBatch, x: number, z: number): void {
+  for (const side of [-3.2, 3.2]) {
+    batch.box(0.12, 2.2, 0.12, x + side, 1.1, z, 0xf1ead7);
+  }
+  batch.box(6.5, 0.12, 0.12, x, 2.2, z, 0xf1ead7);
+}
+
+function addAzaleeVegetation(batch: GeoBatch): void {
+  const piazza = [
+    [872, 392],
+    [928, 392],
+    [872, 448],
+    [928, 448],
+    [858, 420],
+    [942, 420]
+  ] as const;
+  for (const [x, z] of piazza) addBroadTree(batch, x, z);
+  const park = [
+    [870, 766],
+    [930, 766],
+    [868, 814],
+    [932, 814],
+    [856, 790],
+    [944, 790],
+    [884, 748],
+    [916, 832]
+  ] as const;
+  for (const [x, z] of park) addBroadTree(batch, x, z);
+  for (const z of [800, 840, 880, 920]) addBroadTree(batch, 928, z);
+  for (const [x, z] of [
+    [1000, 980],
+    [1100, 980],
+    [1000, 1094],
+    [1100, 1094]
+  ] as const) {
+    addBroadTree(batch, x, z);
+  }
+  for (const [x, z, scale] of [
+    [880, 410, 0.8],
+    [920, 430, 0.9],
+    [880, 445, 0.7],
+    [920, 405, 0.75],
+    [875, 800, 0.8],
+    [925, 800, 0.85]
+  ] as const) {
+    batch.sphere(0.9 * scale, x, 0.5, z, 0x5f7046, 0, 0.8);
+    batch.sphere(0.62 * scale, x + 0.7, 0.42, z + 0.3, 0x697b4c, 0, 0.8);
+  }
+}
+
+function addAermacchi(scene: THREE.Scene): void {
+  const group = new THREE.Group();
+  group.position.set(978, 3.7, 672);
+  group.rotation.y = Math.PI / 4;
+  const body = new THREE.MeshLambertMaterial({ color: 0xe7e3d6, flatShading: true });
+  const red = new THREE.MeshLambertMaterial({ color: 0xb9553b, flatShading: true });
+  const glass = new THREE.MeshLambertMaterial({ color: 0x355a75, flatShading: true });
+  const fuselage = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 8.4, 8), body);
+  fuselage.rotation.z = Math.PI / 2;
+  group.add(fuselage);
+  const nose = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.55, 2.0, 8), body);
+  nose.rotation.z = Math.PI / 2;
+  nose.position.x = -5.1;
+  group.add(nose);
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.18, 8.2), body);
+  wing.position.set(0.2, 0, 0);
+  group.add(wing);
+  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.5, 2.0), red);
+  tail.position.set(-3.4, 0.75, 0);
+  group.add(tail);
+  const stabilizer = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.18, 1.1), body);
+  stabilizer.position.set(-3.6, 0.15, 0);
+  group.add(stabilizer);
+  const canopy = new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 0), glass);
+  canopy.position.set(2.0, 0.5, 0);
+  canopy.scale.set(0.9, 0.65, 0.75);
+  group.add(canopy);
+  group.traverse((object) => {
+    if (object instanceof THREE.Mesh) {
+      object.castShadow = true;
+      object.receiveShadow = true;
+    }
+  });
+  scene.add(group);
 }
 
 function addBench(batch: TriBatch, x: number, z: number, ry: number): void {

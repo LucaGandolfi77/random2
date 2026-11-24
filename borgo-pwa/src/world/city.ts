@@ -58,6 +58,7 @@ export function buildCity(scene: THREE.Scene, collision: CollisionWorld): CityRe
       if (building.landmark === 'sanpaolo' || building.landmark === 'santantonio') {
         addChurchTower(batch, building, building.landmark === 'sanpaolo' ? 0xd7c7ab : 0xd0bea2);
       }
+      if (building.landmark === 'centro-commerciale') addCentroCommerciale(batch, building);
     }
   }
 
@@ -115,9 +116,9 @@ export function buildCity(scene: THREE.Scene, collision: CollisionWorld): CityRe
 /* ------------------------------------------------------------------ roads */
 
 function addAreas(batch: TriBatch): void {
-  for (const area of FIDENZA.areas) {
-    batch.polygonTop(area.poly, 0.015, area.color);
-  }
+  FIDENZA.areas.forEach((area, index) => {
+    batch.polygonTop(area.poly, 0.0146 + (index % 6) * 0.0003, area.color);
+  });
 }
 
 function addWaterways(batch: TriBatch): void {
@@ -256,7 +257,8 @@ function addPiazzas(batch: TriBatch): void {
     { x: -700, z: 405, r: 17 },
     { x: -680, z: -215, r: 16 },
     { x: 560, z: 160, r: 18 },
-    { x: 600, z: 880, r: 18 }
+    { x: 600, z: 880, r: 18 },
+    { x: 900, z: 420, r: 15 }
   ];
   for (const square of squares) {
     batch.disc(square.x, 0.03, square.z, square.r + 1.6, 36, 0xb9a67f);
@@ -780,7 +782,13 @@ function addLandmarkSigns(scene: THREE.Scene, signs: THREE.Mesh[]): void {
     { text: 'LUCE', x: -800, y: 3.4, z: 240, ry: Math.PI, w: 2.4 },
     { text: 'SAN PAOLO', x: -694, y: 4.2, z: 374, ry: Math.PI, w: 3.2 },
     { text: "SANT'ANTONIO", x: -676, y: 4.2, z: -224, ry: Math.PI, w: 3.6 },
-    { text: 'LA LUCE', x: -620, y: 3.2, z: -162, ry: Math.PI, w: 2.8 }
+    { text: 'LA LUCE', x: -620, y: 3.2, z: -162, ry: Math.PI, w: 2.8 },
+    { text: 'LE AZALEE', x: 900, y: 3.2, z: 403, ry: 0, w: 3.0 },
+    { text: 'CENTRO', x: 954, y: 6.4, z: 850, ry: -Math.PI / 2, w: 4.2 },
+    { text: 'PARCO DELLE AZALEE', x: 900, y: 3.0, z: 758, ry: 0, w: 4.6 },
+    { text: 'SKATEPARK', x: 1045, y: 3.0, z: 650, ry: 0, w: 3.2 },
+    { text: 'AERMACCHI MB-326', x: 978, y: 3.4, z: 650, ry: 0, w: 4.8 },
+    { text: 'CIGALA', x: 1053, y: 3.4, z: 1016, ry: 0, w: 3.0 }
   ];
   for (const entry of entries) {
     const sign = makeSign(entry.text, entry.w, 0.6, entry.x, entry.y, entry.z, entry.ry);
@@ -895,6 +903,29 @@ function addChurchTower(batch: TriBatch, building: FidenzaBuilding, stone: numbe
   batch.box(0.8, 0.1, 0.1, towerX, height + 5.7, towerZ, 0x4a4035);
 }
 
+function addCentroCommerciale(batch: TriBatch, building: FidenzaBuilding): void {
+  const box = boundsOf(building.poly);
+  const z = building.z;
+  const west = box.minX;
+  batch.box(8, 0.35, 5, west - 2.0, 5.0, z, 0xd8c7a5);
+  batch.box(0.35, 4.2, 7.8, west - 0.9, 2.3, z, 0x9bbfc5);
+  for (const offset of [-3.9, -2.6, -1.3, 0, 1.3, 2.6, 3.9]) {
+    batch.box(0.12, 4.4, 0.12, west - 1.14, 2.3, z + offset, 0x35474d);
+  }
+  batch.box(0.16, 0.18, 8.0, west - 1.14, 4.48, z, 0x35474d);
+  batch.box(0.16, 0.18, 8.0, west - 1.14, 0.14, z, 0x35474d);
+  batch.box(0.2, 2.2, 2.4, west - 1.17, 1.1, z, 0x2b3a3e);
+  batch.box(0.2, 0.8, 9.4, west - 0.1, 4.9, z, 0xf1e6d0);
+  for (const offset of [-42, -28, 28, 42]) {
+    batch.box(0.14, 2.6, 3.4, west - 0.05, 2.2, z + offset, 0x3b4b50);
+  }
+  for (let offset = -42; offset <= 42; offset += 10) {
+    batch.box(0.12, 1.7, 3.0, west - 0.05, 6.7, z + offset, 0x3b4b50);
+  }
+  batch.box(2.5, 0.16, 1.2, west - 1.4, 0.12, z, 0xb7aa91);
+  batch.box(Math.min(42, box.maxX - box.minX - 12), 0.16, 6, building.x + 6, building.h + 0.74, z + 18, 0x7fa9b3);
+}
+
 function addMuseo(batch: TriBatch): void {
   const x = 379.6;
   const z = 185.9;
@@ -926,7 +957,9 @@ function generateLamps(collision: CollisionWorld): Array<{ x: number; z: number 
       if (length < 24) continue;
       const mx = (ax + bx) / 2;
       const mz = (az + bz) / 2;
-      if (mx < -360 || mx > 290 || mz < -230 || mz > 235) continue;
+      const centre = mx >= -360 && mx <= 290 && mz >= -230 && mz <= 235;
+      const east = mx >= 780 && mx <= 1380 && mz >= -280 && mz <= 1110;
+      if (!centre && !east) continue;
       const nx = (bz - az) / length;
       const nz = -(bx - ax) / length;
       const x = Math.round((mx + nx * (road.w / 2 + 1.6)) * 2) / 2;

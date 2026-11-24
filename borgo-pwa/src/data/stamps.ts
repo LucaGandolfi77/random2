@@ -107,6 +107,33 @@ export const STAMPS: StampSpec[] = [
       en: 'The light wood, its clearings and the outlook over the plain.'
     },
     placeIds: ['pioppi']
+  },
+  {
+    id: 'stamp-azalee',
+    name: { it: 'Timbro delle Azalee', en: 'Azalee stamp' },
+    description: {
+      it: 'Il quartiere est, la piazza nuova e il giardino tra le case.',
+      en: 'The eastern district, its new square and the garden among the houses.'
+    },
+    placeIds: ['azalee', 'parco-azalee']
+  },
+  {
+    id: 'stamp-centro',
+    name: { it: 'Timbro del Centro', en: 'Shopping Centre stamp' },
+    description: {
+      it: 'Vetrine, parcheggi e il jet che ricorda il volo fidentino.',
+      en: 'Shop windows, car parks and the jet that remembers Fidenza’s aviation history.'
+    },
+    placeIds: ['centro-commerciale', 'aermacchi']
+  },
+  {
+    id: 'stamp-sport',
+    name: { it: 'Timbro dello Sport', en: 'Sports stamp' },
+    description: {
+      it: 'Dalle rampe dello skatepark ai campi del Cigala: lo sport di quartiere.',
+      en: 'From the skatepark ramps to the Cigala pitches: local sport.'
+    },
+    placeIds: ['skatepark', 'cigala']
   }
 ];
 

@@ -251,6 +251,42 @@ export const VEHICLES: VehicleSpec[] = [
     z: -30,
     heading: -Math.PI / 2,
     color: 0xb9553b
+  },
+  {
+    id: 'car-azalee',
+    kind: 'car',
+    name: { it: 'Auto delle Azalee', en: 'Azalee car' },
+    x: 930,
+    z: 860,
+    heading: Math.PI,
+    color: 0x8e5b45
+  },
+  {
+    id: 'bike-azalee',
+    kind: 'bike',
+    name: { it: 'Bici delle Azalee', en: 'Azalee bike' },
+    x: 870,
+    z: 440,
+    heading: Math.PI / 2,
+    color: 0x4f8a8b
+  },
+  {
+    id: 'car-cigala',
+    kind: 'car',
+    name: { it: 'Auto del Cigala', en: 'Cigala car' },
+    x: 1010,
+    z: 1000,
+    heading: -Math.PI / 2,
+    color: 0x6b7d8c
+  },
+  {
+    id: 'bike-skate',
+    kind: 'bike',
+    name: { it: 'Bici dello Skatepark', en: 'Skatepark bike' },
+    x: 1020,
+    z: 650,
+    heading: 0,
+    color: 0xc2603f
   }
 ];
 
@@ -476,6 +512,72 @@ export const DISCOVERIES: DiscoverySpec[] = [
     x: -1320,
     z: 110,
     radius: 56
+  },
+  {
+    id: 'azalee',
+    name: { it: 'Le Azalee', en: 'Le Azalee' },
+    description: {
+      it: 'Il quartiere residenziale a est: viali larghi, villette con giardino, negozi di vicinato e una piazza nuova.',
+      en: 'The residential district to the east: wide avenues, villas with gardens, local shops and a new square.'
+    },
+    x: 900,
+    z: 420,
+    radius: 52
+  },
+  {
+    id: 'centro-commerciale',
+    name: { it: 'Centro Commerciale Fidenza', en: 'Fidenza Shopping Centre' },
+    description: {
+      it: 'Il grande centro commerciale della periferia est, con parcheggi, vetrine e il viavai dei sabati.',
+      en: 'The large shopping centre on the eastern edge, with car parks, shop windows and Saturday bustle.'
+    },
+    x: 980,
+    z: 850,
+    radius: 60
+  },
+  {
+    id: 'parco-azalee',
+    name: { it: 'Parco delle Azalee', en: 'Azalee Park' },
+    description: {
+      it: 'Un giardino di quartiere tra il centro commerciale e le case: prato, giochi, panchine e aiuole fiorite.',
+      en: 'A neighbourhood garden between the shopping centre and the houses: lawn, playground, benches and flower beds.'
+    },
+    x: 900,
+    z: 790,
+    radius: 50
+  },
+  {
+    id: 'skatepark',
+    name: { it: 'Skatepark Fidenza', en: 'Fidenza Skatepark' },
+    description: {
+      it: 'Rampa, bowl e graffiti: il punto di ritrovo dei ragazzi della periferia est.',
+      en: 'Ramps, bowls and graffiti: the meeting point for the kids of the eastern edge.'
+    },
+    x: 1045,
+    z: 676,
+    radius: 42
+  },
+  {
+    id: 'aermacchi',
+    name: { it: 'Aermacchi MB-326', en: 'Aermacchi MB-326' },
+    description: {
+      it: 'Un jet militare su un piedistallo, memoria dell’industria aeronautica fidentina, accanto allo skatepark.',
+      en: 'A military jet on a pedestal, remembering Fidenza’s aeronautical industry, beside the skatepark.'
+    },
+    x: 978,
+    z: 672,
+    radius: 30
+  },
+  {
+    id: 'cigala',
+    name: { it: 'Centro Sportivo “Cigala Andrea”', en: 'Cigala Andrea Sports Centre' },
+    description: {
+      it: 'Campi da calcio, spogliatoi e famiglie sui bordi: lo sport di quartiere al margine sud-est della città.',
+      en: 'Football pitches, changing rooms and families on the sidelines: local sport at the south-eastern edge of town.'
+    },
+    x: 1053,
+    z: 1040,
+    radius: 50
   }
 ];
 
@@ -619,6 +721,27 @@ export const ZONES: ZoneSpec[] = [
     x: -1320,
     z: 110,
     r: 72
+  },
+  {
+    id: 'azalee',
+    name: { it: 'Le Azalee', en: 'Le Azalee' },
+    x: 900,
+    z: 470,
+    r: 110
+  },
+  {
+    id: 'fidenza-est',
+    name: { it: 'Fidenza Est', en: 'East Fidenza' },
+    x: 1030,
+    z: 800,
+    r: 210
+  },
+  {
+    id: 'cigala',
+    name: { it: 'Cigala', en: 'Cigala' },
+    x: 1053,
+    z: 1020,
+    r: 82
   }
 ];
 

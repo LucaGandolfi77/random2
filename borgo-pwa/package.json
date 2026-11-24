@@ -1,9 +1,9 @@
 {
   "name": "borgo-pwa",
   "private": true,
-  "version": "2.5.0",
+  "version": "2.6.0",
   "type": "module",
-  "description": "BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, from the historic centre to the eastern districts, southern parks, western Luce and the Stirone river park, with vehicles, free flight, pilgrim stamps and the Festa di San Donnino.",
+  "description": "BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, from the historic centre to the eastern districts, Le Azalee, southern parks, western Luce and the Stirone river park, with vehicles, free flight, pilgrim stamps and the Festa di San Donnino.",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
