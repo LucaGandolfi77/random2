@@ -815,6 +815,42 @@ export const DISCOVERIES: DiscoverySpec[] = [
     z: -5,
     radius: 5,
     interior: 'stazione'
+  },
+  {
+    id: 'pala-interno',
+    name: { it: 'Campo del PalaPratizzoli', en: 'PalaPratizzoli Court' },
+    description: {
+      it: 'Il campo del palazzetto, con canestri, tribune e il tabellone acceso.',
+      en: 'The sports hall court, with baskets, stands and the scoreboard lit.'
+    },
+    x: 4300,
+    z: -3.5,
+    radius: 5,
+    interior: 'pala'
+  },
+  {
+    id: 'piscina-interno',
+    name: { it: 'Corsie della Piscina', en: 'Pool Lanes' },
+    description: {
+      it: 'Le corsie della piscina coperta, tra blocchetti di partenza e vapore sulle vetrate.',
+      en: 'The indoor pool lanes, among starting blocks and steam on the windows.'
+    },
+    x: 4400,
+    z: -5.5,
+    radius: 5,
+    interior: 'piscina'
+  },
+  {
+    id: 'teatro-interno',
+    name: { it: 'Sala del Teatro Magnani', en: 'Teatro Magnani Auditorium' },
+    description: {
+      it: 'La sala del teatro: palco, sipario, platea e il lampadario che si accende.',
+      en: 'The theatre auditorium: stage, curtain, stalls and the chandelier coming on.'
+    },
+    x: 4500,
+    z: -4,
+    radius: 5,
+    interior: 'teatro'
   }
 ];
 

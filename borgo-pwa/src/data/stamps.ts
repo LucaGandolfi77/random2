@@ -233,6 +233,33 @@ export const STAMPS: StampSpec[] = [
       en: 'The station hall, among ticket office, platforms and departures.'
     },
     placeIds: ['stazione-interno']
+  },
+  {
+    id: 'stamp-campo',
+    name: { it: 'Timbro del Campo', en: 'Court stamp' },
+    description: {
+      it: 'Il campo del PalaPratizzoli, i canestri e le tribune.',
+      en: 'The PalaPratizzoli court, its baskets and stands.'
+    },
+    placeIds: ['pala-interno']
+  },
+  {
+    id: 'stamp-corsie',
+    name: { it: 'Timbro delle Corsie', en: 'Pool Lanes stamp' },
+    description: {
+      it: 'Le corsie della piscina coperta e il vapore sulle vetrate.',
+      en: 'The indoor pool lanes and the steam on the windows.'
+    },
+    placeIds: ['piscina-interno']
+  },
+  {
+    id: 'stamp-teatro',
+    name: { it: 'Timbro del Teatro', en: 'Theatre stamp' },
+    description: {
+      it: 'Il palco, il sipario e la platea del Teatro Magnani.',
+      en: 'The stage, curtain and stalls of the Teatro Magnani.'
+    },
+    placeIds: ['teatro-interno']
   }
 ];
 

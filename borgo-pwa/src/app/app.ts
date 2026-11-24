@@ -1374,7 +1374,7 @@ export class BorgoApp {
     this.interiors.show(spec.id);
     this.player.teleport(spec.spawn.x, spec.spawn.z, spec.spawn.rot);
     this.cameraRig.setColliders(room.colliders);
-    this.cameraRig.distance = 3.8;
+    this.cameraRig.distance = 2.8;
     this.cameraRig.reset(spec.spawn.yaw, 0.28);
     this.cameraRig.snapTo(this.player.position);
     this.input.consumeLook();

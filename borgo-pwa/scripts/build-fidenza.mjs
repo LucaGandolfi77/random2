@@ -208,6 +208,8 @@ for (const building of city.buildings) {
   if (finalArea < 8) continue;
   /* The new Piazza delle Azalee replaces a dense residential block. */
   if (Math.hypot(center.x - 900, center.z - 420) < 30) continue;
+  /* Open a small forecourt in front of the Teatro Magnani. */
+  if (Math.hypot(center.x + 92, center.z - 50) < 10) continue;
   const landmark = LANDMARK_NAMES.get(building.name || '') || null;
   const height = clamp(Number(building.h) || 8.5, 3, 24);
   buildings.push({
