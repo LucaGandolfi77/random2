@@ -106,7 +106,7 @@ describe('Fidenza data', () => {
     expect(LETTERS).toHaveLength(3);
     expect(FLOWERS).toHaveLength(5);
     expect(NPCS).toHaveLength(7);
-    expect(DISCOVERIES).toHaveLength(41);
+    expect(DISCOVERIES).toHaveLength(44);
     expect(DELIVERIES).toHaveLength(4);
   });
 
@@ -165,6 +165,9 @@ describe('Fidenza data', () => {
     expect(world.isFree(-870, 940, 0.34)).toBe(true);
     expect(world.isFree(30, 900, 0.34)).toBe(true);
     expect(world.isFree(-451, 947, 0.34)).toBe(true);
+    expect(world.isFree(370, 185, 0.34)).toBe(true);
+    expect(world.isFree(950, 855, 0.34)).toBe(true);
+    expect(world.isFree(175, -100, 0.34)).toBe(true);
   });
 
   it('uses the Fidenza playable bounds', () => {
@@ -197,7 +200,7 @@ describe('walkable route', () => {
   }, 30000);
 
   it('can approach every discoverable place', () => {
-    for (const place of DISCOVERIES) {
+    for (const place of DISCOVERIES.filter((item) => !item.interior)) {
       expect(distanceToWalkable(reach, place), place.id).toBeLessThan(Math.max(8, place.radius));
     }
   }, 30000);

@@ -45,6 +45,10 @@ export class ThirdPersonCamera {
     this.distance = THREE.MathUtils.clamp(this.distance + delta * 0.005, MIN_DISTANCE, MAX_DISTANCE);
   }
 
+  setColliders(colliders: CollisionWorld): void {
+    this.colliders = colliders;
+  }
+
   reset(yaw: number, pitch: number): void {
     this.yaw = yaw;
     const minPitch = this.flight ? -0.42 : MIN_PITCH;

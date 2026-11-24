@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { STIRONE_BRIDGE } from '../data/town';
+import { INTERIORS } from '../data/interiors';
 import { GeoBatch, staticMaterial, TriBatch } from './batch';
 
 /**
@@ -47,6 +48,7 @@ export function createPeriphery(scene: THREE.Scene): void {
   addNorthVegetation(trees);
   addFoundPlaces(buildings);
   addFoundVegetation(trees);
+  addInteriorPortals(buildings);
   addHeron(scene, -1214, -104, 0.6);
   addHeron(scene, -1262, 62, -2.1);
   addHeron(scene, -1206, -52, 1.4);
@@ -741,6 +743,13 @@ function addNorthVegetation(batch: GeoBatch): void {
   ] as const) {
     batch.sphere(0.85 * scale, x, 0.5, z, 0x5f7046, 0, 0.8);
     batch.sphere(0.58 * scale, x + 0.6, 0.42, z + 0.3, 0x697b4c, 0, 0.8);
+  }
+}
+
+function addInteriorPortals(batch: TriBatch): void {
+  for (const interior of INTERIORS) {
+    flatDisc(batch, interior.exterior.x, interior.exterior.z, 1.7, 20, 0.054, 0x7a6a45);
+    flatDisc(batch, interior.exterior.x, interior.exterior.z, 1.3, 20, 0.058, 0xd9a441);
   }
 }
 

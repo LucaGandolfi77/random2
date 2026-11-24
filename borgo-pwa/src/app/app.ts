@@ -43,6 +43,7 @@ import {
   ringBell,
   type GameState
 } from '../game/state';
+import { INTERIORS, type InteriorSpec } from '../data/interiors';
 import { loadGame, saveGame } from '../game/save';
 import {
   addPostcard,
@@ -76,6 +77,7 @@ import { createFestival, type FestivalActor } from '../world/festival';
 import { createTrain, type TrainActor } from '../world/train';
 import { VehicleFleet, type VehicleActor } from '../world/vehicles';
 import { buildWorld, type World, type WorldItem } from '../world/world';
+import { createInteriors, type InteriorWorld } from '../world/interiors';
 
 type Mode =
   | 'title'
@@ -102,7 +104,9 @@ type InteractionKind =
   | 'festival-branch'
   | 'festival-musician'
   | 'festival-guest'
-  | 'festival-procession';
+  | 'festival-procession'
+  | 'enter-interior'
+  | 'exit-interior';
 
 interface Interaction {
   kind: InteractionKind;
@@ -110,6 +114,7 @@ interface Interaction {
   item?: WorldItem;
   vehicle?: VehicleActor;
   festivalId?: string;
+  interior?: InteriorSpec;
   distance: number;
 }
 
@@ -146,6 +151,7 @@ export class BorgoApp {
   private readonly scene = new THREE.Scene();
   private readonly camera: THREE.PerspectiveCamera;
   private readonly world: World;
+  private readonly interiors: InteriorWorld;
   private readonly player: Player;
   private readonly cameraRig: ThirdPersonCamera;
   private readonly input: Input;
@@ -161,6 +167,8 @@ export class BorgoApp {
 
   private travel: TravelMode = 'walk';
   private activeVehicle: VehicleActor | null = null;
+  private currentInterior: InteriorSpec | null = null;
+  private interiorReturn: { x: number; z: number; rot: number; yaw: number; pitch: number } | null = null;
   private lastTrainPhase: TrainPhase | null = null;
   private bumpCooldown = 0;
   private shadowX = Number.NaN;
@@ -228,6 +236,7 @@ export class BorgoApp {
     this.scene.background = new THREE.Color(0x1d1a15);
 
     this.world = buildWorld(this.scene, this.isMobile);
+    this.interiors = createInteriors(this.scene);
     this.fleet = new VehicleFleet(this.scene, this.state.vehicles, VEHICLES);
     this.world.colliders.setDynamic(this.fleet.parkedObstacles());
     this.train = createTrain(this.scene);
@@ -381,6 +390,11 @@ export class BorgoApp {
     return this.state.settings.lang;
   }
 
+  private get collisionWorld() {
+    if (!this.currentInterior) return this.world.colliders;
+    return this.interiors.rooms[this.currentInterior.id].colliders;
+  }
+
   private frame = (): void => {
     requestAnimationFrame(this.frame);
     const dt = Math.min(this.clock.getDelta(), 0.05);
@@ -400,7 +414,7 @@ export class BorgoApp {
     } else if (this.mode === 'playing') {
       const look = this.input.consumeLook();
       this.cameraRig.look(look.x, look.y);
-      this.syncDynamicColliders();
+      if (!this.currentInterior) this.syncDynamicColliders();
 
       if (this.travel === 'fly') {
         this.player.updateFlight(
@@ -420,7 +434,7 @@ export class BorgoApp {
           { x: this.input.moveX, z: this.input.moveZ },
           this.input.isRunning,
           this.cameraRig.yaw,
-          this.world.colliders
+          this.collisionWorld
         );
         this.cameraRig.update(dt, this.player.position);
       }
@@ -431,23 +445,27 @@ export class BorgoApp {
       this.updatePlayerVisibility();
       this.updateInteraction();
       this.checkDiscoveries();
-      this.updateZone();
+      if (!this.currentInterior) this.updateZone();
       this.updateDusk(dt);
       if (this.travel === 'walk') this.updateFootsteps(dt);
       else this.stepAccumulator = 0;
-      this.updateTravelHud();
-      this.updateStation(train);
+      if (!this.currentInterior) {
+        this.updateTravelHud();
+        this.updateStation(train);
+      }
       this.autoSaveTimer += dt;
       if (this.autoSaveTimer >= 18) {
         this.autoSaveTimer = 0;
         this.persist();
       }
       this.hud.updateCompass(this.cameraRig.heading);
-      this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
+      if (!this.currentInterior) {
+        this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
+      }
     } else if (this.mode === 'dialogue') {
       this.input.consumeLook();
       this.syncDynamicColliders();
-      this.player.update(dt, ZERO_AXIS, false, this.cameraRig.yaw, this.world.colliders);
+      this.player.update(dt, ZERO_AXIS, false, this.cameraRig.yaw, this.collisionWorld);
       this.cameraRig.update(dt, this.player.position);
       this.dialogue.update(dt);
       this.world.update(dt, this.time, this.player.position);
@@ -691,6 +709,10 @@ export class BorgoApp {
 
   private handleFly(): void {
     if (this.mode !== 'playing') return;
+    if (this.currentInterior) {
+      this.audio.deny();
+      return;
+    }
     if (this.travel === 'fly') {
       this.tryLand();
       return;
@@ -951,6 +973,14 @@ export class BorgoApp {
 
     const target = this.findInteraction();
     if (!target) return;
+    if (target.kind === 'enter-interior' && target.interior) {
+      this.enterInterior(target.interior);
+      return;
+    }
+    if (target.kind === 'exit-interior') {
+      this.exitInterior();
+      return;
+    }
     if (target.kind === 'vehicle' && target.vehicle) {
       this.enterVehicle(target.vehicle);
       return;
@@ -1064,6 +1094,11 @@ export class BorgoApp {
   }
 
   private handleMap(): void {
+    if (this.currentInterior) {
+      this.audio.deny();
+      this.hud.toast(t('mapInside', this.lang));
+      return;
+    }
     if (this.mode === 'map') {
       this.mapPanel.close();
       return;
@@ -1192,6 +1227,11 @@ export class BorgoApp {
   private startNewGame(): void {
     const settings = { ...this.state.settings };
     this.resetTravel();
+    this.interiors.hideAll();
+    this.currentInterior = null;
+    this.interiorReturn = null;
+    this.cameraRig.setColliders(this.world.colliders);
+    this.hud.setMinimapVisible(true);
     this.state = createInitialState();
     this.state.settings = settings;
     this.state.started = true;
@@ -1225,6 +1265,14 @@ export class BorgoApp {
   }
 
   private startFromState(fromNewGame = false): void {
+    const restoredInterior = this.state.interior
+      ? INTERIORS.find((interior) => interior.id === this.state.interior) ?? null
+      : null;
+    this.interiors.hideAll();
+    this.currentInterior = null;
+    this.interiorReturn = null;
+    this.cameraRig.setColliders(this.world.colliders);
+    this.hud.setMinimapVisible(true);
     this.resetTravel();
     this.fleet.apply(this.state.vehicles);
     this.lastTrainPhase = null;
@@ -1268,6 +1316,9 @@ export class BorgoApp {
     this.refreshShadow(true);
     this.onResize();
 
+    if (restoredInterior) this.enterInterior(restoredInterior, true);
+    else this.state.interior = null;
+
     if (fromNewGame) {
       window.setTimeout(() => {
         if (this.mode === 'playing') this.hud.toast(t('introHint', this.lang));
@@ -1278,6 +1329,11 @@ export class BorgoApp {
   private returnToTitle(): void {
     this.persist();
     this.resetTravel();
+    this.interiors.hideAll();
+    this.currentInterior = null;
+    this.interiorReturn = null;
+    this.cameraRig.setColliders(this.world.colliders);
+    this.hud.setMinimapVisible(true);
     this.audio.setFestival(false);
     this.pauseEl.hidden = true;
     this.settingsEl.hidden = true;
@@ -1295,6 +1351,63 @@ export class BorgoApp {
     this.updateTitleNote();
     this.input.consumeLook();
     this.audio.ui();
+  }
+
+  private enterInterior(spec: InteriorSpec, restoring = false): void {
+    if (this.currentInterior) return;
+    const room = this.interiors.rooms[spec.id];
+    if (!room) return;
+    const returnPoint = restoring
+      ? { ...this.state.player }
+      : {
+          x: this.player.position.x,
+          z: this.player.position.z,
+          rot: this.player.facing,
+          yaw: this.cameraRig.yaw,
+          pitch: this.cameraRig.pitch
+        };
+    this.interiorReturn = returnPoint;
+    this.state.player = { ...returnPoint };
+    this.state.interior = spec.id;
+    this.resetTravel();
+    this.currentInterior = spec;
+    this.interiors.show(spec.id);
+    this.player.teleport(spec.spawn.x, spec.spawn.z, spec.spawn.rot);
+    this.cameraRig.setColliders(room.colliders);
+    this.cameraRig.distance = 3.8;
+    this.cameraRig.reset(spec.spawn.yaw, 0.28);
+    this.cameraRig.snapTo(this.player.position);
+    this.input.consumeLook();
+    this.currentZone = spec.id;
+    this.hud.setZone(pick(spec.name, this.lang));
+    this.hud.setMinimapVisible(false);
+    this.hud.setPrompt(null);
+    this.updatePlayerVisibility();
+    this.audio.ui();
+    this.persist();
+    this.updateInteraction();
+  }
+
+  private exitInterior(): void {
+    if (!this.currentInterior) return;
+    const returnPoint = this.interiorReturn ?? this.state.player;
+    this.interiors.hideAll();
+    this.currentInterior = null;
+    this.state.interior = null;
+    this.cameraRig.setColliders(this.world.colliders);
+    this.cameraRig.distance = 7.2;
+    this.cameraRig.reset(returnPoint.yaw, returnPoint.pitch);
+    this.player.teleport(returnPoint.x, returnPoint.z, returnPoint.rot);
+    this.state.player = { ...returnPoint };
+    this.cameraRig.snapTo(this.player.position);
+    this.input.consumeLook();
+    this.hud.setMinimapVisible(true);
+    this.hud.setPrompt(null);
+    this.currentZone = '';
+    this.updateZone(true);
+    this.updateInteraction();
+    this.audio.ui();
+    this.persist();
   }
 
   private startConversation(npc: NpcActor): void {
@@ -1514,6 +1627,9 @@ export class BorgoApp {
 
   private checkDiscoveries(): void {
     for (const place of DISCOVERIES) {
+      if (place.interior) {
+        if (!this.currentInterior || place.interior !== this.currentInterior.id) continue;
+      } else if (this.currentInterior) continue;
       if (this.state.discovered.includes(place.id)) continue;
       if (Math.hypot(place.x - this.player.position.x, place.z - this.player.position.z) > place.radius) {
         continue;
@@ -1533,6 +1649,13 @@ export class BorgoApp {
     const pz = this.player.position.z;
     let best: Interaction | null = null;
 
+    if (this.currentInterior) {
+      const distance = Math.hypot(this.currentInterior.exit.x - px, this.currentInterior.exit.z - pz);
+      return distance <= this.currentInterior.exit.radius
+        ? { kind: 'exit-interior', interior: this.currentInterior, distance }
+        : null;
+    }
+
     const consider = (candidate: Interaction): void => {
       const score = candidate.distance - (candidate.kind === 'npc' ? 0.12 : 0);
       if (!best || score < best.distance - (best.kind === 'npc' ? 0.12 : 0)) {
@@ -1541,6 +1664,11 @@ export class BorgoApp {
     };
 
     if (this.state.festival.phase === 'procession') return null;
+
+    for (const spec of INTERIORS) {
+      const distance = Math.hypot(spec.exterior.x - px, spec.exterior.z - pz);
+      if (distance <= 2.8) consider({ kind: 'enter-interior', interior: spec, distance });
+    }
 
     if (this.state.festival.phase === 'ready') {
       const distance = Math.hypot(FESTIVAL_STARTER.x - px, FESTIVAL_STARTER.z - pz);
@@ -1666,6 +1794,8 @@ export class BorgoApp {
   }
 
   private actionForTarget(target: Interaction): string {
+    if (target.kind === 'enter-interior') return t('actionEnterInterior', this.lang);
+    if (target.kind === 'exit-interior') return t('actionExitInterior', this.lang);
     if (target.kind === 'vehicle') return t('actionEnter', this.lang);
     if (target.kind === 'festival-starter' || target.kind === 'festival-lantern') {
       return t('actionLight', this.lang);
@@ -1679,6 +1809,10 @@ export class BorgoApp {
 
   private promptFor(target: Interaction): string {
     switch (target.kind) {
+      case 'enter-interior':
+        return `${t('enterInterior', this.lang)} ${pick(target.interior?.name ?? { it: '', en: '' }, this.lang)}`;
+      case 'exit-interior':
+        return `${t('exitInterior', this.lang)} ${pick(target.interior?.name ?? { it: '', en: '' }, this.lang)}`;
       case 'npc':
         return `${t('promptTalk', this.lang)} ${target.npc?.name ?? ''}`;
       case 'vehicle':
@@ -1840,11 +1974,17 @@ export class BorgoApp {
 
   private persist(): boolean {
     if (!this.state.started && !this.saveAvailable) return false;
-    this.state.player.x = this.player.position.x;
-    this.state.player.z = this.player.position.z;
-    this.state.player.rot = this.player.facing;
-    this.state.player.yaw = this.cameraRig.yaw;
-    this.state.player.pitch = this.cameraRig.pitch;
+    if (this.currentInterior && this.interiorReturn) {
+      this.state.interior = this.currentInterior.id;
+      this.state.player = { ...this.interiorReturn };
+    } else {
+      this.state.interior = null;
+      this.state.player.x = this.player.position.x;
+      this.state.player.z = this.player.position.z;
+      this.state.player.rot = this.player.facing;
+      this.state.player.yaw = this.cameraRig.yaw;
+      this.state.player.pitch = this.cameraRig.pitch;
+    }
     this.state.vehicles = this.fleet.actors.map((vehicle) => ({
       id: vehicle.spec.id,
       x: vehicle.motion.x,

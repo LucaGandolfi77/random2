@@ -43,6 +43,8 @@ export interface GameState {
   vehicles: VehicleSnapshot[];
   postcards: string[];
   festival: FestivalState;
+  /** Interior room the player is currently in, if any. */
+  interior: string | null;
   flags: {
     dusk: boolean;
     finaleSeen: boolean;
@@ -97,6 +99,7 @@ export function createInitialState(now = Date.now()): GameState {
     })),
     postcards: [],
     festival: createFestivalState(false),
+    interior: null,
     flags: { dusk: false, finaleSeen: false },
     settings: { ...DEFAULT_SETTINGS },
     elapsed: 0,
@@ -115,6 +118,7 @@ export function cloneState(state: GameState): GameState {
     discovered: [...state.discovered],
     vehicles: state.vehicles.map((vehicle) => ({ ...vehicle })),
     postcards: [...state.postcards],
+    interior: state.interior,
     festival: {
       ...state.festival,
       lanterns: [...state.festival.lanterns],
@@ -324,6 +328,7 @@ export function sanitizeState(raw: unknown, now = Date.now()): GameState | null 
     state.settings.reducedMotion = settings.reducedMotion === true;
   }
 
+  state.interior = typeof data.interior === 'string' ? data.interior : null;
   state.elapsed = Math.max(0, numberOr(data.elapsed, 0));
   state.savedAt = numberOr(data.savedAt, now);
 

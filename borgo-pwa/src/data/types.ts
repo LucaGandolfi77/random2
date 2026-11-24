@@ -89,6 +89,8 @@ export interface DiscoverySpec {
   x: number;
   z: number;
   radius: number;
+  /** Set for discoveries that exist only inside an interior scene. */
+  interior?: string;
 }
 
 export interface DeliverySpec {

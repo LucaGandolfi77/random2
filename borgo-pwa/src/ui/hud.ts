@@ -35,6 +35,7 @@ export class Hud {
   private toasts = byId<HTMLDivElement>('toasts');
   private compass = byId<HTMLCanvasElement>('compass');
   private minimap = byId<HTMLCanvasElement>('minimap');
+  private minimapWrap = byId<HTMLDivElement>('minimap-wrap');
   private travelEl = byId<HTMLDivElement>('travel-status');
   private travelValue = byId<HTMLElement>('travel-value');
   private travelDetail = byId<HTMLElement>('travel-detail');
@@ -68,6 +69,10 @@ export class Hud {
       this.zoneEl.classList.remove('visible');
       this.toasts.textContent = '';
     }
+  }
+
+  setMinimapVisible(visible: boolean): void {
+    this.minimapWrap.hidden = !visible;
   }
 
   setTravel(value: string | null, detail = ''): void {

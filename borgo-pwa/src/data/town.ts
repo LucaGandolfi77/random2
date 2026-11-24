@@ -779,6 +779,42 @@ export const DISCOVERIES: DiscoverySpec[] = [
     x: -451,
     z: 947,
     radius: 70
+  },
+  {
+    id: 'museo-interno',
+    name: { it: 'Sale del Museo Musini', en: 'Musini Museum Galleries' },
+    description: {
+      it: 'Le sale del museo: quadri, teche, reperti del Risorgimento e il tavolo del curatore.',
+      en: 'The museum galleries: paintings, display cases, Risorgimento relics and the curator’s desk.'
+    },
+    x: 4000,
+    z: -3.5,
+    radius: 5,
+    interior: 'museo'
+  },
+  {
+    id: 'centro-interno',
+    name: { it: 'Galleria del Centro', en: 'Shopping Centre Gallery' },
+    description: {
+      it: 'La galleria interna del centro commerciale, con negozi, food court e vetrine.',
+      en: 'The shopping centre’s indoor gallery, with shops, food court and shop windows.'
+    },
+    x: 4100,
+    z: -6,
+    radius: 6,
+    interior: 'centro'
+  },
+  {
+    id: 'stazione-interno',
+    name: { it: 'Atrio della Stazione', en: 'Station Hall' },
+    description: {
+      it: 'L’atrio della stazione: biglietteria, tabellone, panchine e il bar dei viaggiatori.',
+      en: 'The station hall: ticket office, departure board, benches and the travellers’ bar.'
+    },
+    x: 4200,
+    z: -5,
+    radius: 5,
+    interior: 'stazione'
   }
 ];
 

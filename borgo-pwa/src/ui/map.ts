@@ -108,6 +108,7 @@ export function drawFullMap(
   ctx.font = '600 14px Georgia, "Times New Roman", serif';
   const placed: Array<{ x: number; y: number; w: number; h: number }> = [];
   for (const place of DISCOVERIES) {
+    if (place.interior) continue;
     if (!detail && FULL_MAP_MINOR.has(place.id)) continue;
     const x = view.ox + place.x * view.scale;
     const y = view.oy + place.z * view.scale - 9;

@@ -206,6 +206,33 @@ export const STAMPS: StampSpec[] = [
       en: 'Santa Maria Annunziata and San Michele: two quiet churches woven into the town.'
     },
     placeIds: ['santa-maria', 'san-michele']
+  },
+  {
+    id: 'stamp-sale-museo',
+    name: { it: 'Timbro delle Sale del Museo', en: 'Museum Galleries stamp' },
+    description: {
+      it: 'Le sale del Museo Musini, tra quadri, teche e reperti.',
+      en: 'The Musini Museum galleries, among paintings, cases and relics.'
+    },
+    placeIds: ['museo-interno']
+  },
+  {
+    id: 'stamp-galleria',
+    name: { it: 'Timbro della Galleria', en: 'Gallery stamp' },
+    description: {
+      it: 'La galleria del centro commerciale, con negozi e food court.',
+      en: 'The shopping centre gallery, with shops and a food court.'
+    },
+    placeIds: ['centro-interno']
+  },
+  {
+    id: 'stamp-stazione-interno',
+    name: { it: 'Timbro della Stazione', en: 'Station Hall stamp' },
+    description: {
+      it: 'L’atrio della stazione, tra biglietteria, banchine e partenze.',
+      en: 'The station hall, among ticket office, platforms and departures.'
+    },
+    placeIds: ['stazione-interno']
   }
 ];
 
