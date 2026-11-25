@@ -260,6 +260,33 @@ export const STAMPS: StampSpec[] = [
       en: 'The stage, curtain and stalls of the Teatro Magnani.'
     },
     placeIds: ['teatro-interno']
+  },
+  {
+    id: 'stamp-comune',
+    name: { it: 'Timbro del Comune', en: 'Town Hall stamp' },
+    description: {
+      it: 'L’aula del consiglio, le nozze civili e il cuore amministrativo di Fidenza.',
+      en: 'The council chamber, civil weddings and the civic heart of Fidenza.'
+    },
+    placeIds: ['comunale-interno']
+  },
+  {
+    id: 'stamp-taverna',
+    name: { it: 'Timbro della Taverna', en: 'Tavern stamp' },
+    description: {
+      it: 'La tavola dei pellegrini, il camino e una zuppa che sa di cammino.',
+      en: 'The pilgrims’ table, the fireplace and a soup that tastes of the road.'
+    },
+    placeIds: ['taverna-interno']
+  },
+  {
+    id: 'stamp-bar',
+    name: { it: 'Timbro del Bar', en: 'Bar stamp' },
+    description: {
+      it: 'Un caffè al bancone del Bar Diana, tra paste fresche e chiacchiere di paese.',
+      en: 'An espresso at the Bar Diana counter, among fresh pastries and village chatter.'
+    },
+    placeIds: ['bar-interno']
   }
 ];
 

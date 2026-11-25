@@ -7,8 +7,8 @@ import { DISCOVERIES, WORLD } from '../src/data/town';
 const world = new CollisionWorld(buildCityColliders());
 
 describe('enterable interiors', () => {
-  it('has six unique remote rooms', () => {
-    expect(INTERIORS).toHaveLength(6);
+  it('has nine unique remote rooms', () => {
+    expect(INTERIORS).toHaveLength(9);
     expect(new Set(INTERIORS.map((interior) => interior.id)).size).toBe(INTERIORS.length);
     expect(new Set(INTERIORS.map((interior) => interior.room.x)).size).toBe(INTERIORS.length);
     for (const interior of INTERIORS) {

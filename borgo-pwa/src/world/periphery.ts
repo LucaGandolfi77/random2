@@ -49,6 +49,9 @@ export function createPeriphery(scene: THREE.Scene): void {
   addFoundPlaces(buildings);
   addFoundVegetation(trees);
   addInteriorPortals(buildings);
+  addInteriorSignArms(buildings);
+  addInteriorFronts(buildings);
+  addPigeons(buildings);
   addHeron(scene, -1214, -104, 0.6);
   addHeron(scene, -1262, 62, -2.1);
   addHeron(scene, -1206, -52, 1.4);
@@ -750,6 +753,51 @@ function addInteriorPortals(batch: TriBatch): void {
   for (const interior of INTERIORS) {
     flatDisc(batch, interior.exterior.x, interior.exterior.z, 1.7, 20, 0.054, 0x7a6a45);
     flatDisc(batch, interior.exterior.x, interior.exterior.z, 1.3, 20, 0.058, 0xd9a441);
+  }
+}
+
+function addInteriorSignArms(batch: TriBatch): void {
+  batch.box(0.4, 0.08, 0.08, 76.8, 3.48, 104, 0x4b3f31);
+  batch.box(0.08, 0.12, 0.08, 76.6, 3.4, 104, 0x4b3f31);
+  batch.box(0.5, 0.08, 0.08, 37.15, 3.38, 177, 0x4b3f31);
+  batch.box(0.08, 0.1, 0.08, 37.4, 3.3, 177, 0x4b3f31);
+}
+
+function addInteriorFronts(batch: TriBatch): void {
+  /* Taverna door and step */
+  batch.box(0.1, 2.8, 1.8, 76.96, 1.4, 104, 0x3f3428);
+  batch.box(0.12, 3.0, 0.16, 76.95, 1.5, 103.02, 0xd8c7a5);
+  batch.box(0.12, 3.0, 0.16, 76.95, 1.5, 104.98, 0xd8c7a5);
+  batch.box(0.12, 0.16, 2.1, 76.95, 3.0, 104, 0xd8c7a5);
+  batch.box(0.8, 0.08, 2.2, 76.35, 0.04, 104, 0xc9a66f);
+
+  /* Bar Diana door and step */
+  batch.box(0.1, 2.8, 1.8, 36.96, 1.4, 177, 0x3f3428);
+  batch.box(0.12, 3.0, 0.16, 36.95, 1.5, 176.02, 0xe6d9bd);
+  batch.box(0.12, 3.0, 0.16, 36.95, 1.5, 177.98, 0xe6d9bd);
+  batch.box(0.12, 0.16, 2.1, 36.95, 3.0, 177, 0xe6d9bd);
+  batch.box(0.8, 0.08, 2.2, 37.35, 0.04, 177, 0xc9a66f);
+}
+
+function addPigeons(batch: TriBatch): void {
+  const flock: Array<[number, number]> = [
+    [-275, -18],
+    [-282, -22],
+    [-290, -16],
+    [-268, -20],
+    [-300, 8],
+    [-285, -30],
+    [-294, -24],
+    [-297, 5],
+    [-299, -2]
+  ];
+  for (const [x, z] of flock) {
+    batch.box(0.34, 0.22, 0.22, x, 0.2, z, 0x8b9499);
+    batch.box(0.16, 0.16, 0.16, x + 0.18, 0.34, z, 0x9aa2a6);
+    batch.box(0.08, 0.05, 0.1, x + 0.28, 0.33, z, 0xb88445);
+    batch.box(0.22, 0.04, 0.16, x - 0.14, 0.15, z, 0x70787c);
+    batch.box(0.03, 0.12, 0.03, x - 0.08, 0.06, z - 0.06, 0x70787c);
+    batch.box(0.03, 0.12, 0.03, x - 0.08, 0.06, z + 0.06, 0x70787c);
   }
 }
 

@@ -1,6 +1,15 @@
 import type { Localized } from './types';
 
-export type InteriorId = 'museo' | 'centro' | 'stazione' | 'pala' | 'piscina' | 'teatro';
+export type InteriorId =
+  | 'museo'
+  | 'centro'
+  | 'stazione'
+  | 'pala'
+  | 'piscina'
+  | 'teatro'
+  | 'comunale'
+  | 'taverna'
+  | 'bar';
 
 export interface InteriorSpec {
   id: InteriorId;
@@ -66,6 +75,33 @@ export const INTERIORS: InteriorSpec[] = [
     room: { x: 4500, z: 0, w: 26, d: 22, h: 8.0 },
     spawn: { x: 4500, z: 7.8, rot: 0, yaw: 0 },
     exit: { x: 4500, z: 10.2, radius: 1.9 }
+  },
+  {
+    id: 'comunale',
+    name: { it: 'Palazzo Comunale', en: 'Town Hall' },
+    discoveryId: 'comunale-interno',
+    exterior: { x: 20, z: -50 },
+    room: { x: 4600, z: 0, w: 30, d: 22, h: 6.4 },
+    spawn: { x: 4600, z: 7.6, rot: 0, yaw: 0 },
+    exit: { x: 4600, z: 10.0, radius: 1.9 }
+  },
+  {
+    id: 'taverna',
+    name: { it: 'Taverna del Pellegrino', en: 'Pilgrim Tavern' },
+    discoveryId: 'taverna-interno',
+    exterior: { x: 74, z: 104 },
+    room: { x: 4700, z: 0, w: 24, d: 18, h: 4.4 },
+    spawn: { x: 4700, z: 5.9, rot: 0, yaw: 0 },
+    exit: { x: 4700, z: 8.2, radius: 1.8 }
+  },
+  {
+    id: 'bar',
+    name: { it: 'Bar Diana', en: 'Bar Diana' },
+    discoveryId: 'bar-interno',
+    exterior: { x: 38.7, z: 177 },
+    room: { x: 4800, z: 0, w: 18, d: 14, h: 3.6 },
+    spawn: { x: 4800, z: 3.6, rot: 0, yaw: 0 },
+    exit: { x: 4800, z: 6.0, radius: 1.7 }
   }
 ];
 

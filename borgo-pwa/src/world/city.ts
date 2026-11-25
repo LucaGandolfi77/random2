@@ -822,7 +822,9 @@ function addLandmarkSigns(scene: THREE.Scene, signs: THREE.Mesh[]): void {
     { text: 'SANTA MARIA', x: 108, y: 3.8, z: 28, ry: 0, w: 3.2 },
     { text: 'SAN MICHELE', x: 359, y: 3.8, z: 135, ry: 0, w: 3.4 },
     { text: 'PARCO DE GASPERI', x: 30, y: 3.0, z: 860, ry: 0, w: 4.4 },
-    { text: 'PARCOBALENO', x: -451, y: 3.0, z: 930, ry: 0, w: 3.6 }
+    { text: 'PARCOBALENO', x: -451, y: 3.0, z: 930, ry: 0, w: 3.6 },
+    { text: 'TAVERNA DEL PELLEGRINO', x: 76.6, y: 3.1, z: 104, ry: -Math.PI / 2, w: 4.8 },
+    { text: 'BAR DIANA', x: 37.4, y: 3.0, z: 177, ry: Math.PI / 2, w: 3.0 }
   ];
   for (const entry of entries) {
     const sign = makeSign(entry.text, entry.w, 0.6, entry.x, entry.y, entry.z, entry.ry);

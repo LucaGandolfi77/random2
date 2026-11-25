@@ -851,6 +851,42 @@ export const DISCOVERIES: DiscoverySpec[] = [
     z: -4,
     radius: 5,
     interior: 'teatro'
+  },
+  {
+    id: 'comunale-interno',
+    name: { it: 'Sala del Consiglio', en: 'Council Hall' },
+    description: {
+      it: 'L’aula civica del Comune: banchi del consiglio, stendardi e la sala delle nozze.',
+      en: 'The civic council chamber: council benches, banners and the wedding room.'
+    },
+    x: 4600,
+    z: -3.2,
+    radius: 5,
+    interior: 'comunale'
+  },
+  {
+    id: 'taverna-interno',
+    name: { it: 'Tavola del Pellegrino', en: 'Pilgrim’s Table' },
+    description: {
+      it: 'La taverna dei pellegrini: camino acceso, tavole di legno e il gatto che dorme vicino al fuoco.',
+      en: 'The pilgrims’ tavern: a lit fireplace, wooden tables and the cat asleep by the fire.'
+    },
+    x: 4700,
+    z: -3,
+    radius: 5,
+    interior: 'taverna'
+  },
+  {
+    id: 'bar-interno',
+    name: { it: 'Bancone del Bar Diana', en: 'Bar Diana Counter' },
+    description: {
+      it: 'Il bar del quartiere: tazzine, paste fresche e il bancone di marmo sotto le vetrate.',
+      en: 'The neighbourhood bar: espresso cups, fresh pastries and the marble counter under the windows.'
+    },
+    x: 4800,
+    z: -2.8,
+    radius: 4.8,
+    interior: 'bar'
   }
 ];
 
