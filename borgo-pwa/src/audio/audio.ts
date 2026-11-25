@@ -131,6 +131,12 @@ export class AudioEngine {
     this.tone(494, 0.32, 'sawtooth', 0.026, 0.015);
   }
 
+  shutter(): void {
+    this.tone(1450, 0.035, 'square', 0.03, 0);
+    this.tone(760, 0.06, 'triangle', 0.022, 0.045);
+    this.tone(1100, 0.04, 'sine', 0.015, 0.11);
+  }
+
   bikeBell(): void {
     this.tone(1500, 0.13, 'triangle', 0.045, 0);
     this.tone(1770, 0.18, 'triangle', 0.035, 0.16);

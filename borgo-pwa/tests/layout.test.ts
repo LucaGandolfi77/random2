@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildCityColliders, CollisionWorld } from '../src/data/colliders';
 import { FIDENZA, FIDENZA_WORLD } from '../src/data/fidenza';
 import { INTERIORS } from '../src/data/interiors';
+import { PHOTO_SPOTS } from '../src/data/photo';
 import {
   BELL_SPOT,
   DELIVERIES,
@@ -216,9 +217,12 @@ describe('walkable route', () => {
     }
   }, 30000);
 
-  it('can approach every interior portal', () => {
+  it('can approach every interior portal and photo spot', () => {
     for (const interior of INTERIORS) {
       expect(distanceToWalkable(reach, interior.exterior), interior.id).toBeLessThan(2.8);
+    }
+    for (const spot of PHOTO_SPOTS) {
+      expect(distanceToWalkable(reach, spot), spot.id).toBeLessThan(spot.radius + 2);
     }
   }, 30000);
 });

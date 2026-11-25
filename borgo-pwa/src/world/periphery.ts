@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { STIRONE_BRIDGE } from '../data/town';
 import { INTERIORS } from '../data/interiors';
 import { FRANCIGENA_STONES } from '../data/francigena';
+import { PHOTO_SPOTS } from '../data/photo';
 import { GeoBatch, staticMaterial, TriBatch } from './batch';
 
 /**
@@ -53,6 +54,7 @@ export function createPeriphery(scene: THREE.Scene): void {
   addInteriorSignArms(buildings);
   addInteriorFronts(buildings);
   addFrancigenaStones(buildings);
+  addPhotoSpots(buildings);
   addPigeons(buildings);
   addHeron(scene, -1214, -104, 0.6);
   addHeron(scene, -1262, 62, -2.1);
@@ -794,6 +796,21 @@ function addFrancigenaStones(batch: TriBatch): void {
     batch.box(0.06, 0.3, 0.02, x - 0.16, 1.12, z + 0.26, 0xd9a441);
     batch.box(0.06, 0.3, 0.02, x + 0.16, 1.12, z + 0.26, 0xd9a441);
     batch.box(0.28, 0.05, 0.02, x, 0.86, z + 0.26, 0xd9a441);
+  }
+}
+
+function addPhotoSpots(batch: TriBatch): void {
+  for (const spot of PHOTO_SPOTS) {
+    const { x: mx, z: mz } = spot.marker;
+    batch.box(1.25, 0.025, 0.9, mx, 0.06, mz, 0xd9a441);
+    batch.box(1.05, 0.03, 0.7, mx, 0.068, mz, 0xf2e6ce);
+    batch.box(0.06, 0.9, 0.06, mx - 0.25, 0.45, mz, 0x4b3f31);
+    batch.box(0.06, 0.9, 0.06, mx + 0.25, 0.45, mz, 0x4b3f31);
+    batch.box(0.06, 0.9, 0.06, mx, 0.45, mz - 0.25, 0x4b3f31);
+    batch.box(0.55, 0.08, 0.42, mx, 0.92, mz, 0x6a5a45);
+    batch.box(0.45, 0.3, 0.3, mx, 1.1, mz, 0x2f2b26);
+    batch.box(0.22, 0.22, 0.14, mx, 1.1, mz + 0.18, 0x6a7a80);
+    batch.box(0.12, 0.1, 0.12, mx, 1.28, mz, 0xd9a441);
   }
 }
 

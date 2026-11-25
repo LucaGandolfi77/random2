@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#1d1a15" />
-    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, from the northern agricultural district to Le Azalee, the southern sports district, the recovered churches and parks, the Stirone river park, nine enterable interiors and the Via Francigena credential, with vehicles, flight, stamps and the Festa di San Donnino." />
+    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, from the northern agricultural district to Le Azalee, the southern sports district, the recovered churches and parks, the Stirone river park, nine enterable interiors, the Via Francigena credential and six photo postcards, with vehicles, flight, stamps and the Festa di San Donnino." />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
@@ -148,6 +148,10 @@
             <p id="journal-credential-count" class="muted"></p>
             <ul id="journal-credential" class="place-list credential-list"></ul>
             <p id="journal-credential-note" class="fine"></p>
+            <h3 data-i18n="photoAlbumTitle">Obiettivo Fidenza</h3>
+            <p id="journal-photos-count" class="muted"></p>
+            <ul id="journal-photos" class="photo-grid"></ul>
+            <p id="journal-photos-note" class="fine"></p>
             <h3 data-i18n="journalPlaces">Luoghi di Fidenza</h3>
             <p id="journal-places-count" class="muted"></p>
             <ul id="journal-places" class="place-list"></ul>
@@ -188,9 +192,28 @@
           <span><i class="dot dot-tile"></i><span data-i18n="legendTile">Ricordi</span></span>
           <span><i class="dot dot-target"></i><span data-i18n="legendTarget">Incarichi</span></span>
           <span><i class="dot dot-route"></i><span data-i18n="legendFrancigena">Via Francigena</span></span>
+          <span><i class="dot dot-photo"></i><span data-i18n="legendPhoto">Obiettivi foto</span></span>
         </div>
         <p class="map-attribution" data-i18n="mapAttribution">Mappa: © OpenStreetMap contributors (ODbL)</p>
         <p class="panel-foot"><kbd>M</kbd><span data-i18n="closeHint">chiudi</span></p>
+      </div>
+
+      <div id="photo-preview" class="panel photo-preview" hidden role="dialog" aria-modal="true" aria-labelledby="photo-preview-title">
+        <div class="panel-head">
+          <div>
+            <p class="panel-eyebrow" data-i18n="photoAlbumTitle">Obiettivo Fidenza</p>
+            <h2 id="photo-preview-title"></h2>
+          </div>
+          <button id="photo-preview-close" class="icon-btn" type="button" data-i18n-aria="close" aria-label="Chiudi">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 5.6 5.6L17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4 6.4 5Z"/></svg>
+          </button>
+        </div>
+        <img id="photo-preview-image" alt="" />
+        <p id="photo-preview-note" class="muted"></p>
+        <div class="photo-actions">
+          <a id="photo-download" class="btn btn-primary" download data-i18n="photoDownload">Scarica</a>
+          <button id="photo-done" class="btn btn-ghost" type="button" data-i18n="photoDone">Chiudi</button>
+        </div>
       </div>
 
       <div id="pause" class="screen menu-screen" hidden role="dialog" aria-modal="true" aria-labelledby="pause-title">

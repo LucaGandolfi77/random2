@@ -140,6 +140,37 @@ export const UI = {
     it: 'Credenziale completa · Timbro finale nel diario',
     en: 'Credential complete · Final stamp in the journal'
   },
+  photoAlbumTitle: { it: 'Obiettivo Fidenza', en: 'Objective Fidenza' },
+  photoProgress: { it: 'fotografie', en: 'photographs' },
+  photoLocked: { it: 'Scatto non ancora fatto', en: 'Photo not taken yet' },
+  photoPrompt: { it: 'Scatta', en: 'Take a photo' },
+  actionPhoto: { it: 'SCATTA', en: 'SHOOT' },
+  photoDownload: { it: 'Scarica', en: 'Download' },
+  photoDone: { it: 'Chiudi', en: 'Close' },
+  photoPreviewNote: {
+    it: 'La cartolina è stata aggiunta al diario e salvata sul dispositivo.',
+    en: 'The postcard has been added to the journal and saved on this device.'
+  },
+  photoSaveFailed: {
+    it: 'La cartolina non è stata salvata: memoria del dispositivo piena.',
+    en: 'The postcard was not saved: device storage is full.'
+  },
+  photoNoteLocked: {
+    it: 'Sei cartoline lungo la passeggiata. Cerca i treppiedi dorati.',
+    en: 'Six postcards along the walk. Look for the golden tripods.'
+  },
+  photoNoteComplete: {
+    it: 'Obiettivo Fidenza completo: sei cartoline nella collezione.',
+    en: 'Objective Fidenza complete: six postcards in the collection.'
+  },
+  photoCompleteToast: {
+    it: 'Obiettivo Fidenza completo · Sei cartoline nel diario',
+    en: 'Objective Fidenza complete · Six postcards in the journal'
+  },
+  photoPostcardSubtitle: {
+    it: 'Fidenza · ora d’oro',
+    en: 'Fidenza · golden hour'
+  },
   stampsTitle: { it: 'Timbri del Pellegrino', en: 'Pilgrim stamps' },
   stampsFound: { it: 'timbri ottenuti', en: 'stamps earned' },
   stampLocked: { it: 'Timbro non ancora ottenuto', en: 'Stamp not earned yet' },
@@ -203,6 +234,7 @@ export const UI = {
   legendTile: { it: 'Ricordi', en: 'Memories' },
   legendTarget: { it: 'Incarichi', en: 'Errands' },
   legendFrancigena: { it: 'Via Francigena', en: 'Via Francigena' },
+  legendPhoto: { it: 'Obiettivi foto', en: 'Photo spots' },
   pauseEyebrow: { it: "Una pausa all'ombra", en: 'A pause in the shade' },
   paused: { it: 'Pausa', en: 'Paused' },
   resume: { it: 'Riprendi', en: 'Resume' },

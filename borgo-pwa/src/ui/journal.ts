@@ -4,6 +4,7 @@ import { FESTIVAL_BRANCHES, FESTIVAL_LANTERNS, FESTIVAL_MUSICIANS, FESTIVAL_POST
 import { festivalTaskCount, lanternsDone, musiciansDone } from '../game/festival';
 import { STAMPS, stampEarned } from '../data/stamps';
 import { FRANCIGENA_STAGES } from '../data/francigena';
+import { loadPhotos, PHOTO_SPOTS, photoFileName } from '../data/photo';
 import { pick, t } from '../data/strings';
 import type { Language, QuestId } from '../data/types';
 import { questProgress, type GameState } from '../game/state';
@@ -29,6 +30,9 @@ export class JournalPanel {
   private credential = byId<HTMLUListElement>('journal-credential');
   private credentialCount = byId<HTMLParagraphElement>('journal-credential-count');
   private credentialNote = byId<HTMLParagraphElement>('journal-credential-note');
+  private photos = byId<HTMLUListElement>('journal-photos');
+  private photosCount = byId<HTMLParagraphElement>('journal-photos-count');
+  private photosNote = byId<HTMLParagraphElement>('journal-photos-note');
   private stamps = byId<HTMLUListElement>('journal-stamps');
   private stampsCount = byId<HTMLParagraphElement>('journal-stamps-count');
   private mosaic = byId<HTMLCanvasElement>('journal-mosaic');
@@ -68,6 +72,7 @@ export class JournalPanel {
     this.festivalList.textContent = '';
     this.postcards.textContent = '';
     this.credential.textContent = '';
+    this.photos.textContent = '';
     this.stamps.textContent = '';
 
     const active: QuestId[] = [];
@@ -100,6 +105,7 @@ export class JournalPanel {
       this.places.appendChild(item);
     }
     this.refreshCredential(state, lang);
+    this.refreshPhotos(lang);
     this.refreshFestival(state, lang);
     this.refreshStamps(state, lang);
     this.drawMosaic(state.tiles);
@@ -126,6 +132,52 @@ export class JournalPanel {
       found === FRANCIGENA_STAGES.length
         ? t('credentialNoteComplete', lang)
         : t('credentialNoteLocked', lang);
+  }
+
+  private refreshPhotos(lang: Language): void {
+    const photos = loadPhotos();
+    const byId = new Map(photos.map((photo) => [photo.spotId, photo]));
+    for (const spot of PHOTO_SPOTS) {
+      const photo = byId.get(spot.id);
+      const item = document.createElement('li');
+      item.className = photo ? 'photo-card' : 'photo-card photo-locked';
+      if (photo) {
+        const link = document.createElement('a');
+        link.className = 'photo-link';
+        link.href = photo.image;
+        link.download = photoFileName(spot);
+        const image = document.createElement('img');
+        image.src = photo.image;
+        image.alt = pick(spot.name, lang);
+        image.loading = 'lazy';
+        link.appendChild(image);
+        item.appendChild(link);
+      } else {
+        const empty = document.createElement('div');
+        empty.className = 'photo-empty';
+        empty.textContent = t('photoLocked', lang);
+        item.appendChild(empty);
+      }
+      const name = document.createElement('strong');
+      name.textContent = pick(spot.name, lang);
+      const description = document.createElement('p');
+      description.textContent = pick(spot.description, lang);
+      item.append(name, description);
+      if (photo) {
+        const download = document.createElement('a');
+        download.className = 'photo-download';
+        download.href = photo.image;
+        download.download = photoFileName(spot);
+        download.textContent = t('photoDownload', lang);
+        item.appendChild(download);
+      }
+      this.photos.appendChild(item);
+    }
+    this.photosCount.textContent = `${photos.length}/${PHOTO_SPOTS.length} · ${t('photoProgress', lang)}`;
+    this.photosNote.textContent =
+      photos.length === PHOTO_SPOTS.length
+        ? t('photoNoteComplete', lang)
+        : t('photoNoteLocked', lang);
   }
 
   private refreshStamps(state: GameState, lang: Language): void {

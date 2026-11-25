@@ -2,6 +2,7 @@ import { FIDENZA } from '../data/fidenza';
 import { DISCOVERIES, NPCS, STREET_LABELS, TILES, WORLD } from '../data/town';
 import { FESTIVAL_NPC_POSITIONS, FESTIVAL_STAGE, FESTIVAL_STARTER } from '../data/festival';
 import { FRANCIGENA_ROUTE, FRANCIGENA_STAGES } from '../data/francigena';
+import { PHOTO_SPOTS } from '../data/photo';
 import type { Language } from '../data/types';
 import { pick } from '../data/strings';
 import type { GameState } from '../game/state';
@@ -149,6 +150,7 @@ export function drawFullMap(
   ctx.restore();
 
   drawFrancigena(ctx, view, state);
+  drawPhotoSpots(ctx, view);
   drawPlayer(ctx, player, heading, view, 9);
 
   ctx.fillStyle = INK;
@@ -412,6 +414,26 @@ function drawFrancigena(
     ctx.fillText(String(index + 1), x, y + 0.5);
   });
   ctx.restore();
+}
+
+function drawPhotoSpots(ctx: CanvasRenderingContext2D, view: View): void {
+  for (const spot of PHOTO_SPOTS) {
+    const x = view.ox + spot.x * view.scale;
+    const y = view.oy + spot.z * view.scale;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = INK;
+    ctx.fillRect(-6, -4, 12, 8);
+    ctx.fillRect(-5, -7, 4, 3);
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.4, 0, Math.PI * 2);
+    ctx.fillStyle = PAPER;
+    ctx.fill();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
+  }
 }
 
 function npcHasQuestMark(state: GameState, id: string): boolean {

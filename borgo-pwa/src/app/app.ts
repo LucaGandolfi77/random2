@@ -79,6 +79,8 @@ import { VehicleFleet, type VehicleActor } from '../world/vehicles';
 import { buildWorld, type World, type WorldItem } from '../world/world';
 import { createInteriors, type InteriorWorld } from '../world/interiors';
 import { FRANCIGENA_STAGES } from '../data/francigena';
+import { PHOTO_SPOTS, clearPhotos, loadPhotos, photoFileName, savePhoto, type PhotoSpot } from '../data/photo';
+import { createPostcard } from '../ui/postcard';
 
 type Mode =
   | 'title'
@@ -90,7 +92,8 @@ type Mode =
   | 'settings'
   | 'confirm'
   | 'finale'
-  | 'festivalEnd';
+  | 'festivalEnd'
+  | 'photo';
 
 type InteractionKind =
   | 'npc'
@@ -107,7 +110,8 @@ type InteractionKind =
   | 'festival-guest'
   | 'festival-procession'
   | 'enter-interior'
-  | 'exit-interior';
+  | 'exit-interior'
+  | 'photo-spot';
 
 interface Interaction {
   kind: InteractionKind;
@@ -116,6 +120,7 @@ interface Interaction {
   vehicle?: VehicleActor;
   festivalId?: string;
   interior?: InteriorSpec;
+  photoSpot?: PhotoSpot;
   distance: number;
 }
 
@@ -188,6 +193,11 @@ export class BorgoApp {
   private readonly festivalEndEl = byId<HTMLDivElement>('festival-end');
   private readonly festivalEndBody = byId<HTMLParagraphElement>('festival-end-text');
   private readonly festivalEndCards = byId<HTMLDivElement>('festival-end-cards');
+  private readonly photoPreview = byId<HTMLDivElement>('photo-preview');
+  private readonly photoPreviewTitle = byId<HTMLHeadingElement>('photo-preview-title');
+  private readonly photoPreviewImage = byId<HTMLImageElement>('photo-preview-image');
+  private readonly photoPreviewNote = byId<HTMLParagraphElement>('photo-preview-note');
+  private readonly photoDownload = byId<HTMLAnchorElement>('photo-download');
   private readonly titleContinue = byId<HTMLButtonElement>('title-continue');
   private readonly titleSaveNote = byId<HTMLParagraphElement>('title-save-note');
   private readonly titleLang = byId<HTMLButtonElement>('title-lang');
@@ -206,6 +216,7 @@ export class BorgoApp {
   private saveAvailable = false;
   private settingsBack: 'pause' | 'title' = 'pause';
   private confirmBack: 'pause' | 'title' = 'title';
+  private photoCompletionPending = false;
 
   constructor() {
     const loadedSave = loadGame();
@@ -357,6 +368,8 @@ export class BorgoApp {
     byId<HTMLButtonElement>('confirm-no').addEventListener('click', () => this.cancelConfirm());
     byId<HTMLButtonElement>('finale-continue').addEventListener('click', () => this.leaveFinale());
     byId<HTMLButtonElement>('festival-end-close').addEventListener('click', () => this.closeFestivalEnd());
+    byId<HTMLButtonElement>('photo-preview-close').addEventListener('click', () => this.closePhotoPreview());
+    byId<HTMLButtonElement>('photo-done').addEventListener('click', () => this.closePhotoPreview());
     byId<HTMLButtonElement>('finale-new').addEventListener('click', () => {
       this.finaleEl.hidden = true;
       this.startNewGame();
@@ -957,9 +970,72 @@ export class BorgoApp {
     }
   }
 
+  private capturePhoto(spot: PhotoSpot): void {
+    if (this.mode !== 'playing' || this.currentInterior) return;
+    const playerVisible = this.player.group.visible;
+    const shadowVisible = this.player.shadow.visible;
+    this.player.group.visible = false;
+    this.player.shadow.visible = false;
+    this.renderer.render(this.scene, this.camera);
+    const image = createPostcard(
+      this.renderer.domElement,
+      pick(spot.name, this.lang),
+      this.lang
+    );
+    this.player.group.visible = playerVisible;
+    this.player.shadow.visible = shadowVisible;
+    this.renderer.render(this.scene, this.camera);
+
+    const saved = savePhoto({ spotId: spot.id, image, takenAt: Date.now() });
+    this.photoCompletionPending =
+      saved && loadPhotos().length === PHOTO_SPOTS.length;
+    this.showPhotoPreview(spot, image, saved);
+    this.audio.shutter();
+    this.refreshUi();
+  }
+
+  private showPhotoPreview(spot: PhotoSpot, image: string, saved: boolean): void {
+    this.mode = 'photo';
+    this.photoPreviewTitle.textContent = pick(spot.name, this.lang);
+    this.photoPreviewImage.src = image;
+    this.photoPreviewImage.alt = pick(spot.name, this.lang);
+    this.photoPreviewNote.textContent = saved
+      ? t('photoPreviewNote', this.lang)
+      : t('photoSaveFailed', this.lang);
+    this.photoDownload.href = image;
+    this.photoDownload.download = photoFileName(spot);
+    this.photoPreview.hidden = false;
+    this.hud.setPrompt(null);
+    this.hud.setVisible(false);
+    this.input.consumeLook();
+    this.touch.setActionLabel('OK');
+    this.audio.ui();
+  }
+
+  private closePhotoPreview(): void {
+    if (this.mode !== 'photo') return;
+    this.photoPreview.hidden = true;
+    this.mode = 'playing';
+    this.hud.setVisible(true);
+    this.input.consumeLook();
+    this.updateInteraction();
+    this.audio.ui();
+    if (this.photoCompletionPending) {
+      this.photoCompletionPending = false;
+      window.setTimeout(
+        () => this.hud.toast(t('photoCompleteToast', this.lang)),
+        350
+      );
+    }
+  }
+
   private handleInteract(): void {
     if (this.mode === 'dialogue') {
       this.dialogue.advance();
+      return;
+    }
+    if (this.mode === 'photo') {
+      this.closePhotoPreview();
       return;
     }
     if (this.mode !== 'playing') return;
@@ -980,6 +1056,10 @@ export class BorgoApp {
     }
     if (target.kind === 'exit-interior') {
       this.exitInterior();
+      return;
+    }
+    if (target.kind === 'photo-spot' && target.photoSpot) {
+      this.capturePhoto(target.photoSpot);
       return;
     }
     if (target.kind === 'vehicle' && target.vehicle) {
@@ -1141,6 +1221,9 @@ export class BorgoApp {
       case 'paused':
         this.resumeFromPause();
         break;
+      case 'photo':
+        this.closePhotoPreview();
+        break;
       case 'dialogue':
         this.dialogue.close();
         break;
@@ -1226,6 +1309,9 @@ export class BorgoApp {
   }
 
   private startNewGame(): void {
+    clearPhotos();
+    this.photoPreview.hidden = true;
+    this.photoCompletionPending = false;
     const settings = { ...this.state.settings };
     this.resetTravel();
     this.interiors.hideAll();
@@ -1683,6 +1769,11 @@ export class BorgoApp {
       if (distance <= 2.8) consider({ kind: 'enter-interior', interior: spec, distance });
     }
 
+    for (const spot of PHOTO_SPOTS) {
+      const distance = Math.hypot(spot.x - px, spot.z - pz);
+      if (distance <= spot.radius) consider({ kind: 'photo-spot', photoSpot: spot, distance });
+    }
+
     if (this.state.festival.phase === 'ready') {
       const distance = Math.hypot(FESTIVAL_STARTER.x - px, FESTIVAL_STARTER.z - pz);
       if (distance <= 2.7) consider({ kind: 'festival-starter', distance });
@@ -1817,6 +1908,7 @@ export class BorgoApp {
     if (target.kind === 'festival-branch') return t('actionPick', this.lang);
     if (target.kind === 'festival-guest') return t('actionWelcome', this.lang);
     if (target.kind === 'festival-procession') return t('actionGather', this.lang);
+    if (target.kind === 'photo-spot') return t('actionPhoto', this.lang);
     return 'OK';
   }
 
@@ -1869,6 +1961,8 @@ export class BorgoApp {
         return `${t('festivalGuest', this.lang)} · ${pick(FESTIVAL_GUEST.label, this.lang)}`;
       case 'festival-procession':
         return t('festivalProcessionPrompt', this.lang);
+      case 'photo-spot':
+        return `${t('photoPrompt', this.lang)} · ${pick(target.photoSpot?.name ?? { it: '', en: '' }, this.lang)}`;
     }
   }
 

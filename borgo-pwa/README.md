@@ -55,6 +55,7 @@ Cars, bicycles and the jetpack are always available. Vehicles are parked around 
 - **Peripheral Fidenza**: OSM east, south, west and north districts, forty-six new places, thirty-two pilgrim stamps, Le Azalee with its piazza, park, shopping centre, skatepark and MB-326 monument, the Cigala sports centre, the southern Stadio Ballotta, PalaPratizzoli, indoor pool, Piazza La Pira and Giardino di Charlie, the northern Istituto Agrario, Scalo di Fidenza and Parco Nord, the recovered Sacro Cuore, Parco gli Olmi, Santa Maria, San Michele, Parco De Gasperi and Parcobaleno, park gates, a bus shelter, the Luce artwork, the churches of San Paolo and Sant’Antonio, the Stirone river park, hedgerows and poplar rows as natural map edges.
 - **Fidenza Dentro**: nine enterable interiors at the Museo Musini, Centro Commerciale, Stazione, PalaPratizzoli, Piscina coperta, Teatro Magnani, Palazzo Comunale, Taverna del Pellegrino and Bar Diana, with separate low-poly rooms, furniture, people, indoor lighting, portal prompts and safe save/load. The piazza now has pigeons, the tavern has a sleeping cat and a musician by the fire, and the town hall and bar are furnished as lived-in civic rooms.
 - **La Via Francigena**: four shell-marked milestones from the Ponte Romano to Piazza Matteotti, the Taverna del Pellegrino as the fifth and final stop, a **Credenziale del Pellegrino** in the journal, a dotted route on the map, a final stamp and pilgrim walkers along the road.
+- **Obiettivo Fidenza**: six photo spots with golden tripods, from the Duomo to the Stirone and the southern sports district. Each shot becomes a framed postcard in a separate **photo album**, downloadable and saved on the device; new games start with a clean album.
 - **12 cars and 12 bicycles** with arcade physics, dynamic parked-vehicle colliders and saved positions.
 - **Free jetpack flight** with altitude HUD, map bounds, rooftop-safe landing checks and a custom low-poly pack.
 - **Animated regional train** with a 76-second dwell/depart/arrive cycle, platform, shelter, waiting passengers, synthesized whistle and a canvas departure board.
@@ -87,6 +88,7 @@ src/
   data/fidenza.json         derived city database with waterways (ODbL)
   data/stamps.ts            thirty-two pilgrim stamps mapped to discoveries
   data/francigena.ts        Via Francigena stages, route and credential
+  data/photo.ts             photo spots and the local postcard album
   data/town.ts              NPCs, quests, collectibles, zones
   data/dialogue.ts          original bilingual conversations
   game/                     pure quest state, sanitising, persistence
@@ -94,7 +96,7 @@ src/
   world/city.ts             buildings, roads, waterways, piazzas, landmarks, signs
   world/interiors.ts        nine enterable interior rooms and their colliders
   world/                    sky, lighting, props, NPCs, waypoint
-  ui/                       HUD, city map, journal, dialogue, touch controls
+  ui/                       HUD, city map, journal, photo postcards, dialogue, touch controls
 tests/                      collision, reachability, quests, saves, strings, data
 ```
 
@@ -109,7 +111,7 @@ npm run build
 npm run preview
 ```
 
-The layout tests perform a breadth-first walk over the real collision grid, from Piazza Duomo to every character, collectible, delivery point and landmark, and check that every parked vehicle sits on free ground. The expanded map is checked as one 2,840 × 2,000 m walkable rectangle, including the eastern, southern and northern districts. The physics tests cover acceleration, braking, steering, walls, map bounds, jetpack ceiling and the deterministic train cycle. The feast tests cover unlock, lanterns, musicians, garland, guest, the closed procession loop and the festival colliders. The stamp tests cover all thirty-two districts, the two-park requirement, the Le Azalee, southern, northern and recovered groups and the Stirone bridge crossing. The interior tests check every portal, room bound, spawn, exit, discovery and stamp link; the Francigena tests check the four stones, the five-stage credential, the final stamp and the dotted route. The browser QA covers entry, discovery, exit, map lock and save/load from inside.
+The layout tests perform a breadth-first walk over the real collision grid, from Piazza Duomo to every character, collectible, delivery point and landmark, and check that every parked vehicle sits on free ground. The expanded map is checked as one 2,840 × 2,000 m walkable rectangle, including the eastern, southern and northern districts. The physics tests cover acceleration, braking, steering, walls, map bounds, jetpack ceiling and the deterministic train cycle. The feast tests cover unlock, lanterns, musicians, garland, guest, the closed procession loop and the festival colliders. The stamp tests cover all thirty-two districts, the two-park requirement, the Le Azalee, southern, northern and recovered groups and the Stirone bridge crossing. The interior tests check every portal, room bound, spawn, exit, discovery and stamp link; the Francigena tests check the four stones, the five-stage credential, the final stamp and the dotted route; the photo tests check the six spots, the album and its storage rules. The browser QA covers entry, discovery, exit, map lock and save/load from inside.
 
 ## PWA
 
