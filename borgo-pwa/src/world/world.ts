@@ -12,6 +12,7 @@ import {
   TILES
 } from '../data/town';
 import type { QuestId } from '../data/types';
+import { FRANCIGENA_STONES } from '../data/francigena';
 import { GeoBatch, glowMaterial, staticMaterial } from './batch';
 import { buildCity } from './city';
 import { createLighting } from './lighting';
@@ -66,7 +67,14 @@ export function buildWorld(scene: THREE.Scene, mobile: boolean): World {
     { kind: 'circle', x: 900, z: 420, r: 4.4 },
     { kind: 'circle', x: 261, z: 1205, r: 3.8 },
     { kind: 'box', x: 978, z: 672, hw: 1.2, hd: 1.2 },
-    { kind: 'box', x: 1120, z: 990, hw: 6.2, hd: 4.2 }
+    { kind: 'box', x: 1120, z: 990, hw: 6.2, hd: 4.2 },
+    ...FRANCIGENA_STONES.map((stone) => ({
+      kind: 'box' as const,
+      x: stone.x,
+      z: stone.z,
+      hw: 0.5,
+      hd: 0.42
+    }))
   ];
   const collision = new CollisionWorld(buildCityColliders(extras));
   const city = buildCity(scene, collision);
@@ -222,7 +230,10 @@ export function buildWorld(scene: THREE.Scene, mobile: boolean): World {
 /* A handful of non-interactable citizens keep the squares from feeling like
    an empty film set. They use the same low-poly rig as the main cast. */
 function createAmbient(scene: THREE.Scene, mobile: boolean): PersonRig[] {
-  const people: Array<{ look: 'citizen1' | 'citizen2' | 'citizen3'; x: number; z: number; rot: number; scale?: number }> = [
+  const people: Array<{ look: 'citizen1' | 'citizen2' | 'citizen3' | 'pilgrim'; x: number; z: number; rot: number; scale?: number }> = [
+    { look: 'pilgrim', x: -300, z: -36, rot: 0.8 },
+    { look: 'pilgrim', x: -296, z: 18, rot: -1.2 },
+    { look: 'pilgrim', x: 71, z: 105, rot: 2.3 },
     { look: 'citizen1', x: -303, z: -6, rot: 0.6 },
     { look: 'citizen2', x: -299, z: -10, rot: 2.1 },
     { look: 'citizen3', x: -2, z: -36, rot: -0.4, scale: 0.92 },

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#1d1a15" />
-    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, from the northern agricultural district to Le Azalee, the southern sports district, the recovered churches and parks, the Stirone river park and nine enterable interiors, with vehicles, flight, stamps and the Festa di San Donnino." />
+    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, from the northern agricultural district to Le Azalee, the southern sports district, the recovered churches and parks, the Stirone river park, nine enterable interiors and the Via Francigena credential, with vehicles, flight, stamps and the Festa di San Donnino." />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
@@ -144,6 +144,10 @@
             <p id="journal-empty" class="muted" data-i18n="noneYet">Nessun incarico. Parla con la gente del centro.</p>
             <h3 data-i18n="completedQuests">Completate</h3>
             <ul id="journal-done" class="quest-list done-list"></ul>
+            <h3 data-i18n="credentialTitle">Credenziale del Pellegrino</h3>
+            <p id="journal-credential-count" class="muted"></p>
+            <ul id="journal-credential" class="place-list credential-list"></ul>
+            <p id="journal-credential-note" class="fine"></p>
             <h3 data-i18n="journalPlaces">Luoghi di Fidenza</h3>
             <p id="journal-places-count" class="muted"></p>
             <ul id="journal-places" class="place-list"></ul>
@@ -183,6 +187,7 @@
           <span><i class="dot dot-npc"></i><span data-i18n="legendNpc">Paesani</span></span>
           <span><i class="dot dot-tile"></i><span data-i18n="legendTile">Ricordi</span></span>
           <span><i class="dot dot-target"></i><span data-i18n="legendTarget">Incarichi</span></span>
+          <span><i class="dot dot-route"></i><span data-i18n="legendFrancigena">Via Francigena</span></span>
         </div>
         <p class="map-attribution" data-i18n="mapAttribution">Mappa: © OpenStreetMap contributors (ODbL)</p>
         <p class="panel-foot"><kbd>M</kbd><span data-i18n="closeHint">chiudi</span></p>

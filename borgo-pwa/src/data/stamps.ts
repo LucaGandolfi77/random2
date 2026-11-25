@@ -1,3 +1,4 @@
+import { CREDENTIAL_PLACE_IDS } from './francigena';
 import type { Localized } from './types';
 
 export interface StampSpec {
@@ -287,6 +288,15 @@ export const STAMPS: StampSpec[] = [
       en: 'An espresso at the Bar Diana counter, among fresh pastries and village chatter.'
     },
     placeIds: ['bar-interno']
+  },
+  {
+    id: 'stamp-credential',
+    name: { it: 'Credenziale del Pellegrino', en: 'Pilgrim Credential' },
+    description: {
+      it: 'Quattro pietre lungo la Via Francigena e la sosta alla Taverna: il cammino di Fidenza è completo.',
+      en: 'Four stones along the Via Francigena and the stop at the Taverna: the Fidenza route is complete.'
+    },
+    placeIds: CREDENTIAL_PLACE_IDS
   }
 ];
 

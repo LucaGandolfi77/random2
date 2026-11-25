@@ -78,6 +78,7 @@ import { createTrain, type TrainActor } from '../world/train';
 import { VehicleFleet, type VehicleActor } from '../world/vehicles';
 import { buildWorld, type World, type WorldItem } from '../world/world';
 import { createInteriors, type InteriorWorld } from '../world/interiors';
+import { FRANCIGENA_STAGES } from '../data/francigena';
 
 type Mode =
   | 'title'
@@ -1635,10 +1636,22 @@ export class BorgoApp {
         continue;
       }
       if (discover(this.state, place.id)) {
+        const credentialBefore = FRANCIGENA_STAGES.every((stage) =>
+          this.state.discovered.includes(stage.placeId)
+        );
         this.audio.pickup();
         this.hud.toast(`${t('placeDiscovered', this.lang)} · ${pick(place.name, this.lang)}`);
         this.refreshUi();
         this.persist();
+        if (
+          credentialBefore &&
+          FRANCIGENA_STAGES.every((stage) => this.state.discovered.includes(stage.placeId))
+        ) {
+          window.setTimeout(
+            () => this.hud.toast(t('credentialCompleteToast', this.lang)),
+            850
+          );
+        }
       }
     }
   }

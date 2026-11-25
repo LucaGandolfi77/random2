@@ -3,6 +3,7 @@ import { DISCOVERIES } from '../data/town';
 import { FESTIVAL_BRANCHES, FESTIVAL_LANTERNS, FESTIVAL_MUSICIANS, FESTIVAL_POSTCARDS } from '../data/festival';
 import { festivalTaskCount, lanternsDone, musiciansDone } from '../game/festival';
 import { STAMPS, stampEarned } from '../data/stamps';
+import { FRANCIGENA_STAGES } from '../data/francigena';
 import { pick, t } from '../data/strings';
 import type { Language, QuestId } from '../data/types';
 import { questProgress, type GameState } from '../game/state';
@@ -25,6 +26,9 @@ export class JournalPanel {
   private festivalStatus = byId<HTMLParagraphElement>('journal-festival-status');
   private festivalList = byId<HTMLUListElement>('journal-festival');
   private postcards = byId<HTMLUListElement>('journal-postcards');
+  private credential = byId<HTMLUListElement>('journal-credential');
+  private credentialCount = byId<HTMLParagraphElement>('journal-credential-count');
+  private credentialNote = byId<HTMLParagraphElement>('journal-credential-note');
   private stamps = byId<HTMLUListElement>('journal-stamps');
   private stampsCount = byId<HTMLParagraphElement>('journal-stamps-count');
   private mosaic = byId<HTMLCanvasElement>('journal-mosaic');
@@ -63,6 +67,7 @@ export class JournalPanel {
     this.places.textContent = '';
     this.festivalList.textContent = '';
     this.postcards.textContent = '';
+    this.credential.textContent = '';
     this.stamps.textContent = '';
 
     const active: QuestId[] = [];
@@ -94,9 +99,33 @@ export class JournalPanel {
       item.append(name, description);
       this.places.appendChild(item);
     }
+    this.refreshCredential(state, lang);
     this.refreshFestival(state, lang);
     this.refreshStamps(state, lang);
     this.drawMosaic(state.tiles);
+  }
+
+  private refreshCredential(state: GameState, lang: Language): void {
+    let found = 0;
+    for (const [index, stage] of FRANCIGENA_STAGES.entries()) {
+      const reached = state.discovered.includes(stage.placeId);
+      if (reached) found += 1;
+      const item = document.createElement('li');
+      item.className = reached ? 'place credential-place' : 'place place-locked credential-place';
+      const name = document.createElement('strong');
+      name.textContent = `${index + 1}. ${pick(stage.name, lang)}`;
+      const description = document.createElement('p');
+      description.textContent = reached
+        ? t('credentialStageFound', lang)
+        : t('credentialStageLocked', lang);
+      item.append(name, description);
+      this.credential.appendChild(item);
+    }
+    this.credentialCount.textContent = `${found}/${FRANCIGENA_STAGES.length} · ${t('credentialProgress', lang)}`;
+    this.credentialNote.textContent =
+      found === FRANCIGENA_STAGES.length
+        ? t('credentialNoteComplete', lang)
+        : t('credentialNoteLocked', lang);
   }
 
   private refreshStamps(state: GameState, lang: Language): void {

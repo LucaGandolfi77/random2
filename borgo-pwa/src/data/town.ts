@@ -1,4 +1,5 @@
 import { FIDENZA_WORLD } from './fidenza';
+import { FRANCIGENA_STONES } from './francigena';
 import type {
   DiscoverySpec,
   DeliverySpec,
@@ -887,7 +888,8 @@ export const DISCOVERIES: DiscoverySpec[] = [
     z: -2.8,
     radius: 4.8,
     interior: 'bar'
-  }
+  },
+  ...FRANCIGENA_STONES
 ];
 
 export const ZONES: ZoneSpec[] = [

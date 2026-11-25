@@ -11,6 +11,7 @@ export type PersonLook =
   | 'citizen1'
   | 'citizen2'
   | 'citizen3'
+  | 'pilgrim'
   | 'player';
 
 export interface PersonRig {
@@ -32,6 +33,7 @@ interface Outfit {
   hair: number;
   satchel?: boolean;
   moustache?: boolean;
+  staff?: boolean;
 }
 
 const OUTFITS: Record<PersonLook, Outfit> = {
@@ -126,6 +128,18 @@ const OUTFITS: Record<PersonLook, Outfit> = {
     hair: 0x3c2f26,
     satchel: true
   },
+  pilgrim: {
+    shirt: 0x7b6a4f,
+    trousers: 0x4b4338,
+    apron: 0xb8a67f,
+    scarf: 0x8a3b32,
+    hat: 'straw',
+    hatColor: 0xc7a55e,
+    hair: 0x5a4a3a,
+    satchel: true,
+    staff: true,
+    moustache: true
+  },
   player: {
     shirt: 0xf0e6cf,
     trousers: 0x40546b,
@@ -188,6 +202,13 @@ export function createPerson(look: PersonLook): PersonRig {
   if (outfit.satchel) {
     mesh(new THREE.BoxGeometry(0.34, 0.3, 0.14).translate(0, 1.15, -0.24), solid(0x6b4e34));
     mesh(new THREE.BoxGeometry(0.08, 0.62, 0.04).translate(0.2, 1.35, -0.18), solid(0x4a3625));
+  }
+
+  if (outfit.staff) {
+    const staff = mesh(new THREE.BoxGeometry(0.06, 1.8, 0.06), solid(0x6a4a32));
+    staff.position.set(0.55, 0.9, 0.12);
+    const knob = mesh(new THREE.BoxGeometry(0.1, 0.12, 0.1), solid(0x8a6a42));
+    knob.position.set(0.55, 1.82, 0.12);
   }
 
   const leftArm = new THREE.Group();

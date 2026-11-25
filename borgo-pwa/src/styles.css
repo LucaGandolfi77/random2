@@ -1136,6 +1136,11 @@ kbd {
   overflow: hidden;
 }
 
+.credential-place {
+  border-color: rgba(176, 122, 50, 0.32);
+  background: rgba(217, 164, 65, 0.08);
+}
+
 .place-locked {
   opacity: 0.52;
 }
@@ -1275,6 +1280,14 @@ kbd {
   background: var(--gold);
   border-radius: 1px;
   transform: rotate(45deg);
+}
+
+.dot-route {
+  width: 14px;
+  height: 3px;
+  border: 0;
+  border-top: 2px dotted #b07a32;
+  border-radius: 0;
 }
 
 /* ------------------------------------------------------------------ menus */

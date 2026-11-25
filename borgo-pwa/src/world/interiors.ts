@@ -211,7 +211,7 @@ function buildRoom(scene: THREE.Scene, spec: InteriorSpec): InteriorRuntime {
                   : spec.id === 'taverna'
                     ? [
                         ['citizen2', cx + 10.2, cz - 1.6, -1.4],
-                        ['citizen1', cx - 7, cz - 1.0, 1.4],
+                        ['pilgrim', cx - 7, cz - 1.0, 1.4],
                         ['citizen3', cx - 6.4, cz + 4.1, -1.8],
                         ['citizen2', cx + 7.2, cz - 3.2, -1.2]
                       ]

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { STIRONE_BRIDGE } from '../data/town';
 import { INTERIORS } from '../data/interiors';
+import { FRANCIGENA_STONES } from '../data/francigena';
 import { GeoBatch, staticMaterial, TriBatch } from './batch';
 
 /**
@@ -51,6 +52,7 @@ export function createPeriphery(scene: THREE.Scene): void {
   addInteriorPortals(buildings);
   addInteriorSignArms(buildings);
   addInteriorFronts(buildings);
+  addFrancigenaStones(buildings);
   addPigeons(buildings);
   addHeron(scene, -1214, -104, 0.6);
   addHeron(scene, -1262, 62, -2.1);
@@ -770,6 +772,8 @@ function addInteriorFronts(batch: TriBatch): void {
   batch.box(0.12, 3.0, 0.16, 76.95, 1.5, 104.98, 0xd8c7a5);
   batch.box(0.12, 0.16, 2.1, 76.95, 3.0, 104, 0xd8c7a5);
   batch.box(0.8, 0.08, 2.2, 76.35, 0.04, 104, 0xc9a66f);
+  batch.box(0.06, 0.5, 0.5, 76.89, 2.2, 102.6, 0xd9a441);
+  batch.box(0.08, 0.2, 0.2, 76.84, 2.2, 102.6, 0x8a3b32);
 
   /* Bar Diana door and step */
   batch.box(0.1, 2.8, 1.8, 36.96, 1.4, 177, 0x3f3428);
@@ -777,6 +781,20 @@ function addInteriorFronts(batch: TriBatch): void {
   batch.box(0.12, 3.0, 0.16, 36.95, 1.5, 177.98, 0xe6d9bd);
   batch.box(0.12, 0.16, 2.1, 36.95, 3.0, 177, 0xe6d9bd);
   batch.box(0.8, 0.08, 2.2, 37.35, 0.04, 177, 0xc9a66f);
+}
+
+function addFrancigenaStones(batch: TriBatch): void {
+  for (const stone of FRANCIGENA_STONES) {
+    const { x, z } = stone;
+    batch.box(1.0, 0.16, 0.72, x, 0.08, z, 0x7a6a55);
+    batch.box(0.62, 1.35, 0.42, x, 0.72, z, 0x9a8f7a);
+    batch.box(0.84, 0.12, 0.62, x, 1.42, z, 0xc5b087);
+    batch.box(0.44, 0.44, 0.06, x, 1.02, z + 0.22, 0xd9a441);
+    batch.box(0.2, 0.2, 0.07, x, 1.02, z + 0.25, 0x8a3b32);
+    batch.box(0.06, 0.3, 0.02, x - 0.16, 1.12, z + 0.26, 0xd9a441);
+    batch.box(0.06, 0.3, 0.02, x + 0.16, 1.12, z + 0.26, 0xd9a441);
+    batch.box(0.28, 0.05, 0.02, x, 0.86, z + 0.26, 0xd9a441);
+  }
 }
 
 function addPigeons(batch: TriBatch): void {

@@ -124,6 +124,22 @@ export const UI = {
   festivalLanternsProgress: { it: 'lanterne', en: 'lanterns' },
   festivalMusiciansProgress: { it: 'musicisti', en: 'musicians' },
   festivalBranchesProgress: { it: 'rami d’ulivo', en: 'olive branches' },
+  credentialTitle: { it: 'Credenziale del Pellegrino', en: 'Pilgrim Credential' },
+  credentialProgress: { it: 'tappe del cammino', en: 'stages of the route' },
+  credentialStageFound: { it: 'Tappa raggiunta', en: 'Stage reached' },
+  credentialStageLocked: { it: 'Tappa da scoprire', en: 'Stage to discover' },
+  credentialNoteLocked: {
+    it: 'Completa le cinque tappe per ottenere il timbro finale.',
+    en: 'Complete the five stages to earn the final stamp.'
+  },
+  credentialNoteComplete: {
+    it: 'Credenziale completa: il timbro finale è nel diario.',
+    en: 'Credential complete: the final stamp is in the journal.'
+  },
+  credentialCompleteToast: {
+    it: 'Credenziale completa · Timbro finale nel diario',
+    en: 'Credential complete · Final stamp in the journal'
+  },
   stampsTitle: { it: 'Timbri del Pellegrino', en: 'Pilgrim stamps' },
   stampsFound: { it: 'timbri ottenuti', en: 'stamps earned' },
   stampLocked: { it: 'Timbro non ancora ottenuto', en: 'Stamp not earned yet' },
@@ -186,6 +202,7 @@ export const UI = {
   legendNpc: { it: 'Paesani', en: 'Townsfolk' },
   legendTile: { it: 'Ricordi', en: 'Memories' },
   legendTarget: { it: 'Incarichi', en: 'Errands' },
+  legendFrancigena: { it: 'Via Francigena', en: 'Via Francigena' },
   pauseEyebrow: { it: "Una pausa all'ombra", en: 'A pause in the shade' },
   paused: { it: 'Pausa', en: 'Paused' },
   resume: { it: 'Riprendi', en: 'Resume' },

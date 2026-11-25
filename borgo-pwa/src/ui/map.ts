@@ -1,6 +1,7 @@
 import { FIDENZA } from '../data/fidenza';
 import { DISCOVERIES, NPCS, STREET_LABELS, TILES, WORLD } from '../data/town';
 import { FESTIVAL_NPC_POSITIONS, FESTIVAL_STAGE, FESTIVAL_STARTER } from '../data/festival';
+import { FRANCIGENA_ROUTE, FRANCIGENA_STAGES } from '../data/francigena';
 import type { Language } from '../data/types';
 import { pick } from '../data/strings';
 import type { GameState } from '../game/state';
@@ -72,7 +73,11 @@ const FULL_MAP_MINOR = new Set([
   'parco-degasperi',
   'parcobaleno',
   'santa-maria',
-  'san-michele'
+  'san-michele',
+  'vf-ponte',
+  'vf-porta',
+  'vf-duomo',
+  'vf-matteotti'
 ]);
 
 export function drawFullMap(
@@ -143,6 +148,7 @@ export function drawFullMap(
   }
   ctx.restore();
 
+  drawFrancigena(ctx, view, state);
   drawPlayer(ctx, player, heading, view, 9);
 
   ctx.fillStyle = INK;
@@ -365,6 +371,47 @@ function drawTown(
   if (waypoint) {
     marker(ctx, view, waypoint.x, waypoint.z, full ? 7 : 4.5);
   }
+}
+
+function drawFrancigena(
+  ctx: CanvasRenderingContext2D,
+  view: View,
+  state: GameState
+): void {
+  ctx.save();
+  ctx.beginPath();
+  FRANCIGENA_ROUTE.forEach((point, index) => {
+    const x = view.ox + point.x * view.scale;
+    const y = view.oy + point.z * view.scale;
+    if (index === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.setLineDash([9, 6]);
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(154,74,32,0.9)';
+  ctx.lineWidth = 4.8;
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.font = '700 8px Georgia, "Times New Roman", serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  FRANCIGENA_STAGES.forEach((stage, index) => {
+    const x = view.ox + stage.x * view.scale;
+    const y = view.oy + stage.z * view.scale;
+    const found = state.discovered.includes(stage.placeId);
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI * 2);
+    ctx.fillStyle = found ? GOLD : PAPER;
+    ctx.fill();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.font = '700 9px Georgia, "Times New Roman", serif';
+    ctx.fillText(String(index + 1), x, y + 0.5);
+  });
+  ctx.restore();
 }
 
 function npcHasQuestMark(state: GameState, id: string): boolean {
