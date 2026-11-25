@@ -1245,6 +1245,81 @@ kbd {
   background: rgba(43, 36, 28, 0.08);
 }
 
+.belvedere {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+}
+
+.belvedere-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 46%,
+    transparent 0 31vmin,
+    rgba(15, 11, 8, 0.93) 31.5vmin
+  );
+}
+
+.belvedere::before,
+.belvedere::after {
+  content: '';
+  position: absolute;
+  background: rgba(245, 236, 217, 0.16);
+  pointer-events: none;
+}
+
+.belvedere::before {
+  left: 50%;
+  top: calc(46% - 40px);
+  width: 1px;
+  height: 80px;
+}
+
+.belvedere::after {
+  left: calc(50% - 40px);
+  top: 46%;
+  width: 80px;
+  height: 1px;
+}
+
+.belvedere-caption {
+  position: absolute;
+  left: 50%;
+  bottom: max(22px, calc(env(safe-area-inset-bottom) + 18px));
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 24px));
+  padding: 14px 18px 16px;
+  border-radius: 13px;
+  border: 1px solid rgba(43, 36, 28, 0.35);
+  background: rgba(242, 230, 206, 0.93);
+  box-shadow: 0 10px 30px rgba(20, 12, 6, 0.3);
+  text-align: center;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+}
+
+.belvedere-caption h2 {
+  margin: 0 0 5px;
+  font-family: var(--serif);
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.belvedere-caption p {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.belvedere-caption .btn {
+  min-height: 40px;
+  padding: 0 20px;
+}
+
 .place-locked {
   opacity: 0.52;
 }
@@ -1411,6 +1486,36 @@ kbd {
   height: 5px;
   border-radius: 50%;
   background: var(--paper);
+}
+
+.dot-belvedere {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  background: transparent;
+  position: relative;
+}
+
+.dot-belvedere::before,
+.dot-belvedere::after {
+  content: '';
+  position: absolute;
+  background: var(--ink);
+}
+
+.dot-belvedere::before {
+  left: 4px;
+  top: -3px;
+  width: 1px;
+  height: 14px;
+}
+
+.dot-belvedere::after {
+  left: -3px;
+  top: 4px;
+  width: 14px;
+  height: 1px;
 }
 
 /* ------------------------------------------------------------------ menus */

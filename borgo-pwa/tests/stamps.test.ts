@@ -6,7 +6,7 @@ const ids = new Set(DISCOVERIES.map((place) => place.id));
 
 describe('pilgrim stamps', () => {
   it('has stamps for every district and references only real discoveries', () => {
-    expect(STAMPS).toHaveLength(32);
+    expect(STAMPS).toHaveLength(33);
     expect(new Set(STAMPS.map((stamp) => stamp.id)).size).toBe(STAMPS.length);
     for (const stamp of STAMPS) {
       expect(stamp.name.it.length).toBeGreaterThan(0);

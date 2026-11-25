@@ -80,6 +80,7 @@ import { buildWorld, type World, type WorldItem } from '../world/world';
 import { createInteriors, type InteriorWorld } from '../world/interiors';
 import { FRANCIGENA_STAGES } from '../data/francigena';
 import { PHOTO_SPOTS, clearPhotos, loadPhotos, photoFileName, savePhoto, type PhotoSpot } from '../data/photo';
+import { BELVEDERE_SPOTS, type BelvedereSpot } from '../data/belvedere';
 import { createPostcard } from '../ui/postcard';
 
 type Mode =
@@ -93,7 +94,8 @@ type Mode =
   | 'confirm'
   | 'finale'
   | 'festivalEnd'
-  | 'photo';
+  | 'photo'
+  | 'belvedere';
 
 type InteractionKind =
   | 'npc'
@@ -111,7 +113,8 @@ type InteractionKind =
   | 'festival-procession'
   | 'enter-interior'
   | 'exit-interior'
-  | 'photo-spot';
+  | 'photo-spot'
+  | 'belvedere';
 
 interface Interaction {
   kind: InteractionKind;
@@ -121,6 +124,7 @@ interface Interaction {
   festivalId?: string;
   interior?: InteriorSpec;
   photoSpot?: PhotoSpot;
+  belvedere?: BelvedereSpot;
   distance: number;
 }
 
@@ -198,6 +202,9 @@ export class BorgoApp {
   private readonly photoPreviewImage = byId<HTMLImageElement>('photo-preview-image');
   private readonly photoPreviewNote = byId<HTMLParagraphElement>('photo-preview-note');
   private readonly photoDownload = byId<HTMLAnchorElement>('photo-download');
+  private readonly belvedereEl = byId<HTMLDivElement>('belvedere');
+  private readonly belvedereTitle = byId<HTMLHeadingElement>('belvedere-title');
+  private readonly belvedereText = byId<HTMLParagraphElement>('belvedere-text');
   private readonly titleContinue = byId<HTMLButtonElement>('title-continue');
   private readonly titleSaveNote = byId<HTMLParagraphElement>('title-save-note');
   private readonly titleLang = byId<HTMLButtonElement>('title-lang');
@@ -217,6 +224,9 @@ export class BorgoApp {
   private settingsBack: 'pause' | 'title' = 'pause';
   private confirmBack: 'pause' | 'title' = 'title';
   private photoCompletionPending = false;
+  private belvedereCamera: { yaw: number; pitch: number; distance: number; fov: number } | null = null;
+  private belvedereYaw = 0;
+  private belvederePitch = 0.02;
 
   constructor() {
     const loadedSave = loadGame();
@@ -370,6 +380,7 @@ export class BorgoApp {
     byId<HTMLButtonElement>('festival-end-close').addEventListener('click', () => this.closeFestivalEnd());
     byId<HTMLButtonElement>('photo-preview-close').addEventListener('click', () => this.closePhotoPreview());
     byId<HTMLButtonElement>('photo-done').addEventListener('click', () => this.closePhotoPreview());
+    byId<HTMLButtonElement>('belvedere-close').addEventListener('click', () => this.closeBelvedere());
     byId<HTMLButtonElement>('finale-new').addEventListener('click', () => {
       this.finaleEl.hidden = true;
       this.startNewGame();
@@ -487,6 +498,14 @@ export class BorgoApp {
       this.updateDusk(dt);
       this.hud.updateCompass(this.cameraRig.heading);
       this.hud.drawMinimap(this.state, this.player.position, this.cameraRig.heading, this.currentWaypoint());
+    } else if (this.mode === 'belvedere') {
+      const look = this.input.consumeLook();
+      this.belvedereYaw -= look.x * 0.0042;
+      this.belvederePitch = THREE.MathUtils.clamp(this.belvederePitch + look.y * 0.0028, -0.2, 1.1);
+      this.applyBelvedereCamera();
+      this.world.update(dt, this.time, this.player.position);
+      this.updatePlayerVisibility();
+      this.updateDusk(dt);
     } else {
       this.input.consumeLook();
       this.world.update(dt, this.time, this.player.position);
@@ -970,6 +989,63 @@ export class BorgoApp {
     }
   }
 
+  private openBelvedere(spot: BelvedereSpot): void {
+    if (this.mode !== 'playing' || this.currentInterior) return;
+    this.belvedereCamera = {
+      yaw: this.cameraRig.yaw,
+      pitch: this.cameraRig.pitch,
+      distance: this.cameraRig.distance,
+      fov: this.camera.fov
+    };
+    this.mode = 'belvedere';
+    this.belvedereTitle.textContent = pick(spot.name, this.lang);
+    this.belvedereText.textContent = pick(spot.description, this.lang);
+    this.belvedereEl.hidden = false;
+    this.hud.setPrompt(null);
+    this.hud.setVisible(false);
+    this.input.consumeLook();
+    this.player.group.visible = false;
+    this.player.shadow.visible = false;
+    this.belvedereYaw = spot.view.yaw;
+    this.belvederePitch = spot.view.pitch;
+    this.camera.fov = 32;
+    this.camera.updateProjectionMatrix();
+    this.applyBelvedereCamera();
+    this.audio.ui();
+  }
+
+  private applyBelvedereCamera(): void {
+    const eyeY = this.player.position.y + 9;
+    const cos = Math.cos(this.belvederePitch);
+    const dx = -Math.sin(this.belvedereYaw) * cos;
+    const dz = -Math.cos(this.belvedereYaw) * cos;
+    const dy = -Math.sin(this.belvederePitch);
+    this.camera.position.set(this.player.position.x, eyeY, this.player.position.z);
+    this.camera.lookAt(
+      this.player.position.x + dx * 100,
+      eyeY + dy * 100,
+      this.player.position.z + dz * 100
+    );
+  }
+
+  private closeBelvedere(): void {
+    if (this.mode !== 'belvedere') return;
+    const saved = this.belvedereCamera;
+    this.belvedereEl.hidden = true;
+    this.mode = 'playing';
+    this.camera.fov = saved?.fov ?? 55;
+    this.camera.updateProjectionMatrix();
+    this.cameraRig.distance = saved?.distance ?? 7.2;
+    this.cameraRig.reset(saved?.yaw ?? 0, saved?.pitch ?? 0.3);
+    this.cameraRig.snapTo(this.player.position);
+    this.belvedereCamera = null;
+    this.hud.setVisible(true);
+    this.input.consumeLook();
+    this.updatePlayerVisibility();
+    this.updateInteraction();
+    this.audio.ui();
+  }
+
   private capturePhoto(spot: PhotoSpot): void {
     if (this.mode !== 'playing' || this.currentInterior) return;
     const playerVisible = this.player.group.visible;
@@ -1038,6 +1114,10 @@ export class BorgoApp {
       this.closePhotoPreview();
       return;
     }
+    if (this.mode === 'belvedere') {
+      this.closeBelvedere();
+      return;
+    }
     if (this.mode !== 'playing') return;
     if (this.travel === 'fly') {
       this.tryLand();
@@ -1060,6 +1140,10 @@ export class BorgoApp {
     }
     if (target.kind === 'photo-spot' && target.photoSpot) {
       this.capturePhoto(target.photoSpot);
+      return;
+    }
+    if (target.kind === 'belvedere' && target.belvedere) {
+      this.openBelvedere(target.belvedere);
       return;
     }
     if (target.kind === 'vehicle' && target.vehicle) {
@@ -1223,6 +1307,9 @@ export class BorgoApp {
         break;
       case 'photo':
         this.closePhotoPreview();
+        break;
+      case 'belvedere':
+        this.closeBelvedere();
         break;
       case 'dialogue':
         this.dialogue.close();
@@ -1721,20 +1808,32 @@ export class BorgoApp {
       if (Math.hypot(place.x - this.player.position.x, place.z - this.player.position.z) > place.radius) {
         continue;
       }
+      const credentialBefore = FRANCIGENA_STAGES.every((stage) =>
+        this.state.discovered.includes(stage.placeId)
+      );
+      const belvedereBefore = BELVEDERE_SPOTS.every((spot) =>
+        this.state.discovered.includes(spot.id)
+      );
       if (discover(this.state, place.id)) {
-        const credentialBefore = FRANCIGENA_STAGES.every((stage) =>
-          this.state.discovered.includes(stage.placeId)
-        );
         this.audio.pickup();
         this.hud.toast(`${t('placeDiscovered', this.lang)} · ${pick(place.name, this.lang)}`);
         this.refreshUi();
         this.persist();
         if (
-          credentialBefore &&
+          !credentialBefore &&
           FRANCIGENA_STAGES.every((stage) => this.state.discovered.includes(stage.placeId))
         ) {
           window.setTimeout(
             () => this.hud.toast(t('credentialCompleteToast', this.lang)),
+            850
+          );
+        }
+        if (
+          !belvedereBefore &&
+          BELVEDERE_SPOTS.every((spot) => this.state.discovered.includes(spot.id))
+        ) {
+          window.setTimeout(
+            () => this.hud.toast(t('belvedereCompleteToast', this.lang)),
             850
           );
         }
@@ -1772,6 +1871,11 @@ export class BorgoApp {
     for (const spot of PHOTO_SPOTS) {
       const distance = Math.hypot(spot.x - px, spot.z - pz);
       if (distance <= spot.radius) consider({ kind: 'photo-spot', photoSpot: spot, distance });
+    }
+
+    for (const spot of BELVEDERE_SPOTS) {
+      const distance = Math.hypot(spot.x - px, spot.z - pz);
+      if (distance <= spot.radius) consider({ kind: 'belvedere', belvedere: spot, distance });
     }
 
     if (this.state.festival.phase === 'ready') {
@@ -1909,6 +2013,7 @@ export class BorgoApp {
     if (target.kind === 'festival-guest') return t('actionWelcome', this.lang);
     if (target.kind === 'festival-procession') return t('actionGather', this.lang);
     if (target.kind === 'photo-spot') return t('actionPhoto', this.lang);
+    if (target.kind === 'belvedere') return t('actionBelvedere', this.lang);
     return 'OK';
   }
 
@@ -1963,6 +2068,8 @@ export class BorgoApp {
         return t('festivalProcessionPrompt', this.lang);
       case 'photo-spot':
         return `${t('photoPrompt', this.lang)} · ${pick(target.photoSpot?.name ?? { it: '', en: '' }, this.lang)}`;
+      case 'belvedere':
+        return `${t('belvederePrompt', this.lang)} · ${pick(target.belvedere?.name ?? { it: '', en: '' }, this.lang)}`;
     }
   }
 

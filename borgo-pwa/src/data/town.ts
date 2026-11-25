@@ -1,5 +1,6 @@
 import { FIDENZA_WORLD } from './fidenza';
 import { FRANCIGENA_STONES } from './francigena';
+import { BELVEDERE_SPOTS } from './belvedere';
 import type {
   DiscoverySpec,
   DeliverySpec,
@@ -889,7 +890,15 @@ export const DISCOVERIES: DiscoverySpec[] = [
     radius: 4.8,
     interior: 'bar'
   },
-  ...FRANCIGENA_STONES
+  ...FRANCIGENA_STONES,
+  ...BELVEDERE_SPOTS.map((spot) => ({
+    id: spot.id,
+    name: spot.name,
+    description: spot.description,
+    x: spot.x,
+    z: spot.z,
+    radius: spot.radius
+  }))
 ];
 
 export const ZONES: ZoneSpec[] = [

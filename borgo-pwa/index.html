@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#1d1a15" />
-    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, from the northern agricultural district to Le Azalee, the southern sports district, the recovered churches and parks, the Stirone river park, nine enterable interiors, the Via Francigena credential and six photo postcards, with vehicles, flight, stamps and the Festa di San Donnino." />
+    <meta name="description" content="BORGO SAN DONNINO — La Passeggiata: an open-world golden-hour walk through Fidenza, from the northern agricultural district to Le Azalee, the southern sports district, the recovered churches and parks, the Stirone river park, nine enterable interiors, the Via Francigena credential, six photo postcards and five belvedere viewpoints, with vehicles, flight, stamps and the Festa di San Donnino." />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon.svg" />
@@ -193,6 +193,7 @@
           <span><i class="dot dot-target"></i><span data-i18n="legendTarget">Incarichi</span></span>
           <span><i class="dot dot-route"></i><span data-i18n="legendFrancigena">Via Francigena</span></span>
           <span><i class="dot dot-photo"></i><span data-i18n="legendPhoto">Obiettivi foto</span></span>
+          <span><i class="dot dot-belvedere"></i><span data-i18n="legendBelvedere">Belvedere</span></span>
         </div>
         <p class="map-attribution" data-i18n="mapAttribution">Mappa: © OpenStreetMap contributors (ODbL)</p>
         <p class="panel-foot"><kbd>M</kbd><span data-i18n="closeHint">chiudi</span></p>
@@ -213,6 +214,17 @@
         <div class="photo-actions">
           <a id="photo-download" class="btn btn-primary" download data-i18n="photoDownload">Scarica</a>
           <button id="photo-done" class="btn btn-ghost" type="button" data-i18n="photoDone">Chiudi</button>
+        </div>
+      </div>
+
+      <div id="belvedere" class="belvedere" hidden role="dialog" aria-modal="true" aria-labelledby="belvedere-title">
+        <div class="belvedere-vignette" aria-hidden="true"></div>
+        <div class="belvedere-caption">
+          <p class="panel-eyebrow" data-i18n="belvedereEyebrow">I Belvedere</p>
+          <h2 id="belvedere-title"></h2>
+          <p id="belvedere-text"></p>
+          <p class="fine" data-i18n="belvedereHint">Trascina per guardarti intorno.</p>
+          <button id="belvedere-close" class="btn btn-primary" type="button" data-i18n="photoDone">Chiudi</button>
         </div>
       </div>
 

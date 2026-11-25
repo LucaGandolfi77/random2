@@ -1,4 +1,5 @@
 import { CREDENTIAL_PLACE_IDS } from './francigena';
+import { BELVEDERE_SPOTS } from './belvedere';
 import type { Localized } from './types';
 
 export interface StampSpec {
@@ -297,6 +298,15 @@ export const STAMPS: StampSpec[] = [
       en: 'Four stones along the Via Francigena and the stop at the Taverna: the Fidenza route is complete.'
     },
     placeIds: CREDENTIAL_PLACE_IDS
+  },
+  {
+    id: 'stamp-belvedere',
+    name: { it: 'Panorami di Fidenza', en: 'Fidenza Panoramas' },
+    description: {
+      it: 'Cinque sguardi sulla città: dal centro allo Stirone, dalla stazione al parco e allo stadio.',
+      en: 'Five views over the town: from the centre to the Stirone, the station, the park and the stadium.'
+    },
+    placeIds: BELVEDERE_SPOTS.map((spot) => spot.id)
   }
 ];
 

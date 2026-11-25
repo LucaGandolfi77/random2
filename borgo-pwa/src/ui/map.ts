@@ -3,6 +3,7 @@ import { DISCOVERIES, NPCS, STREET_LABELS, TILES, WORLD } from '../data/town';
 import { FESTIVAL_NPC_POSITIONS, FESTIVAL_STAGE, FESTIVAL_STARTER } from '../data/festival';
 import { FRANCIGENA_ROUTE, FRANCIGENA_STAGES } from '../data/francigena';
 import { PHOTO_SPOTS } from '../data/photo';
+import { BELVEDERE_SPOTS } from '../data/belvedere';
 import type { Language } from '../data/types';
 import { pick } from '../data/strings';
 import type { GameState } from '../game/state';
@@ -151,6 +152,7 @@ export function drawFullMap(
 
   drawFrancigena(ctx, view, state);
   drawPhotoSpots(ctx, view);
+  drawBelvedereSpots(ctx, view);
   drawPlayer(ctx, player, heading, view, 9);
 
   ctx.fillStyle = INK;
@@ -431,6 +433,29 @@ function drawPhotoSpots(ctx: CanvasRenderingContext2D, view: View): void {
     ctx.fill();
     ctx.strokeStyle = INK;
     ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function drawBelvedereSpots(ctx: CanvasRenderingContext2D, view: View): void {
+  for (const spot of BELVEDERE_SPOTS) {
+    const x = view.ox + spot.x * view.scale;
+    const y = view.oy + spot.z * view.scale;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.beginPath();
+    ctx.arc(0, 0, 6, 0, Math.PI * 2);
+    ctx.strokeStyle = GOLD;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(-7, 0);
+    ctx.lineTo(7, 0);
+    ctx.moveTo(0, -7);
+    ctx.lineTo(0, 7);
     ctx.stroke();
     ctx.restore();
   }

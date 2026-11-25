@@ -3,6 +3,7 @@ import { buildCityColliders, CollisionWorld } from '../src/data/colliders';
 import { FIDENZA, FIDENZA_WORLD } from '../src/data/fidenza';
 import { INTERIORS } from '../src/data/interiors';
 import { PHOTO_SPOTS } from '../src/data/photo';
+import { BELVEDERE_SPOTS } from '../src/data/belvedere';
 import {
   BELL_SPOT,
   DELIVERIES,
@@ -108,7 +109,7 @@ describe('Fidenza data', () => {
     expect(LETTERS).toHaveLength(3);
     expect(FLOWERS).toHaveLength(5);
     expect(NPCS).toHaveLength(7);
-    expect(DISCOVERIES).toHaveLength(54);
+    expect(DISCOVERIES).toHaveLength(59);
     expect(DELIVERIES).toHaveLength(4);
   });
 
@@ -180,6 +181,11 @@ describe('Fidenza data', () => {
     expect(world.isFree(-298, -40, 0.34)).toBe(true);
     expect(world.isFree(-300, -10, 0.34)).toBe(true);
     expect(world.isFree(39, 106, 0.34)).toBe(true);
+    expect(world.isFree(14, -40, 0.34)).toBe(true);
+    expect(world.isFree(-1240, 20, 0.34)).toBe(true);
+    expect(world.isFree(230, -150, 0.34)).toBe(true);
+    expect(world.isFree(278, 760, 0.34)).toBe(true);
+    expect(world.isFree(-362, 1160, 0.34)).toBe(true);
   });
 
   it('uses the Fidenza playable bounds', () => {
@@ -222,6 +228,9 @@ describe('walkable route', () => {
       expect(distanceToWalkable(reach, interior.exterior), interior.id).toBeLessThan(2.8);
     }
     for (const spot of PHOTO_SPOTS) {
+      expect(distanceToWalkable(reach, spot), spot.id).toBeLessThan(spot.radius + 2);
+    }
+    for (const spot of BELVEDERE_SPOTS) {
       expect(distanceToWalkable(reach, spot), spot.id).toBeLessThan(spot.radius + 2);
     }
   }, 30000);

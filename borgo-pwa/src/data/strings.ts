@@ -171,6 +171,17 @@ export const UI = {
     it: 'Fidenza · ora d’oro',
     en: 'Fidenza · golden hour'
   },
+  belvedereEyebrow: { it: 'I Belvedere', en: 'The Belvederes' },
+  belvederePrompt: { it: 'Guarda dal belvedere', en: 'Look from the viewpoint' },
+  actionBelvedere: { it: 'GUARDA', en: 'LOOK' },
+  belvedereHint: {
+    it: 'Trascina per guardarti intorno.',
+    en: 'Drag to look around.'
+  },
+  belvedereCompleteToast: {
+    it: 'Panorami di Fidenza completi · Timbro nel diario',
+    en: 'Fidenza Panoramas complete · Stamp in the journal'
+  },
   stampsTitle: { it: 'Timbri del Pellegrino', en: 'Pilgrim stamps' },
   stampsFound: { it: 'timbri ottenuti', en: 'stamps earned' },
   stampLocked: { it: 'Timbro non ancora ottenuto', en: 'Stamp not earned yet' },
@@ -235,6 +246,7 @@ export const UI = {
   legendTarget: { it: 'Incarichi', en: 'Errands' },
   legendFrancigena: { it: 'Via Francigena', en: 'Via Francigena' },
   legendPhoto: { it: 'Obiettivi foto', en: 'Photo spots' },
+  legendBelvedere: { it: 'Belvedere', en: 'Viewpoints' },
   pauseEyebrow: { it: "Una pausa all'ombra", en: 'A pause in the shade' },
   paused: { it: 'Pausa', en: 'Paused' },
   resume: { it: 'Riprendi', en: 'Resume' },
