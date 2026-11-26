@@ -54,6 +54,10 @@ fidenza-recon/db/city.db
 # still missing, so it is not ready to be published as a PWA.
 last-dawn-rpg/
 
+# Umbra Sort's deterministic engine and PWA contract tests are source.
+!umbra-sort-pwa/tests/
+!umbra-sort-pwa/tests/**
+
 # WHITEOUT: LAST EMBER needs its manifest, lockfile and tests in CI.
 !whiteout-survival-pwa/package.json
 !whiteout-survival-pwa/package-lock.json

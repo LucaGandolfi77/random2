@@ -26,6 +26,7 @@
   - [Slot Machine](#slot-machine)
   - [Snake](#snake)
   - [Sand Loop](#sand-loop)
+  - [Umbra Sort](#umbra-sort)
   - [Pixel Ants](#pixel-ants)
   - [Inner Circle](#inner-circle)
   - [LUMEN](#lumen)
@@ -135,6 +136,7 @@
 | 56 | **Deep Orbit** | DarkOrbit-inspired mobile space combat: hunt, haul, upgrade, jump | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/darkorbit-pwa/) |
 | 57 | **LEGO Horizon — Fan Store** | Steam-style store clone with original concept art + playable Machine Hunt mini-game | HTML + CSS + vanilla JS + SVG/Canvas | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/lego-horizon-pwa/) |
 | 58 | **COMUNE 2050** | Paper-diorama civic simulation: six Italian towns, five turns, real open data, a final Bilancio Civico | TypeScript + Vite + SVG (no runtime deps) | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/comune-2050-pwa/) |
+| 59 | **Umbra Sort** | Color-shift puzzle with lifts, generators, blackout zones and 100 deterministic levels | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/umbra-sort-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -445,6 +447,26 @@ rows. The cells above fall one row, revealing the sharp photo from the top.
 **Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
 `src/` (`main`, `engine`, `board`, `quantize`, `image-import`, `artworks`,
 `render`), `icons/` (SVG), `tests/`, `smoke.mjs`.
+
+### Umbra Sort
+
+*Sposta. Ordina. Riaccendi.* ◈
+
+An original colour-shift puzzle set inside a light factory. Slide blocks through
+empty cells into collectors with the same colour and symbol while the machine
+changes around you.
+
+- 100 deterministic levels across five areas
+- Moving lifts, block generators, blackout zones and colourless prism blocks
+- Daily seeded challenge, combos, stars, local records and resume
+- Undo, hints, keyboard and touch controls
+- Symbols accompany every colour for colour-independent play
+- Fully offline PWA with generated PNG/maskable icons and isolated cache names
+- Vanilla ES modules, Canvas 2D, Web Audio and no runtime dependencies
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `config`, `levels`, `engine`, `render`, `audio`, `storage`),
+`icons/`, `scripts/gen-icons.py`, `tests/`, `smoke.mjs`.
 
 ### Pixel Ants
 

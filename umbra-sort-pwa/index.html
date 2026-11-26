@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080b14">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Umbra Sort è un puzzle di colori offline: sposta i blocchi, riaccendi la fabbrica e sopravvivi ai blackout.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Umbra Sort">
+  <meta property="og:title" content="Umbra Sort — Color Shift Puzzle">
+  <meta property="og:description" content="Sposta, ordina, riaccendi. Un color-sort puzzle originale che funziona offline.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Umbra Sort — Color Shift Puzzle</title>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button class="brand" id="brandButton" type="button" aria-label="Umbra Sort, menu principale">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>UMBRA <b>SORT</b></span>
+      </button>
+      <div class="top-actions">
+        <button class="icon-btn" id="soundButton" type="button" aria-label="Disattiva audio">♪</button>
+        <button class="icon-btn" id="settingsButton" type="button" aria-label="Impostazioni">⚙</button>
+      </div>
+    </header>
+
+    <main id="menuScreen" class="menu-screen">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">COLOR SHIFT PUZZLE</p>
+          <h1>Sposta.<br><span>Ordina.</span><br>Riaccendi.</h1>
+          <p class="lede">Una fabbrica di luce, cento livelli e un buio che non perdona. Trascina ogni blocco nel collettore giusto prima che la macchina si spenga.</p>
+          <div class="hero-actions">
+            <button class="btn primary" id="continueButton" type="button" hidden>Continua</button>
+            <button class="btn primary" id="playButton" type="button">Gioca</button>
+            <button class="btn ghost" id="levelsButton" type="button">Livelli</button>
+            <button class="btn ghost" id="dailyButton" type="button">Sfida del giorno</button>
+          </div>
+          <p class="privacy-line">Nessun account. Nessun tracciamento. Funziona offline.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-grid">
+            <i class="door d1"></i><i class="door d2"></i><i class="door d3"></i>
+            <i class="block b1"></i><i class="block b2"></i><i class="block b3"></i>
+            <i class="block b4"></i><i class="wall w1"></i><i class="block b5"></i>
+            <i class="blackout"></i>
+          </div>
+          <div class="hero-caption"><span></span> LA MACCHINA È ACCESA</div>
+        </div>
+      </section>
+
+      <section class="stats-row" aria-label="Progressi">
+        <div class="stat-card"><span>Livelli aperti</span><b id="unlockedStat">1/100</b></div>
+        <div class="stat-card"><span>Stelle</span><b id="starsStat">0/300</b></div>
+        <div class="stat-card"><span>Record</span><b id="bestStat">0</b></div>
+      </section>
+
+      <section class="menu-section">
+        <div class="section-head"><h2>Il turno di oggi</h2><span class="section-note" id="dailyDate"></span></div>
+        <button class="daily-card" id="dailyCard" type="button">
+          <span class="daily-icon">◈</span>
+          <span><strong>Una fabbrica, un solo tentativo.</strong><small>Il livello giornaliero è uguale per tutti e cambia a mezzanotte.</small></span>
+          <span class="daily-arrow">→</span>
+        </button>
+      </section>
+    </main>
+
+    <main id="gameScreen" class="game-screen hidden">
+      <div class="game-heading">
+        <button class="text-btn" id="backButton" type="button">← Menu</button>
+        <div><span id="areaLabel">CONVEYOR</span><h1 id="levelLabel">Livello 1</h1></div>
+        <button class="icon-btn" id="pauseButton" type="button" aria-label="Pausa">Ⅱ</button>
+      </div>
+
+      <div class="hud">
+        <div><span>Punti</span><b id="scoreValue">0</b></div>
+        <div><span>Mosse</span><b id="movesValue">0</b></div>
+        <div><span>Combo</span><b id="comboValue">×0</b></div>
+        <div><span>Collettori</span><b id="progressValue">0/0</b></div>
+      </div>
+
+      <div class="board-wrap">
+        <canvas id="gameCanvas" tabindex="0" aria-label="Griglia di gioco. Seleziona un blocco e usa le frecce per spostarlo."></canvas>
+        <div class="board-status" id="boardStatus" role="status" aria-live="polite">Trascina un blocco verso il collettore dello stesso simbolo.</div>
+      </div>
+
+      <div class="power-bar">
+        <button class="power-btn" id="undoButton" type="button"><span>↶</span><small>Annulla</small></button>
+        <button class="power-btn" id="hintButton" type="button"><span>?</span><small>Suggerimento</small></button>
+        <button class="power-btn prism" id="prismButton" type="button"><span>◈</span><small>Prisma <b id="chargeValue">0</b></small></button>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay hidden" id="levelsDialog" role="dialog" aria-modal="true" aria-labelledby="levelsTitle">
+    <div class="sheet wide-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">CAMPAGNA</p><h2 id="levelsTitle">Scegli un livello</h2></div><button class="close-btn" data-close="levelsDialog" type="button" aria-label="Chiudi">×</button></div>
+      <div class="area-tabs" id="areaTabs" role="tablist" aria-label="Aree"></div>
+      <div class="level-grid" id="levelGrid"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet small-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">ESPERIENZA</p><h2 id="settingsTitle">Impostazioni</h2></div><button class="close-btn" data-close="settingsDialog" type="button" aria-label="Chiudi">×</button></div>
+      <label class="toggle-row"><span><strong>Audio sintetizzato</strong><small>Effetti sonori generati dal browser.</small></span><input id="soundSetting" type="checkbox"></label>
+      <label class="toggle-row"><span><strong>Movimento ridotto</strong><small>Disattiva pulsazioni e particelle.</small></span><input id="motionSetting" type="checkbox"></label>
+      <label class="toggle-row"><span><strong>Mostra nel buio</strong><small>I blocchi restano visibili durante i blackout.</small></span><input id="darkSetting" type="checkbox"></label>
+      <button class="btn ghost wide" id="howButton" type="button">Come si gioca</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="howDialog" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+    <div class="sheet how-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">MANUALE DELLA FABBRICA</p><h2 id="howTitle">Come si gioca</h2></div><button class="close-btn" data-close="howDialog" type="button" aria-label="Chiudi">×</button></div>
+      <ol class="steps">
+        <li><span>1</span><div><strong>Sposta i blocchi</strong><p>Trascinali attraverso le celle vuote. Ogni blocco può raggiungere solo il collettore con lo stesso colore e simbolo.</p></div></li>
+        <li><span>2</span><div><strong>Fai spazio</strong><p>I generatori aggiungono blocchi. Gli ascensori scambiano le righe e i blackout bloccano temporaneamente alcune zone.</p></div></li>
+        <li><span>3</span><div><strong>Usa il prisma</strong><p>Le combo ricaricano il prisma. Seleziona un blocco grigio e premi Prisma per dargli un colore.</p></div></li>
+      </ol>
+      <p class="keyboard-note"><b>Tastiera:</b> usa <kbd>[</kbd> e <kbd>]</kbd> per selezionare un blocco, poi le frecce per spostarlo. <kbd>H</kbd> suggerimento, <kbd>Z</kbd> annulla, <kbd>P</kbd> pausa.</p>
+      <button class="btn primary wide" data-close="howDialog" type="button">Ho capito</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="pauseDialog" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="sheet small-sheet">
+      <p class="eyebrow">TURNO IN PAUSA</p><h2 id="pauseTitle">La macchina aspetta</h2>
+      <p class="muted">Il progresso è salvato su questo dispositivo.</p>
+      <button class="btn primary wide" id="resumeButton" type="button">Riprendi</button>
+      <button class="btn ghost wide" id="quitButton" type="button">Torna al menu</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="resultDialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="sheet result-sheet">
+      <p class="eyebrow" id="resultEyebrow">TURNO COMPLETATO</p>
+      <h2 id="resultTitle">Fabbrica riaccesa</h2>
+      <div class="stars" id="resultStars" aria-label="Stelle"></div>
+      <div class="result-grid"><div><span>Punti</span><b id="resultScore">0</b></div><div><span>Mosse</span><b id="resultMoves">0</b></div><div><span>Combo</span><b id="resultCombo">0</b></div></div>
+      <p class="muted" id="resultNote"></p>
+      <button class="btn primary wide" id="nextButton" type="button">Livello successivo</button>
+      <button class="btn ghost wide" id="replayButton" type="button">Rigioca</button>
+      <button class="btn ghost wide" id="resultMenuButton" type="button">Menu</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

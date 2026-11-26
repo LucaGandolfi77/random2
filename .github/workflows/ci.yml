@@ -255,6 +255,9 @@ jobs:
           # cell queues, the loop/bucket rules (idle loses, perfect play wins),
           # and the manifest + service-worker asset list.
           node --test sand-loop-pwa/tests/*.test.mjs
+          # UMBRA SORT: deterministic levels, movement, lifts, generators,
+          # blackout, prism, save restore and the offline PWA contract.
+          node --test umbra-sort-pwa/tests/*.test.mjs
           # PIXEL ANTS: the erosion rules (only exposed pixels, holes open
           # routes, no gravity), the pathfinder over the holes, the ant/bucket
           # lifecycle and win condition, quantization, and the PWA asset list.
@@ -412,6 +415,13 @@ jobs:
           out=$(node sand-loop-pwa/smoke.mjs http://localhost:8099/sand-loop-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  sand-loop-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # UMBRA SORT boots, solves a hinted move, pauses and reloads offline.
+          out=$(node umbra-sort-pwa/smoke.mjs http://localhost:8099/umbra-sort-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  umbra-sort-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3
