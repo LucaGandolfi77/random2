@@ -1,0 +1,20 @@
+{
+  "name": "comune-2050-pwa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "COMUNE 2050 — Dati veri, decisioni immaginarie: a paper-diorama civic simulation across six Italian towns, built from real open data.",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "snapshot": "node scripts/snapshot.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vitest": "^3.2.4"
+  }
+}

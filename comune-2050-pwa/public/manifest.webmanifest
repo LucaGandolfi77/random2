@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "COMUNE 2050 — Dati veri, decisioni immaginarie",
+  "short_name": "COMUNE 2050",
+  "description": "Un simulatore civico a forma di diorama: sei comuni italiani, cinque turni, politiche e eventi costruiti su dati aperti reali.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4ead6",
+  "theme_color": "#1e2a38",
+  "categories": ["games", "education", "government"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

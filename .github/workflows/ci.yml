@@ -88,6 +88,13 @@ jobs:
           npm test
           npm run build
 
+      - name: "COMUNE 2050 (typecheck, tests, build)"
+        working-directory: comune-2050-pwa
+        run: |
+          npm ci
+          npm test
+          npm run build
+
       - name: JavaScript syntax check (ESM-aware)
         run: |
           set -euo pipefail

@@ -134,6 +134,7 @@
 | 55 | **Whiteout: Last Ember** | Survival city builder: furnace, weather, survivors, decrees, tech, heroes | React + Vite + Canvas 2D + Web Audio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/whiteout-survival-pwa/) |
 | 56 | **Deep Orbit** | DarkOrbit-inspired mobile space combat: hunt, haul, upgrade, jump | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/darkorbit-pwa/) |
 | 57 | **LEGO Horizon — Fan Store** | Steam-style store clone with original concept art + playable Machine Hunt mini-game | HTML + CSS + vanilla JS + SVG/Canvas | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/lego-horizon-pwa/) |
+| 58 | **COMUNE 2050** | Paper-diorama civic simulation: six Italian towns, five turns, real open data, a final Bilancio Civico | TypeScript + Vite + SVG (no runtime deps) | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/comune-2050-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.

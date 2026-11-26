@@ -81,6 +81,13 @@ whiteout-survival-pwa/.vite/
 !borgo-pwa/tests/**
 borgo-pwa/dist/
 
+# COMUNE 2050 keeps its manifest, lockfile, snapshot script and tests.
+!comune-2050-pwa/package.json
+!comune-2050-pwa/package-lock.json
+!comune-2050-pwa/tests/
+!comune-2050-pwa/tests/**
+comune-2050-pwa/dist/
+
 # BROS. SAGA keeps its manifest, lockfile and tests in the repository.
 !bros-saga-pwa/package.json
 !bros-saga-pwa/package-lock.json

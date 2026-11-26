@@ -1,0 +1,997 @@
+{
+  "meta": {
+    "title": "COMUNE 2050 — snapshot dati",
+    "generatedAt": "2026-11-26T14:54:35.972Z",
+    "extractionDate": "2026-11-26",
+    "producer": "Cruscotto Italia / dati.gov.it",
+    "endpoint": "https://cruscotto-italia-mcp.agid.workers.dev/mcp",
+    "note": "Snapshot build-time. I valori sono quelli restituiti dal dashboard comunale del Cruscotto Italia alla data di estrazione. Le proiezioni 2050 sono elaborazioni tendenziali sui residenti 2022–2026, non previsioni ufficiali.",
+    "licenses": "Licenze per fonte: ISTAT CC BY 4.0 / CC BY 3.0 IT; ISPRA CC BY 4.0; MEF CC BY 4.0 o CC BY 3.0; Agenzia delle Entrate CC BY 4.0; AGCOM CC BY 4.0; GSE CC BY 4.0; Ministero della Salute IODL 2.0; altre fonti secondo il rispettivo ente."
+  },
+  "comuni": [
+    {
+      "identity": {
+        "istat": "034014",
+        "name": "Fidenza",
+        "province": "PR",
+        "region": "Emilia-Romagna",
+        "codiceCatastale": "B034"
+      },
+      "palette": {
+        "sky": "#f7d7a8",
+        "ground": "#c8b98a",
+        "accent": "#c65d3b",
+        "roof": "#9d4b35",
+        "water": "#7fa7a5"
+      },
+      "tagline": {
+        "it": "La città della Francigena, tra campi, torrente e treno.",
+        "en": "The Via Francigena town, between fields, river and railway."
+      },
+      "population": {
+        "total": 27573,
+        "year": 2026,
+        "estimate": true,
+        "series": [
+          {
+            "year": 2022,
+            "value": 26981,
+            "estimate": false
+          },
+          {
+            "year": 2023,
+            "value": 27045,
+            "estimate": false
+          },
+          {
+            "year": 2024,
+            "value": 27265,
+            "estimate": false
+          },
+          {
+            "year": 2025,
+            "value": 27408,
+            "estimate": false
+          },
+          {
+            "year": 2026,
+            "value": 27573,
+            "estimate": true
+          }
+        ],
+        "births": 212,
+        "deaths": 319,
+        "naturalBalance": -107,
+        "under15": {
+          "count": 3704,
+          "pct": 13.4
+        },
+        "over65": {
+          "count": 6518,
+          "pct": 23.6
+        },
+        "medianAge": 45.3,
+        "oldAgeIndex": 176,
+        "dependencyIndex": 58.9
+      },
+      "economy": {
+        "employmentRate": 78.3,
+        "unemploymentRate": 4.1,
+        "activityRate": 81.7,
+        "incomeMean": 28598,
+        "families": 12071,
+        "averageFamily": 2.25
+      },
+      "housing": {
+        "omiMean": 1259.6,
+        "omiMin": 780,
+        "omiMax": 1950,
+        "vacantDwellingsPct": 15.094609068189932,
+        "tourismBeds": 754,
+        "tourismStructures": 42,
+        "tourismBedsPer100": 2.7
+      },
+      "environment": {
+        "areaKm2": 95.117,
+        "altitudeMean": 94,
+        "soilConsumptionPct": 13.81,
+        "soilConsumptionYear": 2024,
+        "recyclingPct": 85.12,
+        "wasteKgPerPerson": 628,
+        "landslidePopulationPct": 0.17,
+        "seismicZone": "3",
+        "pm10": null,
+        "pm25": null,
+        "no2": null,
+        "airYear": 2025
+      },
+      "mobility": {
+        "commutersOut": 5055,
+        "commutersIn": 5062,
+        "commutingBalance": 7,
+        "selfContainmentPct": 51.7,
+        "vehiclesPer1000": 629,
+        "vehiclesTotal": 23549,
+        "evPoints": 95,
+        "evPer1000": 3.4453994850034455,
+        "accidents": 100,
+        "injuriesPer10k": 51.5,
+        "deathsPer10k": 0.36
+      },
+      "services": {
+        "schools": 18,
+        "schoolsPer1000": 0.6528125340006529,
+        "schoolYear": "2026/27",
+        "ftthPct": 93.4,
+        "thirdSector": 86,
+        "thirdSectorPer1000": 3.1189932180031192,
+        "pnrrProjects": 24,
+        "pnrrPerCapita": 608.1601566750081,
+        "pharmacies": 8,
+        "pharmaciesPer1000": 0.29013890400029013,
+        "incomeYear": 2024
+      },
+      "baseline": {
+        "annualGrowth": 0.54,
+        "population2050": 31377
+      },
+      "sourceByMetric": {
+        "giovani": "istat-posas",
+        "invecchiamento": "istat-posas",
+        "occupazione": "istat-census",
+        "reddito": "mef-income",
+        "suolo": "ispra-soil",
+        "casa": "mef-omi",
+        "turismo": "istat-tourism",
+        "abitato": "istat-census",
+        "aria": "ispra-air",
+        "auto": "aci-vehicles",
+        "incidenti": "aci-vehicles",
+        "ev": "gse-ev",
+        "scuola": "miur-schools",
+        "digitale": "agcom-broadband",
+        "comunita": "runts",
+        "pnrr": "regis-pnrr"
+      },
+      "sources": [
+        "istat-posas",
+        "istat-census",
+        "istat-d7b",
+        "istat-commuting",
+        "ispra-soil",
+        "ispra-air",
+        "istat-tourism",
+        "mef-income",
+        "mef-omi",
+        "aci-vehicles",
+        "miur-schools",
+        "agcom-broadband",
+        "gse-ev",
+        "runts",
+        "regis-pnrr",
+        "mds-health",
+        "cruscotto"
+      ]
+    },
+    {
+      "identity": {
+        "istat": "100005",
+        "name": "Prato",
+        "province": "PO",
+        "region": "Toscana",
+        "codiceCatastale": "G999"
+      },
+      "palette": {
+        "sky": "#f3c9b3",
+        "ground": "#c9a68a",
+        "accent": "#b7513d",
+        "roof": "#7d3a30",
+        "water": "#8fa9a3"
+      },
+      "tagline": {
+        "it": "Il distretto tessile che cuce il futuro, filo dopo filo.",
+        "en": "The textile district stitching the future, thread by thread."
+      },
+      "population": {
+        "total": 198327,
+        "year": 2026,
+        "estimate": true,
+        "series": [
+          {
+            "year": 2022,
+            "value": 195213,
+            "estimate": false
+          },
+          {
+            "year": 2023,
+            "value": 196317,
+            "estimate": false
+          },
+          {
+            "year": 2024,
+            "value": 197088,
+            "estimate": false
+          },
+          {
+            "year": 2025,
+            "value": 197057,
+            "estimate": false
+          },
+          {
+            "year": 2026,
+            "value": 198327,
+            "estimate": true
+          }
+        ],
+        "births": 1080,
+        "deaths": 1922,
+        "naturalBalance": -842,
+        "under15": {
+          "count": 22613,
+          "pct": 11.4
+        },
+        "over65": {
+          "count": 44951,
+          "pct": 22.7
+        },
+        "medianAge": 45.7,
+        "oldAgeIndex": 198.8,
+        "dependencyIndex": 51.7
+      },
+      "economy": {
+        "employmentRate": 79.3,
+        "unemploymentRate": 4.4,
+        "activityRate": 83,
+        "incomeMean": 24611,
+        "families": 82266,
+        "averageFamily": 2.38
+      },
+      "housing": {
+        "omiMean": 1731.1,
+        "omiMin": 1050,
+        "omiMax": 2650,
+        "vacantDwellingsPct": 4.40348365545216,
+        "tourismBeds": 3182,
+        "tourismStructures": 330,
+        "tourismBedsPer100": 1.6
+      },
+      "environment": {
+        "areaKm2": 97.602,
+        "altitudeMean": 120,
+        "soilConsumptionPct": 33.34,
+        "soilConsumptionYear": 2024,
+        "recyclingPct": 71.41,
+        "wasteKgPerPerson": 590,
+        "landslidePopulationPct": 0.159,
+        "seismicZone": "3",
+        "pm10": 19.5,
+        "pm25": 12.5,
+        "no2": 18.5,
+        "airYear": 2025
+      },
+      "mobility": {
+        "commutersOut": 25251,
+        "commutersIn": 24498,
+        "commutingBalance": -753,
+        "selfContainmentPct": 67.7,
+        "vehiclesPer1000": 613.6,
+        "vehiclesTotal": 159988,
+        "evPoints": 58,
+        "evPer1000": 0.29244631341168875,
+        "accidents": 833,
+        "injuriesPer10k": 48.51,
+        "deathsPer10k": 0.4
+      },
+      "services": {
+        "schools": 126,
+        "schoolsPer1000": 0.6353144049978067,
+        "schoolYear": "2026/27",
+        "ftthPct": 98.5,
+        "thirdSector": 404,
+        "thirdSectorPer1000": 2.0370398382469355,
+        "pnrrProjects": 42,
+        "pnrrPerCapita": 223.8444790673988,
+        "pharmacies": 59,
+        "pharmaciesPer1000": 0.2974884912291317,
+        "incomeYear": 2024
+      },
+      "baseline": {
+        "annualGrowth": 0.4,
+        "population2050": 218268
+      },
+      "sourceByMetric": {
+        "giovani": "istat-posas",
+        "invecchiamento": "istat-posas",
+        "occupazione": "istat-census",
+        "reddito": "mef-income",
+        "suolo": "ispra-soil",
+        "casa": "mef-omi",
+        "turismo": "istat-tourism",
+        "abitato": "istat-census",
+        "aria": "ispra-air",
+        "auto": "aci-vehicles",
+        "incidenti": "aci-vehicles",
+        "ev": "gse-ev",
+        "scuola": "miur-schools",
+        "digitale": "agcom-broadband",
+        "comunita": "runts",
+        "pnrr": "regis-pnrr"
+      },
+      "sources": [
+        "istat-posas",
+        "istat-census",
+        "istat-d7b",
+        "istat-commuting",
+        "ispra-soil",
+        "ispra-air",
+        "istat-tourism",
+        "mef-income",
+        "mef-omi",
+        "aci-vehicles",
+        "miur-schools",
+        "agcom-broadband",
+        "gse-ev",
+        "runts",
+        "regis-pnrr",
+        "mds-health",
+        "cruscotto"
+      ]
+    },
+    {
+      "identity": {
+        "istat": "075035",
+        "name": "Lecce",
+        "province": "LE",
+        "region": "Puglia",
+        "codiceCatastale": "E506"
+      },
+      "palette": {
+        "sky": "#f7e2b8",
+        "ground": "#d8c49c",
+        "accent": "#b9843a",
+        "roof": "#a4652f",
+        "water": "#6fa8bd"
+      },
+      "tagline": {
+        "it": "La pietra dorata regge il peso del turismo e della storia.",
+        "en": "Golden stone carries the weight of tourism and history."
+      },
+      "population": {
+        "total": 94387,
+        "year": 2026,
+        "estimate": true,
+        "series": [
+          {
+            "year": 2022,
+            "value": 94783,
+            "estimate": false
+          },
+          {
+            "year": 2023,
+            "value": 94596,
+            "estimate": false
+          },
+          {
+            "year": 2024,
+            "value": 94250,
+            "estimate": false
+          },
+          {
+            "year": 2025,
+            "value": 94187,
+            "estimate": false
+          },
+          {
+            "year": 2026,
+            "value": 94387,
+            "estimate": true
+          }
+        ],
+        "births": 547,
+        "deaths": 1114,
+        "naturalBalance": -567,
+        "under15": {
+          "count": 10206,
+          "pct": 10.8
+        },
+        "over65": {
+          "count": 24820,
+          "pct": 26.3
+        },
+        "medianAge": 47.7,
+        "oldAgeIndex": 243.2,
+        "dependencyIndex": 59
+      },
+      "economy": {
+        "employmentRate": 67.9,
+        "unemploymentRate": 10.2,
+        "activityRate": 75.6,
+        "incomeMean": 27182,
+        "families": 47500,
+        "averageFamily": 1.97
+      },
+      "housing": {
+        "omiMean": 1215.2,
+        "omiMin": 430,
+        "omiMax": 2950,
+        "vacantDwellingsPct": 19.43348933410457,
+        "tourismBeds": 19899,
+        "tourismStructures": 2121,
+        "tourismBedsPer100": 21.1
+      },
+      "environment": {
+        "areaKm2": 239.576,
+        "altitudeMean": 27,
+        "soilConsumptionPct": 14.83,
+        "soilConsumptionYear": 2024,
+        "recyclingPct": 70.39,
+        "wasteKgPerPerson": 571,
+        "landslidePopulationPct": 1.007,
+        "seismicZone": "4",
+        "pm10": 18.5,
+        "pm25": 10,
+        "no2": 14,
+        "airYear": 2025
+      },
+      "mobility": {
+        "commutersOut": 5274,
+        "commutersIn": 29403,
+        "commutingBalance": 24129,
+        "selfContainmentPct": 81.9,
+        "vehiclesPer1000": 732,
+        "vehiclesTotal": 91956,
+        "evPoints": 165,
+        "evPer1000": 1.7481220930848527,
+        "accidents": 509,
+        "injuriesPer10k": 70.24,
+        "deathsPer10k": 0.42
+      },
+      "services": {
+        "schools": 87,
+        "schoolsPer1000": 0.9217371036265588,
+        "schoolYear": "2026/27",
+        "ftthPct": 93.4,
+        "thirdSector": 484,
+        "thirdSectorPer1000": 5.127824806382235,
+        "pnrrProjects": 43,
+        "pnrrPerCapita": 505.72383908801,
+        "pharmacies": 32,
+        "pharmaciesPer1000": 0.3390297392649412,
+        "incomeYear": 2024
+      },
+      "baseline": {
+        "annualGrowth": -0.1,
+        "population2050": 92148
+      },
+      "sourceByMetric": {
+        "giovani": "istat-posas",
+        "invecchiamento": "istat-posas",
+        "occupazione": "istat-census",
+        "reddito": "mef-income",
+        "suolo": "ispra-soil",
+        "casa": "mef-omi",
+        "turismo": "istat-tourism",
+        "abitato": "istat-census",
+        "aria": "ispra-air",
+        "auto": "aci-vehicles",
+        "incidenti": "aci-vehicles",
+        "ev": "gse-ev",
+        "scuola": "miur-schools",
+        "digitale": "agcom-broadband",
+        "comunita": "runts",
+        "pnrr": "regis-pnrr"
+      },
+      "sources": [
+        "istat-posas",
+        "istat-census",
+        "istat-d7b",
+        "istat-commuting",
+        "ispra-soil",
+        "ispra-air",
+        "istat-tourism",
+        "mef-income",
+        "mef-omi",
+        "aci-vehicles",
+        "miur-schools",
+        "agcom-broadband",
+        "gse-ev",
+        "runts",
+        "regis-pnrr",
+        "mds-health",
+        "cruscotto"
+      ]
+    },
+    {
+      "identity": {
+        "istat": "066049",
+        "name": "L'Aquila",
+        "province": "AQ",
+        "region": "Abruzzo",
+        "codiceCatastale": "A345"
+      },
+      "palette": {
+        "sky": "#c9d9e6",
+        "ground": "#b9b6a7",
+        "accent": "#8a6a4f",
+        "roof": "#6e5142",
+        "water": "#7d9aab"
+      },
+      "tagline": {
+        "it": "Dopo il terremoto, la città si ricuce intorno alla montagna.",
+        "en": "After the earthquake, the city stitches itself around the mountain."
+      },
+      "population": {
+        "total": 70803,
+        "year": 2026,
+        "estimate": true,
+        "series": [
+          {
+            "year": 2022,
+            "value": 69210,
+            "estimate": false
+          },
+          {
+            "year": 2023,
+            "value": 69659,
+            "estimate": false
+          },
+          {
+            "year": 2024,
+            "value": 69717,
+            "estimate": false
+          },
+          {
+            "year": 2025,
+            "value": 70425,
+            "estimate": false
+          },
+          {
+            "year": 2026,
+            "value": 70803,
+            "estimate": true
+          }
+        ],
+        "births": 430,
+        "deaths": 680,
+        "naturalBalance": -250,
+        "under15": {
+          "count": 8078,
+          "pct": 11.4
+        },
+        "over65": {
+          "count": 18331,
+          "pct": 25.9
+        },
+        "medianAge": 46.7,
+        "oldAgeIndex": 226.9,
+        "dependencyIndex": 59.5
+      },
+      "economy": {
+        "employmentRate": 75.8,
+        "unemploymentRate": 6,
+        "activityRate": 80.7,
+        "incomeMean": 27226,
+        "families": 33498,
+        "averageFamily": 2.07
+      },
+      "housing": {
+        "omiMean": 899.1,
+        "omiMin": 370,
+        "omiMax": 2150,
+        "vacantDwellingsPct": 42.66422644325592,
+        "tourismBeds": 5059,
+        "tourismStructures": 603,
+        "tourismBedsPer100": 7.1
+      },
+      "environment": {
+        "areaKm2": 473.907,
+        "altitudeMean": 1169,
+        "soilConsumptionPct": 5.46,
+        "soilConsumptionYear": 2024,
+        "recyclingPct": 47.61,
+        "wasteKgPerPerson": 475,
+        "landslidePopulationPct": 0.189,
+        "seismicZone": "1",
+        "pm10": 15,
+        "pm25": 9,
+        "no2": 8,
+        "airYear": 2025
+      },
+      "mobility": {
+        "commutersOut": 2559,
+        "commutersIn": 10760,
+        "commutingBalance": 8201,
+        "selfContainmentPct": 89.3,
+        "vehiclesPer1000": 793.4,
+        "vehiclesTotal": 72266,
+        "evPoints": 89,
+        "evPer1000": 1.2570088838043585,
+        "accidents": 206,
+        "injuriesPer10k": 40.11,
+        "deathsPer10k": 0.85
+      },
+      "services": {
+        "schools": 79,
+        "schoolsPer1000": 1.1157719305679137,
+        "schoolYear": "2026/27",
+        "ftthPct": 79.2,
+        "thirdSector": 315,
+        "thirdSectorPer1000": 4.44896402694801,
+        "pnrrProjects": 35,
+        "pnrrPerCapita": 938.8723359179696,
+        "pharmacies": 22,
+        "pharmaciesPer1000": 0.31072129712017854,
+        "incomeYear": 2024
+      },
+      "baseline": {
+        "annualGrowth": 0.57,
+        "population2050": 81151
+      },
+      "sourceByMetric": {
+        "giovani": "istat-posas",
+        "invecchiamento": "istat-posas",
+        "occupazione": "istat-census",
+        "reddito": "mef-income",
+        "suolo": "ispra-soil",
+        "casa": "mef-omi",
+        "turismo": "istat-tourism",
+        "abitato": "istat-census",
+        "aria": "ispra-air",
+        "auto": "aci-vehicles",
+        "incidenti": "aci-vehicles",
+        "ev": "gse-ev",
+        "scuola": "miur-schools",
+        "digitale": "agcom-broadband",
+        "comunita": "runts",
+        "pnrr": "regis-pnrr"
+      },
+      "sources": [
+        "istat-posas",
+        "istat-census",
+        "istat-d7b",
+        "istat-commuting",
+        "ispra-soil",
+        "ispra-air",
+        "istat-tourism",
+        "mef-income",
+        "mef-omi",
+        "aci-vehicles",
+        "miur-schools",
+        "agcom-broadband",
+        "gse-ev",
+        "runts",
+        "regis-pnrr",
+        "mds-health",
+        "cruscotto"
+      ]
+    },
+    {
+      "identity": {
+        "istat": "118006",
+        "name": "Cagliari",
+        "province": "CA",
+        "region": "Sardegna",
+        "codiceCatastale": "B354"
+      },
+      "palette": {
+        "sky": "#f8d9b0",
+        "ground": "#d7c39a",
+        "accent": "#d27b45",
+        "roof": "#a95338",
+        "water": "#5f9fb4"
+      },
+      "tagline": {
+        "it": "Il mare porta turismo, ma i giovani salpano verso altrove.",
+        "en": "The sea brings tourism, but young people sail away."
+      },
+      "population": {
+        "total": 145981,
+        "year": 2026,
+        "estimate": true,
+        "series": [
+          {
+            "year": 2022,
+            "value": 149092,
+            "estimate": false
+          },
+          {
+            "year": 2023,
+            "value": 148296,
+            "estimate": false
+          },
+          {
+            "year": 2024,
+            "value": 147411,
+            "estimate": false
+          },
+          {
+            "year": 2025,
+            "value": 146692,
+            "estimate": false
+          },
+          {
+            "year": 2026,
+            "value": 145981,
+            "estimate": true
+          }
+        ],
+        "births": 627,
+        "deaths": 1854,
+        "naturalBalance": -1227,
+        "under15": {
+          "count": 12068,
+          "pct": 8.3
+        },
+        "over65": {
+          "count": 44585,
+          "pct": 30.5
+        },
+        "medianAge": 50.7,
+        "oldAgeIndex": 369.4,
+        "dependencyIndex": 63.4
+      },
+      "economy": {
+        "employmentRate": 70.1,
+        "unemploymentRate": 10.6,
+        "activityRate": 78.4,
+        "incomeMean": 30253,
+        "families": 77804,
+        "averageFamily": 1.87
+      },
+      "housing": {
+        "omiMean": 1966.3,
+        "omiMin": 600,
+        "omiMax": 3800,
+        "vacantDwellingsPct": 8.858897197398017,
+        "tourismBeds": 15527,
+        "tourismStructures": 2860,
+        "tourismBedsPer100": 10.6
+      },
+      "environment": {
+        "areaKm2": 84.824,
+        "altitudeMean": 14,
+        "soilConsumptionPct": 25.74,
+        "soilConsumptionYear": 2024,
+        "recyclingPct": 75.94,
+        "wasteKgPerPerson": 474,
+        "landslidePopulationPct": 0.274,
+        "seismicZone": "4",
+        "pm10": 29,
+        "pm25": 8,
+        "no2": 25,
+        "airYear": 2025
+      },
+      "mobility": {
+        "commutersOut": 11596,
+        "commutersIn": 51260,
+        "commutingBalance": 39664,
+        "selfContainmentPct": 75.2,
+        "vehiclesPer1000": 694.6,
+        "vehiclesTotal": 138289,
+        "evPoints": 83,
+        "evPer1000": 0.5685671422993404,
+        "accidents": 520,
+        "injuriesPer10k": 43.29,
+        "deathsPer10k": 0.69
+      },
+      "services": {
+        "schools": 113,
+        "schoolsPer1000": 0.77407333831115,
+        "schoolYear": "2026/27",
+        "ftthPct": 99.2,
+        "thirdSector": 629,
+        "thirdSectorPer1000": 4.3087799097142785,
+        "pnrrProjects": 24,
+        "pnrrPerCapita": 880.2372432028826,
+        "pharmacies": 48,
+        "pharmaciesPer1000": 0.3288099136188956,
+        "incomeYear": 2024
+      },
+      "baseline": {
+        "annualGrowth": -0.53,
+        "population2050": 128501
+      },
+      "sourceByMetric": {
+        "giovani": "istat-posas",
+        "invecchiamento": "istat-posas",
+        "occupazione": "istat-census",
+        "reddito": "mef-income",
+        "suolo": "ispra-soil",
+        "casa": "mef-omi",
+        "turismo": "istat-tourism",
+        "abitato": "istat-census",
+        "aria": "ispra-air",
+        "auto": "aci-vehicles",
+        "incidenti": "aci-vehicles",
+        "ev": "gse-ev",
+        "scuola": "miur-schools",
+        "digitale": "agcom-broadband",
+        "comunita": "runts",
+        "pnrr": "regis-pnrr"
+      },
+      "sources": [
+        "istat-posas",
+        "istat-census",
+        "istat-d7b",
+        "istat-commuting",
+        "ispra-soil",
+        "ispra-air",
+        "istat-tourism",
+        "mef-income",
+        "mef-omi",
+        "aci-vehicles",
+        "miur-schools",
+        "agcom-broadband",
+        "gse-ev",
+        "runts",
+        "regis-pnrr",
+        "mds-health",
+        "cruscotto"
+      ]
+    },
+    {
+      "identity": {
+        "istat": "022205",
+        "name": "Trento",
+        "province": "TN",
+        "region": "Trentino-Alto Adige/Südtirol",
+        "codiceCatastale": "L378"
+      },
+      "palette": {
+        "sky": "#cfe0e8",
+        "ground": "#b9c6a8",
+        "accent": "#6f8f68",
+        "roof": "#567052",
+        "water": "#7ba9b5"
+      },
+      "tagline": {
+        "it": "Le Alpi come laboratorio: servizi, cura e buona amministrazione.",
+        "en": "The Alps as a laboratory: services, care and good government."
+      },
+      "population": {
+        "total": 119359,
+        "year": 2026,
+        "estimate": true,
+        "series": [
+          {
+            "year": 2022,
+            "value": 117847,
+            "estimate": false
+          },
+          {
+            "year": 2023,
+            "value": 118277,
+            "estimate": false
+          },
+          {
+            "year": 2024,
+            "value": 118504,
+            "estimate": false
+          },
+          {
+            "year": 2025,
+            "value": 118640,
+            "estimate": false
+          },
+          {
+            "year": 2026,
+            "value": 119359,
+            "estimate": true
+          }
+        ],
+        "births": 814,
+        "deaths": 1149,
+        "naturalBalance": -335,
+        "under15": {
+          "count": 14527,
+          "pct": 12.2
+        },
+        "over65": {
+          "count": 29679,
+          "pct": 24.9
+        },
+        "medianAge": 45.8,
+        "oldAgeIndex": 204.3,
+        "dependencyIndex": 58.8
+      },
+      "economy": {
+        "employmentRate": 80.8,
+        "unemploymentRate": 3.7,
+        "activityRate": 83.9,
+        "incomeMean": 30544,
+        "families": 55445,
+        "averageFamily": 2.09
+      },
+      "housing": {
+        "omiMean": 2872.5,
+        "omiMin": 1500,
+        "omiMax": 5200,
+        "vacantDwellingsPct": 17.784887263863496,
+        "tourismBeds": 9079,
+        "tourismStructures": 746,
+        "tourismBedsPer100": 7.6
+      },
+      "environment": {
+        "areaKm2": 157.84,
+        "altitudeMean": 650,
+        "soilConsumptionPct": 15.96,
+        "soilConsumptionYear": 2024,
+        "recyclingPct": 83.26,
+        "wasteKgPerPerson": 441,
+        "landslidePopulationPct": 1.002,
+        "seismicZone": "3",
+        "pm10": 20.5,
+        "pm25": 14,
+        "no2": 27.5,
+        "airYear": 2025
+      },
+      "mobility": {
+        "commutersOut": 8875,
+        "commutersIn": 36327,
+        "commutingBalance": 27452,
+        "selfContainmentPct": 80.9,
+        "vehiclesPer1000": null,
+        "vehiclesTotal": 722453,
+        "evPoints": 209,
+        "evPer1000": 1.7510200320042897,
+        "accidents": 350,
+        "injuriesPer10k": 37.11,
+        "deathsPer10k": 0.34
+      },
+      "services": {
+        "schools": 60,
+        "schoolsPer1000": 0.5026851766519491,
+        "schoolYear": "2026/27",
+        "ftthPct": 93.2,
+        "thirdSector": 664,
+        "thirdSectorPer1000": 5.5630492882815705,
+        "pnrrProjects": 25,
+        "pnrrPerCapita": 216.0242796940323,
+        "pharmacies": 35,
+        "pharmaciesPer1000": 0.293233019713637,
+        "incomeYear": 2024
+      },
+      "baseline": {
+        "annualGrowth": 0.32,
+        "population2050": 128871
+      },
+      "sourceByMetric": {
+        "giovani": "istat-posas",
+        "invecchiamento": "istat-posas",
+        "occupazione": "istat-census",
+        "reddito": "mef-income",
+        "suolo": "ispra-soil",
+        "casa": "mef-omi",
+        "turismo": "istat-tourism",
+        "abitato": "istat-census",
+        "aria": "ispra-air",
+        "auto": "aci-vehicles",
+        "incidenti": "aci-vehicles",
+        "ev": "gse-ev",
+        "scuola": "miur-schools",
+        "digitale": "agcom-broadband",
+        "comunita": "runts",
+        "pnrr": "regis-pnrr"
+      },
+      "sources": [
+        "istat-posas",
+        "istat-census",
+        "istat-d7b",
+        "istat-commuting",
+        "ispra-soil",
+        "ispra-air",
+        "istat-tourism",
+        "mef-income",
+        "mef-omi",
+        "aci-vehicles",
+        "miur-schools",
+        "agcom-broadband",
+        "gse-ev",
+        "runts",
+        "regis-pnrr",
+        "mds-health",
+        "cruscotto"
+      ]
+    }
+  ]
+}
