@@ -1759,6 +1759,13 @@ h2 {
   color: var(--ink);
 }
 
+.trend-caveat {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
 .axes-card {
   grid-column: 1 / -1;
 }

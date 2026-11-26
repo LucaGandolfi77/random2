@@ -666,6 +666,7 @@ export class App {
             <div class="population-number">${fmtNumber(report.population, this.lang)}</div>
             <div class="population-line">${esc(this.tt("baseline2050"))}: <b>${fmtNumber(report.baselinePopulation, this.lang)}</b></div>
             <div class="score-delta ${report.populationDelta >= 0 ? "delta-pos" : "delta-neg"}">${fmtSigned(report.populationDelta, this.lang)}</div>
+            <p class="trend-caveat">${esc(this.tt("trendCaveat"))}</p>
           </article>
           <article class="axes-card paper-card">
             <span class="card-label">${esc(this.tt("axisBreakdown"))}</span>
