@@ -113,6 +113,8 @@ export class Renderer {
     this.drawFloor(state, time);
     this.drawBlackouts(state, time);
     this.drawLifts(state, time);
+    this.drawLocks(state, time);
+    this.drawAbilityAura(state, time);
     this.drawHint(state, time);
     this.drawCells(state, time);
     this.drawParticles();
@@ -123,9 +125,9 @@ export class Renderer {
     const ctx = this.ctx;
     const l = this.layout;
     const gradient = ctx.createLinearGradient(0, 0, l.width, l.height);
-    gradient.addColorStop(0, "#111827");
-    gradient.addColorStop(0.55, "#0b1020");
-    gradient.addColorStop(1, "#080b14");
+    gradient.addColorStop(0, "#182238");
+    gradient.addColorStop(0.55, "#111a2b");
+    gradient.addColorStop(1, "#0d1322");
     ctx.fillStyle = gradient;
     rounded(ctx, l.ox - 6, l.oy - 6, l.cell * state.width + 12, l.cell * state.height + 12, 18);
     ctx.fill();
@@ -148,31 +150,71 @@ export class Renderer {
     }
   }
 
+  drawLocks(state) {
+    const ctx = this.ctx;
+    for (const lock of state.locks || []) {
+      if (lock.until <= state.elapsed) continue;
+      for (const point of lock.cells) {
+        const r = this.cellRect(point.x, point.y);
+        ctx.fillStyle = "rgba(244,167,181,.13)";
+        ctx.fillRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
+        ctx.strokeStyle = "rgba(244,167,181,.7)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        ctx.strokeRect(r.x + 5, r.y + 5, r.w - 10, r.h - 10);
+        ctx.setLineDash([]);
+      }
+    }
+  }
+
+  drawAbilityAura(state, time) {
+    const ctx = this.ctx;
+    const l = this.layout;
+    if (state.pulseUntil > state.elapsed) {
+      ctx.strokeStyle = "rgba(169,201,245,.75)";
+      ctx.lineWidth = 3;
+      rounded(ctx, l.ox - 9, l.oy - 9, l.cell * state.width + 18, l.cell * state.height + 18, 22);
+      ctx.stroke();
+    }
+    if (state.scanUntil > state.elapsed) {
+      ctx.fillStyle = "rgba(213,185,236,.07)";
+      rounded(ctx, l.ox - 4, l.oy - 4, l.cell * state.width + 8, l.cell * state.height + 8, 18);
+      ctx.fill();
+      if (!this.settings.reducedMotion) {
+        const y = l.oy + ((time * 0.12) % (l.cell * state.height));
+        ctx.fillStyle = "rgba(213,185,236,.18)";
+        ctx.fillRect(l.ox, y, l.cell * state.width, 3);
+      }
+    }
+  }
+
   drawBlackouts(state, time) {
     const ctx = this.ctx;
     for (const zone of state.blackouts) {
       for (const p of zone.cells) {
         const r = this.cellRect(p.x, p.y);
-        if (zone.active && !this.settings.showDark) {
+        if (zone.active && !this.settings.showDark && state.scanUntil <= state.elapsed) {
           ctx.fillStyle = "rgba(0,0,0,.72)";
           ctx.fillRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
-          ctx.strokeStyle = "rgba(181,140,255,.28)";
+          ctx.strokeStyle = "rgba(213,185,236,.32)";
           ctx.setLineDash([4, 5]);
           ctx.strokeRect(r.x + 4, r.y + 4, r.w - 8, r.h - 8);
           ctx.setLineDash([]);
         } else if (zone.active) {
-          ctx.fillStyle = "rgba(181,140,255,.09)";
+          ctx.fillStyle = "rgba(213,185,236,.1)";
           ctx.fillRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
         }
       }
-      if (zone.active && !this.settings.reducedMotion) {
+      if (zone.active) {
         const first = zone.cells[0];
         const r = this.cellRect(first.x, first.y);
-        ctx.fillStyle = "rgba(181,140,255,.65)";
-        ctx.font = `600 ${Math.max(9, lFont(r.w * 0.2))}px system-ui`;
+        const phase = (state.elapsed + zone.phase) % zone.period;
+        const remaining = zone.forcedUntil > state.elapsed ? zone.forcedUntil - state.elapsed : Math.max(0, zone.offDuration - phase);
+        ctx.fillStyle = "rgba(213,185,236,.78)";
+        ctx.font = `700 ${Math.max(9, lFont(r.w * (state.companion === "luma" ? 0.24 : 0.18)))}px system-ui`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText("BLACKOUT", r.x + r.w / 2, r.y + r.h / 2);
+        ctx.fillText(state.companion === "luma" ? `${remaining.toFixed(1)}s` : "BLACKOUT", r.x + r.w / 2, r.y + r.h / 2);
       }
     }
   }
@@ -183,7 +225,7 @@ export class Renderer {
       const a = this.cellRect(lift.axis === "row" ? 0 : lift.a, lift.axis === "row" ? lift.a : 1);
       const w = lift.axis === "row" ? this.layout.cell * state.width : this.layout.cell;
       const h = lift.axis === "row" ? this.layout.cell * 2 : this.layout.cell * (state.height - 1);
-      ctx.strokeStyle = "rgba(88,166,255,.45)";
+      ctx.strokeStyle = "rgba(169,201,245,.5)";
       ctx.lineWidth = 2;
       ctx.setLineDash([6, 5]);
       ctx.lineDashOffset = this.settings.reducedMotion ? 0 : -time * 0.02;
@@ -255,8 +297,8 @@ export class Renderer {
     const r = this.cellRect(x, y);
     const inset = Math.max(2, r.w * 0.06);
     const gradient = ctx.createLinearGradient(r.x, r.y, r.x + r.w, r.y + r.h);
-    gradient.addColorStop(0, "#263248");
-    gradient.addColorStop(1, "#151d2c");
+    gradient.addColorStop(0, "#34405a");
+    gradient.addColorStop(1, "#202a40");
     ctx.fillStyle = gradient;
     rounded(ctx, r.x + inset, r.y + inset, r.w - inset * 2, r.h - inset * 2, r.w * 0.14);
     ctx.fill();
@@ -309,7 +351,7 @@ export class Renderer {
     const r = this.cellRect(x, y);
     const color = block.gray ? null : COLORS[block.color];
     const selected = state.selected === block.id;
-    const hidden = state.blackouts.some((zone) => zone.active && zone.cells.some((p) => p.x === x && p.y === y)) && !this.settings.showDark;
+    const hidden = state.blackouts.some((zone) => zone.active && zone.cells.some((p) => p.x === x && p.y === y)) && !this.settings.showDark && state.scanUntil <= state.elapsed;
     const inset = Math.max(3, r.w * (selected ? 0.055 : 0.085));
     ctx.save();
     if (hidden) ctx.globalAlpha = 0.18;

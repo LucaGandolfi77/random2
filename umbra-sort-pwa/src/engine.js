@@ -31,8 +31,14 @@ export function createGame(spec, saved) {
   }
 
   const totalPlanned = doors.reduce((sum, door) => sum + door.capacity, 0);
+  const loadout = spec.loadout || {};
+  const bonus = spec.abilityBonus || 0;
+  const abilityMax = (id) => 1 + Math.max(1, Math.min(3, Number(loadout.abilities?.[id]) || 1)) + bonus;
+  const initialCharge = (id) => abilityMax(id) + (loadout.piece === "flux" && id === "pulse" ? 1 : 0) + (loadout.piece === "magnete" && id === "push" && spec.number % 3 === 0 ? 1 : 0);
   const state = {
     specId: spec.id,
+    kind: spec.kind || "campaign",
+    companion: loadout.piece || "luma",
     width,
     height,
     status: "playing",
@@ -42,6 +48,7 @@ export function createGame(spec, saved) {
     generators: clone(spec.generators),
     elevators: clone(spec.elevators),
     blackouts: clone(spec.blackouts),
+    locks: [],
     colors: spec.colors,
     grayQuota: spec.grayQuota.slice(),
     totalPlanned,
@@ -49,10 +56,22 @@ export function createGame(spec, saved) {
     score: 0,
     combo: 0,
     bestCombo: 0,
-    charge: Array.isArray(spec.grayQuota) ? spec.grayQuota.reduce((sum, n) => sum + (n || 0), 0) : 0,
+    charge: (Array.isArray(spec.grayQuota) ? spec.grayQuota.reduce((sum, n) => sum + (n || 0), 0) : 0) + (loadout.piece === "prisma" ? 1 : 0),
+    abilities: {
+      pulse: { charges: initialCharge("pulse"), max: abilityMax("pulse"), cooldown: 0 },
+      push: { charges: initialCharge("push"), max: abilityMax("push"), cooldown: 0 },
+      scan: { charges: initialCharge("scan"), max: abilityMax("scan"), cooldown: 0 }
+    },
+    pulseUntil: 0,
+    scanUntil: 0,
+    pushArmed: false,
+    boss: spec.boss ? clone(spec.boss) : null,
+    bossPhase: 1,
+    bossAttackTimer: spec.boss ? spec.boss.attackInterval : 0,
     elapsed: 0,
     moveLimit: spec.moveLimit || 0,
     par: spec.par || 0,
+    undoDisabled: spec.undoDisabled === true,
     stars: 0,
     selected: null,
     hintPath: null,
@@ -99,6 +118,23 @@ export function createGame(spec, saved) {
     return state.blackouts.some((zone) => zone.active && zone.cells.some((p) => p.x === x && p.y === y));
   }
 
+  function lockedAt(x, y) {
+    return state.locks.some((lock) => lock.until > state.elapsed && lock.cells.some((p) => p.x === x && p.y === y));
+  }
+
+  function pulseActive() {
+    return state.pulseUntil > state.elapsed;
+  }
+
+  function scanActive() {
+    return state.scanUntil > state.elapsed;
+  }
+
+  function addCharge(id) {
+    const ability = state.abilities[id];
+    if (ability) ability.charges = Math.min(ability.max, ability.charges + 1);
+  }
+
   function remember() {
     state.history.push(clone({
       cells: state.cells,
@@ -110,6 +146,10 @@ export function createGame(spec, saved) {
       combo: state.combo,
       bestCombo: state.bestCombo,
       charge: state.charge,
+      abilities: state.abilities,
+      pulseUntil: state.pulseUntil,
+      scanUntil: state.scanUntil,
+      pushArmed: state.pushArmed,
       status: state.status,
       reason: state.reason,
       stars: state.stars
@@ -151,7 +191,7 @@ export function createGame(spec, saved) {
 
   function canEnter(x, y, block) {
     if (!inside(x, y)) return false;
-    if (blackoutAt(x, y)) return false;
+    if (blackoutAt(x, y) || lockedAt(x, y)) return false;
     const cell = cellAt(x, y);
     if (cell) return false;
     const door = doorAt(x, y);
@@ -159,13 +199,39 @@ export function createGame(spec, saved) {
     return !block.gray && block.color === door.color && door.filled < door.capacity;
   }
 
+  function pushBlock(found, dx, dy) {
+    const nx = found.x + dx;
+    const ny = found.y + dy;
+    const bx = nx + dx;
+    const by = ny + dy;
+    if (!inside(bx, by) || blackoutAt(bx, by) || lockedAt(bx, by) || cellAt(bx, by) || doorAt(bx, by)) {
+      return { ok: false, reason: "blocked" };
+    }
+    const adjacentIndex = index(nx, ny);
+    const pushed = cells[adjacentIndex];
+    if (!pushed || pushed.kind !== "block") return { ok: false, reason: "blocked" };
+    remember();
+    cells[found.i] = null;
+    cells[adjacentIndex] = found.block;
+    cells[index(bx, by)] = pushed;
+    state.moves++;
+    state.score += 25;
+    state.pushArmed = false;
+    state.hintPath = null;
+    emit("push", { x: nx, y: ny, pushedX: bx, pushedY: by });
+    return { ok: true, pushed: true };
+  }
+
   function moveBlock(id, dx, dy) {
     if (state.status !== "playing") return { ok: false, reason: "over" };
     const found = blockById(id);
     if (!found) return { ok: false, reason: "missing" };
     if (blackoutAt(found.x, found.y)) return { ok: false, reason: "blackout" };
+    if (lockedAt(found.x, found.y)) return { ok: false, reason: "locked" };
     const nx = found.x + dx;
     const ny = found.y + dy;
+    const destination = cellAt(nx, ny);
+    if (destination && destination.kind === "block" && state.pushArmed) return pushBlock(found, dx, dy);
     if (!canEnter(nx, ny, found.block)) return { ok: false, reason: "blocked" };
 
     remember();
@@ -179,6 +245,9 @@ export function createGame(spec, saved) {
       state.bestCombo = Math.max(state.bestCombo, state.combo);
       state.score += 100 + Math.min(200, state.combo * 12);
       if (state.combo % 4 === 0) state.charge = Math.min(3, state.charge + 1);
+      if (state.combo % 6 === 0) addCharge("pulse");
+      if (state.combo % 8 === 0) addCharge("push");
+      if (state.combo % 10 === 0) addCharge("scan");
       if (door.filled >= door.capacity) state.score += 250;
       emit("capture", { x: nx, y: ny, color: door.color, combo: state.combo });
       checkWin();
@@ -219,7 +288,7 @@ export function createGame(spec, saved) {
         const y = current.y + dy;
         if (!inside(x, y)) continue;
         const key = index(x, y);
-        if (seen.has(key) || blackoutAt(x, y)) continue;
+        if (seen.has(key) || blackoutAt(x, y) || lockedAt(x, y)) continue;
         const cell = cellAt(x, y);
         if (cell && key !== startKey) continue;
         const door = doorAt(x, y);
@@ -240,7 +309,7 @@ export function createGame(spec, saved) {
       if (!cell || cell.kind !== "block") continue;
       const x = i % width;
       const y = Math.floor(i / width);
-      if (blackoutAt(x, y)) continue;
+      if (blackoutAt(x, y) || lockedAt(x, y)) continue;
       for (const [dx, dy] of DIRS) {
         const nx = x + dx;
         const ny = y + dy;
@@ -249,7 +318,7 @@ export function createGame(spec, saved) {
         for (const [ax, ay] of DIRS) {
           const tx = nx + ax;
           const ty = ny + ay;
-          if (inside(tx, ty) && !cellAt(tx, ty) && !blackoutAt(tx, ty)) space++;
+          if (inside(tx, ty) && !cellAt(tx, ty) && !blackoutAt(tx, ty) && !lockedAt(tx, ty)) space++;
         }
         const score = space * 10 + ny;
         if (!best || score > best.score) best = { type: "path", id: cell.id, path: [{ x: nx, y: ny }], score, reposition: true };
@@ -301,10 +370,45 @@ export function createGame(spec, saved) {
     return { ok: true, color };
   }
 
+  function consumeAbility(id, cooldown) {
+    const ability = state.abilities[id];
+    if (!ability || ability.charges <= 0 || ability.cooldown > 0) return false;
+    ability.charges--;
+    ability.cooldown = cooldown;
+    return true;
+  }
+
+  function usePulse() {
+    if (state.status !== "playing") return { ok: false, reason: "over" };
+    if (!consumeAbility("pulse", 5)) return { ok: false, reason: "charge" };
+    const duration = 6 + (state.abilities.pulse.max - 2) * 0.75;
+    state.pulseUntil = state.elapsed + duration;
+    emit("ability", { ability: "pulse", duration });
+    return { ok: true, duration };
+  }
+
+  function armPush() {
+    if (state.status !== "playing") return { ok: false, reason: "over" };
+    if (!consumeAbility("push", 4)) return { ok: false, reason: "charge" };
+    state.pushArmed = true;
+    emit("ability", { ability: "push" });
+    return { ok: true };
+  }
+
+  function useScan() {
+    if (state.status !== "playing") return { ok: false, reason: "over" };
+    if (!consumeAbility("scan", 7)) return { ok: false, reason: "charge" };
+    const duration = 5 + (state.abilities.scan.max - 2) * 0.75;
+    state.scanUntil = state.elapsed + duration;
+    const hint = findHint();
+    emit("ability", { ability: "scan", duration });
+    return { ok: true, duration, hint };
+  }
+
   function undo() {
-    if (!state.history.length || state.status !== "playing") return false;
+    if (state.undoDisabled || !state.history.length || state.status !== "playing") return false;
     const previous = state.history.pop();
-    for (const key of ["cells", "doors", "generators", "elevators", "moves", "score", "combo", "bestCombo", "charge", "status", "reason", "stars"]) {
+    for (const key of ["cells", "doors", "generators", "elevators", "moves", "score", "combo", "bestCombo", "charge", "abilities", "pulseUntil", "scanUntil", "pushArmed", "status", "reason", "stars"]) {
       state[key] = previous[key];
     }
     cells.splice(0, cells.length, ...state.cells);
@@ -346,7 +450,8 @@ export function createGame(spec, saved) {
   function updateBlackouts() {
     for (const zone of state.blackouts) {
       const phase = (state.elapsed + zone.phase) % zone.period;
-      const active = phase < zone.offDuration;
+      const forced = (zone.forcedUntil || 0) > state.elapsed;
+      const active = forced || phase < zone.offDuration;
       if (active !== zone.active) emit(active ? "blackout" : "power", { id: zone.id });
       zone.active = active;
     }
@@ -357,7 +462,7 @@ export function createGame(spec, saved) {
     for (const [dx, dy] of DIRS) {
       const x = gen.x + dx;
       const y = gen.y + dy;
-      if (!inside(x, y) || doorAt(x, y) || blackoutAt(x, y)) continue;
+      if (!inside(x, y) || doorAt(x, y) || blackoutAt(x, y) || lockedAt(x, y)) continue;
       if (!cellAt(x, y)) options.push({ x, y });
     }
     if (!options.length) {
@@ -385,14 +490,71 @@ export function createGame(spec, saved) {
     }
   }
 
+  function updateAbilities(dt) {
+    for (const ability of Object.values(state.abilities)) ability.cooldown = Math.max(0, ability.cooldown - dt);
+    state.locks = state.locks.filter((lock) => lock.until > state.elapsed);
+  }
+
+  function applyBossAttack() {
+    const attack = state.boss.attacks % 4;
+    state.boss.attacks++;
+    state.shake = Math.max(state.shake, 0.3);
+    if (attack === 0 && state.blackouts.length) {
+      state.blackouts.forEach((zone) => { zone.forcedUntil = state.elapsed + 2.2; zone.active = true; });
+      emit("bossAttack", { attack: "blackout" });
+    } else if (attack === 1 && state.generators.length) {
+      state.generators.forEach((generator) => { generator.timer = Math.min(generator.timer, 0.8); });
+      emit("bossAttack", { attack: "surge" });
+    } else if (attack === 2) {
+      const row = 1 + (state.boss.attacks % (height - 2));
+      const cells = [];
+      for (let x = 1; x < width - 1; x++) cells.push({ x, y: row });
+      state.locks.push({ until: state.elapsed + 4, cells });
+      emit("bossAttack", { attack: "lock", row });
+    } else if (state.elevators.length) {
+      const lift = state.elevators[state.boss.attacks % state.elevators.length];
+      if (lift.axis === "row") swapRows(lift.a, lift.b);
+      else swapCols(lift.a, lift.b);
+      emit("bossAttack", { attack: "lift" });
+    } else {
+      const row = 1 + (state.boss.attacks % (height - 2));
+      state.locks.push({ until: state.elapsed + 3, cells: [{ x: 2, y: row }, { x: 3, y: row }, { x: 4, y: row }] });
+      emit("bossAttack", { attack: "lock", row });
+    }
+  }
+
+  function updateBoss(dt) {
+    if (!state.boss) return;
+    const progress = capturedCount() / Math.max(1, state.totalPlanned);
+    const phase = progress >= 0.75 ? 3 : progress >= 0.5 ? 2 : 1;
+    if (phase !== state.bossPhase) {
+      state.bossPhase = phase;
+      state.boss.phase = phase;
+      state.bossAttackTimer = 1;
+      emit("bossPhase", { phase });
+    }
+    if (pulseActive()) return;
+    state.bossAttackTimer -= dt;
+    if (state.bossAttackTimer <= 0) {
+      applyBossAttack();
+      state.bossAttackTimer = state.boss.attackInterval / (phase === 3 ? 1.5 : phase === 2 ? 1.2 : 1);
+    }
+  }
+
   function update(dt) {
     if (state.status !== "playing") return state;
     const step = Math.min(0.1, Math.max(0, dt));
     state.elapsed += step;
     state.shake = Math.max(0, state.shake - step);
-    updateBlackouts();
-    updateElevators(step);
-    updateGenerators(step);
+    updateAbilities(step);
+    if (!pulseActive()) {
+      updateBlackouts();
+      updateElevators(step);
+      updateGenerators(step);
+      updateBoss(step);
+    } else {
+      updateBoss(0);
+    }
     if (state.moveLimit > 0 && state.moves >= state.moveLimit) checkLose("Mosse esaurite.");
     checkWin();
     return state;
@@ -401,6 +563,7 @@ export function createGame(spec, saved) {
   function snapshot() {
     return clone({
       specId: state.specId,
+      companion: state.companion,
       status: state.status,
       reason: state.reason,
       cells: state.cells,
@@ -413,6 +576,14 @@ export function createGame(spec, saved) {
       combo: state.combo,
       bestCombo: state.bestCombo,
       charge: state.charge,
+      abilities: state.abilities,
+      pulseUntil: state.pulseUntil,
+      scanUntil: state.scanUntil,
+      pushArmed: state.pushArmed,
+      locks: state.locks,
+      boss: state.boss,
+      bossPhase: state.bossPhase,
+      bossAttackTimer: state.bossAttackTimer,
       elapsed: state.elapsed,
       stars: state.stars
     });
@@ -420,7 +591,7 @@ export function createGame(spec, saved) {
 
   function restore(savedState) {
     if (!savedState || savedState.specId !== state.specId) return false;
-    for (const key of ["status", "reason", "cells", "doors", "generators", "elevators", "blackouts", "moves", "score", "combo", "bestCombo", "charge", "elapsed", "stars"]) {
+    for (const key of ["status", "reason", "companion", "cells", "doors", "generators", "elevators", "blackouts", "locks", "moves", "score", "combo", "bestCombo", "charge", "abilities", "pulseUntil", "scanUntil", "pushArmed", "boss", "bossPhase", "bossAttackTimer", "elapsed", "stars"]) {
       if (savedState[key] !== undefined) state[key] = clone(savedState[key]);
     }
     cells.splice(0, cells.length, ...state.cells);
@@ -445,6 +616,12 @@ export function createGame(spec, saved) {
     moveAlongPath,
     findHint,
     usePrism,
+    usePulse,
+    armPush,
+    useScan,
+    pulseActive,
+    scanActive,
+    lockedAt,
     undo,
     update,
     snapshot,

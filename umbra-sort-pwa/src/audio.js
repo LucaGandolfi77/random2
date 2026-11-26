@@ -43,6 +43,12 @@ export function createAudio(settings) {
       tone(523, 0.18, "triangle", 0.05);
       tone(659, 0.18, "triangle", 0.05, 0.12);
       tone(784, 0.28, "triangle", 0.05, 0.24);
+    } else if (name === "ability") {
+      tone(330, 0.1, "sine", 0.035);
+      tone(660, 0.16, "triangle", 0.035, 0.05);
+    } else if (name === "boss") {
+      tone(110, 0.22, "sawtooth", 0.025);
+      tone(82, 0.3, "sawtooth", 0.025, 0.15);
     } else if (name === "lose") {
       tone(220, 0.2, "sawtooth", 0.03);
       tone(150, 0.3, "sawtooth", 0.03, 0.16);

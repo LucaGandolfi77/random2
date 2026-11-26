@@ -1,5 +1,5 @@
 /* Umbra Sort PWA — cache names are isolated from every other app in random2. */
-const CACHE_NAME = "umbra-sort-v1";
+const CACHE_NAME = "umbra-sort-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -7,7 +7,11 @@ const ASSETS = [
   "./manifest.json",
   "./src/main.js",
   "./src/config.js",
+  "./src/level-seeds.js",
   "./src/levels.js",
+  "./src/special-levels.js",
+  "./src/boss-levels.js",
+  "./src/progression.js",
   "./src/engine.js",
   "./src/render.js",
   "./src/audio.js",

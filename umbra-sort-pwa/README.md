@@ -1,6 +1,6 @@
 # Umbra Sort — Color Shift Puzzle
 
-Umbra Sort è un PWA originale di color-sort puzzle. Sposta i blocchi attraverso una fabbrica di luce, portali nei collettori con lo stesso colore e simbolo, e sopravvivi a generatori, ascensori e zone blackout.
+Umbra Sort è un PWA originale di color-sort puzzle. Sposta i blocchi attraverso una fabbrica di luce, portali nei collettori con lo stesso colore e simbolo, e sopravvivi a generatori, ascensori, zone blackout e boss.
 
 Il progetto prende ispirazione dalle meccaniche generali dei puzzle di ordinamento dei blocchi, ma **non usa codice, marchi, testi, suoni, illustrazioni o livelli di giochi esistenti**.
 
@@ -11,8 +11,18 @@ Il progetto prende ispirazione dalle meccaniche generali dei puzzle di ordinamen
 3. Libera spazio prima che i generatori producano nuovi blocchi.
 4. Gli ascensori scambiano le righe; i blackout bloccano temporaneamente alcune zone.
 5. Le combo ricaricano il prisma: usalo sui blocchi grigi per assegnargli un colore.
+6. Nei boss, sopravvivi agli attacchi e completa i collettori prima che la macchina ti fermi.
 
-Non tutti i livelli hanno un limite di mosse. Le aree avanzate possono introdurre sfide più rigide.
+### Abilità
+
+| Abilità | Effetto |
+| --- | --- |
+| **Prisma** | Assegna un colore a un blocco grigio |
+| **Pulse** | Congela ascensori, generatori e blackout per alcuni secondi |
+| **Spinta** | Spinge un blocco adiacente e libera il passaggio |
+| **Scansione** | Rivela temporaneamente i blocchi nascosti dal blackout |
+
+Le abilità si ricaricano con le combo e possono essere potenziate con gli ingranaggi.
 
 ### Controlli
 
@@ -22,6 +32,7 @@ Non tutti i livelli hanno un limite di mosse. Le aree avanzate possono introdurr
 | Tap sul blocco + tap su cella adiacente | Movimento alternativo |
 | `[` / `]` | Seleziona il blocco precedente / successivo |
 | Frecce | Sposta il blocco selezionato |
+| `1` / `2` / `3` / `4` | Pulse / Spinta / Scansione / Prisma |
 | `H` | Mostra un suggerimento |
 | `Z` | Annulla l'ultima mossa |
 | `P` / `Esc` | Pausa |
@@ -30,16 +41,30 @@ Ogni colore ha anche un simbolo, quindi il gioco non dipende soltanto dalla perc
 
 ## Contenuti
 
-- 100 livelli deterministici in cinque aree
+- **200 livelli campagna** in dieci aree, approvati da un solver
+- **10 livelli speciali** con modificatori e requisiti di sblocco
+- **10 livelli boss** con tre fasi e attacchi deterministici
+- Blocchi pastello ad alto contrasto su una lavagna scura
 - Ascensori, generatori e zone blackout
 - Blocchi incolori e prisma ricaricabile
-- Sfida giornaliera con seed condiviso
+- Ingranaggi, cinque pedine compagno e potenziamenti
+- Sfida giornaliera basata su un livello validato
 - Punteggio, combo, stelle e record locale
 - Undo e suggerimenti
 - Salvataggio locale e ripresa della partita
 - Audio sintetizzato, senza file audio
 - Interfaccia responsive per telefono, tablet e desktop
 - Installazione PWA e gioco offline
+
+## Pedine
+
+- **Luma** — mostra il countdown dei blackout
+- **Flux** — +1 carica Pulse iniziale
+- **Magnete** — +1 carica Spinta ogni tre livelli
+- **Tessera** — +10% ingranaggi
+- **Prisma** — +1 carica iniziale del prisma
+
+Si equipaggia una pedina alla volta.
 
 ## Privacy
 
@@ -48,6 +73,7 @@ Ogni colore ha anche un simbolo, quindi il gioco non dipende soltanto dalla perc
 - Nessuna risorsa remota a runtime
 - Nessun upload
 - Progressi e salvataggi restano in `localStorage`
+- Migrazione automatica dai salvataggi v1 a v2
 
 ## Architettura
 
@@ -55,6 +81,9 @@ Ogni colore ha anche un simbolo, quindi il gioco non dipende soltanto dalla perc
 - Nessun build step e nessuna dipendenza runtime
 - Motore deterministico e senza DOM in `src/engine.js`
 - Generazione dei livelli in `src/levels.js`
+- Solver di validazione in `src/solver.js`
+- Speciali e boss definiti in moduli separati
+- Progressione e sblocchi in `src/progression.js`
 - Renderer isolato in `src/render.js`
 - Audio Web Audio in `src/audio.js`
 - Storage versionato in `src/storage.js`
@@ -67,11 +96,18 @@ umbra-sort-pwa/
 ├── manifest.json
 ├── service-worker.js
 ├── icons/
-├── scripts/gen-icons.py
+├── scripts/
+│   ├── gen-icons.py
+│   └── validate-levels.mjs
 ├── src/
 │   ├── main.js
 │   ├── config.js
 │   ├── levels.js
+│   ├── level-seeds.js
+│   ├── special-levels.js
+│   ├── boss-levels.js
+│   ├── progression.js
+│   ├── solver.js
 │   ├── engine.js
 │   ├── render.js
 │   ├── audio.js
@@ -79,6 +115,8 @@ umbra-sort-pwa/
 ├── tests/
 │   ├── engine.test.mjs
 │   ├── levels.test.mjs
+│   ├── progression.test.mjs
+│   ├── storage.test.mjs
 │   └── assets.test.mjs
 ├── smoke.mjs
 └── README.md
@@ -97,6 +135,7 @@ Test:
 
 ```bash
 node --test umbra-sort-pwa/tests/*.test.mjs
+node umbra-sort-pwa/scripts/validate-levels.mjs
 node umbra-sort-pwa/smoke.mjs http://localhost:8099/umbra-sort-pwa/
 ```
 

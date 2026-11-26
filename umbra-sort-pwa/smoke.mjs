@@ -53,12 +53,27 @@ try {
   check("manifest linked", boot.manifest);
   check("canvas sized", boot.canvas);
 
+  const levelModes = await evaluate(`(() => {
+    window.UmbraSort.openLevels();
+    const tabs = [...document.querySelectorAll('#levelModeTabs button')];
+    tabs.find((button) => button.textContent === 'Speciali').click();
+    return { tabs: tabs.length, specials: document.getElementById('levelGrid').children.length };
+  })()`);
+  check("campaign, special and boss tabs exist", levelModes.tabs === 3);
+  check("ten special levels are listed", levelModes.specials === 10);
+  await evaluate(`document.querySelector('[data-close="levelsDialog"]').click()`);
+
   const started = await evaluate(`(() => {
     const level = window.UmbraSort.makeLevel(0, 0);
     window.UmbraSort.startLevel(level);
     return { screen: window.UmbraSort.state.screen };
   })()`);
   check("game screen active", started.screen === "game");
+  const pulse = await evaluate(`(() => {
+    window.UmbraSort.activatePulse();
+    return window.UmbraSort.game.pulseActive();
+  })()`);
+  check("Pulse ability activates", pulse === true);
   await sleep(120);
 
   const drag = await evaluate(`(() => {
@@ -116,6 +131,18 @@ try {
     };
   })()`);
   check("pause dialog works", paused.paused && paused.dialog);
+
+  const boss = await evaluate(`(() => {
+    document.getElementById('resumeButton').click();
+    window.UmbraSort.startLevel(window.UmbraSort.makeBossLevel(0));
+    return {
+      boss: !!window.UmbraSort.game.getState().boss,
+      bar: !document.getElementById('bossBar').classList.contains('hidden'),
+      scan: window.UmbraSort.game.useScan().ok
+    };
+  })()`);
+  check("boss level and HUD load", boss.boss && boss.bar);
+  check("Scan ability activates", boss.scan === true);
 
   const sw = await evaluate(`navigator.serviceWorker.ready.then(() => true).catch(() => false)`);
   check("service worker active", sw === true);

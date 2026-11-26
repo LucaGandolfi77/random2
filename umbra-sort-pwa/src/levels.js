@@ -1,4 +1,5 @@
 import { AREAS, COLORS, LEVELS_PER_AREA } from "./config.js";
+import { LEVEL_SEEDS } from "./level-seeds.js";
 
 export function mulberry32(seed) {
   let a = seed >>> 0;
@@ -54,7 +55,7 @@ function staticConnected(spec) {
   return seen.size >= Math.floor(width * height * 0.55);
 }
 
-export function makeLevel(areaIndex, levelIndex, seedOverride) {
+export function makeCandidate(areaIndex, levelIndex, seedOverride, simplify = 0) {
   const area = AREAS[areaIndex] || AREAS[0];
   const stage = Math.max(0, Math.min(LEVELS_PER_AREA - 1, levelIndex | 0));
   const width = 7;
@@ -76,7 +77,7 @@ export function makeLevel(areaIndex, levelIndex, seedOverride) {
     for (let x = 0; x < width; x++) interior.push({ x, y });
   }
 
-  const generatorCount = areaIndex >= 3 ? (stage >= 10 ? 2 : 1) : 0;
+  const generatorCount = areaIndex >= 3 ? (simplify >= 2 ? 1 : (stage >= 10 || areaIndex === 6 || areaIndex === 9 ? 2 : 1)) : 0;
   const generators = [];
   for (let i = 0; i < generatorCount; i++) {
     const x = 1 + Math.floor(rng() * (width - 2));
@@ -89,15 +90,15 @@ export function makeLevel(areaIndex, levelIndex, seedOverride) {
       x,
       y,
       color: i % colorCount,
-      total: 2 + Math.floor(rng() * 3),
-      interval: 7.5 + rng() * 2.5,
+      total: Math.max(1, 2 + Math.floor(rng() * 3) - (simplify > 0 ? 1 : 0)),
+      interval: (areaIndex === 6 ? 4.5 : areaIndex === 9 ? 5.5 : areaIndex === 8 ? 6 : 7.5) + rng() * 2,
       spawned: 0,
       timer: 3 + rng() * 3,
       overload: 0
     });
   }
 
-  const wallCount = Math.min(10, 2 + areaIndex * 2 + Math.floor(stage / 5));
+  const wallCount = Math.max(0, Math.min(10, 2 + areaIndex * 2 + Math.floor(stage / 5)) - simplify);
   const walls = [];
   const candidates = shuffle(interior.filter((p) => !occupied.has(p.y * width + p.x)), rng);
   for (const p of candidates) {
@@ -109,9 +110,11 @@ export function makeLevel(areaIndex, levelIndex, seedOverride) {
     occupied.add(key);
   }
 
-  const blockCount = Math.min(18, 7 + areaIndex * 2 + Math.floor(stage / 4));
+  const blockCount = Math.max(colorCount + 2, Math.min(18, 7 + areaIndex * 2 + Math.floor(stage / 4)) - simplify);
   const blockCells = shuffle(interior.filter((p) => !occupied.has(p.y * width + p.x)), rng).slice(0, blockCount);
-  const grayCount = areaIndex === 4 ? Math.min(4, 1 + Math.floor(stage / 6)) : 0;
+  const grayCount = areaIndex === 4 || areaIndex === 7 || areaIndex === 9
+    ? Math.max(1, Math.min(5, 1 + Math.floor(stage / 5) + (areaIndex >= 7 ? 1 : 0)) - Math.floor(simplify / 2))
+    : 0;
   const blocks = blockCells.map((p, i) => ({
     id: `b${i}`,
     x: p.x,
@@ -131,7 +134,9 @@ export function makeLevel(areaIndex, levelIndex, seedOverride) {
   });
 
   const elevators = [];
-  const elevatorCount = areaIndex === 1 || areaIndex === 4 ? (stage >= 12 ? 2 : 1) : 0;
+  const elevatorCount = areaIndex === 1 || areaIndex === 4 || areaIndex === 5 || areaIndex === 8 || areaIndex === 9
+    ? (stage >= 12 || areaIndex === 8 || areaIndex === 9 ? 2 : 1)
+    : 0;
   for (let i = 0; i < elevatorCount; i++) {
     const row = 2 + i * 2;
     if (row + 1 >= height - 1) continue;
@@ -140,14 +145,16 @@ export function makeLevel(areaIndex, levelIndex, seedOverride) {
       axis: "row",
       a: row,
       b: row + 1,
-      period: 6.5 + rng() * 2,
+      period: (areaIndex === 5 ? 5 : areaIndex === 8 || areaIndex === 9 ? 5.5 : 6.5) + rng() * 1.5,
       timer: 3 + rng() * 3,
       swaps: 0
     });
   }
 
   const blackouts = [];
-  const blackoutCount = areaIndex === 2 || areaIndex === 4 ? (stage >= 10 ? 2 : 1) : 0;
+  const blackoutCount = areaIndex === 2 || areaIndex === 4 || areaIndex === 7 || areaIndex === 8 || areaIndex === 9
+    ? (stage >= 10 || areaIndex === 8 || areaIndex === 9 ? 2 : 1)
+    : 0;
   for (let i = 0; i < blackoutCount; i++) {
     const x0 = 1 + Math.floor(rng() * (width - 3));
     const y0 = 2 + Math.floor(rng() * (height - 4));
@@ -158,8 +165,8 @@ export function makeLevel(areaIndex, levelIndex, seedOverride) {
     blackouts.push({
       id: `z${i}`,
       cells,
-      period: 7 + rng() * 2,
-      offDuration: 2.2 + rng(),
+      period: (areaIndex === 8 || areaIndex === 9 ? 5.5 : 7) + rng() * 1.5,
+      offDuration: (areaIndex === 8 || areaIndex === 9 ? 2.8 : 2.2) + rng(),
       phase: rng() * 5,
       active: false
     });
@@ -167,6 +174,7 @@ export function makeLevel(areaIndex, levelIndex, seedOverride) {
 
   const spec = {
     id: `${area.id}-${stage + 1}`,
+    kind: "campaign",
     areaIndex,
     areaName: area.name,
     levelIndex: stage,
@@ -186,16 +194,28 @@ export function makeLevel(areaIndex, levelIndex, seedOverride) {
     par: blockCount * 3 + generators.reduce((n, g) => n + g.total * 2, 0) + elevators.length * 3 + blackouts.length * 2
   };
 
-  if (!staticConnected(spec)) return makeLevel(areaIndex, levelIndex, (seed + 1013) >>> 0);
+  if (!staticConnected(spec)) return null;
   return spec;
+}
+
+export function makeLevel(areaIndex, levelIndex) {
+  const safeArea = Math.max(0, Math.min(AREAS.length - 1, areaIndex | 0));
+  const stage = Math.max(0, Math.min(LEVELS_PER_AREA - 1, levelIndex | 0));
+  const approved = LEVEL_SEEDS[safeArea]?.[stage] || [8173 + safeArea * 1009 + stage * 7919, 8];
+  for (const simplify of [approved[1], Math.max(8, approved[1]), 14, 22]) {
+    const candidate = makeCandidate(safeArea, stage, approved[0], simplify);
+    if (candidate) return candidate;
+  }
+  return makeCandidate(0, stage, 8173 + stage * 7919, 22);
 }
 
 export function dailyLevel(dateKey) {
   let hash = 2166136261;
   for (const ch of dateKey) hash = Math.imul(hash ^ ch.charCodeAt(0), 16777619);
-  const areaIndex = 2 + (hash >>> 0) % 3;
+  const areaIndex = 2 + ((hash >>> 0) % 3);
   const stage = (hash >>> 8) % LEVELS_PER_AREA;
-  return makeLevel(areaIndex, stage, hash >>> 0);
+  const level = makeLevel(areaIndex, stage);
+  return { ...level, id: `daily-${dateKey}`, kind: "daily", daily: true, seed: hash >>> 0 };
 }
 
 export function validateLevel(spec) {
@@ -207,6 +227,16 @@ export function validateLevel(spec) {
   const colored = spec.blocks.filter((b) => !b.gray).length + spec.generators.reduce((n, g) => n + g.total, 0);
   const gray = spec.blocks.filter((b) => b.gray).length;
   if (colored + gray !== planned) errors.push("block accounting mismatch");
+  const expected = new Array(spec.colors).fill(0);
+  spec.blocks.forEach((block) => { if (!block.gray) expected[block.color]++; });
+  spec.generators.forEach((generator) => { expected[generator.color] += generator.total; });
+  for (let color = 0; color < expected.length; color++) expected[color] += spec.grayQuota?.[color] || 0;
+  for (const door of spec.doors) {
+    if (door.capacity !== expected[door.color]) errors.push(`colour ${door.color} capacity ${door.capacity} != ${expected[door.color]}`);
+  }
+  const occupiedCells = spec.doors.length + spec.walls.length + spec.generators.length + planned;
+  const emptyCells = spec.width * spec.height - occupiedCells;
+  if (emptyCells < 3) errors.push(`only ${emptyCells} empty cells after all spawns`);
   for (const block of spec.blocks) {
     if (block.x < 0 || block.y < 1 || block.x >= spec.width || block.y >= spec.height) errors.push(`block ${block.id} out of bounds`);
   }

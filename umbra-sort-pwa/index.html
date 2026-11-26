@@ -37,11 +37,12 @@
         <div class="hero-copy">
           <p class="eyebrow">COLOR SHIFT PUZZLE</p>
           <h1>Sposta.<br><span>Ordina.</span><br>Riaccendi.</h1>
-          <p class="lede">Una fabbrica di luce, cento livelli e un buio che non perdona. Trascina ogni blocco nel collettore giusto prima che la macchina si spenga.</p>
+          <p class="lede">Una fabbrica di luce, duecentoventi livelli e un buio che non perdona. Trascina ogni blocco nel collettore giusto prima che la macchina si spenga.</p>
           <div class="hero-actions">
             <button class="btn primary" id="continueButton" type="button" hidden>Continua</button>
             <button class="btn primary" id="playButton" type="button">Gioca</button>
             <button class="btn ghost" id="levelsButton" type="button">Livelli</button>
+            <button class="btn ghost" id="piecesButton" type="button">Pedine</button>
             <button class="btn ghost" id="dailyButton" type="button">Sfida del giorno</button>
           </div>
           <p class="privacy-line">Nessun account. Nessun tracciamento. Funziona offline.</p>
@@ -58,8 +59,10 @@
       </section>
 
       <section class="stats-row" aria-label="Progressi">
-        <div class="stat-card"><span>Livelli aperti</span><b id="unlockedStat">1/100</b></div>
-        <div class="stat-card"><span>Stelle</span><b id="starsStat">0/300</b></div>
+        <div class="stat-card"><span>Livelli aperti</span><b id="unlockedStat">1/200</b></div>
+        <div class="stat-card"><span>Stelle</span><b id="starsStat">0/600</b></div>
+        <div class="stat-card"><span>Ingranaggi</span><b id="gearsStat">0</b></div>
+        <div class="stat-card"><span>Pedina</span><b id="pieceStat">Luma</b></div>
         <div class="stat-card"><span>Record</span><b id="bestStat">0</b></div>
       </section>
 
@@ -86,6 +89,7 @@
         <div><span>Combo</span><b id="comboValue">×0</b></div>
         <div><span>Collettori</span><b id="progressValue">0/0</b></div>
       </div>
+      <div class="boss-bar hidden" id="bossBar"><span id="bossName">BOSS</span><div><i id="bossFill"></i></div><b id="bossPhase">FASE 1</b></div>
 
       <div class="board-wrap">
         <canvas id="gameCanvas" tabindex="0" aria-label="Griglia di gioco. Seleziona un blocco e usa le frecce per spostarlo."></canvas>
@@ -96,15 +100,29 @@
         <button class="power-btn" id="undoButton" type="button"><span>↶</span><small>Annulla</small></button>
         <button class="power-btn" id="hintButton" type="button"><span>?</span><small>Suggerimento</small></button>
         <button class="power-btn prism" id="prismButton" type="button"><span>◈</span><small>Prisma <b id="chargeValue">0</b></small></button>
+        <button class="power-btn pulse" id="pulseButton" type="button"><span>ϟ</span><small>Pulse <b id="pulseCharge">0</b></small></button>
+        <button class="power-btn push" id="pushButton" type="button"><span>↔</span><small>Spinta <b id="pushCharge">0</b></small></button>
+        <button class="power-btn scan" id="scanButton" type="button"><span>⌕</span><small>Scansione <b id="scanCharge">0</b></small></button>
       </div>
     </main>
   </div>
 
   <div class="overlay hidden" id="levelsDialog" role="dialog" aria-modal="true" aria-labelledby="levelsTitle">
     <div class="sheet wide-sheet">
-      <div class="sheet-head"><div><p class="eyebrow">CAMPAGNA</p><h2 id="levelsTitle">Scegli un livello</h2></div><button class="close-btn" data-close="levelsDialog" type="button" aria-label="Chiudi">×</button></div>
+      <div class="sheet-head"><div><p class="eyebrow">PROGRESSIONE</p><h2 id="levelsTitle">Scegli un livello</h2></div><button class="close-btn" data-close="levelsDialog" type="button" aria-label="Chiudi">×</button></div>
+      <div class="area-tabs" id="levelModeTabs" role="tablist" aria-label="Tipo di livello"></div>
       <div class="area-tabs" id="areaTabs" role="tablist" aria-label="Aree"></div>
       <div class="level-grid" id="levelGrid"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="piecesDialog" role="dialog" aria-modal="true" aria-labelledby="piecesTitle">
+    <div class="sheet wide-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">OFFICINA</p><h2 id="piecesTitle">Pedine e abilità</h2></div><button class="close-btn" data-close="piecesDialog" type="button" aria-label="Chiudi">×</button></div>
+      <p class="muted">Ingranaggi disponibili: <b id="gearsWallet">0</b></p>
+      <div class="piece-grid" id="pieceGrid"></div>
+      <h3 class="subheading">Potenziamenti</h3>
+      <div class="ability-upgrades" id="abilityUpgrades"></div>
     </div>
   </div>
 
@@ -125,8 +143,9 @@
         <li><span>1</span><div><strong>Sposta i blocchi</strong><p>Trascinali attraverso le celle vuote. Ogni blocco può raggiungere solo il collettore con lo stesso colore e simbolo.</p></div></li>
         <li><span>2</span><div><strong>Fai spazio</strong><p>I generatori aggiungono blocchi. Gli ascensori scambiano le righe e i blackout bloccano temporaneamente alcune zone.</p></div></li>
         <li><span>3</span><div><strong>Usa il prisma</strong><p>Le combo ricaricano il prisma. Seleziona un blocco grigio e premi Prisma per dargli un colore.</p></div></li>
+        <li><span>4</span><div><strong>Attiva le abilità</strong><p>Pulse ferma temporaneamente la macchina, Spinta muove due blocchi e Scansione rivela il buio.</p></div></li>
       </ol>
-      <p class="keyboard-note"><b>Tastiera:</b> usa <kbd>[</kbd> e <kbd>]</kbd> per selezionare un blocco, poi le frecce per spostarlo. <kbd>H</kbd> suggerimento, <kbd>Z</kbd> annulla, <kbd>P</kbd> pausa.</p>
+      <p class="keyboard-note"><b>Tastiera:</b> usa <kbd>[</kbd> e <kbd>]</kbd> per selezionare un blocco, poi le frecce per spostarlo. <kbd>1</kbd> Pulse, <kbd>2</kbd> Spinta, <kbd>3</kbd> Scansione, <kbd>4</kbd> Prisma, <kbd>H</kbd> suggerimento, <kbd>Z</kbd> annulla, <kbd>P</kbd> pausa.</p>
       <button class="btn primary wide" data-close="howDialog" type="button">Ho capito</button>
     </div>
   </div>
@@ -147,6 +166,7 @@
       <div class="stars" id="resultStars" aria-label="Stelle"></div>
       <div class="result-grid"><div><span>Punti</span><b id="resultScore">0</b></div><div><span>Mosse</span><b id="resultMoves">0</b></div><div><span>Combo</span><b id="resultCombo">0</b></div></div>
       <p class="muted" id="resultNote"></p>
+      <div class="reward-box hidden" id="resultReward"></div>
       <button class="btn primary wide" id="nextButton" type="button">Livello successivo</button>
       <button class="btn ghost wide" id="replayButton" type="button">Rigioca</button>
       <button class="btn ghost wide" id="resultMenuButton" type="button">Menu</button>

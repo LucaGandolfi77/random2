@@ -8,14 +8,14 @@
   </defs>
   <rect width="512" height="512" rx="112" fill="url(#bg)"/>
   <g transform="translate(256 222) rotate(-7)">
-    <rect x="-132" y="-132" width="104" height="264" rx="28" fill="#ff5d73"/>
-    <rect x="-14" y="-164" width="104" height="296" rx="28" fill="#ffd166"/>
-    <rect x="104" y="-112" width="104" height="244" rx="28" fill="#53d6b5"/>
+    <rect x="-132" y="-132" width="104" height="264" rx="28" fill="#f4a7b5"/>
+    <rect x="-14" y="-164" width="104" height="296" rx="28" fill="#f7e3a1"/>
+    <rect x="104" y="-112" width="104" height="244" rx="28" fill="#a8e6cf"/>
     <g fill="#09101c" opacity=".82">
       <circle cx="-80" cy="-42" r="17"/>
       <rect x="18" y="-62" width="40" height="40" rx="6" transform="rotate(45 38 -42)"/>
       <path d="M156-58l30 52h-60z"/>
     </g>
   </g>
-  <circle cx="256" cy="414" r="12" fill="#53d6b5"/>
+  <circle cx="256" cy="414" r="12" fill="#a8e6cf"/>
 </svg>

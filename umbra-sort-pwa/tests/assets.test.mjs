@@ -22,7 +22,7 @@ test("manifest is complete and all icons exist", () => {
 
 test("service worker is namespaced and never deletes another app's cache", () => {
   const sw = read("service-worker.js");
-  assert.match(sw, /umbra-sort-v1/);
+  assert.match(sw, /umbra-sort-v3/);
   assert.match(sw, /startsWith\("umbra-sort-"\)/);
   assert.doesNotMatch(sw, /keys\.filter\(\(key\) => key !== CACHE_NAME\)/);
 });

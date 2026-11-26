@@ -136,7 +136,7 @@
 | 56 | **Deep Orbit** | DarkOrbit-inspired mobile space combat: hunt, haul, upgrade, jump | Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/darkorbit-pwa/) |
 | 57 | **LEGO Horizon — Fan Store** | Steam-style store clone with original concept art + playable Machine Hunt mini-game | HTML + CSS + vanilla JS + SVG/Canvas | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/lego-horizon-pwa/) |
 | 58 | **COMUNE 2050** | Paper-diorama civic simulation: six Italian towns, five turns, real open data, a final Bilancio Civico | TypeScript + Vite + SVG (no runtime deps) | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/comune-2050-pwa/) |
-| 59 | **Umbra Sort** | Color-shift puzzle with lifts, generators, blackout zones and 100 deterministic levels | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/umbra-sort-pwa/) |
+| 59 | **Umbra Sort** | 220-level color-shift puzzle with special challenges, bosses, collectible pieces and abilities | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/umbra-sort-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -456,7 +456,10 @@ An original colour-shift puzzle set inside a light factory. Slide blocks through
 empty cells into collectors with the same colour and symbol while the machine
 changes around you.
 
-- 100 deterministic levels across five areas
+- 200 deterministic, solver-approved campaign levels across ten areas
+- 10 unlockable special levels and 10 three-phase boss levels
+- Pastel blocks with high-contrast symbols on a dark factory board
+- Pulse, Push and Scan abilities plus collectible companion pieces
 - Moving lifts, block generators, blackout zones and colourless prism blocks
 - Daily seeded challenge, combos, stars, local records and resume
 - Undo, hints, keyboard and touch controls
@@ -465,7 +468,7 @@ changes around you.
 - Vanilla ES modules, Canvas 2D, Web Audio and no runtime dependencies
 
 **Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
-`src/` (`main`, `config`, `levels`, `engine`, `render`, `audio`, `storage`),
+`src/` (`main`, `config`, `levels`, `level-seeds`, `special-levels`, `boss-levels`, `progression`, `solver`, `engine`, `render`, `audio`, `storage`),
 `icons/`, `scripts/gen-icons.py`, `tests/`, `smoke.mjs`.
 
 ### Pixel Ants

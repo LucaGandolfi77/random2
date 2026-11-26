@@ -118,3 +118,52 @@ test("hint finds a legal path to a matching collector", () => {
   assert.equal(hint.id, "b0");
   assert.ok(hint.path.length >= 2);
 });
+
+test("Pulse freezes generators and lifts", () => {
+  const game = createGame(spec({
+    blocks: [],
+    doors: [{ x: 2, y: 0, color: 0, capacity: 1, filled: 0 }],
+    generators: [{ id: "g0", x: 2, y: 4, color: 0, total: 1, interval: 5, spawned: 0, timer: 0, overload: 0 }]
+  }));
+  assert.equal(game.usePulse().ok, true);
+  game.update(1);
+  assert.equal(game.getState().generators[0].spawned, 0);
+  assert.equal(game.pulseActive(), true);
+});
+
+test("Push moves the selected block and the blocked block", () => {
+  const game = createGame(spec({
+    blocks: [
+      { id: "a", x: 1, y: 2, color: 0, gray: false },
+      { id: "b", x: 2, y: 2, color: 0, gray: false }
+    ],
+    doors: [{ x: 2, y: 0, color: 0, capacity: 2, filled: 0 }]
+  }));
+  assert.equal(game.armPush().ok, true);
+  const result = game.moveBlock("a", 1, 0);
+  assert.equal(result.pushed, true);
+  assert.equal(game.blockById("a").x, 2);
+  assert.equal(game.blockById("b").x, 3);
+  assert.equal(game.getState().pushArmed, false);
+});
+
+test("Scan activates a timed reveal", () => {
+  const game = createGame(spec());
+  const result = game.useScan();
+  assert.equal(result.ok, true);
+  assert.equal(game.scanActive(), true);
+  for (let i = 0; i < 60; i++) game.update(0.1);
+  assert.equal(game.scanActive(), false);
+});
+
+test("boss attacks fire and can lock rows", () => {
+  const game = createGame(spec({
+    blocks: [],
+    doors: [{ x: 2, y: 0, color: 0, capacity: 1, filled: 0 }],
+    boss: { name: "Test Boss", attackInterval: 0.1, phase: 1, attacks: 0 }
+  }));
+  game.update(0.1);
+  game.update(0.1);
+  assert.ok(game.getState().boss.attacks >= 1);
+  assert.ok(game.getState().locks.length >= 1);
+});

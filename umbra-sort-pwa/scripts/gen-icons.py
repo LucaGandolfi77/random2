@@ -81,9 +81,9 @@ def make_icon(size, maskable=False, apple=False):
         rect(size * .10, size * .10, size * .80, size * .80, size * .16, (43, 59, 85), .55)
     # Three original luminous blocks.
     blocks = [
-        (124, 90, 104, 264, (255, 93, 115)),
-        (242, 58, 104, 296, (255, 209, 102)),
-        (360, 110, 104, 244, (83, 214, 181)),
+        (124, 90, 104, 264, (244, 167, 181)),
+        (242, 58, 104, 296, (247, 227, 161)),
+        (360, 110, 104, 244, (168, 230, 207)),
     ]
     for x, y, w, h, color in blocks:
         rect(x * scale, y * scale, w * scale, h * scale, 28 * scale, color)
@@ -91,7 +91,7 @@ def make_icon(size, maskable=False, apple=False):
     circle(176 * scale, 180 * scale, 17 * scale, (9, 16, 28), .82)
     triangle(294 * scale, 162 * scale, 30 * scale, (9, 16, 28))
     rect(384 * scale, 164 * scale, 40 * scale, 40 * scale, 6 * scale, (9, 16, 28), .82)
-    circle(256 * scale, 414 * scale, 12 * scale, (83, 214, 181))
+    circle(256 * scale, 414 * scale, 12 * scale, (168, 230, 207))
 
     raw = b"".join(b"\x00" + bytes(pixels[y * WIDTH * 4:(y + 1) * WIDTH * 4]) for y in range(HEIGHT))
     png = b"\x89PNG\r\n\x1a\n"
