@@ -205,7 +205,7 @@ jobs:
             node --check "$file"
           done
 
-      - name: Shared libraries and self-tests
+      - name: Shared libraries and core game simulations
         run: |
           set -euo pipefail
           node tools/selftest.mjs
@@ -216,114 +216,56 @@ jobs:
           node ironfall-pwa/tests/sim.test.js
           node ironfall-pwa/tests/roster.test.js
           node ironfall-pwa/tests/boot.test.js
-          # Draw-call budget. The renderer is Canvas2D with one beginPath per
-          # polygon, so geometry is added face by face and nothing else in CI
-          # would notice the frame getting more expensive until a phone did.
           node ironfall-pwa/tests/render.test.js
-          # SECTOR 7: a headless sector simulation, the canvas renderer, a
-          # full boot against a fake DOM, and the content tables. The boot
-          # suite is the one that keeps the control schemes honest.
           node sector7-pwa/tests/sim.test.js
           node sector7-pwa/tests/render.test.js
           node sector7-pwa/tests/boot.test.js
           node sector7-pwa/tests/content.test.js
-          # MUSTANG PWA: 2.291 assertions over the stage tables, the wiring
-          # between the markup and the game, and a headless play-through of
-          # all 64 stages. It was never wired in, so a stale assertion sat
-          # broken in the tree for a week.
           node mustang-pwa/tests/run-all.mjs
-          # PIXEL CUP '96: the rules and the balance of a football match, and
-          # the whole game booted against a fake DOM. The second one is what
-          # catches a typo in the wiring, which no amount of model testing
-          # would.
           node pixel-cup-pwa/tests/sim.test.mjs
           node pixel-cup-pwa/tests/boot.test.mjs
-          # GULPER: the content tables (49 levels, 7 weapons, 7 biomes), the
-          # renderer's draw calls and NaN guards, a full boot against a fake
-          # DOM, and a deliberately simple bot that must finish every one of
-          # the 49 levels in a headless campaign. The bot is the balance
-          # proof: if a level cannot be finished, the numbers are wrong.
-          #
-          # The loop runs every suite in the folder, so a new test file
-          # cannot be written and then left out of CI by accident.
           for suite in gulper-pwa/tests/*.test.js; do
             echo "::group::$suite"
             node "$suite"
             echo "::endgroup::"
           done
-          # SAND LOOP: quantization determinism and palette repair, the board's
-          # cell queues, the loop/bucket rules (idle loses, perfect play wins),
-          # and the manifest + service-worker asset list.
           node --test sand-loop-pwa/tests/*.test.mjs
-          # RING ATLAS: circular offsets, linked/locked/mirrored rings, A*
-          # solver, all 100 approved levels, boosters and the PWA contract.
+
+      - name: Puzzle and content PWA suites
+        run: |
+          set -euo pipefail
           node --test ring-atlas-pwa/tests/*.test.mjs
-          # TRAFFIC TESSERA: grid collisions, one-way/docking terminals, A*
-          # solver, all 100 approved levels, boosters and the PWA contract.
           node --test traffic-tessera-pwa/tests/*.test.mjs
-          # ARROW FOUNDRY: ray rules, A* solver, all 100 approved levels,
-          # doors, heavy arrows, boosters and the offline PWA contract.
           node --test arrow-foundry-pwa/tests/*.test.mjs
-          # VIAL GARDEN: pour rules, A* solver, all 100 approved levels,
-          # boosters, saves and the offline PWA contract.
           node --test vial-garden-pwa/tests/*.test.mjs
-          # PRISM BLOCKS: placement, line clears, combos, undo, objectives,
-          # deterministic dailies and the offline PWA contract.
           node --test prism-blocks-pwa/tests/*.test.mjs
-          # UMBRA SORT: deterministic levels, movement, lifts, generators,
-          # blackout, prism, save restore and the offline PWA contract.
           node --test umbra-sort-pwa/tests/*.test.mjs
-          # PIXEL ANTS: the erosion rules (only exposed pixels, holes open
-          # routes, no gravity), the pathfinder over the holes, the ant/bucket
-          # lifecycle and win condition, quantization, and the PWA asset list.
           node --test pixel-ants-pwa/tests/*.test.mjs
-          # INNER CIRCLE: circle collisions and merge chains, wildcard and
-          # power rules, danger timing, seeded daily queues, roster sanitising
-          # and the offline asset/manifest contract.
           node --test inner-circle-pwa/tests/*.test.mjs
-          # PURR PLAYER: filename/format helpers, plus the manifest, icon set,
-          # service-worker precache list and the no-remote-resources rule.
           node --test purr-player-pwa/tests/*.test.mjs
-          # CORE 9: the heat chain, content tables, every low-poly mesh,
-          # a balance bot that must reach prestige, and the PWA asset contract.
           node --test core9-pwa/tests/*.test.mjs
-          # PLANE SHOOTER: relative drag, auto-fire, collisions, invulnerability,
-          # shields, power-ups, wave ramp, determinism, a survival bot and the
-          # PWA precache/manifest contract.
           node --test plane-pwa/tests/*.test.mjs
-          # KING SHOT: oath hearts/score, wave and boss composition beyond the
-          # old cap, wind/collision/combo rules, decree drafts, deterministic
-          # daily runs, save migration/streak logic and the PWA asset contract.
           node --test king-shot-pwa/tests/*.test.mjs
-          # MILANO NERA '77: fixed-step combat, patrol/vision AI, cover,
-          # ricochet, boss/chase progression, level reachability, saves and
-          # the PWA asset contract.
           node --test milano-nera-pwa/tests/*.test.mjs
-          # DOTTOR GELO: the pure economy, the power grid, offline returns,
-          # cyborg training/incubation, campaign progression, story flags,
-          # prestige and save sanitising.
           node --test dottor-gelo-pwa/tests/*.test.js
-          # LAST CALL: the 24-card roster, eight venue decks, seeded RNG,
-          # profile sanitising, upgrades, rewards, deployment, spells,
-          # overtime, AI legality and the PWA precache contract.
           node last-call-pwa/tests/run.mjs
-          # FUMETTI: the issue's data contract, manifest icons, service-worker
-          # precache and the reading-progress save/load contract.
           node --test fumetti-pwa/tests/*.test.mjs
-          # LEGO HORIZON FAN STORE: page facts, manifest/precache contract,
-          # original-art rule and the pure cart/wishlist logic.
           node --test lego-horizon-pwa/tests/*.test.mjs
-          # STRICTLY TYPED: chapter/node integrity, unique rite orders, every
-          # boss answer, star rules, save sanitising and ending gating.
           node --test strictly-typed-pwa/tests/*.test.mjs
-          # Plain-node suites for PWAs that have no package.json, so they
-          # need no install step. Each one exits non-zero on failure.
+
+      - name: Plain-node node:test suites
+        run: |
+          set -euo pipefail
           node --test darkorbit-pwa/tests/*.test.mjs
           node --test slot-pwa/tests/*.test.mjs
           node --test debt-of-years-pwa/tests/*.test.mjs
           node --test pokemon-go-pwa-v2/tests/*.test.mjs
           node --test pocketcode-bridge/test/*.test.mjs
           node --test pocketcode-pwa/tests/shell.test.mjs
+
+      - name: Plain-node script suites
+        run: |
+          set -euo pipefail
           node pocketcode-pwa/tests/smoke.mjs
           node tidefall-pwa/tests/features.test.js
           node tidefall-pwa/tests/world.test.js
