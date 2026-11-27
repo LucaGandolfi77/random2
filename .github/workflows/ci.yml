@@ -263,17 +263,28 @@ jobs:
           node --test pocketcode-bridge/test/*.test.mjs
           node --test pocketcode-pwa/tests/shell.test.mjs
 
-      - name: Plain-node script suites
+      - name: PocketCode smoke
+        run: node pocketcode-pwa/tests/smoke.mjs
+
+      - name: Tidefall suites
         run: |
-          set -euo pipefail
-          node pocketcode-pwa/tests/smoke.mjs
           node tidefall-pwa/tests/features.test.js
           node tidefall-pwa/tests/world.test.js
-          node ripple-cove-pwa/tests/fish.test.mjs
-          node ragduel-pwa/sim.test.mjs
-          node mycel-pwa/runtime.test.mjs
-          node lumen-pwa/tests/sim.test.js
-          node formica-pwa/tests/sim.test.js
+
+      - name: Ripple Cove fish
+        run: node ripple-cove-pwa/tests/fish.test.mjs
+
+      - name: Ragduel simulation
+        run: node ragduel-pwa/sim.test.mjs
+
+      - name: MYCEL runtime
+        run: node mycel-pwa/runtime.test.mjs
+
+      - name: LUMEN simulation
+        run: node lumen-pwa/tests/sim.test.js
+
+      - name: Formica simulation
+        run: node formica-pwa/tests/sim.test.js
 
       - name: Analysis tooling tests
         run: |
