@@ -27,6 +27,11 @@
   - [Snake](#snake)
   - [Sand Loop](#sand-loop)
   - [Umbra Sort](#umbra-sort)
+  - [Prism Blocks](#prism-blocks)
+  - [Vial Garden](#vial-garden)
+  - [Arrow Foundry](#arrow-foundry)
+  - [Ring Atlas](#ring-atlas)
+  - [Traffic Tessera](#traffic-tessera)
   - [Pixel Ants](#pixel-ants)
   - [Inner Circle](#inner-circle)
   - [LUMEN](#lumen)
@@ -137,6 +142,11 @@
 | 57 | **LEGO Horizon — Fan Store** | Steam-style store clone with original concept art + playable Machine Hunt mini-game | HTML + CSS + vanilla JS + SVG/Canvas | ✅ | [▶ Open](https://lucagandolfi77.github.io/random2/lego-horizon-pwa/) |
 | 58 | **COMUNE 2050** | Paper-diorama civic simulation: six Italian towns, five turns, real open data, a final Bilancio Civico | TypeScript + Vite + SVG (no runtime deps) | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/comune-2050-pwa/) |
 | 59 | **Umbra Sort** | 220-level color-shift puzzle with special challenges, bosses, collectible pieces and abilities | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/umbra-sort-pwa/) |
+| 60 | **Prism Blocks** | 8×8 block puzzle with endless, daily and 30 objective challenges | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/prism-blocks-pwa/) |
+| 61 | **Vial Garden** | 100-level water-sort puzzle with A* validation, boosters and daily challenge | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/vial-garden-pwa/) |
+| 62 | **Arrow Foundry** | 100-level arrow puzzle with A* validation, doors, heavy arrows and boosters | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/arrow-foundry-pwa/) |
+| 63 | **Ring Atlas** | 100-level ring puzzle with A* validation, linked rings, mirrors and boosters | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/ring-atlas-pwa/) |
+| 64 | **Traffic Tessera** | 100-level traffic puzzle with A* validation, buses, one-way lanes, precision docks and boosters | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/traffic-tessera-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -470,6 +480,114 @@ changes around you.
 **Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
 `src/` (`main`, `config`, `levels`, `level-seeds`, `special-levels`, `boss-levels`, `progression`, `solver`, `engine`, `render`, `audio`, `storage`),
 `icons/`, `scripts/gen-icons.py`, `tests/`, `smoke.mjs`.
+
+### Prism Blocks
+
+*Incastra. Completa. Brilla.* ▦
+
+An original 8×8 block puzzle with pastel geometric pieces. Drag pieces onto the
+board, clear full rows and columns, and chain combos before the grid fills up.
+
+- Endless mode with local record
+- Deterministic daily challenge
+- 30 sequential objective levels with stars
+- Ten piece shapes with rotation
+- Simultaneous row and column clears with intersection bonuses
+- Limited undo and smart hints
+- Local save and resume
+- Offline PWA with generated PNG/maskable icons and isolated cache names
+- Vanilla ES modules, Canvas 2D, Web Audio and no runtime dependencies
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `config`, `pieces`, `levels`, `engine`, `render`, `audio`,
+`storage`), `icons/`, `scripts/gen-icons.py`, `tests/`, `smoke.mjs`.
+
+### Vial Garden
+
+*Versa. Ordina. Coltiva.* ⚗
+
+An original water-sort puzzle set in a botanical garden. Pour matching tints
+between glass vials, complete every colour and unlock ten themed gardens.
+
+- 100 deterministic levels approved by an A* solver
+- Stored solutions and solver-powered hints
+- Undo, solvable shuffle and extra-tube boosters
+- Daily seeded challenge
+- Pastel glass vials, pour animations and completion particles
+- Local stars, best moves and resume
+- Offline PWA with generated PNG/maskable icons and isolated cache names
+- Vanilla ES modules, Canvas 2D, Web Audio and no runtime dependencies
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `config`, `rules`, `levels`, `level-data`, `solver`, `engine`,
+`render`, `audio`, `storage`), `icons/`, `scripts/`, `tests/`, `smoke.mjs`.
+
+### Arrow Foundry
+
+*Libera. Ordina. Smonta.* ↗
+
+An original arrow puzzle set in a pastel mechanical factory. Remove arrows in an
+order that keeps their path to the edge clear, open pneumatic doors and dismantle
+ten increasingly complex production lines.
+
+- 100 deterministic levels approved by an A* solver
+- Static walls, keyed doors and two-hit heavy arrows
+- Undo, scan, hammer and solver-powered hints
+- Daily seeded challenge
+- Animated exits, doors and particles
+- Local stars, best moves and resume
+- Offline PWA with generated PNG/maskable icons and isolated cache names
+- Vanilla ES modules, Canvas 2D, Web Audio and no runtime dependencies
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `config`, `rules`, `levels`, `level-data`, `solver`, `engine`,
+`render`, `audio`, `storage`), `icons/`, `scripts/`, `tests/`, `smoke.mjs`.
+
+### Ring Atlas
+
+*Ruota. Allinea. Rivela.* ◎
+
+An original ring puzzle built around concentric discs, glowing gaps and a
+central celestial core. Rotate linked, locked and mirrored rings across ten
+increasingly complex atlases.
+
+- 100 deterministic levels approved by an A* solver
+- Linked rings, dependency locks and mirrored controls
+- Undo, impulse, solvable shuffle and solver-powered hints
+- Daily seeded challenge
+- Canvas pseudo-3D rings, star field and alignment particles
+- Local stars, best moves and resume
+- Offline PWA with generated PNG/maskable icons and isolated cache names
+- Vanilla ES modules, Canvas 2D, Web Audio and no runtime dependencies
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `config`, `rules`, `levels`, `level-data`, `solver`, `engine`,
+`render`, `audio`, `storage`), `icons/`, `scripts/`, `tests/`, `smoke.mjs`.
+
+### Traffic Tessera
+
+*Smista. Libera. Riordina.* 🚦
+
+An original top-down traffic puzzle about parking lanes, coloured shuttles and
+long city buses. Every vehicle must reach a terminal of the same colour without
+changing lane.
+
+- 100 deterministic levels approved by an A* solver
+- Levels beyond the tutorial require vehicle repositioning
+- Ten districts with 6×6 to 8×8 grids
+- Two-cell shuttles, three-cell buses and permanent roadblocks
+- Multiple terminals per colour, one-way lanes and precision docking
+- Accessible colour symbols on vehicles and terminals
+- Undo, tow truck, solvable shuffle and solver-powered hints
+- Daily seeded challenge
+- Touch drag, mouse and keyboard controls
+- Local stars, best moves, dispatched vehicles and resume
+- Offline PWA with generated PNG/maskable icons and isolated cache names
+- Vanilla ES modules, Canvas 2D, Web Audio and no runtime dependencies
+
+**Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
+`src/` (`main`, `config`, `rules`, `levels`, `level-data`, `solver`, `engine`,
+`render`, `audio`, `storage`), `icons/`, `scripts/`, `tests/`, `smoke.mjs`.
 
 ### Pixel Ants
 

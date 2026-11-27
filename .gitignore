@@ -54,6 +54,26 @@ fidenza-recon/db/city.db
 # still missing, so it is not ready to be published as a PWA.
 last-dawn-rpg/
 
+# Traffic Tessera's rules, solver and PWA contract tests are source.
+!traffic-tessera-pwa/tests/
+!traffic-tessera-pwa/tests/**
+
+# Ring Atlas's rules, solver and PWA contract tests are source.
+!ring-atlas-pwa/tests/
+!ring-atlas-pwa/tests/**
+
+# Arrow Foundry's rules, solver and PWA contract tests are source.
+!arrow-foundry-pwa/tests/
+!arrow-foundry-pwa/tests/**
+
+# Vial Garden's rules, solver and PWA contract tests are source.
+!vial-garden-pwa/tests/
+!vial-garden-pwa/tests/**
+
+# Prism Blocks' engine and PWA contract tests are source.
+!prism-blocks-pwa/tests/
+!prism-blocks-pwa/tests/**
+
 # Umbra Sort's deterministic engine and PWA contract tests are source.
 !umbra-sort-pwa/tests/
 !umbra-sort-pwa/tests/**
