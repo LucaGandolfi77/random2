@@ -10,6 +10,17 @@
  */
 "use strict";
 
+/* Deterministic global randomness: the game and the bot both call Math.random
+   directly, so fixed world seeds alone cannot make the behavioural suite
+   reproducible. The default seed is part of the test contract; override it
+   only when bisecting a balance change. */
+const TEST_RNG_SEED = Number(process.env.LUMEN_TEST_SEED || 0x9e3779b9) >>> 0;
+let testRngState = TEST_RNG_SEED;
+Math.random = () => {
+    testRngState = (Math.imul(testRngState, 1664525) + 1013904223) >>> 0;
+    return testRngState / 4294967296;
+};
+
 const fs = require("fs");
 const path = require("path");
 
