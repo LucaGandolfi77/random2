@@ -117,3 +117,11 @@ comune-2050-pwa/dist/
 !bros-saga-pwa/package-lock.json
 !bros-saga-pwa/tests/
 !bros-saga-pwa/tests/**
+
+# Darkorbit, Slot, Ripple Cove and the plain-node suites are CI source.
+!darkorbit-pwa/tests/
+!darkorbit-pwa/tests/**
+!slot-pwa/tests/
+!slot-pwa/tests/**
+!ripple-cove-pwa/tests/
+!ripple-cove-pwa/tests/**
