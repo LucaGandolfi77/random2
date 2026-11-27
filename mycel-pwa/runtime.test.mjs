@@ -54,13 +54,20 @@ const byId = (id) => (els[id] ||= makeEl(id));
 const created = [];
 let rafCb = null;
 
+const seededMath = Object.create(Math);
+let rngState = 0x9e3779b9;
+seededMath.random = () => {
+  rngState = (Math.imul(rngState, 1664525) + 1013904223) >>> 0;
+  return rngState / 4294967296;
+};
+
 const sandbox = {
   console,
   setTimeout: () => 0,
   setInterval: () => 0,
   clearTimeout: () => {},
   clearInterval: () => {},
-  Math, Number, String, JSON, Object, Array, Infinity, isFinite,
+  Math: seededMath, Number, String, JSON, Object, Array, Infinity, isFinite,
   localStorage: (() => {
     const s = {};
     return { getItem: (k) => (k in s ? s[k] : null), setItem: (k, v) => { s[k] = String(v); }, removeItem: (k) => { delete s[k]; } };
