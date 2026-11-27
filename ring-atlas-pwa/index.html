@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080b14">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Ring Atlas è un puzzle di anelli: ruota, allinea le fessure e apri il nucleo celeste.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ring Atlas">
+  <meta property="og:title" content="Ring Atlas — Ring Puzzle">
+  <meta property="og:description" content="Un puzzle di anelli celeste, offline e senza account.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Ring Atlas — Ring Puzzle</title>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button class="brand" id="brandButton" type="button" aria-label="Ring Atlas, menu principale"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>RING <b>ATLAS</b></span></button>
+      <div class="top-actions"><button class="icon-btn" id="soundButton" type="button" aria-label="Disattiva audio">♪</button><button class="icon-btn" id="settingsButton" type="button" aria-label="Impostazioni">⚙</button></div>
+    </header>
+    <main id="menuScreen" class="menu-screen">
+      <section class="hero">
+        <div class="hero-copy"><p class="eyebrow">RING PUZZLE</p><h1>Ruota.<br><span>Allinea.</span><br>Rivela.</h1><p class="lede">Ogni anello nasconde una fessura. Ruota i dischi, sincronizza le orbite e apri il nucleo di ogni costellazione.</p><div class="hero-actions"><button class="btn primary" id="continueButton" type="button" hidden>Continua</button><button class="btn primary" id="playButton" type="button">Gioca</button><button class="btn ghost" id="atlasesButton" type="button">Atlanti</button><button class="btn ghost" id="dailyButton" type="button">Giornaliero</button></div><p class="privacy-line">Nessun account. Nessun tracciamento. Funziona offline.</p></div>
+        <div class="hero-art" aria-hidden="true"><div class="hero-rings"><i></i><i></i><i></i><i></i><b>✦</b></div><div class="hero-caption"><span></span> LE ORBITE SONO ALLINEATE</div></div>
+      </section>
+      <section class="stats-row" aria-label="Statistiche"><div class="stat-card"><span>Atlanti</span><b id="atlasesStat">0/10</b></div><div class="stat-card"><span>Stelle</span><b id="starsStat">0/300</b></div><div class="stat-card"><span>Costellazioni</span><b id="constellationsStat">0</b></div><div class="stat-card"><span>Record mosse</span><b id="bestMovesStat">—</b></div></section>
+      <section class="menu-section"><div class="section-head"><h2>L'atlante di oggi</h2><span class="section-note" id="dailyDate"></span></div><button class="daily-card" id="dailyCard" type="button"><span class="daily-icon">✦</span><span><strong>Una nuova costellazione ogni giorno.</strong><small>La sfida giornaliera cambia a mezzanotte.</small></span><span class="daily-arrow">→</span></button></section>
+    </main>
+    <main id="gameScreen" class="game-screen hidden">
+      <div class="game-heading"><button class="text-btn" id="backButton" type="button">← Menu</button><div><span id="modeLabel">ATLANTE</span><h1 id="levelLabel">Prima Orbita · 1</h1></div><button class="icon-btn" id="pauseButton" type="button" aria-label="Pausa">Ⅱ</button></div>
+      <div class="hud"><div><span>Allineati</span><b id="alignedValue">0/3</b></div><div><span>Mosse</span><b id="movesValue">0</b></div><div><span>Punti</span><b id="scoreValue">0</b></div><div><span>Combo</span><b id="comboValue">×0</b></div></div>
+      <canvas id="gameCanvas" tabindex="0" aria-label="Anelli concentrici. Trascina un anello per ruotarlo."></canvas>
+      <div class="board-status" id="boardStatus" role="status" aria-live="polite">Trascina un anello o usa le frecce.</div>
+      <div class="rotate-controls"><button class="icon-btn" id="rotateLeftButton" type="button" aria-label="Ruota a sinistra">↶</button><span id="selectedRingLabel">Anello 1</span><button class="icon-btn" id="rotateRightButton" type="button" aria-label="Ruota a destra">↷</button></div>
+      <div class="power-bar"><button class="power-btn" id="undoButton" type="button"><span>↶</span><small>Annulla <b id="undoValue">5</b></small></button><button class="power-btn" id="boostButton" type="button"><span>✦</span><small>Impulso <b id="boostValue">2</b></small></button><button class="power-btn" id="shuffleButton" type="button"><span>⤨</span><small>Rimescola <b id="shuffleValue">1</b></small></button><button class="power-btn" id="hintButton" type="button"><span>?</span><small>Suggerimento</small></button></div>
+    </main>
+  </div>
+  <div class="overlay hidden" id="atlasesDialog" role="dialog" aria-modal="true" aria-labelledby="atlasesTitle"><div class="sheet wide-sheet"><div class="sheet-head"><div><p class="eyebrow">CARTOGRAFIA</p><h2 id="atlasesTitle">Gli atlanti</h2></div><button class="close-btn" data-close="atlasesDialog" type="button" aria-label="Chiudi">×</button></div><div class="area-tabs" id="areaTabs" role="tablist" aria-label="Atlanti"></div><div class="level-grid" id="levelGrid"></div></div></div>
+  <div class="overlay hidden" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="sheet small-sheet"><div class="sheet-head"><div><p class="eyebrow">ESPERIENZA</p><h2 id="settingsTitle">Impostazioni</h2></div><button class="close-btn" data-close="settingsDialog" type="button" aria-label="Chiudi">×</button></div><label class="toggle-row"><span><strong>Audio sintetizzato</strong><small>Effetti sonori generati dal browser.</small></span><input id="soundSetting" type="checkbox"></label><label class="toggle-row"><span><strong>Movimento ridotto</strong><small>Disattiva particelle e interpolazioni.</small></span><input id="motionSetting" type="checkbox"></label><button class="btn ghost wide" id="howButton" type="button">Come si gioca</button></div></div>
+  <div class="overlay hidden" id="howDialog" role="dialog" aria-modal="true" aria-labelledby="howTitle"><div class="sheet how-sheet"><div class="sheet-head"><div><p class="eyebrow">MANUALE DELL'ATLANTE</p><h2 id="howTitle">Come si gioca</h2></div><button class="close-btn" data-close="howDialog" type="button" aria-label="Chiudi">×</button></div><ol class="steps"><li><span>1</span><div><strong>Seleziona un anello</strong><p>Tocca un anello oppure trascinalo direttamente.</p></div></li><li><span>2</span><div><strong>Ruota le orbite</strong><p>Trascina orizzontalmente o usa i pulsanti. Gli specchi invertono il comando.</p></div></li><li><span>3</span><div><strong>Apri il nucleo</strong><p>Porta tutte le fessure in alto. Gli anelli collegati si muovono insieme.</p></div></li></ol><p class="keyboard-note"><b>Anelli bloccati:</b> si sbloccano quando l'anello dipendente è allineato. <b>Impulso:</b> ruota automaticamente l'anello selezionato verso l'obiettivo.</p><button class="btn primary wide" data-close="howDialog" type="button">Ho capito</button></div></div>
+  <div class="overlay hidden" id="pauseDialog" role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><div class="sheet small-sheet"><p class="eyebrow">ORBITE IN PAUSA</p><h2 id="pauseTitle">Il nucleo aspetta</h2><p class="muted">La partita viene salvata su questo dispositivo.</p><button class="btn primary wide" id="resumeButton" type="button">Riprendi</button><button class="btn ghost wide" id="quitButton" type="button">Torna al menu</button></div></div>
+  <div class="overlay hidden" id="resultDialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle"><div class="sheet result-sheet"><p class="eyebrow">ATLANTE COMPLETATO</p><h2 id="resultTitle">Il nucleo è aperto</h2><div class="stars" id="resultStars" aria-label="Stelle"></div><div class="result-grid"><div><span>Punti</span><b id="resultScore">0</b></div><div><span>Mosse</span><b id="resultMoves">0</b></div><div><span>Par</span><b id="resultPar">0</b></div></div><p class="muted" id="resultNote">Una nuova costellazione è stata rivelata.</p><button class="btn primary wide" id="nextButton" type="button">Prossimo livello</button><button class="btn ghost wide" id="replayButton" type="button">Rigioca</button><button class="btn ghost wide" id="resultMenuButton" type="button">Menu</button></div></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

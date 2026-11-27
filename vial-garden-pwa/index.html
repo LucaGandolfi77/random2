@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080b14">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Vial Garden è un water-sort puzzle botanico: ordina le tinture, fai crescere i fiori e rilassati.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vial Garden">
+  <meta property="og:title" content="Vial Garden — Water Sort Puzzle">
+  <meta property="og:description" content="Un water-sort puzzle botanico, offline e senza account.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Vial Garden — Water Sort Puzzle</title>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button class="brand" id="brandButton" type="button" aria-label="Vial Garden, menu principale">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>VIAL <b>GARDEN</b></span>
+      </button>
+      <div class="top-actions">
+        <button class="icon-btn" id="soundButton" type="button" aria-label="Disattiva audio">♪</button>
+        <button class="icon-btn" id="settingsButton" type="button" aria-label="Impostazioni">⚙</button>
+      </div>
+    </header>
+
+    <main id="menuScreen" class="menu-screen">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">WATER SORT PUZZLE</p>
+          <h1>Versa.<br><span>Ordina.</span><br>Coltiva.</h1>
+          <p class="lede">Mescola le tinture nelle fiale, completa ogni colore e guarda il giardino fiorire. Un puzzle calmo, tattile e completamente offline.</p>
+          <div class="hero-actions">
+            <button class="btn primary" id="continueButton" type="button" hidden>Continua</button>
+            <button class="btn primary" id="playButton" type="button">Gioca</button>
+            <button class="btn ghost" id="gardensButton" type="button">Giardini</button>
+            <button class="btn ghost" id="dailyButton" type="button">Giornaliero</button>
+          </div>
+          <p class="privacy-line">Nessun account. Nessun tracciamento. Funziona offline.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-vials">
+            <div class="vial v1"><i></i><i></i><i></i><i></i></div>
+            <div class="vial v2"><i></i><i></i><i></i></div>
+            <div class="vial v3"><i></i><i></i></div>
+            <div class="vial v4"><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="hero-caption"><span></span> IL GIARDINO STA FIORENDO</div>
+        </div>
+      </section>
+
+      <section class="stats-row" aria-label="Statistiche">
+        <div class="stat-card"><span>Livelli</span><b id="completedStat">0/100</b></div>
+        <div class="stat-card"><span>Stelle</span><b id="gardenStarsStat">0/300</b></div>
+        <div class="stat-card"><span>Fiori</span><b id="flowersStat">0</b></div>
+        <div class="stat-card"><span>Record mosse</span><b id="bestMovesStat">—</b></div>
+      </section>
+
+      <section class="menu-section">
+        <div class="section-head"><h2>Il giardino di oggi</h2><span class="section-note" id="dailyDate"></span></div>
+        <button class="daily-card" id="dailyCard" type="button">
+          <span class="daily-icon">✿</span>
+          <span><strong>Una nuova tintura ogni giorno.</strong><small>La sfida giornaliera cambia a mezzanotte.</small></span>
+          <span class="daily-arrow">→</span>
+        </button>
+      </section>
+    </main>
+
+    <main id="gameScreen" class="game-screen hidden">
+      <div class="game-heading">
+        <button class="text-btn" id="backButton" type="button">← Menu</button>
+        <div><span id="modeLabel">GIARDINO</span><h1 id="levelLabel">Roseto · 1</h1></div>
+        <button class="icon-btn" id="pauseButton" type="button" aria-label="Pausa">Ⅱ</button>
+      </div>
+
+      <div class="hud">
+        <div><span>Mosse</span><b id="movesValue">0</b></div>
+        <div><span>Colori</span><b id="colorsValue">0/4</b></div>
+        <div><span>Punti</span><b id="scoreValue">0</b></div>
+        <div><span>Par</span><b id="parValue">—</b></div>
+      </div>
+
+      <canvas id="gameCanvas" tabindex="0" aria-label="Fiale da ordinare. Seleziona una fiala piena e poi una destinazione compatibile."></canvas>
+      <div class="board-status" id="boardStatus" role="status" aria-live="polite">Seleziona una fiala, poi la destinazione.</div>
+
+      <div class="power-bar">
+        <button class="power-btn" id="undoButton" type="button"><span>↶</span><small>Annulla <b id="undoValue">5</b></small></button>
+        <button class="power-btn" id="shuffleButton" type="button"><span>⤨</span><small>Rimescola <b id="shuffleValue">2</b></small></button>
+        <button class="power-btn" id="extraButton" type="button"><span>＋</span><small>Fiala extra <b id="extraValue">1</b></small></button>
+        <button class="power-btn" id="hintButton" type="button"><span>?</span><small>Suggerimento</small></button>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay hidden" id="gardensDialog" role="dialog" aria-modal="true" aria-labelledby="gardensTitle">
+    <div class="sheet wide-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">COLLEZIONE</p><h2 id="gardensTitle">I giardini</h2></div><button class="close-btn" data-close="gardensDialog" type="button" aria-label="Chiudi">×</button></div>
+      <div class="area-tabs" id="areaTabs" role="tablist" aria-label="Giardini"></div>
+      <div class="level-grid" id="levelGrid"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet small-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">ESPERIENZA</p><h2 id="settingsTitle">Impostazioni</h2></div><button class="close-btn" data-close="settingsDialog" type="button" aria-label="Chiudi">×</button></div>
+      <label class="toggle-row"><span><strong>Audio sintetizzato</strong><small>Effetti sonori generati dal browser.</small></span><input id="soundSetting" type="checkbox"></label>
+      <label class="toggle-row"><span><strong>Movimento ridotto</strong><small>Disattiva particelle e versamenti animati.</small></span><input id="motionSetting" type="checkbox"></label>
+      <button class="btn ghost wide" id="howButton" type="button">Come si gioca</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="howDialog" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+    <div class="sheet how-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">MANUALE DEL GIARDINIERE</p><h2 id="howTitle">Come si gioca</h2></div><button class="close-btn" data-close="howDialog" type="button" aria-label="Chiudi">×</button></div>
+      <ol class="steps">
+        <li><span>1</span><div><strong>Seleziona la partenza</strong><p>Tocca una fiala piena. Le destinazioni compatibili si illuminano.</p></div></li>
+        <li><span>2</span><div><strong>Versa la tintura</strong><p>Puoi versare solo in una fiala vuota o sopra lo stesso colore.</p></div></li>
+        <li><span>3</span><div><strong>Completa i colori</strong><p>Ogni fiala piena deve contenere un solo colore.</p></div></li>
+      </ol>
+      <p class="keyboard-note"><b>Booster:</b> Annulla torna indietro, Rimescola usa una configurazione risolvibile, Fiala extra aggiunge spazio.</p>
+      <button class="btn primary wide" data-close="howDialog" type="button">Ho capito</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="pauseDialog" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="sheet small-sheet">
+      <p class="eyebrow">GIARDINO IN PAUSA</p><h2 id="pauseTitle">Le piante aspettano</h2>
+      <p class="muted">La partita viene salvata su questo dispositivo.</p>
+      <button class="btn primary wide" id="resumeButton" type="button">Riprendi</button>
+      <button class="btn ghost wide" id="quitButton" type="button">Torna al menu</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="resultDialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="sheet result-sheet">
+      <p class="eyebrow">FIORITURA COMPLETATA</p>
+      <h2 id="resultTitle">Il giardino è in ordine</h2>
+      <div class="stars" id="resultStars" aria-label="Stelle"></div>
+      <div class="result-grid"><div><span>Punti</span><b id="resultScore">0</b></div><div><span>Mosse</span><b id="resultMoves">0</b></div><div><span>Par</span><b id="resultPar">0</b></div></div>
+      <p class="muted" id="resultNote">Un nuovo fiore è sbocciato.</p>
+      <button class="btn primary wide" id="nextButton" type="button">Prossimo giardino</button>
+      <button class="btn ghost wide" id="replayButton" type="button">Rigioca</button>
+      <button class="btn ghost wide" id="resultMenuButton" type="button">Menu</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

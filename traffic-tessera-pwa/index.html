@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080b14">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Traffic Tessera è un puzzle di parcheggi: smista navette, tram e bus colorati prima che la città si blocchi.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Traffic Tessera">
+  <meta property="og:title" content="Traffic Tessera — Traffic Puzzle">
+  <meta property="og:description" content="Un puzzle di parcheggi e smistamento, offline e senza account.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Traffic Tessera — Traffic Puzzle</title>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button class="brand" id="brandButton" type="button" aria-label="Traffic Tessera, menu principale"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>TRAFFIC <b>TESSERA</b></span></button>
+      <div class="top-actions"><button class="icon-btn" id="soundButton" type="button" aria-label="Disattiva audio">♪</button><button class="icon-btn" id="settingsButton" type="button" aria-label="Impostazioni">⚙</button></div>
+    </header>
+
+    <main id="menuScreen" class="menu-screen">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">TRAFFIC PUZZLE</p>
+          <h1>Smista.<br><span>Libera.</span><br>Riordina.</h1>
+          <p class="lede">Ogni veicolo ha un terminale. Fallo scorrere, supera gli ingorghi e libera la città una tessera alla volta.</p>
+          <div class="hero-actions"><button class="btn primary" id="continueButton" type="button" hidden>Continua</button><button class="btn primary" id="playButton" type="button">Gioca</button><button class="btn ghost" id="districtsButton" type="button">Distretti</button><button class="btn ghost" id="dailyButton" type="button">Giornaliero</button></div>
+          <p class="privacy-line">Nessun account. Nessun tracciamento. Funziona offline.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-grid">
+            <span class="hero-terminal mint"></span><span class="hero-terminal amber"></span>
+            <i class="hero-car coral"></i><i class="hero-car blue"></i><i class="hero-car mint"></i><i class="hero-bus amber"></i>
+            <b>↗</b>
+          </div>
+          <div class="hero-caption"><span></span> LA CITTÀ È IN MOVIMENTO</div>
+        </div>
+      </section>
+      <section class="stats-row" aria-label="Statistiche">
+        <div class="stat-card"><span>Distretti</span><b id="districtsStat">0/10</b></div>
+        <div class="stat-card"><span>Stelle</span><b id="starsStat">0/300</b></div>
+        <div class="stat-card"><span>Veicoli smistati</span><b id="dispatchedStat">0</b></div>
+        <div class="stat-card"><span>Record mosse</span><b id="bestMovesStat">—</b></div>
+      </section>
+      <section class="menu-section">
+        <div class="section-head"><h2>Il distretto di oggi</h2><span class="section-note" id="dailyDate"></span></div>
+        <button class="daily-card" id="dailyCard" type="button"><span class="daily-icon">✦</span><span><strong>Una nuova griglia ogni giorno.</strong><small>La sfida cambia a mezzanotte, con la stessa configurazione per tutti.</small></span><span class="daily-arrow">→</span></button>
+      </section>
+    </main>
+
+    <main id="gameScreen" class="game-screen hidden">
+      <div class="game-heading"><button class="text-btn" id="backButton" type="button">← Menu</button><div><span id="modeLabel">DISTRETTO</span><h1 id="levelLabel">Primo Parcheggio · 1</h1></div><button class="icon-btn" id="pauseButton" type="button" aria-label="Pausa">Ⅱ</button></div>
+      <div class="hud"><div><span>Da smistare</span><b id="remainingValue">6</b></div><div><span>Mosse</span><b id="movesValue">0</b></div><div><span>Punti</span><b id="scoreValue">0</b></div><div><span>Combo</span><b id="comboValue">×0</b></div></div>
+      <canvas id="gameCanvas" tabindex="0" aria-label="Griglia del parcheggio. Trascina un veicolo lungo la sua direzione."></canvas>
+      <div class="board-status" id="boardStatus" role="status" aria-live="polite">Trascina un veicolo o usa i tasti freccia.</div>
+      <div class="vehicle-controls"><button class="icon-btn" id="previousButton" type="button" aria-label="Veicolo precedente">‹</button><span id="selectedVehicleLabel">Seleziona un veicolo</span><button class="icon-btn" id="nextButton" type="button" aria-label="Veicolo successivo">›</button></div>
+      <button class="btn exit-btn" id="exitButton" type="button">Esci dal terminale <span>→</span></button>
+      <div class="power-bar"><button class="power-btn" id="undoButton" type="button"><span>↶</span><small>Annulla <b id="undoValue">5</b></small></button><button class="power-btn" id="towButton" type="button"><span>⚒</span><small>Carro attrezzi <b id="towValue">2</b></small></button><button class="power-btn" id="shuffleButton" type="button"><span>⤨</span><small>Rimescola <b id="shuffleValue">1</b></small></button><button class="power-btn" id="hintButton" type="button"><span>?</span><small>Suggerimento</small></button></div>
+    </main>
+  </div>
+
+  <div class="overlay hidden" id="districtsDialog" role="dialog" aria-modal="true" aria-labelledby="districtsTitle"><div class="sheet wide-sheet"><div class="sheet-head"><div><p class="eyebrow">CARTOGRAFIA URBANA</p><h2 id="districtsTitle">I distretti</h2></div><button class="close-btn" data-close="districtsDialog" type="button" aria-label="Chiudi">×</button></div><div class="area-tabs" id="areaTabs" role="tablist" aria-label="Distretti"></div><div class="level-grid" id="levelGrid"></div></div></div>
+
+  <div class="overlay hidden" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="sheet small-sheet"><div class="sheet-head"><div><p class="eyebrow">ESPERIENZA</p><h2 id="settingsTitle">Impostazioni</h2></div><button class="close-btn" data-close="settingsDialog" type="button" aria-label="Chiudi">×</button></div><label class="toggle-row"><span><strong>Audio sintetizzato</strong><small>Effetti sonori generati dal browser.</small></span><input id="soundSetting" type="checkbox"></label><label class="toggle-row"><span><strong>Movimento ridotto</strong><small>Disattiva particelle e interpolazioni.</small></span><input id="motionSetting" type="checkbox"></label><button class="btn ghost wide" id="howButton" type="button">Come si gioca</button></div></div>
+
+  <div class="overlay hidden" id="howDialog" role="dialog" aria-modal="true" aria-labelledby="howTitle"><div class="sheet how-sheet"><div class="sheet-head"><div><p class="eyebrow">MANUALE DEL TRASPORTO</p><h2 id="howTitle">Come si gioca</h2></div><button class="close-btn" data-close="howDialog" type="button" aria-label="Chiudi">×</button></div><ol class="steps"><li><span>1</span><div><strong>Seleziona un veicolo</strong><p>Tocca una navetta, un tram o un bus sulla griglia.</p></div></li><li><span>2</span><div><strong>Fallo scorrere</strong><p>Trascinalo nella sua direzione. I veicoli non possono cambiare corsia.</p></div></li><li><span>3</span><div><strong>Raggiungi il terminale</strong><p>Trascina oltre il bordo nella direzione del terminale con lo stesso colore e simbolo.</p></div></li></ol><p class="keyboard-note"><b>Terminali a doppio bordo:</b> il veicolo deve arrivare fino al bordo prima di uscire. <b>Punto bianco:</b> la corsia è a senso unico. <b>Tastiera:</b> frecce per muovere, Invio per uscire, Q/E per cambiare veicolo, U per annullare, H per suggerimento, P per pausa. <b>Carro attrezzi:</b> rimuove un veicolo bloccato senza cambiare gli altri.</p><button class="btn primary wide" data-close="howDialog" type="button">Ho capito</button></div></div>
+
+  <div class="overlay hidden" id="pauseDialog" role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><div class="sheet small-sheet"><p class="eyebrow">TRAFFICO IN PAUSA</p><h2 id="pauseTitle">La città aspetta</h2><p class="muted">La partita viene salvata su questo dispositivo.</p><button class="btn primary wide" id="resumeButton" type="button">Riprendi</button><button class="btn ghost wide" id="quitButton" type="button">Torna al menu</button></div></div>
+
+  <div class="overlay hidden" id="resultDialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle"><div class="sheet result-sheet"><p class="eyebrow">DISTRETTO LIBERATO</p><h2 id="resultTitle">Traffico smistato</h2><div class="stars" id="resultStars" aria-label="Stelle"></div><div class="result-grid"><div><span>Punti</span><b id="resultScore">0</b></div><div><span>Mosse</span><b id="resultMoves">0</b></div><div><span>Par</span><b id="resultPar">0</b></div></div><p class="muted" id="resultNote">Tutte le navette hanno raggiunto il terminale.</p><button class="btn primary wide" id="nextLevelButton" type="button">Prossimo livello</button><button class="btn ghost wide" id="replayButton" type="button">Rigioca</button><button class="btn ghost wide" id="resultMenuButton" type="button">Menu</button></div></div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

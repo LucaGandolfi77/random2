@@ -1,0 +1,3 @@
+import test from"node:test";import assert from"node:assert/strict";import{createGame}from"../src/engine.js";import{makeLevel}from"../src/levels.js";import{recordWin,resumeIsValid}from"../src/storage.js";
+test("fresh snapshot is valid",()=>{const l=makeLevel(0,0),g=createGame(l);assert.equal(resumeIsValid(l,g.snapshot()),true);});
+test("record win stores stars and unlocks next level",()=>{const p={unlocked:1,stars:{},bestMoves:{},daily:{}},l=makeLevel(0,0),g=createGame(l);g.state.status="won";g.state.stars=3;g.state.moves=5;recordWin(p,l,g.state);assert.equal(p.stars[l.id],3);assert.equal(p.unlocked,2);});

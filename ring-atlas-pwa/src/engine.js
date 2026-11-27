@@ -1,0 +1,22 @@
+import { alignedCount, applyMove, circularDistance, isRingLocked, isSolved, normalizeOffset } from "./rules.js";
+import { solveLevel } from "./solver.js";
+
+function clone(value){return JSON.parse(JSON.stringify(value));}
+
+export function createGame(level,saved){
+  const state={specId:level.id,kind:level.kind,rings:level.rings,segments:level.segments,offsets:level.offsets.slice(),links:level.links.map(l=>({...l})),locks:level.locks.map(l=>({...l})),mirrors:level.mirrors.slice(),selected:0,moves:0,score:0,combo:0,bestCombo:0,status:"playing",par:level.par||level.solution.length,stars:0,undosLeft:5,boostsLeft:2,shufflesLeft:1,usedBooster:false,history:[],events:[]};
+  const events=state.events;
+  function emit(type,data){events.push(Object.assign({type},data||{}));}
+  function remember(){state.history.push(clone({offsets:state.offsets,selected:state.selected,moves:state.moves,score:state.score,combo:state.combo,bestCombo:state.bestCombo,status:state.status,undosLeft:state.undosLeft,boostsLeft:state.boostsLeft,shufflesLeft:state.shufflesLeft,usedBooster:state.usedBooster}));if(state.history.length>60)state.history.shift();}
+  function checkWin(){if(state.status==="playing"&&isSolved(state.offsets,state.segments)){state.status="won";const ratio=state.moves/Math.max(1,state.par);state.stars=!state.usedBooster&&ratio<=1?3:ratio<=1.5?2:1;emit("win",{score:state.score,stars:state.stars});return true;}return false;}
+  function select(index){if(index<0||index>=state.rings)return false;state.selected=index;emit("select",{index});return true;}
+  function rotate(ring,delta){if(state.status!=="playing")return{ok:false,reason:"over"};if(ring<0||ring>=state.rings)return{ok:false,reason:"ring"};if(isRingLocked(ring,state.offsets,state)){emit("blocked",{ring});return{ok:false,reason:"locked"};}const before=alignedCount(state.offsets,state.segments);remember();const move={ring,delta};state.offsets=applyMove(state.offsets,state,move);state.moves++;const after=alignedCount(state.offsets,state.segments);if(after>before){state.combo++;state.bestCombo=Math.max(state.bestCombo,state.combo);state.score+=100*after;}else state.combo=0;emit("rotate",{ring,delta,aligned:after>before});checkWin();return{ok:true,aligned:after>before};}
+  function undo(){if(state.status!=="playing"||state.undosLeft<=0||!state.history.length)return false;const p=state.history.pop();for(const k of ["offsets","selected","moves","score","combo","bestCombo","status","undosLeft","boostsLeft","shufflesLeft","usedBooster"])state[k]=p[k];state.undosLeft--;emit("undo");return true;}
+  function boost(ring){if(state.status!=="playing"||state.boostsLeft<=0)return false;if(isRingLocked(ring,state.offsets,state))return false;state.boostsLeft--;state.usedBooster=true;let steps=0;while(normalizeOffset(state.offsets[ring],state.segments)!==0&&steps<Math.floor(state.segments/2)){if(isRingLocked(ring,state.offsets,state))break;const distance=circularDistance(state.offsets[ring],state.segments);const current=normalizeOffset(state.offsets[ring],state.segments);const delta=current<=state.segments/2?-1:1;rotate(ring,delta);steps++;}emit("boost",{ring,steps});checkWin();return true;}
+  function shuffle(){if(state.status!=="playing"||state.shufflesLeft<=0)return false;remember();state.offsets=level.shuffleOffsets.slice();state.selected=0;state.moves++;state.shufflesLeft--;state.usedBooster=true;emit("shuffle");checkWin();return true;}
+  function hint(){if(state.status!=="playing")return null;const r=solveLevel(level,{offsets:state.offsets,maxNodes:250000,maxMoves:120});if(!r.ok||!r.solution.length)return null;const move=r.solution[0];state.selected=move.ring;emit("hint",move);return move;}
+  function snapshot(){return clone({specId:state.specId,offsets:state.offsets,selected:state.selected,moves:state.moves,score:state.score,combo:state.combo,bestCombo:state.bestCombo,status:state.status,undosLeft:state.undosLeft,boostsLeft:state.boostsLeft,shufflesLeft:state.shufflesLeft,usedBooster:state.usedBooster});}
+  function restore(s){if(!s||s.specId!==state.specId)return false;for(const k of ["offsets","selected","moves","score","combo","bestCombo","status","undosLeft","boostsLeft","shufflesLeft","usedBooster"])if(s[k]!==undefined)state[k]=clone(s[k]);return true;}
+  if(saved)restore(saved);
+  return{state,getState(){return state;},select,rotate,undo,boost,shuffle,hint,isRingLocked(ring){return isRingLocked(ring,state.offsets,state);},snapshot,drainEvents(){return events.splice(0,events.length);}};
+}

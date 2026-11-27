@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080b14">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Prism Blocks è un block puzzle pastello: posiziona i pezzi, completa righe e colonne e insegui il record.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Prism Blocks">
+  <meta property="og:title" content="Prism Blocks — Color Block Puzzle">
+  <meta property="og:description" content="Un puzzle di blocchi pastello, offline e senza account.">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Prism Blocks — Color Block Puzzle</title>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <button class="brand" id="brandButton" type="button" aria-label="Prism Blocks, menu principale">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>PRISM <b>BLOCKS</b></span>
+      </button>
+      <div class="top-actions">
+        <button class="icon-btn" id="soundButton" type="button" aria-label="Disattiva audio">♪</button>
+        <button class="icon-btn" id="settingsButton" type="button" aria-label="Impostazioni">⚙</button>
+      </div>
+    </header>
+
+    <main id="menuScreen" class="menu-screen">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">COLOR BLOCK PUZZLE</p>
+          <h1>Incastra.<br><span>Completa.</span><br>Brilla.</h1>
+          <p class="lede">Posiziona i pezzi sulla griglia, completa righe e colonne e crea combo. Un puzzle calmo, immediato e completamente offline.</p>
+          <div class="hero-actions">
+            <button class="btn primary" id="continueButton" type="button" hidden>Continua</button>
+            <button class="btn primary" id="playButton" type="button">Gioca</button>
+            <button class="btn ghost" id="challengesButton" type="button">Sfide</button>
+            <button class="btn ghost" id="dailyButton" type="button">Giornaliero</button>
+          </div>
+          <p class="privacy-line">Nessun account. Nessun tracciamento. Funziona offline.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-grid">
+            <i class="block b1"></i><i class="block b2"></i><i></i><i class="block b3"></i>
+            <i class="block b2"></i><i class="block b4"></i><i class="block b1"></i><i></i>
+            <i></i><i class="block b5"></i><i class="block b3"></i><i class="block b2"></i>
+            <i class="block b4"></i><i></i><i class="block b1"></i><i class="block b5"></i>
+          </div>
+          <div class="hero-caption"><span></span> LA GRIGLIA È PRONTA</div>
+        </div>
+      </section>
+
+      <section class="stats-row" aria-label="Statistiche">
+        <div class="stat-card"><span>Record</span><b id="bestStat">0</b></div>
+        <div class="stat-card"><span>Partite</span><b id="gamesStat">0</b></div>
+        <div class="stat-card"><span>Vittorie</span><b id="winsStat">0</b></div>
+        <div class="stat-card"><span>Stelle sfide</span><b id="challengeStarsStat">0/90</b></div>
+      </section>
+
+      <section class="menu-section">
+        <div class="section-head"><h2>Il prisma di oggi</h2><span class="section-note" id="dailyDate"></span></div>
+        <button class="daily-card" id="dailyCard" type="button">
+          <span class="daily-icon">◈</span>
+          <span><strong>Una griglia, un obiettivo.</strong><small>La sfida giornaliera cambia ogni giorno ed è uguale per tutti.</small></span>
+          <span class="daily-arrow">→</span>
+        </button>
+      </section>
+    </main>
+
+    <main id="gameScreen" class="game-screen hidden">
+      <div class="game-heading">
+        <button class="text-btn" id="backButton" type="button">← Menu</button>
+        <div><span id="modeLabel">ENDLESS</span><h1 id="levelLabel">Endless</h1></div>
+        <button class="icon-btn" id="pauseButton" type="button" aria-label="Pausa">Ⅱ</button>
+      </div>
+
+      <div class="hud">
+        <div><span>Punti</span><b id="scoreValue">0</b></div>
+        <div><span>Combo</span><b id="comboValue">×0</b></div>
+        <div><span>Linee</span><b id="linesValue">0</b></div>
+        <div><span id="objectiveLabel">Obiettivo</span><b id="objectiveValue">—</b></div>
+      </div>
+
+      <div class="board-wrap">
+        <canvas id="boardCanvas" tabindex="0" aria-label="Griglia 8 per 8. Trascina i pezzi dal vassoio."></canvas>
+        <div class="board-status" id="boardStatus" role="status" aria-live="polite">Trascina un pezzo dal vassoio alla griglia.</div>
+      </div>
+
+      <canvas id="trayCanvas" aria-label="Vassoio dei tre pezzi disponibili"></canvas>
+
+      <div class="power-bar">
+        <button class="power-btn" id="rotateButton" type="button"><span>↻</span><small>Ruota</small></button>
+        <button class="power-btn" id="undoButton" type="button"><span>↶</span><small>Annulla <b id="undoValue">3</b></small></button>
+        <button class="power-btn" id="hintButton" type="button"><span>?</span><small>Suggerimento</small></button>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay hidden" id="challengesDialog" role="dialog" aria-modal="true" aria-labelledby="challengesTitle">
+    <div class="sheet wide-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">PROGRESSIONE</p><h2 id="challengesTitle">30 sfide</h2></div><button class="close-btn" data-close="challengesDialog" type="button" aria-label="Chiudi">×</button></div>
+      <p class="muted">Completa una sfida per sbloccare la successiva.</p>
+      <div class="level-grid" id="challengeGrid"></div>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="settingsDialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet small-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">ESPERIENZA</p><h2 id="settingsTitle">Impostazioni</h2></div><button class="close-btn" data-close="settingsDialog" type="button" aria-label="Chiudi">×</button></div>
+      <label class="toggle-row"><span><strong>Audio sintetizzato</strong><small>Effetti sonori generati dal browser.</small></span><input id="soundSetting" type="checkbox"></label>
+      <label class="toggle-row"><span><strong>Movimento ridotto</strong><small>Disattiva particelle e animazioni non essenziali.</small></span><input id="motionSetting" type="checkbox"></label>
+      <button class="btn ghost wide" id="howButton" type="button">Come si gioca</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="howDialog" role="dialog" aria-modal="true" aria-labelledby="howTitle">
+    <div class="sheet how-sheet">
+      <div class="sheet-head"><div><p class="eyebrow">MANUALE DEL PRISMA</p><h2 id="howTitle">Come si gioca</h2></div><button class="close-btn" data-close="howDialog" type="button" aria-label="Chiudi">×</button></div>
+      <ol class="steps">
+        <li><span>1</span><div><strong>Scegli un pezzo</strong><p>Trascinalo dal vassoio oppure selezionalo e tocca la griglia.</p></div></li>
+        <li><span>2</span><div><strong>Completa le linee</strong><p>Righe e colonne piene vengono cancellate insieme.</p></div></li>
+        <li><span>3</span><div><strong>Catena le combo</strong><p>Cancellare linee in mosse consecutive aumenta il punteggio.</p></div></li>
+      </ol>
+      <p class="keyboard-note"><b>Tastiera:</b> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> selezionano, <kbd>R</kbd> ruota, frecce spostano, <kbd>Invio</kbd> piazza, <kbd>U</kbd> annulla, <kbd>H</kbd> suggerisce.</p>
+      <button class="btn primary wide" data-close="howDialog" type="button">Ho capito</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="pauseDialog" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="sheet small-sheet">
+      <p class="eyebrow">PARTITA IN PAUSA</p><h2 id="pauseTitle">Il prisma aspetta</h2>
+      <p class="muted">La partita viene salvata su questo dispositivo.</p>
+      <button class="btn primary wide" id="resumeButton" type="button">Riprendi</button>
+      <button class="btn ghost wide" id="quitButton" type="button">Torna al menu</button>
+    </div>
+  </div>
+
+  <div class="overlay hidden" id="resultDialog" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="sheet result-sheet">
+      <p class="eyebrow" id="resultEyebrow">RISULTATO</p>
+      <h2 id="resultTitle">Partita conclusa</h2>
+      <div class="stars" id="resultStars" aria-label="Stelle"></div>
+      <div class="result-grid"><div><span>Punti</span><b id="resultScore">0</b></div><div><span>Linee</span><b id="resultLines">0</b></div><div><span>Pezzi</span><b id="resultPieces">0</b></div></div>
+      <p class="muted" id="resultNote"></p>
+      <button class="btn primary wide" id="nextButton" type="button" hidden>Sfida successiva</button>
+      <button class="btn ghost wide" id="replayButton" type="button">Rigioca</button>
+      <button class="btn ghost wide" id="resultMenuButton" type="button">Menu</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

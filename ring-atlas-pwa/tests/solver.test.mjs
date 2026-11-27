@@ -1,0 +1,4 @@
+import test from"node:test";import assert from"node:assert/strict";import{ATLASES,LEVELS_PER_ATLAS}from"../src/config.js";import{dailyLevel,makeLevel,validateLevel}from"../src/levels.js";import{solveLevel}from"../src/solver.js";
+test("all 100 levels have valid stored and shuffle solutions",()=>{for(let a=0;a<ATLASES.length;a++)for(let s=0;s<LEVELS_PER_ATLAS;s++){const l=makeLevel(a,s);assert.deepEqual(validateLevel(l),[],l.id);}});
+test("solver independently solves all 100 levels",()=>{for(let a=0;a<ATLASES.length;a++)for(let s=0;s<LEVELS_PER_ATLAS;s++){const l=makeLevel(a,s),r=solveLevel(l,{maxNodes:300000,maxMoves:120});assert.equal(r.ok,true,`${l.id}: ${r.reason}`);}});
+test("daily level is stable and changes by date",()=>{assert.deepEqual(dailyLevel("2026-11-27"),dailyLevel("2026-11-27"));assert.notDeepEqual(dailyLevel("2026-11-27"),dailyLevel("2026-11-28"));});

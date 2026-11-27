@@ -255,6 +255,21 @@ jobs:
           # cell queues, the loop/bucket rules (idle loses, perfect play wins),
           # and the manifest + service-worker asset list.
           node --test sand-loop-pwa/tests/*.test.mjs
+          # RING ATLAS: circular offsets, linked/locked/mirrored rings, A*
+          # solver, all 100 approved levels, boosters and the PWA contract.
+          node --test ring-atlas-pwa/tests/*.test.mjs
+          # TRAFFIC TESSERA: grid collisions, one-way/docking terminals, A*
+          # solver, all 100 approved levels, boosters and the PWA contract.
+          node --test traffic-tessera-pwa/tests/*.test.mjs
+          # ARROW FOUNDRY: ray rules, A* solver, all 100 approved levels,
+          # doors, heavy arrows, boosters and the offline PWA contract.
+          node --test arrow-foundry-pwa/tests/*.test.mjs
+          # VIAL GARDEN: pour rules, A* solver, all 100 approved levels,
+          # boosters, saves and the offline PWA contract.
+          node --test vial-garden-pwa/tests/*.test.mjs
+          # PRISM BLOCKS: placement, line clears, combos, undo, objectives,
+          # deterministic dailies and the offline PWA contract.
+          node --test prism-blocks-pwa/tests/*.test.mjs
           # UMBRA SORT: deterministic levels, movement, lifts, generators,
           # blackout, prism, save restore and the offline PWA contract.
           node --test umbra-sort-pwa/tests/*.test.mjs
@@ -301,6 +316,22 @@ jobs:
           # STRICTLY TYPED: chapter/node integrity, unique rite orders, every
           # boss answer, star rules, save sanitising and ending gating.
           node --test strictly-typed-pwa/tests/*.test.mjs
+          # Plain-node suites for PWAs that have no package.json, so they
+          # need no install step. Each one exits non-zero on failure.
+          node --test darkorbit-pwa/tests/*.test.mjs
+          node --test slot-pwa/tests/*.test.mjs
+          node --test debt-of-years-pwa/tests/*.test.mjs
+          node --test pokemon-go-pwa-v2/tests/*.test.mjs
+          node --test pocketcode-bridge/test/*.test.mjs
+          node --test pocketcode-pwa/tests/shell.test.mjs
+          node pocketcode-pwa/tests/smoke.mjs
+          node tidefall-pwa/tests/features.test.js
+          node tidefall-pwa/tests/world.test.js
+          node ripple-cove-pwa/tests/fish.test.mjs
+          node ragduel-pwa/sim.test.mjs
+          node mycel-pwa/runtime.test.mjs
+          node lumen-pwa/tests/sim.test.js
+          node formica-pwa/tests/sim.test.js
 
       - name: Analysis tooling tests
         run: |
@@ -415,6 +446,46 @@ jobs:
           out=$(node sand-loop-pwa/smoke.mjs http://localhost:8099/sand-loop-pwa/ 2>&1) || {
             echo "$out"
             echo "FAIL  sand-loop-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # RING ATLAS boots, rotates a hinted ring, uses boosters, lists
+          # atlases and reloads the offline shell.
+          out=$(node ring-atlas-pwa/smoke.mjs http://localhost:8099/ring-atlas-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  ring-atlas-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # TRAFFIC TESSERA boots, drags a vehicle, uses boosters, lists
+          # districts, solves a level and reloads the offline shell.
+          out=$(node traffic-tessera-pwa/smoke.mjs http://localhost:8099/traffic-tessera-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  traffic-tessera-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # ARROW FOUNDRY boots, removes an arrow, uses boosters, lists
+          # factories and reloads the offline shell.
+          out=$(node arrow-foundry-pwa/smoke.mjs http://localhost:8099/arrow-foundry-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  arrow-foundry-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # VIAL GARDEN boots, pours, uses boosters, lists gardens and
+          # reloads the offline shell.
+          out=$(node vial-garden-pwa/smoke.mjs http://localhost:8099/vial-garden-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  vial-garden-pwa smoke test"
+            exit 1
+          }
+          echo "$out" | tail -3
+          # PRISM BLOCKS boots, places a hinted piece, rotates, pauses and
+          # reloads the offline shell.
+          out=$(node prism-blocks-pwa/smoke.mjs http://localhost:8099/prism-blocks-pwa/ 2>&1) || {
+            echo "$out"
+            echo "FAIL  prism-blocks-pwa smoke test"
             exit 1
           }
           echo "$out" | tail -3
