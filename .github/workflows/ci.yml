@@ -205,31 +205,53 @@ jobs:
             node --check "$file"
           done
 
-      - name: Shared libraries and core game simulations
+      - name: Shared self-tests
+        run: node tools/selftest.mjs
+
+      - name: Metro simulation
+        run: node metro-pwa/sim.test.mjs
+
+      - name: Census simulation
+        run: node census-pwa/sim.test.mjs
+
+      - name: New Star Soccer simulation
+        run: node new-star-soccer/sim.test.mjs
+
+      - name: Pulse simulation
+        run: node pulse-pwa/sim.test.mjs
+
+      - name: IRONFALL suites
         run: |
-          set -euo pipefail
-          node tools/selftest.mjs
-          node metro-pwa/sim.test.mjs
-          node census-pwa/sim.test.mjs
-          node new-star-soccer/sim.test.mjs
-          node pulse-pwa/sim.test.mjs
           node ironfall-pwa/tests/sim.test.js
           node ironfall-pwa/tests/roster.test.js
           node ironfall-pwa/tests/boot.test.js
           node ironfall-pwa/tests/render.test.js
+
+      - name: SECTOR 7 suites
+        run: |
           node sector7-pwa/tests/sim.test.js
           node sector7-pwa/tests/render.test.js
           node sector7-pwa/tests/boot.test.js
           node sector7-pwa/tests/content.test.js
-          node mustang-pwa/tests/run-all.mjs
+
+      - name: Mustang suite
+        run: node mustang-pwa/tests/run-all.mjs
+
+      - name: Pixel Cup suites
+        run: |
           node pixel-cup-pwa/tests/sim.test.mjs
           node pixel-cup-pwa/tests/boot.test.mjs
+
+      - name: Gulper suites
+        run: |
           for suite in gulper-pwa/tests/*.test.js; do
             echo "::group::$suite"
             node "$suite"
             echo "::endgroup::"
           done
-          node --test sand-loop-pwa/tests/*.test.mjs
+
+      - name: Sand Loop suite
+        run: node --test sand-loop-pwa/tests/*.test.mjs
 
       - name: Puzzle and content PWA suites
         run: |
