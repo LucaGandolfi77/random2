@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "SETA E SILICIO — I fili che il tempo non spezza",
+  "short_name": "Seta e Silicio",
+  "description": "Cinque episodi a Suzhou, 2032: seta, memoria, robotica e una città che sceglie cosa custodire.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "background_color": "#10242b",
+  "theme_color": "#10242b",
+  "categories": ["games", "story", "education"],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

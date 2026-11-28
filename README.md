@@ -32,6 +32,7 @@
   - [Arrow Foundry](#arrow-foundry)
   - [Ring Atlas](#ring-atlas)
   - [Traffic Tessera](#traffic-tessera)
+  - [Seta e Silicio](#seta-e-silicio)
   - [Pixel Ants](#pixel-ants)
   - [Inner Circle](#inner-circle)
   - [LUMEN](#lumen)
@@ -147,6 +148,7 @@
 | 62 | **Arrow Foundry** | 100-level arrow puzzle with A* validation, doors, heavy arrows and boosters | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/arrow-foundry-pwa/) |
 | 63 | **Ring Atlas** | 100-level ring puzzle with A* validation, linked rings, mirrors and boosters | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/ring-atlas-pwa/) |
 | 64 | **Traffic Tessera** | 100-level traffic puzzle with A* validation, buses, one-way lanes, precision docks and boosters | Vanilla JS + Canvas 2D + WebAudio | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/traffic-tessera-pwa/) |
+| 65 | **Seta e Silicio** | Five-episode low-poly narrative adventure in Suzhou, 2032: silk, memory, care robots and dialogue rewind | TypeScript + Three.js + Vite | ✅ | [▶ Play](https://lucagandolfi77.github.io/random2/seta-e-silicio-pwa/) |
 
 \* Snap Cam needs HTTPS (any browser rule for `getUserMedia`) and downloads its
 face-tracking engine on first use; after that it works offline too.
@@ -588,6 +590,33 @@ changing lane.
 **Files:** `index.html`, `styles.css`, `manifest.json`, `service-worker.js`,
 `src/` (`main`, `config`, `rules`, `levels`, `level-data`, `solver`, `engine`,
 `render`, `audio`, `storage`), `icons/`, `scripts/`, `tests/`, `smoke.mjs`.
+
+### Seta e Silicio
+
+*I fili che il tempo non spezza.* 🏮
+
+A five-episode narrative adventure set in Suzhou, 2032. Mei returns home after
+three years in the West. Her grandmother Ah-Xiu, the last master of double-sided
+Su embroidery, is losing her memory. Hao-7, a public care android, has learned
+the local dialect and the grandmother's stories. Mei can rewind conversations by
+a few minutes: the facts stay, the choices begin again.
+
+- Five episodes across a canal courtyard, a willow square, a civic memory lab,
+  a rain-soaked bridge and the night of lanterns
+- Dialogue rewind in the *Life is Strange* tradition: knowledge persists across
+  rewinds, flags and consequences roll back
+- Three endings, plus a hidden community ending earned by listening to the whole
+  neighbourhood
+- Third-person low-poly exploration with WASD, touch joystick, cinematic camera,
+  hotspots and a bilingual journal
+- Procedural Three.js world, characters, water, rain, floating lanterns and a
+  pentatonic Web Audio score — no binary art or external audio
+- Offline PWA, IT/EN, no trackers and no personal data
+- 22 Vitest checks across story links, every dialogue, rewind, endings,
+  save validation and localization
+
+**Files:** `index.html`, `src/` (`data`, `game`, `world`, `ui`), `public/`,
+`tests/`, `vite.config.ts`, `README.md`.
 
 ### Pixel Ants
 

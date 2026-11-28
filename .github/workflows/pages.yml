@@ -44,6 +44,7 @@ jobs:
             phone-or-die-fps/package-lock.json
             borgo-pwa/package-lock.json
             comune-2050-pwa/package-lock.json
+            seta-e-silicio-pwa/package-lock.json
 
       - name: Build BUCIO (Vite + PWA)
         working-directory: bucio
@@ -165,6 +166,13 @@ jobs:
           npm test
           npm run build
 
+      - name: Build SETA E SILICIO (Vite + Three.js)
+        working-directory: seta-e-silicio-pwa
+        run: |
+          npm ci
+          npm test
+          npm run build
+
       - name: Build Pocket DS (static PWA, published by rsync)
         # Pocket DS needs no bundler: the assemble step copies the folder
         # verbatim. This is its build gate — it aborts the deploy if any
@@ -179,7 +187,7 @@ jobs:
           # no business being published to Pages.
           # Il save ArnisWorld3 (575 MB) resta sorgente locale: si pubblicano
           # solo gli asset derivati in fidenza-city-v3/data/arnis/.
-          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' --exclude='hype-brawl-game' --exclude='hype-ko-game' --exclude='i-miserabili-parigi-2000' --exclude='l-ultimo-bagno' --exclude='il-prezzo-della-liberta' --exclude='la-corona-e-la-testa' --exclude='briscola-pwa' --exclude='les-miserables-film' --exclude='anna-karenina-film' --exclude='self-non-self' --exclude='whiteout-survival-pwa' --exclude='gigant-battle-pwa' --exclude='bros-saga-pwa' --exclude='phone-or-die-fps' --exclude='borgo-pwa' --exclude='comune-2050-pwa' --exclude='fidenza-city-v3/assets/ArnisWorld3' ./ _site/
+          rsync -a --exclude='.git' --exclude='.github' --exclude='tools' --exclude='bucio' --exclude='new-star-soccer' --exclude='dottor-gelo-pwa' --exclude='hype-brawl-game' --exclude='hype-ko-game' --exclude='i-miserabili-parigi-2000' --exclude='l-ultimo-bagno' --exclude='il-prezzo-della-liberta' --exclude='la-corona-e-la-testa' --exclude='briscola-pwa' --exclude='les-miserables-film' --exclude='anna-karenina-film' --exclude='self-non-self' --exclude='whiteout-survival-pwa' --exclude='gigant-battle-pwa' --exclude='bros-saga-pwa' --exclude='phone-or-die-fps' --exclude='borgo-pwa' --exclude='comune-2050-pwa' --exclude='seta-e-silicio-pwa' --exclude='fidenza-city-v3/assets/ArnisWorld3' ./ _site/
           # Deploy the built app output under their own paths
           cp -R bucio/dist/ _site/bucio/
           cp -R new-star-soccer/dist/ _site/new-star-soccer/
@@ -198,6 +206,7 @@ jobs:
           cp -R phone-or-die-fps/dist/ _site/phone-or-die-fps/
           cp -R borgo-pwa/dist/ _site/borgo-pwa/
           cp -R comune-2050-pwa/dist/ _site/comune-2050-pwa/
+          cp -R seta-e-silicio-pwa/dist/ _site/seta-e-silicio-pwa/
           # Static PWAs (including nds-pwa) are copied verbatim by rsync.
           test -f _site/nds-pwa/index.html
           test -f _site/nds-pwa/manifest.json
@@ -210,6 +219,10 @@ jobs:
           test -f _site/comune-2050-pwa/manifest.webmanifest
           test -f _site/comune-2050-pwa/sw.js
           test -f _site/comune-2050-pwa/icon.svg
+          test -f _site/seta-e-silicio-pwa/index.html
+          test -f _site/seta-e-silicio-pwa/manifest.webmanifest
+          test -f _site/seta-e-silicio-pwa/sw.js
+          test -f _site/seta-e-silicio-pwa/icon.svg
           touch _site/.nojekyll
 
       - name: Stamp Fidenza build

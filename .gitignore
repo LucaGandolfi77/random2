@@ -125,3 +125,10 @@ comune-2050-pwa/dist/
 !slot-pwa/tests/**
 !ripple-cove-pwa/tests/
 !ripple-cove-pwa/tests/**
+
+# SETA E SILICIO keeps its manifest, lockfile and tests in the repository.
+!seta-e-silicio-pwa/package.json
+!seta-e-silicio-pwa/package-lock.json
+!seta-e-silicio-pwa/tests/
+!seta-e-silicio-pwa/tests/**
+seta-e-silicio-pwa/dist/

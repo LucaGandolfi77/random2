@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Seta e Silicio">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#10242b"/>
+      <stop offset=".62" stop-color="#143c40"/>
+      <stop offset="1" stop-color="#0b171b"/>
+    </linearGradient>
+    <linearGradient id="silk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6d48b"/>
+      <stop offset="1" stop-color="#d98b5a"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="92" fill="url(#sky)"/>
+  <circle cx="382" cy="112" r="42" fill="#f3d08a" opacity=".9"/>
+  <path d="M0 360 Q120 320 240 344 T512 338 L512 512 L0 512 Z" fill="#0a1519"/>
+  <path d="M40 356 Q180 322 320 346 T512 342" fill="none" stroke="#2d6668" stroke-width="3" opacity=".7"/>
+  <path d="M92 360 Q170 356 224 330" fill="none" stroke="#d98b5a" stroke-width="2" opacity=".3"/>
+  <g fill="none" stroke="url(#silk)" stroke-linecap="round" filter="url(#glow)">
+    <path d="M112 300 C148 238 214 226 258 260 C286 282 286 316 268 338" stroke-width="8"/>
+    <path d="M148 246 C174 214 218 204 250 218" stroke-width="5"/>
+    <path d="M112 300 C136 330 178 344 212 332" stroke-width="6"/>
+    <path d="M252 260 C298 246 334 266 342 300 C348 326 330 348 306 354" stroke-width="7"/>
+    <path d="M306 354 C330 362 348 380 346 398" stroke-width="4"/>
+  </g>
+  <g stroke="#77d6c9" stroke-width="2.2" fill="none" opacity=".8">
+    <path d="M190 290 H226 V266 H258"/>
+    <path d="M190 310 H238 V330 H282"/>
+    <path d="M282 330 V354 H318"/>
+    <circle cx="190" cy="290" r="4" fill="#77d6c9"/>
+    <circle cx="190" cy="310" r="4" fill="#77d6c9"/>
+    <circle cx="318" cy="354" r="4" fill="#77d6c9"/>
+  </g>
+  <g fill="#f3d08a" opacity=".9">
+    <circle cx="126" cy="184" r="3"/><circle cx="178" cy="150" r="2"/><circle cx="356" cy="204" r="2.5"/>
+    <circle cx="392" cy="262" r="2"/><circle cx="96" cy="246" r="2"/>
+  </g>
+  <text x="256" y="468" text-anchor="middle" font-family="Georgia, serif" font-size="38" fill="#f4e6c8" opacity=".92">丝 · 硅</text>
+</svg>

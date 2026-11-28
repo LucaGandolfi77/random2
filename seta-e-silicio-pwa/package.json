@@ -1,0 +1,24 @@
+{
+  "name": "seta-e-silicio-pwa",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SETA E SILICIO — I fili che il tempo non spezza: a five-episode, low-poly narrative adventure set in Suzhou, 2032, about memory, silk, robots and the things a city chooses to keep.",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/three": "^0.180.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
+    "vitest": "^3.2.4"
+  }
+}

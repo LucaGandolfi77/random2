@@ -95,6 +95,13 @@ jobs:
           npm test
           npm run build
 
+      - name: "SETA E SILICIO (typecheck, tests, build)"
+        working-directory: seta-e-silicio-pwa
+        run: |
+          npm ci
+          npm test
+          npm run build
+
       - name: JavaScript syntax check (ESM-aware)
         run: |
           set -euo pipefail
