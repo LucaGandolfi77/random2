@@ -189,6 +189,7 @@ const d1Tea: Chapter["dialogues"][number] = {
   chapter: "alba",
   title: L("Tè di gelsomino", "Jasmine tea"),
   start: "d1t_1",
+  retryable: true,
   nodes: [
     node("d1t_1", "narrator", "Il tè di Nainai ha sempre lo stesso profumo: gelsomino, un filo di miele, la teiera di terracotta che non si lava mai davvero.", "Nainai's tea always smells the same: jasmine, a thread of honey, the clay pot that is never truly washed.", { effects: { facts: ["teaMemory"] }, next: "d1t_2" }),
     node("d1t_2", "mei", "A Rotterdam bevevo caffè in piedi, davanti a una vetrina. Nessuno mi chiedeva se avevo fame. Solo se avevo una tessera.", "In Rotterdam I drank coffee standing up, in front of a window. Nobody asked if I was hungry. Only if I had a card.", { next: "d1t_3" }),
@@ -312,6 +313,7 @@ const d2Tea: Chapter["dialogues"][number] = {
   chapter: "piazza",
   title: L("La casa da tè", "The tea house"),
   start: "d2t_1",
+  retryable: true,
   nodes: [
     node("d2t_1", "narrator", "La casa da tè è piena di voci. Un tavolo di scacchi, un bambino che rincorre un drone, una radio che trasmette notizie di robot agricoli.", "The tea house is full of voices. A chess table, a child chasing a drone, a radio reporting on agricultural robots.", { effects: { facts: ["communityTea"] }, next: "d2t_2" }),
     node("d2t_2", "mei", "In Occidente, un posto così sarebbe un museo. Qui è solo martedì.", "In the West, a place like this would be a museum. Here it's just Tuesday.")
@@ -421,6 +423,7 @@ const d3Koi: Chapter["dialogues"][number] = {
   chapter: "giardino",
   title: L("Le carpe del giardino", "The koi of the garden"),
   start: "d3k_1",
+  retryable: true,
   nodes: [
     node("d3k_1", "narrator", "Le carpe koi girano lente intorno alla pietra. Un braccio robotico pota un bonsai senza fretta.", "The koi circle the stone slowly. A robotic arm prunes a bonsai without hurry.", { next: "d3k_2" }),
     node("d3k_2", "mei", "Forse la differenza non è tra antico e nuovo. È tra ciò che cura e ciò che consuma.", "Maybe the difference is not between old and new. It is between what cares and what consumes.", { effects: { facts: ["koiMemory"] } })
@@ -619,6 +622,7 @@ const d5River: Chapter["dialogues"][number] = {
   chapter: "lanterne",
   title: L("Siediti con il fiume", "Sit with the river"),
   start: "d5r_1",
+  retryable: true,
   nodes: [
     node("d5r_1", "narrator", "Mei si siede sulla riva. Il cielo è una cupola di rame. Una maglev attraversa l'orizzonte senza rumore.", "Mei sits on the bank. The sky is a copper dome. A maglev crosses the horizon without a sound.", { next: "d5r_2" }),
     node("d5r_2", "mei", "Ho passato tre anni a costruire macchine che guardano le persone. Nessuna mi ha mai chiesto di restare.", "I spent three years building machines that watch people. None ever asked me to stay.", { next: "d5r_3" }),
